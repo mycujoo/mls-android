@@ -6,11 +6,11 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
-import tv.mycujoo.mls.api.MyCujooLiveService
-import tv.mycujoo.mls.api.MyCujooLiveService.Companion.PUBLIC_KEY
+import tv.mycujoo.mls.api.MyCujooLiveServiceImpl
+import tv.mycujoo.mls.api.MyCujooLiveServiceImpl.Companion.PUBLIC_KEY
 
 
-class MyCujooLiveServiceTest {
+class MyCujooLiveServiceImplTest {
 
     @Mock
     lateinit var context: Context
@@ -22,18 +22,18 @@ class MyCujooLiveServiceTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun `given invalid public_key, should throw IllegalArgumentException`() {
-        MyCujooLiveService.init("", context)
+        MyCujooLiveServiceImpl.init("", context)
     }
 
     @Test
     fun `given valid public_key, should return MyCujooLiveStream`() {
-        assertNotNull(MyCujooLiveService.init(PUBLIC_KEY, context))
+        assertNotNull(MyCujooLiveServiceImpl.init(PUBLIC_KEY, context))
     }
 
 
     @Test
     fun `given invalid context, should throw IllegalArgumentException`() {
-        MyCujooLiveService.init(PUBLIC_KEY, context)
+        MyCujooLiveServiceImpl.init(PUBLIC_KEY, context)
     }
 
 
