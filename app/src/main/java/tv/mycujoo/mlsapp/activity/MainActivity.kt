@@ -1,25 +1,89 @@
 package tv.mycujoo.mlsapp.activity
 
 import android.net.Uri
+import android.os.Build.VERSION_CODES.N
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.activity_main.*
-import tv.mycujoo.mls.api.MyCujooLiveService
+import tv.mycujoo.mls.api.MyCujooLiveServiceImpl
+import tv.mycujoo.mls.api.PlayerEvents
 import tv.mycujoo.mlsapp.R
 
+
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var myCujooLiveService: MyCujooLiveServiceImpl
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val myCujooLiveStream = MyCujooLiveService.init(MyCujooLiveService.PUBLIC_KEY, this)
-        myCujooLiveStream.getPlayer()?.let {
-            playerWidget.setPlayer(it)
+        val playerEvents = object : PlayerEvents {
+            override fun onLoadingChanged(loading: Boolean) {
+                Log.i("PlayerEvents", "onLoadingChanged: $loading")
+            }
 
+            override fun onPlayerError(e: Exception) {
+                Log.i("PlayerEvents", "onPlayerError: " + e.message)
+            }
+
+            override fun onIsPlayingChanged(playing: Boolean) {
+                Log.i("PlayerEvents", "onIsPlayingChanged: $playing")
+
+            }
+
+            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+                Log.i("PlayerEvents", "onPlayerStateChanged: $playWhenReady $playbackState")
+            }
         }
 
-        myCujooLiveStream.playView(Uri.parse("https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"))
 
+        myCujooLiveService =
+            MyCujooLiveServiceImpl.Builder()
+                .withContext(this)
+                .defaultPlayerController(false)
+                .setPlayerEvents(playerEvents)
+                .build()
+
+
+        startButton?.setOnClickListener { myCujooLiveService.playVideo(Uri.parse("https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8")) }
+        playButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerPlay() }
+        pauseButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerPause() }
+        nextButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerNext() }
+        prevButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerPrevious() }
+
+        myCujooLiveService.getPlayerController()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (Util.SDK_INT >= N) {
+            myCujooLiveService.initializePlayer(playerWidget)
+
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (Util.SDK_INT < N) {
+            myCujooLiveService.initializePlayer(playerWidget)
+        }
+    }
+
+
+    override fun onPause() {
+        super.onPause()
+        if (Util.SDK_INT < N) {
+            myCujooLiveService.releasePlayer()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (Util.SDK_INT >= N) {
+            myCujooLiveService.releasePlayer()
+        }
     }
 }
