@@ -19,7 +19,8 @@ class TestDataHelper {
         fun getAnnotationDataSource(): AnnotationDataSource {
             return AnnotationDataSource(
                 AnnotationType.SHOW_OVERLAY,
-                OverlayData("Primary text")
+                OverlayData("Primary text"),
+                0L
             )
         }
     }

@@ -54,7 +54,6 @@ class MainActivity : AppCompatActivity() {
         nextButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerNext() }
         prevButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerPrevious() }
 
-        myCujooLiveService.getPlayerController()
     }
 
     override fun onStart() {

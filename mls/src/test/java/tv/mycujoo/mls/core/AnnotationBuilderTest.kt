@@ -3,6 +3,7 @@ package tv.mycujoo.mls.core
 
 import com.nhaarman.mockitokotlin2.argForWhich
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
@@ -37,5 +38,14 @@ class AnnotationBuilderTest {
 
         Mockito.verify(publisher)
             .onNewAnnotationAvailable(argForWhich { (type == annotationDataSource.type && overlayData == annotationDataSource.overlayData) })
+    }
+
+    @Ignore
+    @Test
+    fun `should be able to receive pending Annotations`() {
+        val annotationDataSourceList =
+            listOf(getAnnotationDataSource(), getAnnotationDataSource(), getAnnotationDataSource())
+        builder.addPendingAnnotations(annotationDataSourceList)
+
     }
 }

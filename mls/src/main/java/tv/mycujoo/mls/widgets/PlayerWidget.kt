@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.widgets
 
 import android.content.Context
+import android.os.Handler
 import android.util.AttributeSet
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -31,6 +32,7 @@ class PlayerWidget : ConstraintLayout, PlayerWidgetInterface {
 
     private lateinit var playerView: PlayerView
     private lateinit var playerControlView: PlayerControlView
+    private var dismissingHandler = Handler()
 
 
     private fun init(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) {
@@ -75,7 +77,24 @@ class PlayerWidget : ConstraintLayout, PlayerWidgetInterface {
     }
 
     fun displayAnnotation(annotationBundle: AnnotationBundle) {
-        println("displayAnnotation $annotationBundle")
+
+        val annotationView = AnnotationView(context)
+        annotationView.id = View.generateViewId()
+        annotationView.setText(annotationBundle.overlayData.primaryText)
+        annotationView.dismissIn(dismissingHandler, 2500L)
+
+
+        addView(annotationView)
+
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(this)
+
+        constraintSet.connect(annotationView.id, ConstraintSet.START, id, ConstraintSet.START)
+        constraintSet.connect(annotationView.id, ConstraintSet.TOP, id, ConstraintSet.TOP)
+
+        constraintSet.applyTo(this)
+
+
     }
 
     override fun setPlayerControllerState(state: Boolean) {

@@ -2,6 +2,7 @@ package tv.mycujoo.mls.api
 
 import android.content.Context
 import android.net.Uri
+import android.os.Handler
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
@@ -10,8 +11,12 @@ import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
+import tv.mycujoo.mls.cordinator.Coordinator
+import tv.mycujoo.mls.core.AnnotationPublisherImpl
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.PlayerStatusImpl
+import tv.mycujoo.mls.network.Api
+import tv.mycujoo.mls.network.RemoteApi
 import tv.mycujoo.mls.widgets.PlayerWidget
 
 
@@ -21,10 +26,12 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
     private var playWhenReady: Boolean = true
     private var playbackPosition: Long = -1L
 
+    private var context: Context
+
     // ExoPlayer is nullable, so it can be released manually
     private var exoPlayer: SimpleExoPlayer? = null
 
-    private var context: Context
+    private var api: Api
 
     private lateinit var playerWidget: PlayerWidget
 
@@ -33,11 +40,17 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
     private lateinit var playerEvents: PlayerEvents
     private lateinit var playerEventsListener: PlayerEventsListener
     private var hasDefaultPlayerController = true
+    private var hasAnnotation = true
+
+    private lateinit var coordinator: Coordinator
 
     init {
         checkNotNull(builder.context)
         checkNotNull(builder.playerEventsListener)
         this.context = builder.context!!
+
+        api = RemoteApi()
+
         exoPlayer = SimpleExoPlayer.Builder(context).build()
 
         exoPlayer?.let {
@@ -48,7 +61,18 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
             it.addListener(builder.playerEventsListener!!)
 
             hasDefaultPlayerController = builder.hasDefaultController
+            hasAnnotation = builder.hasAnnotation
+
+            if (hasAnnotation) {
+                initAnnotation()
+            }
         }
+
+    }
+
+    private fun initAnnotation() {
+        coordinator = Coordinator(api, AnnotationPublisherImpl())
+        coordinator.initialize(exoPlayer!!, Handler())
 
     }
 
@@ -81,6 +105,9 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
     ) {
         setView(playerWidget)
         playerWidget.setPlayerControllerState(hasDefaultPlayerController)
+        if (hasAnnotation) {
+            coordinator.widget = playerWidget
+        }
     }
 
     override fun releasePlayer() {
@@ -114,6 +141,8 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
 
         internal var hasDefaultController: Boolean = true
             private set
+        internal var hasAnnotation: Boolean = true
+            private set
 
         fun withContext(context: Context) = apply { this.context = context }
         fun setPlayerEvents(playerEvents: PlayerEvents) =
@@ -121,6 +150,9 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
 
         fun defaultPlayerController(defaultController: Boolean) =
             apply { this.hasDefaultController = defaultController }
+
+        fun hasAnnotation(hasAnnotation: Boolean) =
+            apply { this.hasAnnotation = hasAnnotation }
 
         fun build() = MyCujooLiveServiceImpl(this)
     }
