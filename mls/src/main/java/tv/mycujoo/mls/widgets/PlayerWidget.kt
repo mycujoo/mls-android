@@ -69,6 +69,13 @@ class PlayerWidget : ConstraintLayout, PlayerWidgetInterface {
 
     }
 
+    fun addMarker(longArray: LongArray, booleanArray: BooleanArray) {
+        playerControlView.setExtraAdGroupMarkers(
+            longArray,
+            booleanArray
+        )
+    }
+
     fun setPlayer(player: Player?) {
         playerView.player = player
         playerControlView.player = player

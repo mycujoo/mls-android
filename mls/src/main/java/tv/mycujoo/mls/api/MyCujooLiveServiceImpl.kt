@@ -17,7 +17,12 @@ import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.PlayerStatusImpl
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.network.RemoteApi
+import tv.mycujoo.mls.widgets.OnTimeLineChangeListener
 import tv.mycujoo.mls.widgets.PlayerWidget
+import tv.mycujoo.mls.widgets.TimeLineSeekBar
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 
 
 class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLiveService {
@@ -61,6 +66,10 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
             it.addListener(builder.playerEventsListener!!)
 
             hasDefaultPlayerController = builder.hasDefaultController
+//            if (hasDefaultPlayerController.not()){
+
+//            }
+
             hasAnnotation = builder.hasAnnotation
 
             if (hasAnnotation) {
@@ -97,17 +106,50 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
 
         exoPlayer?.prepare(mediaSource)
         exoPlayer?.playWhenReady = playWhenReady
+
+        coordinator.onPlayVideo()
     }
 
 
     override fun initializePlayer(
-        playerWidget: PlayerWidget
+        playerWidget: PlayerWidget,
+        timeLineSeekBar: TimeLineSeekBar?
     ) {
         setView(playerWidget)
         playerWidget.setPlayerControllerState(hasDefaultPlayerController)
+
+        if (hasDefaultPlayerController.not()) {
+            coordinator.timeLineSeekBar = timeLineSeekBar
+            initTimeLine(timeLineSeekBar)
+        }
+
+
+
         if (hasAnnotation) {
             coordinator.widget = playerWidget
         }
+    }
+
+    private fun initTimeLine(timeLineSeekBar: TimeLineSeekBar?) {
+        timeLineSeekBar?.listener = object : OnTimeLineChangeListener {
+            override fun onChange(level: Int) {
+                exoPlayer?.let {
+                    it.seekTo((it.duration / 100) * level)
+                }
+            }
+        }
+        val service: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
+        service.scheduleWithFixedDelay(
+            Runnable {
+                exoPlayer?.let {
+                    timeLineSeekBar?.progress =
+                        ((it.contentPosition.toDouble() / it.duration.toDouble()) * 100).toInt()
+                }
+            },
+            1,
+            1,
+            TimeUnit.MILLISECONDS
+        )
     }
 
     override fun releasePlayer() {

@@ -54,12 +54,14 @@ class MainActivity : AppCompatActivity() {
         nextButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerNext() }
         prevButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerPrevious() }
 
+//        myCujooLiveService.getTimeBar()
+
     }
 
     override fun onStart() {
         super.onStart()
         if (Util.SDK_INT >= N) {
-            myCujooLiveService.initializePlayer(playerWidget)
+            myCujooLiveService.initializePlayer(playerWidget, timeLineSeekBar)
 
         }
     }
@@ -67,7 +69,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (Util.SDK_INT < N) {
-            myCujooLiveService.initializePlayer(playerWidget)
+            myCujooLiveService.initializePlayer(playerWidget, timeLineSeekBar)
         }
     }
 

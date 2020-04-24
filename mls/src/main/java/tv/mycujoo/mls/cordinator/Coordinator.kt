@@ -8,12 +8,14 @@ import tv.mycujoo.mls.core.AnnotationPublisher
 import tv.mycujoo.mls.model.AnnotationBundle
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.widgets.PlayerWidget
+import tv.mycujoo.mls.widgets.TimeLineSeekBar
 
 class Coordinator(
     private val api: Api,
     private val publisher: AnnotationPublisher
 ) {
 
+    var timeLineSeekBar: TimeLineSeekBar? = null
     internal lateinit var widget: PlayerWidget
 
     fun initialize(exoPlayer: SimpleExoPlayer, handler: Handler) {
@@ -39,5 +41,15 @@ class Coordinator(
         }
 
         handler.postDelayed(runnable, 1000L)
+    }
+
+    fun onPlayVideo() {
+        val longArray = api.getTimeLineMarkers()
+
+        widget.addMarker(longArray, booleanArrayOf(false, false, false, false, false, false))
+
+        timeLineSeekBar?.max = 100
+        timeLineSeekBar?.progress = 30
+
     }
 }
