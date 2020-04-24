@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.model
 
 enum class AnnotationType {
-    SHOW_OVERLAY, HIDE_OVERLAY
+    SHOW_OVERLAY, HIDE_OVERLAY,
+    TIMELINE_MARKER
 
 }
