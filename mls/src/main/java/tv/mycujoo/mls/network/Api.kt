@@ -7,4 +7,6 @@ interface Api {
     fun getAnnotations(): List<AnnotationDataSource>
     fun getTimeLineMarkers(): LongArray
 
+    fun getHighlights(): List<AnnotationDataSource>
+
 }

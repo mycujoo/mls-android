@@ -14,7 +14,7 @@ class AnnotationBuilderImpl(private val publisher: AnnotationPublisher) : Annota
 
     override fun buildAnnotation(annotationDataSource: AnnotationDataSource) {
         val annotationBundle =
-            AnnotationBundle(annotationDataSource.type, annotationDataSource.overlayData)
+            AnnotationBundle(annotationDataSource.type, annotationDataSource.overlayData!!)
         publisher.onNewAnnotationAvailable(annotationBundle)
     }
 
@@ -27,12 +27,12 @@ class AnnotationBuilderImpl(private val publisher: AnnotationPublisher) : Annota
         pendingAnnotationDataSource.filter { annotationDataSource -> isInRange(annotationDataSource.time) }
             .forEach { annotation ->
                 println(
-                    "MLS-App AnnotationBuilderImpl - buildPendings() time:${annotation.time}, text:${annotation.overlayData.primaryText}"
+                    "MLS-App AnnotationBuilderImpl - buildPendings() time:${annotation.time}, text:${annotation.overlayData!!.primaryText}"
                 )
                 publisher.onNewAnnotationAvailable(
                     AnnotationBundle(
                         annotation.type,
-                        annotation.overlayData
+                        annotation.overlayData!!
                     )
                 )
             }

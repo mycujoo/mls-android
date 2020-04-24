@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.activity_main.*
+import tv.mycujoo.mls.api.HighlightListParams
 import tv.mycujoo.mls.api.MyCujooLiveServiceImpl
 import tv.mycujoo.mls.api.PlayerEvents
 import tv.mycujoo.mlsapp.R
@@ -44,6 +45,7 @@ class MainActivity : AppCompatActivity() {
             MyCujooLiveServiceImpl.Builder()
                 .withContext(this)
                 .defaultPlayerController(false)
+                .highlightList(HighlightListParams(recyclerView))
                 .setPlayerEvents(playerEvents)
                 .build()
 
@@ -53,8 +55,6 @@ class MainActivity : AppCompatActivity() {
         pauseButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerPause() }
         nextButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerNext() }
         prevButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerPrevious() }
-
-//        myCujooLiveService.getTimeBar()
 
     }
 

@@ -3,6 +3,8 @@ package tv.mycujoo.mls.api
 import android.content.Context
 import android.net.Uri
 import android.os.Handler
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
@@ -15,11 +17,11 @@ import tv.mycujoo.mls.cordinator.Coordinator
 import tv.mycujoo.mls.core.AnnotationPublisherImpl
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.PlayerStatusImpl
+import tv.mycujoo.mls.entity.HighlightEntity
+import tv.mycujoo.mls.model.AnnotationMapper
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.network.RemoteApi
-import tv.mycujoo.mls.widgets.OnTimeLineChangeListener
-import tv.mycujoo.mls.widgets.PlayerWidget
-import tv.mycujoo.mls.widgets.TimeLineSeekBar
+import tv.mycujoo.mls.widgets.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -49,6 +51,7 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
 
     private lateinit var coordinator: Coordinator
 
+
     init {
         checkNotNull(builder.context)
         checkNotNull(builder.playerEventsListener)
@@ -66,9 +69,10 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
             it.addListener(builder.playerEventsListener!!)
 
             hasDefaultPlayerController = builder.hasDefaultController
-//            if (hasDefaultPlayerController.not()){
 
-//            }
+            builder.highlightListParams?.let { highlightListParams ->
+                initHighlightList(highlightListParams)
+            }
 
             hasAnnotation = builder.hasAnnotation
 
@@ -77,6 +81,16 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
             }
         }
 
+    }
+
+    private fun initHighlightList(highlightListParams: HighlightListParams) {
+        checkNotNull(highlightListParams.recyclerView)
+        val highlightAdapter = HighlightAdapter(getHighlightList())
+        highlightListParams.recyclerView.adapter = highlightAdapter
+        highlightListParams.recyclerView.layoutManager =
+            LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
+
+        connectToHighlightList(highlightAdapter)
     }
 
     private fun initAnnotation() {
@@ -174,29 +188,49 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
         return playerStatus
     }
 
+    override fun getHighlightList(): List<HighlightEntity> {
+        return api.getHighlights().map { AnnotationMapper.mapToHighlightEntity(it) }
+    }
+
+    private fun connectToHighlightList(highlightAdapter: HighlightAdapter) {
+        val highlightClickListener = object : ListClickListener {
+            override fun onClick(pos: Int) {
+                exoPlayer?.seekTo(getHighlightList()[pos].time)
+                exoPlayer?.playWhenReady = true
+            }
+        }
+        highlightAdapter.setOnClickListener(highlightClickListener)
+    }
+
     class Builder {
         internal var context: Context? = null
             private set
-
-        internal var playerEventsListener: PlayerEventsListener? = null
-            private set
-
         internal var hasDefaultController: Boolean = true
+            private set
+        internal var highlightListParams: HighlightListParams? = null
+            private set
+        internal var playerEventsListener: PlayerEventsListener? = null
             private set
         internal var hasAnnotation: Boolean = true
             private set
 
         fun withContext(context: Context) = apply { this.context = context }
-        fun setPlayerEvents(playerEvents: PlayerEvents) =
-            apply { this.playerEventsListener = PlayerEventsListener(playerEvents) }
 
         fun defaultPlayerController(defaultController: Boolean) =
             apply { this.hasDefaultController = defaultController }
+
+        fun highlightList(highlightListParams: HighlightListParams) =
+            apply { this.highlightListParams = highlightListParams }
+
+        fun setPlayerEvents(playerEvents: PlayerEvents) =
+            apply { this.playerEventsListener = PlayerEventsListener(playerEvents) }
+
 
         fun hasAnnotation(hasAnnotation: Boolean) =
             apply { this.hasAnnotation = hasAnnotation }
 
         fun build() = MyCujooLiveServiceImpl(this)
+
     }
 
     companion object {
