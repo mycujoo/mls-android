@@ -5,8 +5,12 @@ import com.google.android.exoplayer2.SimpleExoPlayer
 import tv.mycujoo.mls.core.AnnotationBuilderImpl
 import tv.mycujoo.mls.core.AnnotationListener
 import tv.mycujoo.mls.core.AnnotationPublisher
-import tv.mycujoo.mls.model.AnnotationBundle
+import tv.mycujoo.mls.entity.HighlightAction
+import tv.mycujoo.mls.entity.OverLayAction
+import tv.mycujoo.mls.entity.AnnotationSourceData
+import tv.mycujoo.mls.entity.TimeLineAction
 import tv.mycujoo.mls.network.Api
+import tv.mycujoo.mls.widgets.HighlightAdapter
 import tv.mycujoo.mls.widgets.PlayerWidget
 import tv.mycujoo.mls.widgets.TimeLineSeekBar
 
@@ -18,10 +22,27 @@ class Coordinator(
     var timeLineSeekBar: TimeLineSeekBar? = null
     internal lateinit var widget: PlayerWidget
 
-    fun initialize(exoPlayer: SimpleExoPlayer, handler: Handler) {
+    fun initialize(
+        exoPlayer: SimpleExoPlayer,
+        handler: Handler,
+        highlightAdapter: HighlightAdapter?
+    ) {
         val listener = object : AnnotationListener {
-            override fun onNewAnnotationAvailable(annotationBundle: AnnotationBundle) {
-                widget.displayAnnotation(annotationBundle)
+            override fun onNewAnnotationAvailable(annotationSourceData: AnnotationSourceData) {
+                when (annotationSourceData.action) {
+                    is OverLayAction -> {
+                        widget.showOverLay(annotationSourceData.action)
+                    }
+                    is HighlightAction -> {
+
+                        highlightAdapter?.addHighlight(annotationSourceData.action)
+                    }
+                    is TimeLineAction -> {
+
+                    }
+                    else -> {
+                    }
+                }
             }
         }
         publisher.setAnnotationListener(listener)
@@ -47,9 +68,6 @@ class Coordinator(
         val longArray = api.getTimeLineMarkers()
 
         widget.addMarker(longArray, booleanArrayOf(false, false, false, false, false, false))
-
-        timeLineSeekBar?.max = 100
-        timeLineSeekBar?.progress = 30
 
     }
 }
