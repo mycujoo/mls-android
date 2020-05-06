@@ -1,8 +1,8 @@
 package tv.mycujoo.mls.core
 
-import tv.mycujoo.mls.model.AnnotationBundle
+import tv.mycujoo.mls.entity.AnnotationSourceData
 
 interface AnnotationPublisher {
     fun setAnnotationListener(annotationListener: AnnotationListener)
-    fun onNewAnnotationAvailable(annotationBundle: AnnotationBundle)
+    fun onNewAnnotationAvailable(annotationSourceData: AnnotationSourceData)
 }

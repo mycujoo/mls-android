@@ -1,22 +1,17 @@
 package tv.mycujoo.mls.core
 
-import tv.mycujoo.mls.model.AnnotationBundle
-import tv.mycujoo.mls.model.AnnotationDataSource
+import tv.mycujoo.mls.entity.AnnotationSourceData
 
-class AnnotationBuilderImpl(private val publisher: AnnotationPublisher) : AnnotationBuilder {
+class AnnotationBuilderImpl(private val publisher: AnnotationPublisher) : AnnotationBuilder() {
 
     private var currentTime: Long = 0L
-    private val pendingAnnotationDataSource = ArrayList<AnnotationDataSource>()
+    private val pendingAnnotationDataSource = ArrayList<AnnotationSourceData>()
 
-    override fun addPendingAnnotations(annotationDataSourceList: List<AnnotationDataSource>) {
-        pendingAnnotationDataSource.addAll(annotationDataSourceList)
+
+    override fun addPendingAnnotations(pendingAnnotationList: List<AnnotationSourceData>) {
+        pendingAnnotationDataSource.addAll(pendingAnnotationList)
     }
 
-    override fun buildAnnotation(annotationDataSource: AnnotationDataSource) {
-        val annotationBundle =
-            AnnotationBundle(annotationDataSource.type, annotationDataSource.overlayData!!)
-        publisher.onNewAnnotationAvailable(annotationBundle)
-    }
 
     override fun setCurrentTime(time: Long) {
         println("MLS-App AnnotationBuilderImpl - setCurrentTime() $time")
@@ -24,21 +19,19 @@ class AnnotationBuilderImpl(private val publisher: AnnotationPublisher) : Annota
     }
 
     override fun buildPendings() {
-        pendingAnnotationDataSource.filter { annotationDataSource -> isInRange(annotationDataSource.time) }
+        pendingAnnotationDataSource.filter { sourceData -> isInRange(sourceData) }
             .forEach { annotation ->
                 println(
-                    "MLS-App AnnotationBuilderImpl - buildPendings() time:${annotation.time}, text:${annotation.overlayData!!.primaryText}"
+                    "MLS-App AnnotationBuilderImpl - buildPendings()"
                 )
                 publisher.onNewAnnotationAvailable(
-                    AnnotationBundle(
-                        annotation.type,
-                        annotation.overlayData!!
-                    )
+                    annotation
                 )
             }
     }
 
-    private fun isInRange(annotationTime: Long): Boolean {
-        return (annotationTime >= currentTime) && (annotationTime < currentTime + 1000L)
+    private fun isInRange(annotationSourceData: AnnotationSourceData): Boolean {
+        return (annotationSourceData.streamOffset >= currentTime) && (annotationSourceData.streamOffset < currentTime + 1000L)
+
     }
 }

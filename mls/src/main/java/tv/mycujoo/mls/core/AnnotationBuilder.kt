@@ -1,10 +1,9 @@
 package tv.mycujoo.mls.core
 
-import tv.mycujoo.mls.model.AnnotationDataSource
+import tv.mycujoo.mls.entity.AnnotationSourceData
 
-interface AnnotationBuilder {
-    fun buildAnnotation(annotationDataSource: AnnotationDataSource)
-    fun setCurrentTime(time: Long)
-    fun addPendingAnnotations(annotationDataSourceList: List<AnnotationDataSource>)
-    fun buildPendings()
+abstract class AnnotationBuilder {
+    abstract fun setCurrentTime(time: Long)
+    abstract fun addPendingAnnotations(pendingAnnotationList: List<AnnotationSourceData>)
+    abstract fun buildPendings()
 }

@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.core
 
-import tv.mycujoo.mls.model.AnnotationBundle
+import tv.mycujoo.mls.entity.AnnotationSourceData
+
 
 class AnnotationPublisherImpl : AnnotationPublisher {
 
@@ -9,7 +10,7 @@ class AnnotationPublisherImpl : AnnotationPublisher {
         listener = annotationListener
     }
 
-    override fun onNewAnnotationAvailable(annotationBundle: AnnotationBundle) {
-        listener.onNewAnnotationAvailable(annotationBundle)
+    override fun onNewAnnotationAvailable(annotationSourceData: AnnotationSourceData) {
+        listener.onNewAnnotationAvailable(annotationSourceData)
     }
 }
