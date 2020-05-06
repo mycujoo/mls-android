@@ -1,8 +1,11 @@
 package tv.mycujoo.mls.api
 
 import android.content.Context
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.net.Uri
 import android.os.Handler
+import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.SimpleExoPlayer
@@ -17,18 +20,14 @@ import tv.mycujoo.mls.cordinator.Coordinator
 import tv.mycujoo.mls.core.AnnotationPublisherImpl
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.PlayerStatusImpl
-import tv.mycujoo.mls.entity.HighlightEntity
-import tv.mycujoo.mls.model.AnnotationMapper
+import tv.mycujoo.mls.entity.HighlightAction
+import tv.mycujoo.mls.model.ConfigParams
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.network.RemoteApi
 import tv.mycujoo.mls.widgets.*
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.TimeUnit
 
 
 class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLiveService {
-
 
     private var playWhenReady: Boolean = true
     private var playbackPosition: Long = -1L
@@ -51,6 +50,12 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
 
     private lateinit var coordinator: Coordinator
 
+    private lateinit var handler: Handler
+
+    var highlightAdapter: HighlightAdapter? = null
+
+    val highlightList = ArrayList<HighlightAction>(0)
+
 
     init {
         checkNotNull(builder.context)
@@ -71,6 +76,7 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
             hasDefaultPlayerController = builder.hasDefaultController
 
             builder.highlightListParams?.let { highlightListParams ->
+                highlightList.addAll(ArrayList(getHighlightList()))
                 initHighlightList(highlightListParams)
             }
 
@@ -85,17 +91,19 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
 
     private fun initHighlightList(highlightListParams: HighlightListParams) {
         checkNotNull(highlightListParams.recyclerView)
-        val highlightAdapter = HighlightAdapter(getHighlightList())
+        highlightAdapter = HighlightAdapter(ArrayList(getHighlightList()))
         highlightListParams.recyclerView.adapter = highlightAdapter
         highlightListParams.recyclerView.layoutManager =
             LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
 
-        connectToHighlightList(highlightAdapter)
+        connectToHighlightList(highlightAdapter!!)
     }
 
     private fun initAnnotation() {
+        handler = Handler()
+
         coordinator = Coordinator(api, AnnotationPublisherImpl())
-        coordinator.initialize(exoPlayer!!, Handler())
+        coordinator.initialize(exoPlayer!!, handler, highlightAdapter)
 
     }
 
@@ -122,6 +130,8 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
         exoPlayer?.playWhenReady = playWhenReady
 
         coordinator.onPlayVideo()
+
+        handler.postDelayed({ }, 4000L)
     }
 
 
@@ -138,7 +148,6 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
         }
 
 
-
         if (hasAnnotation) {
             coordinator.widget = playerWidget
         }
@@ -152,18 +161,57 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
                 }
             }
         }
-        val service: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
-        service.scheduleWithFixedDelay(
-            Runnable {
+
+        val timeLineSyncRunnable = object : Runnable {
+            override fun run() {
                 exoPlayer?.let {
                     timeLineSeekBar?.progress =
                         ((it.contentPosition.toDouble() / it.duration.toDouble()) * 100).toInt()
+                    handler.postDelayed(this, 1000L)
                 }
-            },
-            1,
-            1,
-            TimeUnit.MILLISECONDS
-        )
+            }
+        }
+
+        handler.postDelayed(timeLineSyncRunnable, 1000L)
+    }
+
+    override fun onConfigurationChanged(
+        configParams: ConfigParams,
+        decorView: View,
+        actionBar: androidx.appcompat.app.ActionBar?
+    ) {
+        when (configParams.config.orientation) {
+            ORIENTATION_PORTRAIT -> {
+                playerWidget.screenMode(PlayerWidget.ScreenMode.PORTRAIT)
+                if (configParams.portraitActionBar.not()) {
+                    decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
+                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+                    actionBar?.hide()
+                } else {
+                    decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+                    actionBar?.show()
+
+                }
+
+            }
+            ORIENTATION_LANDSCAPE -> {
+                playerWidget.screenMode(PlayerWidget.ScreenMode.LANDSCAPE)
+                if (configParams.landscapeActionBar.not()) {
+                    decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
+                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+                    actionBar?.hide()
+                } else {
+                    decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+                    actionBar?.show()
+
+                }
+            }
+            else -> {
+                //do nothing
+            }
+        }
     }
 
     override fun releasePlayer() {
@@ -177,6 +225,7 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
 
     private fun setView(playerWidget: PlayerWidget) {
         this.playerWidget = playerWidget
+        this.playerWidget.defaultController(hasDefaultPlayerController)
         playerWidget.setPlayer(exoPlayer)
     }
 
@@ -188,19 +237,20 @@ class MyCujooLiveServiceImpl private constructor(builder: Builder) : MyCujooLive
         return playerStatus
     }
 
-    override fun getHighlightList(): List<HighlightEntity> {
-        return api.getHighlights().map { AnnotationMapper.mapToHighlightEntity(it) }
+    override fun getHighlightList(): List<HighlightAction> {
+        return api.getHighlights()
     }
 
     private fun connectToHighlightList(highlightAdapter: HighlightAdapter) {
         val highlightClickListener = object : ListClickListener {
             override fun onClick(pos: Int) {
-                exoPlayer?.seekTo(getHighlightList()[pos].time)
+                exoPlayer?.seekTo(getHighlightList()[pos].streamOffset)
                 exoPlayer?.playWhenReady = true
             }
         }
         highlightAdapter.setOnClickListener(highlightClickListener)
     }
+
 
     class Builder {
         internal var context: Context? = null

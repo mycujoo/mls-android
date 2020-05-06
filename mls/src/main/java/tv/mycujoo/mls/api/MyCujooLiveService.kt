@@ -1,6 +1,8 @@
 package tv.mycujoo.mls.api
 
-import tv.mycujoo.mls.entity.HighlightEntity
+import android.view.View
+import tv.mycujoo.mls.entity.HighlightAction
+import tv.mycujoo.mls.model.ConfigParams
 import tv.mycujoo.mls.widgets.PlayerWidget
 import tv.mycujoo.mls.widgets.TimeLineSeekBar
 
@@ -11,10 +13,16 @@ internal interface MyCujooLiveService {
         timeLineSeekBar: TimeLineSeekBar? = null
     )
 
+    fun onConfigurationChanged(
+        config: ConfigParams,
+        decorView: View,
+        actionBar: androidx.appcompat.app.ActionBar?
+    )
+
     fun releasePlayer()
 
     fun getPlayerController(): PlayerController
     fun getPlayerStatus(): PlayerStatus
 
-    fun getHighlightList(): List<HighlightEntity>
+    fun getHighlightList(): List<HighlightAction>
 }
