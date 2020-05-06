@@ -1,5 +1,6 @@
 package tv.mycujoo.mlsapp.activity
 
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build.VERSION_CODES.N
 import android.os.Bundle
@@ -10,6 +11,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import tv.mycujoo.mls.api.HighlightListParams
 import tv.mycujoo.mls.api.MyCujooLiveServiceImpl
 import tv.mycujoo.mls.api.PlayerEvents
+import tv.mycujoo.mls.model.ConfigParams
 import tv.mycujoo.mlsapp.R
 
 
@@ -45,7 +47,7 @@ class MainActivity : AppCompatActivity() {
             MyCujooLiveServiceImpl.Builder()
                 .withContext(this)
                 .defaultPlayerController(false)
-                .highlightList(HighlightListParams(recyclerView))
+                .highlightList(HighlightListParams(highlightsRecyclerView))
                 .setPlayerEvents(playerEvents)
                 .build()
 
@@ -56,13 +58,22 @@ class MainActivity : AppCompatActivity() {
         nextButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerNext() }
         prevButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerPrevious() }
 
+
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        myCujooLiveService.onConfigurationChanged(
+            ConfigParams(newConfig, true, false),
+            window.decorView,
+            supportActionBar
+        )
     }
 
     override fun onStart() {
         super.onStart()
         if (Util.SDK_INT >= N) {
             myCujooLiveService.initializePlayer(playerWidget, timeLineSeekBar)
-
         }
     }
 
