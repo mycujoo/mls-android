@@ -7,9 +7,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_highlight.view.*
 import tv.mycujoo.mls.R
-import tv.mycujoo.mls.entity.HighlightEntity
+import tv.mycujoo.mls.entity.HighlightAction
 
-class HighlightAdapter(private val highlightList: List<HighlightEntity>) :
+class HighlightAdapter(private val highlightList: ArrayList<HighlightAction>) :
     RecyclerView.Adapter<HighlightAdapter.ViewHolder>() {
 
     private var clickListener: ListClickListener? = null
@@ -34,15 +34,20 @@ class HighlightAdapter(private val highlightList: List<HighlightEntity>) :
         this.clickListener = clickListener
     }
 
+    fun addHighlight(highlightAction: HighlightAction) {
+        highlightList.add(highlightAction)
+        notifyDataSetChanged()
+    }
+
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
         private val titleTextView: TextView = view.highlight_item_title
         private val timeLabelTextView: TextView = view.highlightItem_timeLabelTextView
 
-        fun updateView(highlightEntity: HighlightEntity) {
-            titleTextView.text = highlightEntity.title
-            timeLabelTextView.text = highlightEntity.timeLabel
+        fun updateView(highlightAction: HighlightAction) {
+            titleTextView.text = highlightAction.title
+            timeLabelTextView.text = highlightAction.timeLabel
         }
 
         fun setOnClickListener(
