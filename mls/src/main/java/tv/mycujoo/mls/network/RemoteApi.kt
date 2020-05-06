@@ -1,16 +1,120 @@
 package tv.mycujoo.mls.network
 
-import tv.mycujoo.mls.model.AnnotationDataSource
-import tv.mycujoo.mls.model.AnnotationType
-import tv.mycujoo.mls.model.HighlightDataSource
-import tv.mycujoo.mls.model.OverlayData
+import tv.mycujoo.mls.entity.*
 
 class RemoteApi : Api {
-    override fun getAnnotations(): List<AnnotationDataSource> {
+
+    override fun getAnnotations(): List<AnnotationSourceData> {
         return listOf(
-            AnnotationDataSource(AnnotationType.SHOW_OVERLAY, OverlayData("overlay_0"), 6000L),
-            AnnotationDataSource(AnnotationType.SHOW_OVERLAY, OverlayData("overlay_1"), 12000L),
-            AnnotationDataSource(AnnotationType.SHOW_OVERLAY, OverlayData("overlay_2"), 18000L)
+            AnnotationSourceData(
+                4000L,
+                getOverLayAction(LayoutType.BASIC_SINGLE_LINE, "First text", "Second text")
+            ),
+            AnnotationSourceData(
+                8000L,
+                getOverLayAction(LayoutType.BASIC_SINGLE_LINE, "First text_2", "Second text_2")
+            ),
+            AnnotationSourceData(
+                12000L, OverLayAction(
+                    103,
+                    3000L,
+                    LayoutType.BASIC_DOUBLE_LINE,
+                    LayoutPosition.BOTTOM_LEFT,
+                    false,
+                    "First text_3",
+                    "Second text_3",
+                    "http://icons.iconarchive.com/icons/giannis-zographos/spanish-football-club/72/FC-Barcelona-icon.png",
+                    "secondLine 0", "secondLine 1"
+                )
+            ),
+            AnnotationSourceData(
+                16000L, OverLayAction(
+                    104,
+                    3000L,
+                    LayoutType.BASIC_DOUBLE_LINE,
+                    LayoutPosition.TOP_LEFT,
+                    false,
+
+                    "First text_3",
+                    "Second text_3",
+                    "http://icons.iconarchive.com/icons/giannis-zographos/spanish-football-club/72/FC-Barcelona-icon.png",
+                    "secondLine 0", "secondLine 1"
+                )
+            ),
+            AnnotationSourceData(
+                18000L, OverLayAction(
+                    105,
+                    3000L,
+                    LayoutType.BASIC_SCORE_BOARD,
+                    LayoutPosition.TOP_LEFT,
+                    false,
+                    "FCB",
+                    "CFC",
+                    null,
+                    "0", "1"
+                )
+            ),
+            AnnotationSourceData(
+                9000L, OverLayAction(
+                    106,
+                    3000L,
+                    LayoutType.BASIC_SINGLE_LINE,
+                    LayoutPosition.TOP_RIGHT,
+                    true,
+                    "FCB 0",
+                    "CFC 0",
+                    null,
+                    null
+                )
+            ),
+            AnnotationSourceData(
+                14000L, OverLayAction(
+                    106,
+                    3000L,
+                    LayoutType.BASIC_SINGLE_LINE,
+                    LayoutPosition.BOTTOM_RIGHT,
+                    false,
+                    "FCB 1",
+                    "CFC 1",
+                    null,
+                    null
+                )
+            ),
+            AnnotationSourceData(
+                5000L, HighlightAction(
+                    136,
+                    5000L,
+                    "5'",
+                    "FCB 1",
+                    "https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"
+                )
+            ),
+            AnnotationSourceData(
+                5000L, HighlightAction(
+                    13,
+                    9000L,
+                    "9'",
+                    "FCB 2",
+                    "https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"
+                )
+            )
+        )
+    }
+
+    private fun getOverLayAction(
+        type: LayoutType,
+        firstText: String,
+        secondText: String
+    ): OverLayAction {
+        return OverLayAction(
+            101,
+            3000L,
+            LayoutType.BASIC_SINGLE_LINE,
+            LayoutPosition.BOTTOM_LEFT,
+            false,
+            firstText,
+            secondText,
+            "http://icons.iconarchive.com/icons/giannis-zographos/spanish-football-club/72/FC-Barcelona-icon.png"
         )
     }
 
@@ -26,88 +130,32 @@ class RemoteApi : Api {
         return longArray
     }
 
-    override fun getHighlights(): List<AnnotationDataSource> {
+    override fun getHighlights(): List<HighlightAction> {
         return listOf(
-            AnnotationDataSource(
-                AnnotationType.HIGHLIGHT,
-                null,
-                99000L,
-                HighlightDataSource(
-                    "Goal 1",
-                    "2'",
-                    "https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"
-                )
+
+            HighlightAction(
+                125,
+                15000L,
+                "15'",
+                "FCB 3",
+                "https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"
             ),
-            AnnotationDataSource(
-                AnnotationType.HIGHLIGHT,
-                null,
-                360000L,
-                HighlightDataSource(
-                    "Goal 2",
-                    "6'",
-                    "https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"
-                )
+            HighlightAction(
+                126,
+                2000L,
+                "20'",
+                "FCB 4",
+                "https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"
             ),
-            AnnotationDataSource(
-                AnnotationType.HIGHLIGHT,
-                null,
-                880000L,
-                HighlightDataSource(
-                    "Goal 3",
-                    "14'",
-                    "https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"
-                )
-            ),
-            AnnotationDataSource(
-                AnnotationType.HIGHLIGHT,
-                null,
-                980000L,
-                HighlightDataSource(
-                    "Goal 4",
-                    "16'",
-                    "https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"
-                )
-            ),
-            AnnotationDataSource(
-                AnnotationType.HIGHLIGHT,
-                null,
-                1080000L,
-                HighlightDataSource(
-                    "Goal 5",
-                    "18'",
-                    "https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"
-                )
-            ),
-            AnnotationDataSource(
-                AnnotationType.HIGHLIGHT,
-                null,
-                1180000L,
-                HighlightDataSource(
-                    "Goal 6",
-                    "19'",
-                    "https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"
-                )
-            ),
-            AnnotationDataSource(
-                AnnotationType.HIGHLIGHT,
-                null,
-                1280000L,
-                HighlightDataSource(
-                    "Goal 7",
-                    "21'",
-                    "https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"
-                )
-            ),
-            AnnotationDataSource(
-                AnnotationType.HIGHLIGHT,
-                null,
-                1380000L,
-                HighlightDataSource(
-                    "Goal 7",
-                    "23'",
-                    "https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"
-                )
+            HighlightAction(
+                127,
+                25000L,
+                "25'",
+                "FCB 5",
+                "https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"
             )
         )
+
     }
+
 }

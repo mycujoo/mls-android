@@ -1,12 +1,13 @@
 package tv.mycujoo.mls.network
 
-import tv.mycujoo.mls.model.AnnotationDataSource
+import tv.mycujoo.mls.entity.HighlightAction
+import tv.mycujoo.mls.entity.AnnotationSourceData
 
 interface Api {
 
-    fun getAnnotations(): List<AnnotationDataSource>
+    fun getAnnotations(): List<AnnotationSourceData>
     fun getTimeLineMarkers(): LongArray
 
-    fun getHighlights(): List<AnnotationDataSource>
+    fun getHighlights(): List<HighlightAction>
 
 }
