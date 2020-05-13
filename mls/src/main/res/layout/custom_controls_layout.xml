@@ -59,7 +59,7 @@
             android:src="@drawable/exo_icon_previous" />
 
         <ImageButton
-            android:id="@id/exo_rew"
+            android:id="@+id/exo_rew"
             android:layout_width="71dp"
             android:layout_height="52dp"
             android:background="#CC000000"
@@ -73,21 +73,21 @@
             android:src="@drawable/exo_icon_play" />
 
         <ImageButton
-            android:id="@id/exo_pause"
+            android:id="@+id/exo_pause"
             android:layout_width="71dp"
             android:layout_height="52dp"
             android:background="#CC000000"
             android:src="@drawable/exo_icon_pause" />
 
         <ImageButton
-            android:id="@id/exo_ffwd"
+            android:id="@+id/exo_ffwd"
             android:layout_width="71dp"
             android:layout_height="52dp"
             android:background="#CC000000"
             android:src="@drawable/exo_icon_fastforward" />
 
         <ImageButton
-            android:id="@id/exo_next"
+            android:id="@+id/exo_next"
             android:layout_width="71dp"
             android:layout_height="52dp"
             android:background="#CC000000"
