@@ -52,7 +52,7 @@ class PlayerWidget @JvmOverloads constructor(
         val inflate =
             LayoutInflater.from(context).inflate(R.layout.player_widget_layout, this, true)
 
-        playerView = playerWidget_playerView
+//        playerView = playerWidget_playerView
         playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
 
 //        playerView = PlayerView(context)

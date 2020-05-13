@@ -14,7 +14,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.updateLayoutParams
 import com.google.android.exoplayer2.ui.PlayerView
-import kotlinx.android.synthetic.main.custom_controls_layout.view.*
 import kotlinx.android.synthetic.main.player_widget_layout.view.*
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.entity.LayoutPosition
@@ -22,7 +21,6 @@ import tv.mycujoo.mls.entity.LayoutType
 import tv.mycujoo.mls.entity.OverLayAction
 import tv.mycujoo.mls.extensions.getDisplaySize
 import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
-import tv.mycujoo.mls.widgets.time_bar.PreviewLoader
 import tv.mycujoo.mls.widgets.time_bar.PreviewTimeBarWrapper
 
 class PlayerViewWrapper @JvmOverloads constructor(
@@ -31,7 +29,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     var playerView: PlayerView
     private var overlayHost: OverlayHost
-    var previewTimeBarWrapper: PreviewTimeBarWrapper
+    var previewTimeBarWrapper: PreviewTimeBarWrapper? = null
 
 
     private var imageView: ImageView? = null
@@ -49,30 +47,71 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
         LayoutInflater.from(context).inflate(R.layout.player_widget_layout, this, true)
 
-        playerView = playerWidget_playerView
-        overlayHost = playerWidget_overlayHost
 
-        previewTimeBarWrapper = findViewById(R.id.exo_progress)
+        playerView = PlayerView(context, attrs, defStyleAttr)
+        initExoPlayerView(playerView)
+
+        overlayHost = playerWidget_overlayHost
+        connectOverlayHostToPlayerView(overlayHost)
+
+//        previewTimeBarWrapper = findViewById(R.id.exo_progress)
+
 //        imageView = findViewById(R.id.previewImageView)
 //        previewTitleTextView = findViewById(R.id.previewTitleTextView)
 
 
-        previewTimeBarWrapper.delegate.setPreviewLoader(object : PreviewLoader {
-            override fun loadPreview(currentPosition: Long, max: Long) {
-//                Glide.with(imageView!!)
-//                    .load(thumbnailsUrl)
-//                    .override(
-//                        Target.SIZE_ORIGINAL,
-//                        Target.SIZE_ORIGINAL
-//                    )
-//                    .into(imageView!!)
-
-                timeBarAnnotationHelper.updateText(currentPosition, previewTitleTextView)
-            }
-        })
+//        previewTimeBarWrapper.delegate.setPreviewLoader(object : PreviewLoader {
+//            override fun loadPreview(currentPosition: Long, max: Long) {
+////                Glide.with(imageView!!)
+////                    .load(thumbnailsUrl)
+////                    .override(
+////                        Target.SIZE_ORIGINAL,
+////                        Target.SIZE_ORIGINAL
+////                    )
+////                    .into(imageView!!)
+//
+//                timeBarAnnotationHelper.updateText(currentPosition, previewTitleTextView)
+//            }
+//        })
 
         playerView.post { screenMode(PlayerWidget.ScreenMode.PORTRAIT) }
 
+    }
+
+    private fun initExoPlayerView(playerView: PlayerView) {
+        playerView.id = View.generateViewId()
+        addView(playerView)
+
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(this)
+
+
+        constraintSet.connect(playerView.id, ConstraintSet.TOP, id, ConstraintSet.TOP)
+        constraintSet.connect(playerView.id, ConstraintSet.START, id, ConstraintSet.START)
+        constraintSet.connect(playerView.id, ConstraintSet.END, id, ConstraintSet.END)
+        constraintSet.connect(playerView.id, ConstraintSet.BOTTOM, id, ConstraintSet.BOTTOM)
+        constraintSet.constrainWidth(playerView.id, 0)
+        constraintSet.constrainHeight(playerView.id, 0)
+
+
+        constraintSet.applyTo(this)
+    }
+
+    private fun connectOverlayHostToPlayerView(overlayHost: OverlayHost) {
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(this)
+
+
+        constraintSet.connect(overlayHost.id, ConstraintSet.TOP, playerView.id, ConstraintSet.TOP)
+        constraintSet.connect(overlayHost.id, ConstraintSet.START, playerView.id, ConstraintSet.START)
+        constraintSet.connect(overlayHost.id, ConstraintSet.END, playerView.id, ConstraintSet.END)
+        constraintSet.connect(overlayHost.id, ConstraintSet.BOTTOM, playerView.id, ConstraintSet.BOTTOM)
+        constraintSet.constrainWidth(overlayHost.id, 0)
+        constraintSet.constrainHeight(overlayHost.id, 0)
+
+        overlayHost.visibility = View.VISIBLE
+
+        constraintSet.applyTo(this)
     }
 
 
