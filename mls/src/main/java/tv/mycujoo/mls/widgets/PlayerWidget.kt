@@ -26,7 +26,6 @@ import tv.mycujoo.mls.entity.OverLayAction
 import tv.mycujoo.mls.extensions.getDisplaySize
 import tv.mycujoo.mls.widgets.PlayerWidget.ScreenMode.LANDSCAPE
 import tv.mycujoo.mls.widgets.PlayerWidget.ScreenMode.PORTRAIT
-import tv.mycujoo.mls.widgets.time_bar.PreviewTimeBar
 
 
 class PlayerWidget @JvmOverloads constructor(

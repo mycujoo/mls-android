@@ -5,24 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!--    <ImageButton-->
-    <!--        android:id="@id/exo_play"-->
-    <!--        style="@style/ExoMediaButton.Play"-->
-    <!--        android:layout_width="100dp"-->
-    <!--        android:layout_height="100dp"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        android:background="#CC000000" />-->
-
-    <!--    <ImageButton-->
-    <!--        android:id="@id/exo_pause"-->
-    <!--        style="@style/ExoMediaButton.Pause"-->
-    <!--        android:layout_width="100dp"-->
-    <!--        android:layout_height="100dp"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        android:layout_gravity="center"-->
-    <!--        android:background="#CC000000" />-->
 
     <FrameLayout
         android:id="@+id/previewContainerLayout"
@@ -40,12 +22,6 @@
         app:layout_constraintWidth_default="percent"
         app:layout_constraintWidth_max="48dp">
 
-        <!--        <ImageView-->
-        <!--            android:id="@+id/previewImageView"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:scaleType="fitXY" />-->
-
         <TextView
             android:id="@+id/previewTitleTextView"
             android:layout_width="wrap_content"
@@ -55,7 +31,7 @@
             tools:text="Title" />
     </FrameLayout>
 
-    <tv.mycujoo.mls.widgets.time_bar.PreviewTimeBar
+    <tv.mycujoo.mls.widgets.time_bar.PreviewTimeBarWrapper
         android:id="@+id/exo_progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -75,29 +51,29 @@
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <ImageButton
-            android:id="@+id/exo_prev"
-            style="@style/ExoMediaButton.Previous" />
+<!--        <ImageButton-->
+<!--            android:id="@+id/exo_prev"-->
+<!--            style="@style/ExoMediaButton.Previous" />-->
 
-        <ImageButton
-            android:id="@id/exo_rew"
-            style="@style/ExoMediaButton.Rewind" />
+<!--        <ImageButton-->
+<!--            android:id="@id/exo_rew"-->
+<!--            style="@style/ExoMediaButton.Rewind" />-->
 
-        <ImageButton
-            android:id="@+id/exo_play"
-            style="@style/ExoMediaButton.Play" />
+<!--        <ImageButton-->
+<!--            android:id="@+id/exo_play"-->
+<!--            style="@style/ExoMediaButton.Play" />-->
 
-        <ImageButton
-            android:id="@id/exo_pause"
-            style="@style/ExoMediaButton.Pause" />
+<!--        <ImageButton-->
+<!--            android:id="@id/exo_pause"-->
+<!--            style="@style/ExoMediaButton.Pause" />-->
 
-        <ImageButton
-            android:id="@id/exo_ffwd"
-            style="@style/ExoMediaButton.FastForward" />
+<!--        <ImageButton-->
+<!--            android:id="@id/exo_ffwd"-->
+<!--            style="@style/ExoMediaButton.FastForward" />-->
 
-        <ImageButton
-            android:id="@id/exo_next"
-            style="@style/ExoMediaButton.Next" />
+<!--        <ImageButton-->
+<!--            android:id="@id/exo_next"-->
+<!--            style="@style/ExoMediaButton.Next" />-->
 
     </LinearLayout>
 

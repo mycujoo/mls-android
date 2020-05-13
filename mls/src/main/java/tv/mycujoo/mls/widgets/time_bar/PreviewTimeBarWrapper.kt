@@ -4,14 +4,16 @@ import android.content.Context
 import android.util.AttributeSet
 import android.util.Log
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import com.google.android.exoplayer2.ui.DefaultTimeBar
 import com.google.android.exoplayer2.ui.TimeBar
 import kotlinx.android.synthetic.main.custom_controls_layout.view.*
 
-class PreviewTimeBar @JvmOverloads constructor(
+class PreviewTimeBarWrapper @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : DefaultTimeBar(context, attrs, defStyleAttr), PreviewView, TimeBar.OnScrubListener {
 
+//    lateinit var defaultTimeBar : DefaultTimeBar
     lateinit var delegate: PreviewDelegate
 
     var onPreviewChangeListener = ArrayList<OnPreviewChangeListener>(0)
@@ -24,7 +26,10 @@ class PreviewTimeBar @JvmOverloads constructor(
     init {
         delegate = PreviewDelegate(this, 555555)
         delegate.setEnabled(isEnabled)
+
+//        defaultTimeBar = DefaultTimeBar(context, attrs, defStyleAttr)
         addListener(this)
+//        defaultTimeBar.addLis
     }
 
     /**region View Over-ridden*/

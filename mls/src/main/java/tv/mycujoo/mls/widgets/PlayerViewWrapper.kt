@@ -13,8 +13,6 @@ import android.widget.RelativeLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.updateLayoutParams
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.Target
 import com.google.android.exoplayer2.ui.PlayerView
 import kotlinx.android.synthetic.main.custom_controls_layout.view.*
 import kotlinx.android.synthetic.main.player_widget_layout.view.*
@@ -25,7 +23,7 @@ import tv.mycujoo.mls.entity.OverLayAction
 import tv.mycujoo.mls.extensions.getDisplaySize
 import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
 import tv.mycujoo.mls.widgets.time_bar.PreviewLoader
-import tv.mycujoo.mls.widgets.time_bar.PreviewTimeBar
+import tv.mycujoo.mls.widgets.time_bar.PreviewTimeBarWrapper
 
 class PlayerViewWrapper @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -33,7 +31,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     var playerView: PlayerView
     private var overlayHost: OverlayHost
-    var previewTimeBar: PreviewTimeBar
+    var previewTimeBarWrapper: PreviewTimeBarWrapper
 
 
     private var imageView: ImageView? = null
@@ -54,13 +52,13 @@ class PlayerViewWrapper @JvmOverloads constructor(
         playerView = playerWidget_playerView
         overlayHost = playerWidget_overlayHost
 
-        previewTimeBar = findViewById(R.id.exo_progress)
+        previewTimeBarWrapper = findViewById(R.id.exo_progress)
 //        imageView = findViewById(R.id.previewImageView)
 //        previewTitleTextView = findViewById(R.id.previewTitleTextView)
 
 
 
-        previewTimeBar.delegate.setPreviewLoader(object : PreviewLoader {
+        previewTimeBarWrapper.delegate.setPreviewLoader(object : PreviewLoader {
             override fun loadPreview(currentPosition: Long, max: Long) {
 //                Glide.with(imageView!!)
 //                    .load(thumbnailsUrl)
