@@ -5,13 +5,13 @@ import com.google.android.exoplayer2.SimpleExoPlayer
 import tv.mycujoo.mls.core.AnnotationBuilderImpl
 import tv.mycujoo.mls.core.AnnotationListener
 import tv.mycujoo.mls.core.AnnotationPublisher
+import tv.mycujoo.mls.entity.AnnotationSourceData
 import tv.mycujoo.mls.entity.HighlightAction
 import tv.mycujoo.mls.entity.OverLayAction
-import tv.mycujoo.mls.entity.AnnotationSourceData
 import tv.mycujoo.mls.entity.TimeLineAction
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.widgets.HighlightAdapter
-import tv.mycujoo.mls.widgets.PlayerWidget
+import tv.mycujoo.mls.widgets.PlayerViewWrapper
 import tv.mycujoo.mls.widgets.TimeLineSeekBar
 
 class Coordinator(
@@ -20,7 +20,7 @@ class Coordinator(
 ) {
 
     var timeLineSeekBar: TimeLineSeekBar? = null
-    internal lateinit var widget: PlayerWidget
+    internal lateinit var playerViewWrapper: PlayerViewWrapper
 
     fun initialize(
         exoPlayer: SimpleExoPlayer,
@@ -31,7 +31,7 @@ class Coordinator(
             override fun onNewAnnotationAvailable(annotationSourceData: AnnotationSourceData) {
                 when (annotationSourceData.action) {
                     is OverLayAction -> {
-                        widget.showOverLay(annotationSourceData.action)
+                        playerViewWrapper.showOverLay(annotationSourceData.action)
                     }
                     is HighlightAction -> {
 
@@ -65,9 +65,15 @@ class Coordinator(
     }
 
     fun onPlayVideo() {
-        val longArray = api.getTimeLineMarkers()
+        val timeLineList = api.getTimeLineMarkers()
 
-        widget.addMarker(longArray, booleanArrayOf(false, false, false, false, false, false))
+        val longArray = LongArray(timeLineList.size)
+        val booleanArray = BooleanArray(timeLineList.size)
+        timeLineList.forEachIndexed() { index, timeLineItem ->
+            longArray[index] = timeLineItem.streamOffset
+            booleanArray[index] = false
+        }
+        playerViewWrapper.addMarker(longArray, booleanArray)
 
     }
 }
