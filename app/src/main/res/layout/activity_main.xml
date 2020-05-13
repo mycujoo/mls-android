@@ -10,20 +10,21 @@
         android:id="@+id/startButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Start"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:text="Start" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 
-    <tv.mycujoo.mls.widgets.PlayerWidget
-        android:id="@+id/playerWidget"
+    <tv.mycujoo.mls.widgets.PlayerViewWrapper
+        android:id="@+id/playerViewWrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_height="240dp" />
+
 
     <tv.mycujoo.mls.widgets.TimeLineSeekBar
         android:id="@+id/timeLineSeekBar"
@@ -37,7 +38,8 @@
         android:thumb="@drawable/bg_thumb"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/playerWidget"/>
+        app:layout_constraintTop_toBottomOf="@id/playerViewWrapper" />
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/highlightsRecyclerView"
@@ -53,9 +55,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        app:layout_constraintTop_toBottomOf="@id/highlightsRecyclerView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/highlightsRecyclerView">
 
         <!--        <Button-->
         <!--            android:id="@+id/startButton"-->

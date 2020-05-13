@@ -2,14 +2,12 @@ package tv.mycujoo.mlsapp.activity
 
 import android.content.res.Configuration
 import android.net.Uri
-import android.os.Build.VERSION_CODES.N
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.activity_main.*
 import tv.mycujoo.mls.api.HighlightListParams
-import tv.mycujoo.mls.api.MyCujooLiveServiceImpl
+import tv.mycujoo.mls.api.MyCujooLiveService
 import tv.mycujoo.mls.api.PlayerEvents
 import tv.mycujoo.mls.model.ConfigParams
 import tv.mycujoo.mlsapp.R
@@ -17,7 +15,7 @@ import tv.mycujoo.mlsapp.R
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var myCujooLiveService: MyCujooLiveServiceImpl
+    private lateinit var myCujooLiveService: MyCujooLiveService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,19 +42,23 @@ class MainActivity : AppCompatActivity() {
 
 
         myCujooLiveService =
-            MyCujooLiveServiceImpl.Builder()
+            MyCujooLiveService.Builder()
                 .withContext(this)
-                .defaultPlayerController(false)
+                .defaultPlayerController(true)
                 .highlightList(HighlightListParams(highlightsRecyclerView))
                 .setPlayerEvents(playerEvents)
                 .build()
 
 
         startButton?.setOnClickListener { myCujooLiveService.playVideo(Uri.parse("https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8")) }
+
         playButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerPlay() }
         pauseButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerPause() }
         nextButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerNext() }
         prevButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerPrevious() }
+
+
+        myCujooLiveService.loadVideo(Uri.parse("https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"))
 
 
     }
@@ -64,7 +66,7 @@ class MainActivity : AppCompatActivity() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         myCujooLiveService.onConfigurationChanged(
-            ConfigParams(newConfig, true, false),
+            ConfigParams(newConfig, hasPortraitActionBar = true, hasLandscapeActionBar = false),
             window.decorView,
             supportActionBar
         )
@@ -72,30 +74,24 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        if (Util.SDK_INT >= N) {
-            myCujooLiveService.initializePlayer(playerWidget, timeLineSeekBar)
-        }
+        myCujooLiveService.onStart(playerViewWrapper)
     }
 
     override fun onResume() {
         super.onResume()
-        if (Util.SDK_INT < N) {
-            myCujooLiveService.initializePlayer(playerWidget, timeLineSeekBar)
-        }
+        myCujooLiveService.onResume(playerViewWrapper)
+
     }
 
 
     override fun onPause() {
         super.onPause()
-        if (Util.SDK_INT < N) {
-            myCujooLiveService.releasePlayer()
-        }
+        myCujooLiveService.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        if (Util.SDK_INT >= N) {
-            myCujooLiveService.releasePlayer()
-        }
+        myCujooLiveService.onStop()
+
     }
 }
