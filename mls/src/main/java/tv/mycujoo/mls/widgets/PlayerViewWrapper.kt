@@ -8,120 +8,107 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.RelativeLayout
-import android.widget.RelativeLayout.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.updateLayoutParams
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.Target
 import com.google.android.exoplayer2.ui.PlayerView
+import kotlinx.android.synthetic.main.custom_controls_layout.view.*
 import kotlinx.android.synthetic.main.player_widget_layout.view.*
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.entity.LayoutPosition
-import tv.mycujoo.mls.entity.LayoutPosition.*
 import tv.mycujoo.mls.entity.LayoutType
-import tv.mycujoo.mls.entity.LayoutType.*
 import tv.mycujoo.mls.entity.OverLayAction
 import tv.mycujoo.mls.extensions.getDisplaySize
-import tv.mycujoo.mls.widgets.PlayerWidget.ScreenMode.LANDSCAPE
-import tv.mycujoo.mls.widgets.PlayerWidget.ScreenMode.PORTRAIT
+import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
+import tv.mycujoo.mls.widgets.time_bar.PreviewLoader
 import tv.mycujoo.mls.widgets.time_bar.PreviewTimeBar
 
-
-class PlayerWidget @JvmOverloads constructor(
+class PlayerViewWrapper @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : ConstraintLayout(context, attrs, defStyleAttr), PlayerWidgetInterface {
+) : ConstraintLayout(context, attrs, defStyleAttr) {
 
-    init {
-        init(context, attrs, defStyleAttr)
-    }
+    var playerView: PlayerView
+    private var overlayHost: OverlayHost
+    var previewTimeBar: PreviewTimeBar
 
 
-    private lateinit var playerView: PlayerView
-    private lateinit var overlayHost: OverlayHost
+    private var imageView: ImageView? = null
+    private val thumbnailsUrl: String =
+        "https://bitdash-a.akamaihd.net/content/MI201109210084_1/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.jpg"
+    lateinit var timeBarAnnotationHelper : TimeBarAnnotationHelper
+
 
     private var dismissingHandler = Handler()
 
     private val overlaySingleLineHashMap = HashMap<LayoutType, BasicSingleLineOverlayView>()
     private val overlayDoubleLineHashMap = HashMap<LayoutType, BasicDoubleLineOverlayView>()
 
+    init {
 
-    private fun init(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) {
-
-
-        val inflate =
-            LayoutInflater.from(context).inflate(R.layout.player_widget_layout, this, true)
+        LayoutInflater.from(context).inflate(R.layout.player_widget_layout, this, true)
 
         playerView = playerWidget_playerView
-        playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
+        overlayHost = playerWidget_overlayHost
 
-//        playerView = PlayerView(context)
-//        playerView.id = View.generateViewId()
-//        playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
-//        addView(playerView)
-
-        overlayHost = OverlayHost(context)
-        overlayHost.id = View.generateViewId()
-//        addView(overlayHost)
+        previewTimeBar = findViewById(R.id.exo_progress)
+//        imageView = findViewById(R.id.previewImageView)
+//        previewTitleTextView = findViewById(R.id.previewTitleTextView)
 
 
-        val constraintSet = ConstraintSet()
-        constraintSet.clone(this)
 
+        previewTimeBar.delegate.setPreviewLoader(object : PreviewLoader {
+            override fun loadPreview(currentPosition: Long, max: Long) {
+//                Glide.with(imageView!!)
+//                    .load(thumbnailsUrl)
+//                    .override(
+//                        Target.SIZE_ORIGINAL,
+//                        Target.SIZE_ORIGINAL
+//                    )
+//                    .into(imageView!!)
 
-//        constraintSet.connect(playerView.id, ConstraintSet.TOP, id, ConstraintSet.TOP)
-//        constraintSet.connect(playerView.id, ConstraintSet.START, id, ConstraintSet.START)
-//        constraintSet.connect(playerView.id, ConstraintSet.END, id, ConstraintSet.END)
-//
-//        constraintSet.constrainHeight(id, ConstraintSet.WRAP_CONTENT)
+                timeBarAnnotationHelper.updateText(currentPosition, previewTitleTextView)
+            }
+        })
 
-
-        constraintSet.connect(overlayHost.id, ConstraintSet.TOP, id, ConstraintSet.TOP)
-        constraintSet.connect(overlayHost.id, ConstraintSet.START, id, ConstraintSet.START)
-        constraintSet.connect(overlayHost.id, ConstraintSet.END, id, ConstraintSet.END)
-        constraintSet.connect(overlayHost.id, ConstraintSet.BOTTOM, id, ConstraintSet.BOTTOM)
-        constraintSet.constrainWidth(overlayHost.id, 0)
-        constraintSet.constrainHeight(overlayHost.id, 0)
-
-
-//        constraintSet.applyTo(this)
-
-//        screenMode(PORTRAIT)
-
-        //todo uncomment this
-        overlayHost.visibility = View.GONE
+        playerView.post { screenMode(PlayerWidget.ScreenMode.PORTRAIT) }
 
     }
 
-    fun screenMode(screenMode: ScreenMode) {
+
+    /**region UI*/
+
+    fun screenMode(screenMode: PlayerWidget.ScreenMode) {
         when (screenMode) {
-            PORTRAIT -> {
-                val constraintSet = ConstraintSet()
-                constraintSet.clone(this)
+            PlayerWidget.ScreenMode.PORTRAIT -> {
 
                 val displaySize = context.getDisplaySize()
-                constraintSet.constrainWidth(playerView.id, ConstraintSet.MATCH_CONSTRAINT)
-                constraintSet.constrainHeight(playerView.id, displaySize.width * 9 / 16)
+                val layoutParams = layoutParams as ViewGroup.LayoutParams
+                layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+                layoutParams.height = displaySize.width * 9 / 16
 
-                constraintSet.applyTo(this)
+                setLayoutParams(layoutParams)
 
             }
-            LANDSCAPE -> {
-                val constraintSet = ConstraintSet()
-                constraintSet.clone(this)
+            PlayerWidget.ScreenMode.LANDSCAPE -> {
 
-                constraintSet.constrainWidth(playerView.id, ConstraintSet.MATCH_CONSTRAINT)
-                constraintSet.constrainHeight(playerView.id, ConstraintSet.WRAP_CONTENT)
+                val layoutParams = layoutParams as ViewGroup.LayoutParams
+                layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+                layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
 
-                constraintSet.applyTo(this)
+                setLayoutParams(layoutParams)
             }
         }
     }
 
-    enum class ScreenMode {
-        PORTRAIT,
-        LANDSCAPE
+    /**endregion */
+
+    /**region Functionality*/
+    fun defaultController(hasDefaultPlayerController: Boolean) {
+        playerView.useController = hasDefaultPlayerController
     }
 
     fun addMarker(longArray: LongArray, booleanArray: BooleanArray) {
@@ -131,39 +118,18 @@ class PlayerWidget @JvmOverloads constructor(
         )
     }
 
-    fun setPlayer(player: Player?) {
-        playerView.player = player
-    }
-
-    override fun setPlayerControllerState(state: Boolean) {
-        playerView.hideController()
-        if (state) {
-            playerView.hideController()
-        } else {
-            playerView.showController()
-        }
-    }
-
-
-    private fun hideController() {
-        playerView.hideController()
-    }
-
-    fun defaultController(hasDefaultPlayerController: Boolean) {
-        playerView.useController = hasDefaultPlayerController
-    }
 
     fun showOverLay(action: OverLayAction) {
-        hideController()
+        playerView.hideController()
         when (action.layoutType) {
-            BASIC_SINGLE_LINE -> {
-                showBasicSingleLine(action)
+            LayoutType.BASIC_SINGLE_LINE -> {
+//                showBasicSingleLine(action)
             }
-            BASIC_DOUBLE_LINE -> {
-                showBasicDoubleLine(action)
+            LayoutType.BASIC_DOUBLE_LINE -> {
+//                showBasicDoubleLine(action)
             }
-            BASIC_SCORE_BOARD -> {
-                showBasicScoreBoard(action)
+            LayoutType.BASIC_SCORE_BOARD -> {
+//                showBasicScoreBoard(action)
             }
         }
     }
@@ -184,12 +150,12 @@ class PlayerWidget @JvmOverloads constructor(
             overlaySingleLineHashMap[action.layoutType] = overlay
         } else {
             when (action.layoutPosition) {
-                TOP_LEFT,
-                BOTTOM_LEFT -> {
+                LayoutPosition.TOP_LEFT,
+                LayoutPosition.BOTTOM_LEFT -> {
                     overlay.dismissIn(dismissingHandler, action.duration)
                 }
-                BOTTOM_RIGHT,
-                TOP_RIGHT -> {
+                LayoutPosition.BOTTOM_RIGHT,
+                LayoutPosition.TOP_RIGHT -> {
                     overlay.dismissToRightIn(dismissingHandler, action.duration)
                 }
             }
@@ -206,6 +172,7 @@ class PlayerWidget @JvmOverloads constructor(
         return overlayView
     }
 
+
     private fun createBasicSingleLineOverLayView(action: OverLayAction): BasicSingleLineOverlayView {
         val overlayView = BasicSingleLineOverlayView(context)
         overlayView.setData(action)
@@ -215,38 +182,38 @@ class PlayerWidget @JvmOverloads constructor(
 
 
         when (action.layoutPosition) {
-            TOP_LEFT -> {
+            LayoutPosition.TOP_LEFT -> {
                 val layoutParams = RelativeLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
-                layoutParams.addRule(ALIGN_PARENT_TOP)
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP)
                 overlayHost.addView(overlayView, layoutParams)
             }
-            TOP_RIGHT -> {
+            LayoutPosition.TOP_RIGHT -> {
                 val layoutParams = RelativeLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
-                layoutParams.addRule(ALIGN_PARENT_TOP)
-                layoutParams.addRule(ALIGN_PARENT_RIGHT)
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP)
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
                 overlayHost.addView(overlayView, layoutParams)
             }
-            BOTTOM_RIGHT -> {
+            LayoutPosition.BOTTOM_RIGHT -> {
                 val layoutParams = RelativeLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
-                layoutParams.addRule(ALIGN_PARENT_BOTTOM)
-                layoutParams.addRule(ALIGN_PARENT_RIGHT)
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
                 overlayHost.addView(overlayView, layoutParams)
             }
-            BOTTOM_LEFT -> {
+            LayoutPosition.BOTTOM_LEFT -> {
                 val layoutParams = RelativeLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
-                layoutParams.addRule(ALIGN_PARENT_BOTTOM)
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
                 overlayHost.addView(overlayView, layoutParams)
             }
         }
@@ -264,7 +231,7 @@ class PlayerWidget @JvmOverloads constructor(
 
             overlayView.updateLayoutParams<RelativeLayout.LayoutParams> {
                 when (layoutPosition) {
-                    TOP_LEFT -> {
+                    LayoutPosition.TOP_LEFT -> {
                         marginStart = overlayView.width.unaryMinus()
                         animation = ObjectAnimator.ofFloat(
                             overlayView,
@@ -272,7 +239,7 @@ class PlayerWidget @JvmOverloads constructor(
                             overlayView.width.toFloat()
                         )
                     }
-                    TOP_RIGHT -> {
+                    LayoutPosition.TOP_RIGHT -> {
                         val x = overlayView.width.toFloat()
                         marginEnd = overlayView.width.unaryMinus()
 
@@ -283,7 +250,7 @@ class PlayerWidget @JvmOverloads constructor(
                         )
 
                     }
-                    BOTTOM_RIGHT -> {
+                    LayoutPosition.BOTTOM_RIGHT -> {
                         val x = overlayView.width.toFloat()
                         marginEnd = overlayView.width.unaryMinus()
                         animation = ObjectAnimator.ofFloat(
@@ -292,7 +259,7 @@ class PlayerWidget @JvmOverloads constructor(
                             x.unaryMinus()
                         )
                     }
-                    BOTTOM_LEFT -> {
+                    LayoutPosition.BOTTOM_LEFT -> {
                         marginStart = overlayView.width.unaryMinus()
                         animation = ObjectAnimator.ofFloat(
                             overlayView,
@@ -332,6 +299,7 @@ class PlayerWidget @JvmOverloads constructor(
 
     }
 
+
     private fun attachStartingAnimation(
         overlayView: BasicDoubleLineOverlayView,
         layoutPosition: LayoutPosition
@@ -341,7 +309,7 @@ class PlayerWidget @JvmOverloads constructor(
 
             overlayView.updateLayoutParams<RelativeLayout.LayoutParams> {
                 when (layoutPosition) {
-                    TOP_LEFT -> {
+                    LayoutPosition.TOP_LEFT -> {
                         marginStart = overlayView.width.unaryMinus()
                         animation = ObjectAnimator.ofFloat(
                             overlayView,
@@ -349,7 +317,7 @@ class PlayerWidget @JvmOverloads constructor(
                             overlayView.width.toFloat()
                         )
                     }
-                    TOP_RIGHT -> {
+                    LayoutPosition.TOP_RIGHT -> {
                         val x = overlayView.width.toFloat()
                         marginEnd = overlayView.width.unaryMinus()
 
@@ -360,7 +328,7 @@ class PlayerWidget @JvmOverloads constructor(
                         )
 
                     }
-                    BOTTOM_RIGHT -> {
+                    LayoutPosition.BOTTOM_RIGHT -> {
                         val x = overlayView.width.toFloat()
                         marginEnd = overlayView.width.unaryMinus()
                         animation = ObjectAnimator.ofFloat(
@@ -369,7 +337,7 @@ class PlayerWidget @JvmOverloads constructor(
                             x.unaryMinus()
                         )
                     }
-                    BOTTOM_LEFT -> {
+                    LayoutPosition.BOTTOM_LEFT -> {
                         marginStart = overlayView.width.unaryMinus()
                         animation = ObjectAnimator.ofFloat(
                             overlayView,
@@ -427,12 +395,12 @@ class PlayerWidget @JvmOverloads constructor(
             overlayDoubleLineHashMap[action.layoutType] = overlay
         } else {
             when (action.layoutPosition) {
-                TOP_LEFT,
-                BOTTOM_LEFT -> {
+                LayoutPosition.TOP_LEFT,
+                LayoutPosition.BOTTOM_LEFT -> {
                     overlay.dismissIn(dismissingHandler, action.duration)
                 }
-                BOTTOM_RIGHT,
-                TOP_RIGHT -> {
+                LayoutPosition.BOTTOM_RIGHT,
+                LayoutPosition.TOP_RIGHT -> {
                     overlay.dismissToRightIn(dismissingHandler, action.duration)
                 }
             }
@@ -448,38 +416,38 @@ class PlayerWidget @JvmOverloads constructor(
         overlayView.visibility = View.INVISIBLE
 
         when (action.layoutPosition) {
-            TOP_LEFT -> {
+            LayoutPosition.TOP_LEFT -> {
                 val layoutParams = RelativeLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
-                layoutParams.addRule(ALIGN_PARENT_TOP)
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP)
                 overlayHost.addView(overlayView, layoutParams)
             }
-            TOP_RIGHT -> {
+            LayoutPosition.TOP_RIGHT -> {
                 val layoutParams = RelativeLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
-                layoutParams.addRule(ALIGN_PARENT_TOP)
-                layoutParams.addRule(ALIGN_PARENT_RIGHT)
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP)
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
                 overlayHost.addView(overlayView, layoutParams)
             }
-            BOTTOM_RIGHT -> {
+            LayoutPosition.BOTTOM_RIGHT -> {
                 val layoutParams = RelativeLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
-                layoutParams.addRule(ALIGN_PARENT_BOTTOM)
-                layoutParams.addRule(ALIGN_PARENT_RIGHT)
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
                 overlayHost.addView(overlayView, layoutParams)
             }
-            BOTTOM_LEFT -> {
+            LayoutPosition.BOTTOM_LEFT -> {
                 val layoutParams = RelativeLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
-                layoutParams.addRule(ALIGN_PARENT_BOTTOM)
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
                 overlayHost.addView(overlayView, layoutParams)
             }
         }
@@ -506,26 +474,26 @@ class PlayerWidget @JvmOverloads constructor(
         constraintSetForAnimatingView.clone(this)
 
         when (action.layoutPosition) {
-            TOP_LEFT -> {
+            LayoutPosition.TOP_LEFT -> {
                 val layoutParams = RelativeLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
-                layoutParams.addRule(ALIGN_PARENT_TOP)
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP)
                 overlayHost.addView(overlayView, layoutParams)
             }
-            TOP_RIGHT -> {
+            LayoutPosition.TOP_RIGHT -> {
                 //todo
             }
-            BOTTOM_RIGHT -> {
+            LayoutPosition.BOTTOM_RIGHT -> {
                 //todo
             }
-            BOTTOM_LEFT -> {
+            LayoutPosition.BOTTOM_LEFT -> {
                 val layoutParams = RelativeLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
-                layoutParams.addRule(ALIGN_PARENT_BOTTOM)
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
                 overlayHost.addView(overlayView, layoutParams)
             }
         }
@@ -571,5 +539,9 @@ class PlayerWidget @JvmOverloads constructor(
         }
 
     }
+
+
+    /**endregion */
+
 
 }
