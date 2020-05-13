@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="controller_layout_id" format="reference" />
+    <declare-styleable name="com.google.android.exoplayer2.ui.PlayerView" />
+</resources>

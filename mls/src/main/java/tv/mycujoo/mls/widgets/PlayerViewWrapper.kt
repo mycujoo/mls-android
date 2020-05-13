@@ -37,7 +37,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
     private var imageView: ImageView? = null
     private val thumbnailsUrl: String =
         "https://bitdash-a.akamaihd.net/content/MI201109210084_1/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.jpg"
-    lateinit var timeBarAnnotationHelper : TimeBarAnnotationHelper
+    lateinit var timeBarAnnotationHelper: TimeBarAnnotationHelper
 
 
     private var dismissingHandler = Handler()
@@ -55,7 +55,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
         previewTimeBarWrapper = findViewById(R.id.exo_progress)
 //        imageView = findViewById(R.id.previewImageView)
 //        previewTitleTextView = findViewById(R.id.previewTitleTextView)
-
 
 
         previewTimeBarWrapper.delegate.setPreviewLoader(object : PreviewLoader {
