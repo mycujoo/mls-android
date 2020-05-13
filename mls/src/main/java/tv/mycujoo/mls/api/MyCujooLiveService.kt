@@ -48,7 +48,7 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
     private lateinit var controller: PlayerController
     private lateinit var playerStatus: PlayerStatus
     private lateinit var playerEvents: PlayerEvents
-    private lateinit var playerEventsListener: PlayerEventsListener
+    private var playerEventsListener: PlayerEventsListener? = null
     private var hasDefaultPlayerController = true
     private var hasAnnotation = true
 
@@ -63,7 +63,7 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
 
     init {
         checkNotNull(builder.context)
-        checkNotNull(builder.playerEventsListener)
+//        checkNotNull(builder.playerEventsListener)
         this.context = builder.context!!
 
         api = RemoteApi()
@@ -75,7 +75,7 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
             controller = PlayerControllerImpl(it)
             playerStatus = PlayerStatusImpl(it)
 
-            it.addListener(builder.playerEventsListener!!)
+            playerEventsListener?.let { playerEventsListener ->  it.addListener(playerEventsListener) }
 
             hasDefaultPlayerController = builder.hasDefaultController
 
