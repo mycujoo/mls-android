@@ -34,7 +34,8 @@ class HighlightAction(
 
 class TimeLineAction(
     id: Int,
-    val color: String
+    val color: String,
+    val text : String
 ) : Action(id) {
 
 }

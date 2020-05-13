@@ -1,8 +1,28 @@
 package tv.mycujoo.mls.network
 
+import com.google.gson.Gson
 import tv.mycujoo.mls.entity.*
+import tv.mycujoo.mls.model.MetaDataHolder
+import tv.mycujoo.mls.model.PlacardSpecs
+import tv.mycujoo.mls.model.Placard
 
 class RemoteApi : Api {
+
+    override fun getPlacardsSpecs(): List<PlacardSpecs> {
+        val listOfActions = listOf<String>("SHOW_SCORE_BOARD", "HOME_TEAM_PLUS_1")
+
+        val goalMetaData = MetaDataHolder("tag", "Goal")
+        val listOfMetaData = listOf(goalMetaData)
+        val gson = Gson()
+        val metaDataJson = gson.toJson(listOfActions)
+
+        val placardType = Placard(9000, "homeGoal", metaDataJson, listOfActions)
+
+        val placard = PlacardSpecs("LIVE_MODE_01", 2000L)
+
+
+        return listOf(placard)
+    }
 
     override fun getAnnotations(): List<AnnotationSourceData> {
         return listOf(
@@ -118,16 +138,18 @@ class RemoteApi : Api {
         )
     }
 
-    override fun getTimeLineMarkers(): LongArray {
-        val longArray = LongArray(6)
-        longArray[0] = 1000L
-        longArray[1] = 20000L
-        longArray[2] = 60000L
-        longArray[3] = 320000L
-        longArray[4] = 920000L
-        longArray[5] = 1920000L
+    override fun getTimeLineMarkers(): List<TimeLineItem> {
 
-        return longArray
+        val mutableList = ArrayList<TimeLineItem>(6)
+
+        mutableList.add(TimeLineItem(1000L, TimeLineAction(3000, "#ff00ff", "Goal")))
+        mutableList.add(TimeLineItem(60000L, TimeLineAction(3000, "#ff00ff", "Goal")))
+        mutableList.add(TimeLineItem(320000L, TimeLineAction(3000, "#ff00ff", "Foul")))
+        mutableList.add(TimeLineItem(920000L, TimeLineAction(3000, "#ff00ff", "Goal")))
+        mutableList.add(TimeLineItem(1920000L, TimeLineAction(3000, "#ff00ff", "Goal")))
+        mutableList.add(TimeLineItem(2920000L, TimeLineAction(3000, "#ff00ff", "Free Kick")))
+
+        return mutableList
     }
 
     override fun getHighlights(): List<HighlightAction> {
