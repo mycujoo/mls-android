@@ -26,7 +26,7 @@ class CoordinatorTest {
     lateinit var api: Api
 
     @Mock
-    lateinit var widget: PlayerWidget
+    lateinit var widget: PlayerViewWrapper
     private var publisher = AnnotationPublisherImpl()
 
     @Mock
@@ -39,7 +39,7 @@ class CoordinatorTest {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         coordinator = Coordinator(api, publisher)
-        coordinator.widget = widget
+        coordinator.playerViewWrapper = widget
 
         val listener = object : AnnotationListener {
             override fun onNewAnnotationAvailable(annotationBundle: AnnotationBundle) {
@@ -53,8 +53,8 @@ class CoordinatorTest {
     @Test
     fun `should set PlayerWidget`() {
         val coordinator = Coordinator(api, publisher)
-        coordinator.widget = widget
-        assertNotNull(coordinator.widget)
+        coordinator.playerViewWrapper = widget
+        assertNotNull(coordinator.playerViewWrapper)
 
     }
 
