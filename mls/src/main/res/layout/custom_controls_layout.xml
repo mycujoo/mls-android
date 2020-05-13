@@ -53,46 +53,43 @@
 
         <ImageButton
             android:id="@+id/exo_prev"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="71dp"
+            android:layout_height="52dp"
             android:background="#CC000000"
             android:src="@drawable/exo_icon_previous" />
 
         <ImageButton
             android:id="@id/exo_rew"
-            style="@style/ExoMediaButton.Rewind"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="71dp"
+            android:layout_height="52dp"
             android:background="#CC000000"
             android:src="@drawable/exo_icon_previous" />
 
         <ImageButton
             android:id="@+id/exo_play"
-            style="@style/ExoMediaButton.Play"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="71dp"
+            android:layout_height="52dp"
             android:background="#CC000000"
             android:src="@drawable/exo_icon_play" />
 
         <ImageButton
             android:id="@id/exo_pause"
-            style="@style/ExoMediaButton.Pause"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="71dp"
+            android:layout_height="52dp"
             android:background="#CC000000"
             android:src="@drawable/exo_icon_pause" />
 
         <ImageButton
             android:id="@id/exo_ffwd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="71dp"
+            android:layout_height="52dp"
             android:background="#CC000000"
             android:src="@drawable/exo_icon_fastforward" />
 
         <ImageButton
             android:id="@id/exo_next"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="71dp"
+            android:layout_height="52dp"
             android:background="#CC000000"
             android:src="@drawable/exo_icon_next" />
 
