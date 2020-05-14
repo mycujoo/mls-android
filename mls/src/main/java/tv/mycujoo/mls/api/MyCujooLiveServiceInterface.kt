@@ -25,7 +25,6 @@ abstract class MyCujooLiveServiceInterface {
 
     abstract fun onPause()
     abstract fun onStop()
-    abstract fun releasePlayer()
 
     abstract fun getPlayerController(): PlayerController
     abstract fun getPlayerStatus(): PlayerStatus

@@ -9,6 +9,7 @@ import android.os.Handler
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
@@ -19,7 +20,6 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import tv.mycujoo.mls.cordinator.Coordinator
-import tv.mycujoo.mls.core.AnnotationPublisherImpl
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.PlayerStatusImpl
 import tv.mycujoo.mls.entity.HighlightAction
@@ -31,6 +31,10 @@ import tv.mycujoo.mls.widgets.*
 
 
 class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServiceInterface() {
+
+    private var uri: Uri? = null
+    private var resumePosition: Long = C.INDEX_UNSET.toLong()
+    private var resumeWindow: Int = C.INDEX_UNSET
 
     private lateinit var playerView: PlayerView
     private var playWhenReady: Boolean = true
@@ -50,7 +54,7 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
     private lateinit var playerEvents: PlayerEvents
     private var playerEventsListener: PlayerEventsListener? = null
     private var hasDefaultPlayerController = true
-    private var hasAnnotation = true
+    private var hasAnnotation = false
 
     private lateinit var coordinator: Coordinator
 
@@ -75,7 +79,7 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
             controller = PlayerControllerImpl(it)
             playerStatus = PlayerStatusImpl(it)
 
-            playerEventsListener?.let { playerEventsListener ->  it.addListener(playerEventsListener) }
+            playerEventsListener?.let { playerEventsListener -> it.addListener(playerEventsListener) }
 
             hasDefaultPlayerController = builder.hasDefaultController
 
@@ -112,6 +116,7 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
     }
 
     fun loadVideo(uri: Uri) {
+        this.uri = uri
         val mediaSource =
             HlsMediaSource.Factory(DefaultHttpDataSourceFactory(Util.getUserAgent(context, "mls")))
                 .createMediaSource(uri)
@@ -120,12 +125,17 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
             exoPlayer?.seekTo(playbackPosition)
         }
 
-        exoPlayer?.prepare(mediaSource)
-        exoPlayer?.playWhenReady = false
+        val haveResumePosition = resumeWindow != C.INDEX_UNSET
+        if (haveResumePosition) {
+            exoPlayer?.seekTo(resumeWindow, resumePosition)
+        }
 
+        exoPlayer?.prepare(mediaSource)
     }
 
     fun playVideo(uri: Uri) {
+        this.uri = uri
+
         val mediaSource =
             HlsMediaSource.Factory(DefaultHttpDataSourceFactory(Util.getUserAgent(context, "mls")))
                 .createMediaSource(uri)
@@ -144,6 +154,11 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
             exoPlayer?.seekTo(playbackPosition)
         }
 
+        val haveResumePosition = resumeWindow != C.INDEX_UNSET
+        if (haveResumePosition) {
+            exoPlayer?.seekTo(resumeWindow, resumePosition)
+        }
+
         exoPlayer?.prepare(mediaSource)
         exoPlayer?.playWhenReady = playWhenReady
 
@@ -157,8 +172,39 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
         timeLineSeekBar: TimeLineSeekBar?
     ) {
 
-        this.playerViewWrapper = playerViewWrapper
-        attachPlayer(playerViewWrapper)
+        if (exoPlayer == null) {
+
+            exoPlayer = SimpleExoPlayer.Builder(context).build()
+
+            exoPlayer?.let {
+
+                it.playWhenReady = playWhenReady
+
+                val haveResumePosition = resumeWindow != C.INDEX_UNSET
+                if (haveResumePosition) {
+                    exoPlayer?.seekTo(resumeWindow, resumePosition)
+                }
+                uri?.let { uri ->
+                    val mediaSource = HlsMediaSource.Factory(
+                        DefaultHttpDataSourceFactory(
+                            Util.getUserAgent(
+                                context,
+                                "mls"
+                            )
+                        )
+                    )
+                        .createMediaSource(uri)
+
+                    it.prepare(mediaSource, false, false)
+                }
+            }
+
+
+            this.playerViewWrapper = playerViewWrapper
+            attachPlayer(playerViewWrapper)
+        } else {
+
+        }
 
 
 //        playerViewWrapper.previewTimeBar.addOnPreviewChangeListener(object :
@@ -183,9 +229,9 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
         }
 
 
-        if (hasAnnotation) {
-            coordinator.playerViewWrapper = playerViewWrapper
-        }
+//        if (hasAnnotation) {
+//            coordinator.playerViewWrapper = playerViewWrapper
+//        }
     }
 
     private fun initTimeLine(timeLineSeekBar: TimeLineSeekBar?) {
@@ -253,6 +299,7 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
         if (Util.SDK_INT >= Build.VERSION_CODES.N) {
             this.playerViewWrapper = playerViewWrapper
             attachPlayer(playerViewWrapper)
+            initializePlayer(playerViewWrapper)
         }
     }
 
@@ -260,39 +307,41 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
         if (Util.SDK_INT < Build.VERSION_CODES.N) {
             this.playerViewWrapper = playerViewWrapper
             attachPlayer(playerViewWrapper)
+            initializePlayer(playerViewWrapper)
         }
     }
 
     override fun onPause() {
         if (Util.SDK_INT < Build.VERSION_CODES.N) {
-            exoPlayer?.let {
-                playWhenReady = it.playWhenReady
-                playbackPosition = it.currentPosition
-                it.release()
-                exoPlayer = null
-            }
+            release()
         }
     }
 
     override fun onStop() {
         if (Util.SDK_INT >= Build.VERSION_CODES.N) {
-            exoPlayer?.let {
-                playWhenReady = it.playWhenReady
-                playbackPosition = it.currentPosition
-                it.release()
-                exoPlayer = null
-            }
+            release()
         }
     }
 
-    override fun releasePlayer() {
-
+    private fun release() {
         exoPlayer?.let {
+            updateResumePosition()
             playWhenReady = it.playWhenReady
             playbackPosition = it.currentPosition
             it.release()
             exoPlayer = null
         }
+    }
+
+    private fun updateResumePosition() {
+        exoPlayer?.let {
+            resumeWindow = it.currentWindowIndex
+            resumePosition = if (it.isCurrentWindowSeekable) Math.max(
+                0,
+                it.currentPosition
+            ) else C.POSITION_UNSET.toLong()
+        }
+
     }
 
     private fun attachPlayer(
@@ -362,7 +411,6 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
     companion object {
 
         const val PUBLIC_KEY = "pk_test_123"
-
     }
 
 }
