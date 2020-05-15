@@ -20,6 +20,7 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import tv.mycujoo.mls.cordinator.Coordinator
+import tv.mycujoo.mls.core.AnnotationPublisherImpl
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.PlayerStatusImpl
 import tv.mycujoo.mls.entity.HighlightAction
@@ -54,7 +55,7 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
     private lateinit var playerEvents: PlayerEvents
     private var playerEventsListener: PlayerEventsListener? = null
     private var hasDefaultPlayerController = true
-    private var hasAnnotation = false
+    private var hasAnnotation = true
 
     private lateinit var coordinator: Coordinator
 
@@ -110,8 +111,8 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
     private fun initAnnotation() {
         handler = Handler()
 
-//        coordinator = Coordinator(api, AnnotationPublisherImpl())
-//        coordinator.initialize(exoPlayer!!, handler, highlightAdapter)
+        coordinator = Coordinator(api, AnnotationPublisherImpl())
+        coordinator.initialize(exoPlayer!!, handler, highlightAdapter)
 
     }
 
@@ -229,9 +230,9 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
         }
 
 
-//        if (hasAnnotation) {
-//            coordinator.playerViewWrapper = playerViewWrapper
-//        }
+        if (hasAnnotation) {
+            coordinator.playerViewWrapper = playerViewWrapper
+        }
     }
 
     private fun initTimeLine(timeLineSeekBar: TimeLineSeekBar?) {

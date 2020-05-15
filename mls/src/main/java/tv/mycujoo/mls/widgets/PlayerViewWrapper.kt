@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RelativeLayout
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.updateLayoutParams
@@ -51,7 +52,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         playerView = PlayerView(context, attrs, defStyleAttr)
         initExoPlayerView(playerView)
 
-        overlayHost = playerWidget_overlayHost
+        overlayHost = OverlayHost(context, attrs, defStyleAttr)
         connectOverlayHostToPlayerView(overlayHost)
 
 //        previewTimeBarWrapper = findViewById(R.id.exo_progress)
@@ -98,6 +99,8 @@ class PlayerViewWrapper @JvmOverloads constructor(
     }
 
     private fun connectOverlayHostToPlayerView(overlayHost: OverlayHost) {
+        playerView.addView(overlayHost)
+
         val constraintSet = ConstraintSet()
         constraintSet.clone(this)
 
@@ -106,12 +109,17 @@ class PlayerViewWrapper @JvmOverloads constructor(
         constraintSet.connect(overlayHost.id, ConstraintSet.START, playerView.id, ConstraintSet.START)
         constraintSet.connect(overlayHost.id, ConstraintSet.END, playerView.id, ConstraintSet.END)
         constraintSet.connect(overlayHost.id, ConstraintSet.BOTTOM, playerView.id, ConstraintSet.BOTTOM)
-        constraintSet.constrainWidth(overlayHost.id, 0)
-        constraintSet.constrainHeight(overlayHost.id, 0)
+        constraintSet.constrainWidth(overlayHost.id, 300)
+        constraintSet.constrainHeight(overlayHost.id, 3000)
 
         overlayHost.visibility = View.VISIBLE
+        overlayHost.bringToFront()
+        bringChildToFront(overlayHost)
 
         constraintSet.applyTo(this)
+
+
+        overlayHost.elevation = playerView.elevation + 200F
     }
 
 
@@ -159,18 +167,24 @@ class PlayerViewWrapper @JvmOverloads constructor(
         playerView.hideController()
         when (action.layoutType) {
             LayoutType.BASIC_SINGLE_LINE -> {
-//                showBasicSingleLine(action)
+                showBasicSingleLine(action)
             }
             LayoutType.BASIC_DOUBLE_LINE -> {
-//                showBasicDoubleLine(action)
+                showBasicDoubleLine(action)
             }
             LayoutType.BASIC_SCORE_BOARD -> {
-//                showBasicScoreBoard(action)
+                showBasicScoreBoard(action)
             }
         }
     }
 
     private fun showBasicSingleLine(action: OverLayAction) {
+
+        val textView = TextView(context)
+        textView.id = View.generateViewId()
+        textView.text = "126723452673452736482734823642"
+
+//        playerView.addView(textView)
 
         val overlay: BasicSingleLineOverlayView
 
@@ -214,7 +228,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         overlayView.setData(action)
 
         overlayView.id = View.generateViewId()
-        overlayView.visibility = View.INVISIBLE
+//        overlayView.visibility = View.INVISIBLE
 
 
         when (action.layoutPosition) {
@@ -323,6 +337,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
                 override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
                     overlayView.visibility = View.VISIBLE
+                    overlayView.bringToFront()
 
                 }
 
@@ -401,6 +416,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
                 override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
                     overlayView.visibility = View.VISIBLE
+                    overlayView.bringToFront()
 
                 }
 
@@ -563,6 +579,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
                 override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
                     overlayView.visibility = View.VISIBLE
+                    overlayView.bringToFront()
 
                 }
 
