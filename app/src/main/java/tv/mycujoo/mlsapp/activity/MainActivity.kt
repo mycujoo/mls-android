@@ -43,6 +43,8 @@ class MainActivity : AppCompatActivity() {
 
         myCujooLiveService =
             MyCujooLiveService.Builder()
+                .publicKey("USER_PUBLIC_KEY_123")
+                .withActivity(this)
                 .withContext(this)
                 .defaultPlayerController(true)
                 .highlightList(HighlightListParams(highlightsRecyclerView))

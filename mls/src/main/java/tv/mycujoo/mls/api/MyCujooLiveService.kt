@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.api
 
+import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
@@ -19,13 +20,21 @@ import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
+import com.npaw.youbora.lib6.YouboraLog
+import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
+import com.npaw.youbora.lib6.plugin.Options
+import com.npaw.youbora.lib6.plugin.Plugin
+import tv.mycujoo.mls.BuildConfig
+import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.cordinator.Coordinator
 import tv.mycujoo.mls.core.AnnotationPublisherImpl
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.PlayerStatusImpl
+import tv.mycujoo.mls.data.DataHolder
 import tv.mycujoo.mls.entity.HighlightAction
 import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
 import tv.mycujoo.mls.model.ConfigParams
+import tv.mycujoo.mls.model.Event
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.network.RemoteApi
 import tv.mycujoo.mls.widgets.*
@@ -56,6 +65,7 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
     private var playerEventsListener: PlayerEventsListener? = null
     private var hasDefaultPlayerController = true
     private var hasAnnotation = true
+    private var hasAnalytic = false
 
     private lateinit var coordinator: Coordinator
 
@@ -66,9 +76,16 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
     private val highlightList = ArrayList<HighlightAction>(0)
 
 
+    private lateinit var youboraClient: YouboraClient
+
+
+    private val dataHolder = DataHolder()
+
+
     init {
         checkNotNull(builder.context)
 //        checkNotNull(builder.playerEventsListener)
+        this.dataHolder
         this.context = builder.context!!
 
         api = RemoteApi()
@@ -94,7 +111,33 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
             if (hasAnnotation) {
                 initAnnotation()
             }
+
+            hasAnalytic = builder.hasAnalytic
+            if (hasAnalytic) {
+                initAnalytic(builder.publicKey, builder.activity, it)
+            }
         }
+
+    }
+
+    private fun initAnalytic(
+        publicKey: String,
+        activity: Activity?,
+        exoPlayer: SimpleExoPlayer
+    ) {
+        if (BuildConfig.DEBUG) {
+            YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE)
+        }
+        val youboraOptions = Options()
+        youboraOptions.accountCode = "mls"
+        youboraOptions.isAutoDetectBackground = true
+
+        val plugin = Plugin(youboraOptions, context)
+        plugin.activity = activity
+        plugin.adapter = Exoplayer2Adapter(exoPlayer)
+
+        youboraClient = YouboraClient(publicKey, plugin)
+
 
     }
 
@@ -118,6 +161,16 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
 
     fun loadVideo(uri: Uri) {
         this.uri = uri
+        dataHolder.eventLiveData.postValue(
+            Event(
+                "101",
+                uri.toString(),
+                "Sample name",
+                "Sample location",
+                "started"
+            )
+        )
+
         val mediaSource =
             HlsMediaSource.Factory(DefaultHttpDataSourceFactory(Util.getUserAgent(context, "mls")))
                 .createMediaSource(uri)
@@ -132,10 +185,23 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
         }
 
         exoPlayer?.prepare(mediaSource)
+
+        if (hasAnalytic) {
+            youboraClient.logEvent(dataHolder.getEvent())
+        }
     }
 
     fun playVideo(uri: Uri) {
         this.uri = uri
+        dataHolder.eventLiveData.postValue(
+            Event(
+                "101",
+                uri.toString(),
+                "Sample name",
+                "Sample location",
+                "started"
+            )
+        )
 
         val mediaSource =
             HlsMediaSource.Factory(DefaultHttpDataSourceFactory(Util.getUserAgent(context, "mls")))
@@ -165,6 +231,9 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
 
         coordinator.onPlayVideo()
 
+        if (hasAnalytic) {
+            youboraClient.logEvent(dataHolder.getEvent())
+        }
     }
 
 
@@ -232,6 +301,10 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
 
         if (hasAnnotation) {
             coordinator.playerViewWrapper = playerViewWrapper
+        }
+
+        if (hasAnalytic){
+
         }
     }
 
@@ -379,7 +452,11 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
 
 
     class Builder {
+        internal var publicKey: String = ""
+            private set
         internal var context: Context? = null
+            private set
+        internal var activity: Activity? = null
             private set
         internal var hasDefaultController: Boolean = true
             private set
@@ -389,6 +466,12 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
             private set
         internal var hasAnnotation: Boolean = true
             private set
+        internal var hasAnalytic: Boolean = true
+            private set
+
+        fun publicKey(publicKey: String) = apply { this.publicKey = publicKey }
+
+        fun withActivity(activity: Activity) = apply { this.activity = activity }
 
         fun withContext(context: Context) = apply { this.context = context }
 
@@ -404,6 +487,9 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
 
         fun hasAnnotation(hasAnnotation: Boolean) =
             apply { this.hasAnnotation = hasAnnotation }
+
+        fun hasAnalyticPlugin(hasAnalytic: Boolean) =
+            apply { this.hasAnalytic = hasAnalytic }
 
         fun build() = MyCujooLiveService(this)
 
