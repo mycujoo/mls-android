@@ -31,6 +31,8 @@ import tv.mycujoo.mls.core.AnnotationPublisherImpl
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.PlayerStatusImpl
 import tv.mycujoo.mls.data.DataHolder
+import tv.mycujoo.mls.di.DaggerMlsComponent
+import tv.mycujoo.mls.di.NetworkModule
 import tv.mycujoo.mls.entity.HighlightAction
 import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
 import tv.mycujoo.mls.model.ConfigParams
@@ -93,6 +95,8 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
         exoPlayer = SimpleExoPlayer.Builder(context).build()
 
         exoPlayer?.let {
+
+            DaggerMlsComponent.builder().networkModule(NetworkModule(builder.context!!)).build()
 
             controller = PlayerControllerImpl(it)
             playerStatus = PlayerStatusImpl(it)
