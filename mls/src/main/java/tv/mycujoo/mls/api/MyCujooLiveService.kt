@@ -24,7 +24,10 @@ import com.npaw.youbora.lib6.YouboraLog
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
-import retrofit2.Retrofit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import tv.mycujoo.domain.entity.Result
+import tv.mycujoo.domain.usecase.GetEventsUseCase
 import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.cordinator.Coordinator
@@ -85,8 +88,12 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
 
     private val dataHolder = DataHolder()
 
+
     @Inject
-    lateinit var retrofitClient : Retrofit
+    lateinit var eventsRepository: tv.mycujoo.domain.repository.EventsRepository
+
+    @Inject
+    lateinit var dispatcher: CoroutineScope
 
 
     init {
@@ -105,6 +112,20 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
                 DaggerMlsComponent.builder().networkModule(NetworkModule(builder.context!!)).build()
 
             dependencyGraph.inject(this)
+
+            dispatcher.launch {
+                val result = GetEventsUseCase(eventsRepository).execute()
+                when (result) {
+
+                    is Result.Success -> {
+                    }
+                    is Result.NetworkError -> {
+                    }
+                    is Result.GenericError -> {
+                    }
+                }
+            }
+
 
             controller = PlayerControllerImpl(it)
             playerStatus = PlayerStatusImpl(it)

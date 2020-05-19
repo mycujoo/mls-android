@@ -9,6 +9,7 @@ import okhttp3.OkHttpClient
 import okio.Buffer
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import tv.mycujoo.mls.network.MlsApi
 import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
@@ -60,6 +61,12 @@ class NetworkModule(val context: Context) {
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideMlsApi(retrofit: Retrofit): MlsApi {
+        return retrofit.create(MlsApi::class.java)
     }
 
 }

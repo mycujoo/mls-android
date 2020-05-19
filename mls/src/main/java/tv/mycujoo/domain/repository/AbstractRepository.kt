@@ -16,7 +16,7 @@ abstract class AbstractRepository {
 
                     return tv.mycujoo.domain.entity.Result.GenericError(
                         code,
-                        "custom error message"
+                        throwable.message()
                     )
 
                 }
