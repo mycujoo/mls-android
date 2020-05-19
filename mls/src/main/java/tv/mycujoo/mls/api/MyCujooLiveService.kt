@@ -24,6 +24,7 @@ import com.npaw.youbora.lib6.YouboraLog
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
+import retrofit2.Retrofit
 import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.cordinator.Coordinator
@@ -40,6 +41,7 @@ import tv.mycujoo.mls.model.Event
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.network.RemoteApi
 import tv.mycujoo.mls.widgets.*
+import javax.inject.Inject
 
 
 class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServiceInterface() {
@@ -83,6 +85,9 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
 
     private val dataHolder = DataHolder()
 
+    @Inject
+    lateinit var retrofitClient : Retrofit
+
 
     init {
         checkNotNull(builder.context)
@@ -96,7 +101,10 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
 
         exoPlayer?.let {
 
-            DaggerMlsComponent.builder().networkModule(NetworkModule(builder.context!!)).build()
+            val dependencyGraph =
+                DaggerMlsComponent.builder().networkModule(NetworkModule(builder.context!!)).build()
+
+            dependencyGraph.inject(this)
 
             controller = PlayerControllerImpl(it)
             playerStatus = PlayerStatusImpl(it)
