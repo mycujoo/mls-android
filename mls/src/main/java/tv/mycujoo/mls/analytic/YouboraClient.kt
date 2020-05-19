@@ -24,4 +24,14 @@ class YouboraClient(var publicKey: String, val plugin: Plugin) {
         plugin.options.adCustomDimension4 = event.status
     }
 
+    fun stop() {
+        plugin.fireStop()
+    }
+
+    fun start() {
+        if (plugin.adapter != null){
+            plugin.adapter.fireResume()
+        }
+    }
+
 }

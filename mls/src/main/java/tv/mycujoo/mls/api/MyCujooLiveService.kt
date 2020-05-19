@@ -129,7 +129,8 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
             YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE)
         }
         val youboraOptions = Options()
-        youboraOptions.accountCode = "mls"
+        //todo : use mls specific Youbora account
+        youboraOptions.accountCode = "mycujoodev"
         youboraOptions.isAutoDetectBackground = true
 
         val plugin = Plugin(youboraOptions, context)
@@ -161,15 +162,14 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
 
     fun loadVideo(uri: Uri) {
         this.uri = uri
-        dataHolder.eventLiveData.postValue(
-            Event(
-                "101",
-                uri.toString(),
-                "Sample name",
-                "Sample location",
-                "started"
-            )
+        dataHolder.eventLiveData = Event(
+            "101",
+            uri.toString(),
+            "Sample name",
+            "Sample location",
+            "started"
         )
+
 
         val mediaSource =
             HlsMediaSource.Factory(DefaultHttpDataSourceFactory(Util.getUserAgent(context, "mls")))
@@ -193,15 +193,15 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
 
     fun playVideo(uri: Uri) {
         this.uri = uri
-        dataHolder.eventLiveData.postValue(
-            Event(
-                "101",
-                uri.toString(),
-                "Sample name",
-                "Sample location",
-                "started"
-            )
-        )
+        dataHolder.eventLiveData = (
+                Event(
+                    "101",
+                    uri.toString(),
+                    "Sample name",
+                    "Sample location",
+                    "started"
+                )
+                )
 
         val mediaSource =
             HlsMediaSource.Factory(DefaultHttpDataSourceFactory(Util.getUserAgent(context, "mls")))
@@ -303,7 +303,7 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
             coordinator.playerViewWrapper = playerViewWrapper
         }
 
-        if (hasAnalytic){
+        if (hasAnalytic) {
 
         }
     }
@@ -374,6 +374,9 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
             this.playerViewWrapper = playerViewWrapper
             attachPlayer(playerViewWrapper)
             initializePlayer(playerViewWrapper)
+            if (hasAnalytic) {
+                youboraClient.start()
+            }
         }
     }
 
@@ -382,6 +385,9 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
             this.playerViewWrapper = playerViewWrapper
             attachPlayer(playerViewWrapper)
             initializePlayer(playerViewWrapper)
+            if (hasAnalytic) {
+                youboraClient.start()
+            }
         }
     }
 
@@ -402,6 +408,11 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
             updateResumePosition()
             playWhenReady = it.playWhenReady
             playbackPosition = it.currentPosition
+
+            if (hasAnalytic) {
+                youboraClient.stop()
+            }
+
             it.release()
             exoPlayer = null
         }

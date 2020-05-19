@@ -44,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         myCujooLiveService =
             MyCujooLiveService.Builder()
                 .publicKey("USER_PUBLIC_KEY_123")
+                .hasAnalyticPlugin(true)
                 .withActivity(this)
                 .withContext(this)
                 .defaultPlayerController(true)
@@ -51,8 +52,6 @@ class MainActivity : AppCompatActivity() {
                 .setPlayerEvents(playerEvents)
                 .build()
 
-
-        startButton?.setOnClickListener { myCujooLiveService.playVideo(Uri.parse("https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8")) }
 
         playButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerPlay() }
         pauseButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerPause() }

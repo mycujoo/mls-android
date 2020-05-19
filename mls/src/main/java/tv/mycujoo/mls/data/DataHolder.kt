@@ -1,14 +1,13 @@
 package tv.mycujoo.mls.data
 
 import tv.mycujoo.mls.model.Event
-import tv.mycujoo.mls.model.SingleLiveEvent
 
 class DataHolder : DataHolderContract {
     override fun getEvent(): Event? {
-        return eventLiveData.value
+        return eventLiveData
     }
 
-    val eventLiveData = SingleLiveEvent<Event>()
+    var eventLiveData : Event? = null
 }
 
 interface DataHolderContract {
