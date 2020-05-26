@@ -65,6 +65,33 @@ class ActionRootSourceData {
                         }
                         actionsList.add(showTimeLineMarkerAction)
                     }
+
+                    ABSTRACT_ACTION_SHOW_ANNOUNCEMENT_OVERLAY_ID -> {
+                        val showAnnouncementOverlayAction = ShowAnnouncementOverlayAction()
+                        action.metadata?.forEach { metadata ->
+                            if (metadata.value.isNullOrEmpty()) {
+                                Log.e("ActionRootSourceData", "given null value for meta!")
+                                return
+                            }
+                            when (metadata.key) {
+                                "color" -> {
+                                    showAnnouncementOverlayAction.color = metadata.value!!
+                                }
+                                "line1" -> {
+                                    showAnnouncementOverlayAction.line1 = metadata.value!!
+                                }
+                                "line2" -> {
+                                    showAnnouncementOverlayAction.line2 = metadata.value!!
+                                }
+                                "imageUrl" -> {
+                                    showAnnouncementOverlayAction.imageUrl = metadata.value!!
+                                }
+                                else -> {
+                                }
+                            }
+                        }
+                        actionsList.add(showAnnouncementOverlayAction)
+                    }
                     else -> {
                     }
                 }
