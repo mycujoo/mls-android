@@ -16,7 +16,7 @@ class RemoteApi : Api {
 
         val actionRootSourceData = ActionRootSourceData()
         actionRootSourceData.id = "id_1000"
-        actionRootSourceData.time = 20000L
+        actionRootSourceData.time = 10000L
 
 
         val sampleShowAnnouncementOverlayAction = getSampleShowAnnouncementOverlayAction()
@@ -25,7 +25,7 @@ class RemoteApi : Api {
 
         val actionWrapper = ActionWrapper()
         actionWrapper.action = sampleShowAnnouncementOverlayAction
-        actionWrapper.time = actionRootSourceData.time ?: -1
+        actionWrapper.offset = actionRootSourceData.time ?: -1
 
         listOfActionWrapper.add(actionWrapper)
 

@@ -21,7 +21,9 @@ import tv.mycujoo.mls.entity.LayoutType
 import tv.mycujoo.mls.entity.OverLayAction
 import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
 import tv.mycujoo.mls.extensions.getDisplaySize
+import tv.mycujoo.mls.helper.OverlayHelper
 import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
+import tv.mycujoo.mls.widgets.overlay.AnnouncementOverlayView
 import tv.mycujoo.mls.widgets.time_bar.PreviewTimeBarWrapper
 
 class PlayerViewWrapper @JvmOverloads constructor(
@@ -604,6 +606,16 @@ class PlayerViewWrapper @JvmOverloads constructor(
     }
 
     fun showAnnouncementOverLay(action: ShowAnnouncementOverlayAction) {
+        val announcementOverlayView = AnnouncementOverlayView(context)
+        announcementOverlayView.id = View.generateViewId()
+        announcementOverlayView.viewAction(action)
+
+
+        OverlayHelper.addView(
+            overlayHost,
+            announcementOverlayView,
+            action.position
+        )
 
     }
 
