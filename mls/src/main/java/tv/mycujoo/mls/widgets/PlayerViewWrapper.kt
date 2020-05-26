@@ -15,11 +15,11 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.updateLayoutParams
 import com.google.android.exoplayer2.ui.PlayerView
-import kotlinx.android.synthetic.main.player_widget_layout.view.*
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.entity.LayoutPosition
 import tv.mycujoo.mls.entity.LayoutType
 import tv.mycujoo.mls.entity.OverLayAction
+import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
 import tv.mycujoo.mls.extensions.getDisplaySize
 import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
 import tv.mycujoo.mls.widgets.time_bar.PreviewTimeBarWrapper
@@ -106,9 +106,19 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
 
         constraintSet.connect(overlayHost.id, ConstraintSet.TOP, playerView.id, ConstraintSet.TOP)
-        constraintSet.connect(overlayHost.id, ConstraintSet.START, playerView.id, ConstraintSet.START)
+        constraintSet.connect(
+            overlayHost.id,
+            ConstraintSet.START,
+            playerView.id,
+            ConstraintSet.START
+        )
         constraintSet.connect(overlayHost.id, ConstraintSet.END, playerView.id, ConstraintSet.END)
-        constraintSet.connect(overlayHost.id, ConstraintSet.BOTTOM, playerView.id, ConstraintSet.BOTTOM)
+        constraintSet.connect(
+            overlayHost.id,
+            ConstraintSet.BOTTOM,
+            playerView.id,
+            ConstraintSet.BOTTOM
+        )
         constraintSet.constrainWidth(overlayHost.id, 300)
         constraintSet.constrainHeight(overlayHost.id, 3000)
 
@@ -590,6 +600,10 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
             overlayView.dismissIn(dismissingHandler, action.duration)
         }
+
+    }
+
+    fun showAnnouncementOverLay(action: ShowAnnouncementOverlayAction) {
 
     }
 

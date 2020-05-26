@@ -9,6 +9,8 @@ import tv.mycujoo.mls.entity.AnnotationSourceData
 import tv.mycujoo.mls.entity.HighlightAction
 import tv.mycujoo.mls.entity.OverLayAction
 import tv.mycujoo.mls.entity.TimeLineAction
+import tv.mycujoo.mls.entity.actions.ActionWrapper
+import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.widgets.HighlightAdapter
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
@@ -44,6 +46,17 @@ class Coordinator(
                     }
                 }
             }
+
+
+            override fun onNewActionWrapperAvailable(actionWrapper: ActionWrapper) {
+                when (actionWrapper.action) {
+                    is ShowAnnouncementOverlayAction -> {
+                        playerViewWrapper.showAnnouncementOverLay(actionWrapper.action as ShowAnnouncementOverlayAction)
+                    }
+                    else -> {
+                    }
+                }
+            }
         }
         publisher.setAnnotationListener(listener)
 
@@ -52,6 +65,7 @@ class Coordinator(
         annotationBuilder.buildPendings()
 
         annotationBuilder.addPendingAnnotations(api.getAnnotations())
+        annotationBuilder.addPendingActions(api.getActions())
 
         val runnable = object : Runnable {
             override fun run() {

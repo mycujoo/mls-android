@@ -25,11 +25,11 @@ class ShowAnnouncmentOverlayActionStructureTest {
         actionRootSourceData.id = "id_1000"
 
 
-        val actionIdentifier = ActionIdentifier(
+        val actionIdentifier = ActionSourceData(
             ABSTRACT_ACTION_SHOW_ANNOUNCEMENT_OVERLAY_ID,
             emptyList()
         )
-        actionRootSourceData.actionIdentifiers = listOf(actionIdentifier)
+        actionRootSourceData.actionSourceData = listOf(actionIdentifier)
 
 
         val json = gson.toJson(actionRootSourceData)
@@ -63,11 +63,11 @@ class ShowAnnouncmentOverlayActionStructureTest {
         metaDataImageUrl.key = "imageUrl"
         metaDataImageUrl.value = "url_to_image"
 
-        val actionIdentifier = ActionIdentifier(
+        val actionIdentifier = ActionSourceData(
             ABSTRACT_ACTION_SHOW_ANNOUNCEMENT_OVERLAY_ID,
             listOf(metaDataColor, metaDataLine1, metaDataLine2, metaDataImageUrl)
         )
-        actionRootSourceData.actionIdentifiers = listOf(actionIdentifier)
+        actionRootSourceData.actionSourceData = listOf(actionIdentifier)
 
         val json = gson.toJson(actionRootSourceData)
         val rootSourceData = gson.fromJson(json, ActionRootSourceData::class.java)

@@ -25,11 +25,11 @@ class ShowTimelineMarkerAbstractActionStructureTest {
         actionRootSourceData.id = "id_1000"
 
 
-        val actionIdentifier = ActionIdentifier(
+        val actionIdentifier = ActionSourceData(
             ABSTRACT_ACTION_SHOW_TIME_LINE_MARKER_ID,
             emptyList()
         )
-        actionRootSourceData.actionIdentifiers = listOf(actionIdentifier)
+        actionRootSourceData.actionSourceData = listOf(actionIdentifier)
 
 
         val json = gson.toJson(actionRootSourceData)
@@ -55,11 +55,11 @@ class ShowTimelineMarkerAbstractActionStructureTest {
         metaDataColor.key = "color"
         metaDataColor.value = "#ffffff"
 
-        val actionIdentifier = ActionIdentifier(
+        val actionIdentifier = ActionSourceData(
             ABSTRACT_ACTION_SHOW_TIME_LINE_MARKER_ID,
             listOf(metaDataTag, metaDataColor)
         )
-        actionRootSourceData.actionIdentifiers = listOf(actionIdentifier)
+        actionRootSourceData.actionSourceData = listOf(actionIdentifier)
 
         val json = gson.toJson(actionRootSourceData)
         val rootSourceData = gson.fromJson(json, ActionRootSourceData::class.java)

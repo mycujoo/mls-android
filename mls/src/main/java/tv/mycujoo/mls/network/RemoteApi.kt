@@ -2,11 +2,46 @@ package tv.mycujoo.mls.network
 
 import com.google.gson.Gson
 import tv.mycujoo.mls.entity.*
+import tv.mycujoo.mls.entity.actions.ActionRootSourceData
+import tv.mycujoo.mls.entity.actions.ActionWrapper
+import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
 import tv.mycujoo.mls.model.MetaDataHolder
-import tv.mycujoo.mls.model.PlacardSpecs
 import tv.mycujoo.mls.model.Placard
+import tv.mycujoo.mls.model.PlacardSpecs
 
 class RemoteApi : Api {
+
+    override fun getActions(): List<ActionWrapper> {
+        val listOfActionWrapper = ArrayList<ActionWrapper>()
+
+        val actionRootSourceData = ActionRootSourceData()
+        actionRootSourceData.id = "id_1000"
+        actionRootSourceData.time = 20000L
+
+
+        val sampleShowAnnouncementOverlayAction = getSampleShowAnnouncementOverlayAction()
+
+        actionRootSourceData.actionsList.add(sampleShowAnnouncementOverlayAction)
+
+        val actionWrapper = ActionWrapper()
+        actionWrapper.action = sampleShowAnnouncementOverlayAction
+        actionWrapper.time = actionRootSourceData.time ?: -1
+
+        listOfActionWrapper.add(actionWrapper)
+
+        return listOfActionWrapper
+    }
+
+    private fun getSampleShowAnnouncementOverlayAction(): ShowAnnouncementOverlayAction {
+        val showAnnouncementOverlayAction = ShowAnnouncementOverlayAction()
+        showAnnouncementOverlayAction.color = "#cccccc"
+        showAnnouncementOverlayAction.line1 = "Line 1"
+        showAnnouncementOverlayAction.line2 = " Line 2"
+        showAnnouncementOverlayAction.imageUrl = "some url"
+
+        return showAnnouncementOverlayAction
+    }
+
 
     override fun getPlacardsSpecs(): List<PlacardSpecs> {
         val listOfActions = listOf<String>("SHOW_SCORE_BOARD", "HOME_TEAM_PLUS_1")
@@ -179,5 +214,6 @@ class RemoteApi : Api {
         )
 
     }
+
 
 }

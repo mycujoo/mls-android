@@ -6,7 +6,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
-import tv.mycujoo.mls.entity.actions.ActionIdentifier
+import tv.mycujoo.mls.entity.actions.ActionSourceData
 import tv.mycujoo.mls.entity.actions.ActionRootSourceData
 import tv.mycujoo.mls.entity.actions.MetaData
 import tv.mycujoo.mls.entity.actions.ShowScoreboardOverlayAction
@@ -45,16 +45,16 @@ class ActionStructureTest {
         val actionRootSourceData = ActionRootSourceData()
         actionRootSourceData.id = "id_1000"
 
-        val actionIdentifier_0 = ActionIdentifier("0")
-        val actionIdentifier_1 = ActionIdentifier("1")
-        actionRootSourceData.actionIdentifiers = listOf(actionIdentifier_0, actionIdentifier_1)
+        val actionIdentifier_0 = ActionSourceData("0")
+        val actionIdentifier_1 = ActionSourceData("1")
+        actionRootSourceData.actionSourceData = listOf(actionIdentifier_0, actionIdentifier_1)
 
 
         val json = gson.toJson(actionRootSourceData)
         val rootSourceData = gson.fromJson(json, ActionRootSourceData::class.java)
 
-        assertEquals(actionIdentifier_0, rootSourceData.actionIdentifiers?.first())
-        assertEquals(actionIdentifier_1, rootSourceData.actionIdentifiers?.get(1))
+        assertEquals(actionIdentifier_0, rootSourceData.actionSourceData?.first())
+        assertEquals(actionIdentifier_1, rootSourceData.actionSourceData?.get(1))
     }
 
 
@@ -63,8 +63,8 @@ class ActionStructureTest {
         val actionRootSourceData = ActionRootSourceData()
         actionRootSourceData.id = "id_1000"
 
-        val actionIdentifier_0 = ActionIdentifier("0")
-        actionRootSourceData.actionIdentifiers = listOf(actionIdentifier_0)
+        val actionIdentifier_0 = ActionSourceData("0")
+        actionRootSourceData.actionSourceData = listOf(actionIdentifier_0)
 
         val json = gson.toJson(actionRootSourceData)
         val rootSourceData = gson.fromJson(json, ActionRootSourceData::class.java)
@@ -105,11 +105,11 @@ class ActionStructureTest {
         metaDataScoreRight.key = "scoreRight"
         metaDataScoreRight.value = "0"
 
-        val actionIdentifier_0 = ActionIdentifier(
+        val actionIdentifier_0 = ActionSourceData(
             "0",
             listOf(metaDataColorLeft, metaDataColorRight, metaDataAbbrLeft, metaDataAbbrRight, metaDataScoreLeft, metaDataScoreRight)
         )
-        actionRootSourceData.actionIdentifiers = listOf(actionIdentifier_0)
+        actionRootSourceData.actionSourceData = listOf(actionIdentifier_0)
 
         val json = gson.toJson(actionRootSourceData)
         val rootSourceData = gson.fromJson(json, ActionRootSourceData::class.java)

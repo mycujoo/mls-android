@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 
 class ActionRootSourceData {
     fun build() {
-        actionIdentifiers?.forEach { action ->
+        actionSourceData?.forEach { action ->
             action.actionAbstractId?.let {
                 when (it) {
                     // 0 -> ShowScoreboardOverlayAction
@@ -104,8 +104,11 @@ class ActionRootSourceData {
     @SerializedName("id")
     var id: String? = null
 
+    @SerializedName("time")
+    var time: Long? = null
+
     @SerializedName("actions")
-    var actionIdentifiers: List<ActionIdentifier>? = null
+    var actionSourceData: List<ActionSourceData>? = null
 
 
 }
