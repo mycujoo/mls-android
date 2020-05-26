@@ -1,13 +1,9 @@
 package tv.mycujoo.mls.widgets.overlay
 
-import android.animation.Animator
-import android.animation.ObjectAnimator
 import android.content.Context
 import android.graphics.Color
-import android.os.Handler
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.ViewGroup
 import android.widget.LinearLayout
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.view_overlay_announcement.view.*
@@ -31,39 +27,4 @@ class AnnouncementOverlayView @JvmOverloads constructor(
             .into(announcementOverlayView_imageView)
     }
 
-    fun dismissIn(handler: Handler, delay: Long) {
-        handler.postDelayed({
-
-
-            parent?.let {
-                val animation =
-                    ObjectAnimator.ofFloat(this, "translationX", this.width.unaryMinus().toFloat())
-                animation.duration = 1000L
-                animation.start()
-                animation.addListener(object : Animator.AnimatorListener {
-                    override fun onAnimationRepeat(animation: Animator?) {
-                    }
-
-                    override fun onAnimationEnd(animation: Animator?, isReverse: Boolean) {
-                    }
-
-                    override fun onAnimationEnd(animation: Animator?) {
-                        parent?.let {
-                            (it as ViewGroup).removeView(this@AnnouncementOverlayView)
-                        }
-                    }
-
-                    override fun onAnimationCancel(animation: Animator?) {
-                    }
-
-                    override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
-                    }
-
-                    override fun onAnimationStart(animation: Animator?) {
-                    }
-                })
-            }
-
-        }, delay)
-    }
 }

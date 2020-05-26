@@ -25,6 +25,7 @@ import tv.mycujoo.mls.extensions.getDisplaySize
 import tv.mycujoo.mls.helper.OverlayHelper
 import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
 import tv.mycujoo.mls.widgets.overlay.AnnouncementOverlayView
+import tv.mycujoo.mls.widgets.overlay.ScoreboardOverlayView
 import tv.mycujoo.mls.widgets.time_bar.PreviewTimeBarWrapper
 
 class PlayerViewWrapper @JvmOverloads constructor(
@@ -624,7 +625,15 @@ class PlayerViewWrapper @JvmOverloads constructor(
     }
 
     fun showScoreboardOverlay(action: ShowScoreboardOverlayAction) {
+        val scoreboardOverlayView = ScoreboardOverlayView(context)
+        scoreboardOverlayView.id = View.generateViewId()
+        scoreboardOverlayView.viewAction(action)
 
+        if (action.dismissible) {
+            OverlayHelper.removeInFuture(overlayHost, scoreboardOverlayView, action.dismissIn)
+        }
+
+        OverlayHelper.addView(overlayHost, scoreboardOverlayView, action.position)
     }
 
 
