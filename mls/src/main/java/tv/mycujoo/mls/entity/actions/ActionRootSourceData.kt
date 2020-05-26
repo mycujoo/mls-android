@@ -9,7 +9,7 @@ class ActionRootSourceData {
             action.actionAbstractId?.let {
                 when (it) {
                     // 0 -> ShowScoreboardOverlayAction
-                    "0" -> {
+                    ABSTRACT_ACTION_SHOW_SCOREBOARD_OVERLAY_ID -> {
                         val showScoreboardOverlayAction = ShowScoreboardOverlayAction()
                         action.metadata?.let { metadataList ->
                             metadataList.forEach { metadata ->
@@ -85,6 +85,12 @@ class ActionRootSourceData {
                                 }
                                 "imageUrl" -> {
                                     showAnnouncementOverlayAction.imageUrl = metadata.value!!
+                                }
+                                "dismissible" -> {
+                                    showAnnouncementOverlayAction.dismissible = metadata.value!!.toBoolean()
+                                }
+                                "dismissIn" -> {
+                                    showAnnouncementOverlayAction.dismissIn = metadata.value!!.toLong()
                                 }
                                 else -> {
                                 }

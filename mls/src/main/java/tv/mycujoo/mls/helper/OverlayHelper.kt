@@ -7,6 +7,7 @@ import tv.mycujoo.mls.widgets.OverlayHost
 
 class OverlayHelper {
     companion object {
+
         fun addView(
             host: OverlayHost,
             overlay: ViewGroup,
@@ -51,6 +52,14 @@ class OverlayHelper {
             }
 
 
+        }
+
+        fun removeInFuture(
+            host: OverlayHost,
+            overlayView: ViewGroup,
+            dismissIn: Long
+        ) {
+            host.postDelayed({ host.removeView(overlayView) }, dismissIn)
         }
 
     }

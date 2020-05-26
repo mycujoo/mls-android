@@ -63,9 +63,17 @@ class ShowAnnouncmentOverlayActionStructureTest {
         metaDataImageUrl.key = "imageUrl"
         metaDataImageUrl.value = "url_to_image"
 
+        val metaDataDismissible = MetaData()
+        metaDataDismissible.key = "dismissible"
+        metaDataDismissible.value = "true"
+
+        val metaDataDismissIn = MetaData()
+        metaDataDismissIn.key = "dismissIn"
+        metaDataDismissIn.value = "6000"
+
         val actionIdentifier = ActionSourceData(
             ABSTRACT_ACTION_SHOW_ANNOUNCEMENT_OVERLAY_ID,
-            listOf(metaDataColor, metaDataLine1, metaDataLine2, metaDataImageUrl)
+            listOf(metaDataColor, metaDataLine1, metaDataLine2, metaDataImageUrl, metaDataDismissible, metaDataDismissIn)
         )
         actionRootSourceData.actionSourceData = listOf(actionIdentifier)
 
@@ -90,6 +98,14 @@ class ShowAnnouncmentOverlayActionStructureTest {
         assertEquals(
             metaDataImageUrl.value,
             (rootSourceData.actionsList.first() as ShowAnnouncementOverlayAction).imageUrl
+        )
+        assertEquals(
+            metaDataDismissible.value?.toBoolean(),
+            (rootSourceData.actionsList.first() as ShowAnnouncementOverlayAction).dismissible
+        )
+        assertEquals(
+            metaDataDismissIn.value?.toLong(),
+            (rootSourceData.actionsList.first() as ShowAnnouncementOverlayAction).dismissIn
         )
     }
 }

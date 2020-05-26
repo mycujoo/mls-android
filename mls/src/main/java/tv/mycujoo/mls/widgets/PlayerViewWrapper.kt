@@ -610,6 +610,9 @@ class PlayerViewWrapper @JvmOverloads constructor(
         announcementOverlayView.id = View.generateViewId()
         announcementOverlayView.viewAction(action)
 
+        if (action.dismissible) {
+            OverlayHelper.removeInFuture(overlayHost, announcementOverlayView, action.dismissIn)
+        }
 
         OverlayHelper.addView(
             overlayHost,
