@@ -76,7 +76,7 @@ class ActionStructureTest {
     }
 
     @Test
-    fun verifyActionContent() {
+    fun verifyShowScoreboardOverlayActionContent() {
         val actionRootSourceData = ActionRootSourceData()
         actionRootSourceData.id = "id_1000"
 
@@ -97,9 +97,17 @@ class ActionStructureTest {
         metaDataAbbrRight.key = "abbrRight"
         metaDataAbbrRight.value = "CFC"
 
+        val metaDataScoreLeft = MetaData()
+        metaDataScoreLeft.key = "scoreLeft"
+        metaDataScoreLeft.value = "0"
+
+        val metaDataScoreRight = MetaData()
+        metaDataScoreRight.key = "scoreRight"
+        metaDataScoreRight.value = "0"
+
         val actionIdentifier_0 = ActionIdentifier(
             "0",
-            listOf(metaDataColorLeft, metaDataColorRight, metaDataAbbrLeft, metaDataAbbrRight)
+            listOf(metaDataColorLeft, metaDataColorRight, metaDataAbbrLeft, metaDataAbbrRight, metaDataScoreLeft, metaDataScoreRight)
         )
         actionRootSourceData.actionIdentifiers = listOf(actionIdentifier_0)
 
@@ -116,6 +124,22 @@ class ActionStructureTest {
         assertEquals(
             metaDataColorRight.value,
             (rootSourceData.actionsList.first() as ShowScoreboardOverlayAction).colorRight
+        )
+        assertEquals(
+            metaDataAbbrLeft.value,
+            (rootSourceData.actionsList.first() as ShowScoreboardOverlayAction).abbrLeft
+        )
+        assertEquals(
+            metaDataAbbrRight.value,
+            (rootSourceData.actionsList.first() as ShowScoreboardOverlayAction).abbrRight
+        )
+        assertEquals(
+            metaDataScoreLeft.value,
+            (rootSourceData.actionsList.first() as ShowScoreboardOverlayAction).scoreLeft
+        )
+        assertEquals(
+            metaDataScoreRight.value,
+            (rootSourceData.actionsList.first() as ShowScoreboardOverlayAction).scoreRight
         )
 
     }

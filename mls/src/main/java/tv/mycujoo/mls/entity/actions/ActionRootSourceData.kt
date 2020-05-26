@@ -30,6 +30,12 @@ class ActionRootSourceData {
                                     "abbrRight" -> {
                                         showScoreboardOverlayAction.abbrRight = metadata.value!!
                                     }
+                                    "scoreLeft" -> {
+                                        showScoreboardOverlayAction.scoreLeft = metadata.value!!
+                                    }
+                                    "scoreRight" -> {
+                                        showScoreboardOverlayAction.scoreRight = metadata.value!!
+                                    }
                                     else -> {
                                     }
                                 }
@@ -38,6 +44,26 @@ class ActionRootSourceData {
                         }
                         actionsList.add(showScoreboardOverlayAction)
 
+                    }
+                    ABSTRACT_ACTION_SHOW_TIME_LINE_MARKER_ID -> {
+                        val showTimeLineMarkerAction = ShowTimeLineMarkerAction()
+                        action.metadata?.forEach { metadata ->
+                            if (metadata.value.isNullOrEmpty()) {
+                                Log.e("ActionRootSourceData", "given null value for meta!")
+                                return
+                            }
+                            when (metadata.key) {
+                                "tag" -> {
+                                    showTimeLineMarkerAction.tag = metadata.value!!
+                                }
+                                "color" -> {
+                                    showTimeLineMarkerAction.color = metadata.value!!
+                                }
+                                else -> {
+                                }
+                            }
+                        }
+                        actionsList.add(showTimeLineMarkerAction)
                     }
                     else -> {
                     }

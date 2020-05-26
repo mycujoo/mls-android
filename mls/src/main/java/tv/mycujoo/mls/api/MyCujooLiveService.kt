@@ -114,7 +114,7 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
             dependencyGraph.inject(this)
 
             dispatcher.launch {
-                when (val result  = GetEventsUseCase(eventsRepository).execute()) {
+                when (val result = GetEventsUseCase(eventsRepository).execute()) {
                     is Result.Success -> {
                     }
                     is Result.NetworkError -> {
