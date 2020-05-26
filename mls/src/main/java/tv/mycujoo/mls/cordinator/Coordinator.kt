@@ -11,6 +11,7 @@ import tv.mycujoo.mls.entity.OverLayAction
 import tv.mycujoo.mls.entity.TimeLineAction
 import tv.mycujoo.mls.entity.actions.ActionWrapper
 import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
+import tv.mycujoo.mls.entity.actions.ShowScoreboardOverlayAction
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.widgets.HighlightAdapter
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
@@ -52,6 +53,9 @@ class Coordinator(
                 when (actionWrapper.action) {
                     is ShowAnnouncementOverlayAction -> {
                         playerViewWrapper.showAnnouncementOverLay(actionWrapper.action as ShowAnnouncementOverlayAction)
+                    }
+                    is ShowScoreboardOverlayAction -> {
+                        playerViewWrapper.showScoreboardOverlay(actionWrapper.action as ShowScoreboardOverlayAction)
                     }
                     else -> {
                     }

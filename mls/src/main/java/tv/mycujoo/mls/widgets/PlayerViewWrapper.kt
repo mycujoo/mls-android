@@ -20,6 +20,7 @@ import tv.mycujoo.mls.entity.LayoutPosition
 import tv.mycujoo.mls.entity.LayoutType
 import tv.mycujoo.mls.entity.OverLayAction
 import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
+import tv.mycujoo.mls.entity.actions.ShowScoreboardOverlayAction
 import tv.mycujoo.mls.extensions.getDisplaySize
 import tv.mycujoo.mls.helper.OverlayHelper
 import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
@@ -619,6 +620,10 @@ class PlayerViewWrapper @JvmOverloads constructor(
             announcementOverlayView,
             action.position
         )
+
+    }
+
+    fun showScoreboardOverlay(action: ShowScoreboardOverlayAction) {
 
     }
 

@@ -5,6 +5,7 @@ import tv.mycujoo.mls.entity.*
 import tv.mycujoo.mls.entity.actions.ActionRootSourceData
 import tv.mycujoo.mls.entity.actions.ActionWrapper
 import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
+import tv.mycujoo.mls.entity.actions.ShowScoreboardOverlayAction
 import tv.mycujoo.mls.model.MetaDataHolder
 import tv.mycujoo.mls.model.Placard
 import tv.mycujoo.mls.model.PlacardSpecs
@@ -20,8 +21,10 @@ class RemoteApi : Api {
 
 
         val sampleShowAnnouncementOverlayAction = getSampleShowAnnouncementOverlayAction()
+        val sampleShowScoreboardAction = getSampleShowScoreboardAction()
 
         actionRootSourceData.actionsList.add(sampleShowAnnouncementOverlayAction)
+        actionRootSourceData.actionsList.add(sampleShowScoreboardAction)
 
         val actionWrapper = ActionWrapper()
         actionWrapper.action = sampleShowAnnouncementOverlayAction
@@ -40,6 +43,20 @@ class RemoteApi : Api {
         showAnnouncementOverlayAction.imageUrl = "some url"
 
         return showAnnouncementOverlayAction
+    }
+
+    private fun getSampleShowScoreboardAction(): ShowScoreboardOverlayAction {
+        val showScoreboardOverlayAction = ShowScoreboardOverlayAction()
+        showScoreboardOverlayAction.colorLeft = "#cccccc"
+        showScoreboardOverlayAction.colorRight = "#f4f4f4"
+        showScoreboardOverlayAction.abbrLeft = "FCB"
+        showScoreboardOverlayAction.abbrRight = " CFC"
+        showScoreboardOverlayAction.scoreLeft = "0"
+        showScoreboardOverlayAction.scoreRight = "0"
+
+
+
+        return showScoreboardOverlayAction
     }
 
 

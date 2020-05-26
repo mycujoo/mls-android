@@ -36,6 +36,14 @@ class ActionRootSourceData {
                                     "scoreRight" -> {
                                         showScoreboardOverlayAction.scoreRight = metadata.value!!
                                     }
+                                    "dismissible" -> {
+                                        showScoreboardOverlayAction.dismissible =
+                                            metadata.value!!.toBoolean()
+                                    }
+                                    "dismissIn" -> {
+                                        showScoreboardOverlayAction.dismissIn =
+                                            metadata.value!!.toLong()
+                                    }
                                     else -> {
                                     }
                                 }
@@ -87,10 +95,12 @@ class ActionRootSourceData {
                                     showAnnouncementOverlayAction.imageUrl = metadata.value!!
                                 }
                                 "dismissible" -> {
-                                    showAnnouncementOverlayAction.dismissible = metadata.value!!.toBoolean()
+                                    showAnnouncementOverlayAction.dismissible =
+                                        metadata.value!!.toBoolean()
                                 }
                                 "dismissIn" -> {
-                                    showAnnouncementOverlayAction.dismissIn = metadata.value!!.toLong()
+                                    showAnnouncementOverlayAction.dismissIn =
+                                        metadata.value!!.toLong()
                                 }
                                 else -> {
                                 }
