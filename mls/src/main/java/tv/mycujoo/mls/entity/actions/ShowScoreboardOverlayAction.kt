@@ -17,6 +17,7 @@ class ShowScoreboardOverlayAction : AbstractAction(), ViewGuideline {
     lateinit var scoreLeft: String
     lateinit var scoreRight: String
 
+    override var viewId: String = ""
     override var position: LayoutPosition = LayoutPosition.BOTTOM_RIGHT
     override var dismissible: Boolean = false
     override var dismissIn: Long = -1L

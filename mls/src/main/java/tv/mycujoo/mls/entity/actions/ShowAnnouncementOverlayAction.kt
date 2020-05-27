@@ -10,6 +10,7 @@ class ShowAnnouncementOverlayAction : AbstractAction(), ViewGuideline {
     lateinit var line2: String
     lateinit var imageUrl: String
 
+    override var viewId: String = ""
     override var position: LayoutPosition = LayoutPosition.BOTTOM_RIGHT
     override var dismissible: Boolean = false
     override var dismissIn: Long = -1L

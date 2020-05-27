@@ -36,6 +36,9 @@ class ActionRootSourceData {
                                     "scoreRight" -> {
                                         showScoreboardOverlayAction.scoreRight = metadata.value!!
                                     }
+                                    "viewId" -> {
+                                        showScoreboardOverlayAction.viewId = metadata.value!!
+                                    }
                                     "dismissible" -> {
                                         showScoreboardOverlayAction.dismissible =
                                             metadata.value!!.toBoolean()
@@ -93,6 +96,9 @@ class ActionRootSourceData {
                                 }
                                 "imageUrl" -> {
                                     showAnnouncementOverlayAction.imageUrl = metadata.value!!
+                                }
+                                "viewId" -> {
+                                    showAnnouncementOverlayAction.viewId = metadata.value!!
                                 }
                                 "dismissible" -> {
                                     showAnnouncementOverlayAction.dismissible =

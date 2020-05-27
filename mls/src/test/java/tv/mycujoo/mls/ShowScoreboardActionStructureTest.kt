@@ -67,6 +67,10 @@ class ShowScoreboardActionStructureTest {
         metaDataScoreRight.key = "scoreRight"
         metaDataScoreRight.value = "0"
 
+        val metaDataViewId = MetaData()
+        metaDataViewId.key = "viewId"
+        metaDataViewId.value = "sho_timeline_marker_id_00"
+
         val metaDataDismissible = MetaData()
         metaDataDismissible.key = "dismissible"
         metaDataDismissible.value = "true"
@@ -85,7 +89,8 @@ class ShowScoreboardActionStructureTest {
                 metaDataScoreLeft,
                 metaDataScoreRight,
                 metaDataDismissible,
-                metaDataDismissIn
+                metaDataDismissIn,
+                metaDataViewId
             )
         )
         actionRootSourceData.actionSourceData = listOf(actionIdentifier)
@@ -127,6 +132,10 @@ class ShowScoreboardActionStructureTest {
         assertEquals(
             metaDataDismissIn.value?.toLong(),
             (rootSourceData.actionsList.first() as ShowScoreboardOverlayAction).dismissIn
+        )
+        assertEquals(
+            metaDataViewId.value,
+            (rootSourceData.actionsList.first() as ShowScoreboardOverlayAction).viewId
         )
 
     }
