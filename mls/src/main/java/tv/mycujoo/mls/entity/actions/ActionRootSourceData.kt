@@ -100,13 +100,35 @@ class ActionRootSourceData {
                                 }
                                 "dismissIn" -> {
                                     showAnnouncementOverlayAction.dismissIn =
-                                        metadata.value!!.toLong()
+                                        metadata.value?.toLong() ?: -1L
                                 }
                                 else -> {
                                 }
                             }
                         }
                         actionsList.add(showAnnouncementOverlayAction)
+                    }
+
+                    ABSTRACT_ACTION_COMMAND_ID -> {
+                        val commandAction = CommandAction()
+                        action.metadata?.forEach { metadata ->
+                            when (metadata.key) {
+                                "targetViewId" -> {
+                                    commandAction.targetViewId = metadata.value!!
+                                }
+                                "verb" -> {
+                                    commandAction.verb = metadata.value!!
+                                }
+                                "offset" -> {
+                                    commandAction.offset = metadata.value?.toLong() ?: -1L
+                                }
+                                else -> {
+
+                                }
+
+                            }
+                        }
+                        actionsList.add(commandAction)
                     }
                     else -> {
                     }

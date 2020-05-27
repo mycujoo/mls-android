@@ -2,10 +2,7 @@ package tv.mycujoo.mls.network
 
 import com.google.gson.Gson
 import tv.mycujoo.mls.entity.*
-import tv.mycujoo.mls.entity.actions.ActionRootSourceData
-import tv.mycujoo.mls.entity.actions.ActionWrapper
-import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
-import tv.mycujoo.mls.entity.actions.ShowScoreboardOverlayAction
+import tv.mycujoo.mls.entity.actions.*
 import tv.mycujoo.mls.model.MetaDataHolder
 import tv.mycujoo.mls.model.Placard
 import tv.mycujoo.mls.model.PlacardSpecs
@@ -23,8 +20,11 @@ class RemoteApi : Api {
         val sampleShowAnnouncementOverlayAction = getSampleShowAnnouncementOverlayAction()
         val sampleShowScoreboardAction = getSampleShowScoreboardAction()
 
+        val sampleCommandAction = getSampleCommandAction()
+
         actionRootSourceData.actionsList.add(sampleShowAnnouncementOverlayAction)
         actionRootSourceData.actionsList.add(sampleShowScoreboardAction)
+        actionRootSourceData.actionsList.add(sampleCommandAction)
 
         val actionWrapper = ActionWrapper()
         actionWrapper.action = sampleShowAnnouncementOverlayAction
@@ -57,6 +57,14 @@ class RemoteApi : Api {
 
 
         return showScoreboardOverlayAction
+    }
+
+    private fun getSampleCommandAction() : CommandAction {
+        val commandAction = getSampleCommandAction()
+        commandAction.verb = "hide"
+        commandAction.targetViewId = "?"
+
+        return commandAction
     }
 
 
