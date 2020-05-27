@@ -10,6 +10,7 @@ import tv.mycujoo.mls.entity.HighlightAction
 import tv.mycujoo.mls.entity.OverLayAction
 import tv.mycujoo.mls.entity.TimeLineAction
 import tv.mycujoo.mls.entity.actions.ActionWrapper
+import tv.mycujoo.mls.entity.actions.CommandAction
 import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
 import tv.mycujoo.mls.entity.actions.ShowScoreboardOverlayAction
 import tv.mycujoo.mls.network.Api
@@ -56,6 +57,9 @@ class Coordinator(
                     }
                     is ShowScoreboardOverlayAction -> {
                         playerViewWrapper.showScoreboardOverlay(actionWrapper.action as ShowScoreboardOverlayAction)
+                    }
+                    is CommandAction -> {
+                        playerViewWrapper.executeCommand(actionWrapper.action as CommandAction)
                     }
                     else -> {
                     }

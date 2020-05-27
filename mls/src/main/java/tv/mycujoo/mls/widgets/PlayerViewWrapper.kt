@@ -19,9 +19,11 @@ import tv.mycujoo.mls.R
 import tv.mycujoo.mls.entity.LayoutPosition
 import tv.mycujoo.mls.entity.LayoutType
 import tv.mycujoo.mls.entity.OverLayAction
+import tv.mycujoo.mls.entity.actions.CommandAction
 import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
 import tv.mycujoo.mls.entity.actions.ShowScoreboardOverlayAction
 import tv.mycujoo.mls.extensions.getDisplaySize
+import tv.mycujoo.mls.helper.OverlayCommandHelper
 import tv.mycujoo.mls.helper.OverlayHelper
 import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
 import tv.mycujoo.mls.widgets.overlay.AnnouncementOverlayView
@@ -634,6 +636,10 @@ class PlayerViewWrapper @JvmOverloads constructor(
         }
 
         OverlayHelper.addView(overlayHost, scoreboardOverlayView, action.position)
+    }
+
+    fun executeCommand(commandAction: CommandAction) {
+        OverlayCommandHelper.executeInFuture(overlayHost, commandAction)
     }
 
 
