@@ -653,6 +653,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         viewIdentifierManager.storeViewId(scoreboardOverlayView, action.viewId)
 
         if (action.dismissible) {
+            idlingResource.increment()
             OverlayViewHelper.removeInFuture(
                 overlayHost,
                 scoreboardOverlayView,
@@ -661,6 +662,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             )
         }
 
+        idlingResource.increment()
         OverlayViewHelper.addView(
             overlayHost,
             scoreboardOverlayView,

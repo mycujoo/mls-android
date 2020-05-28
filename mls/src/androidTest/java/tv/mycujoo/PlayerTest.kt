@@ -19,6 +19,7 @@ import org.junit.runner.RunWith
 import tv.mycujoo.mls.BlankActivity
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
+import tv.mycujoo.mls.entity.actions.ShowScoreboardOverlayAction
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
 
@@ -86,6 +87,31 @@ class PlayerTest {
         onView(withText("Line 1")).check(doesNotExist())
     }
 
+    @Test
+    fun givenScoreboardOverlayAction_shouldDisplayIt() {
+        onView(withText("FCB")).check(doesNotExist())
+
+        UiThreadStatement.runOnUiThread {
+            playerViewWrapper.showScoreboardOverlay(getSampleShowScoreboardAction())
+        }
+
+        onView(withText("FCB")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+    }
+
+    @Test
+    fun givenDismissibleScoreboardOverlayAction_shouldRemoveAfterDisplayingIt() {
+        onView(withText("FCB")).check(doesNotExist())
+
+        UiThreadStatement.runOnUiThread {
+            val action = getSampleShowScoreboardAction()
+            action.dismissible = true
+            action.dismissIn = 200L
+            playerViewWrapper.showScoreboardOverlay(action)
+        }
+
+        onView(withText("FCB")).check(doesNotExist())
+    }
+
 
     companion object {
         private fun getSampleShowAnnouncementOverlayAction(): ShowAnnouncementOverlayAction {
@@ -98,6 +124,20 @@ class PlayerTest {
             showAnnouncementOverlayAction.viewId = "action_view_id_10000"
 
             return showAnnouncementOverlayAction
+        }
+
+        private fun getSampleShowScoreboardAction(): ShowScoreboardOverlayAction {
+            val showScoreboardOverlayAction = ShowScoreboardOverlayAction()
+            showScoreboardOverlayAction.colorLeft = "#cccccc"
+            showScoreboardOverlayAction.colorRight = "#f4f4f4"
+            showScoreboardOverlayAction.abbrLeft = "FCB"
+            showScoreboardOverlayAction.abbrRight = " CFC"
+            showScoreboardOverlayAction.scoreLeft = "0"
+            showScoreboardOverlayAction.scoreRight = "0"
+
+            showScoreboardOverlayAction.viewId = "action_view_id_10001"
+
+            return showScoreboardOverlayAction
         }
     }
 }
