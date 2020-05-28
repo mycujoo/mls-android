@@ -2,6 +2,7 @@ package tv.mycujoo.mls.helper
 
 import android.view.ViewGroup
 import android.widget.RelativeLayout
+import androidx.test.espresso.idling.CountingIdlingResource
 import tv.mycujoo.mls.entity.LayoutPosition
 import tv.mycujoo.mls.widgets.OverlayHost
 
@@ -11,7 +12,8 @@ class OverlayViewHelper {
         fun addView(
             host: OverlayHost,
             overlay: ViewGroup,
-            position: LayoutPosition
+            position: LayoutPosition,
+            idlingResource: CountingIdlingResource
         ) {
 
             when (position) {
@@ -51,15 +53,26 @@ class OverlayViewHelper {
                 }
             }
 
+            if (!idlingResource.isIdleNow) {
+                idlingResource.decrement()
+            }
 
         }
 
         fun removeInFuture(
             host: OverlayHost,
             overlayView: ViewGroup,
-            dismissIn: Long
+            dismissIn: Long,
+            idlingResource: CountingIdlingResource
         ) {
-            host.postDelayed({ host.removeView(overlayView) }, dismissIn)
+            host.postDelayed({
+                host.removeView(overlayView)
+
+                if (!idlingResource.isIdleNow) {
+                    idlingResource.decrement()
+                }
+
+            }, dismissIn)
         }
 
     }

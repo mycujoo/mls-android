@@ -11,9 +11,11 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.updateLayoutParams
+import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.ui.PlayerView
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.entity.LayoutPosition
@@ -52,6 +54,9 @@ class PlayerViewWrapper @JvmOverloads constructor(
     private val overlayDoubleLineHashMap = HashMap<LayoutType, BasicDoubleLineOverlayView>()
 
     private val viewIdentifierManager = ViewIdentifierManager()
+
+    @Nullable
+    val idlingResource = CountingIdlingResource("displaying_overlays")
 
     init {
 
@@ -620,13 +625,22 @@ class PlayerViewWrapper @JvmOverloads constructor(
         viewIdentifierManager.storeViewId(announcementOverlayView, action.viewId)
 
         if (action.dismissible) {
-            OverlayViewHelper.removeInFuture(overlayHost, announcementOverlayView, action.dismissIn)
+
+            idlingResource.increment()
+            OverlayViewHelper.removeInFuture(
+                overlayHost,
+                announcementOverlayView,
+                action.dismissIn,
+                idlingResource
+            )
         }
 
+        idlingResource.increment()
         OverlayViewHelper.addView(
             overlayHost,
             announcementOverlayView,
-            action.position
+            action.position,
+            idlingResource
         )
 
     }
@@ -639,10 +653,20 @@ class PlayerViewWrapper @JvmOverloads constructor(
         viewIdentifierManager.storeViewId(scoreboardOverlayView, action.viewId)
 
         if (action.dismissible) {
-            OverlayViewHelper.removeInFuture(overlayHost, scoreboardOverlayView, action.dismissIn)
+            OverlayViewHelper.removeInFuture(
+                overlayHost,
+                scoreboardOverlayView,
+                action.dismissIn,
+                idlingResource
+            )
         }
 
-        OverlayViewHelper.addView(overlayHost, scoreboardOverlayView, action.position)
+        OverlayViewHelper.addView(
+            overlayHost,
+            scoreboardOverlayView,
+            action.position,
+            idlingResource
+        )
     }
 
     fun executeCommand(commandAction: CommandAction) {

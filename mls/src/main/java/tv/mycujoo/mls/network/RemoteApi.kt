@@ -68,7 +68,7 @@ class RemoteApi : Api {
     private fun getSampleCommandAction(): CommandAction {
         val commandAction = CommandAction()
         commandAction.verb = "hide"
-        commandAction.targetViewId = "action_view_id_10000"
+        commandAction.targetViewId = "action_view_id_10001"
         commandAction.offset = 3000L
 
         return commandAction
@@ -92,6 +92,8 @@ class RemoteApi : Api {
     }
 
     override fun getAnnotations(): List<AnnotationSourceData> {
+        return emptyList()
+        // do not delete! these are sample data to play with
         return listOf(
             AnnotationSourceData(
                 4000L,

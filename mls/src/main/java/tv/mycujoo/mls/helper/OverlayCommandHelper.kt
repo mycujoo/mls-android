@@ -15,8 +15,14 @@ class OverlayCommandHelper {
         ) {
             host.postDelayed({
                 host.children.forEach { view ->
-                    if (view.tag == viewIdentifier) {
-                        view.visibility = View.GONE
+                    if (view.id == viewIdentifier) {
+                        if (commandAction.verb.equals("remove", true)) {
+                            host.removeView(view)
+                        } else if (commandAction.verb.equals("hide", true)) {
+                            view.visibility = View.INVISIBLE
+                        } else if (commandAction.verb.equals("show", true)) {
+                            view.visibility = View.VISIBLE
+                        }
                     }
                 }
             }, commandAction.offset)
