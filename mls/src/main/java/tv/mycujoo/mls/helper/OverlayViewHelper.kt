@@ -5,7 +5,7 @@ import android.widget.RelativeLayout
 import tv.mycujoo.mls.entity.LayoutPosition
 import tv.mycujoo.mls.widgets.OverlayHost
 
-class OverlayHelper {
+class OverlayViewHelper {
     companion object {
 
         fun addView(

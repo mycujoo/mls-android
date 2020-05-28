@@ -24,8 +24,9 @@ import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
 import tv.mycujoo.mls.entity.actions.ShowScoreboardOverlayAction
 import tv.mycujoo.mls.extensions.getDisplaySize
 import tv.mycujoo.mls.helper.OverlayCommandHelper
-import tv.mycujoo.mls.helper.OverlayHelper
+import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
+import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.overlay.AnnouncementOverlayView
 import tv.mycujoo.mls.widgets.overlay.ScoreboardOverlayView
 import tv.mycujoo.mls.widgets.time_bar.PreviewTimeBarWrapper
@@ -49,6 +50,8 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     private val overlaySingleLineHashMap = HashMap<LayoutType, BasicSingleLineOverlayView>()
     private val overlayDoubleLineHashMap = HashMap<LayoutType, BasicDoubleLineOverlayView>()
+
+    private val viewIdentifierManager = ViewIdentifierManager()
 
     init {
 
@@ -614,11 +617,13 @@ class PlayerViewWrapper @JvmOverloads constructor(
         announcementOverlayView.id = View.generateViewId()
         announcementOverlayView.viewAction(action)
 
+        viewIdentifierManager.storeViewId(announcementOverlayView, action.viewId)
+
         if (action.dismissible) {
-            OverlayHelper.removeInFuture(overlayHost, announcementOverlayView, action.dismissIn)
+            OverlayViewHelper.removeInFuture(overlayHost, announcementOverlayView, action.dismissIn)
         }
 
-        OverlayHelper.addView(
+        OverlayViewHelper.addView(
             overlayHost,
             announcementOverlayView,
             action.position
@@ -631,15 +636,21 @@ class PlayerViewWrapper @JvmOverloads constructor(
         scoreboardOverlayView.id = View.generateViewId()
         scoreboardOverlayView.viewAction(action)
 
+        viewIdentifierManager.storeViewId(scoreboardOverlayView, action.viewId)
+
         if (action.dismissible) {
-            OverlayHelper.removeInFuture(overlayHost, scoreboardOverlayView, action.dismissIn)
+            OverlayViewHelper.removeInFuture(overlayHost, scoreboardOverlayView, action.dismissIn)
         }
 
-        OverlayHelper.addView(overlayHost, scoreboardOverlayView, action.position)
+        OverlayViewHelper.addView(overlayHost, scoreboardOverlayView, action.position)
     }
 
     fun executeCommand(commandAction: CommandAction) {
-        OverlayCommandHelper.executeInFuture(overlayHost, commandAction)
+        OverlayCommandHelper.executeInFuture(
+            overlayHost,
+            commandAction,
+            viewIdentifierManager.getViewIdentifier(commandAction.targetViewId)
+        )
     }
 
 

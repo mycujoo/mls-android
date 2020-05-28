@@ -26,11 +26,15 @@ class RemoteApi : Api {
         actionRootSourceData.actionsList.add(sampleShowScoreboardAction)
         actionRootSourceData.actionsList.add(sampleCommandAction)
 
-        val actionWrapper = ActionWrapper()
-        actionWrapper.action = sampleShowAnnouncementOverlayAction
-        actionWrapper.offset = actionRootSourceData.time ?: -1
+        actionRootSourceData.build()
 
-        listOfActionWrapper.add(actionWrapper)
+        actionRootSourceData.actionsList.forEach { abstractAction: AbstractAction ->
+            val actionWrapper = ActionWrapper()
+            actionWrapper.action = abstractAction
+            actionWrapper.offset = 10000L
+
+            listOfActionWrapper.add(actionWrapper)
+        }
 
         return listOfActionWrapper
     }
@@ -41,6 +45,8 @@ class RemoteApi : Api {
         showAnnouncementOverlayAction.line1 = "Line 1"
         showAnnouncementOverlayAction.line2 = " Line 2"
         showAnnouncementOverlayAction.imageUrl = "some url"
+
+        showAnnouncementOverlayAction.viewId = "action_view_id_10000"
 
         return showAnnouncementOverlayAction
     }
@@ -54,15 +60,16 @@ class RemoteApi : Api {
         showScoreboardOverlayAction.scoreLeft = "0"
         showScoreboardOverlayAction.scoreRight = "0"
 
-
+        showScoreboardOverlayAction.viewId = "action_view_id_10001"
 
         return showScoreboardOverlayAction
     }
 
-    private fun getSampleCommandAction() : CommandAction {
-        val commandAction = getSampleCommandAction()
+    private fun getSampleCommandAction(): CommandAction {
+        val commandAction = CommandAction()
         commandAction.verb = "hide"
-        commandAction.targetViewId = "?"
+        commandAction.targetViewId = "action_view_id_10000"
+        commandAction.offset = 3000L
 
         return commandAction
     }
