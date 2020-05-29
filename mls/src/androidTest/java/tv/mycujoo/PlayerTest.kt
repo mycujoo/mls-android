@@ -18,6 +18,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import tv.mycujoo.mls.BlankActivity
 import tv.mycujoo.mls.R
+import tv.mycujoo.mls.entity.actions.CommandAction
 import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
 import tv.mycujoo.mls.entity.actions.ShowScoreboardOverlayAction
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
@@ -112,6 +113,50 @@ class PlayerTest {
         onView(withText("FCB")).check(doesNotExist())
     }
 
+    @Test
+    fun givenRemoveCommandShouldRemoveTarget() {
+        onView(withText("FCB")).check(doesNotExist())
+        UiThreadStatement.runOnUiThread {
+            val action = getSampleShowScoreboardAction()
+            playerViewWrapper.showScoreboardOverlay(action)
+        }
+        onView(withText("FCB")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+
+
+        playerViewWrapper.executeCommand(getSampleCommandAction("remove"))
+        onView(withText("FCB")).check(doesNotExist())
+    }
+
+    @Test
+    fun givenHideCommandShouldHideTarget() {
+        onView(withText("FCB")).check(doesNotExist())
+        UiThreadStatement.runOnUiThread {
+            val action = getSampleShowScoreboardAction()
+            playerViewWrapper.showScoreboardOverlay(action)
+        }
+        onView(withText("FCB")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+
+
+        playerViewWrapper.executeCommand(getSampleCommandAction("hide"))
+        onView(withText("FCB")).check(matches(withEffectiveVisibility(Visibility.INVISIBLE)))
+    }
+
+    @Test
+    fun givenShowCommandShouldShowTarget() {
+        onView(withText("FCB")).check(doesNotExist())
+        UiThreadStatement.runOnUiThread {
+            val action = getSampleShowScoreboardAction()
+            playerViewWrapper.showScoreboardOverlay(action)
+        }
+        onView(withText("FCB")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+        playerViewWrapper.executeCommand(getSampleCommandAction("hide"))
+        onView(withText("FCB")).check(matches(withEffectiveVisibility(Visibility.INVISIBLE)))
+
+
+
+        playerViewWrapper.executeCommand(getSampleCommandAction("show"))
+        onView(withText("FCB")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+    }
 
     companion object {
         private fun getSampleShowAnnouncementOverlayAction(): ShowAnnouncementOverlayAction {
@@ -138,6 +183,15 @@ class PlayerTest {
             showScoreboardOverlayAction.viewId = "action_view_id_10001"
 
             return showScoreboardOverlayAction
+        }
+
+        private fun getSampleCommandAction(verb: String): CommandAction {
+            val commandAction = CommandAction()
+            commandAction.verb = verb
+            commandAction.targetViewId = "action_view_id_10001"
+            commandAction.offset = 100L
+
+            return commandAction
         }
     }
 }

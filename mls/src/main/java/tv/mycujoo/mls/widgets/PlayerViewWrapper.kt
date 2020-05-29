@@ -672,10 +672,12 @@ class PlayerViewWrapper @JvmOverloads constructor(
     }
 
     fun executeCommand(commandAction: CommandAction) {
+        idlingResource.increment()
         OverlayCommandHelper.executeInFuture(
             overlayHost,
             commandAction,
-            viewIdentifierManager.getViewIdentifier(commandAction.targetViewId)
+            viewIdentifierManager.getViewIdentifier(commandAction.targetViewId),
+            idlingResource
         )
     }
 
