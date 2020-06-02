@@ -42,21 +42,6 @@ class CoordinatorTest {
     @Mock
     lateinit var playerViewWrapper: PlayerViewWrapper
 
-    lateinit var coordinator: Coordinator
-
-    @Mock
-    lateinit var api: Api
-
-    @Mock
-    lateinit var widget: PlayerViewWrapper
-    private var publisher = AnnotationPublisherImpl()
-
-    @Mock
-    lateinit var exoPlayer: SimpleExoPlayer
-
-    @Mock
-    lateinit var handler: Handler
-
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
