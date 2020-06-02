@@ -652,15 +652,15 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
         viewIdentifierManager.storeViewId(scoreboardOverlayView, action.viewId)
 
-        if (action.dismissible) {
-            idlingResource.increment()
-            OverlayViewHelper.removeInFuture(
-                overlayHost,
-                scoreboardOverlayView,
-                action.dismissIn,
-                idlingResource
-            )
-        }
+//        if (action.dismissible) {
+//            idlingResource.increment()
+//            OverlayViewHelper.removeInFuture(
+//                overlayHost,
+//                scoreboardOverlayView,
+//                action.dismissIn,
+//                idlingResource
+//            )
+//        }
 
         idlingResource.increment()
         OverlayViewHelper.addView(
@@ -670,6 +670,20 @@ class PlayerViewWrapper @JvmOverloads constructor(
             idlingResource
         )
     }
+
+    fun hideOverlay(viewId: String) {
+        viewIdentifierManager.getViewIdentifier(viewId)?.let {
+            findViewById<ViewGroup>(it)?.visibility = View.INVISIBLE
+
+        }
+    }
+
+    fun removeOverlay(viewId: String) {
+        viewIdentifierManager.getViewIdentifier(viewId)?.let {
+            findViewById<ViewGroup>(it)?.let { overlayView -> overlayHost.removeView(overlayView) }
+        }
+    }
+
 
     fun executeCommand(commandAction: CommandAction) {
         idlingResource.increment()

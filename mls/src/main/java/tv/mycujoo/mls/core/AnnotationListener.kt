@@ -8,4 +8,6 @@ interface AnnotationListener {
 
     fun onNewActionWrapperAvailable(actionWrapper: ActionWrapper)
 
+    fun onNewRemovalWrapperAvailable(actionWrapper: ActionWrapper)
+
 }

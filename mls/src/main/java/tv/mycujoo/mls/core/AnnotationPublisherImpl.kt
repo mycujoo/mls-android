@@ -18,4 +18,9 @@ class AnnotationPublisherImpl : AnnotationPublisher {
     override fun onNewActionWrapperAvailable(actionWrapper: ActionWrapper) {
         listener.onNewActionWrapperAvailable(actionWrapper)
     }
+
+    override fun onNewRemovalOrHidingActionAvailable(actionWrapper: ActionWrapper) {
+        listener.onNewRemovalWrapperAvailable(actionWrapper)
+
+    }
 }

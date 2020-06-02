@@ -1,7 +1,9 @@
 package tv.mycujoo.mls.cordinator
 
 import android.os.Handler
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
+import tv.mycujoo.mls.core.AnnotationBuilder
 import tv.mycujoo.mls.core.AnnotationBuilderImpl
 import tv.mycujoo.mls.core.AnnotationListener
 import tv.mycujoo.mls.core.AnnotationPublisher
@@ -25,13 +27,17 @@ class Coordinator(
 
     var timeLineSeekBar: TimeLineSeekBar? = null
     internal lateinit var playerViewWrapper: PlayerViewWrapper
+    internal lateinit var annotationBuilder: AnnotationBuilder
+    internal lateinit var seekInterruptionEventListener: Player.EventListener
 
     fun initialize(
         exoPlayer: SimpleExoPlayer,
         handler: Handler,
         highlightAdapter: HighlightAdapter?
     ) {
-        val listener = object : AnnotationListener {
+        initEventListener(exoPlayer)
+
+        val annotationListener = object : AnnotationListener {
             override fun onNewAnnotationAvailable(annotationSourceData: AnnotationSourceData) {
                 when (annotationSourceData.action) {
                     is OverLayAction -> {
@@ -65,25 +71,54 @@ class Coordinator(
                     }
                 }
             }
+
+            override fun onNewRemovalWrapperAvailable(actionWrapper: ActionWrapper) {
+                when (actionWrapper.action) {
+                    is ShowAnnouncementOverlayAction -> {
+                        playerViewWrapper.hideOverlay((actionWrapper.action as ShowAnnouncementOverlayAction).viewId)
+                    }
+                    is ShowScoreboardOverlayAction -> {
+                        playerViewWrapper.hideOverlay((actionWrapper.action as ShowScoreboardOverlayAction).viewId)
+                    }
+                    is CommandAction -> {
+                        playerViewWrapper.executeCommand(actionWrapper.action as CommandAction)
+                    }
+                    else -> {
+                    }
+                }
+            }
         }
-        publisher.setAnnotationListener(listener)
+        publisher.setAnnotationListener(annotationListener)
 
 
-        val annotationBuilder = AnnotationBuilderImpl(publisher)
-        annotationBuilder.buildPendings()
+        annotationBuilder = AnnotationBuilderImpl(publisher)
+        annotationBuilder.buildPendingAnnotationsForCurrentTime()
 
         annotationBuilder.addPendingAnnotations(api.getAnnotations())
         annotationBuilder.addPendingActions(api.getActions())
 
         val runnable = object : Runnable {
             override fun run() {
-                annotationBuilder.setCurrentTime(exoPlayer.currentPosition)
-                annotationBuilder.buildPendings()
+                annotationBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
+                annotationBuilder.buildPendingAnnotationsForCurrentTime()
                 handler.postDelayed(this, 1000L)
             }
         }
 
         handler.postDelayed(runnable, 1000L)
+    }
+
+    private fun initEventListener(exoPlayer: SimpleExoPlayer) {
+        seekInterruptionEventListener = object : Player.EventListener {
+
+            override fun onPositionDiscontinuity(reason: Int) {
+                super.onPositionDiscontinuity(reason)
+                println("MLS-App Coordinator - onPositionDiscontinuity() reason-> $reason")
+                annotationBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
+                annotationBuilder.buildRemovalAnnotationsUpToCurrentTime()
+            }
+        }
+        exoPlayer.addListener(seekInterruptionEventListener)
     }
 
     fun onPlayVideo() {

@@ -14,6 +14,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.internal.runner.junit4.statement.UiThreadStatement
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import tv.mycujoo.mls.BlankActivity
@@ -100,14 +101,27 @@ class PlayerTest {
     }
 
     @Test
+    fun givenDismissibleScoreboardOverlayAction_shouldHideAfterDisplayingIt() {
+        onView(withText("FCB")).check(doesNotExist())
+
+        UiThreadStatement.runOnUiThread {
+            val action = getSampleShowScoreboardAction()
+            action.dismissible = true
+            playerViewWrapper.showScoreboardOverlay(action)
+            playerViewWrapper.hideOverlay(action.viewId)
+        }
+
+        onView(withText("FCB")).check(matches(withEffectiveVisibility(Visibility.INVISIBLE)))
+    }
+    @Test
     fun givenDismissibleScoreboardOverlayAction_shouldRemoveAfterDisplayingIt() {
         onView(withText("FCB")).check(doesNotExist())
 
         UiThreadStatement.runOnUiThread {
             val action = getSampleShowScoreboardAction()
             action.dismissible = true
-            action.dismissIn = 200L
             playerViewWrapper.showScoreboardOverlay(action)
+            playerViewWrapper.removeOverlay(action.viewId)
         }
 
         onView(withText("FCB")).check(doesNotExist())
@@ -158,6 +172,20 @@ class PlayerTest {
         onView(withText("FCB")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
     }
 
+    @Ignore
+    @Test
+    fun givenSeekToCommandShouldRemoveAllPreviousOverlays() {
+        onView(withText("FCB")).check(doesNotExist())
+        UiThreadStatement.runOnUiThread {
+            val action = getSampleShowScoreboardAction_WithDismissingParams()
+            playerViewWrapper.showScoreboardOverlay(action)
+        }
+        onView(withText("FCB")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+
+
+//        onView(withText("FCB")).check(doesNotExist())
+    }
+
     companion object {
         private fun getSampleShowAnnouncementOverlayAction(): ShowAnnouncementOverlayAction {
             val showAnnouncementOverlayAction = ShowAnnouncementOverlayAction()
@@ -181,6 +209,22 @@ class PlayerTest {
             showScoreboardOverlayAction.scoreRight = "0"
 
             showScoreboardOverlayAction.viewId = "action_view_id_10001"
+
+            return showScoreboardOverlayAction
+        }
+
+        private fun getSampleShowScoreboardAction_WithDismissingParams(): ShowScoreboardOverlayAction {
+            val showScoreboardOverlayAction = ShowScoreboardOverlayAction()
+            showScoreboardOverlayAction.colorLeft = "#cccccc"
+            showScoreboardOverlayAction.colorRight = "#f4f4f4"
+            showScoreboardOverlayAction.abbrLeft = "FCB"
+            showScoreboardOverlayAction.abbrRight = " CFC"
+            showScoreboardOverlayAction.scoreLeft = "0"
+            showScoreboardOverlayAction.scoreRight = "0"
+
+            showScoreboardOverlayAction.viewId = "action_view_id_10001"
+            showScoreboardOverlayAction.dismissible = true
+            showScoreboardOverlayAction.dismissIn = 3000L
 
             return showScoreboardOverlayAction
         }

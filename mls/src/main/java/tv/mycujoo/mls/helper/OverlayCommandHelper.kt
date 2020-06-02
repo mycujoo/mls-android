@@ -38,5 +38,19 @@ class OverlayCommandHelper {
             }, commandAction.offset)
         }
 
+        fun isRemoveOrHide(commandAction: CommandAction): Boolean {
+            return when {
+                commandAction.verb.equals("remove", true) -> {
+                    true
+                }
+                commandAction.verb.equals("hide", true) -> {
+                    true
+                }
+                else -> {
+                    false
+                }
+            }
+        }
+
     }
 }

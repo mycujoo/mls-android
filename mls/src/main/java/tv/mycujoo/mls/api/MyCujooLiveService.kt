@@ -128,7 +128,11 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
             controller = PlayerControllerImpl(it)
             playerStatus = PlayerStatusImpl(it)
 
-            playerEventsListener?.let { playerEventsListener -> it.addListener(playerEventsListener) }
+            builder.playerEventsListener?.let { playerEventsListener ->
+                it.addListener(playerEventsListener)
+                this.playerEventsListener = playerEventsListener
+
+            }
 
             hasDefaultPlayerController = builder.hasDefaultController
 

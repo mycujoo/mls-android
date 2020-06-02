@@ -17,10 +17,25 @@ class PlayerEventsListener(private val playerEvents: PlayerEvents) : Player.Even
 
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         playerEvents.onIsPlayingChanged(isPlaying)
+        println("MLS-App PlayerEventsListener - onIsPlayingChanged() isPlaying-> $isPlaying")
     }
 
     override fun onPlayerError(error: ExoPlaybackException) {
         playerEvents.onPlayerError(error)
 
+    }
+
+    override fun onSeekProcessed() {
+        super.onSeekProcessed()
+        println("MLS-App PlayerEventsListener - onSeekProcessed()")
+
+//        ?
+    }
+
+    override fun onPositionDiscontinuity(reason: Int) {
+        super.onPositionDiscontinuity(reason)
+        println("MLS-App PlayerEventsListener - onPositionDiscontinuity() reason -> $reason")
+
+//        ?
     }
 }

@@ -8,4 +8,5 @@ interface AnnotationPublisher {
     fun onNewAnnotationAvailable(annotationSourceData: AnnotationSourceData)
 
     fun onNewActionWrapperAvailable(actionWrapper: ActionWrapper)
+    fun onNewRemovalOrHidingActionAvailable(actionWrapper: ActionWrapper)
 }
