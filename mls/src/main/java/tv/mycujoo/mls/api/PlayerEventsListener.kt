@@ -1,6 +1,6 @@
 package tv.mycujoo.mls.api
 
-interface PlayerEvents {
+interface PlayerEventsListener {
 
     fun onIsPlayingChanged(playing: Boolean)
     fun onPlayerStateChanged(playbackState: Int)

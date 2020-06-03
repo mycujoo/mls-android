@@ -7,7 +7,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import tv.mycujoo.mls.api.MLS
-import tv.mycujoo.mls.api.PlayerEvents
+import tv.mycujoo.mls.api.PlayerEventsListener
 import tv.mycujoo.mls.model.ConfigParams
 import tv.mycujoo.mlsapp.R
 
@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val playerEvents = object : PlayerEvents {
+        val playerEvents = object : PlayerEventsListener {
 
             override fun onIsPlayingChanged(playing: Boolean) {
                 Log.i("PlayerEvents", "onIsPlayingChanged() $playing")
@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
             tv.mycujoo.mls.api.MLS.Builder()
                 .publicKey("USER_PUBLIC_KEY_123")
                 .withActivity(this)
-                .setPlayerEvents(playerEvents)
+                .setPlayerEventsListener(playerEvents)
 //                .hasAnalyticPlugin(true)
 //                .defaultPlayerController(true)
 //                .highlightList(HighlightListParams(highlightsRecyclerView))
@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         prevButton?.setOnClickListener { MLS.getPlayerController().playerPrevious() }
 
 
-        MLS.loadVideo(Uri.parse("https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"))
+
 
 
     }
@@ -71,6 +71,8 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         MLS.onResume(playerViewWrapper)
+
+        MLS.loadVideo(Uri.parse("https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"))
     }
 
 

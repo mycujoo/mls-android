@@ -47,8 +47,9 @@ import tv.mycujoo.mls.widgets.*
 import javax.inject.Inject
 
 
-class MLS private constructor(builder: Builder) : MLSInterface() {
+class MLS private constructor(builder: Builder) : MLSAbstract() {
 
+    private var builder: Builder
     private var uri: Uri? = null
     private var resumePosition: Long = C.INDEX_UNSET.toLong()
     private var resumeWindow: Int = C.INDEX_UNSET
@@ -68,7 +69,7 @@ class MLS private constructor(builder: Builder) : MLSInterface() {
 
     private lateinit var controller: PlayerController
     private lateinit var playerStatus: PlayerStatus
-    private lateinit var playerEvents: PlayerEvents
+    private lateinit var playerEvents: tv.mycujoo.mls.api.PlayerEventsListener
     private var playerEventsListener: PlayerEventsListener? = null
     private var hasDefaultPlayerController = true
     private var hasAnnotation = true
@@ -100,57 +101,9 @@ class MLS private constructor(builder: Builder) : MLSInterface() {
         checkNotNull(builder.activity)
         this.dataHolder
         this.context = builder.activity!!
+        this.builder = builder
 
         api = RemoteApi()
-
-        exoPlayer = SimpleExoPlayer.Builder(context).build()
-
-        exoPlayer?.let {
-
-            val dependencyGraph =
-                DaggerMlsComponent.builder().networkModule(NetworkModule(context)).build()
-
-            dependencyGraph.inject(this)
-
-            dispatcher.launch {
-                when (val result = GetEventsUseCase(eventsRepository).execute()) {
-                    is Result.Success -> {
-                    }
-                    is Result.NetworkError -> {
-                    }
-                    is Result.GenericError -> {
-                    }
-                }
-            }
-
-
-            controller = PlayerControllerImpl(it)
-            playerStatus = PlayerStatusImpl(it)
-
-            builder.playerEventsListener?.let { playerEventsListener ->
-                it.addListener(playerEventsListener)
-                this.playerEventsListener = playerEventsListener
-
-            }
-
-            hasDefaultPlayerController = builder.hasDefaultController
-
-            builder.highlightListParams?.let { highlightListParams ->
-                highlightList.addAll(ArrayList(getHighlightList()))
-                initHighlightList(highlightListParams)
-            }
-
-            hasAnnotation = builder.hasAnnotation
-
-            if (hasAnnotation) {
-                initAnnotation()
-            }
-
-            hasAnalytic = builder.hasAnalytic
-            if (hasAnalytic) {
-                initAnalytic(builder.publicKey, builder.activity, it)
-            }
-        }
 
     }
 
@@ -194,7 +147,7 @@ class MLS private constructor(builder: Builder) : MLSInterface() {
 
     }
 
-    fun loadVideo(uri: Uri) {
+    override fun loadVideo(uri: Uri) {
         this.uri = uri
         dataHolder.eventLiveData = Event(
             "101",
@@ -225,7 +178,7 @@ class MLS private constructor(builder: Builder) : MLSInterface() {
         }
     }
 
-    fun playVideo(uri: Uri) {
+    override fun playVideo(uri: Uri) {
         this.uri = uri
         dataHolder.eventLiveData = (
                 Event(
@@ -271,43 +224,57 @@ class MLS private constructor(builder: Builder) : MLSInterface() {
     }
 
 
-    override fun initializePlayer(
-        playerViewWrapper: PlayerViewWrapper,
-        timeLineSeekBar: TimeLineSeekBar?
+    fun initializePlayer(
+        playerViewWrapper: PlayerViewWrapper
     ) {
 
         if (exoPlayer == null) {
+
+            val dependencyGraph =
+                DaggerMlsComponent.builder().networkModule(NetworkModule(context)).build()
+            dependencyGraph.inject(this)
 
             exoPlayer = SimpleExoPlayer.Builder(context).build()
 
             exoPlayer?.let {
 
-                it.playWhenReady = playWhenReady
+                val dependencyGraph =
+                    DaggerMlsComponent.builder().networkModule(NetworkModule(context)).build()
 
-                val haveResumePosition = resumeWindow != C.INDEX_UNSET
-                if (haveResumePosition) {
-                    exoPlayer?.seekTo(resumeWindow, resumePosition)
+                dependencyGraph.inject(this)
+                dispatcher.launch {
+                    when (val result = GetEventsUseCase(eventsRepository).execute()) {
+                        is Result.Success -> {
+                        }
+                        is Result.NetworkError -> {
+                        }
+                        is Result.GenericError -> {
+                        }
+                    }
                 }
-                uri?.let { uri ->
-                    val mediaSource = HlsMediaSource.Factory(
-                        DefaultHttpDataSourceFactory(
-                            Util.getUserAgent(
-                                context,
-                                "mls"
-                            )
-                        )
-                    )
-                        .createMediaSource(uri)
-
-                    it.prepare(mediaSource, false, false)
+                controller = PlayerControllerImpl(it)
+                playerStatus = PlayerStatusImpl(it)
+                builder.playerEventsListener?.let { playerEventsListener ->
+                    it.addListener(playerEventsListener)
+                    this.playerEventsListener = playerEventsListener
+                }
+                hasDefaultPlayerController = builder.hasDefaultController
+                builder.highlightListParams?.let { highlightListParams ->
+                    highlightList.addAll(ArrayList(getHighlightList()))
+                    initHighlightList(highlightListParams)
+                }
+                hasAnnotation = builder.hasAnnotation
+                if (hasAnnotation) {
+                    initAnnotation()
+                }
+                hasAnalytic = builder.hasAnalytic
+                if (hasAnalytic) {
+                    initAnalytic(builder.publicKey, builder.activity, it)
                 }
             }
 
-
             this.playerViewWrapper = playerViewWrapper
             attachPlayer(playerViewWrapper)
-        } else {
-
         }
 
 
@@ -328,17 +295,13 @@ class MLS private constructor(builder: Builder) : MLSInterface() {
 
 
         if (hasDefaultPlayerController.not()) {
-            coordinator.timeLineSeekBar = timeLineSeekBar
-            initTimeLine(timeLineSeekBar)
+//            coordinator.timeLineSeekBar = timeLineSeekBar
+//            initTimeLine(timeLineSeekBar)
         }
 
 
         if (hasAnnotation) {
             coordinator.playerViewWrapper = playerViewWrapper
-        }
-
-        if (hasAnalytic) {
-
         }
     }
 
@@ -526,8 +489,8 @@ class MLS private constructor(builder: Builder) : MLSInterface() {
         fun highlightList(highlightListParams: HighlightListParams) =
             apply { this.highlightListParams = highlightListParams }
 
-        fun setPlayerEvents(playerEvents: PlayerEvents) =
-            apply { this.playerEventsListener = PlayerEventsListener(playerEvents) }
+        fun setPlayerEventsListener(playerEventsListener: tv.mycujoo.mls.api.PlayerEventsListener) =
+            apply { this.playerEventsListener = PlayerEventsListener(playerEventsListener) }
 
 
         fun hasAnnotation(hasAnnotation: Boolean) =

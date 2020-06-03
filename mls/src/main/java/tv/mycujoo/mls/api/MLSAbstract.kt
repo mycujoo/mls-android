@@ -1,17 +1,12 @@
 package tv.mycujoo.mls.api
 
+import android.net.Uri
 import android.view.View
 import tv.mycujoo.mls.entity.HighlightAction
 import tv.mycujoo.mls.model.ConfigParams
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
-import tv.mycujoo.mls.widgets.TimeLineSeekBar
 
-abstract class MLSInterface {
-
-    abstract fun initializePlayer(
-        playerViewWrapper: PlayerViewWrapper,
-        timeLineSeekBar: TimeLineSeekBar? = null
-    )
+abstract class MLSAbstract {
 
     abstract fun onConfigurationChanged(
         config: ConfigParams,
@@ -30,4 +25,7 @@ abstract class MLSInterface {
     abstract fun getPlayerStatus(): PlayerStatus
 
     abstract fun getHighlightList(): List<HighlightAction>
+
+    abstract fun loadVideo(uri: Uri)
+    abstract fun playVideo(uri: Uri)
 }
