@@ -8,7 +8,7 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 
-class MyCujooLiveServiceTest {
+class MLSTest {
 
     @Mock
     lateinit var context: Context

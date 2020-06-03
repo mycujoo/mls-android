@@ -6,7 +6,7 @@ import tv.mycujoo.mls.model.ConfigParams
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 import tv.mycujoo.mls.widgets.TimeLineSeekBar
 
-abstract class MyCujooLiveServiceInterface {
+abstract class MLSInterface {
 
     abstract fun initializePlayer(
         playerViewWrapper: PlayerViewWrapper,

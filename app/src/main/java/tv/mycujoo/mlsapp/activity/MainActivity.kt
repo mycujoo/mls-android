@@ -6,8 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
-import tv.mycujoo.mls.api.HighlightListParams
-import tv.mycujoo.mls.api.MyCujooLiveService
+import tv.mycujoo.mls.api.MLS
 import tv.mycujoo.mls.api.PlayerEvents
 import tv.mycujoo.mls.model.ConfigParams
 import tv.mycujoo.mlsapp.R
@@ -15,7 +14,7 @@ import tv.mycujoo.mlsapp.R
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var myCujooLiveService: MyCujooLiveService
+    private lateinit var MLS: MLS
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,47 +22,41 @@ class MainActivity : AppCompatActivity() {
 
         val playerEvents = object : PlayerEvents {
 
-
-            override fun onPlay() {
-                Log.i("PlayerEvents", "onPlay()")
+            override fun onIsPlayingChanged(playing: Boolean) {
+                Log.i("PlayerEvents", "onIsPlayingChanged() $playing")
             }
 
-            override fun onPause() {
-                Log.i("PlayerEvents", "onPause()")
-            }
-
-            override fun onEnd() {
-                Log.i("PlayerEvents", "onEnd()")
+            override fun onPlayerStateChanged(playbackState: Int) {
+                Log.i("PlayerEvents", "onPlayerStateChanged() $playbackState")
             }
         }
 
 
-        myCujooLiveService =
-            MyCujooLiveService.Builder()
+        MLS =
+            tv.mycujoo.mls.api.MLS.Builder()
                 .publicKey("USER_PUBLIC_KEY_123")
-                .hasAnalyticPlugin(true)
                 .withActivity(this)
-                .withContext(this)
-                .defaultPlayerController(true)
-                .highlightList(HighlightListParams(highlightsRecyclerView))
                 .setPlayerEvents(playerEvents)
+//                .hasAnalyticPlugin(true)
+//                .defaultPlayerController(true)
+//                .highlightList(HighlightListParams(highlightsRecyclerView))
                 .build()
 
 
-        playButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerPlay() }
-        pauseButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerPause() }
-        nextButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerNext() }
-        prevButton?.setOnClickListener { myCujooLiveService.getPlayerController().playerPrevious() }
+        playButton?.setOnClickListener { MLS.getPlayerController().playerPlay() }
+        pauseButton?.setOnClickListener { MLS.getPlayerController().playerPause() }
+        nextButton?.setOnClickListener { MLS.getPlayerController().playerNext() }
+        prevButton?.setOnClickListener { MLS.getPlayerController().playerPrevious() }
 
 
-        myCujooLiveService.loadVideo(Uri.parse("https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"))
+        MLS.loadVideo(Uri.parse("https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"))
 
 
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        myCujooLiveService.onConfigurationChanged(
+        MLS.onConfigurationChanged(
             ConfigParams(newConfig, hasPortraitActionBar = true, hasLandscapeActionBar = false),
             window.decorView,
             supportActionBar
@@ -72,22 +65,22 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        myCujooLiveService.onStart(playerViewWrapper)
+        MLS.onStart(playerViewWrapper)
     }
 
     override fun onResume() {
         super.onResume()
-        myCujooLiveService.onResume(playerViewWrapper)
+        MLS.onResume(playerViewWrapper)
     }
 
 
     override fun onPause() {
         super.onPause()
-        myCujooLiveService.onPause()
+        MLS.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        myCujooLiveService.onStop()
+        MLS.onStop()
     }
 }

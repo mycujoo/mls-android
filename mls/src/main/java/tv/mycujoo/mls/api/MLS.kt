@@ -47,7 +47,7 @@ import tv.mycujoo.mls.widgets.*
 import javax.inject.Inject
 
 
-class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServiceInterface() {
+class MLS private constructor(builder: Builder) : MLSInterface() {
 
     private var uri: Uri? = null
     private var resumePosition: Long = C.INDEX_UNSET.toLong()
@@ -97,10 +97,9 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
 
 
     init {
-        checkNotNull(builder.context)
-//        checkNotNull(builder.playerEventsListener)
+        checkNotNull(builder.activity)
         this.dataHolder
-        this.context = builder.context!!
+        this.context = builder.activity!!
 
         api = RemoteApi()
 
@@ -109,7 +108,7 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
         exoPlayer?.let {
 
             val dependencyGraph =
-                DaggerMlsComponent.builder().networkModule(NetworkModule(builder.context!!)).build()
+                DaggerMlsComponent.builder().networkModule(NetworkModule(context)).build()
 
             dependencyGraph.inject(this)
 
@@ -537,7 +536,7 @@ class MyCujooLiveService private constructor(builder: Builder) : MyCujooLiveServ
         fun hasAnalyticPlugin(hasAnalytic: Boolean) =
             apply { this.hasAnalytic = hasAnalytic }
 
-        fun build() = MyCujooLiveService(this)
+        fun build() = MLS(this)
 
     }
 
