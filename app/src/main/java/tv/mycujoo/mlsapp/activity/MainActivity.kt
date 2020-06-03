@@ -43,10 +43,10 @@ class MainActivity : AppCompatActivity() {
                 .build()
 
 
-        playButton?.setOnClickListener { MLS.getPlayerController().playerPlay() }
-        pauseButton?.setOnClickListener { MLS.getPlayerController().playerPause() }
-        nextButton?.setOnClickListener { MLS.getPlayerController().playerNext() }
-        prevButton?.setOnClickListener { MLS.getPlayerController().playerPrevious() }
+        playButton?.setOnClickListener { MLS.getPlayerController().play() }
+        pauseButton?.setOnClickListener { MLS.getPlayerController().pause() }
+        nextButton?.setOnClickListener { MLS.getPlayerController().next() }
+        prevButton?.setOnClickListener { MLS.getPlayerController().previous() }
 
 
 
