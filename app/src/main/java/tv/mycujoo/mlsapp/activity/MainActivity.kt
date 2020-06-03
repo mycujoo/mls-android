@@ -22,21 +22,18 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val playerEvents = object : PlayerEvents {
-            override fun onLoadingChanged(loading: Boolean) {
-                Log.i("PlayerEvents", "onLoadingChanged: $loading")
+
+
+            override fun onPlay() {
+                Log.i("PlayerEvents", "onPlay()")
             }
 
-            override fun onPlayerError(e: Exception) {
-                Log.i("PlayerEvents", "onPlayerError: " + e.message)
+            override fun onPause() {
+                Log.i("PlayerEvents", "onPause()")
             }
 
-            override fun onIsPlayingChanged(playing: Boolean) {
-                Log.i("PlayerEvents", "onIsPlayingChanged: $playing")
-
-            }
-
-            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                Log.i("PlayerEvents", "onPlayerStateChanged: $playWhenReady $playbackState")
+            override fun onEnd() {
+                Log.i("PlayerEvents", "onEnd()")
             }
         }
 
