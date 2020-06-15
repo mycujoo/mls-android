@@ -21,8 +21,7 @@ abstract class MLSAbstract {
     abstract fun onPause()
     abstract fun onStop()
 
-    abstract fun getPlayerController(): PlayerController
-    abstract fun getPlayerStatus(): PlayerStatus
+    abstract fun getVideoPlayer(): VideoPlayer
 
     abstract fun getHighlightList(): List<HighlightAction>
 

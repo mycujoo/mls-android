@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val playerEvents = object : PlayerEventsListener {
+        val playerEventsListener = object : PlayerEventsListener {
 
             override fun onIsPlayingChanged(playing: Boolean) {
                 Log.i("PlayerEvents", "onIsPlayingChanged() $playing")
@@ -36,20 +36,17 @@ class MainActivity : AppCompatActivity() {
             tv.mycujoo.mls.api.MLS.Builder()
                 .publicKey("USER_PUBLIC_KEY_123")
                 .withActivity(this)
-                .setPlayerEventsListener(playerEvents)
+                .setPlayerEventsListener(playerEventsListener)
 //                .hasAnalyticPlugin(true)
 //                .defaultPlayerController(true)
 //                .highlightList(HighlightListParams(highlightsRecyclerView))
                 .build()
 
 
-        playButton?.setOnClickListener { MLS.getPlayerController().play() }
-        pauseButton?.setOnClickListener { MLS.getPlayerController().pause() }
-        nextButton?.setOnClickListener { MLS.getPlayerController().next() }
-        prevButton?.setOnClickListener { MLS.getPlayerController().previous() }
-
-
-
+        playButton?.setOnClickListener { MLS.getVideoPlayer().getPlayerController().play() }
+        pauseButton?.setOnClickListener { MLS.getVideoPlayer().getPlayerController().pause() }
+        nextButton?.setOnClickListener { MLS.getVideoPlayer().getPlayerController().next() }
+        prevButton?.setOnClickListener { MLS.getVideoPlayer().getPlayerController().previous() }
 
 
     }
@@ -57,7 +54,11 @@ class MainActivity : AppCompatActivity() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         MLS.onConfigurationChanged(
-            ConfigParams(newConfig, hasPortraitActionBar = true, hasLandscapeActionBar = false),
+            ConfigParams(
+                newConfig,
+                hasPortraitActionBar = true,
+                hasLandscapeActionBar = false
+            ),
             window.decorView,
             supportActionBar
         )

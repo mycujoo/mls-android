@@ -33,7 +33,6 @@ import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.cordinator.Coordinator
 import tv.mycujoo.mls.core.AnnotationPublisherImpl
 import tv.mycujoo.mls.core.PlayerEventsListener
-import tv.mycujoo.mls.core.PlayerStatusImpl
 import tv.mycujoo.mls.data.DataHolder
 import tv.mycujoo.mls.di.DaggerMlsComponent
 import tv.mycujoo.mls.di.NetworkModule
@@ -68,10 +67,8 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
 
     private lateinit var playerViewWrapper: PlayerViewWrapper
 
-    private lateinit var controller: PlayerController
-    private lateinit var playerStatus: PlayerStatus
+    private lateinit var videoPlayer: VideoPlayer
     private lateinit var playerEvents: tv.mycujoo.mls.api.PlayerEventsListener
-    private var playerEventsListener: PlayerEventsListener? = null
     private var hasDefaultPlayerController = true
     private var hasAnnotation = true
     private var hasAnalytic = false
@@ -225,7 +222,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     }
 
 
-    fun initializePlayer(
+    private fun initializePlayer(
         playerViewWrapper: PlayerViewWrapper
     ) {
 
@@ -249,11 +246,12 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
                         }
                     }
                 }
-                controller = PlayerControllerImpl(it)
-                playerStatus = PlayerStatusImpl(it)
+
+                videoPlayer = VideoPlayer(it)
+
                 builder.playerEventsListener?.let { playerEventsListener ->
                     it.addListener(playerEventsListener)
-                    this.playerEventsListener = playerEventsListener
+                    videoPlayer.playerEventsListener = playerEventsListener
                 }
                 hasDefaultPlayerController = builder.hasDefaultController
                 builder.highlightListParams?.let { highlightListParams ->
@@ -427,12 +425,8 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
             TimeBarAnnotationHelper(api.getTimeLineMarkers())
     }
 
-    override fun getPlayerController(): PlayerController {
-        return controller
-    }
-
-    override fun getPlayerStatus(): PlayerStatus {
-        return playerStatus
+    override fun getVideoPlayer(): VideoPlayer {
+        return videoPlayer
     }
 
     override fun getHighlightList(): List<HighlightAction> {
@@ -453,8 +447,6 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     class Builder {
         internal var publicKey: String = ""
             private set
-        internal var context: Context? = null
-            private set
         internal var activity: Activity? = null
             private set
         internal var hasDefaultController: Boolean = true
@@ -471,8 +463,6 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         fun publicKey(publicKey: String) = apply { this.publicKey = publicKey }
 
         fun withActivity(activity: Activity) = apply { this.activity = activity }
-
-        fun withContext(context: Context) = apply { this.context = context }
 
         fun defaultPlayerController(defaultController: Boolean) =
             apply { this.hasDefaultController = defaultController }
