@@ -4,6 +4,7 @@ import android.net.Uri
 import android.view.View
 import tv.mycujoo.mls.entity.HighlightAction
 import tv.mycujoo.mls.model.ConfigParams
+import tv.mycujoo.mls.model.Event
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
 abstract class MLSAbstract {
@@ -27,4 +28,6 @@ abstract class MLSAbstract {
 
     abstract fun loadVideo(uri: Uri)
     abstract fun playVideo(uri: Uri)
+    abstract fun loadVideo(event: Event)
+    abstract fun playVideo(event: Event)
 }

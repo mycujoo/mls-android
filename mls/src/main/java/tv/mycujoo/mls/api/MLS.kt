@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
-import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
@@ -47,29 +46,44 @@ import javax.inject.Inject
 
 class MLS private constructor(builder: Builder) : MLSAbstract() {
 
-    private var builder: Builder
-    private var uri: Uri? = null
+    /**region Exo-player fields*/
+    // ExoPlayer is nullable, so it can be released manually
+    private var exoPlayer: SimpleExoPlayer? = null
+
     private var resumePosition: Long = C.INDEX_UNSET.toLong()
     private var resumeWindow: Int = C.INDEX_UNSET
 
-    private lateinit var playerView: PlayerView
     private var playWhenReady: Boolean = false
     private var playbackPosition: Long = -1L
+    /**endregion */
 
+    /**region Initializing fields*/
+    private var builder: Builder
+
+    /**endregion */
+
+    /**region DI fields*/
+    @Inject
+    lateinit var eventsRepository: tv.mycujoo.domain.repository.EventsRepository
+
+    @Inject
+    lateinit var dispatcher: CoroutineScope
+
+    /**endregion */
+
+    /**region MLS fields*/
     private var context: Context
-
-    // ExoPlayer is nullable, so it can be released manually
-    private var exoPlayer: SimpleExoPlayer? = null
 
     private var api: Api
 
     private lateinit var playerViewWrapper: PlayerViewWrapper
 
     private lateinit var videoPlayer: VideoPlayer
-    private lateinit var playerEvents: tv.mycujoo.mls.api.PlayerEventsListener
     private var hasDefaultPlayerController = true
     private var hasAnnotation = true
     private var hasAnalytic = false
+
+    private var uri: Uri? = null
 
     private lateinit var coordinator: Coordinator
 
@@ -79,18 +93,13 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
 
     private val highlightList = ArrayList<HighlightAction>(0)
 
+    private val dataHolder = DataHolder()
+    /**endregion */
 
+    /**region Plugins*/
     private lateinit var youboraClient: YouboraClient
 
-
-    private val dataHolder = DataHolder()
-
-
-    @Inject
-    lateinit var eventsRepository: tv.mycujoo.domain.repository.EventsRepository
-
-    @Inject
-    lateinit var dispatcher: CoroutineScope
+    /**endregion */
 
 
     init {
@@ -328,6 +337,14 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         playVideo(uri, true)
     }
 
+    override fun loadVideo(event: Event) {
+        playVideo(event.stream.uriList.first(), false)
+    }
+
+    override fun playVideo(event: Event) {
+        playVideo(event.stream.uriList.first(), true)
+    }
+
     /**endregion */
 
     /**region Exo-player Functions*/
@@ -425,6 +442,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     }
 
 
+    /**region Inner-classes*/
     class Builder {
         internal var publicKey: String = ""
             private set
@@ -469,5 +487,6 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
 
         const val PUBLIC_KEY = "pk_test_123"
     }
+    /**endregion */
 
 }
