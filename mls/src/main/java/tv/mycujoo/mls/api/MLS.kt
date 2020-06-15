@@ -12,8 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.SimpleExoPlayer
-import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.upstream.DataSource
@@ -55,7 +53,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     private var resumeWindow: Int = C.INDEX_UNSET
 
     private lateinit var playerView: PlayerView
-    private var playWhenReady: Boolean = true
+    private var playWhenReady: Boolean = false
     private var playbackPosition: Long = -1L
 
     private var context: Context
@@ -143,82 +141,6 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         coordinator = Coordinator(api, AnnotationPublisherImpl())
         coordinator.initialize(exoPlayer!!, handler, highlightAdapter)
 
-    }
-
-    override fun loadVideo(uri: Uri) {
-        this.uri = uri
-        dataHolder.eventLiveData = Event(
-            "101",
-            Stream(listOf(uri)),
-            "Sample name",
-            "Sample location",
-            "started"
-        )
-
-
-        val mediaSource =
-            HlsMediaSource.Factory(DefaultHttpDataSourceFactory(Util.getUserAgent(context, "mls")))
-                .createMediaSource(uri)
-
-        if (playbackPosition != -1L) {
-            exoPlayer?.seekTo(playbackPosition)
-        }
-
-        val haveResumePosition = resumeWindow != C.INDEX_UNSET
-        if (haveResumePosition) {
-            exoPlayer?.seekTo(resumeWindow, resumePosition)
-        }
-
-        exoPlayer?.prepare(mediaSource)
-
-        if (hasAnalytic) {
-            youboraClient.logEvent(dataHolder.getEvent())
-        }
-    }
-
-    override fun playVideo(uri: Uri) {
-        this.uri = uri
-        dataHolder.eventLiveData = (
-                Event(
-                    "101",
-                    Stream(listOf(uri)),
-                    "Sample name",
-                    "Sample location",
-                    "started"
-                )
-                )
-
-        val mediaSource =
-            HlsMediaSource.Factory(DefaultHttpDataSourceFactory(Util.getUserAgent(context, "mls")))
-                .createMediaSource(uri)
-
-        // Hls data source
-        val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(
-            context,
-            Util.getUserAgent(context, "mls")
-        )
-        // todo: other media types data source
-        val videoSource: MediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(uri)
-
-
-        if (playbackPosition != -1L) {
-            exoPlayer?.seekTo(playbackPosition)
-        }
-
-        val haveResumePosition = resumeWindow != C.INDEX_UNSET
-        if (haveResumePosition) {
-            exoPlayer?.seekTo(resumeWindow, resumePosition)
-        }
-
-        exoPlayer?.prepare(mediaSource)
-        exoPlayer?.playWhenReady = playWhenReady
-
-        coordinator.onPlayVideo()
-
-        if (hasAnalytic) {
-            youboraClient.logEvent(dataHolder.getEvent())
-        }
     }
 
 
@@ -390,7 +312,6 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         }
     }
 
-
     override fun getVideoPlayer(): VideoPlayer {
         return videoPlayer
     }
@@ -399,9 +320,61 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         return api.getHighlights()
     }
 
+    override fun loadVideo(uri: Uri) {
+        playVideo(uri, false)
+    }
+
+    override fun playVideo(uri: Uri) {
+        playVideo(uri, true)
+    }
+
     /**endregion */
 
     /**region Exo-player Functions*/
+
+    private fun playVideo(uri: Uri, playWhenReady: Boolean) {
+        this.uri = uri
+        dataHolder.eventLiveData = (
+                Event(
+                    "101",
+                    Stream(listOf(uri)),
+                    "Sample name",
+                    "Sample location",
+                    "started"
+                )
+                )
+
+        val mediaSource =
+            HlsMediaSource.Factory(DefaultHttpDataSourceFactory(Util.getUserAgent(context, "mls")))
+                .createMediaSource(uri)
+
+        // Hls data source
+        val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(
+            context,
+            Util.getUserAgent(context, "mls")
+        )
+
+        if (playbackPosition != -1L) {
+            exoPlayer?.seekTo(playbackPosition)
+        }
+
+        val haveResumePosition = resumeWindow != C.INDEX_UNSET
+        if (haveResumePosition) {
+            exoPlayer?.seekTo(resumeWindow, resumePosition)
+        }
+
+        exoPlayer?.prepare(mediaSource)
+        exoPlayer?.playWhenReady = playWhenReady or this.playWhenReady
+
+        if (playWhenReady or this.playWhenReady) {
+            coordinator.onPlayVideo()
+        }
+
+
+        if (hasAnalytic) {
+            youboraClient.logEvent(dataHolder.getEvent())
+        }
+    }
 
     private fun release() {
         exoPlayer?.let {
