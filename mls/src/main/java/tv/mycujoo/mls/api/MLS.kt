@@ -41,6 +41,7 @@ import tv.mycujoo.mls.entity.HighlightAction
 import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
 import tv.mycujoo.mls.model.ConfigParams
 import tv.mycujoo.mls.model.Event
+import tv.mycujoo.mls.model.Stream
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.network.RemoteApi
 import tv.mycujoo.mls.widgets.*
@@ -151,7 +152,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         this.uri = uri
         dataHolder.eventLiveData = Event(
             "101",
-            uri.toString(),
+            Stream(listOf(uri)),
             "Sample name",
             "Sample location",
             "started"
@@ -183,7 +184,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         dataHolder.eventLiveData = (
                 Event(
                     "101",
-                    uri.toString(),
+                    Stream(listOf(uri)),
                     "Sample name",
                     "Sample location",
                     "started"
@@ -238,10 +239,6 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
 
             exoPlayer?.let {
 
-                val dependencyGraph =
-                    DaggerMlsComponent.builder().networkModule(NetworkModule(context)).build()
-
-                dependencyGraph.inject(this)
                 dispatcher.launch {
                     when (val result = GetEventsUseCase(eventsRepository).execute()) {
                         is Result.Success -> {
@@ -292,12 +289,6 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
 //
 //            }
 //        })
-
-
-        if (hasDefaultPlayerController.not()) {
-//            coordinator.timeLineSeekBar = timeLineSeekBar
-//            initTimeLine(timeLineSeekBar)
-        }
 
 
         if (hasAnnotation) {

@@ -16,7 +16,7 @@ class YouboraClient(var publicKey: String, val plugin: Plugin) {
         }
         plugin.options.username = userName.orEmpty()
         plugin.options.contentTitle = event.name
-        plugin.options.contentResource = event.streamUrl
+        plugin.options.contentResource = event.stream.uriList.first().toString()
 
         plugin.options.adCustomDimension1 = publicKey
         plugin.options.adCustomDimension2 = event.id

@@ -18,6 +18,7 @@ import tv.mycujoo.data.repository.EventsRepository
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.mls.CoroutineTestRule
 import tv.mycujoo.mls.model.Event
+import tv.mycujoo.mls.model.Stream
 import tv.mycujoo.mls.network.MlsApi
 import java.net.HttpURLConnection
 import kotlin.test.assertEquals
@@ -63,8 +64,8 @@ class GetEventsUseCaseTest {
     fun `given valid list of events, should return them`() = runBlocking<Unit> {
 
 
-        val event_0 = Event("1000", "stream url", "name str", "location str", "started")
-        val event_1 = Event("1001", "stream url", "name str", "location str", "started")
+        val event_0 = Event("1000", Stream(emptyList()), "name str", "location str", "started")
+        val event_1 = Event("1001", Stream(emptyList()), "name str", "location str", "started")
         val toJson = Gson().toJson(listOf(event_0, event_1))
 
         val response = MockResponse()
@@ -78,7 +79,8 @@ class GetEventsUseCaseTest {
         when (val result = GetEventsUseCase(EventsRepository(api)).execute()) {
 
             is Result.Success -> {
-                assertTrue { result.value.isEmpty() }
+                assertTrue { result.value[0] == event_0 }
+                assertTrue { result.value[1] == event_1 }
             }
             is Result.NetworkError -> {
                 fail()
