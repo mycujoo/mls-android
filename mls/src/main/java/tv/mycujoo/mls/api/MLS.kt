@@ -316,6 +316,41 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         handler.postDelayed(timeLineSyncRunnable, 1000L)
     }
 
+    /**region Over-ridden Functions*/
+    override fun onStart(playerViewWrapper: PlayerViewWrapper) {
+        if (Util.SDK_INT >= Build.VERSION_CODES.N) {
+            this.playerViewWrapper = playerViewWrapper
+            attachPlayer(playerViewWrapper)
+            initializePlayer(playerViewWrapper)
+            if (hasAnalytic) {
+                youboraClient.start()
+            }
+        }
+    }
+
+    override fun onResume(playerViewWrapper: PlayerViewWrapper) {
+        if (Util.SDK_INT < Build.VERSION_CODES.N) {
+            this.playerViewWrapper = playerViewWrapper
+            attachPlayer(playerViewWrapper)
+            initializePlayer(playerViewWrapper)
+            if (hasAnalytic) {
+                youboraClient.start()
+            }
+        }
+    }
+
+    override fun onPause() {
+        if (Util.SDK_INT < Build.VERSION_CODES.N) {
+            release()
+        }
+    }
+
+    override fun onStop() {
+        if (Util.SDK_INT >= Build.VERSION_CODES.N) {
+            release()
+        }
+    }
+
     override fun onConfigurationChanged(
         config: ConfigParams,
         decorView: View,
@@ -355,39 +390,18 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         }
     }
 
-    override fun onStart(playerViewWrapper: PlayerViewWrapper) {
-        if (Util.SDK_INT >= Build.VERSION_CODES.N) {
-            this.playerViewWrapper = playerViewWrapper
-            attachPlayer(playerViewWrapper)
-            initializePlayer(playerViewWrapper)
-            if (hasAnalytic) {
-                youboraClient.start()
-            }
-        }
+
+    override fun getVideoPlayer(): VideoPlayer {
+        return videoPlayer
     }
 
-    override fun onResume(playerViewWrapper: PlayerViewWrapper) {
-        if (Util.SDK_INT < Build.VERSION_CODES.N) {
-            this.playerViewWrapper = playerViewWrapper
-            attachPlayer(playerViewWrapper)
-            initializePlayer(playerViewWrapper)
-            if (hasAnalytic) {
-                youboraClient.start()
-            }
-        }
+    override fun getHighlightList(): List<HighlightAction> {
+        return api.getHighlights()
     }
 
-    override fun onPause() {
-        if (Util.SDK_INT < Build.VERSION_CODES.N) {
-            release()
-        }
-    }
+    /**endregion */
 
-    override fun onStop() {
-        if (Util.SDK_INT >= Build.VERSION_CODES.N) {
-            release()
-        }
-    }
+    /**region Exo-player Functions*/
 
     private fun release() {
         exoPlayer?.let {
@@ -425,13 +439,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
             TimeBarAnnotationHelper(api.getTimeLineMarkers())
     }
 
-    override fun getVideoPlayer(): VideoPlayer {
-        return videoPlayer
-    }
-
-    override fun getHighlightList(): List<HighlightAction> {
-        return api.getHighlights()
-    }
+    /**endregion */
 
     private fun connectToHighlightList(highlightAdapter: HighlightAdapter) {
         val highlightClickListener = object : ListClickListener {
