@@ -43,12 +43,6 @@ class MainActivity : AppCompatActivity() {
                 .build()
 
 
-        playButton?.setOnClickListener { MLS.getVideoPlayer().getPlayerController().play() }
-        pauseButton?.setOnClickListener { MLS.getVideoPlayer().getPlayerController().pause() }
-        nextButton?.setOnClickListener { MLS.getVideoPlayer().getPlayerController().next() }
-        prevButton?.setOnClickListener { MLS.getVideoPlayer().getPlayerController().previous() }
-
-
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -73,7 +67,18 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         MLS.onResume(playerViewWrapper)
 
+        val playerController = MLS.getVideoPlayer().getPlayerController()
+        playButton?.setOnClickListener { playerController.play() }
+        pauseButton?.setOnClickListener { playerController.pause() }
+        nextButton?.setOnClickListener { playerController.next() }
+        prevButton?.setOnClickListener { playerController.previous() }
+
+        val playerStatus = MLS.getVideoPlayer().getPlayerStatus()
+        val currentPosition = playerStatus.getCurrentPosition()
+        val duration = playerStatus.getDuration()
+
         MLS.loadVideo(Uri.parse("https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"))
+
     }
 
 

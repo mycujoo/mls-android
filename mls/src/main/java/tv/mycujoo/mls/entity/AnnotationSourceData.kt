@@ -1,9 +1,5 @@
 package tv.mycujoo.mls.entity
 
-data class AnnotationSourceData(val streamOffset: Long, val action: Action) {
-
-
-}
 
 abstract class Action(val id: Int)
 
@@ -27,7 +23,7 @@ class HighlightAction(
     val streamOffset: Long,
     val timeLabel: String,
     val title: String,
-    val streamUrl : String
+    val streamUrl: String
 ) : Action(id) {
 
 }
@@ -35,7 +31,7 @@ class HighlightAction(
 class TimeLineAction(
     id: Int,
     val color: String,
-    val text : String
+    val text: String
 ) : Action(id) {
 
 }

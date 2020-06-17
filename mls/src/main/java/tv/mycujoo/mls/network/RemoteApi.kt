@@ -1,11 +1,9 @@
 package tv.mycujoo.mls.network
 
-import tv.mycujoo.mls.entity.AnnotationSourceData
 import tv.mycujoo.mls.entity.HighlightAction
 import tv.mycujoo.mls.entity.TimeLineAction
 import tv.mycujoo.mls.entity.TimeLineItem
 import tv.mycujoo.mls.entity.actions.*
-import tv.mycujoo.mls.model.PlacardSpecs
 
 class RemoteApi : Api {
 
@@ -72,18 +70,6 @@ class RemoteApi : Api {
         commandAction.offset = 3000L
 
         return commandAction
-    }
-
-
-    override fun getPlacardsSpecs(): List<PlacardSpecs> {
-        val placard = PlacardSpecs("LIVE_MODE_01", 2000L)
-
-        return listOf(placard)
-    }
-
-    override fun getAnnotations(): List<AnnotationSourceData> {
-        return emptyList()
-        // do not delete! these are sample data to play with
     }
 
     override fun getTimeLineMarkers(): List<TimeLineItem> {

@@ -7,10 +7,6 @@ import tv.mycujoo.mls.core.AnnotationBuilder
 import tv.mycujoo.mls.core.AnnotationBuilderImpl
 import tv.mycujoo.mls.core.AnnotationListener
 import tv.mycujoo.mls.core.AnnotationPublisher
-import tv.mycujoo.mls.entity.AnnotationSourceData
-import tv.mycujoo.mls.entity.HighlightAction
-import tv.mycujoo.mls.entity.OverLayAction
-import tv.mycujoo.mls.entity.TimeLineAction
 import tv.mycujoo.mls.entity.actions.ActionWrapper
 import tv.mycujoo.mls.entity.actions.CommandAction
 import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
@@ -38,24 +34,6 @@ class Coordinator(
         initEventListener(exoPlayer)
 
         val annotationListener = object : AnnotationListener {
-            override fun onNewAnnotationAvailable(annotationSourceData: AnnotationSourceData) {
-                when (annotationSourceData.action) {
-                    is OverLayAction -> {
-                        playerViewWrapper.showOverLay(annotationSourceData.action)
-                    }
-                    is HighlightAction -> {
-
-                        highlightAdapter?.addHighlight(annotationSourceData.action)
-                    }
-                    is TimeLineAction -> {
-
-                    }
-                    else -> {
-                    }
-                }
-            }
-
-
             override fun onNewActionWrapperAvailable(actionWrapper: ActionWrapper) {
                 when (actionWrapper.action) {
                     is ShowAnnouncementOverlayAction -> {
@@ -94,7 +72,6 @@ class Coordinator(
         annotationBuilder = AnnotationBuilderImpl(publisher)
         annotationBuilder.buildPendingAnnotationsForCurrentTime()
 
-        annotationBuilder.addPendingAnnotations(api.getAnnotations())
         annotationBuilder.addPendingActions(api.getActions())
 
         val runnable = object : Runnable {

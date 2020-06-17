@@ -1,6 +1,5 @@
 package tv.mycujoo.mls.core
 
-import tv.mycujoo.mls.entity.AnnotationSourceData
 import tv.mycujoo.mls.entity.actions.ActionWrapper
 import tv.mycujoo.mls.entity.actions.CommandAction
 import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
@@ -11,13 +10,8 @@ class AnnotationBuilderImpl(private val publisher: AnnotationPublisher) : Annota
 
     private var currentTime: Long = 0L
     private var isPlaying: Boolean = false
-    private val pendingAnnotationDataSource = ArrayList<AnnotationSourceData>()
     private val pendingActions = ArrayList<ActionWrapper>()
 
-
-    override fun addPendingAnnotations(pendingAnnotationList: List<AnnotationSourceData>) {
-        pendingAnnotationDataSource.addAll(pendingAnnotationList)
-    }
 
     override fun addPendingActions(actions: List<ActionWrapper>) {
         pendingActions.addAll(actions)
@@ -35,16 +29,6 @@ class AnnotationBuilderImpl(private val publisher: AnnotationPublisher) : Annota
             return
         }
         println("MLS-App AnnotationBuilderImpl - buildPendings()")
-
-        pendingAnnotationDataSource.filter { sourceData -> isInCurrentTimeRange(sourceData) }
-            .forEach { annotation ->
-                println(
-                    "MLS-App AnnotationBuilderImpl - buildPendings() for Annotations"
-                )
-                publisher.onNewAnnotationAvailable(
-                    annotation
-                )
-            }
 
 
         pendingActions.filter { actionWrapper -> isInCurrentTimeRange(actionWrapper) }
@@ -96,10 +80,6 @@ class AnnotationBuilderImpl(private val publisher: AnnotationPublisher) : Annota
                 false
             }
         }
-    }
-
-    private fun isInCurrentTimeRange(annotationSourceData: AnnotationSourceData): Boolean {
-        return (annotationSourceData.streamOffset >= currentTime) && (annotationSourceData.streamOffset < currentTime + 1000L)
     }
 
     private fun isInCurrentTimeRange(actionWrapper: ActionWrapper): Boolean {
