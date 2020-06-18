@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:background="#CC000000"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <tv.mycujoo.mls.widgets.CustomTimeBar
+        android:id="@id/exo_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+
+        <ImageButton
+            android:id="@+id/exo_prev"
+            android:layout_width="71dp"
+            android:layout_height="52dp"
+            android:background="#CC000000"
+            android:src="@drawable/exo_icon_previous"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageButton
+            android:id="@+id/exo_rew"
+            android:layout_width="71dp"
+            android:layout_height="52dp"
+            android:background="#CC000000"
+            android:src="@drawable/exo_icon_previous"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/exo_play" />
+
+        <ImageButton
+            android:id="@+id/exo_play"
+            android:layout_width="71dp"
+            android:layout_height="52dp"
+            android:background="#CC000000"
+            android:src="@drawable/exo_icon_play"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageButton
+            android:id="@+id/exo_pause"
+            android:layout_width="71dp"
+            android:layout_height="52dp"
+            android:background="#CC000000"
+            android:src="@drawable/exo_icon_pause"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/exo_play" />
+
+        <ImageButton
+            android:id="@+id/exo_ffwd"
+            android:layout_width="71dp"
+            android:layout_height="52dp"
+            android:background="#CC000000"
+            android:src="@drawable/exo_icon_fastforward"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/exo_pause" />
+
+        <ImageButton
+            android:id="@+id/exo_next"
+            android:layout_width="71dp"
+            android:layout_height="52dp"
+            android:background="#CC000000"
+            android:src="@drawable/exo_icon_next"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </LinearLayout>
+
+
+</LinearLayout>

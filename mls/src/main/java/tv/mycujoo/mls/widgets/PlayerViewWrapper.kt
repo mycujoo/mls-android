@@ -63,7 +63,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         LayoutInflater.from(context).inflate(R.layout.player_widget_layout, this, true)
 
 
-        playerView = PlayerView(context, attrs, defStyleAttr)
+        playerView = findViewById(R.id.playerView)
         initExoPlayerView(playerView)
 
         overlayHost = OverlayHost(context, attrs, defStyleAttr)
@@ -91,12 +91,16 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
         playerView.post { screenMode(PlayerWidget.ScreenMode.PORTRAIT) }
 
+        val customTimeBar = findViewById<CustomTimeBar>(R.id.exo_progress)
+        customTimeBar.addTimeLineHighlight(10 * 1000L)
+        customTimeBar.addTimeLineHighlight(60 * 1000L)
+        customTimeBar.addTimeLineHighlight(360 * 1000L)
+        customTimeBar.addTimeLineHighlight(900 * 1000L)
+        customTimeBar.addTimeLineHighlight(3600 * 1000L)
+
     }
 
     private fun initExoPlayerView(playerView: PlayerView) {
-        playerView.id = View.generateViewId()
-        addView(playerView)
-
         val constraintSet = ConstraintSet()
         constraintSet.clone(this)
 
