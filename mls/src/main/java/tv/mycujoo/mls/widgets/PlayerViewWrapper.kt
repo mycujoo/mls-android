@@ -3,6 +3,7 @@ package tv.mycujoo.mls.widgets
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.content.Context
+import android.graphics.Color
 import android.os.Handler
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -28,7 +29,9 @@ import tv.mycujoo.mls.extensions.getDisplaySize
 import tv.mycujoo.mls.helper.OverlayCommandHelper
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
+import tv.mycujoo.mls.manager.HighlightMarkerManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.widgets.mlstimebar.*
 import tv.mycujoo.mls.widgets.overlay.AnnouncementOverlayView
 import tv.mycujoo.mls.widgets.overlay.ScoreboardOverlayView
 import tv.mycujoo.mls.widgets.time_bar.PreviewTimeBarWrapper
@@ -91,12 +94,42 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
         playerView.post { screenMode(PlayerWidget.ScreenMode.PORTRAIT) }
 
-        val customTimeBar = findViewById<CustomTimeBar>(R.id.exo_progress)
-        customTimeBar.addTimeLineHighlight(10 * 1000L)
-        customTimeBar.addTimeLineHighlight(60 * 1000L)
-        customTimeBar.addTimeLineHighlight(360 * 1000L)
-        customTimeBar.addTimeLineHighlight(900 * 1000L)
-        customTimeBar.addTimeLineHighlight(3600 * 1000L)
+        initMlsTimeBar()
+
+    }
+
+    private fun initMlsTimeBar() {
+        val mlsTimeBar = findViewById<MLSTimeBar>(R.id.exo_progress)
+        val highlightMarkerTextView = findViewById<HighlightMarker>(R.id.exo_highlight_marker_title_highlight_marker)
+
+        val highlightMarkerManager = HighlightMarkerManager(mlsTimeBar, highlightMarkerTextView)
+
+        val greenPointOfInterestType = PointOfInterestType(Color.GREEN)
+        val redPointOfInterestType = PointOfInterestType(Color.RED)
+
+        highlightMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                900 * 1000L,
+                "Goal!",
+                greenPointOfInterestType
+            )
+        )
+        highlightMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                3600 * 1000L,
+                "Half-time!",
+                redPointOfInterestType
+            )
+        )
+
+        highlightMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                360 * 1000L,
+                "Foul!",
+                redPointOfInterestType
+            )
+        )
+
 
     }
 
@@ -104,14 +137,12 @@ class PlayerViewWrapper @JvmOverloads constructor(
         val constraintSet = ConstraintSet()
         constraintSet.clone(this)
 
-
         constraintSet.connect(playerView.id, ConstraintSet.TOP, id, ConstraintSet.TOP)
         constraintSet.connect(playerView.id, ConstraintSet.START, id, ConstraintSet.START)
         constraintSet.connect(playerView.id, ConstraintSet.END, id, ConstraintSet.END)
         constraintSet.connect(playerView.id, ConstraintSet.BOTTOM, id, ConstraintSet.BOTTOM)
         constraintSet.constrainWidth(playerView.id, 0)
         constraintSet.constrainHeight(playerView.id, 0)
-
 
         constraintSet.applyTo(this)
     }

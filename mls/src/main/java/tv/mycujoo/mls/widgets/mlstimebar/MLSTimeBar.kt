@@ -1,4 +1,4 @@
-package tv.mycujoo.mls.widgets
+package tv.mycujoo.mls.widgets.mlstimebar
 
 import android.annotation.TargetApi
 import android.content.Context
@@ -25,7 +25,7 @@ import tv.mycujoo.mls.R
 import java.util.*
 import java.util.concurrent.CopyOnWriteArraySet
 
-class CustomTimeBar @JvmOverloads constructor(
+class MLSTimeBar @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
@@ -71,7 +71,9 @@ class CustomTimeBar @JvmOverloads constructor(
     private var adGroupCount = 0
     private var adGroupTimesMs: LongArray? = null
     private var playedAdGroups: BooleanArray? = null
-    private val poiArrayList = ArrayList<Long>()
+    private val poiArrayList = ArrayList<PointOfInterest>()
+    private val poiPositionOnTimeBarArrayList = ArrayList<Int>()
+    private lateinit var highlightMarkerPositionListener: HighlightMarkerPosition
 
 
     /**
@@ -138,6 +140,10 @@ class CustomTimeBar @JvmOverloads constructor(
         invalidate(seekBounds)
     }
 
+    fun setHighlightMarkerPositionListener(listener: HighlightMarkerPosition) {
+        highlightMarkerPositionListener = listener
+    }
+
     // TimeBar implementation.
     override fun addListener(listener: OnScrubListener) {
         listeners.add(listener)
@@ -179,7 +185,11 @@ class CustomTimeBar @JvmOverloads constructor(
     }
 
     override fun getPreferredUpdateDelay(): Long {
-        val timeBarWidthDp = pxToDp(density, progressBar.width())
+        val timeBarWidthDp =
+            pxToDp(
+                density,
+                progressBar.width()
+            )
         return if (timeBarWidthDp == 0 || duration == 0L || duration == C.TIME_UNSET) Long.MAX_VALUE else duration / timeBarWidthDp
     }
 
@@ -197,8 +207,9 @@ class CustomTimeBar @JvmOverloads constructor(
         update()
     }
 
-    fun addTimeLineHighlight(offset: Long) {
-        poiArrayList.add(offset)
+    fun addTimeLineHighlight(poi: PointOfInterest) {
+        poiArrayList.add(poi)
+        poiPositionOnTimeBarArrayList.add(-1)
     }
 
     // View methods.
@@ -356,13 +367,15 @@ class CustomTimeBar @JvmOverloads constructor(
         if (event.eventType == AccessibilityEvent.TYPE_VIEW_SELECTED) {
             event.text.add(progressText)
         }
-        event.className = ACCESSIBILITY_CLASS_NAME
+        event.className =
+            ACCESSIBILITY_CLASS_NAME
     }
 
     @TargetApi(21)
     override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {
         super.onInitializeAccessibilityNodeInfo(info)
-        info.className = ACCESSIBILITY_CLASS_NAME
+        info.className =
+            ACCESSIBILITY_CLASS_NAME
         info.contentDescription = progressText
         if (duration <= 0) {
             return
@@ -418,6 +431,11 @@ class CustomTimeBar @JvmOverloads constructor(
         for (listener in listeners) {
             listener.onScrubMove(this, scrubPosition)
         }
+
+        if (this::highlightMarkerPositionListener.isInitialized) {
+            highlightMarkerPositionListener.onScrubMove(scrubPosition, poiPositionOnTimeBarArrayList)
+        }
+
     }
 
     private fun stopScrubbing(canceled: Boolean) {
@@ -555,13 +573,14 @@ class CustomTimeBar @JvmOverloads constructor(
 
 
         val paint = Paint()
-        paint.color = DEFAULT_PLAYED_COLOR
         val poiMarkerOffset = adMarkerWidth / 2
 
-        poiArrayList.forEach { offset ->
+        poiArrayList.forEachIndexed { index, poi ->
+            paint.color =
+                poi.poiType.color
 
             val poiTimeMs = Util.constrainValue(
-                offset,
+                poi.offset,
                 0,
                 duration
             )
@@ -573,13 +592,19 @@ class CustomTimeBar @JvmOverloads constructor(
                 progressBar.width() - adMarkerWidth,
                 Math.max(0, markerPositionOffset)
             )
+            val markerRight = markerLeft + adMarkerWidth.toFloat()
+
             canvas.drawRect(
                 markerLeft.toFloat(),
                 barTop.toFloat(),
-                markerLeft + adMarkerWidth.toFloat(),
+                markerRight,
                 barBottom.toFloat(),
                 paint
             )
+
+            poiPositionOnTimeBarArrayList[index] =
+                ((markerLeft + markerRight) / 2).toInt()
+
         }
 
 
@@ -811,32 +836,41 @@ class CustomTimeBar @JvmOverloads constructor(
         val res = context.resources
         val displayMetrics = res.displayMetrics
         density = displayMetrics.density
-        fineScrubYThreshold = dpToPx(
-            density,
-            FINE_SCRUB_Y_THRESHOLD_DP
-        )
+        fineScrubYThreshold =
+            dpToPx(
+                density,
+                FINE_SCRUB_Y_THRESHOLD_DP
+            )
         val defaultBarHeight =
-            dpToPx(density, DEFAULT_BAR_HEIGHT_DP)
-        var defaultTouchTargetHeight = dpToPx(
-            density,
-            DEFAULT_TOUCH_TARGET_HEIGHT_DP
-        )
-        val defaultAdMarkerWidth = dpToPx(
-            density,
-            DEFAULT_AD_MARKER_WIDTH_DP
-        )
-        val defaultScrubberEnabledSize = dpToPx(
-            density,
-            DEFAULT_SCRUBBER_ENABLED_SIZE_DP
-        )
-        val defaultScrubberDisabledSize = dpToPx(
-            density,
-            DEFAULT_SCRUBBER_DISABLED_SIZE_DP
-        )
-        val defaultScrubberDraggedSize = dpToPx(
-            density,
-            DEFAULT_SCRUBBER_DRAGGED_SIZE_DP
-        )
+            dpToPx(
+                density,
+                DEFAULT_BAR_HEIGHT_DP
+            )
+        var defaultTouchTargetHeight =
+            dpToPx(
+                density,
+                DEFAULT_TOUCH_TARGET_HEIGHT_DP
+            )
+        val defaultAdMarkerWidth =
+            dpToPx(
+                density,
+                DEFAULT_AD_MARKER_WIDTH_DP
+            )
+        val defaultScrubberEnabledSize =
+            dpToPx(
+                density,
+                DEFAULT_SCRUBBER_ENABLED_SIZE_DP
+            )
+        val defaultScrubberDisabledSize =
+            dpToPx(
+                density,
+                DEFAULT_SCRUBBER_DISABLED_SIZE_DP
+            )
+        val defaultScrubberDraggedSize =
+            dpToPx(
+                density,
+                DEFAULT_SCRUBBER_DRAGGED_SIZE_DP
+            )
         if (timebarAttrs != null) {
             val a = context.theme
                 .obtainStyledAttributes(timebarAttrs, R.styleable.DefaultTimeBar, 0, 0)
@@ -910,12 +944,18 @@ class CustomTimeBar @JvmOverloads constructor(
             scrubberEnabledSize = defaultScrubberEnabledSize
             scrubberDisabledSize = defaultScrubberDisabledSize
             scrubberDraggedSize = defaultScrubberDraggedSize
-            playedPaint.color = DEFAULT_PLAYED_COLOR
-            scrubberPaint.color = DEFAULT_SCRUBBER_COLOR
-            bufferedPaint.color = DEFAULT_BUFFERED_COLOR
-            unplayedPaint.color = DEFAULT_UNPLAYED_COLOR
-            adMarkerPaint.color = DEFAULT_AD_MARKER_COLOR
-            playedAdMarkerPaint.color = DEFAULT_PLAYED_AD_MARKER_COLOR
+            playedPaint.color =
+                DEFAULT_PLAYED_COLOR
+            scrubberPaint.color =
+                DEFAULT_SCRUBBER_COLOR
+            bufferedPaint.color =
+                DEFAULT_BUFFERED_COLOR
+            unplayedPaint.color =
+                DEFAULT_UNPLAYED_COLOR
+            adMarkerPaint.color =
+                DEFAULT_AD_MARKER_COLOR
+            playedAdMarkerPaint.color =
+                DEFAULT_PLAYED_AD_MARKER_COLOR
             scrubberDrawable = null
         }
         formatBuilder = StringBuilder()
@@ -932,7 +972,8 @@ class CustomTimeBar @JvmOverloads constructor(
         }
         duration = C.TIME_UNSET
         keyTimeIncrement = C.TIME_UNSET
-        keyCountIncrement = DEFAULT_INCREMENT_COUNT
+        keyCountIncrement =
+            DEFAULT_INCREMENT_COUNT
         isFocusable = true
         if (importantForAccessibility == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
             importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_YES
