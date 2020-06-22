@@ -287,38 +287,38 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         decorView: View,
         actionBar: androidx.appcompat.app.ActionBar?
     ) {
-        when (config.config.orientation) {
-            ORIENTATION_PORTRAIT -> {
-                playerViewWrapper.screenMode(PlayerWidget.ScreenMode.PORTRAIT)
-                if (config.hasPortraitActionBar.not()) {
-                    decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
-                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
-                    actionBar?.hide()
-                } else {
-                    decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
-                    actionBar?.show()
-
-                }
-
-            }
-            ORIENTATION_LANDSCAPE -> {
-                playerViewWrapper.screenMode(PlayerWidget.ScreenMode.LANDSCAPE)
-                if (config.hasLandscapeActionBar.not()) {
-                    decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
-                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
-                    actionBar?.hide()
-                } else {
-                    decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
-                    actionBar?.show()
-
-                }
-            }
-            else -> {
-                //do nothing
-            }
-        }
+//        when (config.config.orientation) {
+//            ORIENTATION_PORTRAIT -> {
+//                playerViewWrapper.screenMode(PlayerWidget.ScreenMode.PORTRAIT)
+//                if (config.hasPortraitActionBar.not()) {
+//                    decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
+//                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+//                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+//                    actionBar?.hide()
+//                } else {
+//                    decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+//                    actionBar?.show()
+//
+//                }
+//
+//            }
+//            ORIENTATION_LANDSCAPE -> {
+//                playerViewWrapper.screenMode(PlayerWidget.ScreenMode.LANDSCAPE)
+//                if (config.hasLandscapeActionBar.not()) {
+//                    decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
+//                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+//                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+//                    actionBar?.hide()
+//                } else {
+//                    decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+//                    actionBar?.show()
+//
+//                }
+//            }
+//            else -> {
+//                //do nothing
+//            }
+//        }
     }
 
     override fun getVideoPlayer(): VideoPlayer {

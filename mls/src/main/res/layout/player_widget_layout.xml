@@ -6,23 +6,25 @@
     android:layout_height="wrap_content">
 
 
-    <tv.mycujoo.mls.widgets.OverlayHost
-        android:id="@+id/playerWidget_overlayHost"
-        android:layout_width="600dp"
-        android:layout_height="600dp"
-        android:background="@android:color/transparent"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <com.google.android.exoplayer2.ui.PlayerView
         android:id="@+id/playerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:controller_layout_id="@layout/main_controls_layout"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <tv.mycujoo.mls.widgets.OverlayHost
+        android:id="@+id/playerWidget_overlayHost"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@id/playerView"
+        app:layout_constraintEnd_toEndOf="@id/playerView"
+        app:layout_constraintStart_toStartOf="@id/playerView"
+        app:layout_constraintTop_toTopOf="@id/playerView" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -24,11 +24,9 @@ class HighlightMarker @JvmOverloads constructor(
 
 
     /**
-     * expect input from 0L to 1L
+     * expects input from 0L to 1L
      */
     fun setPosition(relationalPosition: Int) {
-//        setPadding(((parent as ConstraintLayout).width * relationalPosition).toInt(), 0, 0, 0)
-
         val constraintSet = ConstraintSet()
         constraintSet.clone(parent as ConstraintLayout)
 
@@ -37,6 +35,7 @@ class HighlightMarker @JvmOverloads constructor(
                 this.id,
                 ConstraintSet.START,
                 relationalPosition - (measuredWidth / 2)
+
             )
             constraintSet.applyTo(parent as ConstraintLayout)
             visibility = View.VISIBLE

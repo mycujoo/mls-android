@@ -31,7 +31,10 @@ import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
 import tv.mycujoo.mls.manager.HighlightMarkerManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
-import tv.mycujoo.mls.widgets.mlstimebar.*
+import tv.mycujoo.mls.widgets.mlstimebar.HighlightMarker
+import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
+import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterest
+import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterestType
 import tv.mycujoo.mls.widgets.overlay.AnnouncementOverlayView
 import tv.mycujoo.mls.widgets.overlay.ScoreboardOverlayView
 import tv.mycujoo.mls.widgets.time_bar.PreviewTimeBarWrapper
@@ -40,6 +43,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
+    /**region Fields*/
     var playerView: PlayerView
     private var overlayHost: OverlayHost
     var previewTimeBarWrapper: PreviewTimeBarWrapper? = null
@@ -60,17 +64,15 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     @Nullable
     val idlingResource = CountingIdlingResource("displaying_overlays")
+    /**endregion */
 
+    /**region Initializing*/
     init {
 
         LayoutInflater.from(context).inflate(R.layout.player_widget_layout, this, true)
 
-
         playerView = findViewById(R.id.playerView)
-        initExoPlayerView(playerView)
-
-        overlayHost = OverlayHost(context, attrs, defStyleAttr)
-        connectOverlayHostToPlayerView(overlayHost)
+        overlayHost = findViewById(R.id.playerWidget_overlayHost)
 
 //        previewTimeBarWrapper = findViewById(R.id.exo_progress)
 
@@ -92,7 +94,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
 //            }
 //        })
 
-        playerView.post { screenMode(PlayerWidget.ScreenMode.PORTRAIT) }
+//        playerView.post { screenMode(PlayerWidget.ScreenMode.PORTRAIT) }
 
         initMlsTimeBar()
 
@@ -100,7 +102,8 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     private fun initMlsTimeBar() {
         val mlsTimeBar = findViewById<MLSTimeBar>(R.id.exo_progress)
-        val highlightMarkerTextView = findViewById<HighlightMarker>(R.id.exo_highlight_marker_title_highlight_marker)
+        val highlightMarkerTextView =
+            findViewById<HighlightMarker>(R.id.exo_highlight_marker_title_highlight_marker)
 
         val highlightMarkerManager = HighlightMarkerManager(mlsTimeBar, highlightMarkerTextView)
 
@@ -117,7 +120,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         highlightMarkerManager.addTimeLineHighlight(
             PointOfInterest(
                 3600 * 1000L,
-                "Half-time!",
+                "Goal!",
                 redPointOfInterestType
             )
         )
@@ -125,68 +128,20 @@ class PlayerViewWrapper @JvmOverloads constructor(
         highlightMarkerManager.addTimeLineHighlight(
             PointOfInterest(
                 360 * 1000L,
-                "Foul!",
+                "Goal!",
                 redPointOfInterestType
             )
         )
 
 
     }
-
-    private fun initExoPlayerView(playerView: PlayerView) {
-        val constraintSet = ConstraintSet()
-        constraintSet.clone(this)
-
-        constraintSet.connect(playerView.id, ConstraintSet.TOP, id, ConstraintSet.TOP)
-        constraintSet.connect(playerView.id, ConstraintSet.START, id, ConstraintSet.START)
-        constraintSet.connect(playerView.id, ConstraintSet.END, id, ConstraintSet.END)
-        constraintSet.connect(playerView.id, ConstraintSet.BOTTOM, id, ConstraintSet.BOTTOM)
-        constraintSet.constrainWidth(playerView.id, 0)
-        constraintSet.constrainHeight(playerView.id, 0)
-
-        constraintSet.applyTo(this)
-    }
-
-    private fun connectOverlayHostToPlayerView(overlayHost: OverlayHost) {
-        playerView.addView(overlayHost)
-
-        val constraintSet = ConstraintSet()
-        constraintSet.clone(this)
-
-
-        constraintSet.connect(overlayHost.id, ConstraintSet.TOP, playerView.id, ConstraintSet.TOP)
-        constraintSet.connect(
-            overlayHost.id,
-            ConstraintSet.START,
-            playerView.id,
-            ConstraintSet.START
-        )
-        constraintSet.connect(overlayHost.id, ConstraintSet.END, playerView.id, ConstraintSet.END)
-        constraintSet.connect(
-            overlayHost.id,
-            ConstraintSet.BOTTOM,
-            playerView.id,
-            ConstraintSet.BOTTOM
-        )
-        constraintSet.constrainWidth(overlayHost.id, 300)
-        constraintSet.constrainHeight(overlayHost.id, 3000)
-
-        overlayHost.visibility = View.VISIBLE
-        overlayHost.bringToFront()
-        bringChildToFront(overlayHost)
-
-        constraintSet.applyTo(this)
-
-
-        overlayHost.elevation = playerView.elevation + 200F
-    }
-
+    /**endregion */
 
     /**region UI*/
 
-    fun screenMode(screenMode: PlayerWidget.ScreenMode) {
+    fun screenMode(screenMode: ScreenMode) {
         when (screenMode) {
-            PlayerWidget.ScreenMode.PORTRAIT -> {
+            ScreenMode.PORTRAIT -> {
 
                 val displaySize = context.getDisplaySize()
                 val layoutParams = layoutParams as ViewGroup.LayoutParams
@@ -196,7 +151,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
                 setLayoutParams(layoutParams)
 
             }
-            PlayerWidget.ScreenMode.LANDSCAPE -> {
+            ScreenMode.LANDSCAPE -> {
 
                 val layoutParams = layoutParams as ViewGroup.LayoutParams
                 layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
@@ -732,6 +687,11 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
 
     /**endregion */
+
+    enum class ScreenMode {
+        PORTRAIT,
+        LANDSCAPE
+    }
 
 
 }
