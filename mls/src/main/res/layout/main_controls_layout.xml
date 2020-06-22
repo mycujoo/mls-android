@@ -121,10 +121,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
-            android:src="@drawable/exo_icon_pause"
+            android:src="@drawable/ic_fullscreen_24dp"
             app:layout_constraintBottom_toBottomOf="@id/exo_progress"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_chainStyle="packed"
+            android:layout_marginEnd="8dp"
+
             app:layout_constraintStart_toEndOf="@id/exo_position"
             app:layout_constraintTop_toTopOf="@id/exo_progress" />
 

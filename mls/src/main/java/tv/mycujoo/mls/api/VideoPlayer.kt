@@ -2,6 +2,7 @@ package tv.mycujoo.mls.api
 
 import com.google.android.exoplayer2.SimpleExoPlayer
 import tv.mycujoo.mls.core.PlayerEventsListener
+import tv.mycujoo.mls.core.UIEventListener
 
 class VideoPlayer(private val exoPlayer: SimpleExoPlayer) : PlayerController, PlayerStatus {
 
@@ -10,6 +11,8 @@ class VideoPlayer(private val exoPlayer: SimpleExoPlayer) : PlayerController, Pl
             field = value
             value?.let { exoPlayer.addListener(it) }
         }
+
+    lateinit var uiEventListener: UIEventListener
 
 
     /**region PlayerController*/

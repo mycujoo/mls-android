@@ -2,8 +2,6 @@ package tv.mycujoo.mls.api
 
 import android.app.Activity
 import android.content.Context
-import android.content.res.Configuration.ORIENTATION_LANDSCAPE
-import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -30,6 +28,7 @@ import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.cordinator.Coordinator
 import tv.mycujoo.mls.core.AnnotationPublisherImpl
 import tv.mycujoo.mls.core.PlayerEventsListener
+import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.data.DataHolder
 import tv.mycujoo.mls.di.DaggerMlsComponent
 import tv.mycujoo.mls.di.NetworkModule
@@ -184,6 +183,12 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
                     it.addListener(playerEventsListener)
                     videoPlayer.playerEventsListener = playerEventsListener
                 }
+                builder.uiEventListener?.let { uiEventCallback ->
+                    videoPlayer.uiEventListener = uiEventCallback
+                    playerViewWrapper.uiEventListener = uiEventCallback
+
+                }
+
                 hasDefaultPlayerController = builder.hasDefaultController
                 builder.highlightListParams?.let { highlightListParams ->
                     highlightList.addAll(ArrayList(getHighlightList()))
@@ -424,7 +429,6 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     ) {
         playerViewWrapper.playerView.player = exoPlayer
         playerViewWrapper.defaultController(hasDefaultPlayerController)
-
         playerViewWrapper.timeBarAnnotationHelper =
             TimeBarAnnotationHelper(api.getTimeLineMarkers())
     }
@@ -454,6 +458,8 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
             private set
         internal var playerEventsListener: PlayerEventsListener? = null
             private set
+        internal var uiEventListener: UIEventListener? = null
+            private set
         internal var hasAnnotation: Boolean = true
             private set
         internal var hasAnalytic: Boolean = true
@@ -471,6 +477,9 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
 
         fun setPlayerEventsListener(playerEventsListener: tv.mycujoo.mls.api.PlayerEventsListener) =
             apply { this.playerEventsListener = PlayerEventsListener(playerEventsListener) }
+
+        fun setUIEventListener(uiEventListener: UIEventListener) =
+            apply { this.uiEventListener = uiEventListener }
 
 
         fun hasAnnotation(hasAnnotation: Boolean) =

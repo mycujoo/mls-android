@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -19,6 +20,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.ui.PlayerView
 import tv.mycujoo.mls.R
+import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.entity.LayoutPosition
 import tv.mycujoo.mls.entity.LayoutType
 import tv.mycujoo.mls.entity.OverLayAction
@@ -43,12 +45,16 @@ class PlayerViewWrapper @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
+
     /**region Fields*/
     var playerView: PlayerView
     private var overlayHost: OverlayHost
+
+    lateinit var uiEventListener: UIEventListener
+    private var isFullScreen = false
+    private lateinit var fullScreenButton: ImageButton
+
     var previewTimeBarWrapper: PreviewTimeBarWrapper? = null
-
-
     private var imageView: ImageView? = null
     private val thumbnailsUrl: String =
         "https://bitdash-a.akamaihd.net/content/MI201109210084_1/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.jpg"
@@ -73,6 +79,21 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
         playerView = findViewById(R.id.playerView)
         overlayHost = findViewById(R.id.playerWidget_overlayHost)
+
+        fullScreenButton = findViewById<ImageButton>(R.id.fullscreen)
+        fullScreenButton.setOnClickListener {
+            if (this::uiEventListener.isInitialized) {
+                isFullScreen = !isFullScreen
+
+                if (isFullScreen) {
+                    fullScreenButton.setImageResource(R.drawable.ic_fullscreen_exit_24dp)
+                } else {
+                    fullScreenButton.setImageResource(R.drawable.ic_fullscreen_24dp)
+                }
+
+                uiEventListener.onFullScreenButtonClicked(isFullScreen)
+            }
+        }
 
 //        previewTimeBarWrapper = findViewById(R.id.exo_progress)
 

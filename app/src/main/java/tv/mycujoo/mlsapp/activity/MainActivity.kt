@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import tv.mycujoo.mls.api.MLS
 import tv.mycujoo.mls.api.PlayerEventsListener
+import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.model.ConfigParams
 import tv.mycujoo.mlsapp.R
 
@@ -31,12 +32,18 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val uiEventListener = object : UIEventListener {
+            override fun onFullScreenButtonClicked(fullScreen: Boolean) {
+                Log.d("uiEventListener", "onFullScreenButtonClicked $fullScreen")
+            }
+        }
 
         MLS =
             tv.mycujoo.mls.api.MLS.Builder()
                 .publicKey("USER_PUBLIC_KEY_123")
                 .withActivity(this)
                 .setPlayerEventsListener(playerEventsListener)
+                .setUIEventListener(uiEventListener)
 //                .hasAnalyticPlugin(true)
 //                .defaultPlayerController(true)
 //                .highlightList(HighlightListParams(highlightsRecyclerView))
@@ -68,6 +75,7 @@ class MainActivity : AppCompatActivity() {
         MLS.onResume(playerViewWrapper)
 
         val playerController = MLS.getVideoPlayer().getPlayerController()
+
         playButton?.setOnClickListener { playerController.play() }
         pauseButton?.setOnClickListener { playerController.pause() }
         nextButton?.setOnClickListener { playerController.next() }
