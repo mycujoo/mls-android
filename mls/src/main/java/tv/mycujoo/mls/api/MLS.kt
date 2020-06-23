@@ -5,7 +5,6 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
-import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.C
@@ -34,7 +33,6 @@ import tv.mycujoo.mls.di.DaggerMlsComponent
 import tv.mycujoo.mls.di.NetworkModule
 import tv.mycujoo.mls.entity.HighlightAction
 import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
-import tv.mycujoo.mls.model.ConfigParams
 import tv.mycujoo.mls.model.Event
 import tv.mycujoo.mls.model.Stream
 import tv.mycujoo.mls.network.Api
@@ -285,45 +283,6 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         if (Util.SDK_INT >= Build.VERSION_CODES.N) {
             release()
         }
-    }
-
-    override fun onConfigurationChanged(
-        config: ConfigParams,
-        decorView: View,
-        actionBar: androidx.appcompat.app.ActionBar?
-    ) {
-//        when (config.config.orientation) {
-//            ORIENTATION_PORTRAIT -> {
-//                playerViewWrapper.screenMode(PlayerWidget.ScreenMode.PORTRAIT)
-//                if (config.hasPortraitActionBar.not()) {
-//                    decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
-//                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-//                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
-//                    actionBar?.hide()
-//                } else {
-//                    decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
-//                    actionBar?.show()
-//
-//                }
-//
-//            }
-//            ORIENTATION_LANDSCAPE -> {
-//                playerViewWrapper.screenMode(PlayerWidget.ScreenMode.LANDSCAPE)
-//                if (config.hasLandscapeActionBar.not()) {
-//                    decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
-//                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-//                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
-//                    actionBar?.hide()
-//                } else {
-//                    decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
-//                    actionBar?.show()
-//
-//                }
-//            }
-//            else -> {
-//                //do nothing
-//            }
-//        }
     }
 
     override fun getVideoPlayer(): VideoPlayer {

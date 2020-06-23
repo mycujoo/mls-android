@@ -1,6 +1,5 @@
 package tv.mycujoo.mlsapp.activity
 
-import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -9,7 +8,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import tv.mycujoo.mls.api.MLS
 import tv.mycujoo.mls.api.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
-import tv.mycujoo.mls.model.ConfigParams
 import tv.mycujoo.mlsapp.R
 
 
@@ -50,19 +48,6 @@ class MainActivity : AppCompatActivity() {
                 .build()
 
 
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        MLS.onConfigurationChanged(
-            ConfigParams(
-                newConfig,
-                hasPortraitActionBar = true,
-                hasLandscapeActionBar = false
-            ),
-            window.decorView,
-            supportActionBar
-        )
     }
 
     override fun onStart() {

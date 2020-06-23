@@ -18,6 +18,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.updateLayoutParams
 import androidx.test.espresso.idling.CountingIdlingResource
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
 import com.google.android.exoplayer2.ui.PlayerView
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.UIEventListener
@@ -79,6 +80,8 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
         playerView = findViewById(R.id.playerView)
         overlayHost = findViewById(R.id.playerWidget_overlayHost)
+
+        playerView.resizeMode = RESIZE_MODE_FIXED_WIDTH
 
         fullScreenButton = findViewById<ImageButton>(R.id.fullscreen)
         fullScreenButton.setOnClickListener {
