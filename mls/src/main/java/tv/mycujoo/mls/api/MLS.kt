@@ -28,6 +28,7 @@ import tv.mycujoo.mls.cordinator.Coordinator
 import tv.mycujoo.mls.core.AnnotationPublisherImpl
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
+import tv.mycujoo.mls.core.VideoPlayerCoordinator
 import tv.mycujoo.mls.data.DataHolder
 import tv.mycujoo.mls.di.DaggerMlsComponent
 import tv.mycujoo.mls.di.NetworkModule
@@ -210,15 +211,12 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
 //        playerViewWrapper.previewTimeBar.addOnPreviewChangeListener(object :
 //            OnPreviewChangeListener {
 //            override fun onStartPreview(previewView: PreviewView, progress: Int) {
-//
 //            }
 //
 //            override fun onPreview(previewView: PreviewView, progress: Int, fromUser: Boolean) {
-//
 //            }
 //
 //            override fun onStopPreview(previewView: PreviewView, progress: Int) {
-//
 //            }
 //        })
 
@@ -390,6 +388,17 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         playerViewWrapper.defaultController(hasDefaultPlayerController)
         playerViewWrapper.timeBarAnnotationHelper =
             TimeBarAnnotationHelper(api.getTimeLineMarkers())
+
+        initVideoPlayerCoordinator(playerViewWrapper, exoPlayer)
+    }
+
+    private fun initVideoPlayerCoordinator(
+        playerViewWrapper: PlayerViewWrapper,
+        exoPlayer: SimpleExoPlayer?
+    ) {
+        exoPlayer?.let {
+            VideoPlayerCoordinator(exoPlayer, playerViewWrapper)
+        }
     }
 
     /**endregion */

@@ -9,10 +9,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -46,6 +43,10 @@ class PlayerViewWrapper @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
+
+    /**region UI Fields*/
+    private lateinit var bufferView: ProgressBar
+    /**endregion */
 
     /**region Fields*/
     var playerView: PlayerView
@@ -81,9 +82,10 @@ class PlayerViewWrapper @JvmOverloads constructor(
         playerView = findViewById(R.id.playerView)
         overlayHost = findViewById(R.id.playerWidget_overlayHost)
 
+        bufferView = findViewById(R.id.controller_buffering)
         playerView.resizeMode = RESIZE_MODE_FIXED_WIDTH
 
-        fullScreenButton = findViewById<ImageButton>(R.id.fullscreen)
+        fullScreenButton = findViewById<ImageButton>(R.id.controller_fullscreen)
         fullScreenButton.setOnClickListener {
             if (this::uiEventListener.isInitialized) {
                 isFullScreen = !isFullScreen
@@ -707,6 +709,14 @@ class PlayerViewWrapper @JvmOverloads constructor(
             viewIdentifierManager.getViewIdentifier(commandAction.targetViewId),
             idlingResource
         )
+    }
+
+    fun showBuffering() {
+        bufferView.visibility = View.VISIBLE
+    }
+
+    fun hideBuffering() {
+        bufferView.visibility = View.GONE
     }
 
 
