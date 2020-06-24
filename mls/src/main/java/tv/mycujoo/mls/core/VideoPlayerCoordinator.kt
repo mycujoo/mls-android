@@ -11,7 +11,7 @@ class VideoPlayerCoordinator(exoPlayer: SimpleExoPlayer, playerViewWrapper: Play
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 super.onPlayerStateChanged(playWhenReady, playbackState)
 
-                if (playbackState == STATE_BUFFERING) {
+                if (playbackState == STATE_BUFFERING && playWhenReady) {
                     playerViewWrapper.showBuffering()
                 } else {
                     playerViewWrapper.hideBuffering()
