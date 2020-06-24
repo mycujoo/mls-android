@@ -85,7 +85,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         bufferView = findViewById(R.id.controller_buffering)
         playerView.resizeMode = RESIZE_MODE_FIXED_WIDTH
 
-        fullScreenButton = findViewById<ImageButton>(R.id.controller_fullscreen)
+        fullScreenButton = findViewById<ImageButton>(R.id.controller_fullscreenImageButton)
         fullScreenButton.setOnClickListener {
             if (this::uiEventListener.isInitialized) {
                 isFullScreen = !isFullScreen
