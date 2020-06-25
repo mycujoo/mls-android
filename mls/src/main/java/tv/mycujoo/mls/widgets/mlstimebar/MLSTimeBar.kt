@@ -596,9 +596,9 @@ class MLSTimeBar @JvmOverloads constructor(
 
             canvas.drawRect(
                 markerLeft.toFloat(),
-                barTop.toFloat(),
+                (barTop - 6).toFloat(),
                 markerRight,
-                barBottom.toFloat(),
+                (barBottom + 6).toFloat(),
                 paint
             )
 

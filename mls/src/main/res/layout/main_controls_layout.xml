@@ -141,6 +141,7 @@
             android:id="@id/exo_progress"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            app:ad_marker_width="2dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintLeft_toLeftOf="parent"
