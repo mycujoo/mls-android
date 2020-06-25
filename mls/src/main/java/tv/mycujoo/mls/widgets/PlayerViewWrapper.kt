@@ -12,7 +12,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ImageButton
+import android.widget.ProgressBar
+import android.widget.RelativeLayout
+import android.widget.TextView
 import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -46,7 +49,6 @@ import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterest
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterestType
 import tv.mycujoo.mls.widgets.overlay.AnnouncementOverlayView
 import tv.mycujoo.mls.widgets.overlay.ScoreboardOverlayView
-import tv.mycujoo.mls.widgets.time_bar.PreviewTimeBarWrapper
 
 
 class PlayerViewWrapper @JvmOverloads constructor(
@@ -66,10 +68,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
     private var isFullScreen = false
     private lateinit var fullScreenButton: ImageButton
 
-    var previewTimeBarWrapper: PreviewTimeBarWrapper? = null
-    private var imageView: ImageView? = null
-    private val thumbnailsUrl: String =
-        "https://bitdash-a.akamaihd.net/content/MI201109210084_1/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.jpg"
     lateinit var timeBarAnnotationHelper: TimeBarAnnotationHelper
 
 
@@ -121,28 +119,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
                 uiEventListener.onFullScreenButtonClicked(isFullScreen)
             }
         }
-
-//        previewTimeBarWrapper = findViewById(R.id.exo_progress)
-
-//        imageView = findViewById(R.id.previewImageView)
-//        previewTitleTextView = findViewById(R.id.previewTitleTextView)
-
-
-//        previewTimeBarWrapper.delegate.setPreviewLoader(object : PreviewLoader {
-//            override fun loadPreview(currentPosition: Long, max: Long) {
-////                Glide.with(imageView!!)
-////                    .load(thumbnailsUrl)
-////                    .override(
-////                        Target.SIZE_ORIGINAL,
-////                        Target.SIZE_ORIGINAL
-////                    )
-////                    .into(imageView!!)
-//
-//                timeBarAnnotationHelper.updateText(currentPosition, previewTitleTextView)
-//            }
-//        })
-
-//        playerView.post { screenMode(PlayerWidget.ScreenMode.PORTRAIT) }
 
         initMlsTimeBar()
 

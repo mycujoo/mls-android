@@ -43,10 +43,7 @@ class MainActivity : AppCompatActivity() {
                 .setPlayerEventsListener(playerEventsListener)
                 .setUIEventListener(uiEventListener)
 //                .hasAnalyticPlugin(true)
-//                .defaultPlayerController(true)
-//                .highlightList(HighlightListParams(highlightsRecyclerView))
                 .build()
-
 
     }
 
@@ -58,13 +55,6 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         MLS.onResume(playerViewWrapper)
-
-        val playerController = MLS.getVideoPlayer().getPlayerController()
-
-        playButton?.setOnClickListener { playerController.play() }
-        pauseButton?.setOnClickListener { playerController.pause() }
-        nextButton?.setOnClickListener { playerController.next() }
-        prevButton?.setOnClickListener { playerController.previous() }
 
         val playerStatus = MLS.getVideoPlayer().getPlayerStatus()
         val currentPosition = playerStatus.getCurrentPosition()
