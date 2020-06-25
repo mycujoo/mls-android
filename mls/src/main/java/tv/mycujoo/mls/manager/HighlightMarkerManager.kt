@@ -32,13 +32,15 @@ class HighlightMarkerManager(
                 }
 
                 if (highlightIndex != -1) {
-                    if (pointOfInterestList[highlightIndex].title != null && poiPositionOnTimeBarArrayList[highlightIndex] != -1)
-                        highlightMarker.setText(pointOfInterestList[highlightIndex].title)
-                    highlightMarker.setPosition(poiPositionOnTimeBarArrayList[highlightIndex])
+                    if (pointOfInterestList[highlightIndex].title.isNotEmpty() && poiPositionOnTimeBarArrayList[highlightIndex] != -1) {
+
+                        highlightMarker.addHighlightTexts(pointOfInterestList[highlightIndex].title)
+                        highlightMarker.setPosition(poiPositionOnTimeBarArrayList[highlightIndex])
+                    }
 
                 } else {
                     highlightMarker.visibility = View.INVISIBLE
-                    highlightMarker.setText(null)
+                    highlightMarker.removeTexts()
                 }
             }
         })

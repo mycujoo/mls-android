@@ -21,6 +21,8 @@ class VideoPlayerCoordinator(exoPlayer: SimpleExoPlayer, playerViewWrapper: Play
         }
 
         exoPlayer.addListener(mainEventListener)
+
+
     }
 
 }

@@ -17,6 +17,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
 import com.google.android.exoplayer2.ui.PlayerView
+import kotlinx.android.synthetic.main.dialog_information_layout.view.*
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.entity.LayoutPosition
@@ -38,6 +39,7 @@ import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterestType
 import tv.mycujoo.mls.widgets.overlay.AnnouncementOverlayView
 import tv.mycujoo.mls.widgets.overlay.ScoreboardOverlayView
 import tv.mycujoo.mls.widgets.time_bar.PreviewTimeBarWrapper
+
 
 class PlayerViewWrapper @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -85,7 +87,12 @@ class PlayerViewWrapper @JvmOverloads constructor(
         bufferView = findViewById(R.id.controller_buffering)
         playerView.resizeMode = RESIZE_MODE_FIXED_WIDTH
 
-        fullScreenButton = findViewById<ImageButton>(R.id.controller_fullscreenImageButton)
+        findViewById<ImageButton>(R.id.controller_informationButton).setOnClickListener {
+            displayInformation()
+        }
+
+
+        fullScreenButton = findViewById(R.id.controller_fullscreenImageButton)
         fullScreenButton.setOnClickListener {
             if (this::uiEventListener.isInitialized) {
                 isFullScreen = !isFullScreen
@@ -126,10 +133,59 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     }
 
+    private fun displayInformation() {
+        val informationDialog =
+            LayoutInflater.from(context).inflate(R.layout.dialog_information_layout, this, false)
+
+        addView(informationDialog)
+
+
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(this)
+
+        constraintSet.connect(
+            informationDialog.id,
+            ConstraintSet.TOP,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.TOP
+        )
+        constraintSet.connect(
+            informationDialog.id,
+            ConstraintSet.BOTTOM,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.BOTTOM
+        )
+        constraintSet.connect(
+            informationDialog.id,
+            ConstraintSet.START,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.START
+        )
+        constraintSet.connect(
+            informationDialog.id,
+            ConstraintSet.END,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.END
+        )
+
+
+        constraintSet.applyTo(this)
+
+        informationDialog_titleTextView.text = "OK!"
+
+        informationDialog.setOnClickListener {
+            if (it.parent is ViewGroup) {
+                (it.parent as ViewGroup).removeView(it)
+            }
+        }
+    }
+
     private fun initMlsTimeBar() {
         val mlsTimeBar = findViewById<MLSTimeBar>(R.id.exo_progress)
+        mlsTimeBar.setPlayedColor(Color.BLUE)
         val highlightMarkerTextView =
             findViewById<HighlightMarker>(R.id.exo_highlight_marker_title_highlight_marker)
+        highlightMarkerTextView.initialize(Color.BLUE)
 
         val highlightMarkerManager = HighlightMarkerManager(mlsTimeBar, highlightMarkerTextView)
 
@@ -138,23 +194,30 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
         highlightMarkerManager.addTimeLineHighlight(
             PointOfInterest(
+                360 * 1000L,
+                listOf("Goal!"),
+                redPointOfInterestType
+            )
+        )
+        highlightMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
                 900 * 1000L,
-                "Goal!",
+                listOf("Goal!", "Card"),
                 greenPointOfInterestType
             )
         )
         highlightMarkerManager.addTimeLineHighlight(
             PointOfInterest(
                 3600 * 1000L,
-                "Goal!",
+                listOf("Goal!"),
                 redPointOfInterestType
             )
         )
 
         highlightMarkerManager.addTimeLineHighlight(
             PointOfInterest(
-                360 * 1000L,
-                "Goal!",
+                4600 * 1000L,
+                listOf("Again Goal!", "Offside", "Card"),
                 redPointOfInterestType
             )
         )

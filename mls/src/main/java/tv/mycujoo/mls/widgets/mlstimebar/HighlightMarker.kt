@@ -1,26 +1,50 @@
 package tv.mycujoo.mls.widgets.mlstimebar
 
 import android.content.Context
+import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.util.AttributeSet
-import android.view.LayoutInflater
+import android.view.Gravity
 import android.view.View
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import kotlinx.android.synthetic.main.highlight_marker_layout.view.*
+import androidx.core.content.ContextCompat
+import androidx.core.view.children
 import tv.mycujoo.mls.R
 
 
 class HighlightMarker @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : ConstraintLayout(context, attrs, defStyleAttr) {
+) : LinearLayout(context, attrs, defStyleAttr) {
 
 
+    /**region Initializing*/
     init {
+        orientation = VERTICAL
+        gravity = Gravity.CENTER
+        background = ContextCompat.getDrawable(context, R.drawable.shape_highlight_marker_bg)
+        val density = resources.displayMetrics.density
+        val verticalPadding: Int = (4 * density).toInt()
+        val sidePadding: Int = (8 * density).toInt()
 
-        LayoutInflater.from(context).inflate(R.layout.highlight_marker_layout, this, true)
-
-
+        setPadding(sidePadding, verticalPadding, sidePadding, verticalPadding)
     }
+
+    fun initialize(color: Int) {
+        background.colorFilter = PorterDuffColorFilter(
+            color,
+            PorterDuff.Mode.SRC_ATOP
+        )
+
+        visibility = View.GONE
+    }
+    /**endregion */
+
+
+    /**region Functions*/
 
 
     /**
@@ -35,17 +59,27 @@ class HighlightMarker @JvmOverloads constructor(
                 this.id,
                 ConstraintSet.START,
                 relationalPosition - (measuredWidth / 2)
-
             )
             constraintSet.applyTo(parent as ConstraintLayout)
             visibility = View.VISIBLE
-
-
         }
 
     }
 
-    fun setText(title: String?) {
-        highlightMarker_textView.text = title
+    fun removeTexts() {
+        children.forEach { removeView(it) }
     }
+
+    fun addHighlightTexts(titles: List<String>) {
+        removeTexts()
+        titles.forEach {
+            addView(TextView(context).apply {
+                text = it
+                gravity = Gravity.CENTER
+                setTextColor(Color.parseColor("#FFFFFF"))
+            })
+        }
+    }
+
+    /**endregion */
 }
