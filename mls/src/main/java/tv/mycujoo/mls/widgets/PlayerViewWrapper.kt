@@ -3,9 +3,12 @@ package tv.mycujoo.mls.widgets
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.PorterDuff
 import android.os.Handler
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,16 +16,20 @@ import android.widget.*
 import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import androidx.test.espresso.idling.CountingIdlingResource
+import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
 import com.google.android.exoplayer2.ui.PlayerView
 import kotlinx.android.synthetic.main.dialog_information_layout.view.*
+import kotlinx.android.synthetic.main.main_controls_layout.view.*
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.entity.LayoutPosition
 import tv.mycujoo.mls.entity.LayoutType
 import tv.mycujoo.mls.entity.OverLayAction
+import tv.mycujoo.mls.entity.VideoPlayerConfig
 import tv.mycujoo.mls.entity.actions.CommandAction
 import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
 import tv.mycujoo.mls.entity.actions.ShowScoreboardOverlayAction
@@ -32,6 +39,7 @@ import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
 import tv.mycujoo.mls.manager.HighlightMarkerManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.widgets.PlayerViewWrapper.LiveState.*
 import tv.mycujoo.mls.widgets.mlstimebar.HighlightMarker
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterest
@@ -47,7 +55,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
 
     /**region UI Fields*/
-    private lateinit var bufferView: ProgressBar
+    private var bufferView: ProgressBar
     /**endregion */
 
     /**region Fields*/
@@ -89,6 +97,13 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
         findViewById<ImageButton>(R.id.controller_informationButton).setOnClickListener {
             displayInformation()
+        }
+
+
+        val liveBadgeTextView = findViewById<TextView>(R.id.controller_liveBadgeTextView)
+        liveBadgeTextView.setOnClickListener {
+            playerView.player?.seekTo(C.TIME_UNSET)
+            it.isEnabled = false
         }
 
 
@@ -782,12 +797,100 @@ class PlayerViewWrapper @JvmOverloads constructor(
         bufferView.visibility = View.GONE
     }
 
+    fun config(config: VideoPlayerConfig) {
+        try {
+            val primaryColor = Color.parseColor(config.primaryColor)
+            val secondaryColor = Color.parseColor(config.secondaryColor)
+
+            val mlsTimeBar = findViewById<MLSTimeBar>(R.id.exo_progress)
+            mlsTimeBar.setPlayedColor(primaryColor)
+            val highlightMarkerTextView =
+                findViewById<HighlightMarker>(R.id.exo_highlight_marker_title_highlight_marker)
+            highlightMarkerTextView.initialize(secondaryColor)
+
+            bufferView.indeterminateTintList = ColorStateList.valueOf(primaryColor)
+            findViewById<ImageButton>(R.id.exo_play).setColorFilter(
+                primaryColor,
+                PorterDuff.Mode.SRC_ATOP
+            )
+            findViewById<ImageButton>(R.id.exo_pause).setColorFilter(
+                primaryColor,
+                PorterDuff.Mode.SRC_ATOP
+            )
+            findViewById<ImageButton>(R.id.exo_rew).setColorFilter(
+                primaryColor,
+                PorterDuff.Mode.SRC_ATOP
+            )
+            findViewById<ImageButton>(R.id.exo_ffwd).setColorFilter(
+                primaryColor,
+                PorterDuff.Mode.SRC_ATOP
+            )
+
+            playerView.player?.playWhenReady = config.autoPlay
+
+            if (config.backForwardButtons) {
+                findViewById<ImageButton>(R.id.exo_rew).visibility = View.VISIBLE
+                findViewById<ImageButton>(R.id.exo_ffwd).visibility = View.VISIBLE
+            } else {
+                findViewById<ImageButton>(R.id.exo_rew).visibility = View.GONE
+                findViewById<ImageButton>(R.id.exo_ffwd).visibility = View.GONE
+            }
+
+            if (config.eventInfoButton) {
+                findViewById<ImageButton>(R.id.controller_informationButton).visibility =
+                    View.VISIBLE
+            } else {
+                findViewById<ImageButton>(R.id.controller_informationButton).visibility = View.GONE
+            }
+
+
+        } catch (e: Exception) {
+            Log.e("PlayerViewWrapper", e.message)
+        } finally {
+
+
+        }
+    }
+
+    fun setLiveMode(liveState: LiveState) {
+        when (liveState) {
+            LIVE_ON_THE_EDGE -> {
+                controller_liveBadgeTextView.visibility = View.VISIBLE
+
+                controller_liveBadgeTextView.background =
+                    ContextCompat.getDrawable(context, R.drawable.bg_live)
+                controller_liveBadgeTextView.isEnabled = false
+            }
+            LIVE_TRAILING -> {
+                controller_liveBadgeTextView.visibility = View.VISIBLE
+
+                controller_liveBadgeTextView.background =
+                    ContextCompat.getDrawable(context, R.drawable.bg_live_gray)
+                controller_liveBadgeTextView.isEnabled = true
+            }
+            VOD -> {
+                controller_liveBadgeTextView.visibility = View.GONE
+            }
+        }
+    }
+
+
+    fun getTimeBar(): MLSTimeBar {
+        return findViewById(R.id.exo_progress)
+    }
+
 
     /**endregion */
 
     enum class ScreenMode {
         PORTRAIT,
         LANDSCAPE
+    }
+
+    enum class LiveState {
+        LIVE_ON_THE_EDGE,
+        LIVE_TRAILING,
+        VOD
     }
 
 

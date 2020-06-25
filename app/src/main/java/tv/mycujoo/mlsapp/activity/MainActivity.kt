@@ -70,7 +70,9 @@ class MainActivity : AppCompatActivity() {
         val currentPosition = playerStatus.getCurrentPosition()
         val duration = playerStatus.getDuration()
 
-        MLS.loadVideo(Uri.parse("https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"))
+//        MLS.loadVideo(Uri.parse("https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"))
+//        MLS.loadVideo(Uri.parse("https://raw-rendered-europe-west.mls.mycujoo.tv/3619/ckbuult7c00010121qjpp3rej/index.m3u8"))
+        MLS.loadVideo(Uri.parse("https://playlists.mycujoo.football/as/ck3axeudv3m1a0hfyzlu4dw3x/master.m3u8"))
 
     }
 

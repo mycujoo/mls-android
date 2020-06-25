@@ -3,4 +3,5 @@
     <string name="time_separator">/</string>
     <string name="information">Information</string>
     <string name="live">LIVE</string>
+    <string name="back_to_live">BACK TO LIVE</string>
 </resources>
