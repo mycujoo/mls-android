@@ -1,9 +1,9 @@
 package tv.mycujoo.mls.entity
 
-
+@Deprecated("Use Action instead")
 abstract class Action(val id: Int)
 
-
+@Deprecated("Use Action instead")
 class OverLayAction(
     id: Int,
     val duration: Long,
@@ -18,6 +18,7 @@ class OverLayAction(
 ) : Action(id)
 
 // stream url is not provided by api, rather than injected when entities are made
+@Deprecated("Use Action instead")
 class HighlightAction(
     id: Int,
     val streamOffset: Long,
@@ -28,6 +29,7 @@ class HighlightAction(
 
 }
 
+@Deprecated("Use Action instead")
 class TimeLineAction(
     id: Int,
     val color: String,
@@ -36,6 +38,7 @@ class TimeLineAction(
 
 }
 
+@Deprecated("Use Action instead")
 enum class LayoutType {
     BASIC_SINGLE_LINE,
     BASIC_DOUBLE_LINE,
@@ -43,6 +46,7 @@ enum class LayoutType {
 
 }
 
+@Deprecated("Use Action instead")
 enum class LayoutPosition {
     TOP_LEFT,
     TOP_RIGHT,

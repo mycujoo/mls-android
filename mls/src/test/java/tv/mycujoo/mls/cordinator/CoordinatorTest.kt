@@ -12,7 +12,7 @@ import tv.mycujoo.mls.TestSampleData.Companion.getSampleCommandAction
 import tv.mycujoo.mls.TestSampleData.Companion.getSampleShowAnnouncementOverlayAction
 import tv.mycujoo.mls.core.AnnotationPublisher
 import tv.mycujoo.mls.entity.actions.AbstractAction
-import tv.mycujoo.mls.entity.actions.ActionRootSourceData
+import tv.mycujoo.mls.entity.actions.OldActionRootSourceData
 import tv.mycujoo.mls.entity.actions.ActionWrapper
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.widgets.HighlightAdapter
@@ -46,7 +46,7 @@ class CoordinatorTest {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        whenever(api.getAnnotations()).thenReturn(emptyList())
+//        whenever(api.getAnnotations()).thenReturn(emptyList())
         whenever(api.getActions()).thenReturn(getListOfActionWrapper())
 
         coordinator = Coordinator(api, publisher)
@@ -70,7 +70,7 @@ class CoordinatorTest {
     }
 
     @Test
-    fun `should AddOverlay & NOT remove or hide OnSeeking to 10th second`() {
+    fun `should Add overlay & NOT remove or hide OnSeeking to 10th second`() {
         seekTo(10000L)
 
         coordinator.seekInterruptionEventListener.onPositionDiscontinuity(1)
@@ -94,7 +94,10 @@ class CoordinatorTest {
         verify(publisher, never()).onNewActionWrapperAvailable(captor.capture())
 
         val captorForRemoveCommand = argumentCaptor<ActionWrapper>()
-        verify(publisher, times(2)).onNewRemovalOrHidingActionAvailable(captorForRemoveCommand.capture())
+        verify(
+            publisher,
+            times(2)
+        ).onNewRemovalOrHidingActionAvailable(captorForRemoveCommand.capture())
         assertEquals(10000L, captorForRemoveCommand.firstValue.offset)
         assertEquals(20000L, captorForRemoveCommand.secondValue.offset)
     }
@@ -110,7 +113,10 @@ class CoordinatorTest {
         verify(publisher, never()).onNewActionWrapperAvailable(captor.capture())
 
         val captorForRemoveCommand = argumentCaptor<ActionWrapper>()
-        verify(publisher, times(3)).onNewRemovalOrHidingActionAvailable(captorForRemoveCommand.capture())
+        verify(
+            publisher,
+            times(3)
+        ).onNewRemovalOrHidingActionAvailable(captorForRemoveCommand.capture())
         assertEquals(10000L, captorForRemoveCommand.firstValue.offset)
         assertEquals(20000L, captorForRemoveCommand.secondValue.offset)
         assertEquals(30000L, captorForRemoveCommand.thirdValue.offset)
@@ -124,7 +130,7 @@ class CoordinatorTest {
     fun getListOfActionWrapper(): List<ActionWrapper> {
         val listOfActionWrapper = ArrayList<ActionWrapper>()
 
-        val firstActionRootSourceData = ActionRootSourceData().apply {
+        val firstActionRootSourceData = OldActionRootSourceData().apply {
             id = "id_1000"
             time = 10000L
             actionsList.add(getSampleShowAnnouncementOverlayAction())
@@ -142,7 +148,7 @@ class CoordinatorTest {
             listOfActionWrapper.add(actionWrapper)
         }
 
-        val secondActionRootSourceData = ActionRootSourceData().apply {
+        val secondActionRootSourceData = OldActionRootSourceData().apply {
             id = "id_1001"
             time = 20000L
             actionsList.add(getSampleCommandAction("remove").apply {
@@ -158,7 +164,7 @@ class CoordinatorTest {
             listOfActionWrapper.add(actionWrapper)
         }
 
-        val thirdActionRootSourceData = ActionRootSourceData().apply {
+        val thirdActionRootSourceData = OldActionRootSourceData().apply {
             id = "id_1002"
             time = 30000L
             actionsList.add(getSampleCommandAction("hide").apply {

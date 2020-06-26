@@ -3,7 +3,7 @@ package tv.mycujoo.mls.entity.actions
 import tv.mycujoo.mls.entity.LayoutPosition
 import tv.mycujoo.mls.widgets.ViewGuideline
 
-
+@Deprecated("Use Action instead")
 class ShowScoreboardOverlayAction : AbstractAction(), ViewGuideline {
 
     lateinit var colorLeft: String

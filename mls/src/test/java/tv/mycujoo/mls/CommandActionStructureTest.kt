@@ -21,7 +21,7 @@ class CommandActionStructureTest {
 
     @Test
     fun verifyActionType() {
-        val actionRootSourceData = ActionRootSourceData()
+        val actionRootSourceData = OldActionRootSourceData()
         actionRootSourceData.id = "id_1000"
 
 
@@ -33,7 +33,7 @@ class CommandActionStructureTest {
 
 
         val json = gson.toJson(actionRootSourceData)
-        val rootSourceData = gson.fromJson(json, ActionRootSourceData::class.java)
+        val rootSourceData = gson.fromJson(json, OldActionRootSourceData::class.java)
 
         rootSourceData.build()
 
@@ -43,7 +43,7 @@ class CommandActionStructureTest {
 
     @Test
     fun verifyCommandActionContent() {
-        val actionRootSourceData = ActionRootSourceData()
+        val actionRootSourceData = OldActionRootSourceData()
         actionRootSourceData.id = "id_1000"
 
 
@@ -70,7 +70,7 @@ class CommandActionStructureTest {
         actionRootSourceData.actionSourceData = listOf(actionIdentifier)
 
         val json = gson.toJson(actionRootSourceData)
-        val rootSourceData = gson.fromJson(json, ActionRootSourceData::class.java)
+        val rootSourceData = gson.fromJson(json, OldActionRootSourceData::class.java)
 
         rootSourceData.build()
 

@@ -10,7 +10,7 @@ class RemoteApi : Api {
     override fun getActions(): List<ActionWrapper> {
         val listOfActionWrapper = ArrayList<ActionWrapper>()
 
-        val actionRootSourceData = ActionRootSourceData()
+        val actionRootSourceData = OldActionRootSourceData()
         actionRootSourceData.id = "id_1000"
         actionRootSourceData.time = 10000L
 

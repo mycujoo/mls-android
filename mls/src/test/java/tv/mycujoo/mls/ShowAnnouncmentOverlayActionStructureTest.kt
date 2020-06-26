@@ -21,7 +21,7 @@ class ShowAnnouncmentOverlayActionStructureTest {
 
     @Test
     fun verifyActionType() {
-        val actionRootSourceData = ActionRootSourceData()
+        val actionRootSourceData = OldActionRootSourceData()
         actionRootSourceData.id = "id_1000"
 
 
@@ -33,7 +33,7 @@ class ShowAnnouncmentOverlayActionStructureTest {
 
 
         val json = gson.toJson(actionRootSourceData)
-        val rootSourceData = gson.fromJson(json, ActionRootSourceData::class.java)
+        val rootSourceData = gson.fromJson(json, OldActionRootSourceData::class.java)
 
         rootSourceData.build()
 
@@ -43,7 +43,7 @@ class ShowAnnouncmentOverlayActionStructureTest {
 
     @Test
     fun verifyShowTimeLineMarkerActionContent() {
-        val actionRootSourceData = ActionRootSourceData()
+        val actionRootSourceData = OldActionRootSourceData()
         actionRootSourceData.id = "id_1000"
 
 
@@ -82,7 +82,7 @@ class ShowAnnouncmentOverlayActionStructureTest {
         actionRootSourceData.actionSourceData = listOf(actionIdentifier)
 
         val json = gson.toJson(actionRootSourceData)
-        val rootSourceData = gson.fromJson(json, ActionRootSourceData::class.java)
+        val rootSourceData = gson.fromJson(json, OldActionRootSourceData::class.java)
 
         rootSourceData.build()
 

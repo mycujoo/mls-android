@@ -19,7 +19,7 @@ class ShowScoreboardActionStructureTest {
 
     @Test
     fun verifyActionType() {
-        val actionRootSourceData = ActionRootSourceData()
+        val actionRootSourceData = OldActionRootSourceData()
         actionRootSourceData.id = "id_1000"
 
         val actionIdentifier = ActionSourceData(
@@ -29,7 +29,7 @@ class ShowScoreboardActionStructureTest {
         actionRootSourceData.actionSourceData = listOf(actionIdentifier)
 
         val json = gson.toJson(actionRootSourceData)
-        val rootSourceData = gson.fromJson(json, ActionRootSourceData::class.java)
+        val rootSourceData = gson.fromJson(json, OldActionRootSourceData::class.java)
 
         rootSourceData.build()
 
@@ -39,7 +39,7 @@ class ShowScoreboardActionStructureTest {
 
     @Test
     fun verifyShowScoreboardOverlayActionContent() {
-        val actionRootSourceData = ActionRootSourceData()
+        val actionRootSourceData = OldActionRootSourceData()
         actionRootSourceData.id = "id_1000"
 
 
@@ -96,7 +96,7 @@ class ShowScoreboardActionStructureTest {
         actionRootSourceData.actionSourceData = listOf(actionIdentifier)
 
         val json = gson.toJson(actionRootSourceData)
-        val rootSourceData = gson.fromJson(json, ActionRootSourceData::class.java)
+        val rootSourceData = gson.fromJson(json, OldActionRootSourceData::class.java)
 
         rootSourceData.build()
 

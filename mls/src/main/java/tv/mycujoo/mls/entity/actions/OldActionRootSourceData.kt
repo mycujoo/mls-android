@@ -3,7 +3,8 @@ package tv.mycujoo.mls.entity.actions
 import android.util.Log
 import com.google.gson.annotations.SerializedName
 
-class ActionRootSourceData {
+@Deprecated("Use Action instead")
+class OldActionRootSourceData {
     fun build() {
         actionSourceData?.forEach { action ->
             action.actionAbstractId?.let {
