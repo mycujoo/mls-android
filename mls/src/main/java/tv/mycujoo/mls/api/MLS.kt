@@ -8,10 +8,9 @@ import android.os.Handler
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.C
+import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
-import com.google.android.exoplayer2.upstream.DataSource
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import com.npaw.youbora.lib6.YouboraLog
@@ -164,6 +163,18 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
             exoPlayer = SimpleExoPlayer.Builder(context).build()
 
             exoPlayer?.let {
+
+                builder.mlsConfiguration?.let { mlsConfiguration ->
+                    if (mlsConfiguration.accuracy > 0) {
+                        it.setSeekParameters(
+                            SeekParameters(
+                                mlsConfiguration.accuracy / 2,
+                                mlsConfiguration.accuracy / 2
+                            )
+                        )
+                    }
+                }
+
 
                 dispatcher.launch {
                     when (val result = GetEventsUseCase(eventsRepository).execute()) {
@@ -327,12 +338,6 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
             HlsMediaSource.Factory(DefaultHttpDataSourceFactory(Util.getUserAgent(context, "mls")))
                 .createMediaSource(uri)
 
-        // Hls data source
-        val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(
-            context,
-            Util.getUserAgent(context, "mls")
-        )
-
         if (playbackPosition != -1L) {
             exoPlayer?.seekTo(playbackPosition)
         }
@@ -428,6 +433,9 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
             private set
         internal var uiEventListener: UIEventListener? = null
             private set
+        internal var mlsConfiguration: MLSConfiguration? = null
+            private set
+
         internal var hasAnnotation: Boolean = true
             private set
         internal var hasAnalytic: Boolean = true
@@ -457,6 +465,9 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
             apply { this.hasAnalytic = hasAnalytic }
 
         fun build() = MLS(this)
+        fun setConfiguration(mlsConfiguration: MLSConfiguration) = apply {
+            this.mlsConfiguration = mlsConfiguration
+        }
 
     }
 

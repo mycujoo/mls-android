@@ -66,7 +66,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     lateinit var uiEventListener: UIEventListener
     private var isFullScreen = false
-    private lateinit var fullScreenButton: ImageButton
+    private var fullScreenButton: ImageButton
 
     lateinit var timeBarAnnotationHelper: TimeBarAnnotationHelper
 
@@ -84,7 +84,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     /**region Initializing*/
     init {
-
         LayoutInflater.from(context).inflate(R.layout.player_widget_layout, this, true)
 
         playerView = findViewById(R.id.playerView)
