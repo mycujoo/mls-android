@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import tv.mycujoo.mls.api.MLS
+import tv.mycujoo.mls.api.MLSConfiguration
 import tv.mycujoo.mls.api.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mlsapp.R
@@ -42,6 +43,7 @@ class MainActivity : AppCompatActivity() {
                 .withActivity(this)
                 .setPlayerEventsListener(playerEventsListener)
                 .setUIEventListener(uiEventListener)
+                .setConfiguration(MLSConfiguration(1000L))
 //                .hasAnalyticPlugin(true)
                 .build()
 
