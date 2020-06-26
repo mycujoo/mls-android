@@ -1,6 +1,6 @@
 package tv.mycujoo.mls.widgets
 
-import tv.mycujoo.mls.entity.LayoutPosition
+import tv.mycujoo.mls.entity.actions.LayoutPosition
 
 interface ViewGuideline {
     var viewId : String

@@ -1,4 +1,4 @@
-package tv.mycujoo.mls.entity
+package tv.mycujoo.mls.entity.msc
 
 data class VideoPlayerConfig(
     val primaryColor: String,

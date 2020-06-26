@@ -31,7 +31,7 @@ import tv.mycujoo.mls.core.VideoPlayerCoordinator
 import tv.mycujoo.mls.data.DataHolder
 import tv.mycujoo.mls.di.DaggerMlsComponent
 import tv.mycujoo.mls.di.NetworkModule
-import tv.mycujoo.mls.entity.HighlightAction
+import tv.mycujoo.mls.entity.actions.HighlightAction
 import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
 import tv.mycujoo.mls.model.Event
 import tv.mycujoo.mls.model.Stream

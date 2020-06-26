@@ -1,7 +1,7 @@
 package tv.mycujoo.mls.api
 
 import android.net.Uri
-import tv.mycujoo.mls.entity.HighlightAction
+import tv.mycujoo.mls.entity.actions.HighlightAction
 import tv.mycujoo.mls.model.Event
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 

@@ -2,8 +2,8 @@ package tv.mycujoo.mls.helper
 
 import android.view.View
 import android.widget.TextView
-import tv.mycujoo.mls.entity.TimeLineAction
-import tv.mycujoo.mls.entity.TimeLineItem
+import tv.mycujoo.mls.entity.actions.TimeLineAction
+import tv.mycujoo.mls.entity.msc.TimeLineItem
 
 class TimeBarAnnotationHelper(val timeLineItemList: List<TimeLineItem>) {
     fun updateText(currentPosition: Long, previewTitleTextView: TextView) {

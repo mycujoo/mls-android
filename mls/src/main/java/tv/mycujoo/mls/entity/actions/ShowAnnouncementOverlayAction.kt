@@ -1,6 +1,5 @@
 package tv.mycujoo.mls.entity.actions
 
-import tv.mycujoo.mls.entity.LayoutPosition
 import tv.mycujoo.mls.widgets.ViewGuideline
 @Deprecated("Use Action instead")
 class ShowAnnouncementOverlayAction : AbstractAction(), ViewGuideline {

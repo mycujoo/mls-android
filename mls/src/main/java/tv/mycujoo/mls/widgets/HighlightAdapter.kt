@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_highlight.view.*
 import tv.mycujoo.mls.R
-import tv.mycujoo.mls.entity.HighlightAction
+import tv.mycujoo.mls.entity.actions.HighlightAction
 
 class HighlightAdapter(private val highlightList: ArrayList<HighlightAction>) :
     RecyclerView.Adapter<HighlightAdapter.ViewHolder>() {

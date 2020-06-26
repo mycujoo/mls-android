@@ -3,7 +3,7 @@ package tv.mycujoo.mls.helper
 import android.view.ViewGroup
 import android.widget.RelativeLayout
 import androidx.test.espresso.idling.CountingIdlingResource
-import tv.mycujoo.mls.entity.LayoutPosition
+import tv.mycujoo.mls.entity.actions.LayoutPosition
 import tv.mycujoo.mls.widgets.OverlayHost
 
 class OverlayViewHelper {

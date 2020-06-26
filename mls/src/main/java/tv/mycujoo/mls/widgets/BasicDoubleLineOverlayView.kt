@@ -11,7 +11,7 @@ import android.widget.LinearLayout
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.overlay_view_basic_double_line.view.*
 import tv.mycujoo.mls.R
-import tv.mycujoo.mls.entity.OverLayAction
+import tv.mycujoo.mls.entity.actions.OverLayAction
 
 class BasicDoubleLineOverlayView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0

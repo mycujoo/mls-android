@@ -3,7 +3,7 @@ package tv.mycujoo.mls.core
 import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ui.TimeBar
-import tv.mycujoo.mls.entity.VideoPlayerConfig
+import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
 class VideoPlayerCoordinator(exoPlayer: SimpleExoPlayer, playerViewWrapper: PlayerViewWrapper) {

@@ -1,4 +1,4 @@
-package tv.mycujoo.mls.entity
+package tv.mycujoo.mls.entity.actions
 
 @Deprecated("Use Action instead")
 abstract class Action(val id: Int)

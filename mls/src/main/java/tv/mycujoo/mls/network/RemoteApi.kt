@@ -1,8 +1,8 @@
 package tv.mycujoo.mls.network
 
-import tv.mycujoo.mls.entity.HighlightAction
-import tv.mycujoo.mls.entity.TimeLineAction
-import tv.mycujoo.mls.entity.TimeLineItem
+import tv.mycujoo.mls.entity.actions.HighlightAction
+import tv.mycujoo.mls.entity.actions.TimeLineAction
+import tv.mycujoo.mls.entity.msc.TimeLineItem
 import tv.mycujoo.mls.entity.actions.*
 
 class RemoteApi : Api {
@@ -76,12 +76,66 @@ class RemoteApi : Api {
 
         val mutableList = ArrayList<TimeLineItem>(6)
 
-        mutableList.add(TimeLineItem(1000L, TimeLineAction(3000, "#ff00ff", "Goal")))
-        mutableList.add(TimeLineItem(60000L, TimeLineAction(3000, "#ff00ff", "Goal")))
-        mutableList.add(TimeLineItem(320000L, TimeLineAction(3000, "#ff00ff", "Foul")))
-        mutableList.add(TimeLineItem(920000L, TimeLineAction(3000, "#ff00ff", "Goal")))
-        mutableList.add(TimeLineItem(1920000L, TimeLineAction(3000, "#ff00ff", "Goal")))
-        mutableList.add(TimeLineItem(2920000L, TimeLineAction(3000, "#ff00ff", "Free Kick")))
+        mutableList.add(
+            TimeLineItem(
+                1000L,
+                TimeLineAction(
+                    3000,
+                    "#ff00ff",
+                    "Goal"
+                )
+            )
+        )
+        mutableList.add(
+            TimeLineItem(
+                60000L,
+                TimeLineAction(
+                    3000,
+                    "#ff00ff",
+                    "Goal"
+                )
+            )
+        )
+        mutableList.add(
+            TimeLineItem(
+                320000L,
+                TimeLineAction(
+                    3000,
+                    "#ff00ff",
+                    "Foul"
+                )
+            )
+        )
+        mutableList.add(
+            TimeLineItem(
+                920000L,
+                TimeLineAction(
+                    3000,
+                    "#ff00ff",
+                    "Goal"
+                )
+            )
+        )
+        mutableList.add(
+            TimeLineItem(
+                1920000L,
+                TimeLineAction(
+                    3000,
+                    "#ff00ff",
+                    "Goal"
+                )
+            )
+        )
+        mutableList.add(
+            TimeLineItem(
+                2920000L,
+                TimeLineAction(
+                    3000,
+                    "#ff00ff",
+                    "Free Kick"
+                )
+            )
+        )
 
         return mutableList
     }

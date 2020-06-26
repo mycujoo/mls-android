@@ -29,10 +29,10 @@ import kotlinx.android.synthetic.main.dialog_information_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.UIEventListener
-import tv.mycujoo.mls.entity.LayoutPosition
-import tv.mycujoo.mls.entity.LayoutType
-import tv.mycujoo.mls.entity.OverLayAction
-import tv.mycujoo.mls.entity.VideoPlayerConfig
+import tv.mycujoo.mls.entity.actions.LayoutPosition
+import tv.mycujoo.mls.entity.actions.LayoutType
+import tv.mycujoo.mls.entity.actions.OverLayAction
+import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.entity.actions.CommandAction
 import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
 import tv.mycujoo.mls.entity.actions.ShowScoreboardOverlayAction
