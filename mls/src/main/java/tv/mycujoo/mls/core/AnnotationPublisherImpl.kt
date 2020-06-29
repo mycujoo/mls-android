@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.core
 
+import tv.mycujoo.domain.entity.ActionEntity
 import tv.mycujoo.mls.entity.actions.ActionWrapper
 
 
@@ -16,6 +17,9 @@ class AnnotationPublisherImpl : AnnotationPublisher {
 
     override fun onNewRemovalOrHidingActionAvailable(actionWrapper: ActionWrapper) {
         listener.onNewRemovalWrapperAvailable(actionWrapper)
+    }
 
+    override fun onNewActionAvailable(actionEntity: ActionEntity) {
+        listener.onNewActionAvailable(actionEntity)
     }
 }

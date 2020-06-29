@@ -22,20 +22,20 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import androidx.test.espresso.idling.CountingIdlingResource
+import com.caverock.androidsvg.SVG
+import com.caverock.androidsvg.SVGImageView
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
 import com.google.android.exoplayer2.ui.PlayerView
 import kotlinx.android.synthetic.main.dialog_information_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
+import tv.mycujoo.domain.entity.ActionEntity
+import tv.mycujoo.domain.entity.HideOverlayActionEntity
+import tv.mycujoo.domain.entity.ShowOverlayActionEntity
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.UIEventListener
-import tv.mycujoo.mls.entity.actions.LayoutPosition
-import tv.mycujoo.mls.entity.actions.LayoutType
-import tv.mycujoo.mls.entity.actions.OverLayAction
+import tv.mycujoo.mls.entity.actions.*
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
-import tv.mycujoo.mls.entity.actions.CommandAction
-import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
-import tv.mycujoo.mls.entity.actions.ShowScoreboardOverlayAction
 import tv.mycujoo.mls.extensions.getDisplaySize
 import tv.mycujoo.mls.helper.OverlayCommandHelper
 import tv.mycujoo.mls.helper.OverlayViewHelper
@@ -854,8 +854,45 @@ class PlayerViewWrapper @JvmOverloads constructor(
         return findViewById(R.id.exo_progress)
     }
 
+    fun action(actionEntity: ActionEntity) {
+        actionEntity.type
+    }
+
 
     /**endregion */
+
+    /**region New Annotation structure*/
+
+    fun showOverlay(overlayEntity: ShowOverlayActionEntity) {
+        val svgImageView = SVGImageView(context)
+        try {
+            val svg = SVG.getFromString(getTimeSvgString())
+            svgImageView.setSVG(svg)
+            overlayHost.addView(svgImageView)
+            viewIdentifierManager.storeViewId(svgImageView, overlayEntity.customId!!)
+
+        } catch (e: Exception) {
+            Log.e("PlayerView", "e: ${e.message}")
+        }
+    }
+
+    fun hideOverlay(hideOverlayActionEntity: HideOverlayActionEntity) {
+        idlingResource.increment()
+        OverlayCommandHelper.removeView(
+            overlayHost,
+            viewIdentifierManager.getViewIdentifier(hideOverlayActionEntity.customId!!),
+            idlingResource
+        )
+    }
+
+
+    fun getTimeSvgString(): String {
+        return "<svg height=\"30\" width=\"200\"><rect width=\"200\" height=\"30\" style=\"fill:rgb(211,211,211);stroke-width:3;stroke:rgb(128, 128, 128)\" /><text x=\"0\" y=\"15\" fill=\"red\">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</text></svg>"
+    }
+    /**endregion */
+
+
+    /**region Classes*/
 
     enum class ScreenMode {
         PORTRAIT,
@@ -867,6 +904,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         LIVE_TRAILING,
         VOD
     }
+    /**endregion */
 
 
 }

@@ -3,6 +3,11 @@ package tv.mycujoo.mls.cordinator
 import android.os.Handler
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
+import tv.mycujoo.domain.entity.ActionEntity
+import tv.mycujoo.domain.entity.models.ActionType.*
+import tv.mycujoo.domain.mapper.HideOverlayMapper
+import tv.mycujoo.domain.mapper.ShowOverlayMapper
+import tv.mycujoo.domain.usecase.GetAnnotationUseCase
 import tv.mycujoo.mls.core.AnnotationBuilder
 import tv.mycujoo.mls.core.AnnotationBuilderImpl
 import tv.mycujoo.mls.core.AnnotationListener
@@ -65,6 +70,21 @@ class Coordinator(
                     }
                 }
             }
+
+            override fun onNewActionAvailable(actionEntity: ActionEntity) {
+
+                when (actionEntity.type) {
+                    UNKNOWN -> {
+                        // do nothing
+                    }
+                    SHOW_OVERLAY -> {
+                        playerViewWrapper.showOverlay(ShowOverlayMapper.mapToEntity(actionEntity))
+                    }
+                    HIDE_OVERLAY -> {
+                        playerViewWrapper.hideOverlay(HideOverlayMapper.mapToEntity(actionEntity))
+                    }
+                }
+            }
         }
         publisher.setAnnotationListener(annotationListener)
 
@@ -72,7 +92,8 @@ class Coordinator(
         annotationBuilder = AnnotationBuilderImpl(publisher)
         annotationBuilder.buildPendingAnnotationsForCurrentTime()
 
-        annotationBuilder.addPendingActions(api.getActions())
+        annotationBuilder.addPendingActionsDeprecated(api.getActions())
+        annotationBuilder.addPendingActions(GetAnnotationUseCase.result().actions)
 
         val runnable = object : Runnable {
             override fun run() {

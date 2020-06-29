@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.core
 
+import tv.mycujoo.domain.entity.ActionEntity
 import tv.mycujoo.mls.entity.actions.ActionWrapper
 
 interface AnnotationPublisher {
@@ -7,4 +8,7 @@ interface AnnotationPublisher {
 
     fun onNewActionWrapperAvailable(actionWrapper: ActionWrapper)
     fun onNewRemovalOrHidingActionAvailable(actionWrapper: ActionWrapper)
+
+    fun onNewActionAvailable(actionEntity: ActionEntity)
+
 }

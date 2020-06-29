@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.core
 
+import tv.mycujoo.domain.entity.ActionEntity
 import tv.mycujoo.mls.entity.actions.ActionWrapper
 import tv.mycujoo.mls.entity.actions.CommandAction
 import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
@@ -11,10 +12,15 @@ class AnnotationBuilderImpl(private val publisher: AnnotationPublisher) : Annota
     private var currentTime: Long = 0L
     private var isPlaying: Boolean = false
     private val pendingActions = ArrayList<ActionWrapper>()
+    private val pendingActionEntities = ArrayList<ActionEntity>()
 
 
-    override fun addPendingActions(actions: List<ActionWrapper>) {
+    override fun addPendingActionsDeprecated(actions: List<ActionWrapper>) {
         pendingActions.addAll(actions)
+    }
+
+    override fun addPendingActions(actions: List<ActionEntity>) {
+        pendingActionEntities.addAll(actions)
     }
 
 
@@ -39,6 +45,11 @@ class AnnotationBuilderImpl(private val publisher: AnnotationPublisher) : Annota
                 publisher.onNewActionWrapperAvailable(
                     actionWrapper
                 )
+            }
+
+        pendingActionEntities.filter { actionEntity -> isInCurrentTimeRange(actionEntity) }
+            .forEach { actionEntity: ActionEntity ->
+                publisher.onNewActionAvailable(actionEntity)
             }
 
 
@@ -84,6 +95,10 @@ class AnnotationBuilderImpl(private val publisher: AnnotationPublisher) : Annota
 
     private fun isInCurrentTimeRange(actionWrapper: ActionWrapper): Boolean {
         return (actionWrapper.offset >= currentTime) && (actionWrapper.offset < currentTime + 1000L)
+    }
+
+    private fun isInCurrentTimeRange(actionEntity: ActionEntity): Boolean {
+        return (actionEntity.offset >= currentTime) && (actionEntity.offset < currentTime + 1000L)
     }
 
     private fun isInStartUpToCurrentTimeRange(actionWrapper: ActionWrapper): Boolean {

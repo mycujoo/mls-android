@@ -9,9 +9,13 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.internal.runner.junit4.statement.UiThreadStatement
+import com.caverock.androidsvg.SVGImageView
+import org.hamcrest.BaseMatcher
+import org.hamcrest.Description
 import org.junit.After
 import org.junit.Before
 import org.junit.Ignore
@@ -62,6 +66,57 @@ class PlayerTest {
         onView(withId(playerViewWrapper.id)).check(matches(isDisplayed()))
     }
 
+    /**region New Annotation Structure*/
+    @Test
+    fun givenShowOverlayAction_shouldDisplayIt() {
+        val typeMatcher = object : BaseMatcher<String>() {
+            override fun describeTo(description: Description?) {
+            }
+
+            override fun matches(item: Any): Boolean {
+                return (item as String).equals(SVGImageView::class.java.canonicalName, true)
+            }
+        }
+
+        onView(withClassName(typeMatcher)).check(doesNotExist())
+
+        UiThreadStatement.runOnUiThread {
+            playerViewWrapper.showOverlay(getShowOverlayActionEntity(1000L))
+        }
+
+        onView(withClassName(typeMatcher)).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+    }
+
+
+    @Test
+    fun givenShowOverlayAction_withFullWidth_shouldDisplayInFullWidth() {
+
+    }
+
+    @Test
+    fun giveHideOverlayAction_shouldHideRelatedOverlay() {
+        val typeMatcher = object : BaseMatcher<String>() {
+            override fun describeTo(description: Description?) {
+            }
+
+            override fun matches(item: Any): Boolean {
+                return (item as String).equals(SVGImageView::class.java.canonicalName, true)
+            }
+        }
+        onView(withClassName(typeMatcher)).check(doesNotExist())
+        UiThreadStatement.runOnUiThread {
+            playerViewWrapper.showOverlay(getShowOverlayActionEntity(1000L))
+        }
+        onView(withClassName(typeMatcher)).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+
+        UiThreadStatement.runOnUiThread {
+            playerViewWrapper.hideOverlay(getHideOverlayActionEntity(15000L))
+        }
+
+        onView(withClassName(typeMatcher)).check(doesNotExist())
+    }
+
+    /**endregion */
 
     @Test
     fun givenAnnouncementOverlayAction_shouldDisplayIt() {
@@ -113,6 +168,7 @@ class PlayerTest {
 
         onView(withText("FCB")).check(matches(withEffectiveVisibility(Visibility.INVISIBLE)))
     }
+
     @Test
     fun givenDismissibleScoreboardOverlayAction_shouldRemoveAfterDisplayingIt() {
         onView(withText("FCB")).check(doesNotExist())
@@ -185,6 +241,7 @@ class PlayerTest {
 
 //        onView(withText("FCB")).check(doesNotExist())
     }
+
 
     companion object {
         private fun getSampleShowAnnouncementOverlayAction(): ShowAnnouncementOverlayAction {

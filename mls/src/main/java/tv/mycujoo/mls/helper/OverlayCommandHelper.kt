@@ -52,5 +52,24 @@ class OverlayCommandHelper {
             }
         }
 
+
+        fun removeView(
+            host: OverlayHost,
+            viewIdentifier: Int?,
+            idlingResource: CountingIdlingResource
+        ) {
+            host.post(Runnable {
+                host.children.forEach { view ->
+                    if (view.id == viewIdentifier) {
+                        host.removeView(view)
+                        if (!idlingResource.isIdleNow) {
+                            idlingResource.decrement()
+                        }
+                        return@Runnable
+                    }
+                }
+            })
+        }
+
     }
 }
