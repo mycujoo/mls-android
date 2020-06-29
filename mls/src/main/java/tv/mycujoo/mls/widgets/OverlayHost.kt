@@ -2,8 +2,8 @@ package tv.mycujoo.mls.widgets
 
 import android.content.Context
 import android.util.AttributeSet
-import android.widget.RelativeLayout
+import androidx.constraintlayout.widget.ConstraintLayout
 
 class OverlayHost @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : RelativeLayout(context, attrs, defStyleAttr)
+) : ConstraintLayout(context, attrs, defStyleAttr)

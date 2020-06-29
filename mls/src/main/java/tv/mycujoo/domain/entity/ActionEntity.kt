@@ -8,6 +8,6 @@ data class ActionEntity(
     val type: ActionType,
     val customId: String?,
     val svgUrl: String?,
-//    val size: Pair<Float, Float>
+    val size: Pair<Float, Float>,
     val duration: Long?
 )

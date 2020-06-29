@@ -17,7 +17,7 @@ class GetAnnotationUseCase {
                 "20001",
                 offset,
                 "tml_1",
-                listOf(getShowOverLayAction(), getHideOverlayAction())
+                listOf(getShowOverLayAction())
             )
         }
 
@@ -30,6 +30,7 @@ class GetAnnotationUseCase {
                 ActionType.SHOW_OVERLAY,
                 "scoreboard1",
                 "https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/DroidSans.svg",
+                Pair(50F, -1F),
                 5000L
             )
         }
@@ -41,6 +42,7 @@ class GetAnnotationUseCase {
                 ActionType.HIDE_OVERLAY,
                 "scoreboard1",
                 null,
+                Pair(300F, 150F),
                 null
             )
         }

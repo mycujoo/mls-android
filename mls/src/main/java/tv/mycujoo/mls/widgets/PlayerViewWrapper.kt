@@ -38,6 +38,7 @@ import tv.mycujoo.mls.entity.actions.*
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.extensions.getDisplaySize
 import tv.mycujoo.mls.helper.OverlayCommandHelper
+import tv.mycujoo.mls.helper.OverlayFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
 import tv.mycujoo.mls.manager.HighlightMarkerManager
@@ -864,11 +865,17 @@ class PlayerViewWrapper @JvmOverloads constructor(
     /**region New Annotation structure*/
 
     fun showOverlay(overlayEntity: ShowOverlayActionEntity) {
-        val svgImageView = SVGImageView(context)
+
+
+
+        val svgImageView = OverlayFactory.create(context)
         try {
             val svg = SVG.getFromString(getTimeSvgString())
             svgImageView.setSVG(svg)
-            overlayHost.addView(svgImageView)
+//            overlayHost.addView(svgImageView)
+
+            OverlayViewHelper.addView(overlayHost, svgImageView, overlayEntity.size, idlingResource)
+
             viewIdentifierManager.storeViewId(svgImageView, overlayEntity.customId!!)
 
         } catch (e: Exception) {

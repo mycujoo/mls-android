@@ -2,7 +2,9 @@ package tv.mycujoo.mls.helper
 
 import android.view.ViewGroup
 import android.widget.RelativeLayout
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.test.espresso.idling.CountingIdlingResource
+import com.caverock.androidsvg.SVGImageView
 import tv.mycujoo.mls.entity.actions.LayoutPosition
 import tv.mycujoo.mls.widgets.OverlayHost
 
@@ -75,6 +77,34 @@ class OverlayViewHelper {
             }, dismissIn)
         }
 
-    }
 
+        fun addView(
+            host: OverlayHost,
+            overlay: SVGImageView,
+            size: Pair<Float, Float>,
+            idlingResource: CountingIdlingResource
+        ) {
+            host.post {
+                val overlayLayoutParams = ConstraintLayout.LayoutParams(
+                    0,
+                    ConstraintLayout.LayoutParams.WRAP_CONTENT
+                )
+
+                val hostLayoutParams = host.layoutParams as ConstraintLayout.LayoutParams
+
+                if (size.first > 0){
+                    overlayLayoutParams.matchConstraintPercentWidth = size.first / 100
+                }
+
+                host.addView(overlay, overlayLayoutParams)
+
+                if (!idlingResource.isIdleNow) {
+                    idlingResource.decrement()
+                }
+
+            }
+
+        }
+
+    }
 }
