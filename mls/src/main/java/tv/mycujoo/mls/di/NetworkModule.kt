@@ -32,7 +32,6 @@ class NetworkModule(val context: Context) {
             .connectTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(Interceptor { chain: Interceptor.Chain ->
                 val newRequest = chain.request().newBuilder()
-//                    .addHeader("Authorization", "Bearer " + NetworkManager.getToken())
                     .build()
                 val requestBody = newRequest.body()
                 if (requestBody != null) {

@@ -10,7 +10,7 @@ class ShowOverlayMapper {
             return ShowOverlayActionEntity(
                 actionEntity.id,
                 actionEntity.customId,
-                actionEntity.svgUrl,
+                actionEntity.svgInputStream,
                 actionEntity.size,
                 actionEntity.duration
             )

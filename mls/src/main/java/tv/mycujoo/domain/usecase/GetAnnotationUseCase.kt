@@ -29,8 +29,10 @@ class GetAnnotationUseCase {
                 offset,
                 ActionType.SHOW_OVERLAY,
                 "scoreboard1",
-                "https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/DroidSans.svg",
-                Pair(50F, -1F),
+//                "https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/DroidSans.svg",
+                "https://storage.googleapis.com/mycujoo-player-app.appspot.com/announcement_overlay.svg",
+                null,
+                Pair(0F, 40F),
                 5000L
             )
         }
@@ -41,6 +43,7 @@ class GetAnnotationUseCase {
                 15000L,
                 ActionType.HIDE_OVERLAY,
                 "scoreboard1",
+                null,
                 null,
                 Pair(300F, 150F),
                 null

@@ -19,12 +19,12 @@ import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.usecase.GetEventsUseCase
 import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.cordinator.Coordinator
-import tv.mycujoo.mls.core.AnnotationPublisherImpl
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.core.VideoPlayerCoordinator
@@ -65,6 +65,9 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
 
     @Inject
     lateinit var dispatcher: CoroutineScope
+
+    @Inject
+    lateinit var okHttpClient: OkHttpClient
 
     /**endregion */
 
@@ -144,9 +147,8 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     private fun initAnnotation() {
         handler = Handler()
 
-        coordinator = Coordinator(api, AnnotationPublisherImpl())
-        coordinator.initialize(exoPlayer!!, handler, highlightAdapter)
-
+        coordinator = Coordinator(api)
+        coordinator.initialize(exoPlayer!!, handler, okHttpClient)
     }
 
 
@@ -217,20 +219,6 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
             this.playerViewWrapper = playerViewWrapper
             attachPlayer(playerViewWrapper)
         }
-
-
-//        playerViewWrapper.previewTimeBar.addOnPreviewChangeListener(object :
-//            OnPreviewChangeListener {
-//            override fun onStartPreview(previewView: PreviewView, progress: Int) {
-//            }
-//
-//            override fun onPreview(previewView: PreviewView, progress: Int, fromUser: Boolean) {
-//            }
-//
-//            override fun onStopPreview(previewView: PreviewView, progress: Int) {
-//            }
-//        })
-
 
         if (hasAnnotation) {
             coordinator.playerViewWrapper = playerViewWrapper

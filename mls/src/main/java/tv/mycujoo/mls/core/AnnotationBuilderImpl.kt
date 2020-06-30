@@ -1,13 +1,18 @@
 package tv.mycujoo.mls.core
 
+import okhttp3.*
 import tv.mycujoo.domain.entity.ActionEntity
 import tv.mycujoo.mls.entity.actions.ActionWrapper
 import tv.mycujoo.mls.entity.actions.CommandAction
 import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
 import tv.mycujoo.mls.entity.actions.ShowScoreboardOverlayAction
 import tv.mycujoo.mls.helper.OverlayCommandHelper.Companion.isRemoveOrHide
+import java.io.IOException
 
-class AnnotationBuilderImpl(private val publisher: AnnotationPublisher) : AnnotationBuilder() {
+class AnnotationBuilderImpl(
+    private val listener: AnnotationListener,
+    private val okHttpClient: OkHttpClient
+) : AnnotationBuilder() {
 
     private var currentTime: Long = 0L
     private var isPlaying: Boolean = false
@@ -42,17 +47,42 @@ class AnnotationBuilderImpl(private val publisher: AnnotationPublisher) : Annota
                 println(
                     "MLS-App AnnotationBuilderImpl - buildPendings() for Actions"
                 )
-                publisher.onNewActionWrapperAvailable(
+                listener.onNewActionWrapperAvailable(
                     actionWrapper
                 )
             }
 
         pendingActionEntities.filter { actionEntity -> isInCurrentTimeRange(actionEntity) }
             .forEach { actionEntity: ActionEntity ->
-                publisher.onNewActionAvailable(actionEntity)
+                if (actionEntity.svgUrl != null) {
+                    downloadSVGthenCallListener(actionEntity)
+                } else {
+                    listener.onNewActionAvailable(actionEntity)
+                }
             }
 
 
+    }
+
+    private fun downloadSVGthenCallListener(actionEntity: ActionEntity) {
+        val request: Request = Request.Builder().url(actionEntity.svgUrl).build()
+        okHttpClient.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                println(
+                    "MLS-App AnnotationBuilderImpl - getInputStream() onFailure"
+                )
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful && response.body() != null) {
+                    listener.onNewActionAvailable(
+                        actionEntity.copy(
+                            svgInputStream = response.body()!!.byteStream()
+                        )
+                    )
+                }
+            }
+        })
     }
 
     override fun buildRemovalAnnotationsUpToCurrentTime() {
@@ -63,7 +93,7 @@ class AnnotationBuilderImpl(private val publisher: AnnotationPublisher) : Annota
                 )
                 // dismiss
                 if (isDismissingType(actionWrapper) || isRemovalType(actionWrapper)) {
-                    publisher.onNewRemovalOrHidingActionAvailable(actionWrapper)
+//                    listener.onNewRemovalOrHidingActionAvailable(actionWrapper)
                 }
             }
     }

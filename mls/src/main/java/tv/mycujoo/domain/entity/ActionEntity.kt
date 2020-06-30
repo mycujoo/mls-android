@@ -1,6 +1,7 @@
 package tv.mycujoo.domain.entity
 
 import tv.mycujoo.domain.entity.models.ActionType
+import java.io.InputStream
 
 data class ActionEntity(
     val id: String,
@@ -8,6 +9,7 @@ data class ActionEntity(
     val type: ActionType,
     val customId: String?,
     val svgUrl: String?,
+    val svgInputStream: InputStream?,
     val size: Pair<Float, Float>,
     val duration: Long?
 )

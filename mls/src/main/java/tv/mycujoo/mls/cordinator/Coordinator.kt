@@ -3,6 +3,7 @@ package tv.mycujoo.mls.cordinator
 import android.os.Handler
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
+import okhttp3.OkHttpClient
 import tv.mycujoo.domain.entity.ActionEntity
 import tv.mycujoo.domain.entity.models.ActionType.*
 import tv.mycujoo.domain.mapper.HideOverlayMapper
@@ -11,19 +12,17 @@ import tv.mycujoo.domain.usecase.GetAnnotationUseCase
 import tv.mycujoo.mls.core.AnnotationBuilder
 import tv.mycujoo.mls.core.AnnotationBuilderImpl
 import tv.mycujoo.mls.core.AnnotationListener
-import tv.mycujoo.mls.core.AnnotationPublisher
 import tv.mycujoo.mls.entity.actions.ActionWrapper
 import tv.mycujoo.mls.entity.actions.CommandAction
 import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
 import tv.mycujoo.mls.entity.actions.ShowScoreboardOverlayAction
 import tv.mycujoo.mls.network.Api
-import tv.mycujoo.mls.widgets.HighlightAdapter
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 import tv.mycujoo.mls.widgets.TimeLineSeekBar
 
 class Coordinator(
-    private val api: Api,
-    private val publisher: AnnotationPublisher
+    private val api: Api
+//    private val publisher: AnnotationPublisher
 ) {
 
     var timeLineSeekBar: TimeLineSeekBar? = null
@@ -34,7 +33,7 @@ class Coordinator(
     fun initialize(
         exoPlayer: SimpleExoPlayer,
         handler: Handler,
-        highlightAdapter: HighlightAdapter?
+        okHttpClient: OkHttpClient
     ) {
         initEventListener(exoPlayer)
 
@@ -86,10 +85,10 @@ class Coordinator(
                 }
             }
         }
-        publisher.setAnnotationListener(annotationListener)
+//        publisher.setAnnotationListener(annotationListener)
 
 
-        annotationBuilder = AnnotationBuilderImpl(publisher)
+        annotationBuilder = AnnotationBuilderImpl(annotationListener, okHttpClient)
         annotationBuilder.buildPendingAnnotationsForCurrentTime()
 
         annotationBuilder.addPendingActionsDeprecated(api.getActions())
