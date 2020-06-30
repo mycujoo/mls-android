@@ -12,10 +12,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.ProgressBar
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -23,7 +20,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.caverock.androidsvg.SVG
-import com.caverock.androidsvg.SVGImageView
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
 import com.google.android.exoplayer2.ui.PlayerView
@@ -867,16 +863,16 @@ class PlayerViewWrapper @JvmOverloads constructor(
     fun showOverlay(overlayEntity: ShowOverlayActionEntity) {
 
 
-
-        val svgImageView = OverlayFactory.create(context)
+        val proportionalImageView = OverlayFactory.create(context, overlayEntity.size)
         try {
-            val svg = SVG.getFromString(getTimeSvgString())
-            svgImageView.setSVG(svg)
-//            overlayHost.addView(svgImageView)
+            val svg = SVG.getFromInputStream(overlayEntity.svgInputStream)
+            svg.setDocumentWidth("100%")
+            svg.setDocumentHeight("100%")
+            proportionalImageView.setSVG(svg)
 
-            OverlayViewHelper.addView(overlayHost, svgImageView, overlayEntity.size, idlingResource)
+            OverlayViewHelper.addView(overlayHost, proportionalImageView, overlayEntity.size, idlingResource)
 
-            viewIdentifierManager.storeViewId(svgImageView, overlayEntity.customId!!)
+            viewIdentifierManager.storeViewId(proportionalImageView, overlayEntity.customId!!)
 
         } catch (e: Exception) {
             Log.e("PlayerView", "e: ${e.message}")

@@ -3,10 +3,12 @@ package tv.mycujoo.mls.helper
 import android.view.ViewGroup
 import android.widget.RelativeLayout
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.caverock.androidsvg.SVGImageView
 import tv.mycujoo.mls.entity.actions.LayoutPosition
 import tv.mycujoo.mls.widgets.OverlayHost
+import tv.mycujoo.mls.widgets.ProportionalImageView
 
 class OverlayViewHelper {
     companion object {
@@ -80,23 +82,70 @@ class OverlayViewHelper {
 
         fun addView(
             host: OverlayHost,
-            overlay: SVGImageView,
+            proportionalImageView: ProportionalImageView,
             size: Pair<Float, Float>,
             idlingResource: CountingIdlingResource
         ) {
             host.post {
-                val overlayLayoutParams = ConstraintLayout.LayoutParams(
-                    0,
-                    ConstraintLayout.LayoutParams.WRAP_CONTENT
-                )
+                val overlayLayoutParams: ConstraintLayout.LayoutParams
+
 
                 val hostLayoutParams = host.layoutParams as ConstraintLayout.LayoutParams
 
-                if (size.first > 0){
-                    overlayLayoutParams.matchConstraintPercentWidth = size.first / 100
+                when {
+                    size.first > 0F -> {
+                        overlayLayoutParams = ConstraintLayout.LayoutParams(
+                            ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                            ConstraintLayout.LayoutParams.WRAP_CONTENT
+                        )
+
+//                        overlayLayoutParams.matchConstraintPercentWidth = size.first / 100
+//                        overlayLayoutParams.matchConstraintPercentHeight = 1F
+                    }
+                    size.second > 0F -> {
+                        overlayLayoutParams = ConstraintLayout.LayoutParams(
+                            ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                            ConstraintLayout.LayoutParams.WRAP_CONTENT
+
+                            )
+//                        overlayLayoutParams.matchConstraintPercentWidth = 1F
+//                        overlayLayoutParams.matchConstraintPercentHeight = size.second / 100
+                    }
+                    else -> {
+                        overlayLayoutParams = ConstraintLayout.LayoutParams(
+                            ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                            ConstraintLayout.LayoutParams.WRAP_CONTENT
+                        )
+                    }
                 }
 
-                host.addView(overlay, overlayLayoutParams)
+                host.addView(proportionalImageView, overlayLayoutParams)
+//                when {
+//                    size.first > 0F -> {
+//                        val set = ConstraintSet()
+//                        set.clone(host)
+//
+//                        set.connect(overlay.id, ConstraintSet.TOP, host.id, ConstraintSet.TOP)
+//                        set.connect(overlay.id, ConstraintSet.RIGHT, host.id, ConstraintSet.RIGHT)
+//                        set.connect(overlay.id, ConstraintSet.BOTTOM, host.id, ConstraintSet.BOTTOM)
+//                        set.connect(overlay.id, ConstraintSet.LEFT, host.id, ConstraintSet.LEFT)
+//
+//                        set.applyTo(host)
+//                    }
+//                    size.second > 0F -> {
+//                        val set = ConstraintSet()
+//                        set.clone(host)
+//
+//                        set.connect(overlay.id, ConstraintSet.TOP, host.id, ConstraintSet.TOP)
+//                        set.connect(overlay.id, ConstraintSet.RIGHT, host.id, ConstraintSet.RIGHT)
+//                        set.connect(overlay.id, ConstraintSet.BOTTOM, host.id, ConstraintSet.BOTTOM)
+//                        set.connect(overlay.id, ConstraintSet.LEFT, host.id, ConstraintSet.LEFT)
+//
+//                        set.applyTo(host)
+//                    }
+//
+//                }
+
 
                 if (!idlingResource.isIdleNow) {
                     idlingResource.decrement()
