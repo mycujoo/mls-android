@@ -10,6 +10,7 @@ data class ActionEntity(
     val customId: String?,
     val svgUrl: String?,
     val svgInputStream: InputStream?,
+    val position : PositionGuide?,
     val size: Pair<Float, Float>,
     val duration: Long?
 )

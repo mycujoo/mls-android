@@ -12,7 +12,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ImageButton
+import android.widget.ProgressBar
+import android.widget.RelativeLayout
+import android.widget.TextView
 import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -689,25 +692,25 @@ class PlayerViewWrapper @JvmOverloads constructor(
         announcementOverlayView.viewAction(action)
 
         viewIdentifierManager.storeViewId(announcementOverlayView, action.viewId)
-
-        if (action.dismissible) {
-
-            idlingResource.increment()
-            OverlayViewHelper.removeInFuture(
-                overlayHost,
-                announcementOverlayView,
-                action.dismissIn,
-                idlingResource
-            )
-        }
-
-        idlingResource.increment()
-        OverlayViewHelper.addView(
-            overlayHost,
-            announcementOverlayView,
-            action.position,
-            idlingResource
-        )
+//
+//        if (action.dismissible) {
+//
+//            idlingResource.increment()
+//            OverlayViewHelper.removeInFuture(
+//                overlayHost,
+//                announcementOverlayView,
+//                action.dismissIn,
+//                idlingResource
+//            )
+//        }
+//
+//        idlingResource.increment()
+//        OverlayViewHelper.addView(
+//            overlayHost,
+//            announcementOverlayView,
+//            action.position,
+//            idlingResource
+//        )
 
     }
 
@@ -729,12 +732,12 @@ class PlayerViewWrapper @JvmOverloads constructor(
 //        }
 
         idlingResource.increment()
-        OverlayViewHelper.addView(
-            overlayHost,
-            scoreboardOverlayView,
-            action.position,
-            idlingResource
-        )
+//        OverlayViewHelper.addView(
+//            overlayHost,
+//            scoreboardOverlayView,
+//            action.position,
+//            idlingResource
+//        )
     }
 
     fun hideOverlay(viewId: String) {
@@ -753,12 +756,12 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     fun executeCommand(commandAction: CommandAction) {
         idlingResource.increment()
-        OverlayCommandHelper.executeInFuture(
-            overlayHost,
-            commandAction,
-            viewIdentifierManager.getViewIdentifier(commandAction.targetViewId),
-            idlingResource
-        )
+//        OverlayCommandHelper.executeInFuture(
+//            overlayHost,
+//            commandAction,
+//            viewIdentifierManager.getViewIdentifier(commandAction.targetViewId),
+//            idlingResource
+//        )
     }
 
     fun showBuffering() {
@@ -861,8 +864,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
     /**region New Annotation structure*/
 
     fun showOverlay(overlayEntity: ShowOverlayActionEntity) {
-
-
         val proportionalImageView = OverlayFactory.create(context, overlayEntity.size)
         try {
             val svg = SVG.getFromInputStream(overlayEntity.svgInputStream)
@@ -870,7 +871,12 @@ class PlayerViewWrapper @JvmOverloads constructor(
             svg.setDocumentHeight("100%")
             proportionalImageView.setSVG(svg)
 
-            OverlayViewHelper.addView(overlayHost, proportionalImageView, overlayEntity.size, idlingResource)
+            OverlayViewHelper.addView(
+                overlayHost,
+                proportionalImageView,
+                overlayEntity.positionGuide,
+                idlingResource
+            )
 
             viewIdentifierManager.storeViewId(proportionalImageView, overlayEntity.customId!!)
 

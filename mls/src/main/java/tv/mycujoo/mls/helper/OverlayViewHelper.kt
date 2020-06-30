@@ -1,11 +1,13 @@
 package tv.mycujoo.mls.helper
 
+import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.RelativeLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.espresso.idling.CountingIdlingResource
-import com.caverock.androidsvg.SVGImageView
+import tv.mycujoo.domain.entity.PositionGuide
 import tv.mycujoo.mls.entity.actions.LayoutPosition
 import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ProportionalImageView
@@ -83,68 +85,68 @@ class OverlayViewHelper {
         fun addView(
             host: OverlayHost,
             proportionalImageView: ProportionalImageView,
-            size: Pair<Float, Float>,
+            positionGuide: PositionGuide,
             idlingResource: CountingIdlingResource
         ) {
             host.post {
-                val overlayLayoutParams: ConstraintLayout.LayoutParams
 
 
-                val hostLayoutParams = host.layoutParams as ConstraintLayout.LayoutParams
+                val constraintSet = ConstraintSet()
+                constraintSet.clone(host)
+                val layoutParams = ConstraintLayout.LayoutParams(
+                    ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                    ConstraintLayout.LayoutParams.WRAP_CONTENT
+                )
 
-                when {
-                    size.first > 0F -> {
-                        overlayLayoutParams = ConstraintLayout.LayoutParams(
-                            ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                            ConstraintLayout.LayoutParams.WRAP_CONTENT
-                        )
 
-//                        overlayLayoutParams.matchConstraintPercentWidth = size.first / 100
-//                        overlayLayoutParams.matchConstraintPercentHeight = 1F
+                positionGuide.leading?.let {
+                    if (it < 0F){
+                        return@let
                     }
-                    size.second > 0F -> {
-                        overlayLayoutParams = ConstraintLayout.LayoutParams(
-                            ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                            ConstraintLayout.LayoutParams.WRAP_CONTENT
+                    val leadGuideLineId = View.generateViewId()
+                    constraintSet.create(leadGuideLineId, ConstraintSet.VERTICAL)
+                    constraintSet.setGuidelinePercent(leadGuideLineId, it / 100)
 
-                            )
-//                        overlayLayoutParams.matchConstraintPercentWidth = 1F
-//                        overlayLayoutParams.matchConstraintPercentHeight = size.second / 100
-                    }
-                    else -> {
-                        overlayLayoutParams = ConstraintLayout.LayoutParams(
-                            ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                            ConstraintLayout.LayoutParams.WRAP_CONTENT
-                        )
-                    }
+                    layoutParams.leftToLeft = leadGuideLineId
+                    proportionalImageView.scaleType = ImageView.ScaleType.FIT_START
+
                 }
+                positionGuide.trailing?.let {
+                    if (it < 0F){
+                        return@let
+                    }
+                    val trailGuideLineId = View.generateViewId()
+                    constraintSet.create(trailGuideLineId, ConstraintSet.VERTICAL)
+                    constraintSet.setGuidelinePercent(trailGuideLineId, 1F - (it / 100))
 
-                host.addView(proportionalImageView, overlayLayoutParams)
-//                when {
-//                    size.first > 0F -> {
-//                        val set = ConstraintSet()
-//                        set.clone(host)
-//
-//                        set.connect(overlay.id, ConstraintSet.TOP, host.id, ConstraintSet.TOP)
-//                        set.connect(overlay.id, ConstraintSet.RIGHT, host.id, ConstraintSet.RIGHT)
-//                        set.connect(overlay.id, ConstraintSet.BOTTOM, host.id, ConstraintSet.BOTTOM)
-//                        set.connect(overlay.id, ConstraintSet.LEFT, host.id, ConstraintSet.LEFT)
-//
-//                        set.applyTo(host)
-//                    }
-//                    size.second > 0F -> {
-//                        val set = ConstraintSet()
-//                        set.clone(host)
-//
-//                        set.connect(overlay.id, ConstraintSet.TOP, host.id, ConstraintSet.TOP)
-//                        set.connect(overlay.id, ConstraintSet.RIGHT, host.id, ConstraintSet.RIGHT)
-//                        set.connect(overlay.id, ConstraintSet.BOTTOM, host.id, ConstraintSet.BOTTOM)
-//                        set.connect(overlay.id, ConstraintSet.LEFT, host.id, ConstraintSet.LEFT)
-//
-//                        set.applyTo(host)
-//                    }
-//
-//                }
+                    layoutParams.rightToRight = trailGuideLineId
+                }
+                positionGuide.top?.let {
+                    if (it < 0F){
+                        return@let
+                    }
+                    val topGuideLineId = View.generateViewId()
+                    constraintSet.create(topGuideLineId, ConstraintSet.HORIZONTAL)
+                    constraintSet.setGuidelinePercent(topGuideLineId, it / 100)
+
+                    layoutParams.topToTop = topGuideLineId
+                }
+                positionGuide.bottom?.let {
+                    if (it < 0F){
+                        return@let
+                    }
+                    val bottomGuideLineId = View.generateViewId()
+                    constraintSet.create(bottomGuideLineId, ConstraintSet.HORIZONTAL)
+                    constraintSet.setGuidelinePercent(bottomGuideLineId, 1F - (it / 100))
+
+                    layoutParams.bottomToBottom = bottomGuideLineId
+                    proportionalImageView.scaleType = ImageView.ScaleType.FIT_END
+
+                }
+                constraintSet.applyTo(host)
+                proportionalImageView.layoutParams = layoutParams
+
+                host.addView(proportionalImageView)
 
 
                 if (!idlingResource.isIdleNow) {
