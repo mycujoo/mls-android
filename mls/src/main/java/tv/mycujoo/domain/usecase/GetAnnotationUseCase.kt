@@ -76,7 +76,7 @@ class GetAnnotationUseCase {
         private fun getHideOverlayAction(): ActionEntity {
             return ActionEntity(
                 "f43f9ajf9dfjSX",
-                10000L,
+                15000L,
                 ActionType.HIDE_OVERLAY,
                 "scoreboard1",
                 null,

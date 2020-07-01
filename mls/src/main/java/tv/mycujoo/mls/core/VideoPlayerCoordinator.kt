@@ -3,12 +3,14 @@ package tv.mycujoo.mls.core
 import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ui.TimeBar
+import tv.mycujoo.mls.cordinator.CoordinatorInterface
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
 class VideoPlayerCoordinator(
     private val exoPlayer: SimpleExoPlayer,
-    private val playerViewWrapper: PlayerViewWrapper
+    private val playerViewWrapper: PlayerViewWrapper,
+    coordinator: CoordinatorInterface
 ) {
 
     init {
@@ -36,6 +38,7 @@ class VideoPlayerCoordinator(
 
             override fun onScrubStop(timeBar: TimeBar, position: Long, canceled: Boolean) {
                 handleLiveModeState()
+                coordinator.onSeekHappened(exoPlayer)
             }
         })
 

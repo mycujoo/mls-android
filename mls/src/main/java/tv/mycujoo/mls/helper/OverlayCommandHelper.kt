@@ -97,5 +97,27 @@ class OverlayCommandHelper {
             })
         }
 
+        fun clearScreen(
+            host: OverlayHost,
+            viewIdentifierToBeCleared: List<Int?>,
+            idlingResource: CountingIdlingResource
+        ) {
+
+            host.post(Runnable {
+                host.children.forEach { view ->
+                    if (viewIdentifierToBeCleared.contains(view.id)) {
+                        host.removeView(view)
+                    }
+                }
+
+                if (!idlingResource.isIdleNow) {
+                    idlingResource.decrement()
+                }
+                return@Runnable
+            })
+
+
+        }
+
     }
 }

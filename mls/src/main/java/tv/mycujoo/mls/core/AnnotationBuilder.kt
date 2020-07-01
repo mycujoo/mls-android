@@ -12,4 +12,6 @@ abstract class AnnotationBuilder {
 
     abstract fun buildRemovalAnnotationsUpToCurrentTime()
 
+    abstract fun buildRemovalAnnotations()
+
 }

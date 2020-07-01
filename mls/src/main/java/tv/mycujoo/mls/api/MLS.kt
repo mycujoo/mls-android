@@ -25,6 +25,7 @@ import tv.mycujoo.domain.usecase.GetEventsUseCase
 import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.cordinator.Coordinator
+import tv.mycujoo.mls.cordinator.CoordinatorInterface
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.core.VideoPlayerCoordinator
@@ -217,7 +218,6 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
             }
 
             this.playerViewWrapper = playerViewWrapper
-            attachPlayer(playerViewWrapper)
         }
 
         if (hasAnnotation) {
@@ -251,8 +251,8 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     override fun onStart(playerViewWrapper: PlayerViewWrapper) {
         if (Util.SDK_INT >= Build.VERSION_CODES.N) {
             this.playerViewWrapper = playerViewWrapper
-            attachPlayer(playerViewWrapper)
             initializePlayer(playerViewWrapper)
+            attachPlayer(playerViewWrapper)
             if (hasAnalytic) {
                 youboraClient.start()
             }
@@ -262,8 +262,8 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     override fun onResume(playerViewWrapper: PlayerViewWrapper) {
         if (Util.SDK_INT < Build.VERSION_CODES.N) {
             this.playerViewWrapper = playerViewWrapper
-            attachPlayer(playerViewWrapper)
             initializePlayer(playerViewWrapper)
+            attachPlayer(playerViewWrapper)
             if (hasAnalytic) {
                 youboraClient.start()
             }
@@ -378,17 +378,18 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         playerViewWrapper.timeBarAnnotationHelper =
             TimeBarAnnotationHelper(api.getTimeLineMarkers())
 
-        initVideoPlayerCoordinator(playerViewWrapper, exoPlayer)
+        initVideoPlayerCoordinator(playerViewWrapper, exoPlayer, coordinator as CoordinatorInterface)
 
         playerViewWrapper.screenMode(PlayerViewWrapper.ScreenMode.PORTRAIT)
     }
 
     private fun initVideoPlayerCoordinator(
         playerViewWrapper: PlayerViewWrapper,
-        exoPlayer: SimpleExoPlayer?
+        exoPlayer: SimpleExoPlayer?,
+        coordinator: CoordinatorInterface
     ) {
         exoPlayer?.let {
-            VideoPlayerCoordinator(exoPlayer, playerViewWrapper)
+            VideoPlayerCoordinator(exoPlayer, playerViewWrapper, coordinator)
         }
     }
 

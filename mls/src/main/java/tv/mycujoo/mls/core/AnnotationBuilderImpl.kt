@@ -2,6 +2,7 @@ package tv.mycujoo.mls.core
 
 import okhttp3.*
 import tv.mycujoo.domain.entity.ActionEntity
+import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.mls.entity.actions.ActionWrapper
 import tv.mycujoo.mls.entity.actions.CommandAction
 import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
@@ -55,7 +56,7 @@ class AnnotationBuilderImpl(
         pendingActionEntities.filter { actionEntity -> isInCurrentTimeRange(actionEntity) }
             .forEach { actionEntity: ActionEntity ->
                 if (actionEntity.svgUrl != null) {
-                    downloadSVGthenCallListener(actionEntity)
+                    downloadSVGThenCallListener(actionEntity)
                 } else {
                     listener.onNewActionAvailable(actionEntity)
                 }
@@ -64,7 +65,7 @@ class AnnotationBuilderImpl(
 
     }
 
-    private fun downloadSVGthenCallListener(actionEntity: ActionEntity) {
+    private fun downloadSVGThenCallListener(actionEntity: ActionEntity) {
         val request: Request = Request.Builder().url(actionEntity.svgUrl).build()
         okHttpClient.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -96,6 +97,12 @@ class AnnotationBuilderImpl(
 //                    listener.onNewRemovalOrHidingActionAvailable(actionWrapper)
                 }
             }
+    }
+
+    override fun buildRemovalAnnotations() {
+        listener.clearScreen(pendingActionEntities.filter { actionEntity -> actionEntity.type == ActionType.HIDE_OVERLAY }
+            .mapNotNull { it.customId }
+            .toList())
     }
 
     private fun isDismissingType(actionWrapper: ActionWrapper): Boolean {

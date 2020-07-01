@@ -21,7 +21,7 @@ import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
 class Coordinator(
     private val api: Api
-) {
+) : CoordinatorInterface {
 
     /**region Fields*/
     internal lateinit var playerViewWrapper: PlayerViewWrapper
@@ -84,6 +84,10 @@ class Coordinator(
                     }
                 }
             }
+
+            override fun clearScreen(customIdList: List<String>) {
+                playerViewWrapper.clearScreen(customIdList)
+            }
         }
 
 
@@ -115,6 +119,12 @@ class Coordinator(
             }
         }
         exoPlayer.addListener(seekInterruptionEventListener)
+    }
+    /**endregion */
+
+    /**region Over-ridden Functions*/
+    override fun onSeekHappened(exoplayer: SimpleExoPlayer) {
+        annotationBuilder.buildRemovalAnnotations()
     }
     /**endregion */
 }
