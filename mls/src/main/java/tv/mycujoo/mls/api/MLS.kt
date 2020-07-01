@@ -338,10 +338,6 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         exoPlayer?.prepare(mediaSource)
         exoPlayer?.playWhenReady = playWhenReady or this.playWhenReady
 
-        if (playWhenReady or this.playWhenReady) {
-            coordinator.onPlayVideo()
-        }
-
 
         if (hasAnalytic) {
             youboraClient.logEvent(dataHolder.getEvent())

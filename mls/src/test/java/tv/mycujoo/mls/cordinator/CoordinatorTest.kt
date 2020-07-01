@@ -3,6 +3,7 @@ package tv.mycujoo.mls.cordinator
 import android.os.Handler
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.nhaarman.mockitokotlin2.*
+import okhttp3.OkHttpClient
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -42,6 +43,9 @@ class CoordinatorTest {
     @Mock
     lateinit var playerViewWrapper: PlayerViewWrapper
 
+    @Mock
+    lateinit var okHttpClient: OkHttpClient
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -49,8 +53,8 @@ class CoordinatorTest {
 //        whenever(api.getAnnotations()).thenReturn(emptyList())
         whenever(api.getActions()).thenReturn(getListOfActionWrapper())
 
-        coordinator = Coordinator(api, publisher)
-        coordinator.initialize(exoPlayer, handler, highlightAdapter)
+        coordinator = Coordinator(api)
+        coordinator.initialize(exoPlayer, handler, okHttpClient)
         coordinator.playerViewWrapper = playerViewWrapper
 
     }

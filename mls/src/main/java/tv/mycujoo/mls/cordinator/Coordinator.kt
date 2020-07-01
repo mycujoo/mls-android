@@ -18,18 +18,18 @@ import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
 import tv.mycujoo.mls.entity.actions.ShowScoreboardOverlayAction
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
-import tv.mycujoo.mls.widgets.TimeLineSeekBar
 
 class Coordinator(
     private val api: Api
-//    private val publisher: AnnotationPublisher
 ) {
 
-    var timeLineSeekBar: TimeLineSeekBar? = null
+    /**region Fields*/
     internal lateinit var playerViewWrapper: PlayerViewWrapper
     internal lateinit var annotationBuilder: AnnotationBuilder
     internal lateinit var seekInterruptionEventListener: Player.EventListener
+    /**endregion */
 
+    /**region Initialization*/
     fun initialize(
         exoPlayer: SimpleExoPlayer,
         handler: Handler,
@@ -85,7 +85,6 @@ class Coordinator(
                 }
             }
         }
-//        publisher.setAnnotationListener(annotationListener)
 
 
         annotationBuilder = AnnotationBuilderImpl(annotationListener, okHttpClient)
@@ -117,17 +116,5 @@ class Coordinator(
         }
         exoPlayer.addListener(seekInterruptionEventListener)
     }
-
-    fun onPlayVideo() {
-        val timeLineList = api.getTimeLineMarkers()
-
-        val longArray = LongArray(timeLineList.size)
-        val booleanArray = BooleanArray(timeLineList.size)
-        timeLineList.forEachIndexed() { index, timeLineItem ->
-            longArray[index] = timeLineItem.streamOffset
-            booleanArray[index] = false
-        }
-        playerViewWrapper.addMarker(longArray, booleanArray)
-
-    }
+    /**endregion */
 }
