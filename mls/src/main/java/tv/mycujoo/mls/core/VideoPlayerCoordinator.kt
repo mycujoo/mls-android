@@ -6,38 +6,26 @@ import com.google.android.exoplayer2.ui.TimeBar
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
-class VideoPlayerCoordinator(exoPlayer: SimpleExoPlayer, playerViewWrapper: PlayerViewWrapper) {
+class VideoPlayerCoordinator(
+    private val exoPlayer: SimpleExoPlayer,
+    private val playerViewWrapper: PlayerViewWrapper
+) {
 
     init {
         val mainEventListener = object : MainEventListener {
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 super.onPlayerStateChanged(playWhenReady, playbackState)
 
-                if (playbackState == STATE_BUFFERING && playWhenReady) {
-                    playerViewWrapper.showBuffering()
-                } else {
-                    playerViewWrapper.hideBuffering()
-                }
+                handleBufferingProgressBarVisibility(playbackState, playWhenReady)
 
-                if (exoPlayer.isCurrentWindowDynamic) {
-                    // live stream
-                    if (exoPlayer.currentPosition + 15000L >= exoPlayer.duration) {
-                        playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.LIVE_ON_THE_EDGE)
-                    } else {
-                        playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.LIVE_TRAILING)
-                    }
-
-                } else {
-                    // VOD
-                    playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.VOD)
-                }
-
+                handleLiveModeState()
             }
+
         }
 
         exoPlayer.addListener(mainEventListener)
 
-        playerViewWrapper.getTimeBar().addListener(object : TimeBar.OnScrubListener{
+        playerViewWrapper.getTimeBar().addListener(object : TimeBar.OnScrubListener {
             override fun onScrubMove(timeBar: TimeBar, position: Long) {
                 //do nothing
             }
@@ -47,18 +35,7 @@ class VideoPlayerCoordinator(exoPlayer: SimpleExoPlayer, playerViewWrapper: Play
             }
 
             override fun onScrubStop(timeBar: TimeBar, position: Long, canceled: Boolean) {
-                if (exoPlayer.isCurrentWindowDynamic) {
-                    // live stream
-                    if (exoPlayer.currentPosition + 15000L >= exoPlayer.duration) {
-                        playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.LIVE_ON_THE_EDGE)
-                    } else {
-                        playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.LIVE_TRAILING)
-                    }
-
-                } else {
-                    // VOD
-                    playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.VOD)
-                }
+                handleLiveModeState()
             }
         })
 
@@ -75,6 +52,32 @@ class VideoPlayerCoordinator(exoPlayer: SimpleExoPlayer, playerViewWrapper: Play
         playerViewWrapper.config(videoPlayerConfig)
 
 
+    }
+
+    private fun handleLiveModeState() {
+        if (exoPlayer.isCurrentWindowDynamic) {
+            // live stream
+            if (exoPlayer.currentPosition + 15000L >= exoPlayer.duration) {
+                playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.LIVE_ON_THE_EDGE)
+            } else {
+                playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.LIVE_TRAILING)
+            }
+
+        } else {
+            // VOD
+            playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.VOD)
+        }
+    }
+
+    private fun handleBufferingProgressBarVisibility(
+        playbackState: Int,
+        playWhenReady: Boolean
+    ) {
+        if (playbackState == STATE_BUFFERING && playWhenReady) {
+            playerViewWrapper.showBuffering()
+        } else {
+            playerViewWrapper.hideBuffering()
+        }
     }
 
 }
