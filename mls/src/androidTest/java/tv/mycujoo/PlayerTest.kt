@@ -12,7 +12,6 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.internal.runner.junit4.statement.UiThreadStatement
-import com.caverock.androidsvg.SVGImageView
 import org.junit.After
 import org.junit.Before
 import org.junit.Ignore
@@ -26,6 +25,7 @@ import tv.mycujoo.mls.entity.actions.CommandAction
 import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
 import tv.mycujoo.mls.entity.actions.ShowScoreboardOverlayAction
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
+import tv.mycujoo.mls.widgets.ProportionalImageView
 
 
 @RunWith(AndroidJUnit4::class)
@@ -68,7 +68,7 @@ class PlayerTest {
     /**region New Annotation Structure*/
     @Test
     fun givenShowOverlayAction_shouldDisplayIt() {
-        onView(withClassName(TypeMatcher(SVGImageView::class.java.canonicalName))).check(
+        onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
             doesNotExist()
         )
 
@@ -76,7 +76,7 @@ class PlayerTest {
             playerViewWrapper.showOverlay(getShowOverlayActionEntity(1000L))
         }
 
-        onView(withClassName(TypeMatcher(SVGImageView::class.java.canonicalName))).check(
+        onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
             matches(
                 withEffectiveVisibility(Visibility.VISIBLE)
             )
@@ -86,7 +86,7 @@ class PlayerTest {
 
     @Test
     fun givenShowOverlayAction_withFullWidth_shouldDisplayInFullWidth() {
-        onView(withClassName(TypeMatcher(SVGImageView::class.java.canonicalName))).check(
+        onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
             doesNotExist()
         )
 
@@ -94,7 +94,7 @@ class PlayerTest {
             playerViewWrapper.showOverlay(getShowOverlayActionEntity(1000L))
         }
 
-        onView(withClassName(TypeMatcher(SVGImageView::class.java.canonicalName))).check(
+        onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
             matches(
                 ViewSizeMatcher(300)
             )
@@ -105,13 +105,13 @@ class PlayerTest {
 
     @Test
     fun giveHideOverlayAction_shouldHideRelatedOverlay() {
-        onView(withClassName(TypeMatcher(SVGImageView::class.java.canonicalName))).check(
+        onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
             doesNotExist()
         )
         UiThreadStatement.runOnUiThread {
             playerViewWrapper.showOverlay(getShowOverlayActionEntity(1000L))
         }
-        onView(withClassName(TypeMatcher(SVGImageView::class.java.canonicalName))).check(
+        onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
             matches(
                 withEffectiveVisibility(Visibility.VISIBLE)
             )
@@ -121,7 +121,7 @@ class PlayerTest {
             playerViewWrapper.hideOverlay(getHideOverlayActionEntity(15000L))
         }
 
-        onView(withClassName(TypeMatcher(SVGImageView::class.java.canonicalName))).check(
+        onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
             doesNotExist()
         )
     }

@@ -19,11 +19,17 @@ class GetAnnotationUseCase {
                 offset,
                 "tml_1",
                 listOf(
+//                    getShowOverLayAction(
+//                        PositionGuide(trailing = 5F, top = 10F)
+//                    ),
+//                    getShowOverLayAction(
+//                        PositionGuide(leading = 5F, bottom = 10F)
+//                    ),
+//                    getShowOverLayAction(
+//                        PositionGuide(top = 5F, hCenter = 10F)
+//                    ),
                     getShowOverLayAction(
-                        PositionGuide(trailing = 5F, top = 10F)
-                    ),
-                    getShowOverLayAction(
-                        PositionGuide(leading = 5F, bottom = 10F)
+                        PositionGuide(leading = 5F, vCenter = 50F)
                     )
                 )
             )

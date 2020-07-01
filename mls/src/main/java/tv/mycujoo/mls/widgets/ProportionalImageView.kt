@@ -20,12 +20,12 @@ class ProportionalImageView @JvmOverloads constructor(
 
             if (widthPercentage > 0F) {
                 val desiredWidth = (screenWidth / 100) * widthPercentage
-                val h = screenWidth * d.intrinsicHeight / d.intrinsicWidth
-                setMeasuredDimension(desiredWidth.toInt(), h)
+                val h = desiredWidth * d.intrinsicHeight / d.intrinsicWidth
+                setMeasuredDimension(desiredWidth.toInt(), h.toInt())
             } else if (heightPercentage > 0F) {
                 val desiredHeight = (screenHeight / 100) * heightPercentage
-                val w = screenHeight * d.intrinsicWidth / d.intrinsicHeight
-                setMeasuredDimension(w, desiredHeight.toInt())
+                val w = desiredHeight * d.intrinsicWidth / d.intrinsicHeight
+                setMeasuredDimension(w.toInt(), desiredHeight.toInt())
             }
 
         } else super.onMeasure(widthMeasureSpec, heightMeasureSpec)

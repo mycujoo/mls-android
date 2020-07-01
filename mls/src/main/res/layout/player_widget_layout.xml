@@ -11,11 +11,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:controller_layout_id="@layout/main_controls_layout"
-        app:layout_constraintEnd_toEndOf="parent"
         app:fastforward_increment="10000"
-        app:rewind_increment="10000"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:rewind_increment="10000" />
 
     <tv.mycujoo.mls.widgets.OverlayHost
         android:id="@+id/playerWidget_overlayHost"

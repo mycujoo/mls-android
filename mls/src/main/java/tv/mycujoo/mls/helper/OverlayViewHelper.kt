@@ -100,7 +100,7 @@ class OverlayViewHelper {
 
 
                 positionGuide.leading?.let {
-                    if (it < 0F){
+                    if (it < 0F) {
                         return@let
                     }
                     val leadGuideLineId = View.generateViewId()
@@ -109,10 +109,9 @@ class OverlayViewHelper {
 
                     layoutParams.leftToLeft = leadGuideLineId
                     proportionalImageView.scaleType = ImageView.ScaleType.FIT_START
-
                 }
                 positionGuide.trailing?.let {
-                    if (it < 0F){
+                    if (it < 0F) {
                         return@let
                     }
                     val trailGuideLineId = View.generateViewId()
@@ -122,7 +121,7 @@ class OverlayViewHelper {
                     layoutParams.rightToRight = trailGuideLineId
                 }
                 positionGuide.top?.let {
-                    if (it < 0F){
+                    if (it < 0F) {
                         return@let
                     }
                     val topGuideLineId = View.generateViewId()
@@ -132,7 +131,7 @@ class OverlayViewHelper {
                     layoutParams.topToTop = topGuideLineId
                 }
                 positionGuide.bottom?.let {
-                    if (it < 0F){
+                    if (it < 0F) {
                         return@let
                     }
                     val bottomGuideLineId = View.generateViewId()
@@ -142,6 +141,22 @@ class OverlayViewHelper {
                     layoutParams.bottomToBottom = bottomGuideLineId
                     proportionalImageView.scaleType = ImageView.ScaleType.FIT_END
 
+                }
+                positionGuide.vCenter?.let {
+                    if (it > 50F || it < -50F) {
+                        return@let
+                    }
+                    layoutParams.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+                    layoutParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+                    layoutParams.verticalBias = (0.5F + it / 100)
+                }
+                positionGuide.hCenter?.let {
+                    if (it > 50F || it < -50F) {
+                        return@let
+                    }
+                    layoutParams.leftToLeft = ConstraintLayout.LayoutParams.PARENT_ID
+                    layoutParams.rightToRight = ConstraintLayout.LayoutParams.PARENT_ID
+                    layoutParams.horizontalBias = (0.5F + it / 100)
                 }
                 constraintSet.applyTo(host)
                 proportionalImageView.layoutParams = layoutParams

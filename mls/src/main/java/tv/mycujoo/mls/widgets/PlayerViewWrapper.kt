@@ -866,7 +866,12 @@ class PlayerViewWrapper @JvmOverloads constructor(
     fun showOverlay(overlayEntity: ShowOverlayActionEntity) {
         val proportionalImageView = OverlayFactory.create(context, overlayEntity.size)
         try {
-            val svg = SVG.getFromInputStream(overlayEntity.svgInputStream)
+            val svg : SVG
+            if (overlayEntity.svgInputStream != null){
+                svg = SVG.getFromInputStream(overlayEntity.svgInputStream)
+            } else {
+                svg = SVG.getFromString(getTimeSvgString())
+            }
             svg.setDocumentWidth("100%")
             svg.setDocumentHeight("100%")
             proportionalImageView.setSVG(svg)
