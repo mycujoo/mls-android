@@ -87,7 +87,9 @@ class PlayerViewWrapper @JvmOverloads constructor(
         LayoutInflater.from(context).inflate(R.layout.player_widget_layout, this, true)
 
         playerView = findViewById(R.id.playerView)
-        overlayHost = findViewById(R.id.playerWidget_overlayHost)
+        overlayHost = OverlayHost(context)
+        playerView.addView(overlayHost, 1)
+
 
         bufferView = findViewById(R.id.controller_buffering)
         playerView.resizeMode = RESIZE_MODE_FIXED_WIDTH
@@ -866,8 +868,8 @@ class PlayerViewWrapper @JvmOverloads constructor(
     fun showOverlay(overlayEntity: ShowOverlayActionEntity) {
         val proportionalImageView = OverlayFactory.create(context, overlayEntity.size)
         try {
-            val svg : SVG
-            if (overlayEntity.svgInputStream != null){
+            val svg: SVG
+            if (overlayEntity.svgInputStream != null) {
                 svg = SVG.getFromInputStream(overlayEntity.svgInputStream)
             } else {
                 svg = SVG.getFromString(getTimeSvgString())
