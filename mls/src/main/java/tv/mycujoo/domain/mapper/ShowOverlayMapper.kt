@@ -13,7 +13,9 @@ class ShowOverlayMapper {
                 actionEntity.svgInputStream,
                 actionEntity.position!!,
                 actionEntity.size,
-                actionEntity.duration
+                actionEntity.duration,
+                actionEntity.animationType,
+                actionEntity.animationDuration!!
             )
         }
 

@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.helper
 
+import android.animation.ObjectAnimator
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -8,6 +9,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.espresso.idling.CountingIdlingResource
 import tv.mycujoo.domain.entity.PositionGuide
+import tv.mycujoo.domain.entity.ShowOverlayActionEntity
 import tv.mycujoo.mls.entity.actions.LayoutPosition
 import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ProportionalImageView
@@ -86,6 +88,8 @@ class OverlayViewHelper {
             host: OverlayHost,
             proportionalImageView: ProportionalImageView,
             positionGuide: PositionGuide,
+            overlayEntity: ShowOverlayActionEntity,
+            objectAnimator : ObjectAnimator,
             idlingResource: CountingIdlingResource
         ) {
             host.post {
@@ -162,6 +166,7 @@ class OverlayViewHelper {
                 proportionalImageView.layoutParams = layoutParams
 
                 host.addView(proportionalImageView)
+                objectAnimator.start()
 
 
                 if (!idlingResource.isIdleNow) {

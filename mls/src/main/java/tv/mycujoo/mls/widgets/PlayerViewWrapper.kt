@@ -36,10 +36,7 @@ import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.entity.actions.*
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.extensions.getDisplaySize
-import tv.mycujoo.mls.helper.OverlayCommandHelper
-import tv.mycujoo.mls.helper.OverlayFactory
-import tv.mycujoo.mls.helper.OverlayViewHelper
-import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
+import tv.mycujoo.mls.helper.*
 import tv.mycujoo.mls.manager.HighlightMarkerManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.PlayerViewWrapper.LiveState.*
@@ -878,12 +875,22 @@ class PlayerViewWrapper @JvmOverloads constructor(
             svg.setDocumentHeight("100%")
             proportionalImageView.setSVG(svg)
 
+            val animation = AnimationFactory.create(
+                proportionalImageView,
+                overlayEntity.animationType,
+                overlayEntity.animationDuration
+            )
+
             OverlayViewHelper.addView(
                 overlayHost,
                 proportionalImageView,
                 overlayEntity.positionGuide,
+                overlayEntity,
+                animation,
                 idlingResource
             )
+
+
 
             viewIdentifierManager.storeViewId(proportionalImageView, overlayEntity.customId!!)
 
@@ -897,6 +904,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         OverlayCommandHelper.removeView(
             overlayHost,
             viewIdentifierManager.getViewIdentifier(hideOverlayActionEntity.customId!!),
+            hideOverlayActionEntity,
             idlingResource
         )
     }

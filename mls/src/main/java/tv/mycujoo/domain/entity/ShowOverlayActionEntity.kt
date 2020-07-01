@@ -8,6 +8,8 @@ data class ShowOverlayActionEntity(
     val svgInputStream: InputStream?,
     val positionGuide: PositionGuide,
     val size: Pair<Float, Float>,
-    val duration: Long?
+    val duration: Long?,
+    val animationType: AnimationType,
+    val animationDuration: Long
 ) {
 }

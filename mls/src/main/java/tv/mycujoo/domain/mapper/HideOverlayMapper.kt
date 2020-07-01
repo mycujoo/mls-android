@@ -9,7 +9,9 @@ class HideOverlayMapper {
         fun mapToEntity(actionEntity: ActionEntity): HideOverlayActionEntity {
             return HideOverlayActionEntity(
                 actionEntity.id,
-                actionEntity.customId
+                actionEntity.customId,
+                actionEntity.animationType,
+                actionEntity.animationDuration!!
             )
         }
 

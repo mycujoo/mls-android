@@ -1,8 +1,11 @@
 package tv.mycujoo.mls.helper
 
+import android.animation.Animator
+import android.animation.ObjectAnimator
 import android.view.View
 import androidx.core.view.children
 import androidx.test.espresso.idling.CountingIdlingResource
+import tv.mycujoo.domain.entity.HideOverlayActionEntity
 import tv.mycujoo.mls.entity.actions.CommandAction
 import tv.mycujoo.mls.widgets.OverlayHost
 
@@ -56,12 +59,35 @@ class OverlayCommandHelper {
         fun removeView(
             host: OverlayHost,
             viewIdentifier: Int?,
+            overlayEntity: HideOverlayActionEntity,
             idlingResource: CountingIdlingResource
         ) {
             host.post(Runnable {
                 host.children.forEach { view ->
                     if (view.id == viewIdentifier) {
-                        host.removeView(view)
+
+                        val animation = ObjectAnimator.ofFloat(view, View.ALPHA, 1F, 0F)
+                        animation.duration = overlayEntity.animationDuration
+
+                        animation.addListener(object : Animator.AnimatorListener {
+                            override fun onAnimationStart(animation: Animator?) {
+                            }
+
+                            override fun onAnimationEnd(animation: Animator?) {
+                                host.removeView(view)
+                            }
+
+                            override fun onAnimationRepeat(animation: Animator?) {
+                            }
+
+                            override fun onAnimationCancel(animation: Animator?) {
+                            }
+
+                        })
+
+                        animation.start()
+
+
                         if (!idlingResource.isIdleNow) {
                             idlingResource.decrement()
                         }

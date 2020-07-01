@@ -1,6 +1,7 @@
 package tv.mycujoo.domain.usecase
 
 import tv.mycujoo.domain.entity.ActionEntity
+import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.AnnotationEntity
 import tv.mycujoo.domain.entity.PositionGuide
 import tv.mycujoo.domain.entity.models.ActionType
@@ -30,7 +31,8 @@ class GetAnnotationUseCase {
 //                    ),
                     getShowOverLayAction(
                         PositionGuide(leading = 5F, vCenter = 50F)
-                    )
+                    ),
+                    getHideOverlayAction()
                 )
             )
         }
@@ -48,7 +50,9 @@ class GetAnnotationUseCase {
                 null,
                 positionGuide,
                 Pair(30F, 0F),
-                5000L
+                5000L,
+                AnimationType.FADE_IN,
+                1000L
             )
         }
 
@@ -63,7 +67,9 @@ class GetAnnotationUseCase {
                 null,
                 PositionGuide(trailing = 10F),
                 Pair(0F, 40F),
-                5000L
+                5000L,
+                AnimationType.FADE_IN,
+                1000L
             )
         }
 
@@ -77,7 +83,9 @@ class GetAnnotationUseCase {
                 null,
                 null,
                 Pair(300F, 150F),
-                null
+                null,
+                AnimationType.FADE_OUT,
+                1000L
             )
         }
     }
