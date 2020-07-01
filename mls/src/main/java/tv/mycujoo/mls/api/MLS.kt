@@ -383,6 +383,8 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
             TimeBarAnnotationHelper(api.getTimeLineMarkers())
 
         initVideoPlayerCoordinator(playerViewWrapper, exoPlayer)
+
+        playerViewWrapper.screenMode(PlayerViewWrapper.ScreenMode.PORTRAIT)
     }
 
     private fun initVideoPlayerCoordinator(
