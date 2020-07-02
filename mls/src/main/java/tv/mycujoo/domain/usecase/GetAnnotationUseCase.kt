@@ -24,13 +24,13 @@ class GetAnnotationUseCase {
                         "scoreboard1",
                         7000L,
                         10000L,
-                        PositionGuide(leading = 5F, vCenter = 50F)
+                        PositionGuide(leading = 5F, bottom = 5F)
                     ),
                     getShowOverLayAction(
                         "scoreboard2",
                         50000L,
                         40000L,
-                        PositionGuide(leading = 5F, vCenter = 50F)
+                        PositionGuide(leading = 5F, bottom = 5F)
                     ),
                     getHideOverlayAction("scoreboard1", 15000L),
                     getHideOverlayAction("scoreboard2", 90000L)

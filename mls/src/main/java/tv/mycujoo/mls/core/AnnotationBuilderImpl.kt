@@ -56,7 +56,11 @@ class AnnotationBuilderImpl(
         pendingActionEntities.filter { actionEntity -> isInCurrentTimeRange(actionEntity) }
             .forEach { actionEntity: ActionEntity ->
                 if (actionEntity.svgUrl != null) {
-                    downloadSVGThenCallListener(actionEntity)
+                    downloadSVGThenCallListener(actionEntity) { actionEntityWithSvgData ->
+                        listener.onNewActionAvailable(
+                            actionEntityWithSvgData
+                        )
+                    }
                 } else {
                     listener.onNewActionAvailable(actionEntity)
                 }
@@ -65,7 +69,10 @@ class AnnotationBuilderImpl(
 
     }
 
-    private fun downloadSVGThenCallListener(actionEntity: ActionEntity) {
+    private fun downloadSVGThenCallListener(
+        actionEntity: ActionEntity,
+        callback: (ActionEntity) -> Unit
+    ) {
         val request: Request = Request.Builder().url(actionEntity.svgUrl).build()
         okHttpClient.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -76,7 +83,7 @@ class AnnotationBuilderImpl(
 
             override fun onResponse(call: Call, response: Response) {
                 if (response.isSuccessful && response.body() != null) {
-                    listener.onNewActionAvailable(
+                    callback(
                         actionEntity.copy(
                             svgInputStream = response.body()!!.byteStream()
                         )
@@ -101,7 +108,14 @@ class AnnotationBuilderImpl(
 
     override fun buildLingeringAnnotations() {
         pendingActionEntities.filter { isLingering(it) }.forEach {
-            listener.onLingeringActionAvailable(it)
+
+            if (it.svgUrl != null) {
+                downloadSVGThenCallListener(
+                    it,
+                    callback = { actionEntity -> listener.onLingeringActionAvailable(actionEntity) })
+            } else {
+                listener.onLingeringActionAvailable(it)
+            }
         }
     }
 
