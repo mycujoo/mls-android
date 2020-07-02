@@ -914,6 +914,37 @@ class PlayerViewWrapper @JvmOverloads constructor(
         return "<svg height=\"30\" width=\"200\"><rect width=\"200\" height=\"30\" style=\"fill:rgb(211,211,211);stroke-width:3;stroke:rgb(128, 128, 128)\" /><text x=\"0\" y=\"15\" fill=\"red\">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</text></svg>"
     }
 
+    fun showLingeringOverlay(overlayEntity: ShowOverlayActionEntity) {
+        val proportionalImageView = OverlayFactory.create(context, overlayEntity.size)
+        try {
+            val svg: SVG
+            if (overlayEntity.svgInputStream != null) {
+                svg = SVG.getFromInputStream(overlayEntity.svgInputStream)
+            } else {
+                svg = SVG.getFromString(getTimeSvgString())
+            }
+            svg.setDocumentWidth("100%")
+            svg.setDocumentHeight("100%")
+            proportionalImageView.setSVG(svg)
+
+            OverlayViewHelper.addView(
+                overlayHost,
+                proportionalImageView,
+                overlayEntity.positionGuide,
+                overlayEntity,
+                null,
+                idlingResource
+            )
+
+
+
+            viewIdentifierManager.storeViewId(proportionalImageView, overlayEntity.customId!!)
+
+        } catch (e: Exception) {
+            Log.e("PlayerView", "e: ${e.message}")
+        }
+    }
+
     fun clearScreen(customIdList: List<String>) {
         val viewIdentifierToBeCleared =
             customIdList.map { viewIdentifierManager.getViewIdentifier(it) }

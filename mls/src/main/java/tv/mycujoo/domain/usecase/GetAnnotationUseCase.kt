@@ -20,37 +20,42 @@ class GetAnnotationUseCase {
                 offset,
                 "tml_1",
                 listOf(
-//                    getShowOverLayAction(
-//                        PositionGuide(trailing = 5F, top = 10F)
-//                    ),
-//                    getShowOverLayAction(
-//                        PositionGuide(leading = 5F, bottom = 10F)
-//                    ),
-//                    getShowOverLayAction(
-//                        PositionGuide(top = 5F, hCenter = 10F)
-//                    ),
                     getShowOverLayAction(
+                        "scoreboard1",
+                        7000L,
+                        10000L,
                         PositionGuide(leading = 5F, vCenter = 50F)
                     ),
-                    getHideOverlayAction()
+                    getShowOverLayAction(
+                        "scoreboard2",
+                        50000L,
+                        40000L,
+                        PositionGuide(leading = 5F, vCenter = 50F)
+                    ),
+                    getHideOverlayAction("scoreboard1", 15000L),
+                    getHideOverlayAction("scoreboard2", 90000L)
                 )
             )
         }
 
 
-        private fun getShowOverLayAction(positionGuide: PositionGuide): ActionEntity {
-            val offset = 7000L
+        private fun getShowOverLayAction(
+            customId: String,
+            offset: Long,
+            duration: Long,
+            positionGuide: PositionGuide
+        ): ActionEntity {
             return ActionEntity(
                 "f43fgaf94j3ofg",
                 offset,
                 ActionType.SHOW_OVERLAY,
-                "scoreboard1",
+                customId,
 //                "https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/DroidSans.svg",
                 "https://storage.googleapis.com/mycujoo-player-app.appspot.com/announcement_overlay.svg",
                 null,
                 positionGuide,
                 Pair(30F, 0F),
-                5000L,
+                duration,
                 AnimationType.FADE_IN,
                 1000L
             )
@@ -73,12 +78,12 @@ class GetAnnotationUseCase {
             )
         }
 
-        private fun getHideOverlayAction(): ActionEntity {
+        private fun getHideOverlayAction(customId: String, offset: Long): ActionEntity {
             return ActionEntity(
                 "f43f9ajf9dfjSX",
-                15000L,
+                offset,
                 ActionType.HIDE_OVERLAY,
-                "scoreboard1",
+                customId,
                 null,
                 null,
                 null,

@@ -99,10 +99,17 @@ class AnnotationBuilderImpl(
             }
     }
 
+    override fun buildLingeringAnnotations() {
+        pendingActionEntities.filter { isLingering(it) }.forEach {
+            listener.onLingeringActionAvailable(it)
+        }
+    }
+
     override fun buildRemovalAnnotations() {
-        listener.clearScreen(pendingActionEntities.filter { actionEntity -> actionEntity.type == ActionType.HIDE_OVERLAY }
-            .mapNotNull { it.customId }
-            .toList())
+        listener.clearScreen(
+            pendingActionEntities.filter { actionEntity -> actionEntity.type == ActionType.HIDE_OVERLAY }
+                .mapNotNull { it.customId }
+                .toList())
     }
 
     private fun isDismissingType(actionWrapper: ActionWrapper): Boolean {
@@ -130,12 +137,19 @@ class AnnotationBuilderImpl(
         }
     }
 
-    private fun isInCurrentTimeRange(actionWrapper: ActionWrapper): Boolean {
-        return (actionWrapper.offset >= currentTime) && (actionWrapper.offset < currentTime + 1000L)
+    private fun isLingering(actionEntity: ActionEntity): Boolean {
+        if (actionEntity.duration == null) {
+            return false
+        }
+        return (actionEntity.offset < currentTime) && (actionEntity.offset + actionEntity.duration > currentTime)
     }
 
     private fun isInCurrentTimeRange(actionEntity: ActionEntity): Boolean {
         return (actionEntity.offset >= currentTime) && (actionEntity.offset < currentTime + 1000L)
+    }
+
+    private fun isInCurrentTimeRange(actionWrapper: ActionWrapper): Boolean {
+        return (actionWrapper.offset >= currentTime) && (actionWrapper.offset < currentTime + 1000L)
     }
 
     private fun isInStartUpToCurrentTimeRange(actionWrapper: ActionWrapper): Boolean {

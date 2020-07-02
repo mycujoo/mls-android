@@ -89,7 +89,7 @@ class OverlayViewHelper {
             proportionalImageView: ProportionalImageView,
             positionGuide: PositionGuide,
             overlayEntity: ShowOverlayActionEntity,
-            objectAnimator : ObjectAnimator,
+            objectAnimator : ObjectAnimator?,
             idlingResource: CountingIdlingResource
         ) {
             host.post {
@@ -166,7 +166,7 @@ class OverlayViewHelper {
                 proportionalImageView.layoutParams = layoutParams
 
                 host.addView(proportionalImageView)
-                objectAnimator.start()
+                objectAnimator?.start()
 
 
                 if (!idlingResource.isIdleNow) {

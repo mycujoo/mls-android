@@ -85,6 +85,19 @@ class Coordinator(
                 }
             }
 
+            override fun onLingeringActionAvailable(actionEntity: ActionEntity) {
+                when (actionEntity.type) {
+                    UNKNOWN,
+                    HIDE_OVERLAY-> {
+                        // do nothing, should not happen
+                    }
+                    SHOW_OVERLAY -> {
+                        playerViewWrapper.showLingeringOverlay(ShowOverlayMapper.mapToEntity(actionEntity))
+                    }
+                }
+
+            }
+
             override fun clearScreen(customIdList: List<String>) {
                 playerViewWrapper.clearScreen(customIdList)
             }
@@ -125,6 +138,7 @@ class Coordinator(
     /**region Over-ridden Functions*/
     override fun onSeekHappened(exoplayer: SimpleExoPlayer) {
         annotationBuilder.buildRemovalAnnotations()
+        annotationBuilder.buildLingeringAnnotations()
     }
     /**endregion */
 }

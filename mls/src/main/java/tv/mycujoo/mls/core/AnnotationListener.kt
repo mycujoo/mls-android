@@ -10,6 +10,7 @@ interface AnnotationListener {
 
     fun onNewActionAvailable(actionEntity: ActionEntity)
 
+    fun onLingeringActionAvailable(actionEntity: ActionEntity)
     fun clearScreen(customIdList: List<String>)
 
 }
