@@ -24,16 +24,36 @@ class GetAnnotationUseCase {
                         "scoreboard1",
                         7000L,
                         10000L,
-                        PositionGuide(leading = 5F, bottom = 5F)
+                        PositionGuide(leading = 5F, bottom = 5F),
+                        AnimationType.SLIDE_FROM_LEADING,
+                        1000L
                     ),
                     getShowOverLayAction(
                         "scoreboard2",
+                        7000L,
+                        10000L,
+                        PositionGuide(trailing = 5F, bottom = 5F),
+                        AnimationType.SLIDE_FROM_TRAILING,
+                        6000L
+                    ),
+                    getShowOverLayAction(
+                        "scoreboard",
+                        9000L,
+                        10000L,
+                        PositionGuide(leading = 5F, top = 5F),
+                        AnimationType.SLIDE_FROM_TRAILING,
+                        6000L
+                    ),
+                    getShowOverLayAction(
+                        "scoreboard3",
                         50000L,
                         40000L,
-                        PositionGuide(leading = 5F, bottom = 5F)
-                    ),
-                    getHideOverlayAction("scoreboard1", 15000L),
-                    getHideOverlayAction("scoreboard2", 90000L)
+                        PositionGuide(leading = 5F, bottom = 5F),
+                        AnimationType.FADE_IN,
+                        1000L
+                    )
+//                    getHideOverlayAction("scoreboard1", 15000L),
+//                    getHideOverlayAction("scoreboard2", 90000L)
                 )
             )
         }
@@ -43,7 +63,9 @@ class GetAnnotationUseCase {
             customId: String,
             offset: Long,
             duration: Long,
-            positionGuide: PositionGuide
+            positionGuide: PositionGuide,
+            animationType: AnimationType,
+            animationDuration: Long
         ): ActionEntity {
             return ActionEntity(
                 "f43fgaf94j3ofg",
@@ -56,25 +78,8 @@ class GetAnnotationUseCase {
                 positionGuide,
                 Pair(30F, 0F),
                 duration,
-                AnimationType.FADE_IN,
-                1000L
-            )
-        }
-
-        private fun getShowOverLayAction(offset: Long): ActionEntity {
-            return ActionEntity(
-                "f43fgaf94j3ofg",
-                offset,
-                ActionType.SHOW_OVERLAY,
-                "scoreboard1",
-//                "https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/DroidSans.svg",
-                "https://storage.googleapis.com/mycujoo-player-app.appspot.com/announcement_overlay.svg",
-                null,
-                PositionGuide(trailing = 10F),
-                Pair(0F, 40F),
-                5000L,
-                AnimationType.FADE_IN,
-                1000L
+                animationType,
+                animationDuration
             )
         }
 

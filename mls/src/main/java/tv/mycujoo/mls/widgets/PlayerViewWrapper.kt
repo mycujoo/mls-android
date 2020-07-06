@@ -927,12 +927,11 @@ class PlayerViewWrapper @JvmOverloads constructor(
             svg.setDocumentHeight("100%")
             proportionalImageView.setSVG(svg)
 
-            OverlayViewHelper.addView(
+            OverlayViewHelper.addViewWithNoAnimation(
                 overlayHost,
                 proportionalImageView,
                 overlayEntity.positionGuide,
                 overlayEntity,
-                null,
                 idlingResource
             )
 
