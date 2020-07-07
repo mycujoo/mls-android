@@ -901,7 +901,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     fun hideOverlay(hideOverlayActionEntity: HideOverlayActionEntity) {
         idlingResource.increment()
-        OverlayCommandHelper.removeView(
+        OverlayRemoveHelper.removeView(
             overlayHost,
             viewIdentifierManager.getViewId(hideOverlayActionEntity.customId!!),
             hideOverlayActionEntity,
@@ -1002,7 +1002,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         val viewIdentifierToBeCleared =
             customIdList.map { viewIdentifierManager.getViewId(it) }
 
-        OverlayCommandHelper.clearScreen(
+        OverlayRemoveHelper.clearScreen(
             overlayHost,
             viewIdentifierToBeCleared,
             idlingResource

@@ -11,7 +11,7 @@ import tv.mycujoo.domain.entity.HideOverlayActionEntity
 import tv.mycujoo.mls.entity.actions.CommandAction
 import tv.mycujoo.mls.widgets.OverlayHost
 
-class OverlayCommandHelper {
+class OverlayRemoveHelper {
     companion object {
 
         fun executeInFuture(
