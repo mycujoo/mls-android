@@ -875,7 +875,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             svg.setDocumentHeight("100%")
             proportionalImageView.setSVG(svg)
 
-            val animation = AnimationFactory.create(
+            val animation = AnimationFactory.createStaticAnimation(
                 proportionalImageView,
                 overlayEntity.animationType,
                 overlayEntity.animationDuration

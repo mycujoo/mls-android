@@ -3,8 +3,10 @@ package tv.mycujoo.mls.helper
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.children
 import androidx.test.espresso.idling.CountingIdlingResource
+import tv.mycujoo.domain.entity.AnimationType.*
 import tv.mycujoo.domain.entity.HideOverlayActionEntity
 import tv.mycujoo.mls.entity.actions.CommandAction
 import tv.mycujoo.mls.widgets.OverlayHost
@@ -55,16 +57,114 @@ class OverlayCommandHelper {
             }
         }
 
+        private fun hasDynamicAnimation(overlayEntity: HideOverlayActionEntity): Boolean {
+            return when (overlayEntity.animationType) {
+                NONE,
+                FADE_IN,
+                FADE_OUT -> {
+                    false
+                }
+                SLIDE_FROM_LEADING,
+                SLIDE_FROM_TRAILING,
+                SLIDE_TO_LEADING,
+                SLIDE_TO_TRAILING -> {
+                    true
+                }
+            }
+        }
+
+        private fun hasStaticAnimation(overlayEntity: HideOverlayActionEntity): Boolean {
+            return when (overlayEntity.animationType) {
+                NONE -> {
+                    false
+                }
+                FADE_IN,
+                FADE_OUT -> {
+                    true
+                }
+                SLIDE_FROM_LEADING,
+                SLIDE_FROM_TRAILING,
+                SLIDE_TO_LEADING,
+                SLIDE_TO_TRAILING -> {
+                    false
+                }
+            }
+        }
+
 
         fun removeView(
             host: OverlayHost,
-            viewIdentifier: Int?,
+            viewId: Int?,
+            overlayEntity: HideOverlayActionEntity,
+            idlingResource: CountingIdlingResource
+        ) {
+
+            if (overlayEntity.animationType == NONE || overlayEntity.animationDuration <= 0L) {
+                removeViewWithNoAnimation(host, viewId, overlayEntity, idlingResource)
+                return
+            }
+
+
+            if (hasDynamicAnimation(overlayEntity)) {
+                removeViewWithDynamicAnimation(host, viewId, overlayEntity, idlingResource)
+            } else if (hasStaticAnimation(overlayEntity)) {
+                removeViewWithStaticAnimation(host, viewId, overlayEntity, idlingResource)
+            }
+
+        }
+
+        private fun removeViewWithNoAnimation(
+            host: OverlayHost,
+            viewId: Int?,
             overlayEntity: HideOverlayActionEntity,
             idlingResource: CountingIdlingResource
         ) {
             host.post(Runnable {
                 host.children.forEach { view ->
-                    if (view.id == viewIdentifier) {
+                    if (view.id == viewId) {
+
+                        (host as ViewGroup).setOnHierarchyChangeListener(object :
+                            ViewGroup.OnHierarchyChangeListener {
+                            override fun onChildViewRemoved(parent: View?, child: View?) {
+                                if (child != null && child.id == viewId) {
+                                    if (!idlingResource.isIdleNow) {
+                                        idlingResource.decrement()
+                                    }
+                                }
+
+                            }
+
+                            override fun onChildViewAdded(parent: View?, child: View?) {}
+                        })
+
+                        host.removeView(view)
+
+                        return@Runnable
+                    }
+                }
+            })
+
+        }
+
+        private fun removeViewWithDynamicAnimation(
+            host: OverlayHost,
+            viewId: Int?,
+            overlayEntity: HideOverlayActionEntity,
+            idlingResource: CountingIdlingResource
+        ) {
+
+        }
+
+        private fun removeViewWithStaticAnimation(
+            host: OverlayHost,
+            viewId: Int?,
+            overlayEntity: HideOverlayActionEntity,
+            idlingResource: CountingIdlingResource
+        ) {
+
+            host.post(Runnable {
+                host.children.forEach { view ->
+                    if (view.id == viewId) {
 
                         val animation = ObjectAnimator.ofFloat(view, View.ALPHA, 1F, 0F)
                         animation.duration = overlayEntity.animationDuration
@@ -95,6 +195,8 @@ class OverlayCommandHelper {
                     }
                 }
             })
+
+
         }
 
         fun clearScreen(

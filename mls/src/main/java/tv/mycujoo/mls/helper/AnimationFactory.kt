@@ -9,7 +9,7 @@ import tv.mycujoo.mls.widgets.ProportionalImageView
 class AnimationFactory {
 
     companion object {
-        fun create(
+        fun createStaticAnimation(
             overlayView: ProportionalImageView,
             animationType: AnimationType,
             animationDuration: Long
@@ -19,7 +19,9 @@ class AnimationFactory {
             when (animationType) {
                 NONE,
                 SLIDE_FROM_LEADING,
-                SLIDE_FROM_TRAILING -> {
+                SLIDE_FROM_TRAILING,
+                SLIDE_TO_LEADING,
+                SLIDE_TO_TRAILING -> {
                     // should not happen
                     animation = null
                 }
