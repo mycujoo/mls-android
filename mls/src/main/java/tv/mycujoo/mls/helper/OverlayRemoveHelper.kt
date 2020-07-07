@@ -13,36 +13,6 @@ import tv.mycujoo.mls.widgets.OverlayHost
 
 class OverlayRemoveHelper {
     companion object {
-
-        fun executeInFuture(
-            host: OverlayHost,
-            commandAction: CommandAction,
-            viewIdentifier: Int?,
-            idlingResource: CountingIdlingResource
-        ) {
-            host.postDelayed({
-                host.children.forEach { view ->
-                    if (view.id == viewIdentifier) {
-                        when {
-                            commandAction.verb.equals("remove", true) -> {
-                                host.removeView(view)
-                            }
-                            commandAction.verb.equals("hide", true) -> {
-                                view.visibility = View.INVISIBLE
-                            }
-                            commandAction.verb.equals("show", true) -> {
-                                view.visibility = View.VISIBLE
-                            }
-                        }
-
-                        if (!idlingResource.isIdleNow) {
-                            idlingResource.decrement()
-                        }
-                    }
-                }
-            }, commandAction.offset)
-        }
-
         fun isRemoveOrHide(commandAction: CommandAction): Boolean {
             return when {
                 commandAction.verb.equals("remove", true) -> {
