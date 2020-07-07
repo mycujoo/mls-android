@@ -2,6 +2,8 @@ package tv.mycujoo.mls.core
 
 import okhttp3.*
 import tv.mycujoo.domain.entity.ActionEntity
+import tv.mycujoo.domain.entity.AnimationType
+import tv.mycujoo.domain.entity.AnimationType.*
 import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.mls.entity.actions.ActionWrapper
 import tv.mycujoo.mls.entity.actions.CommandAction
@@ -107,15 +109,43 @@ class AnnotationBuilderImpl(
     }
 
     override fun buildLingeringAnnotations() {
-        pendingActionEntities.filter { isLingering(it) }.forEach {
+        pendingActionEntities.filter { isLingeringWithNoAnimation(it) || isLingeringPostAnimation(it) }
+            .forEach {
 
-            if (it.svgUrl != null) {
-                downloadSVGThenCallListener(
-                    it,
-                    callback = { actionEntity -> listener.onLingeringActionAvailable(actionEntity) })
-            } else {
-                listener.onLingeringActionAvailable(it)
+                if (it.svgUrl != null) {
+                    downloadSVGThenCallListener(
+                        it,
+                        callback = { actionEntity ->
+                            listener.onLingeringActionAvailable(
+                                actionEntity
+                            )
+                        })
+                } else {
+                    listener.onLingeringActionAvailable(it)
+                }
             }
+    }
+
+    override fun buildLingeringAnimations(isPlaying: Boolean) {
+        pendingActionEntities.filter { isLingeringDuringAnimation(it) }.forEach { actionEntity ->
+
+
+            if (actionEntity.svgUrl != null) {
+                downloadSVGThenCallListener(actionEntity) { actionEntityWithSvgData ->
+
+                    getAnimationPosition(actionEntity, currentTime)?.let { animationPosition ->
+
+                        listener.onLingeringAnimationAvailable(
+                            actionEntityWithSvgData,
+                            animationPosition,
+                            isPlaying
+                        )
+                    }
+                }
+            } else {
+                listener.onNewActionAvailable(actionEntity)
+            }
+
         }
     }
 
@@ -124,6 +154,15 @@ class AnnotationBuilderImpl(
             pendingActionEntities.filter { actionEntity -> actionEntity.type == ActionType.HIDE_OVERLAY }
                 .mapNotNull { it.customId }
                 .toList())
+    }
+
+
+    private fun getAnimationPosition(actionEntity: ActionEntity, currentTime: Long): Long? {
+        if (actionEntity.animationDuration == null) {
+            return null
+        }
+
+        return currentTime - actionEntity.offset
     }
 
     private fun isDismissingType(actionWrapper: ActionWrapper): Boolean {
@@ -151,11 +190,45 @@ class AnnotationBuilderImpl(
         }
     }
 
-    private fun isLingering(actionEntity: ActionEntity): Boolean {
+    private fun isLingeringWithNoAnimation(actionEntity: ActionEntity): Boolean {
         if (actionEntity.duration == null) {
             return false
         }
+
+        if (hasEnteringAnimation(actionEntity.animationType)) {
+            return false
+        }
+
         return (actionEntity.offset < currentTime) && (actionEntity.offset + actionEntity.duration > currentTime)
+    }
+
+    private fun hasEnteringAnimation(animationType: AnimationType): Boolean {
+        return when (animationType) {
+            NONE,
+            FADE_OUT -> {
+                false
+            }
+            FADE_IN,
+            SLIDE_FROM_LEADING,
+            SLIDE_FROM_TRAILING -> {
+                true
+            }
+            else -> false
+        }
+    }
+
+    private fun isLingeringPostAnimation(actionEntity: ActionEntity): Boolean {
+        if (actionEntity.duration == null || actionEntity.animationDuration == null) {
+            return false
+        }
+        return (actionEntity.offset + actionEntity.animationDuration < currentTime) && (actionEntity.offset + actionEntity.duration > currentTime)
+    }
+
+    private fun isLingeringDuringAnimation(actionEntity: ActionEntity): Boolean {
+        if (actionEntity.animationDuration == null) {
+            return false
+        }
+        return (actionEntity.offset < currentTime) && (actionEntity.offset + actionEntity.animationDuration > currentTime)
     }
 
     private fun isInCurrentTimeRange(actionEntity: ActionEntity): Boolean {

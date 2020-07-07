@@ -740,14 +740,14 @@ class PlayerViewWrapper @JvmOverloads constructor(
     }
 
     fun hideOverlay(viewId: String) {
-        viewIdentifierManager.getViewIdentifier(viewId)?.let {
+        viewIdentifierManager.getViewId(viewId)?.let {
             findViewById<ViewGroup>(it)?.visibility = View.INVISIBLE
 
         }
     }
 
     fun removeOverlay(viewId: String) {
-        viewIdentifierManager.getViewIdentifier(viewId)?.let {
+        viewIdentifierManager.getViewId(viewId)?.let {
             findViewById<ViewGroup>(it)?.let { overlayView -> overlayHost.removeView(overlayView) }
         }
     }
@@ -887,9 +887,9 @@ class PlayerViewWrapper @JvmOverloads constructor(
                 overlayEntity.positionGuide,
                 overlayEntity,
                 animation,
+                viewIdentifierManager,
                 idlingResource
             )
-
 
 
             viewIdentifierManager.storeViewId(proportionalImageView, overlayEntity.customId!!)
@@ -903,10 +903,11 @@ class PlayerViewWrapper @JvmOverloads constructor(
         idlingResource.increment()
         OverlayCommandHelper.removeView(
             overlayHost,
-            viewIdentifierManager.getViewIdentifier(hideOverlayActionEntity.customId!!),
+            viewIdentifierManager.getViewId(hideOverlayActionEntity.customId!!),
             hideOverlayActionEntity,
             idlingResource
         )
+        //todo: remove animation too
     }
 
 
@@ -944,9 +945,62 @@ class PlayerViewWrapper @JvmOverloads constructor(
         }
     }
 
+
+    fun onLingeringAnimationAvailable(
+        overlayEntity: ShowOverlayActionEntity,
+        animationPosition: Long,
+        isPlaying: Boolean
+    ) {
+        val proportionalImageView = OverlayFactory.create(context, overlayEntity.size)
+        try {
+            val svg: SVG
+            if (overlayEntity.svgInputStream != null) {
+                svg = SVG.getFromInputStream(overlayEntity.svgInputStream)
+            } else {
+                svg = SVG.getFromString(getTimeSvgString())
+            }
+            svg.setDocumentWidth("100%")
+            svg.setDocumentHeight("100%")
+            proportionalImageView.setSVG(svg)
+
+            OverlayViewHelper.addViewWithLingeringAnimation(
+                overlayHost,
+                proportionalImageView,
+                overlayEntity.positionGuide,
+                overlayEntity,
+                animationPosition,
+                isPlaying,
+                viewIdentifierManager,
+                idlingResource
+            )
+
+
+
+            viewIdentifierManager.storeViewId(proportionalImageView, overlayEntity.customId!!)
+
+        } catch (e: Exception) {
+            Log.e("PlayerView", "e: ${e.message}")
+        }
+    }
+
+    fun updateAnimationPosition(
+        actionEntity: ActionEntity,
+        animationPosition: Long,
+        isPlaying: Boolean
+    ) {
+        viewIdentifierManager.getAnimationByCustomId(actionEntity.customId)?.let { objectAnimator ->
+            objectAnimator.currentPlayTime = animationPosition
+            if (isPlaying) {
+                objectAnimator.resume()
+            } else {
+                objectAnimator.pause()
+            }
+        }
+    }
+
     fun clearScreen(customIdList: List<String>) {
         val viewIdentifierToBeCleared =
-            customIdList.map { viewIdentifierManager.getViewIdentifier(it) }
+            customIdList.map { viewIdentifierManager.getViewId(it) }
 
         OverlayCommandHelper.clearScreen(
             overlayHost,
@@ -954,6 +1008,14 @@ class PlayerViewWrapper @JvmOverloads constructor(
             idlingResource
         )
 
+    }
+
+    fun continueOverlayAnimations() {
+        viewIdentifierManager.getAnimations().forEach { it.resume() }
+    }
+
+    fun freezeOverlayAnimations() {
+        viewIdentifierManager.getAnimations().forEach { it.pause() }
     }
     /**endregion */
 

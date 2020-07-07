@@ -88,14 +88,42 @@ class Coordinator(
             override fun onLingeringActionAvailable(actionEntity: ActionEntity) {
                 when (actionEntity.type) {
                     UNKNOWN,
-                    HIDE_OVERLAY-> {
+                    HIDE_OVERLAY -> {
                         // do nothing, should not happen
                     }
                     SHOW_OVERLAY -> {
-                        playerViewWrapper.showLingeringOverlay(ShowOverlayMapper.mapToEntity(actionEntity))
+                        playerViewWrapper.showLingeringOverlay(
+                            ShowOverlayMapper.mapToEntity(
+                                actionEntity
+                            )
+                        )
                     }
                 }
 
+            }
+
+            override fun onLingeringAnimationAvailable(
+                actionEntity: ActionEntity,
+                animationPosition: Long,
+                isPlaying: Boolean
+            ) {
+                playerViewWrapper.onLingeringAnimationAvailable(
+                    ShowOverlayMapper.mapToEntity(
+                        actionEntity
+                    ), animationPosition, isPlaying
+                )
+            }
+
+            override fun updateAnimations(
+                actionEntity: ActionEntity,
+                animationPosition: Long,
+                isPlaying: Boolean
+            ) {
+                playerViewWrapper.updateAnimationPosition(
+                    actionEntity,
+                    animationPosition,
+                    isPlaying
+                )
             }
 
             override fun clearScreen(customIdList: List<String>) {
@@ -136,9 +164,13 @@ class Coordinator(
     /**endregion */
 
     /**region Over-ridden Functions*/
-    override fun onSeekHappened(exoplayer: SimpleExoPlayer) {
+    override fun onSeekHappened(exoPlayer: SimpleExoPlayer) {
+        annotationBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
+
         annotationBuilder.buildRemovalAnnotations()
         annotationBuilder.buildLingeringAnnotations()
+
+        annotationBuilder.buildLingeringAnimations(exoPlayer.isPlaying)
     }
     /**endregion */
 }

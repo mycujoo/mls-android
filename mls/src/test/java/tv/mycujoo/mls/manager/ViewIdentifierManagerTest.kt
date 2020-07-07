@@ -30,7 +30,7 @@ class ViewIdentifierManagerTest {
 
         viewIdentifierManager.storeViewId(view0, "show_overlay_action")
 
-        assertEquals(view0.id, viewIdentifierManager.getViewIdentifier("show_overlay_action"))
+        assertEquals(view0.id, viewIdentifierManager.getViewId("show_overlay_action"))
     }
 
     @Test
@@ -41,7 +41,7 @@ class ViewIdentifierManagerTest {
         viewIdentifierManager.storeViewId(view0, "show_overlay_action")
         viewIdentifierManager.storeViewId(view1, "show_scoreboard_action")
 
-        assertEquals(view0.id, viewIdentifierManager.getViewIdentifier("show_overlay_action"))
-        assertEquals(view1.id, viewIdentifierManager.getViewIdentifier("show_scoreboard_action"))
+        assertEquals(view0.id, viewIdentifierManager.getViewId("show_overlay_action"))
+        assertEquals(view1.id, viewIdentifierManager.getViewId("show_scoreboard_action"))
     }
 }

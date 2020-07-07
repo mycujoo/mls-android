@@ -23,36 +23,38 @@ class GetAnnotationUseCase {
                     getShowOverLayAction(
                         "scoreboard1",
                         7000L,
-                        10000L,
+                        60000L,
                         PositionGuide(leading = 5F, bottom = 5F),
-                        AnimationType.SLIDE_FROM_LEADING,
-                        1000L
+                        AnimationType.NONE,
+                        0L
                     ),
                     getShowOverLayAction(
                         "scoreboard2",
                         7000L,
-                        10000L,
+                        60000L,
                         PositionGuide(trailing = 5F, bottom = 5F),
                         AnimationType.SLIDE_FROM_TRAILING,
                         6000L
                     ),
                     getShowOverLayAction(
-                        "scoreboard",
-                        9000L,
-                        10000L,
+                        "scoreboard5",
+                        8000L,
+                        120000L,
                         PositionGuide(leading = 5F, top = 5F),
                         AnimationType.SLIDE_FROM_TRAILING,
-                        6000L
+                        60000L
                     ),
-                    getShowOverLayAction(
-                        "scoreboard3",
-                        50000L,
-                        40000L,
-                        PositionGuide(leading = 5F, bottom = 5F),
-                        AnimationType.FADE_IN,
-                        1000L
-                    )
-//                    getHideOverlayAction("scoreboard1", 15000L),
+//                    getShowOverLayAction(
+//                        "scoreboard4",
+//                        50000L,
+//                        40000L,
+//                        PositionGuide(leading = 5F, bottom = 5F),
+//                        AnimationType.FADE_IN,
+//                        1000L
+//                    ),
+                    getHideOverlayAction("scoreboard1", 67000L),
+                    getHideOverlayAction("scoreboard2", 67000L),
+                    getHideOverlayAction("scoreboard5", 128000L)
 //                    getHideOverlayAction("scoreboard2", 90000L)
                 )
             )

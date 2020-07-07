@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.core
 
 import com.google.android.exoplayer2.Player.STATE_BUFFERING
+import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ui.TimeBar
 import tv.mycujoo.mls.cordinator.CoordinatorInterface
@@ -21,6 +22,16 @@ class VideoPlayerCoordinator(
                 handleBufferingProgressBarVisibility(playbackState, playWhenReady)
 
                 handleLiveModeState()
+
+                handlePlayStatusOfOverlayAnimationsWhileBuffering(playbackState, playWhenReady)
+
+            }
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                super.onIsPlayingChanged(isPlaying)
+
+                handlePlayStatusOfOverlayAnimationsOnPlayPause(isPlaying)
+
             }
 
         }
@@ -69,6 +80,27 @@ class VideoPlayerCoordinator(
         } else {
             // VOD
             playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.VOD)
+        }
+    }
+
+    private fun handlePlayStatusOfOverlayAnimationsOnPlayPause(isPlaying: Boolean) {
+        if (isPlaying) {
+            playerViewWrapper.continueOverlayAnimations()
+        } else {
+            playerViewWrapper.freezeOverlayAnimations()
+        }
+    }
+
+    private fun handlePlayStatusOfOverlayAnimationsWhileBuffering(
+        playbackState: Int,
+        playWhenReady: Boolean
+    ) {
+        if (playbackState == STATE_BUFFERING && playWhenReady) {
+            playerViewWrapper.freezeOverlayAnimations()
+
+        } else if (playbackState == STATE_READY && playWhenReady) {
+            playerViewWrapper.continueOverlayAnimations()
+
         }
     }
 
