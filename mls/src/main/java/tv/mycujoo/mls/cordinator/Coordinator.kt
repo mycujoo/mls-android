@@ -102,15 +102,31 @@ class Coordinator(
 
             }
 
-            override fun onLingeringAnimationAvailable(
+            override fun onLingeringIntroAnimationAvailable(
                 actionEntity: ActionEntity,
                 animationPosition: Long,
                 isPlaying: Boolean
             ) {
-                playerViewWrapper.onLingeringAnimationAvailable(
+                playerViewWrapper.onLingeringIntroAnimationAvailable(
                     ShowOverlayMapper.mapToEntity(
                         actionEntity
                     ), animationPosition, isPlaying
+                )
+            }
+
+            override fun onLingeringOutroAnimationAvailable(
+                relatedShowActionEntity: ActionEntity,
+                hideActionEntity: ActionEntity,
+                animationPosition: Long,
+                isPlaying: Boolean
+            ) {
+                playerViewWrapper.onLingeringOutroAnimationAvailable(
+                    ShowOverlayMapper.mapToEntity(
+                        relatedShowActionEntity
+                    ),
+                    HideOverlayMapper.mapToEntity(hideActionEntity),
+                    animationPosition,
+                    isPlaying
                 )
             }
 
@@ -170,7 +186,8 @@ class Coordinator(
         annotationBuilder.buildRemovalAnnotations()
         annotationBuilder.buildLingeringAnnotations()
 
-        annotationBuilder.buildLingeringAnimations(exoPlayer.isPlaying)
+        annotationBuilder.buildLingeringIntroAnimations(exoPlayer.isPlaying)
+        annotationBuilder.buildLingeringOutroAnimations(exoPlayer.isPlaying)
     }
     /**endregion */
 }

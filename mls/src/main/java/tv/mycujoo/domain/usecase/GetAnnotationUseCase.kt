@@ -60,9 +60,14 @@ class GetAnnotationUseCase {
 //                        AnimationType.FADE_IN,
 //                        1000L
 //                    ),
-                    getHideOverlayAction("scoreboard0", 12000L, AnimationType.FADE_OUT),
-                    getHideOverlayAction("scoreboard1", 12000L, AnimationType.NONE),
-                    getHideOverlayAction("scoreboard2", 12000L, AnimationType.SLIDE_TO_LEADING)
+                    getHideOverlayAction("scoreboard0", 12000L, AnimationType.FADE_OUT, 1000L),
+                    getHideOverlayAction("scoreboard1", 12000L, AnimationType.NONE, 1000L),
+                    getHideOverlayAction(
+                        "scoreboard2",
+                        12000L,
+                        AnimationType.SLIDE_TO_LEADING,
+                        60000L
+                    )
 //                    getHideOverlayAction("scoreboard5", 128000L, AnimationType.FADE_OUT)
 //                    getHideOverlayAction("scoreboard2", 90000L)
                 )
@@ -97,7 +102,8 @@ class GetAnnotationUseCase {
         private fun getHideOverlayAction(
             customId: String,
             offset: Long,
-            animationType: AnimationType
+            animationType: AnimationType,
+            animationDuration: Long
         ): ActionEntity {
             return ActionEntity(
                 "f43f9ajf9dfjSX",
@@ -110,7 +116,7 @@ class GetAnnotationUseCase {
                 Pair(300F, 150F),
                 null,
                 animationType,
-                1000L
+                animationDuration
             )
         }
     }

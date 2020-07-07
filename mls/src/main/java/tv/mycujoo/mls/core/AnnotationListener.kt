@@ -28,11 +28,25 @@ interface AnnotationListener {
      * add an overlay which:
      *
      * offset has passed,
-     * has animation, and it's within the animation duration
+     * has an Intro animation, and it's within the animation duration
      *
      */
-    fun onLingeringAnimationAvailable(
+    fun onLingeringIntroAnimationAvailable(
         actionEntity: ActionEntity,
+        animationPosition: Long,
+        isPlaying: Boolean
+    )
+
+    /**
+     * add an overlay which:
+     *
+     * duration has passed,
+     * has an Outro animation, and it's within the animation duration
+     *
+     */
+    fun onLingeringOutroAnimationAvailable(
+        relatedShowActionEntity: ActionEntity,
+        hideActionEntity: ActionEntity,
         animationPosition: Long,
         isPlaying: Boolean
     )

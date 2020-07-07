@@ -946,7 +946,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
     }
 
 
-    fun onLingeringAnimationAvailable(
+    fun onLingeringIntroAnimationAvailable(
         overlayEntity: ShowOverlayActionEntity,
         animationPosition: Long,
         isPlaying: Boolean
@@ -963,11 +963,50 @@ class PlayerViewWrapper @JvmOverloads constructor(
             svg.setDocumentHeight("100%")
             proportionalImageView.setSVG(svg)
 
-            OverlayViewHelper.addViewWithLingeringAnimation(
+            OverlayViewHelper.addViewWithLingeringIntroAnimation(
                 overlayHost,
                 proportionalImageView,
                 overlayEntity.positionGuide,
                 overlayEntity,
+                animationPosition,
+                isPlaying,
+                viewIdentifierManager,
+                idlingResource
+            )
+
+
+
+            viewIdentifierManager.storeViewId(proportionalImageView, overlayEntity.customId!!)
+
+        } catch (e: Exception) {
+            Log.e("PlayerView", "e: ${e.message}")
+        }
+    }
+
+    fun onLingeringOutroAnimationAvailable(
+        overlayEntity: ShowOverlayActionEntity,
+        hideOverlayActionEntity: HideOverlayActionEntity,
+        animationPosition: Long,
+        isPlaying: Boolean
+    ) {
+        val proportionalImageView = OverlayFactory.create(context, overlayEntity.size)
+        try {
+            val svg: SVG
+            if (overlayEntity.svgInputStream != null) {
+                svg = SVG.getFromInputStream(overlayEntity.svgInputStream)
+            } else {
+                svg = SVG.getFromString(getTimeSvgString())
+            }
+            svg.setDocumentWidth("100%")
+            svg.setDocumentHeight("100%")
+            proportionalImageView.setSVG(svg)
+
+            OverlayViewHelper.addViewWithLingeringOutroAnimation(
+                overlayHost,
+                proportionalImageView,
+                overlayEntity.positionGuide,
+                overlayEntity,
+                hideOverlayActionEntity,
                 animationPosition,
                 isPlaying,
                 viewIdentifierManager,

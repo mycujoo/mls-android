@@ -27,8 +27,12 @@ abstract class AnnotationBuilder {
     abstract fun buildRemovalAnnotations()
 
     /**
-     * returns actions which are in their animation time
+     * returns actions which are in their Intro animation time
      */
-    abstract fun buildLingeringAnimations(isPlaying: Boolean)
+    abstract fun buildLingeringIntroAnimations(isPlaying: Boolean)
+    /**
+     * returns actions which are in their Outro animation time
+     */
+    abstract fun buildLingeringOutroAnimations(isPlaying: Boolean)
 
 }
