@@ -39,10 +39,10 @@ class GetAnnotationUseCase {
                     getShowOverLayAction(
                         "scoreboard2",
                         7000L,
-                        60000L,
-                        PositionGuide(trailing = 5F, bottom = 5F),
-                        AnimationType.NONE,
-                        0L
+                        5000L,
+                        PositionGuide(trailing = 5F, top = 5F),
+                        AnimationType.SLIDE_FROM_LEADING,
+                        2000L
                     ),
 //                    getShowOverLayAction(
 //                        "scoreboard5",
@@ -62,7 +62,7 @@ class GetAnnotationUseCase {
 //                    ),
                     getHideOverlayAction("scoreboard0", 12000L, AnimationType.FADE_OUT),
                     getHideOverlayAction("scoreboard1", 12000L, AnimationType.NONE),
-                    getHideOverlayAction("scoreboard2", 67000L, AnimationType.SLIDE_TO_LEADING)
+                    getHideOverlayAction("scoreboard2", 12000L, AnimationType.SLIDE_TO_LEADING)
 //                    getHideOverlayAction("scoreboard5", 128000L, AnimationType.FADE_OUT)
 //                    getHideOverlayAction("scoreboard2", 90000L)
                 )

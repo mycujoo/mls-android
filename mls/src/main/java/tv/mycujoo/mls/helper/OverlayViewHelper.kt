@@ -7,10 +7,14 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.children
 import androidx.test.espresso.idling.CountingIdlingResource
+import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.AnimationType.*
+import tv.mycujoo.domain.entity.HideOverlayActionEntity
 import tv.mycujoo.domain.entity.PositionGuide
 import tv.mycujoo.domain.entity.ShowOverlayActionEntity
+import tv.mycujoo.mls.entity.actions.CommandAction
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ProportionalImageView
@@ -18,6 +22,7 @@ import tv.mycujoo.mls.widgets.ProportionalImageView
 class OverlayViewHelper {
     companion object {
 
+        /**region Add View*/
         fun addView(
             host: OverlayHost,
             proportionalImageView: ProportionalImageView,
@@ -27,44 +32,38 @@ class OverlayViewHelper {
             viewIdentifierManager: ViewIdentifierManager,
             idlingResource: CountingIdlingResource
         ) {
-            when (overlayEntity.animationType) {
-                NONE -> {
-                    addViewWithNoAnimation(
-                        host,
-                        proportionalImageView,
-                        positionGuide,
-                        overlayEntity,
-                        idlingResource
-                    )
-                }
-                FADE_IN -> {
 
-                    addViewWithStaticAnimation(
-                        host,
-                        proportionalImageView,
-                        positionGuide,
-                        overlayEntity,
-                        objectAnimator,
-                        viewIdentifierManager,
-                        idlingResource
-                    )
-                }
-                FADE_OUT -> {
-                    // should not happen
-                }
-                SLIDE_FROM_LEADING,
-                SLIDE_FROM_TRAILING -> {
-                    addViewWithDynamicAnimation(
-                        host,
-                        proportionalImageView,
-                        positionGuide,
-                        overlayEntity,
-                        viewIdentifierManager,
-                        idlingResource
-                    )
-                }
+            if (hasNoAnimation(overlayEntity)) {
+                addViewWithNoAnimation(
+                    host,
+                    proportionalImageView,
+                    positionGuide,
+                    overlayEntity,
+                    idlingResource
+                )
+                return
             }
 
+            if (hasDynamicIntroAnimation(overlayEntity.animationType)) {
+                addViewWithDynamicAnimation(
+                    host,
+                    proportionalImageView,
+                    positionGuide,
+                    overlayEntity,
+                    viewIdentifierManager,
+                    idlingResource
+                )
+            } else if (hasStaticIntroAnimation(overlayEntity.animationType)) {
+                addViewWithStaticAnimation(
+                    host,
+                    proportionalImageView,
+                    positionGuide,
+                    overlayEntity,
+                    objectAnimator,
+                    viewIdentifierManager,
+                    idlingResource
+                )
+            }
 
         }
 
@@ -554,8 +553,235 @@ class OverlayViewHelper {
 
         }
 
-        /**region Private Functions*/
+        /**endregion */
 
+
+        /**region Remove View*/
+        fun removeView(
+            host: OverlayHost,
+            viewId: Int?,
+            overlayEntity: HideOverlayActionEntity,
+            idlingResource: CountingIdlingResource
+        ) {
+
+            if (viewId == null) {
+                return
+            }
+
+            if (overlayEntity.animationType == NONE || overlayEntity.animationDuration <= 0L) {
+                removeViewWithNoAnimation(host, viewId, overlayEntity, idlingResource)
+                return
+            }
+
+
+            if (hasDynamicOutroAnimation(overlayEntity.animationType)) {
+                removeViewWithDynamicAnimation(host, viewId, overlayEntity, idlingResource)
+            } else if (hasStaticOutroAnimation(overlayEntity.animationType)) {
+                removeViewWithStaticAnimation(host, viewId, overlayEntity, idlingResource)
+            }
+
+        }
+
+        private fun removeViewWithNoAnimation(
+            host: OverlayHost,
+            viewId: Int,
+            overlayEntity: HideOverlayActionEntity,
+            idlingResource: CountingIdlingResource
+        ) {
+            host.post(Runnable {
+                host.children.forEach { view ->
+                    if (view.id == viewId) {
+
+                        (host as ViewGroup).setOnHierarchyChangeListener(object :
+                            ViewGroup.OnHierarchyChangeListener {
+                            override fun onChildViewRemoved(parent: View?, child: View?) {
+                                if (child != null && child.id == viewId) {
+                                    if (!idlingResource.isIdleNow) {
+                                        idlingResource.decrement()
+                                    }
+                                }
+
+                            }
+
+                            override fun onChildViewAdded(parent: View?, child: View?) {}
+                        })
+
+                        host.removeView(view)
+
+                        return@Runnable
+                    }
+                }
+            })
+
+        }
+
+        private fun removeViewWithDynamicAnimation(
+            host: OverlayHost,
+            viewId: Int,
+            overlayEntity: HideOverlayActionEntity,
+            idlingResource: CountingIdlingResource
+        ) {
+
+        }
+
+        private fun removeViewWithStaticAnimation(
+            host: OverlayHost,
+            viewId: Int,
+            overlayEntity: HideOverlayActionEntity,
+            idlingResource: CountingIdlingResource
+        ) {
+
+            host.post(Runnable {
+                host.children.forEach { view ->
+                    if (view.id == viewId) {
+
+                        val animation = ObjectAnimator.ofFloat(view, View.ALPHA, 1F, 0F)
+                        animation.duration = overlayEntity.animationDuration
+
+                        animation.addListener(object : Animator.AnimatorListener {
+                            override fun onAnimationStart(animation: Animator?) {
+                            }
+
+                            override fun onAnimationEnd(animation: Animator?) {
+                                host.removeView(view)
+                            }
+
+                            override fun onAnimationRepeat(animation: Animator?) {
+                            }
+
+                            override fun onAnimationCancel(animation: Animator?) {
+                            }
+
+                        })
+
+                        animation.start()
+
+
+                        if (!idlingResource.isIdleNow) {
+                            idlingResource.decrement()
+                        }
+                        return@Runnable
+                    }
+                }
+            })
+
+
+        }
+
+        fun clearScreen(
+            host: OverlayHost,
+            viewIdentifierToBeCleared: List<Int?>,
+            idlingResource: CountingIdlingResource
+        ) {
+
+            host.post(Runnable {
+                host.children.forEach { view ->
+                    if (viewIdentifierToBeCleared.contains(view.id)) {
+                        host.removeView(view)
+                    }
+                }
+
+                if (!idlingResource.isIdleNow) {
+                    idlingResource.decrement()
+                }
+                return@Runnable
+            })
+
+
+        }
+        /**endregion */
+
+
+        /**region Private Functions*/
+        fun isRemoveOrHide(commandAction: CommandAction): Boolean {
+            return when {
+                commandAction.verb.equals("remove", true) -> {
+                    true
+                }
+                commandAction.verb.equals("hide", true) -> {
+                    true
+                }
+                else -> {
+                    false
+                }
+            }
+        }
+
+        private fun hasNoAnimation(overlayEntity: HideOverlayActionEntity): Boolean {
+            return overlayEntity.animationType == NONE
+        }
+
+        private fun hasNoAnimation(overlayEntity: ShowOverlayActionEntity): Boolean {
+            return overlayEntity.animationType == NONE
+        }
+
+        private fun hasDynamicIntroAnimation(animationType: AnimationType): Boolean {
+            return when (animationType) {
+                NONE,
+                FADE_IN,
+                FADE_OUT,
+                SLIDE_TO_LEADING,
+                SLIDE_TO_TRAILING -> {
+                    false
+                }
+
+                SLIDE_FROM_LEADING,
+                SLIDE_FROM_TRAILING -> {
+                    true
+                }
+            }
+        }
+
+        private fun hasStaticIntroAnimation(animationType: AnimationType): Boolean {
+            return when (animationType) {
+                FADE_IN -> {
+                    true
+                }
+
+                NONE,
+                FADE_OUT,
+                SLIDE_FROM_LEADING,
+                SLIDE_FROM_TRAILING,
+                SLIDE_TO_LEADING,
+                SLIDE_TO_TRAILING -> {
+                    false
+                }
+            }
+        }
+
+        private fun hasDynamicOutroAnimation(animationType: AnimationType): Boolean {
+            return when (animationType) {
+                NONE,
+                FADE_IN,
+                FADE_OUT,
+                SLIDE_FROM_LEADING,
+                SLIDE_FROM_TRAILING -> {
+                    false
+                }
+
+                SLIDE_TO_LEADING,
+                SLIDE_TO_TRAILING -> {
+                    true
+                }
+            }
+        }
+
+        private fun hasStaticOutroAnimation(animationType: AnimationType): Boolean {
+            return when (animationType) {
+                FADE_OUT -> {
+                    true
+                }
+
+                NONE,
+                FADE_IN,
+                SLIDE_FROM_LEADING,
+                SLIDE_FROM_TRAILING,
+                SLIDE_TO_LEADING,
+                SLIDE_TO_TRAILING -> {
+                    false
+                }
+            }
+        }
 
         private fun setHCenterConstrains(
             layoutParams: ConstraintLayout.LayoutParams,
@@ -628,23 +854,5 @@ class OverlayViewHelper {
         }
 
         /**endregion */
-
-
-        fun removeInFuture(
-            host: OverlayHost,
-            overlayView: ViewGroup,
-            dismissIn: Long,
-            idlingResource: CountingIdlingResource
-        ) {
-            host.postDelayed({
-                host.removeView(overlayView)
-
-                if (!idlingResource.isIdleNow) {
-                    idlingResource.decrement()
-                }
-
-            }, dismissIn)
-        }
-
     }
 }

@@ -9,7 +9,7 @@ import tv.mycujoo.mls.entity.actions.ActionWrapper
 import tv.mycujoo.mls.entity.actions.CommandAction
 import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
 import tv.mycujoo.mls.entity.actions.ShowScoreboardOverlayAction
-import tv.mycujoo.mls.helper.OverlayRemoveHelper.Companion.isRemoveOrHide
+import tv.mycujoo.mls.helper.OverlayViewHelper.Companion.isRemoveOrHide
 import java.io.IOException
 
 class AnnotationBuilderImpl(
