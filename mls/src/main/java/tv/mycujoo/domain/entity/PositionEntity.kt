@@ -12,10 +12,10 @@ package tv.mycujoo.domain.entity
  * ranges from -50 to 50
  */
 data class PositionGuide(
-    val leading: Float? = null,
-    val trailing: Float? = null,
-    val top: Float? = null,
-    val bottom: Float? = null,
-    val vCenter: Float? = null,
-    val hCenter: Float? = null
+    var leading: Float? = null,
+    var trailing: Float? = null,
+    var top: Float? = null,
+    var bottom: Float? = null,
+    var vCenter: Float? = null,
+    var hCenter: Float? = null
 )
