@@ -12,10 +12,6 @@ import tv.mycujoo.domain.usecase.GetAnnotationUseCase
 import tv.mycujoo.mls.core.AnnotationBuilder
 import tv.mycujoo.mls.core.AnnotationBuilderImpl
 import tv.mycujoo.mls.core.AnnotationListener
-import tv.mycujoo.mls.entity.actions.ActionWrapper
-import tv.mycujoo.mls.entity.actions.CommandAction
-import tv.mycujoo.mls.entity.actions.ShowAnnouncementOverlayAction
-import tv.mycujoo.mls.entity.actions.ShowScoreboardOverlayAction
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
@@ -38,38 +34,6 @@ class Coordinator(
         initEventListener(exoPlayer)
 
         val annotationListener = object : AnnotationListener {
-            override fun onNewActionWrapperAvailable(actionWrapper: ActionWrapper) {
-                when (actionWrapper.action) {
-                    is ShowAnnouncementOverlayAction -> {
-                        playerViewWrapper.showAnnouncementOverLay(actionWrapper.action as ShowAnnouncementOverlayAction)
-                    }
-                    is ShowScoreboardOverlayAction -> {
-                        playerViewWrapper.showScoreboardOverlay(actionWrapper.action as ShowScoreboardOverlayAction)
-                    }
-                    is CommandAction -> {
-                        playerViewWrapper.executeCommand(actionWrapper.action as CommandAction)
-                    }
-                    else -> {
-                    }
-                }
-            }
-
-            override fun onNewRemovalWrapperAvailable(actionWrapper: ActionWrapper) {
-                when (actionWrapper.action) {
-                    is ShowAnnouncementOverlayAction -> {
-                        playerViewWrapper.hideOverlay((actionWrapper.action as ShowAnnouncementOverlayAction).viewId)
-                    }
-                    is ShowScoreboardOverlayAction -> {
-                        playerViewWrapper.hideOverlay((actionWrapper.action as ShowScoreboardOverlayAction).viewId)
-                    }
-                    is CommandAction -> {
-                        playerViewWrapper.executeCommand(actionWrapper.action as CommandAction)
-                    }
-                    else -> {
-                    }
-                }
-            }
-
             override fun onNewActionAvailable(actionEntity: ActionEntity) {
 
                 when (actionEntity.type) {
@@ -149,7 +113,6 @@ class Coordinator(
         annotationBuilder = AnnotationBuilderImpl(annotationListener, okHttpClient)
         annotationBuilder.buildPendingAnnotationsForCurrentTime()
 
-        annotationBuilder.addPendingActionsDeprecated(api.getActions())
         annotationBuilder.addPendingActions(GetAnnotationUseCase.result().actions)
 
         val runnable = object : Runnable {
@@ -171,7 +134,7 @@ class Coordinator(
                 super.onPositionDiscontinuity(reason)
                 println("MLS-App Coordinator - onPositionDiscontinuity() reason-> $reason")
                 annotationBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
-                annotationBuilder.buildRemovalAnnotationsUpToCurrentTime()
+//                annotationBuilder.buildRemovalAnnotationsUpToCurrentTime()
             }
         }
         exoPlayer.addListener(seekInterruptionEventListener)

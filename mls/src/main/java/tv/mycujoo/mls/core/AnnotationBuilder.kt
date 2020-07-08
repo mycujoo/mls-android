@@ -1,12 +1,8 @@
 package tv.mycujoo.mls.core
 
 import tv.mycujoo.domain.entity.ActionEntity
-import tv.mycujoo.mls.entity.actions.ActionWrapper
 
 abstract class AnnotationBuilder {
-    @Deprecated("use @Class ActionEntity")
-    abstract fun addPendingActionsDeprecated(actions: List<ActionWrapper>)
-
     /**
      * adds ActionEntity which will be processed to create Overlays
      */
@@ -14,7 +10,6 @@ abstract class AnnotationBuilder {
 
     abstract fun setCurrentTime(time: Long, playing: Boolean)
     abstract fun buildPendingAnnotationsForCurrentTime()
-    abstract fun buildRemovalAnnotationsUpToCurrentTime()
 
     /**
      * returns list of actions, which their 'offset' is passed, but not their duration [offset + duration]

@@ -1,41 +1,9 @@
 package tv.mycujoo.mls.network
 
-import tv.mycujoo.mls.entity.actions.HighlightAction
-import tv.mycujoo.mls.entity.actions.TimeLineAction
-import tv.mycujoo.mls.entity.msc.TimeLineItem
 import tv.mycujoo.mls.entity.actions.*
+import tv.mycujoo.mls.entity.msc.TimeLineItem
 
 class RemoteApi : Api {
-
-    override fun getActions(): List<ActionWrapper> {
-        val listOfActionWrapper = ArrayList<ActionWrapper>()
-
-        val actionRootSourceData = OldActionRootSourceData()
-        actionRootSourceData.id = "id_1000"
-        actionRootSourceData.time = 10000L
-
-
-        val sampleShowAnnouncementOverlayAction = getSampleShowAnnouncementOverlayAction()
-        val sampleShowScoreboardAction = getSampleShowScoreboardAction()
-
-        val sampleCommandAction = getSampleCommandAction()
-
-        actionRootSourceData.actionsList.add(sampleShowAnnouncementOverlayAction)
-        actionRootSourceData.actionsList.add(sampleShowScoreboardAction)
-        actionRootSourceData.actionsList.add(sampleCommandAction)
-
-        actionRootSourceData.build()
-
-        actionRootSourceData.actionsList.forEach { abstractAction: AbstractAction ->
-            val actionWrapper = ActionWrapper()
-            actionWrapper.action = abstractAction
-            actionWrapper.offset = 10000L
-
-            listOfActionWrapper.add(actionWrapper)
-        }
-
-        return listOfActionWrapper
-    }
 
     private fun getSampleShowAnnouncementOverlayAction(): ShowAnnouncementOverlayAction {
         val showAnnouncementOverlayAction = ShowAnnouncementOverlayAction()
