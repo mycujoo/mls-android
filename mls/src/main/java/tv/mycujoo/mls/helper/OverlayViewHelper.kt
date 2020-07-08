@@ -9,11 +9,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 import androidx.test.espresso.idling.CountingIdlingResource
-import tv.mycujoo.domain.entity.AnimationType
+import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.AnimationType.*
-import tv.mycujoo.domain.entity.HideOverlayActionEntity
-import tv.mycujoo.domain.entity.PositionGuide
-import tv.mycujoo.domain.entity.ShowOverlayActionEntity
 import tv.mycujoo.mls.entity.actions.CommandAction
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.OverlayHost
@@ -720,6 +717,100 @@ class OverlayViewHelper {
                     idlingResource.decrement()
                 }
 
+            }
+
+        }
+
+        /**endregion */
+
+        /**region Animating Outro in normal playback*/
+        fun addOutroAnimationToCurrentOverlay(
+            host: OverlayHost,
+            customId: String?,
+            hideOverlayEntity: ActionEntity,
+            viewIdentifierManager: ViewIdentifierManager
+        ) {
+            if (customId.isNullOrEmpty() || hideOverlayEntity.animationDuration == null) {
+                return
+            }
+
+            val viewId = viewIdentifierManager.getViewId(customId) ?: return
+            host.children.first { it.id == viewId }.let { proportionalImageView ->
+                host.post {
+                    when (hideOverlayEntity.animationType) {
+                        NONE,
+                        FADE_OUT,
+                        FADE_IN -> {
+                            // should not happen
+                        }
+                        SLIDE_TO_LEADING -> {
+
+                            val animation = ObjectAnimator.ofFloat(
+                                proportionalImageView,
+                                View.X,
+                                proportionalImageView.x,
+                                -proportionalImageView.width.toFloat()
+                            )
+                            animation.duration = hideOverlayEntity.animationDuration
+                            animation.addListener(object : Animator.AnimatorListener {
+                                override fun onAnimationRepeat(animation: Animator?) {
+                                }
+
+                                override fun onAnimationEnd(animation: Animator?) {
+
+                                }
+
+                                override fun onAnimationCancel(animation: Animator?) {
+
+                                }
+
+                                override fun onAnimationStart(animation: Animator?) {
+                                    proportionalImageView.visibility = View.VISIBLE
+                                }
+
+                            })
+
+                            viewIdentifierManager.storeAnimation(
+                                proportionalImageView.id,
+                                animation
+                            )
+                            animation.start()
+                        }
+                        SLIDE_TO_TRAILING -> {
+                            val animation = ObjectAnimator.ofFloat(
+                                proportionalImageView,
+                                View.X,
+                                proportionalImageView.x,
+                                proportionalImageView.width.toFloat()
+                            )
+                            animation.duration = hideOverlayEntity.animationDuration
+                            animation.addListener(object : Animator.AnimatorListener {
+                                override fun onAnimationRepeat(animation: Animator?) {
+                                }
+
+                                override fun onAnimationEnd(animation: Animator?) {
+
+                                }
+
+                                override fun onAnimationCancel(animation: Animator?) {
+
+                                }
+
+                                override fun onAnimationStart(animation: Animator?) {
+                                    proportionalImageView.visibility = View.VISIBLE
+
+                                }
+
+                            })
+                            viewIdentifierManager.storeAnimation(
+                                proportionalImageView.id,
+                                animation
+                            )
+                            animation.start()
+                        }
+                    }
+
+                }
             }
 
         }

@@ -126,6 +126,29 @@ class AnnotationBuilderImpl(
             }
     }
 
+    override fun buildPendingOutroAnimations() {
+        pendingActionEntities.filter { it.type == ActionType.HIDE_OVERLAY }.forEach { hideAction ->
+            pendingActionEntities.firstOrNull {
+                it.customId == hideAction.customId &&
+                        isPendingOutroAnimation(it, hideAction)
+            }
+                ?.let { relatedShowAction ->
+                    getOutroAnimationPosition(
+                        relatedShowAction,
+                        currentTime
+                    )?.let { animationPosition ->
+
+                        listener.onNewOutroAnimationAvailable(
+                            relatedShowAction,
+                            hideAction
+                        )
+                    }
+
+                }
+        }
+
+    }
+
     override fun buildLingeringIntroAnimations(isPlaying: Boolean) {
         pendingActionEntities.filter { isLingeringDuringIntroAnimation(it) }
             .forEach { actionEntity ->
@@ -278,6 +301,16 @@ class AnnotationBuilderImpl(
             return false
         }
         return (showAction.offset + showAction.duration + hideAction.animationDuration > currentTime) && (showAction.offset + showAction.duration < currentTime)
+    }
+
+    private fun isPendingOutroAnimation(
+        showAction: ActionEntity,
+        hideAction: ActionEntity
+    ): Boolean {
+        if (showAction.duration == null || hideAction.animationDuration == null) {
+            return false
+        }
+        return (showAction.offset + showAction.duration >= currentTime) && (showAction.offset + showAction.duration < currentTime + 1000L)
     }
 
     private fun isInCurrentTimeRange(actionEntity: ActionEntity): Boolean {

@@ -36,7 +36,10 @@ import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.entity.actions.*
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.extensions.getDisplaySize
-import tv.mycujoo.mls.helper.*
+import tv.mycujoo.mls.helper.AnimationFactory
+import tv.mycujoo.mls.helper.OverlayFactory
+import tv.mycujoo.mls.helper.OverlayViewHelper
+import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
 import tv.mycujoo.mls.manager.HighlightMarkerManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.PlayerViewWrapper.LiveState.*
@@ -1013,8 +1016,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
                 idlingResource
             )
 
-
-
             viewIdentifierManager.storeViewId(proportionalImageView, overlayEntity.customId!!)
 
         } catch (e: Exception) {
@@ -1022,19 +1023,17 @@ class PlayerViewWrapper @JvmOverloads constructor(
         }
     }
 
-    fun updateAnimationPosition(
-        actionEntity: ActionEntity,
-        animationPosition: Long,
-        isPlaying: Boolean
+    fun onNewOutroAnimationAvailable(
+        relatedActionEntity: ActionEntity,
+        hideActionEntity: ActionEntity
     ) {
-        viewIdentifierManager.getAnimationByCustomId(actionEntity.customId)?.let { objectAnimator ->
-            objectAnimator.currentPlayTime = animationPosition
-            if (isPlaying) {
-                objectAnimator.resume()
-            } else {
-                objectAnimator.pause()
-            }
-        }
+
+        OverlayViewHelper.addOutroAnimationToCurrentOverlay(
+            overlayHost,
+            relatedActionEntity.customId,
+            hideActionEntity,
+            viewIdentifierManager
+        )
     }
 
     fun clearScreen(customIdList: List<String>) {

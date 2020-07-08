@@ -52,13 +52,12 @@ interface AnnotationListener {
     )
 
     /**
-     * Can not be used unless clear screen is revisited
-     * update currently on-screen overlay
+     * adds Outro animation to a currently displaying overlay
+     *
      */
-    fun updateAnimations(
+    fun onNewOutroAnimationAvailable(
         actionEntity: ActionEntity,
-        animationPosition: Long,
-        isPlaying: Boolean
+        hideActionEntity: ActionEntity
     )
 
     fun clearScreen(customIdList: List<String>)

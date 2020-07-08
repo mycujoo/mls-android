@@ -27,6 +27,11 @@ abstract class AnnotationBuilder {
     abstract fun buildRemovalAnnotations()
 
     /**
+     * returns actions which are about to go to their outro animation
+     */
+    abstract fun buildPendingOutroAnimations()
+
+    /**
      * returns actions which are in their Intro animation time
      */
     abstract fun buildLingeringIntroAnimations(isPlaying: Boolean)
@@ -34,5 +39,7 @@ abstract class AnnotationBuilder {
      * returns actions which are in their Outro animation time
      */
     abstract fun buildLingeringOutroAnimations(isPlaying: Boolean)
+
+
 
 }

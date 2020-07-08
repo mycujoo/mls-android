@@ -130,15 +130,13 @@ class Coordinator(
                 )
             }
 
-            override fun updateAnimations(
-                actionEntity: ActionEntity,
-                animationPosition: Long,
-                isPlaying: Boolean
+            override fun onNewOutroAnimationAvailable(
+                relatedActionEntity: ActionEntity,
+                hideActionEntity: ActionEntity
             ) {
-                playerViewWrapper.updateAnimationPosition(
-                    actionEntity,
-                    animationPosition,
-                    isPlaying
+                playerViewWrapper.onNewOutroAnimationAvailable(
+                    relatedActionEntity,
+                    hideActionEntity
                 )
             }
 
@@ -158,6 +156,7 @@ class Coordinator(
             override fun run() {
                 annotationBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
                 annotationBuilder.buildPendingAnnotationsForCurrentTime()
+                annotationBuilder.buildPendingOutroAnimations()
                 handler.postDelayed(this, 1000L)
             }
         }
