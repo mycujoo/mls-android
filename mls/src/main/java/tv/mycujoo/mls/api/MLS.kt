@@ -5,8 +5,6 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.SimpleExoPlayer
@@ -32,13 +30,13 @@ import tv.mycujoo.mls.core.VideoPlayerCoordinator
 import tv.mycujoo.mls.data.DataHolder
 import tv.mycujoo.mls.di.DaggerMlsComponent
 import tv.mycujoo.mls.di.NetworkModule
-import tv.mycujoo.mls.entity.actions.HighlightAction
-import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
 import tv.mycujoo.mls.model.Event
 import tv.mycujoo.mls.model.Stream
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.network.RemoteApi
-import tv.mycujoo.mls.widgets.*
+import tv.mycujoo.mls.widgets.OnTimeLineChangeListener
+import tv.mycujoo.mls.widgets.PlayerViewWrapper
+import tv.mycujoo.mls.widgets.TimeLineSeekBar
 import javax.inject.Inject
 
 
@@ -90,10 +88,6 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
 
     private lateinit var handler: Handler
 
-    private var highlightAdapter: HighlightAdapter? = null
-
-    private val highlightList = ArrayList<HighlightAction>(0)
-
     private val dataHolder = DataHolder()
     /**endregion */
 
@@ -133,16 +127,6 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         youboraClient = YouboraClient(publicKey, plugin)
 
 
-    }
-
-    private fun initHighlightList(highlightListParams: HighlightListParams) {
-        checkNotNull(highlightListParams.recyclerView)
-        highlightAdapter = HighlightAdapter(ArrayList(getHighlightList()))
-        highlightListParams.recyclerView.adapter = highlightAdapter
-        highlightListParams.recyclerView.layoutManager =
-            LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
-
-        connectToHighlightList(highlightAdapter!!)
     }
 
     private fun initAnnotation() {
@@ -203,10 +187,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
                 }
 
                 hasDefaultPlayerController = builder.hasDefaultController
-                builder.highlightListParams?.let { highlightListParams ->
-                    highlightList.addAll(ArrayList(getHighlightList()))
-                    initHighlightList(highlightListParams)
-                }
+
                 hasAnnotation = builder.hasAnnotation
                 if (hasAnnotation) {
                     initAnnotation()
@@ -286,9 +267,6 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         return videoPlayer
     }
 
-    override fun getHighlightList(): List<HighlightAction> {
-        return api.getHighlights()
-    }
 
     override fun loadVideo(uri: Uri) {
         playVideo(uri, false)
@@ -375,10 +353,12 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     ) {
         playerViewWrapper.playerView.player = exoPlayer
         playerViewWrapper.defaultController(hasDefaultPlayerController)
-        playerViewWrapper.timeBarAnnotationHelper =
-            TimeBarAnnotationHelper(api.getTimeLineMarkers())
 
-        initVideoPlayerCoordinator(playerViewWrapper, exoPlayer, coordinator as CoordinatorInterface)
+        initVideoPlayerCoordinator(
+            playerViewWrapper,
+            exoPlayer,
+            coordinator as CoordinatorInterface
+        )
 
         playerViewWrapper.screenMode(PlayerViewWrapper.ScreenMode.PORTRAIT)
     }
@@ -394,16 +374,6 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     }
 
     /**endregion */
-
-    private fun connectToHighlightList(highlightAdapter: HighlightAdapter) {
-        val highlightClickListener = object : ListClickListener {
-            override fun onClick(pos: Int) {
-                exoPlayer?.seekTo(getHighlightList()[pos].streamOffset)
-                exoPlayer?.playWhenReady = true
-            }
-        }
-        highlightAdapter.setOnClickListener(highlightClickListener)
-    }
 
 
     /**region Inner-classes*/

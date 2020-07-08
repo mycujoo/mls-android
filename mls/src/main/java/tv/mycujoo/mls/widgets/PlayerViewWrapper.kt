@@ -1,7 +1,5 @@
 package tv.mycujoo.mls.widgets
 
-import android.animation.Animator
-import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -14,13 +12,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ProgressBar
-import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
-import androidx.core.view.updateLayoutParams
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.caverock.androidsvg.SVG
 import com.google.android.exoplayer2.C
@@ -33,13 +29,11 @@ import tv.mycujoo.domain.entity.HideOverlayActionEntity
 import tv.mycujoo.domain.entity.ShowOverlayActionEntity
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.UIEventListener
-import tv.mycujoo.mls.entity.actions.*
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.extensions.getDisplaySize
 import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.helper.OverlayFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
-import tv.mycujoo.mls.helper.TimeBarAnnotationHelper
 import tv.mycujoo.mls.manager.HighlightMarkerManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.PlayerViewWrapper.LiveState.*
@@ -47,8 +41,6 @@ import tv.mycujoo.mls.widgets.mlstimebar.HighlightMarker
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterest
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterestType
-import tv.mycujoo.mls.widgets.overlay.AnnouncementOverlayView
-import tv.mycujoo.mls.widgets.overlay.ScoreboardOverlayView
 
 
 class PlayerViewWrapper @JvmOverloads constructor(
@@ -68,13 +60,8 @@ class PlayerViewWrapper @JvmOverloads constructor(
     private var isFullScreen = false
     private var fullScreenButton: ImageButton
 
-    lateinit var timeBarAnnotationHelper: TimeBarAnnotationHelper
-
 
     private var dismissingHandler = Handler()
-
-    private val overlaySingleLineHashMap = HashMap<LayoutType, BasicSingleLineOverlayView>()
-    private val overlayDoubleLineHashMap = HashMap<LayoutType, BasicDoubleLineOverlayView>()
 
     private val viewIdentifierManager = ViewIdentifierManager()
 
@@ -258,490 +245,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
     }
 
 
-    fun showOverLay(action: OverLayAction) {
-        playerView.hideController()
-        when (action.layoutType) {
-            LayoutType.BASIC_SINGLE_LINE -> {
-                showBasicSingleLine(action)
-            }
-            LayoutType.BASIC_DOUBLE_LINE -> {
-                showBasicDoubleLine(action)
-            }
-            LayoutType.BASIC_SCORE_BOARD -> {
-                showBasicScoreBoard(action)
-            }
-        }
-    }
-
-    private fun showBasicSingleLine(action: OverLayAction) {
-
-        val textView = TextView(context)
-        textView.id = View.generateViewId()
-        textView.text = "126723452673452736482734823642"
-
-//        playerView.addView(textView)
-
-        val overlay: BasicSingleLineOverlayView
-
-        if (isRenewedOverlay(action.layoutType)) {
-            overlay = updateBasicSingleLineOverLayView(action)
-        } else {
-            overlay = createBasicSingleLineOverLayView(action)
-            attachStartingAnimation(overlay, action.layoutPosition)
-        }
-
-
-        if (action.sticky) {
-            overlaySingleLineHashMap[action.layoutType] = overlay
-        } else {
-            when (action.layoutPosition) {
-                LayoutPosition.TOP_LEFT,
-                LayoutPosition.BOTTOM_LEFT -> {
-                    overlay.dismissIn(dismissingHandler, action.duration)
-                }
-                LayoutPosition.BOTTOM_RIGHT,
-                LayoutPosition.TOP_RIGHT -> {
-                    overlay.dismissToRightIn(dismissingHandler, action.duration)
-                }
-            }
-        }
-
-
-    }
-
-    private fun updateBasicSingleLineOverLayView(action: OverLayAction): BasicSingleLineOverlayView {
-        val overlayView = overlaySingleLineHashMap[action.layoutType]!!
-
-        overlayView.setData(action)
-
-        return overlayView
-    }
-
-
-    private fun createBasicSingleLineOverLayView(action: OverLayAction): BasicSingleLineOverlayView {
-        val overlayView = BasicSingleLineOverlayView(context)
-        overlayView.setData(action)
-
-        overlayView.id = View.generateViewId()
-//        overlayView.visibility = View.INVISIBLE
-
-
-        when (action.layoutPosition) {
-            LayoutPosition.TOP_LEFT -> {
-                val layoutParams = RelativeLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP)
-                overlayHost.addView(overlayView, layoutParams)
-            }
-            LayoutPosition.TOP_RIGHT -> {
-                val layoutParams = RelativeLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP)
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
-                overlayHost.addView(overlayView, layoutParams)
-            }
-            LayoutPosition.BOTTOM_RIGHT -> {
-                val layoutParams = RelativeLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
-                overlayHost.addView(overlayView, layoutParams)
-            }
-            LayoutPosition.BOTTOM_LEFT -> {
-                val layoutParams = RelativeLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-                overlayHost.addView(overlayView, layoutParams)
-            }
-        }
-
-        return overlayView
-
-    }
-
-    private fun attachStartingAnimation(
-        overlayView: BasicSingleLineOverlayView,
-        layoutPosition: LayoutPosition
-    ) {
-        overlayView.post {
-            var animation: ObjectAnimator? = null
-
-            overlayView.updateLayoutParams<RelativeLayout.LayoutParams> {
-                when (layoutPosition) {
-                    LayoutPosition.TOP_LEFT -> {
-                        marginStart = overlayView.width.unaryMinus()
-                        animation = ObjectAnimator.ofFloat(
-                            overlayView,
-                            "translationX",
-                            overlayView.width.toFloat()
-                        )
-                    }
-                    LayoutPosition.TOP_RIGHT -> {
-                        val x = overlayView.width.toFloat()
-                        marginEnd = overlayView.width.unaryMinus()
-
-                        animation = ObjectAnimator.ofFloat(
-                            overlayView,
-                            "translationX",
-                            x.unaryMinus()
-                        )
-
-                    }
-                    LayoutPosition.BOTTOM_RIGHT -> {
-                        val x = overlayView.width.toFloat()
-                        marginEnd = overlayView.width.unaryMinus()
-                        animation = ObjectAnimator.ofFloat(
-                            overlayView,
-                            "translationX",
-                            x.unaryMinus()
-                        )
-                    }
-                    LayoutPosition.BOTTOM_LEFT -> {
-                        marginStart = overlayView.width.unaryMinus()
-                        animation = ObjectAnimator.ofFloat(
-                            overlayView,
-                            "translationX",
-                            overlayView.width.toFloat()
-                        )
-                    }
-                }
-            }
-
-
-            animation?.duration = 1000L
-            animation?.addListener(object : Animator.AnimatorListener {
-                override fun onAnimationRepeat(animation: Animator?) {
-                }
-
-                override fun onAnimationEnd(animation: Animator?, isReverse: Boolean) {
-                }
-
-                override fun onAnimationEnd(animation: Animator?) {
-                }
-
-                override fun onAnimationCancel(animation: Animator?) {
-                }
-
-                override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
-                    overlayView.visibility = View.VISIBLE
-                    overlayView.bringToFront()
-
-                }
-
-                override fun onAnimationStart(animation: Animator?) {
-                }
-            })
-            animation?.start()
-
-        }
-
-    }
-
-
-    private fun attachStartingAnimation(
-        overlayView: BasicDoubleLineOverlayView,
-        layoutPosition: LayoutPosition
-    ) {
-        overlayView.post {
-            var animation: ObjectAnimator? = null
-
-            overlayView.updateLayoutParams<RelativeLayout.LayoutParams> {
-                when (layoutPosition) {
-                    LayoutPosition.TOP_LEFT -> {
-                        marginStart = overlayView.width.unaryMinus()
-                        animation = ObjectAnimator.ofFloat(
-                            overlayView,
-                            "translationX",
-                            overlayView.width.toFloat()
-                        )
-                    }
-                    LayoutPosition.TOP_RIGHT -> {
-                        val x = overlayView.width.toFloat()
-                        marginEnd = overlayView.width.unaryMinus()
-
-                        animation = ObjectAnimator.ofFloat(
-                            overlayView,
-                            "translationX",
-                            x.unaryMinus()
-                        )
-
-                    }
-                    LayoutPosition.BOTTOM_RIGHT -> {
-                        val x = overlayView.width.toFloat()
-                        marginEnd = overlayView.width.unaryMinus()
-                        animation = ObjectAnimator.ofFloat(
-                            overlayView,
-                            "translationX",
-                            x.unaryMinus()
-                        )
-                    }
-                    LayoutPosition.BOTTOM_LEFT -> {
-                        marginStart = overlayView.width.unaryMinus()
-                        animation = ObjectAnimator.ofFloat(
-                            overlayView,
-                            "translationX",
-                            overlayView.width.toFloat()
-                        )
-                    }
-                }
-            }
-
-
-            animation?.duration = 1000L
-            animation?.addListener(object : Animator.AnimatorListener {
-                override fun onAnimationRepeat(animation: Animator?) {
-                }
-
-                override fun onAnimationEnd(animation: Animator?, isReverse: Boolean) {
-                }
-
-                override fun onAnimationEnd(animation: Animator?) {
-                }
-
-                override fun onAnimationCancel(animation: Animator?) {
-                }
-
-                override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
-                    overlayView.visibility = View.VISIBLE
-                    overlayView.bringToFront()
-
-                }
-
-                override fun onAnimationStart(animation: Animator?) {
-                }
-            })
-            animation?.start()
-
-        }
-
-    }
-
-    private fun isRenewedOverlay(id: LayoutType): Boolean {
-        return overlaySingleLineHashMap.containsKey(id) || overlayDoubleLineHashMap.containsKey(id)
-    }
-
-    private fun showBasicDoubleLine(action: OverLayAction) {
-        val overlay: BasicDoubleLineOverlayView
-
-        if (isRenewedOverlay(action.layoutType)) {
-            overlay = updateBasicDoubleLineOverLayView(action)
-        } else {
-            overlay = createBasicDoubleLineOverLayView(action)
-            attachStartingAnimation(overlay, action.layoutPosition)
-        }
-
-        if (action.sticky) {
-            overlayDoubleLineHashMap[action.layoutType] = overlay
-        } else {
-            when (action.layoutPosition) {
-                LayoutPosition.TOP_LEFT,
-                LayoutPosition.BOTTOM_LEFT -> {
-                    overlay.dismissIn(dismissingHandler, action.duration)
-                }
-                LayoutPosition.BOTTOM_RIGHT,
-                LayoutPosition.TOP_RIGHT -> {
-                    overlay.dismissToRightIn(dismissingHandler, action.duration)
-                }
-            }
-        }
-
-    }
-
-    private fun createBasicDoubleLineOverLayView(action: OverLayAction): BasicDoubleLineOverlayView {
-        val overlayView = BasicDoubleLineOverlayView(context)
-        overlayView.setData(action)
-
-        overlayView.id = View.generateViewId()
-        overlayView.visibility = View.INVISIBLE
-
-        when (action.layoutPosition) {
-            LayoutPosition.TOP_LEFT -> {
-                val layoutParams = RelativeLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP)
-                overlayHost.addView(overlayView, layoutParams)
-            }
-            LayoutPosition.TOP_RIGHT -> {
-                val layoutParams = RelativeLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP)
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
-                overlayHost.addView(overlayView, layoutParams)
-            }
-            LayoutPosition.BOTTOM_RIGHT -> {
-                val layoutParams = RelativeLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
-                overlayHost.addView(overlayView, layoutParams)
-            }
-            LayoutPosition.BOTTOM_LEFT -> {
-                val layoutParams = RelativeLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-                overlayHost.addView(overlayView, layoutParams)
-            }
-        }
-
-        return overlayView
-    }
-
-    private fun updateBasicDoubleLineOverLayView(action: OverLayAction): BasicDoubleLineOverlayView {
-        val overlayView = overlayDoubleLineHashMap[action.layoutType]!!
-
-        overlayView.setData(action)
-
-        return overlayView
-    }
-
-    private fun showBasicScoreBoard(action: OverLayAction) {
-        val overlayView = BasicScoreBoardOverlayView(context)
-        overlayView.setData(action)
-
-        overlayView.id = View.generateViewId()
-        overlayView.visibility = View.INVISIBLE
-
-        val constraintSetForAnimatingView = ConstraintSet()
-        constraintSetForAnimatingView.clone(this)
-
-        when (action.layoutPosition) {
-            LayoutPosition.TOP_LEFT -> {
-                val layoutParams = RelativeLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP)
-                overlayHost.addView(overlayView, layoutParams)
-            }
-            LayoutPosition.TOP_RIGHT -> {
-                //todo
-            }
-            LayoutPosition.BOTTOM_RIGHT -> {
-                //todo
-            }
-            LayoutPosition.BOTTOM_LEFT -> {
-                val layoutParams = RelativeLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-                overlayHost.addView(overlayView, layoutParams)
-            }
-        }
-
-        constraintSetForAnimatingView.applyTo(this)
-
-
-        overlayView.post {
-            overlayView.updateLayoutParams<RelativeLayout.LayoutParams> {
-                marginStart = overlayView.width.unaryMinus()
-            }
-
-            val animation = ObjectAnimator.ofFloat(
-                overlayView,
-                "translationX",
-                overlayView.width.toFloat()
-            )
-            animation.duration = 1000L
-            animation.addListener(object : Animator.AnimatorListener {
-                override fun onAnimationRepeat(animation: Animator?) {
-                }
-
-                override fun onAnimationEnd(animation: Animator?, isReverse: Boolean) {
-                }
-
-                override fun onAnimationEnd(animation: Animator?) {
-                }
-
-                override fun onAnimationCancel(animation: Animator?) {
-                }
-
-                override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
-                    overlayView.visibility = View.VISIBLE
-                    overlayView.bringToFront()
-
-                }
-
-                override fun onAnimationStart(animation: Animator?) {
-                }
-            })
-            animation.start()
-
-            overlayView.dismissIn(dismissingHandler, action.duration)
-        }
-
-    }
-
-    fun showAnnouncementOverLay(action: ShowAnnouncementOverlayAction) {
-        val announcementOverlayView = AnnouncementOverlayView(context)
-        announcementOverlayView.id = View.generateViewId()
-        announcementOverlayView.viewAction(action)
-
-        viewIdentifierManager.storeViewId(announcementOverlayView, action.viewId)
-//
-//        if (action.dismissible) {
-//
-//            idlingResource.increment()
-//            OverlayViewHelper.removeInFuture(
-//                overlayHost,
-//                announcementOverlayView,
-//                action.dismissIn,
-//                idlingResource
-//            )
-//        }
-//
-//        idlingResource.increment()
-//        OverlayViewHelper.addView(
-//            overlayHost,
-//            announcementOverlayView,
-//            action.position,
-//            idlingResource
-//        )
-
-    }
-
-    fun showScoreboardOverlay(action: ShowScoreboardOverlayAction) {
-        val scoreboardOverlayView = ScoreboardOverlayView(context)
-        scoreboardOverlayView.id = View.generateViewId()
-        scoreboardOverlayView.viewAction(action)
-
-        viewIdentifierManager.storeViewId(scoreboardOverlayView, action.viewId)
-
-//        if (action.dismissible) {
-//            idlingResource.increment()
-//            OverlayViewHelper.removeInFuture(
-//                overlayHost,
-//                scoreboardOverlayView,
-//                action.dismissIn,
-//                idlingResource
-//            )
-//        }
-
-        idlingResource.increment()
-//        OverlayViewHelper.addView(
-//            overlayHost,
-//            scoreboardOverlayView,
-//            action.position,
-//            idlingResource
-//        )
-    }
-
     fun hideOverlay(viewId: String) {
         viewIdentifierManager.getViewId(viewId)?.let {
             findViewById<ViewGroup>(it)?.visibility = View.INVISIBLE
@@ -755,16 +258,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
         }
     }
 
-
-    fun executeCommand(commandAction: CommandAction) {
-        idlingResource.increment()
-//        OverlayCommandHelper.executeInFuture(
-//            overlayHost,
-//            commandAction,
-//            viewIdentifierManager.getViewIdentifier(commandAction.targetViewId),
-//            idlingResource
-//        )
-    }
 
     fun showBuffering() {
         bufferView.visibility = View.VISIBLE

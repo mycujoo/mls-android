@@ -1,7 +1,6 @@
 package tv.mycujoo.mls.api
 
 import android.net.Uri
-import tv.mycujoo.mls.entity.actions.HighlightAction
 import tv.mycujoo.mls.model.Event
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
@@ -15,8 +14,6 @@ abstract class MLSAbstract {
     abstract fun onStop()
 
     abstract fun getVideoPlayer(): VideoPlayer
-
-    abstract fun getHighlightList(): List<HighlightAction>
 
     abstract fun loadVideo(uri: Uri)
     abstract fun playVideo(uri: Uri)

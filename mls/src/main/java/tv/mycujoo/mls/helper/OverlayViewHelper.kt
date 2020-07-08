@@ -11,7 +11,6 @@ import androidx.core.view.children
 import androidx.test.espresso.idling.CountingIdlingResource
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.AnimationType.*
-import tv.mycujoo.mls.entity.actions.CommandAction
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ProportionalImageView
@@ -956,19 +955,6 @@ class OverlayViewHelper {
 
 
         /**region Private Functions*/
-        fun isRemoveOrHide(commandAction: CommandAction): Boolean {
-            return when {
-                commandAction.verb.equals("remove", true) -> {
-                    true
-                }
-                commandAction.verb.equals("hide", true) -> {
-                    true
-                }
-                else -> {
-                    false
-                }
-            }
-        }
 
         private fun hasNoAnimation(overlayEntity: HideOverlayActionEntity): Boolean {
             return overlayEntity.animationType == NONE
