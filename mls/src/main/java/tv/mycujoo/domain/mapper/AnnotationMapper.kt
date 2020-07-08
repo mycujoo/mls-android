@@ -1,13 +1,20 @@
 package tv.mycujoo.domain.mapper
 
 import tv.mycujoo.domain.entity.AnnotationSourceData
+import tv.mycujoo.domain.entity.AnnotationsSourceData
 import tv.mycujoo.domain.entity.NEWActionEntity
 import tv.mycujoo.domain.entity.NEWAnnotationEntity
 
 class AnnotationMapper {
 
     companion object {
-        fun mapToEntity(annotationSourceData: AnnotationSourceData): NEWAnnotationEntity? {
+
+        fun mapToAnnotationEntityList(annotationsSourceData: AnnotationsSourceData): List<NEWAnnotationEntity> {
+            return annotationsSourceData.annotations?.mapNotNull { mapToNewAnnotationEntity(it) }
+                ?: emptyList()
+        }
+
+        private fun mapToNewAnnotationEntity(annotationSourceData: AnnotationSourceData): NEWAnnotationEntity? {
 
             val id = annotationSourceData.id ?: return null
             val offset = annotationSourceData.offset ?: return null

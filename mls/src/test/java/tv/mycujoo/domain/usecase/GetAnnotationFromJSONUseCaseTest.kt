@@ -1,9 +1,8 @@
 package tv.mycujoo.domain.usecase
 
 import com.google.gson.Gson
+import org.junit.Assert.assertNotNull
 import org.junit.Before
-
-import org.junit.Assert.*
 import org.junit.Test
 import tv.mycujoo.domain.entity.AnnotationsSourceData
 import tv.mycujoo.domain.mapper.AnnotationMapper
@@ -38,16 +37,6 @@ class GetAnnotationFromJSONUseCaseTest {
         )
 
 
-        AnnotationMapper.mapToEntity(annotationsSourceData.annotations!![0])
-    }
-
-
-    @Test
-    fun someTest() {
-        var d : Double = 0.5
-
-        var l = d.toLong()
-
-        assertNotNull(l)
+        val list = AnnotationMapper.mapToAnnotationEntityList(annotationsSourceData)
     }
 }
