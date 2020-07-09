@@ -95,7 +95,9 @@ class GetAnnotationUseCase {
                 Pair(30F, 0F),
                 duration,
                 animationType,
-                animationDuration
+                animationDuration,
+                AnimationType.NONE,
+                -1L
             )
         }
 
@@ -115,6 +117,8 @@ class GetAnnotationUseCase {
                 null,
                 Pair(300F, 150F),
                 null,
+                AnimationType.NONE,
+                -1L,
                 animationType,
                 animationDuration
             )

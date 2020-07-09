@@ -9,7 +9,9 @@ data class ShowOverlayActionEntity(
     val positionGuide: PositionGuide,
     val size: Pair<Float, Float>,
     val duration: Long?,
-    val animationType: AnimationType,
-    val animationDuration: Long
+    val introAnimationType: AnimationType,
+    val introAnimationDuration: Long,
+    val outroAnimationType: AnimationType,
+    val outroAnimationDuration: Long
 ) {
 }

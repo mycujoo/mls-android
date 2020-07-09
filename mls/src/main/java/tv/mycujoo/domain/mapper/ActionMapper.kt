@@ -6,6 +6,7 @@ import tv.mycujoo.domain.entity.NEWActionEntity
 import tv.mycujoo.domain.entity.PositionGuide
 import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.mls.model.MutablePair
+import kotlin.random.Random
 
 class ActionMapper {
     companion object {
@@ -24,9 +25,9 @@ class ActionMapper {
             val sizePair = MutablePair(INVALID_FLOAT_VALUE, INVALID_FLOAT_VALUE)
 
             var introAnimationType = AnimationType.NONE
-            var introAnimationDuration = INVALID_FLOAT_VALUE
+            var introAnimationDuration = INVALID_LONG_VALUE
             var outroAnimationType = AnimationType.NONE
-            var outroAnimationDuration = INVALID_FLOAT_VALUE
+            var outroAnimationDuration = INVALID_LONG_VALUE
 
 
             var label = INVALID_STRING_VALUE
@@ -57,7 +58,7 @@ class ActionMapper {
                             }
                         }
                         "animatein_duration" -> {
-                            any?.let { introAnimationDuration = (it as Double).toFloat() }
+                            any?.let { introAnimationDuration = (it as Double).toLong() }
 
                         }
                         "animateout_type" -> {
@@ -66,7 +67,7 @@ class ActionMapper {
                             }
                         }
                         "animateout_duration" -> {
-                            any?.let { outroAnimationDuration = (it as Double).toFloat() }
+                            any?.let { outroAnimationDuration = (it as Double).toLong() }
                         }
 
                         "label" -> {
@@ -77,6 +78,10 @@ class ActionMapper {
                         }
                     }
                 }
+            }
+
+            if (customId == INVALID_STRING_VALUE) {
+                customId = Random.nextLong().toString()
             }
 
 

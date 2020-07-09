@@ -14,7 +14,11 @@ interface AnnotationListener {
 
 
     /**
-     * todo
+     * add an overlay which:
+     *
+     * offset has passed,
+     * either with no Intro animation,
+     * or the animation time has passed too
      */
     fun onLingeringActionAvailable(actionEntity: ActionEntity)
 
@@ -50,9 +54,16 @@ interface AnnotationListener {
      * adds Outro animation to a currently displaying overlay
      *
      */
-    fun onNewOutroAnimationAvailable(
+    fun onNewOutroAnimationAvailableSeparateAction(
         actionEntity: ActionEntity,
         hideActionEntity: ActionEntity
+    )
+
+    /**
+     * runs Outro animation from a currently displaying overlay
+     */
+    fun onNewOutroAnimationAvailableSameCommand(
+        actionEntity: ActionEntity
     )
 
     fun clearScreen(customIdList: List<String>)

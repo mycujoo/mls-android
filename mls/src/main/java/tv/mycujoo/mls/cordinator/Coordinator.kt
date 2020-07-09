@@ -8,10 +8,11 @@ import tv.mycujoo.domain.entity.ActionEntity
 import tv.mycujoo.domain.entity.models.ActionType.*
 import tv.mycujoo.domain.mapper.HideOverlayMapper
 import tv.mycujoo.domain.mapper.ShowOverlayMapper
-import tv.mycujoo.domain.usecase.GetAnnotationUseCase
+import tv.mycujoo.domain.usecase.GetAnnotationFromJSONUseCase
 import tv.mycujoo.mls.core.AnnotationBuilder
 import tv.mycujoo.mls.core.AnnotationBuilderImpl
 import tv.mycujoo.mls.core.AnnotationListener
+import tv.mycujoo.mls.helper.ActionEntityFactory
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
@@ -94,13 +95,19 @@ class Coordinator(
                 )
             }
 
-            override fun onNewOutroAnimationAvailable(
+            override fun onNewOutroAnimationAvailableSeparateAction(
                 relatedActionEntity: ActionEntity,
                 hideActionEntity: ActionEntity
             ) {
                 playerViewWrapper.onNewOutroAnimationAvailable(
                     relatedActionEntity,
                     hideActionEntity
+                )
+            }
+
+            override fun onNewOutroAnimationAvailableSameCommand(actionEntity: ActionEntity) {
+                playerViewWrapper.onNewOutroAnimationAvailable(
+                    actionEntity
                 )
             }
 
@@ -113,7 +120,17 @@ class Coordinator(
         annotationBuilder = AnnotationBuilderImpl(annotationListener, okHttpClient)
         annotationBuilder.buildPendingAnnotationsForCurrentTime()
 
-        annotationBuilder.addPendingActions(GetAnnotationUseCase.result().actions)
+
+        GetAnnotationFromJSONUseCase.mappedResult().forEach {
+            val actionList = it.actions.map { newActionEntity ->
+                ActionEntityFactory.create(newActionEntity)
+            }
+
+            actionList.filter { it.type == SHOW_OVERLAY }
+                .let { showActions -> annotationBuilder.addPendingShowActions(showActions) }
+            actionList.filter { it.type == HIDE_OVERLAY }
+                .let { hideActions -> annotationBuilder.addPendingHideActions(hideActions) }
+        }
 
         val runnable = object : Runnable {
             override fun run() {
@@ -146,10 +163,14 @@ class Coordinator(
         annotationBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
 
         annotationBuilder.buildRemovalAnnotations()
-        annotationBuilder.buildLingeringAnnotations()
+//        annotationBuilder.buildRemovalAnnotationsUpToCurrentTime()
 
-        annotationBuilder.buildLingeringIntroAnimations(exoPlayer.isPlaying)
-        annotationBuilder.buildLingeringOutroAnimations(exoPlayer.isPlaying)
+        annotationBuilder.buildLingeringAnnotationsUpToCurrentTime()
+        annotationBuilder.buildPendingAnnotationsForCurrentTime()
+
+
+//        annotationBuilder.buildLingeringIntroAnimations(exoPlayer.isPlaying)
+//        annotationBuilder.buildLingeringOutroAnimations(exoPlayer.isPlaying)
     }
     /**endregion */
 }

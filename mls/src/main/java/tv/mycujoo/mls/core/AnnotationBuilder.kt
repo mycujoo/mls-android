@@ -4,22 +4,39 @@ import tv.mycujoo.domain.entity.ActionEntity
 
 abstract class AnnotationBuilder {
     /**
-     * adds ActionEntity which will be processed to create Overlays
+     * adds ActionEntity which will be processed to create Show Overlays
      */
-    abstract fun addPendingActions(actions: List<ActionEntity>)
+    abstract fun addPendingShowActions(actions: List<ActionEntity>)
+    /**
+     * adds ActionEntity which will be processed to create Hide Overlays
+     */
+    abstract fun addPendingHideActions(actions: List<ActionEntity>)
 
+    /**
+     * set current time & playing status of player
+     */
     abstract fun setCurrentTime(time: Long, playing: Boolean)
+
+    /**
+     * build Show actions which belongs to current time (now until next second)
+     * If the action has animation, it will be handled
+     */
     abstract fun buildPendingAnnotationsForCurrentTime()
 
     /**
-     * returns list of actions, which their 'offset' is passed, but not their duration [offset + duration]
+     * build actions, which their 'offset' is passed, but not their duration [offset + duration]
+     * if the action does not have duration, the possible related HideAction should be considered
      */
-    abstract fun buildLingeringAnnotations()
+    abstract fun buildLingeringAnnotationsUpToCurrentTime()
 
     /**
-     * Should return list of all Removal types of action from start to end
+     * builds all Removal types of action from start to end
      */
     abstract fun buildRemovalAnnotations()
+    /**
+     * builds all Removal types of action from start to current time
+     */
+    abstract fun buildRemovalAnnotationsUpToCurrentTime()
 
     /**
      * returns actions which are about to go to their outro animation

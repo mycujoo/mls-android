@@ -1,7 +1,9 @@
 package tv.mycujoo.domain.usecase
 
 import com.google.gson.Gson
-import tv.mycujoo.domain.entity.AnnotationSourceData
+import tv.mycujoo.domain.entity.AnnotationsSourceData
+import tv.mycujoo.domain.entity.NEWAnnotationEntity
+import tv.mycujoo.domain.mapper.AnnotationMapper
 
 class GetAnnotationFromJSONUseCase {
 
@@ -10,14 +12,18 @@ class GetAnnotationFromJSONUseCase {
 
     companion object {
 
-        fun result(): AnnotationSourceData {
+        fun result(): AnnotationsSourceData {
 
-            val annotationSourceData = Gson().fromJson<AnnotationSourceData>(
+            val annotationSourceData = Gson().fromJson<AnnotationsSourceData>(
                 sourceRawResponse,
-                AnnotationSourceData::class.java
+                AnnotationsSourceData::class.java
             )
 
             return annotationSourceData
+        }
+
+        fun mappedResult(): List<NEWAnnotationEntity> {
+            return AnnotationMapper.mapToAnnotationEntityList(result())
         }
 
         val sourceRawResponse = """
@@ -50,7 +56,7 @@ class GetAnnotationFromJSONUseCase {
                              "width":25.0
                           },
                           "animatein_type":"fade_in",
-                          "animatein_duration":0.3,
+                          "animatein_duration":3000,
                           "variable_positions":{
                              "###_HOMESCORE_###":"homeScore",
                              "###_AWAYSCORE_###":"awayScore",
@@ -87,16 +93,16 @@ class GetAnnotationFromJSONUseCase {
                           },
                           "animatein_type":"slide_from_leading",
                           "animateout_type":"slide_to_leading",
-                          "animatein_duration":0.5,
-                          "animateout_duration":0.5,
-                          "duration":5.0
+                          "animatein_duration":5000,
+                          "animateout_duration":5000,
+                          "duration":15000
                        }
                     }
                  ]
               },
               {
                  "id":"ann_3",
-                 "offset":8850000,
+                 "offset":6600000,
                  "timeline_id":"tml_1",
                  "actions":[
                     {
@@ -113,7 +119,7 @@ class GetAnnotationFromJSONUseCase {
                        "data":{
                           "custom_id":"scoreboard1",
                           "animateout_type":"fade_out",
-                          "animateout_duration":0.3
+                          "animateout_duration":3000
                        }
                     }
                  ]

@@ -14,8 +14,10 @@ class ShowOverlayMapper {
                 actionEntity.position!!,
                 actionEntity.size,
                 actionEntity.duration,
-                actionEntity.animationType,
-                actionEntity.animationDuration!!
+                actionEntity.introAnimationType,
+                actionEntity.introAnimationDuration,
+                actionEntity.outroAnimationType,
+                actionEntity.outroAnimationDuration
             )
         }
 

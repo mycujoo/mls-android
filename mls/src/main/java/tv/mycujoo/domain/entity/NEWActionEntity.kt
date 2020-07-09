@@ -13,8 +13,8 @@ data class NEWActionEntity(
     val sizePair: MutablePair<Float, Float>, // either value or -1 for each
     val duration: Long,
     val introAnimationType: AnimationType,
-    val introAnimationDuration: Float,
+    val introAnimationDuration: Long,
     val outroAnimationType: AnimationType,
-    val outroAnimationDuration: Float,
+    val outroAnimationDuration: Long,
     val label : String?
 )

@@ -10,8 +10,8 @@ class HideOverlayMapper {
             return HideOverlayActionEntity(
                 actionEntity.id,
                 actionEntity.customId,
-                actionEntity.animationType,
-                actionEntity.animationDuration!!
+                actionEntity.outroAnimationType,
+                actionEntity.outroAnimationDuration!!
             )
         }
 

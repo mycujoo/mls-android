@@ -27,6 +27,8 @@ import kotlinx.android.synthetic.main.main_controls_layout.view.*
 import tv.mycujoo.domain.entity.ActionEntity
 import tv.mycujoo.domain.entity.HideOverlayActionEntity
 import tv.mycujoo.domain.entity.ShowOverlayActionEntity
+import tv.mycujoo.domain.entity.models.ActionType
+import tv.mycujoo.domain.usecase.GetAnnotationFromJSONUseCase
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
@@ -171,35 +173,20 @@ class PlayerViewWrapper @JvmOverloads constructor(
         val greenPointOfInterestType = PointOfInterestType(Color.GREEN)
         val redPointOfInterestType = PointOfInterestType(Color.RED)
 
-        highlightMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                360 * 1000L,
-                listOf("Goal!"),
-                redPointOfInterestType
-            )
-        )
-        highlightMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                900 * 1000L,
-                listOf("Goal!", "Card"),
-                greenPointOfInterestType
-            )
-        )
-        highlightMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                3600 * 1000L,
-                listOf("Goal!"),
-                redPointOfInterestType
-            )
-        )
 
-        highlightMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                4600 * 1000L,
-                listOf("Again Goal!", "Offside", "Card"),
-                redPointOfInterestType
-            )
-        )
+        GetAnnotationFromJSONUseCase.mappedResult()
+            .forEach {
+                it.actions.filter { it.type == ActionType.SHOW_TIMELINE_MARKER }
+                    .forEach { showTimelineMarkerEntity ->
+                        highlightMarkerManager.addTimeLineHighlight(
+                            PointOfInterest(
+                                showTimelineMarkerEntity.offset,
+                                listOf(showTimelineMarkerEntity.label!!),
+                                redPointOfInterestType
+                            )
+                        )
+                    }
+            }
 
 
     }
@@ -373,8 +360,8 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
             val animation = AnimationFactory.createStaticAnimation(
                 proportionalImageView,
-                overlayEntity.animationType,
-                overlayEntity.animationDuration
+                overlayEntity.introAnimationType,
+                overlayEntity.introAnimationDuration
             )
 
             OverlayViewHelper.addView(
@@ -525,6 +512,17 @@ class PlayerViewWrapper @JvmOverloads constructor(
             overlayHost,
             relatedActionEntity.customId,
             hideActionEntity,
+            viewIdentifierManager
+        )
+    }
+
+    fun onNewOutroAnimationAvailable(
+        relatedActionEntity: ActionEntity
+    ) {
+
+        OverlayViewHelper.runOutroAnimationOfCurrentOverlaySameCommand(
+            overlayHost,
+            relatedActionEntity,
             viewIdentifierManager
         )
     }
