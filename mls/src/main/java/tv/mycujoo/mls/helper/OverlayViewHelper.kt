@@ -400,9 +400,48 @@ class OverlayViewHelper {
 
                                 when (overlayEntity.introAnimationType) {
                                     NONE,
-                                    FADE_OUT,
-                                    FADE_IN -> {
+                                    FADE_OUT -> {
                                         // should not happen
+                                    }
+                                    FADE_IN -> {
+                                        proportionalImageView.x =
+                                            -proportionalImageView.width.toFloat()
+                                        val animation = ObjectAnimator.ofFloat(
+                                            proportionalImageView,
+                                            View.ALPHA,
+                                            0F,
+                                            1F
+                                        )
+                                        animation.duration = overlayEntity.introAnimationDuration
+                                        animation.addListener(object : Animator.AnimatorListener {
+                                            override fun onAnimationRepeat(animation: Animator?) {
+                                            }
+
+                                            override fun onAnimationEnd(animation: Animator?) {
+
+                                            }
+
+                                            override fun onAnimationCancel(animation: Animator?) {
+
+                                            }
+
+                                            override fun onAnimationStart(animation: Animator?) {
+                                                proportionalImageView.visibility = View.VISIBLE
+                                            }
+
+                                        })
+
+                                        viewIdentifierManager.storeAnimation(
+                                            proportionalImageView.id,
+                                            animation
+                                        )
+                                        animation.start()
+                                        animation.currentPlayTime = animationPosition
+                                        if (isPlaying) {
+                                            animation.resume()
+                                        } else {
+                                            animation.pause()
+                                        }
                                     }
                                     SLIDE_FROM_LEADING -> {
                                         proportionalImageView.x =
@@ -573,6 +612,9 @@ class OverlayViewHelper {
                             host.post {
                                 when (hideOverlayEntity.outroAnimationType) {
                                     NONE,
+                                    FADE_IN -> {
+                                        // should not happen
+                                    }
                                     FADE_OUT -> {
                                         val animation = ObjectAnimator.ofFloat(
                                             proportionalImageView,
@@ -611,9 +653,6 @@ class OverlayViewHelper {
                                             animation.pause()
                                         }
 
-                                    }
-                                    FADE_IN -> {
-                                        // should not happen
                                     }
                                     SLIDE_TO_LEADING -> {
 

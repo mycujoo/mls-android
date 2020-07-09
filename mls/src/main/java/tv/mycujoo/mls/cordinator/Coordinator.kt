@@ -163,9 +163,17 @@ class Coordinator(
 
             override fun onPositionDiscontinuity(reason: Int) {
                 super.onPositionDiscontinuity(reason)
-                println("MLS-App Coordinator - onPositionDiscontinuity() reason-> $reason")
                 annotationBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
-//                annotationBuilder.buildRemovalAnnotationsUpToCurrentTime()
+
+                annotationBuilder.buildRemovalAnnotations()
+//        annotationBuilder.buildRemovalAnnotationsUpToCurrentTime()
+
+                annotationBuilder.buildLingeringAnnotationsUpToCurrentTime()
+                annotationBuilder.buildPendingAnnotationsForCurrentTime()
+
+
+                annotationBuilder.buildLingeringIntroAnimations(exoPlayer.isPlaying)
+                annotationBuilder.buildLingeringOutroAnimations(exoPlayer.isPlaying)
             }
         }
         exoPlayer.addListener(seekInterruptionEventListener)
@@ -174,17 +182,7 @@ class Coordinator(
 
     /**region Over-ridden Functions*/
     override fun onSeekHappened(exoPlayer: SimpleExoPlayer) {
-        annotationBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
-
-        annotationBuilder.buildRemovalAnnotations()
-//        annotationBuilder.buildRemovalAnnotationsUpToCurrentTime()
-
-        annotationBuilder.buildLingeringAnnotationsUpToCurrentTime()
-        annotationBuilder.buildPendingAnnotationsForCurrentTime()
-
-
-//        annotationBuilder.buildLingeringIntroAnimations(exoPlayer.isPlaying)
-        annotationBuilder.buildLingeringOutroAnimations(exoPlayer.isPlaying)
+        // remove
     }
     /**endregion */
 }

@@ -56,7 +56,7 @@ class GetAnnotationFromJSONUseCase {
                              "width":25.0
                           },
                           "animatein_type":"fade_in",
-                          "animatein_duration":3000,
+                          "animatein_duration":30000,
                           "variable_positions":{
                              "###_HOMESCORE_###":"homeScore",
                              "###_AWAYSCORE_###":"awayScore",

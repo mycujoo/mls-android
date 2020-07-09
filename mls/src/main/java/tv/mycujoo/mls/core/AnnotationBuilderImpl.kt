@@ -166,8 +166,7 @@ class AnnotationBuilderImpl(
             hasOutroAnimation(it.introAnimationType) && isLingeringDuringOutroAnimation(
                 it
             )
-        }.forEach {
-                showAction ->
+        }.forEach { showAction ->
 
             if (showAction.svgUrl != null) {
                 downloadSVGThenCallListener(showAction) { showActionWithSvg ->
@@ -189,11 +188,6 @@ class AnnotationBuilderImpl(
     }
 
     override fun buildRemovalAnnotations() {
-//        listener.clearScreen(
-//            pendingShowActionEntities.filter { actionEntity -> actionEntity.type == ActionType.HIDE_OVERLAY }
-//                .mapNotNull { it.customId }
-//                .toList())
-
         listener.clearScreen(
             pendingHideActionEntities.mapNotNull { it.customId }
                 .toList()
@@ -257,19 +251,19 @@ class AnnotationBuilderImpl(
     }
 
 
-//    private fun isLingeringPostAnimation(actionEntity: ActionEntity): Boolean {
+    //    private fun isLingeringPostAnimation(actionEntity: ActionEntity): Boolean {
 //        if (actionEntity.duration == null || actionEntity.animationDuration == null) {
 //            return false
 //        }
 //        return (actionEntity.offset + actionEntity.animationDuration < currentTime) && (actionEntity.offset + actionEntity.duration > currentTime)
 //    }
 //
-//    private fun isLingeringDuringIntroAnimation(actionEntity: ActionEntity): Boolean {
-//        if (actionEntity.animationDuration == null) {
-//            return false
-//        }
-//        return (actionEntity.offset < currentTime) && (actionEntity.offset + actionEntity.animationDuration > currentTime)
-//    }
+    private fun isLingeringDuringIntroAnimation(actionEntity: ActionEntity): Boolean {
+        if (actionEntity.introAnimationDuration == -1L) {
+            return false
+        }
+        return (actionEntity.offset < currentTime) && (actionEntity.offset + actionEntity.introAnimationDuration > currentTime)
+    }
 
     //    private fun isLingeringDuringOutroAnimation(
 //        showAction: ActionEntity,
@@ -322,6 +316,23 @@ class AnnotationBuilderImpl(
                 ?.let { hideAction ->
                     hideAction.offset > currentTime
                 } ?: false
+        }
+    }
+
+    private fun isLingeringExcludingIntroAnimationPart(actionEntity: ActionEntity): Boolean {
+        if (actionEntity.introAnimationDuration == -1L) {
+            return false
+        }
+
+        if (actionEntity.offset > currentTime) {
+            return false
+        }
+
+        if (actionEntity.duration != null && actionEntity.duration != -1L) {
+            return (actionEntity.offset <= currentTime && actionEntity.offset + actionEntity.introAnimationDuration >= currentTime)
+        } else {
+            // there must be HideAction for this action
+            return false
         }
     }
 
