@@ -166,7 +166,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
         mlsTimeBar.setPlayedColor(Color.BLUE)
         val highlightMarkerTextView =
             findViewById<HighlightMarker>(R.id.exo_highlight_marker_title_highlight_marker)
-        highlightMarkerTextView.initialize(Color.BLUE)
 
         val highlightMarkerManager = HighlightMarkerManager(mlsTimeBar, highlightMarkerTextView)
 
@@ -263,7 +262,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             mlsTimeBar.setPlayedColor(primaryColor)
             val highlightMarkerTextView =
                 findViewById<HighlightMarker>(R.id.exo_highlight_marker_title_highlight_marker)
-            highlightMarkerTextView.initialize(secondaryColor)
+            highlightMarkerTextView.initialize(config.secondaryColor)
 
             bufferView.indeterminateTintList = ColorStateList.valueOf(primaryColor)
             findViewById<ImageButton>(R.id.exo_play).setColorFilter(

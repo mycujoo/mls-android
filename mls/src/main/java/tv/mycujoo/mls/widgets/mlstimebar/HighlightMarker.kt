@@ -14,12 +14,16 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import tv.mycujoo.mls.R
+import tv.mycujoo.mls.utils.ColorUtils
 
 
 class HighlightMarker @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr) {
 
+    /**region Fields*/
+    var bgColor = ""
+    /**endregion */
 
     /**region Initializing*/
     init {
@@ -33,9 +37,10 @@ class HighlightMarker @JvmOverloads constructor(
         setPadding(sidePadding, verticalPadding, sidePadding, verticalPadding)
     }
 
-    fun initialize(color: Int) {
+    fun initialize(color: String) {
+        bgColor = color
         background.colorFilter = PorterDuffColorFilter(
-            color,
+            Color.parseColor(color),
             PorterDuff.Mode.SRC_ATOP
         )
 
@@ -76,7 +81,14 @@ class HighlightMarker @JvmOverloads constructor(
             addView(TextView(context).apply {
                 text = it
                 gravity = Gravity.CENTER
-                setTextColor(Color.parseColor("#FFFFFF"))
+
+
+                if (ColorUtils.isColorBright(bgColor)) {
+                    setTextColor(Color.parseColor("#000000"))
+                } else {
+                    setTextColor(Color.parseColor("#FFFFFF"))
+                }
+
             })
         }
     }

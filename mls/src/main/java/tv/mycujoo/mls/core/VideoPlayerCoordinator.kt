@@ -56,7 +56,7 @@ class VideoPlayerCoordinator(
 
         val videoPlayerConfig = VideoPlayerConfig(
             "#32c5ff",
-            "#6236ff",
+            "#FFFFFF",
             true,
             80F,
             true,
