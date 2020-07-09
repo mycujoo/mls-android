@@ -79,7 +79,7 @@ class Coordinator(
                 )
             }
 
-            override fun onLingeringOutroAnimationAvailable(
+            override fun onLingeringOutroAnimationAvailableFromSeparateAction(
                 relatedShowActionEntity: ActionEntity,
                 hideActionEntity: ActionEntity,
                 animationPosition: Long,
@@ -90,6 +90,20 @@ class Coordinator(
                         relatedShowActionEntity
                     ),
                     HideOverlayMapper.mapToEntity(hideActionEntity),
+                    animationPosition,
+                    isPlaying
+                )
+            }
+
+            override fun onLingeringOutroAnimationAvailableFromSameAction(
+                relatedShowActionEntity: ActionEntity,
+                animationPosition: Long,
+                isPlaying: Boolean
+            ) {
+                playerViewWrapper.onLingeringOutroAnimationAvailableFromSameCommand(
+                    ShowOverlayMapper.mapToEntity(
+                        relatedShowActionEntity
+                    ),
                     animationPosition,
                     isPlaying
                 )
@@ -170,7 +184,7 @@ class Coordinator(
 
 
 //        annotationBuilder.buildLingeringIntroAnimations(exoPlayer.isPlaying)
-//        annotationBuilder.buildLingeringOutroAnimations(exoPlayer.isPlaying)
+        annotationBuilder.buildLingeringOutroAnimations(exoPlayer.isPlaying)
     }
     /**endregion */
 }

@@ -502,6 +502,40 @@ class PlayerViewWrapper @JvmOverloads constructor(
             Log.e("PlayerView", "e: ${e.message}")
         }
     }
+    fun onLingeringOutroAnimationAvailableFromSameCommand(
+        overlayEntity: ShowOverlayActionEntity,
+        animationPosition: Long,
+        isPlaying: Boolean
+    ) {
+        val proportionalImageView = OverlayFactory.create(context, overlayEntity.size)
+        try {
+            val svg: SVG
+            if (overlayEntity.svgInputStream != null) {
+                svg = SVG.getFromInputStream(overlayEntity.svgInputStream)
+            } else {
+                svg = SVG.getFromString(getTimeSvgString())
+            }
+            svg.setDocumentWidth("100%")
+            svg.setDocumentHeight("100%")
+            proportionalImageView.setSVG(svg)
+
+            OverlayViewHelper.addViewWithLingeringOutroAnimationFromSameCommand(
+                overlayHost,
+                proportionalImageView,
+                overlayEntity.positionGuide,
+                overlayEntity,
+                animationPosition,
+                isPlaying,
+                viewIdentifierManager,
+                idlingResource
+            )
+
+            viewIdentifierManager.storeViewId(proportionalImageView, overlayEntity.customId!!)
+
+        } catch (e: Exception) {
+            Log.e("PlayerView", "e: ${e.message}")
+        }
+    }
 
     fun onNewOutroAnimationAvailable(
         relatedActionEntity: ActionEntity,

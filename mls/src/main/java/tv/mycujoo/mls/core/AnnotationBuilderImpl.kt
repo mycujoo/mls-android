@@ -61,45 +61,43 @@ class AnnotationBuilderImpl(
 
     override fun buildLingeringAnnotationsUpToCurrentTime() {
 
-        pendingShowActionEntities.filter { isLingering(it) }.forEach { actionEntity: ActionEntity ->
-            if (actionEntity.svgUrl != null) {
-                downloadSVGThenCallListener(actionEntity) { actionEntityWithSvgData ->
-                    listener.onLingeringActionAvailable(
-                        actionEntityWithSvgData
-                    )
-                }
-            } else {
+        pendingShowActionEntities.filter { isLingeringExcludingAnimationPart(it) }
+            .forEach { actionEntity: ActionEntity ->
+                if (actionEntity.svgUrl != null) {
+                    downloadSVGThenCallListener(actionEntity) { actionEntityWithSvgData ->
+                        listener.onLingeringActionAvailable(
+                            actionEntityWithSvgData
+                        )
+                    }
+                } else {
 //                listener.onNewActionAvailable(actionEntity)
+                }
             }
-        }
     }
 
     override fun buildPendingOutroAnimations() {
         // outro animations might be found in hide_overlay or in the same show_overlay action
-        pendingShowActionEntities.filter { it.type == ActionType.HIDE_OVERLAY || it.type == ActionType.SHOW_OVERLAY }
-            .forEach { action ->
-
-                if (action.type == ActionType.HIDE_OVERLAY) {
-                    pendingShowActionEntities.firstOrNull {
-                        it.customId == action.customId &&
-//                                isPendingOutroAnimation(action)
-                                isInCurrentTimeRange(action)
-                    }
-                        ?.let { relatedShowAction ->
-
-                            listener.onNewOutroAnimationAvailableSeparateAction(
-                                relatedShowAction,
-                                action
-                            )
-                        }
-                } else if (action.type == ActionType.SHOW_OVERLAY && isInCurrentTimeRange(action)) {
-                    listener.onNewOutroAnimationAvailableSameCommand(
-                        action
+        pendingHideActionEntities.forEach { hideAction ->
+            pendingShowActionEntities.firstOrNull {
+                it.customId == hideAction.customId && isInCurrentTimeRange(
+                    hideAction
+                )
+            }
+                ?.let { showAction ->
+                    listener.onNewOutroAnimationAvailableSeparateAction(
+                        showAction,
+                        hideAction
                     )
                 }
+        }
 
-
-            }
+        pendingShowActionEntities.filter {
+            hasOutroAnimation(it.introAnimationType) && isInCurrentTimeRange(
+                it
+            )
+        }.forEach {
+            listener.onNewOutroAnimationAvailableSameCommand(it)
+        }
 
     }
 
@@ -134,38 +132,60 @@ class AnnotationBuilderImpl(
     }
 
     override fun buildLingeringOutroAnimations(isPlaying: Boolean) {
-//        pendingShowActionEntities.filter { it.type == ActionType.HIDE_OVERLAY }
-//            .forEach { hideAction ->
-//                pendingShowActionEntities.firstOrNull {
-//                    it.customId == hideAction.customId &&
-//                            isLingeringDuringOutroAnimation(it, hideAction)
-//                }
-//                    ?.let { relatedShowAction ->
-//                        if (relatedShowAction.svgUrl != null) {
-//                            downloadSVGThenCallListener(relatedShowAction) { actionEntityWithSvgData ->
-//
-//                                getOutroAnimationPositionFromSameAction(
-//                                    relatedShowAction,
-//                                    currentTime
-//                                )?.let { animationPosition ->
-//
-//                                    listener.onLingeringOutroAnimationAvailable(
-//                                        actionEntityWithSvgData,
-//                                        hideAction,
-//                                        animationPosition,
-//                                        isPlaying
-//                                    )
-//                                }
-//                            }
-//                        } else {
-////                        listener.onNewActionAvailable(relatedShowAction)
-//                            Log.w(
-//                                "AnnotationBuilderImpl",
-//                                "No url svg available! [buildLingeringOutroAnimations]"
-//                            )
-//                        }
-//                    }
-//            }
+
+        // outro animations might be found in hide_overlay or in the same show_overlay action
+        pendingHideActionEntities.forEach { hideAction ->
+            pendingShowActionEntities.firstOrNull {
+                it.customId == hideAction.customId &&
+                        isLingeringDuringOutroAnimation(it, hideAction)
+            }
+                ?.let { showAction ->
+
+                    if (showAction.svgUrl != null) {
+                        downloadSVGThenCallListener(showAction) { showActionWithSvg ->
+
+                            getOutroAnimationPositionFromHideAction(
+                                showActionWithSvg,
+                                hideAction,
+                                currentTime
+                            )?.let { animationProgress ->
+
+                                listener.onLingeringOutroAnimationAvailableFromSeparateAction(
+                                    showActionWithSvg,
+                                    hideAction,
+                                    animationProgress,
+                                    isPlaying
+                                )
+                            }
+                        }
+                    }
+                }
+        }
+
+        pendingShowActionEntities.filter {
+            hasOutroAnimation(it.introAnimationType) && isLingeringDuringOutroAnimation(
+                it
+            )
+        }.forEach {
+                showAction ->
+
+            if (showAction.svgUrl != null) {
+                downloadSVGThenCallListener(showAction) { showActionWithSvg ->
+
+                    getOutroAnimationPositionFromSameAction(
+                        showActionWithSvg,
+                        currentTime
+                    )?.let { animationProgress ->
+
+                        listener.onLingeringOutroAnimationAvailableFromSameAction(
+                            showActionWithSvg,
+                            animationProgress,
+                            isPlaying
+                        )
+                    }
+                }
+            }
+        }
     }
 
     override fun buildRemovalAnnotations() {
@@ -205,13 +225,22 @@ class AnnotationBuilderImpl(
     }
 
     private fun getOutroAnimationPositionFromSameAction(
-        relatedShowAction: ActionEntity,
+        showAction: ActionEntity,
         currentTime: Long
     ): Long? {
-        if (relatedShowAction.duration == null) {
+        if (showAction.duration == null) {
             return null
         }
-        return currentTime - relatedShowAction.offset + relatedShowAction.duration
+        return currentTime - showAction.offset + showAction.duration
+    }
+
+    private fun getOutroAnimationPositionFromHideAction(
+        ShowAction: ActionEntity,
+        hideAction: ActionEntity,
+        currentTime: Long
+    ): Long? {
+
+        return currentTime - hideAction.offset + hideAction.introAnimationDuration
     }
 
     private fun isLingeringWithNoIntroAnimation(actionEntity: ActionEntity): Boolean {
@@ -242,7 +271,7 @@ class AnnotationBuilderImpl(
 //        return (actionEntity.offset < currentTime) && (actionEntity.offset + actionEntity.animationDuration > currentTime)
 //    }
 
-//    private fun isLingeringDuringOutroAnimation(
+    //    private fun isLingeringDuringOutroAnimation(
 //        showAction: ActionEntity,
 //        hideAction: ActionEntity
 //    ): Boolean {
@@ -251,6 +280,25 @@ class AnnotationBuilderImpl(
 //        }
 //        return (showAction.offset + showAction.duration + hideAction.animationDuration > currentTime) && (showAction.offset + showAction.duration < currentTime)
 //    }
+    private fun isLingeringDuringOutroAnimation(
+        showAction: ActionEntity,
+        hideAction: ActionEntity
+    ): Boolean {
+        if (showAction.duration != null && showAction.outroAnimationDuration != -1L) {
+            return (showAction.offset + showAction.duration + showAction.outroAnimationDuration > currentTime) && (showAction.offset + showAction.duration < currentTime)
+        }
+
+        return (hideAction.offset + hideAction.outroAnimationDuration > currentTime) && (hideAction.offset < currentTime)
+
+    }
+
+    private fun isLingeringDuringOutroAnimation(
+        showAction: ActionEntity
+    ): Boolean {
+        if (showAction.duration != null && showAction.outroAnimationDuration != -1L) {
+            return (showAction.offset + showAction.duration + showAction.outroAnimationDuration > currentTime) && (showAction.offset + showAction.duration < currentTime)
+        } else return false
+    }
 
     private fun isPendingOutroAnimation(
         hideAction: ActionEntity
@@ -261,8 +309,8 @@ class AnnotationBuilderImpl(
         return (hideAction.offset >= currentTime) && (hideAction.offset < currentTime + 1000L)
     }
 
-    private fun isLingering(actionEntity: ActionEntity): Boolean {
-        if (actionEntity.offset > currentTime){
+    private fun isLingeringExcludingAnimationPart(actionEntity: ActionEntity): Boolean {
+        if (actionEntity.offset > currentTime) {
             return false
         }
 

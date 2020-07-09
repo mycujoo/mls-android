@@ -50,7 +50,7 @@ class GetAnnotationFromJSONUseCase {
                           "svg_url":"https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg",
                           "position":{
                              "top":5.0,
-                             "leading":5.0
+                             "trailing":5.0
                           },
                           "size":{
                              "width":25.0
@@ -118,8 +118,8 @@ class GetAnnotationFromJSONUseCase {
                        "type":"hide_overlay",
                        "data":{
                           "custom_id":"scoreboard1",
-                          "animateout_type":"fade_out",
-                          "animateout_duration":3000
+                          "animateout_type":"slide_to_trailing",
+                          "animateout_duration":30000
                        }
                     }
                  ]

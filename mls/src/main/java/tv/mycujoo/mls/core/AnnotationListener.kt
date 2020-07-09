@@ -43,9 +43,21 @@ interface AnnotationListener {
      * has an Outro animation, and it's within the animation duration
      *
      */
-    fun onLingeringOutroAnimationAvailable(
+    fun onLingeringOutroAnimationAvailableFromSeparateAction(
         relatedShowActionEntity: ActionEntity,
         hideActionEntity: ActionEntity,
+        animationPosition: Long,
+        isPlaying: Boolean
+    )
+    /**
+     * add an overlay which:
+     *
+     * duration has passed,
+     * has an Outro animation, and it's within the animation duration
+     *
+     */
+    fun onLingeringOutroAnimationAvailableFromSameAction(
+        relatedShowActionEntity: ActionEntity,
         animationPosition: Long,
         isPlaying: Boolean
     )
