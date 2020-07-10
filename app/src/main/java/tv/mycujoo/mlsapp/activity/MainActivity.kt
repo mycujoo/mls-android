@@ -1,10 +1,11 @@
 package tv.mycujoo.mlsapp.activity
 
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.activity_main.*
+import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.mls.api.MLS
 import tv.mycujoo.mls.api.MLSConfiguration
 import tv.mycujoo.mls.api.PlayerEventsListener
@@ -39,7 +40,7 @@ class MainActivity : AppCompatActivity() {
 
         MLS =
             tv.mycujoo.mls.api.MLS.Builder()
-                .publicKey("USER_PUBLIC_KEY_123")
+                .publicKey("3HFCBP4EQJME2EH8H0SBH9RCST0IR269")
                 .withActivity(this)
                 .setPlayerEventsListener(playerEventsListener)
                 .setUIEventListener(uiEventListener)
@@ -47,6 +48,16 @@ class MainActivity : AppCompatActivity() {
 //                .hasAnalyticPlugin(true)
                 .build()
 
+        MLS.getDataProvider().getEventsLiveData()
+            .observe(this, Observer { eventList -> onEventListUpdated(eventList) })
+
+    }
+
+    private fun onEventListUpdated(eventList: List<EventEntity>) {
+        Log.i("MainActivity", "onEventListUpdated")
+        eventList.firstOrNull()?.let {
+            MLS.loadVideo(it)
+        }
     }
 
     override fun onStart() {
@@ -64,7 +75,7 @@ class MainActivity : AppCompatActivity() {
 
 //        MLS.loadVideo(Uri.parse("https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"))
 //        MLS.loadVideo(Uri.parse("https://raw-rendered-europe-west.mls.mycujoo.tv/3619/ckbuult7c00010121qjpp3rej/index.m3u8"))
-        MLS.loadVideo(Uri.parse("https://playlists.mycujoo.football/as/ck3axeudv3m1a0hfyzlu4dw3x/master.m3u8"))
+//        MLS.loadVideo(Uri.parse("https://playlists.mycujoo.football/as/ck3axeudv3m1a0hfyzlu4dw3x/master.m3u8"))
 
     }
 

@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.api
 
 import android.net.Uri
+import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.mls.model.Event
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
@@ -18,6 +19,6 @@ abstract class MLSAbstract {
 
     abstract fun loadVideo(uri: Uri)
     abstract fun playVideo(uri: Uri)
-    abstract fun loadVideo(event: Event)
-    abstract fun playVideo(event: Event)
+    abstract fun loadVideo(event: EventEntity)
+    abstract fun playVideo(event: EventEntity)
 }

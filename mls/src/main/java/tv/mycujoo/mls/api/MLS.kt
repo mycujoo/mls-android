@@ -18,12 +18,12 @@ import com.npaw.youbora.lib6.plugin.Plugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
+import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.usecase.GetEventsUseCase
 import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.cordinator.Coordinator
-import tv.mycujoo.mls.cordinator.CoordinatorInterface
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.core.VideoPlayerCoordinator
@@ -290,12 +290,17 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         playVideo(uri, true)
     }
 
-    override fun loadVideo(event: Event) {
-        playVideo(event.stream.uriList.first(), false)
+    override fun loadVideo(event: EventEntity) {
+        event.streams.firstOrNull()?.fullUrl?.let {
+            playVideo(Uri.parse(it), false)
+
+        }
     }
 
-    override fun playVideo(event: Event) {
-        playVideo(event.stream.uriList.first(), true)
+    override fun playVideo(event: EventEntity) {
+        event.streams.firstOrNull()?.fullUrl?.let {
+            playVideo(Uri.parse(it), true)
+        }
     }
 
     override fun getDataProvider(): DataProvider {
@@ -374,8 +379,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
 
         initVideoPlayerCoordinator(
             playerViewWrapper,
-            exoPlayer,
-            coordinator as CoordinatorInterface
+            exoPlayer
         )
 
         playerViewWrapper.screenMode(PlayerViewWrapper.ScreenMode.PORTRAIT)
@@ -383,11 +387,10 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
 
     private fun initVideoPlayerCoordinator(
         playerViewWrapper: PlayerViewWrapper,
-        exoPlayer: SimpleExoPlayer?,
-        coordinator: CoordinatorInterface
+        exoPlayer: SimpleExoPlayer?
     ) {
         exoPlayer?.let {
-            VideoPlayerCoordinator(exoPlayer, playerViewWrapper, coordinator)
+            VideoPlayerCoordinator(exoPlayer, playerViewWrapper)
         }
     }
 
