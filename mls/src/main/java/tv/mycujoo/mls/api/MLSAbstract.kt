@@ -14,6 +14,7 @@ abstract class MLSAbstract {
     abstract fun onStop()
 
     abstract fun getVideoPlayer(): VideoPlayer
+    abstract fun getDataProvider(): DataProvider
 
     abstract fun loadVideo(uri: Uri)
     abstract fun playVideo(uri: Uri)

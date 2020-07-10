@@ -30,6 +30,7 @@ import tv.mycujoo.mls.core.VideoPlayerCoordinator
 import tv.mycujoo.mls.data.DataHolder
 import tv.mycujoo.mls.di.DaggerMlsComponent
 import tv.mycujoo.mls.di.NetworkModule
+import tv.mycujoo.mls.manager.IPrefManager
 import tv.mycujoo.mls.model.Event
 import tv.mycujoo.mls.model.Stream
 import tv.mycujoo.mls.network.Api
@@ -41,6 +42,7 @@ import javax.inject.Inject
 
 
 class MLS private constructor(builder: Builder) : MLSAbstract() {
+
 
     /**region Exo-player fields*/
     // ExoPlayer is nullable, so it can be released manually
@@ -68,6 +70,12 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     @Inject
     lateinit var okHttpClient: OkHttpClient
 
+    @Inject
+    lateinit var dataProvider: DataProviderImpl
+
+    @Inject
+    lateinit var prefManager: IPrefManager
+
     /**endregion */
 
     /**region MLS fields*/
@@ -89,6 +97,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     private lateinit var handler: Handler
 
     private val dataHolder = DataHolder()
+
     /**endregion */
 
     /**region Plugins*/
@@ -96,12 +105,18 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
 
     /**endregion */
 
-
+    /**region Initializing*/
     init {
         checkNotNull(builder.activity)
         this.dataHolder
         this.context = builder.activity!!
         this.builder = builder
+
+        val dependencyGraph =
+            DaggerMlsComponent.builder().networkModule(NetworkModule(context)).build()
+        dependencyGraph.inject(this)
+
+        persistPublicKey(this.builder.publicKey)
 
         api = RemoteApi()
 
@@ -142,10 +157,6 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     ) {
 
         if (exoPlayer == null) {
-
-            val dependencyGraph =
-                DaggerMlsComponent.builder().networkModule(NetworkModule(context)).build()
-            dependencyGraph.inject(this)
 
             exoPlayer = SimpleExoPlayer.Builder(context).build()
 
@@ -204,6 +215,8 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         if (hasAnnotation) {
             coordinator.playerViewWrapper = playerViewWrapper
         }
+
+        dataProvider.fetchEvents()
     }
 
     private fun initTimeLine(timeLineSeekBar: TimeLineSeekBar?) {
@@ -227,6 +240,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
 
         handler.postDelayed(timeLineSyncRunnable, 1000L)
     }
+    /**endregion */
 
     /**region Over-ridden Functions*/
     override fun onStart(playerViewWrapper: PlayerViewWrapper) {
@@ -282,6 +296,10 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
 
     override fun playVideo(event: Event) {
         playVideo(event.stream.uriList.first(), true)
+    }
+
+    override fun getDataProvider(): DataProvider {
+        return dataProvider
     }
 
     /**endregion */
@@ -375,6 +393,11 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
 
     /**endregion */
 
+    /**region msc Functions*/
+    private fun persistPublicKey(publicKey: String) {
+        prefManager.persist("PUBLIC_KEY", publicKey)
+    }
+    /**endregion */
 
     /**region Inner-classes*/
     class Builder {

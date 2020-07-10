@@ -9,15 +9,18 @@ import okhttp3.OkHttpClient
 import okio.Buffer
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import tv.mycujoo.mls.manager.IPrefManager
 import tv.mycujoo.mls.network.MlsApi
 import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
 class NetworkModule(val context: Context) {
 
-    private val baseUrl: String = "https://mls.mycujoo.tv"
+    private val publicBaseUrl: String = "https://mls.mycujoo.tv"
+    private val mlsApiBaseUrl: String = "https://mls-api.mycujoo.tv"
 
     @Provides
     @Singleton
@@ -25,13 +28,14 @@ class NetworkModule(val context: Context) {
 
     @Provides
     @Singleton
-    fun provideOkHttp(): OkHttpClient {
+    fun provideOkHttp(prefManager: IPrefManager): OkHttpClient {
         val okHttpBuilder = OkHttpClient.Builder()
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .connectTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(Interceptor { chain: Interceptor.Chain ->
                 val newRequest = chain.request().newBuilder()
+                    .addHeader("Authorization", "Bearer " + prefManager.get("PUBLIC_KEY"))
                     .build()
                 val requestBody = newRequest.body()
                 if (requestBody != null) {
@@ -54,17 +58,34 @@ class NetworkModule(val context: Context) {
     }
 
     @Provides
+    @Named("PUBLIC-API")
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
-        return Retrofit.Builder().baseUrl(baseUrl)
+        return Retrofit.Builder().baseUrl(publicBaseUrl)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
 
     @Provides
+    @Named("MLS-API")
     @Singleton
-    fun provideMlsApi(retrofit: Retrofit): MlsApi {
+    fun provideMlsApiRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder().baseUrl(mlsApiBaseUrl)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+//    @Provides
+//    @Singleton
+//    fun providePublicApi(@Named("PUBLIC-API") retrofit: Retrofit): MlsApi {
+//        return retrofit.create(MlsApi::class.java)
+//    }
+
+    @Provides
+    @Singleton
+    fun provideMlsApi(@Named("MLS-API") retrofit: Retrofit): MlsApi {
         return retrofit.create(MlsApi::class.java)
     }
 
