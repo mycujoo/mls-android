@@ -6,7 +6,8 @@ import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.mls.model.Event
 import tv.mycujoo.mls.network.MlsApi
 
-class EventsRepository(val api: MlsApi) : AbstractRepository(), EventsRepository {
+class EventsRepository(val api: MlsApi) : AbstractRepository(),
+    EventsRepository {
     override suspend fun getEventsList(): Result<Exception, List<Event>> {
         return safeApiCall { api.getEventList() }
     }
