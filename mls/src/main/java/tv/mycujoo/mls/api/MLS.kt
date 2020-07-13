@@ -216,7 +216,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
             coordinator.playerViewWrapper = playerViewWrapper
         }
 
-        dataProvider.fetchEvents()
+//        dataProvider.fetchEvents()
     }
 
     private fun initTimeLine(timeLineSeekBar: TimeLineSeekBar?) {
@@ -294,6 +294,8 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         event.streams.firstOrNull()?.fullUrl?.let {
             playVideo(Uri.parse(it), false)
         } ?: displayPreviewModeWithEventInfo(event)
+
+        setEventInfoToPlayerViewWrapper(event)
     }
 
     override fun playVideo(event: EventEntity) {
@@ -411,6 +413,13 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
             event.description,
             event.streams.isNotEmpty()
         )
+    }
+    private fun setEventInfoToPlayerViewWrapper(event: EventEntity) {
+        if (!this::playerViewWrapper.isInitialized) {
+            return
+        }
+
+        playerViewWrapper.setVideoInfo(event.title, event.description)
     }
 
     private fun hidePreviewMode() {

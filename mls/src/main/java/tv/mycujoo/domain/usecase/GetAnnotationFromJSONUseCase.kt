@@ -38,7 +38,7 @@ class GetAnnotationFromJSONUseCase {
                        "id":"f4354364q6afd",
                        "type":"show_timeline_marker",
                        "data":{
-                          "color":"#ffffff",
+                          "color":"#FFFF00",
                           "label":"Kickoff"
                        }
                     },

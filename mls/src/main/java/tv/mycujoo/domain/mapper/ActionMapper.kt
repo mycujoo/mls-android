@@ -31,6 +31,7 @@ class ActionMapper {
 
 
             var label = INVALID_STRING_VALUE
+            var color = INVALID_STRING_VALUE
 
 
             actionSourceData.data?.let { data ->
@@ -74,6 +75,10 @@ class ActionMapper {
                             any?.let { label = it as String }
                         }
 
+                        "color" -> {
+                            any?.let { color = it as String }
+                        }
+
                         else -> {
                         }
                     }
@@ -98,7 +103,8 @@ class ActionMapper {
                 introAnimationDuration,
                 outroAnimationType,
                 outroAnimationDuration,
-                label
+                label,
+                color
             )
         }
 

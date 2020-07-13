@@ -1,3 +1,5 @@
 package tv.mycujoo.mls.widgets.mlstimebar
 
-data class PointOfInterestType(val color: Int)
+import android.graphics.Color
+
+data class PointOfInterestType(val color: String? = Color.RED.toString())

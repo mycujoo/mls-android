@@ -2,10 +2,7 @@ package tv.mycujoo.mls.widgets.mlstimebar
 
 import android.annotation.TargetApi
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Point
-import android.graphics.Rect
+import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.AttributeSet
@@ -581,7 +578,7 @@ class MLSTimeBar @JvmOverloads constructor(
 
         poiArrayList.forEachIndexed { index, poi ->
             paint.color =
-                poi.poiType.color
+                Color.parseColor(poi.poiType.color)
 
             val poiTimeMs = Util.constrainValue(
                 poi.offset,

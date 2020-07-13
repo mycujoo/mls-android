@@ -16,5 +16,6 @@ data class NEWActionEntity(
     val introAnimationDuration: Long,
     val outroAnimationType: AnimationType,
     val outroAnimationDuration: Long,
-    val label : String?
+    val label : String?,
+    val color : String?
 )

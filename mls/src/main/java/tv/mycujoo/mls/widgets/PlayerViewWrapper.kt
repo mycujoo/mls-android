@@ -149,10 +149,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
         val timelineMarkerManager = TimelineMarkerManager(mlsTimeBar, highlightMarkerTextView)
 
-        val greenPointOfInterestType = PointOfInterestType(Color.GREEN)
-        val redPointOfInterestType = PointOfInterestType(Color.RED)
-
-
         GetAnnotationFromJSONUseCase.mappedResult()
             .forEach {
                 it.actions.filter { it.type == ActionType.SHOW_TIMELINE_MARKER }
@@ -161,12 +157,11 @@ class PlayerViewWrapper @JvmOverloads constructor(
                             PointOfInterest(
                                 showTimelineMarkerEntity.offset,
                                 listOf(showTimelineMarkerEntity.label!!),
-                                redPointOfInterestType
+                                PointOfInterestType(showTimelineMarkerEntity.color)
                             )
                         )
                     }
             }
-
 
     }
     /**endregion */
@@ -562,6 +557,11 @@ class PlayerViewWrapper @JvmOverloads constructor(
     /**endregion */
 
     /**region Event Info related functions*/
+    fun setVideoInfo(title: String, description: String) {
+        eventInfoTitle = title
+        eventInfoDescription = description
+    }
+
     fun displayEventInformationDialog(title: String, description: String, cancelable: Boolean) {
         playerView.hideController()
 
