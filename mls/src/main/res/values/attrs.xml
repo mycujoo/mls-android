@@ -2,4 +2,9 @@
 <resources>
     <attr name="controller_layout_id" format="reference" />
     <declare-styleable name="com.google.android.exoplayer2.ui.PlayerView" />
+    <declare-styleable name="PlayerViewWrapper">
+
+        <attr name="has_fullscreen_button" format="boolean"/>
+
+    </declare-styleable>
 </resources>

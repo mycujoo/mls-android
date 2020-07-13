@@ -74,7 +74,9 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     /**region Initializing*/
     init {
-        LayoutInflater.from(context).inflate(R.layout.player_widget_layout, this, true)
+        LayoutInflater.from(context).inflate(R.layout.player_view_wrapper, this, true)
+
+        initAttributes(attrs, context)
 
         playerView = findViewById(R.id.playerView)
         overlayHost = OverlayHost(context)
@@ -115,6 +117,28 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
         initMlsTimeBar()
 
+    }
+
+    private fun initAttributes(attrs: AttributeSet?, context: Context) {
+        attrs?.let {
+            val obtainAttrs =
+                context.obtainStyledAttributes(it, R.styleable.PlayerViewWrapper)
+            if (obtainAttrs.hasValue(R.styleable.PlayerViewWrapper_has_fullscreen_button)) {
+                if (!obtainAttrs.getBoolean(
+                        R.styleable.PlayerViewWrapper_has_fullscreen_button,
+                        true
+                    )
+                ) {
+                    removeFullscreenButton()
+                }
+            }
+
+            obtainAttrs.recycle()
+        }
+    }
+
+    private fun removeFullscreenButton() {
+        findViewById<ImageButton>(R.id.controller_fullscreenImageButton).visibility = View.GONE
     }
 
     private fun initMlsTimeBar() {
