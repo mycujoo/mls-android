@@ -17,7 +17,7 @@ import tv.mycujoo.mls.R
 import tv.mycujoo.mls.utils.ColorUtils
 
 
-class HighlightMarker @JvmOverloads constructor(
+class TimelineMarker @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr) {
 
@@ -53,19 +53,43 @@ class HighlightMarker @JvmOverloads constructor(
 
 
     /**
-     * expects input from 0L to 1L
+     * expects input from 0 to screen-width to position the time-line marker
      */
     fun setPosition(relationalPosition: Int) {
+        val parentLayout = parent as ConstraintLayout
         val constraintSet = ConstraintSet()
-        constraintSet.clone(parent as ConstraintLayout)
+        constraintSet.clone(parentLayout)
 
         this.post {
-            constraintSet.setMargin(
-                this.id,
-                ConstraintSet.START,
-                relationalPosition - (measuredWidth / 2)
-            )
-            constraintSet.applyTo(parent as ConstraintLayout)
+
+            if (parentLayout.width - (measuredWidth / 2) < relationalPosition) {
+                // marker should stick to the end
+                constraintSet.connect(
+                    this.id,
+                    ConstraintSet.END,
+                    parentLayout.id,
+                    ConstraintSet.END
+                )
+                constraintSet.clear(this.id, ConstraintSet.START)
+            } else {
+                constraintSet.connect(
+                    this.id,
+                    ConstraintSet.START,
+                    parentLayout.id,
+                    ConstraintSet.START
+                )
+                constraintSet.setMargin(
+                    this.id,
+                    ConstraintSet.START,
+                    relationalPosition - (measuredWidth / 2)
+                )
+                constraintSet.clear(this.id, ConstraintSet.END)
+            }
+
+
+
+
+            constraintSet.applyTo(parentLayout)
             visibility = View.VISIBLE
         }
 

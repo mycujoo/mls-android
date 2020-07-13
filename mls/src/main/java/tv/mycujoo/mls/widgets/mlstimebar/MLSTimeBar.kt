@@ -73,7 +73,7 @@ class MLSTimeBar @JvmOverloads constructor(
     private var playedAdGroups: BooleanArray? = null
     private val poiArrayList = ArrayList<PointOfInterest>()
     private val poiPositionOnTimeBarArrayList = ArrayList<Int>()
-    private lateinit var highlightMarkerPositionListener: HighlightMarkerPosition
+    private lateinit var timelineMarkerPositionListener: TimelineMarkerPosition
 
 
     /**
@@ -140,8 +140,8 @@ class MLSTimeBar @JvmOverloads constructor(
         invalidate(seekBounds)
     }
 
-    fun setHighlightMarkerPositionListener(listener: HighlightMarkerPosition) {
-        highlightMarkerPositionListener = listener
+    fun setHighlightMarkerPositionListener(listener: TimelineMarkerPosition) {
+        timelineMarkerPositionListener = listener
     }
 
     // TimeBar implementation.
@@ -432,8 +432,12 @@ class MLSTimeBar @JvmOverloads constructor(
             listener.onScrubMove(this, scrubPosition)
         }
 
-        if (this::highlightMarkerPositionListener.isInitialized) {
-            highlightMarkerPositionListener.onScrubMove(scrubPosition, poiPositionOnTimeBarArrayList)
+        if (this::timelineMarkerPositionListener.isInitialized) {
+            timelineMarkerPositionListener.onScrubMove(
+                scrubPosition,
+                duration,
+                poiPositionOnTimeBarArrayList
+            )
         }
 
     }

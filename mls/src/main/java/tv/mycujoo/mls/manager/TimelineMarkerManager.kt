@@ -3,14 +3,14 @@ package tv.mycujoo.mls.manager
 import android.util.Log
 import android.view.View
 import tv.mycujoo.mls.helper.TimeRangeHelper.Companion.isInRange
-import tv.mycujoo.mls.widgets.mlstimebar.HighlightMarker
-import tv.mycujoo.mls.widgets.mlstimebar.HighlightMarkerPosition
+import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarker
+import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarkerPosition
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterest
 
-class HighlightMarkerManager(
+class TimelineMarkerManager(
     private val mlsTimeBar: MLSTimeBar,
-    private val highlightMarker: HighlightMarker
+    private val timelineMarker: TimelineMarker
 ) {
 
     private val pointOfInterestList = ArrayList<PointOfInterest>()
@@ -18,15 +18,17 @@ class HighlightMarkerManager(
 
     init {
 
-        mlsTimeBar.setHighlightMarkerPositionListener(object : HighlightMarkerPosition {
+        mlsTimeBar.setHighlightMarkerPositionListener(object : TimelineMarkerPosition {
             override fun onScrubMove(
                 position: Long,
+                videoDuration: Long,
                 poiPositionOnTimeBarArrayList: ArrayList<Int>
             ) {
-                Log.d("HighlightMarkerManager", " onScrubMove pos: $position")
+                Log.d("TimelineMarkerManager", " onScrubMove pos: $position")
                 val highlightIndex = pointOfInterestList.indexOfFirst { pointOfInterest ->
                     isInRange(
                         position,
+                        videoDuration,
                         pointOfInterest.offset
                     )
                 }
@@ -34,13 +36,13 @@ class HighlightMarkerManager(
                 if (highlightIndex != -1) {
                     if (pointOfInterestList[highlightIndex].title.isNotEmpty() && poiPositionOnTimeBarArrayList[highlightIndex] != -1) {
 
-                        highlightMarker.addHighlightTexts(pointOfInterestList[highlightIndex].title)
-                        highlightMarker.setPosition(poiPositionOnTimeBarArrayList[highlightIndex])
+                        timelineMarker.addHighlightTexts(pointOfInterestList[highlightIndex].title)
+                        timelineMarker.setPosition(poiPositionOnTimeBarArrayList[highlightIndex])
                     }
 
                 } else {
-                    highlightMarker.visibility = View.INVISIBLE
-                    highlightMarker.removeTexts()
+                    timelineMarker.visibility = View.INVISIBLE
+                    timelineMarker.removeTexts()
                 }
             }
         })

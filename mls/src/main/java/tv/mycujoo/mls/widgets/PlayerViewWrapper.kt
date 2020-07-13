@@ -36,13 +36,13 @@ import tv.mycujoo.mls.extensions.getDisplaySize
 import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.helper.OverlayFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
-import tv.mycujoo.mls.manager.HighlightMarkerManager
+import tv.mycujoo.mls.manager.TimelineMarkerManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.PlayerViewWrapper.LiveState.*
-import tv.mycujoo.mls.widgets.mlstimebar.HighlightMarker
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterest
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterestType
+import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarker
 
 
 class PlayerViewWrapper @JvmOverloads constructor(
@@ -145,9 +145,9 @@ class PlayerViewWrapper @JvmOverloads constructor(
         val mlsTimeBar = findViewById<MLSTimeBar>(R.id.exo_progress)
         mlsTimeBar.setPlayedColor(Color.BLUE)
         val highlightMarkerTextView =
-            findViewById<HighlightMarker>(R.id.exo_highlight_marker_title_highlight_marker)
+            findViewById<TimelineMarker>(R.id.exo_highlight_marker_title_highlight_marker)
 
-        val highlightMarkerManager = HighlightMarkerManager(mlsTimeBar, highlightMarkerTextView)
+        val timelineMarkerManager = TimelineMarkerManager(mlsTimeBar, highlightMarkerTextView)
 
         val greenPointOfInterestType = PointOfInterestType(Color.GREEN)
         val redPointOfInterestType = PointOfInterestType(Color.RED)
@@ -157,7 +157,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             .forEach {
                 it.actions.filter { it.type == ActionType.SHOW_TIMELINE_MARKER }
                     .forEach { showTimelineMarkerEntity ->
-                        highlightMarkerManager.addTimeLineHighlight(
+                        timelineMarkerManager.addTimeLineHighlight(
                             PointOfInterest(
                                 showTimelineMarkerEntity.offset,
                                 listOf(showTimelineMarkerEntity.label!!),
@@ -241,7 +241,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             val mlsTimeBar = findViewById<MLSTimeBar>(R.id.exo_progress)
             mlsTimeBar.setPlayedColor(primaryColor)
             val highlightMarkerTextView =
-                findViewById<HighlightMarker>(R.id.exo_highlight_marker_title_highlight_marker)
+                findViewById<TimelineMarker>(R.id.exo_highlight_marker_title_highlight_marker)
             highlightMarkerTextView.initialize(config.secondaryColor)
 
             bufferView.indeterminateTintList = ColorStateList.valueOf(primaryColor)
