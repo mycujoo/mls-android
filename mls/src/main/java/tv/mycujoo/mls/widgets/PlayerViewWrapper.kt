@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
-import android.os.Handler
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,6 +16,7 @@ import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
+import androidx.core.view.children
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.caverock.androidsvg.SVG
 import com.google.android.exoplayer2.C
@@ -51,21 +51,22 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
 
     /**region UI Fields*/
-    private var bufferView: ProgressBar
-    /**endregion */
-
-    /**region Fields*/
     var playerView: PlayerView
     private var overlayHost: OverlayHost
 
+    private var bufferView: ProgressBar
+
+    private var fullScreenButton: ImageButton
+    /**endregion */
+
+    /**region Fields*/
     lateinit var uiEventListener: UIEventListener
     private var isFullScreen = false
-    private var fullScreenButton: ImageButton
-
-
-    private var dismissingHandler = Handler()
 
     private val viewIdentifierManager = ViewIdentifierManager()
+
+    private lateinit var eventInfoTitle: String
+    private lateinit var eventInfoDescription: String
 
     @Nullable
     val idlingResource = CountingIdlingResource("displaying_overlays")
@@ -84,7 +85,9 @@ class PlayerViewWrapper @JvmOverloads constructor(
         playerView.resizeMode = RESIZE_MODE_FIXED_WIDTH
 
         findViewById<ImageButton>(R.id.controller_informationButton).setOnClickListener {
-            displayInformation()
+            if (this::eventInfoTitle.isInitialized && this::eventInfoDescription.isInitialized) {
+                displayEventInformationDialog(eventInfoTitle, eventInfoDescription, true)
+            }
         }
 
 
@@ -112,53 +115,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
         initMlsTimeBar()
 
-    }
-
-    private fun displayInformation() {
-        val informationDialog =
-            LayoutInflater.from(context).inflate(R.layout.dialog_information_layout, this, false)
-
-        addView(informationDialog)
-
-
-        val constraintSet = ConstraintSet()
-        constraintSet.clone(this)
-
-        constraintSet.connect(
-            informationDialog.id,
-            ConstraintSet.TOP,
-            ConstraintSet.PARENT_ID,
-            ConstraintSet.TOP
-        )
-        constraintSet.connect(
-            informationDialog.id,
-            ConstraintSet.BOTTOM,
-            ConstraintSet.PARENT_ID,
-            ConstraintSet.BOTTOM
-        )
-        constraintSet.connect(
-            informationDialog.id,
-            ConstraintSet.START,
-            ConstraintSet.PARENT_ID,
-            ConstraintSet.START
-        )
-        constraintSet.connect(
-            informationDialog.id,
-            ConstraintSet.END,
-            ConstraintSet.PARENT_ID,
-            ConstraintSet.END
-        )
-
-
-        constraintSet.applyTo(this)
-
-        informationDialog_titleTextView.text = "OK!"
-
-        informationDialog.setOnClickListener {
-            if (it.parent is ViewGroup) {
-                (it.parent as ViewGroup).removeView(it)
-            }
-        }
     }
 
     private fun initMlsTimeBar() {
@@ -293,10 +249,9 @@ class PlayerViewWrapper @JvmOverloads constructor(
             }
 
             if (config.eventInfoButton) {
-                findViewById<ImageButton>(R.id.controller_informationButton).visibility =
-                    View.VISIBLE
+                showEventInfoButton()
             } else {
-                findViewById<ImageButton>(R.id.controller_informationButton).visibility = View.GONE
+                hideEventInfoButton()
             }
 
 
@@ -501,6 +456,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             Log.e("PlayerView", "e: ${e.message}")
         }
     }
+
     fun onLingeringOutroAnimationAvailableFromSameCommand(
         overlayEntity: ShowOverlayActionEntity,
         animationPosition: Long,
@@ -581,6 +537,75 @@ class PlayerViewWrapper @JvmOverloads constructor(
     }
     /**endregion */
 
+    /**region Event Info related functions*/
+    fun displayEventInformationDialog(title: String, description: String, cancelable: Boolean) {
+        playerView.hideController()
+
+        val informationDialog =
+            LayoutInflater.from(context).inflate(R.layout.dialog_information_layout, this, false)
+        addView(informationDialog)
+
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(this)
+
+        constraintSet.connect(
+            informationDialog.id,
+            ConstraintSet.TOP,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.TOP
+        )
+        constraintSet.connect(
+            informationDialog.id,
+            ConstraintSet.BOTTOM,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.BOTTOM
+        )
+        constraintSet.connect(
+            informationDialog.id,
+            ConstraintSet.START,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.START
+        )
+        constraintSet.connect(
+            informationDialog.id,
+            ConstraintSet.END,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.END
+        )
+        constraintSet.applyTo(this)
+
+        informationDialog.informationDialog_titleTextView.text = title
+        informationDialog.informationDialog_bodyTextView.text = description
+
+        if (cancelable) {
+            informationDialog.setOnClickListener {
+                if (it.parent is ViewGroup) {
+                    (it.parent as ViewGroup).removeView(it)
+                }
+                playerView.showController()
+            }
+        }
+    }
+
+    fun hideEventInfoDialog() {
+        children.forEach { child ->
+            if (child.tag == "event_info_dialog") {
+                removeView(child)
+            }
+        }
+    }
+
+    fun showEventInfoButton() {
+        findViewById<ImageButton>(R.id.controller_informationButton).visibility =
+            View.VISIBLE
+    }
+
+    fun hideEventInfoButton() {
+        findViewById<ImageButton>(R.id.controller_informationButton).visibility =
+            View.GONE
+    }
+
+    /**endregion */
 
     /**region Classes*/
 

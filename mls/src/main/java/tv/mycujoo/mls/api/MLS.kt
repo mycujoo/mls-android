@@ -293,14 +293,13 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     override fun loadVideo(event: EventEntity) {
         event.streams.firstOrNull()?.fullUrl?.let {
             playVideo(Uri.parse(it), false)
-
-        }
+        } ?: displayPreviewModeWithEventInfo(event)
     }
 
     override fun playVideo(event: EventEntity) {
         event.streams.firstOrNull()?.fullUrl?.let {
             playVideo(Uri.parse(it), true)
-        }
+        } ?: displayPreviewModeWithEventInfo(event)
     }
 
     override fun getDataProvider(): DataProvider {
@@ -399,6 +398,26 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     /**region msc Functions*/
     private fun persistPublicKey(publicKey: String) {
         prefManager.persist("PUBLIC_KEY", publicKey)
+    }
+
+    private fun displayPreviewModeWithEventInfo(event: EventEntity) {
+        if (!this::playerViewWrapper.isInitialized) {
+            return
+        }
+
+        playerViewWrapper.hideEventInfoButton()
+        playerViewWrapper.displayEventInformationDialog(
+            event.title,
+            event.description,
+            event.streams.isNotEmpty()
+        )
+    }
+
+    private fun hidePreviewMode() {
+        if (!this::playerViewWrapper.isInitialized) {
+            return
+        }
+        playerViewWrapper.hideEventInfoDialog()
     }
     /**endregion */
 
