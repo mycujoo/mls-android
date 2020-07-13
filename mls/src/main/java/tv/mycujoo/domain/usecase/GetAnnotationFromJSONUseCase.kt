@@ -31,7 +31,7 @@ class GetAnnotationFromJSONUseCase {
            "annotations":[
               {
                  "id":"ann_1",
-                 "offset":1699000,
+                 "offset":1000,
                  "timeline_id":"tml_1",
                  "actions":[
                     {

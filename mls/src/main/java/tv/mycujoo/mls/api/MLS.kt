@@ -162,12 +162,12 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
 
             exoPlayer?.let {
 
-                builder.mlsConfiguration?.let { mlsConfiguration ->
-                    if (mlsConfiguration.accuracy > 0) {
+                builder.mlsConfiguration.accuracy?.let { accuracy ->
+                    if (accuracy > 0) {
                         it.setSeekParameters(
                             SeekParameters(
-                                mlsConfiguration.accuracy / 2,
-                                mlsConfiguration.accuracy / 2
+                                accuracy / 2,
+                                accuracy / 2
                             )
                         )
                     }
@@ -389,7 +389,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         exoPlayer: SimpleExoPlayer?
     ) {
         exoPlayer?.let {
-            VideoPlayerCoordinator(exoPlayer, playerViewWrapper)
+            VideoPlayerCoordinator(exoPlayer, playerViewWrapper, builder.mlsConfiguration.VideoPlayerConfig)
         }
     }
 
@@ -435,7 +435,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
             private set
         internal var uiEventListener: UIEventListener? = null
             private set
-        internal var mlsConfiguration: MLSConfiguration? = null
+        internal var mlsConfiguration: MLSConfiguration = MLSConfiguration()
             private set
 
         internal var hasAnnotation: Boolean = true

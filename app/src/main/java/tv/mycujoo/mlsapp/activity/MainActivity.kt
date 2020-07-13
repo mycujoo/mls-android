@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
                 .withActivity(this)
                 .setPlayerEventsListener(playerEventsListener)
                 .setUIEventListener(uiEventListener)
-                .setConfiguration(MLSConfiguration(1000L))
+                .setConfiguration(MLSConfiguration(accuracy = 1000L))
 //                .hasAnalyticPlugin(true)
                 .build()
 

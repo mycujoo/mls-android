@@ -9,7 +9,8 @@ import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
 class VideoPlayerCoordinator(
     private val exoPlayer: SimpleExoPlayer,
-    private val playerViewWrapper: PlayerViewWrapper
+    private val playerViewWrapper: PlayerViewWrapper,
+    videoPlayerConfig: VideoPlayerConfig
 ) {
 
     init {
@@ -50,18 +51,7 @@ class VideoPlayerCoordinator(
             }
         })
 
-
-        val videoPlayerConfig = VideoPlayerConfig(
-            "#32c5ff",
-            "#FFFFFF",
-            true,
-            80F,
-            true,
-            liveViewers = false,
-            eventInfoButton = true
-        )
         playerViewWrapper.config(videoPlayerConfig)
-
 
     }
 
