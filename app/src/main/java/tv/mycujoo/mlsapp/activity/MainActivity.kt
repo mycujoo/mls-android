@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.activity_main.*
 import tv.mycujoo.domain.entity.EventEntity
+import tv.mycujoo.domain.entity.EventStatus
+import tv.mycujoo.domain.entity.OrderByEventsParam
 import tv.mycujoo.mls.api.MLS
 import tv.mycujoo.mls.api.MLSConfiguration
 import tv.mycujoo.mls.api.PlayerEventsListener
@@ -76,6 +78,13 @@ class MainActivity : AppCompatActivity() {
 //        MLS.loadVideo(Uri.parse("https://playlists.mycujoo.football/eu/ck8u05tfu1u090hew2kgobnud/master.m3u8"))
 //        MLS.loadVideo(Uri.parse("https://raw-rendered-europe-west.mls.mycujoo.tv/3619/ckbuult7c00010121qjpp3rej/index.m3u8"))
 //        MLS.loadVideo(Uri.parse("https://playlists.mycujoo.football/as/ck3axeudv3m1a0hfyzlu4dw3x/master.m3u8"))
+
+        MLS.getDataProvider().fetchEvents(
+            10,
+            null,
+            listOf(EventStatus.EVENT_STATUS_SCHEDULED, EventStatus.EVENT_STATUS_CANCELLED),
+            OrderByEventsParam.ORDER_TITLE_ASC
+        )
 
     }
 
