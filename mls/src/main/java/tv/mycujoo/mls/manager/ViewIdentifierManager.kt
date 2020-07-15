@@ -9,7 +9,8 @@ class ViewIdentifierManager {
 
     var animations = ArrayList<ObjectAnimator>()
 
-    val attachedOverlayList: List<String> = ArrayList()
+    val attachedOverlayList: ArrayList<String> = ArrayList()
+    val attachedAnimationList: ArrayList<String> = ArrayList()
 
 
     fun storeViewId(view: View, customId: String) {

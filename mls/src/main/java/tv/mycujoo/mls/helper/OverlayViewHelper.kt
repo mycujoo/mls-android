@@ -1521,7 +1521,8 @@ class OverlayViewHelper {
                 doAddViewWithNoAnimation(
                     overlayHost,
                     proportionalImageView,
-                    overlayObject.viewSpec.positionGuide!!
+                    overlayObject.viewSpec.positionGuide!!,
+                    viewIdentifierManager
                 )
 
             } catch (e: Exception) {
@@ -1636,16 +1637,30 @@ class OverlayViewHelper {
                 proportionalImageView.layoutParams = layoutParams
 
                 overlayHost.addView(proportionalImageView)
-//                objectAnimator?.let {
-//                    viewIdentifierManager.storeAnimation(proportionalImageView.id, it)
-//                }
-                val objectAnimator = AnimationFactory.createStaticAnimation(
+                viewIdentifierManager.attachedOverlayList.add(proportionalImageView.tag as String)
+
+                val animation = AnimationFactory.createStaticAnimation(
                     proportionalImageView,
                     introTransitionSpec.animationType,
                     introTransitionSpec.animationDuration
                 )
-                viewIdentifierManager.addAnimation(objectAnimator!!)
-                objectAnimator?.start()
+                animation!!.addListener(object : Animator.AnimatorListener {
+                    override fun onAnimationRepeat(animation: Animator?) {
+                    }
+
+                    override fun onAnimationEnd(animation: Animator?) {
+                        viewIdentifierManager.attachedOverlayList.remove(proportionalImageView.tag as String)
+                    }
+
+                    override fun onAnimationCancel(animation: Animator?) {
+                    }
+
+                    override fun onAnimationStart(animation: Animator?) {
+
+                    }
+                })
+                viewIdentifierManager.addAnimation(animation)
+                animation.start()
 
             }
         }
@@ -1669,8 +1684,6 @@ class OverlayViewHelper {
                     override fun onChildViewAdded(parent: View?, child: View?) {
                         if (child != null && child.id == proportionalImageView.id) {
                             host.post {
-
-
                                 val x = proportionalImageView.x
                                 val y = proportionalImageView.y
 
@@ -1690,17 +1703,15 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationEnd(animation: Animator?) {
-
+                                                viewIdentifierManager.attachedOverlayList.remove(proportionalImageView.tag as String)
                                             }
 
                                             override fun onAnimationCancel(animation: Animator?) {
-
                                             }
 
                                             override fun onAnimationStart(animation: Animator?) {
                                                 proportionalImageView.visibility = View.VISIBLE
                                             }
-
                                         })
 
                                         animation.start()
@@ -1719,7 +1730,7 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationEnd(animation: Animator?) {
-
+                                                viewIdentifierManager.attachedOverlayList.remove(proportionalImageView.tag as String)
                                             }
 
                                             override fun onAnimationCancel(animation: Animator?) {
@@ -1739,12 +1750,9 @@ class OverlayViewHelper {
                                         // should not happen
                                     }
                                 }
-
                             }
                         }
-
                     }
-
                 })
 
                 val constraintSet = ConstraintSet()
@@ -1795,6 +1803,8 @@ class OverlayViewHelper {
                 proportionalImageView.visibility = View.INVISIBLE
                 constraintSet.applyTo(host)
                 host.addView(proportionalImageView)
+                viewIdentifierManager.attachedOverlayList.add(proportionalImageView.tag as String)
+
 
             }
 
@@ -1804,7 +1814,8 @@ class OverlayViewHelper {
         private fun doAddViewWithNoAnimation(
             overlayHost: OverlayHost,
             proportionalImageView: ProportionalImageView,
-            positionGuide: PositionGuide
+            positionGuide: PositionGuide,
+            viewIdentifierManager: ViewIdentifierManager
         ) {
             overlayHost.post {
                 val constraintSet = ConstraintSet()
@@ -1855,8 +1866,7 @@ class OverlayViewHelper {
                 proportionalImageView.layoutParams = layoutParams
 
                 overlayHost.addView(proportionalImageView)
-                // todo
-//                viewIdentifierManager.storeViewId(proportionalImageView, overlayEntity.customId!!)
+                viewIdentifierManager.attachedOverlayList.add(proportionalImageView.tag as String)
             }
         }
 
@@ -1867,14 +1877,21 @@ class OverlayViewHelper {
             overlayObject: OverlayObject,
             viewIdentifierManager: ViewIdentifierManager
         ) {
-
             when (overlayObject.outroTransitionSpec.animationType) {
                 FADE_OUT -> {
-                    removalViewWithStaticAnimation(overlayHost, overlayObject, viewIdentifierManager)
+                    removalViewWithStaticAnimation(
+                        overlayHost,
+                        overlayObject,
+                        viewIdentifierManager
+                    )
                 }
                 SLIDE_TO_LEADING,
                 SLIDE_TO_TRAILING -> {
-                    removalViewWithDynamicAnimation(overlayHost, overlayObject, viewIdentifierManager)
+                    removalViewWithDynamicAnimation(
+                        overlayHost,
+                        overlayObject,
+                        viewIdentifierManager
+                    )
                 }
                 else -> {
                     // should not happen
@@ -1882,8 +1899,6 @@ class OverlayViewHelper {
                 }
 
             }
-
-
         }
 
         private fun removalViewWithStaticAnimation(
@@ -1902,6 +1917,7 @@ class OverlayViewHelper {
 
                         override fun onAnimationEnd(animation: Animator?) {
                             overlayHost.removeView(view)
+                            viewIdentifierManager.attachedAnimationList.remove(overlayObject.id)
                         }
 
                         override fun onAnimationRepeat(animation: Animator?) {
@@ -1913,6 +1929,7 @@ class OverlayViewHelper {
                     })
 
                     viewIdentifierManager.addAnimation(animation)
+                    viewIdentifierManager.attachedAnimationList.add(overlayObject.id)
                     animation.start()
                 }
             }
@@ -1925,7 +1942,6 @@ class OverlayViewHelper {
         ) {
             overlayHost.post {
                 overlayHost.children.filter { it.tag == overlayObject.id }.forEach { view ->
-
                     var animation: ObjectAnimator? = null
 
                     if (overlayObject.outroTransitionSpec.animationType == SLIDE_TO_LEADING) {
@@ -1957,6 +1973,8 @@ class OverlayViewHelper {
 
                         override fun onAnimationEnd(animation: Animator?) {
                             overlayHost.removeView(view)
+                            viewIdentifierManager.attachedAnimationList.remove(overlayObject.id)
+
                         }
 
                         override fun onAnimationCancel(animation: Animator?) {
@@ -1968,11 +1986,10 @@ class OverlayViewHelper {
 
                     })
                     viewIdentifierManager.addAnimation(animation)
+                    viewIdentifierManager.attachedAnimationList.add(overlayObject.id)
                     animation.start()
                 }
             }
-
-
         }
 
         // lingerings
@@ -1997,7 +2014,6 @@ class OverlayViewHelper {
                     svg.setDocumentWidth("100%")
                     svg.setDocumentHeight("100%")
                     proportionalImageView.setSVG(svg)
-
                 } catch (e: Exception) {
                     Log.w("OverlayViewHelper", "Exception => ".plus(e.message))
                 }
@@ -2034,11 +2050,10 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationEnd(animation: Animator?) {
-
+                                                viewIdentifierManager.attachedAnimationList.remove(overlayObject.id)
                                             }
 
                                             override fun onAnimationCancel(animation: Animator?) {
-
                                             }
 
                                             override fun onAnimationStart(animation: Animator?) {
@@ -2072,11 +2087,10 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationEnd(animation: Animator?) {
-
+                                                viewIdentifierManager.attachedAnimationList.remove(overlayObject.id)
                                             }
 
                                             override fun onAnimationCancel(animation: Animator?) {
-
                                             }
 
                                             override fun onAnimationStart(animation: Animator?) {
@@ -2108,7 +2122,7 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationEnd(animation: Animator?) {
-
+                                                viewIdentifierManager.attachedAnimationList.remove(overlayObject.id)
                                             }
 
                                             override fun onAnimationCancel(animation: Animator?) {
@@ -2219,13 +2233,6 @@ class OverlayViewHelper {
                     svg.setDocumentWidth("100%")
                     svg.setDocumentHeight("100%")
                     proportionalImageView.setSVG(svg)
-
-//                    doAddViewWithNoAnimation(
-//                        overlayHost,
-//                        proportionalImageView,
-//                        overlayObject.viewSpec.positionGuide!!
-//                    )
-
                 } catch (e: Exception) {
                     Log.w("OverlayViewHelper", "Exception => ".plus(e.message))
                 }
@@ -2253,7 +2260,10 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationEnd(animation: Animator?) {
-
+                                                overlayHost.removeView(proportionalImageView)
+                                                viewIdentifierManager.attachedAnimationList.remove(
+                                                    overlayObject.id
+                                                )
                                             }
 
                                             override fun onAnimationCancel(animation: Animator?) {
@@ -2266,7 +2276,10 @@ class OverlayViewHelper {
 
                                         })
 
-
+                                        viewIdentifierManager.addAnimation(animation)
+                                        viewIdentifierManager.attachedAnimationList.add(
+                                            overlayObject.id
+                                        )
                                         animation.start()
                                         animation.currentPlayTime = animationPosition
                                         if (isPlaying) {
@@ -2291,7 +2304,10 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationEnd(animation: Animator?) {
-
+                                                overlayHost.removeView(proportionalImageView)
+                                                viewIdentifierManager.attachedAnimationList.remove(
+                                                    overlayObject.id
+                                                )
                                             }
 
                                             override fun onAnimationCancel(animation: Animator?) {
@@ -2305,6 +2321,9 @@ class OverlayViewHelper {
                                         })
 
                                         viewIdentifierManager.addAnimation(animation)
+                                        viewIdentifierManager.attachedAnimationList.add(
+                                            overlayObject.id
+                                        )
                                         animation.start()
                                         animation.currentPlayTime = animationPosition
                                         if (isPlaying) {
@@ -2327,7 +2346,10 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationEnd(animation: Animator?) {
-
+                                                overlayHost.removeView(proportionalImageView)
+                                                viewIdentifierManager.attachedAnimationList.remove(
+                                                    overlayObject.id
+                                                )
                                             }
 
                                             override fun onAnimationCancel(animation: Animator?) {
@@ -2336,11 +2358,14 @@ class OverlayViewHelper {
 
                                             override fun onAnimationStart(animation: Animator?) {
                                                 proportionalImageView.visibility = View.VISIBLE
-
                                             }
 
                                         })
 
+                                        viewIdentifierManager.addAnimation(animation)
+                                        viewIdentifierManager.attachedAnimationList.add(
+                                            overlayObject.id
+                                        )
                                         animation.start()
                                         animation.currentPlayTime = animationPosition
                                         if (isPlaying) {
@@ -2353,7 +2378,6 @@ class OverlayViewHelper {
                                         // should not happen
                                     }
                                 }
-
                             }
                         }
 
@@ -2413,6 +2437,7 @@ class OverlayViewHelper {
                 proportionalImageView.visibility = View.INVISIBLE
                 constraintSet.applyTo(overlayHost)
                 overlayHost.addView(proportionalImageView)
+                viewIdentifierManager.attachedOverlayList.add(overlayObject.id)
 
             }
         }

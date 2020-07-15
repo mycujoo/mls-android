@@ -23,7 +23,6 @@ import com.google.android.exoplayer2.ui.AspectRatioFrameLayout.RESIZE_MODE_FIXED
 import com.google.android.exoplayer2.ui.PlayerView
 import kotlinx.android.synthetic.main.dialog_information_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
-import tv.mycujoo.domain.entity.ActionEntity
 import tv.mycujoo.domain.entity.OverlayObject
 import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.domain.usecase.GetAnnotationFromJSONUseCase
@@ -304,12 +303,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
     fun getTimeBar(): MLSTimeBar {
         return findViewById(R.id.exo_progress)
     }
-
-    fun action(actionEntity: ActionEntity) {
-        actionEntity.type
-    }
-
-
     /**endregion */
 
     /**region New Annotation structure*/
@@ -425,7 +418,13 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     fun onOverlayRemovalWithNoAnimation(overlayObject: OverlayObject) {
         overlayHost.children.filter { it.tag == overlayObject.id }
-            .forEach { overlayHost.removeView(it) }
+            .forEach {
+                overlayHost.removeView(it)
+                if (this::viewIdentifierManager.isInitialized) {
+                    viewIdentifierManager.attachedOverlayList.remove(overlayObject.id)
+                }
+            }
+
     }
 
     fun onOverlayRemovalWithAnimation(overlayObject: OverlayObject) {
@@ -442,6 +441,9 @@ class PlayerViewWrapper @JvmOverloads constructor(
             .forEach {
                 if (idList.contains(it.tag)) {
                     overlayHost.removeView(it)
+                    if (this::viewIdentifierManager.isInitialized) {
+                        viewIdentifierManager.attachedOverlayList.remove(it.tag as String)
+                    }
                 }
             }
     }

@@ -1,12 +1,10 @@
 package tv.mycujoo.mls.core
 
 import okhttp3.*
-import tv.mycujoo.domain.entity.ActionEntity
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.AnimationType.*
 import tv.mycujoo.domain.entity.OverlayObject
 import tv.mycujoo.domain.entity.SvgData
-import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import java.io.IOException
 
@@ -21,6 +19,7 @@ class AnnotationBuilderImpl(
     private var isPlaying: Boolean = false
 
     private var overlayObjects = ArrayList<OverlayObject>()
+    private var toBeDownloadedSvgList = ArrayList<String>()
 
     /**endregion */
 
@@ -32,12 +31,20 @@ class AnnotationBuilderImpl(
 
 
     override fun buildCurrentTimeRange() {
-        overlayObjects.filter { isNotAttached(it) && additionIsInCurrentTimeRange(it) }
+        overlayObjects.filter {
+            isNotDownloading(it)
+                    && isNotAttached(it)
+                    && additionIsInCurrentTimeRange(it)
+        }
             .forEach { overlayObject ->
                 downloadSVGThenCallListener(overlayObject) { listener.onNewOverlay(it) }
             }
 
-        overlayObjects.filter { removalIsInCurrentTimeRange(it) }.forEach {
+        overlayObjects.filter {
+            isNotInDisplayingOutroAnimation(it) && isAttached(it) && removalIsInCurrentTimeRange(
+                it
+            )
+        }.forEach {
             listener.onRemovalOverlay(it)
         }
     }
@@ -96,8 +103,20 @@ class AnnotationBuilderImpl(
     /**region Action classifiers*/
 
     //re-write
+    private fun isNotDownloading(overlayObject: OverlayObject): Boolean {
+        return toBeDownloadedSvgList.none { it == overlayObject.id }
+    }
+
     private fun isNotAttached(overlayObject: OverlayObject): Boolean {
         return viewIdentifierManager.attachedOverlayList.none { it == overlayObject.id }
+    }
+
+    private fun isAttached(overlayObject: OverlayObject): Boolean {
+        return viewIdentifierManager.attachedOverlayList.any { it == overlayObject.id }
+    }
+
+    private fun isNotInDisplayingOutroAnimation(overlayObject: OverlayObject): Boolean {
+        return viewIdentifierManager.attachedAnimationList.none { it == overlayObject.id }
     }
 
     /**
@@ -210,43 +229,24 @@ class AnnotationBuilderImpl(
 
     /**region msc*/
     private fun downloadSVGThenCallListener(
-        actionEntity: ActionEntity,
-        callback: (ActionEntity) -> Unit
-    ) {
-        val request: Request = Request.Builder().url(actionEntity.svgUrl).build()
-        okHttpClient.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                println(
-                    "MLS-App AnnotationBuilderImpl - getInputStream() onFailure"
-                )
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                if (response.isSuccessful && response.body() != null) {
-                    callback(
-                        actionEntity.copy(
-                            svgInputStream = response.body()!!.byteStream()
-                        )
-                    )
-                }
-            }
-        })
-    }
-
-    private fun downloadSVGThenCallListener(
         overlayObject: OverlayObject,
         callback: (OverlayObject) -> Unit
     ) {
+        toBeDownloadedSvgList.add(overlayObject.id)
+
         val svgUrl = overlayObject.svgData!!.svgUrl!!
         val request: Request = Request.Builder().url(svgUrl).build()
         okHttpClient.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
+                toBeDownloadedSvgList.remove(overlayObject.id)
+
                 println(
                     "MLS-App AnnotationBuilderImpl - getInputStream() onFailure"
                 )
             }
 
             override fun onResponse(call: Call, response: Response) {
+                toBeDownloadedSvgList.remove(overlayObject.id)
                 if (response.isSuccessful && response.body() != null) {
                     callback(
                         overlayObject.copy(

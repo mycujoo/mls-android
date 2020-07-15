@@ -7,9 +7,7 @@ import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SimpleExoPlayer
 import okhttp3.OkHttpClient
 import tv.mycujoo.domain.entity.*
-import tv.mycujoo.domain.entity.models.ActionType.*
-import tv.mycujoo.domain.mapper.HideOverlayMapper
-import tv.mycujoo.domain.mapper.ShowOverlayMapper
+import tv.mycujoo.domain.entity.models.ActionType.SHOW_OVERLAY
 import tv.mycujoo.domain.usecase.GetAnnotationFromJSONUseCase
 import tv.mycujoo.mls.core.AnnotationBuilder
 import tv.mycujoo.mls.core.AnnotationBuilderImpl
@@ -114,11 +112,11 @@ class Coordinator(
             override fun run() {
                 annotationBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
                 annotationBuilder.buildCurrentTimeRange()
-                handler.postDelayed(this, 1000L)
+                handler.postDelayed(this, 200L)
             }
         }
 
-        handler.postDelayed(runnable, 1000L)
+        handler.postDelayed(runnable, 200L)
     }
 
     private fun createOverlayObject(actionEntity: ActionEntity): OverlayObject {
