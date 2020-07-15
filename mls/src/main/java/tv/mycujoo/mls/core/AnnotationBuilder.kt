@@ -1,12 +1,14 @@
 package tv.mycujoo.mls.core
 
 import tv.mycujoo.domain.entity.ActionEntity
+import tv.mycujoo.domain.entity.OverlayObject
 
 abstract class AnnotationBuilder {
     /**
      * adds ActionEntity which will be processed to create Show Overlays
      */
     abstract fun addPendingShowActions(actions: List<ActionEntity>)
+
     /**
      * adds ActionEntity which will be processed to create Hide Overlays
      */
@@ -33,6 +35,7 @@ abstract class AnnotationBuilder {
      * builds all Removal types of action from start to end
      */
     abstract fun buildRemovalAnnotations()
+
     /**
      * builds all Removal types of action from start to current time
      */
@@ -49,11 +52,19 @@ abstract class AnnotationBuilder {
      * intro-animation is always in the same action.
      */
     abstract fun buildLingeringIntroAnimations(isPlaying: Boolean)
+
     /**
      * build actions which are in their Outro animation time.
      */
     abstract fun buildLingeringOutroAnimations(isPlaying: Boolean)
 
+
+    // re-write
+    abstract fun addOverlayObjects(overlayObject: List<OverlayObject>)
+    abstract fun buildCurrentTimeRange()
+    // remove ALL, clear screen
+    abstract fun removeAll()
+    abstract fun buildLingerings()
 
 
 }

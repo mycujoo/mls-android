@@ -7,6 +7,11 @@ class ViewIdentifierManager {
     var viewIdToIdMap = mutableMapOf<String, Int>()
     var viewIdToAnimationMap = mutableMapOf<Int, ObjectAnimator>()
 
+    var animations = ArrayList<ObjectAnimator>()
+
+    val attachedOverlayList: List<String> = ArrayList()
+
+
     fun storeViewId(view: View, customId: String) {
         viewIdToIdMap[customId] = view.id
     }
@@ -25,15 +30,19 @@ class ViewIdentifierManager {
         } else null
     }
 
-    fun getAnimations(): List<ObjectAnimator> {
-        return viewIdToAnimationMap.values.toList()
+    fun addAnimation(objectAnimator: ObjectAnimator) {
+        animations.add(objectAnimator)
     }
 
-    fun getAnimationByCustomId(customId: String?) : ObjectAnimator?{
-        if (customId.isNullOrEmpty()){
+    fun getAnimations(): List<ObjectAnimator> {
+        return animations
+    }
+
+    fun getAnimationByCustomId(customId: String?): ObjectAnimator? {
+        if (customId.isNullOrEmpty()) {
             return null
         }
-       return getViewId(customId)?.let { getAnimationByViewId(it) }
+        return getViewId(customId)?.let { getAnimationByViewId(it) }
 
     }
 

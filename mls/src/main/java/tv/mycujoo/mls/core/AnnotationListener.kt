@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.core
 
 import tv.mycujoo.domain.entity.ActionEntity
+import tv.mycujoo.domain.entity.OverlayObject
 
 interface AnnotationListener {
     /**
@@ -49,6 +50,7 @@ interface AnnotationListener {
         animationPosition: Long,
         isPlaying: Boolean
     )
+
     /**
      * add an overlay which:
      *
@@ -78,7 +80,28 @@ interface AnnotationListener {
         actionEntity: ActionEntity
     )
 
-    fun clearScreen(customIdList: List<String>)
+//    fun clearScreen(customIdList: List<String>)
+
+    // re-write
+    // from now up to next second
+    fun onNewOverlay(overlayObject: OverlayObject)
+    fun onRemovalOverlay(overlayObject: OverlayObject)
+
+    fun clearScreen(idList: List<String>)
+
+    fun onLingeringIntroOverlay(
+        overlayObject: OverlayObject,
+        animationPosition: Long,
+        isPlaying: Boolean
+    )
+    fun onLingeringOutroOverlay(
+        overlayObject: OverlayObject,
+        animationPosition: Long,
+        isPlaying: Boolean
+    )
+    fun onLingeringOverlay(
+        overlayObject: OverlayObject
+    )
 
 
 }

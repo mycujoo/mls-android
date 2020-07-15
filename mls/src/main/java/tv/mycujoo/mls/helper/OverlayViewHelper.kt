@@ -2,6 +2,8 @@ package tv.mycujoo.mls.helper
 
 import android.animation.Animator
 import android.animation.ObjectAnimator
+import android.content.Context
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -9,6 +11,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 import androidx.test.espresso.idling.CountingIdlingResource
+import com.caverock.androidsvg.SVG
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.AnimationType.*
 import tv.mycujoo.mls.manager.ViewIdentifierManager
@@ -622,7 +625,8 @@ class OverlayViewHelper {
                                             1F,
                                             0F
                                         )
-                                        animation.duration = hideOverlayEntity.outroAnimationDuration
+                                        animation.duration =
+                                            hideOverlayEntity.outroAnimationDuration
                                         animation.addListener(object : Animator.AnimatorListener {
                                             override fun onAnimationRepeat(animation: Animator?) {
                                             }
@@ -662,7 +666,8 @@ class OverlayViewHelper {
                                             proportionalImageView.x,
                                             -proportionalImageView.width.toFloat()
                                         )
-                                        animation.duration = hideOverlayEntity.outroAnimationDuration
+                                        animation.duration =
+                                            hideOverlayEntity.outroAnimationDuration
                                         animation.addListener(object : Animator.AnimatorListener {
                                             override fun onAnimationRepeat(animation: Animator?) {
                                             }
@@ -700,7 +705,8 @@ class OverlayViewHelper {
                                             proportionalImageView.x,
                                             host.width.toFloat()
                                         )
-                                        animation.duration = hideOverlayEntity.outroAnimationDuration
+                                        animation.duration =
+                                            hideOverlayEntity.outroAnimationDuration
                                         animation.addListener(object : Animator.AnimatorListener {
                                             override fun onAnimationRepeat(animation: Animator?) {
                                             }
@@ -796,6 +802,7 @@ class OverlayViewHelper {
             }
 
         }
+
         fun addViewWithLingeringOutroAnimationFromSameCommand(
             host: OverlayHost,
             proportionalImageView: ProportionalImageView,
@@ -826,7 +833,8 @@ class OverlayViewHelper {
                                             1F,
                                             0F
                                         )
-                                        animation.duration = relatedShowOverlayEntity.outroAnimationDuration
+                                        animation.duration =
+                                            relatedShowOverlayEntity.outroAnimationDuration
                                         animation.addListener(object : Animator.AnimatorListener {
                                             override fun onAnimationRepeat(animation: Animator?) {
                                             }
@@ -869,7 +877,8 @@ class OverlayViewHelper {
                                             proportionalImageView.x,
                                             -proportionalImageView.width.toFloat()
                                         )
-                                        animation.duration = relatedShowOverlayEntity.outroAnimationDuration
+                                        animation.duration =
+                                            relatedShowOverlayEntity.outroAnimationDuration
                                         animation.addListener(object : Animator.AnimatorListener {
                                             override fun onAnimationRepeat(animation: Animator?) {
                                             }
@@ -907,7 +916,8 @@ class OverlayViewHelper {
                                             proportionalImageView.x,
                                             host.width.toFloat()
                                         )
-                                        animation.duration = relatedShowOverlayEntity.outroAnimationDuration
+                                        animation.duration =
+                                            relatedShowOverlayEntity.outroAnimationDuration
                                         animation.addListener(object : Animator.AnimatorListener {
                                             override fun onAnimationRepeat(animation: Animator?) {
                                             }
@@ -1372,17 +1382,12 @@ class OverlayViewHelper {
 
         private fun hasDynamicIntroAnimation(animationType: AnimationType): Boolean {
             return when (animationType) {
-                NONE,
-                FADE_IN,
-                FADE_OUT,
-                SLIDE_TO_LEADING,
-                SLIDE_TO_TRAILING -> {
-                    false
-                }
-
                 SLIDE_FROM_LEADING,
                 SLIDE_FROM_TRAILING -> {
                     true
+                }
+                else -> {
+                    false
                 }
             }
         }
@@ -1393,12 +1398,7 @@ class OverlayViewHelper {
                     true
                 }
 
-                NONE,
-                FADE_OUT,
-                SLIDE_FROM_LEADING,
-                SLIDE_FROM_TRAILING,
-                SLIDE_TO_LEADING,
-                SLIDE_TO_TRAILING -> {
+                else -> {
                     false
                 }
             }
@@ -1406,17 +1406,13 @@ class OverlayViewHelper {
 
         private fun hasDynamicOutroAnimation(animationType: AnimationType): Boolean {
             return when (animationType) {
-                NONE,
-                FADE_IN,
-                FADE_OUT,
-                SLIDE_FROM_LEADING,
-                SLIDE_FROM_TRAILING -> {
-                    false
-                }
-
                 SLIDE_TO_LEADING,
                 SLIDE_TO_TRAILING -> {
                     true
+                }
+
+                else -> {
+                    false
                 }
             }
         }
@@ -1427,12 +1423,7 @@ class OverlayViewHelper {
                     true
                 }
 
-                NONE,
-                FADE_IN,
-                SLIDE_FROM_LEADING,
-                SLIDE_FROM_TRAILING,
-                SLIDE_TO_LEADING,
-                SLIDE_TO_TRAILING -> {
+                else -> {
                     false
                 }
             }
@@ -1509,5 +1500,922 @@ class OverlayViewHelper {
         }
 
         /**endregion */
+
+
+        // re-write
+        fun addViewWithNoAnimation(
+            context: Context,
+            overlayHost: OverlayHost,
+            overlayObject: OverlayObject,
+            viewIdentifierManager: ViewIdentifierManager
+        ) {
+            val proportionalImageView =
+                OverlayFactory.create(context, overlayObject.id, overlayObject.viewSpec.size!!)
+
+            try {
+                val svg = SVG.getFromInputStream(overlayObject.svgData!!.svgInputStream)
+                svg.setDocumentWidth("100%")
+                svg.setDocumentHeight("100%")
+                proportionalImageView.setSVG(svg)
+
+                doAddViewWithNoAnimation(
+                    overlayHost,
+                    proportionalImageView,
+                    overlayObject.viewSpec.positionGuide!!
+                )
+
+            } catch (e: Exception) {
+                Log.w("OverlayViewHelper", "Exception => ".plus(e.message))
+            }
+
+        }
+
+        fun addViewWithAnimation(
+            context: Context,
+            overlayHost: OverlayHost,
+            overlayObject: OverlayObject,
+            viewIdentifierManager: ViewIdentifierManager
+        ) {
+
+            overlayHost.post {
+                val proportionalImageView =
+                    OverlayFactory.create(context, overlayObject.id, overlayObject.viewSpec.size!!)
+
+                try {
+                    val svg = SVG.getFromInputStream(overlayObject.svgData!!.svgInputStream)
+                    svg.setDocumentWidth("100%")
+                    svg.setDocumentHeight("100%")
+                    proportionalImageView.setSVG(svg)
+
+                    when (overlayObject.introTransitionSpec.animationType) {
+                        FADE_IN -> {
+                            doAddViewWithStaticAnimation(
+                                overlayHost,
+                                proportionalImageView,
+                                overlayObject.viewSpec.positionGuide!!,
+                                overlayObject.introTransitionSpec,
+                                viewIdentifierManager
+                            )
+                        }
+                        SLIDE_FROM_LEADING,
+                        SLIDE_FROM_TRAILING -> {
+
+                            doAddViewWithDynamicAnimation(
+                                overlayHost,
+                                proportionalImageView,
+                                overlayObject.viewSpec.positionGuide!!,
+                                overlayObject.introTransitionSpec,
+                                viewIdentifierManager
+                            )
+                        }
+                        else -> {
+                            // should not happen
+                        }
+                    }
+
+                } catch (e: Exception) {
+                    Log.w("OverlayViewHelper", "Exception => ".plus(e.message))
+                }
+
+            }
+        }
+
+        private fun doAddViewWithStaticAnimation(
+            overlayHost: OverlayHost,
+            proportionalImageView: ProportionalImageView,
+            positionGuide: PositionGuide,
+            introTransitionSpec: TransitionSpec,
+            viewIdentifierManager: ViewIdentifierManager
+        ) {
+            overlayHost.post {
+
+                val constraintSet = ConstraintSet()
+                constraintSet.clone(overlayHost)
+                val layoutParams = ConstraintLayout.LayoutParams(
+                    ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                    ConstraintLayout.LayoutParams.WRAP_CONTENT
+                )
+
+                positionGuide.leading?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setLeadingConstraints(constraintSet, it, layoutParams, proportionalImageView)
+                }
+                positionGuide.trailing?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setTrailingConstraints(constraintSet, it, layoutParams)
+                }
+                positionGuide.top?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setTopConstraints(constraintSet, it, layoutParams)
+                }
+                positionGuide.bottom?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setBottomConstraints(constraintSet, it, layoutParams, proportionalImageView)
+                }
+                positionGuide.vCenter?.let {
+                    if (it > 50F || it < -50F) {
+                        return@let
+                    }
+                    setVCenterConstraints(layoutParams, it)
+                }
+                positionGuide.hCenter?.let {
+                    if (it > 50F || it < -50F) {
+                        return@let
+                    }
+                    setHCenterConstrains(layoutParams, it)
+                }
+                constraintSet.applyTo(overlayHost)
+                proportionalImageView.layoutParams = layoutParams
+
+                overlayHost.addView(proportionalImageView)
+//                objectAnimator?.let {
+//                    viewIdentifierManager.storeAnimation(proportionalImageView.id, it)
+//                }
+                val objectAnimator = AnimationFactory.createStaticAnimation(
+                    proportionalImageView,
+                    introTransitionSpec.animationType,
+                    introTransitionSpec.animationDuration
+                )
+                viewIdentifierManager.addAnimation(objectAnimator!!)
+                objectAnimator?.start()
+
+            }
+        }
+
+        private fun doAddViewWithDynamicAnimation(
+            host: OverlayHost,
+            proportionalImageView: ProportionalImageView,
+            positionGuide: PositionGuide,
+            introTransitionSpec: TransitionSpec,
+            viewIdentifierManager: ViewIdentifierManager
+        ) {
+
+            host.post {
+
+                (host as ViewGroup).setOnHierarchyChangeListener(object :
+                    ViewGroup.OnHierarchyChangeListener {
+                    override fun onChildViewRemoved(parent: View?, child: View?) {
+
+                    }
+
+                    override fun onChildViewAdded(parent: View?, child: View?) {
+                        if (child != null && child.id == proportionalImageView.id) {
+                            host.post {
+
+
+                                val x = proportionalImageView.x
+                                val y = proportionalImageView.y
+
+                                when (introTransitionSpec.animationType) {
+                                    SLIDE_FROM_LEADING -> {
+                                        proportionalImageView.x =
+                                            -proportionalImageView.width.toFloat()
+                                        val animation = ObjectAnimator.ofFloat(
+                                            proportionalImageView,
+                                            View.X,
+                                            proportionalImageView.x,
+                                            x
+                                        )
+                                        animation.duration = introTransitionSpec.animationDuration
+                                        animation.addListener(object : Animator.AnimatorListener {
+                                            override fun onAnimationRepeat(animation: Animator?) {
+                                            }
+
+                                            override fun onAnimationEnd(animation: Animator?) {
+
+                                            }
+
+                                            override fun onAnimationCancel(animation: Animator?) {
+
+                                            }
+
+                                            override fun onAnimationStart(animation: Animator?) {
+                                                proportionalImageView.visibility = View.VISIBLE
+                                            }
+
+                                        })
+
+                                        animation.start()
+                                    }
+                                    SLIDE_FROM_TRAILING -> {
+                                        proportionalImageView.x = host.width.toFloat()
+                                        val animation = ObjectAnimator.ofFloat(
+                                            proportionalImageView,
+                                            View.X,
+                                            proportionalImageView.x,
+                                            x
+                                        )
+                                        animation.duration = introTransitionSpec.animationDuration
+                                        animation.addListener(object : Animator.AnimatorListener {
+                                            override fun onAnimationRepeat(animation: Animator?) {
+                                            }
+
+                                            override fun onAnimationEnd(animation: Animator?) {
+
+                                            }
+
+                                            override fun onAnimationCancel(animation: Animator?) {
+
+                                            }
+
+                                            override fun onAnimationStart(animation: Animator?) {
+                                                proportionalImageView.visibility = View.VISIBLE
+
+                                            }
+
+                                        })
+                                        viewIdentifierManager.addAnimation(animation)
+                                        animation.start()
+                                    }
+                                    else -> {
+                                        // should not happen
+                                    }
+                                }
+
+                            }
+                        }
+
+                    }
+
+                })
+
+                val constraintSet = ConstraintSet()
+                constraintSet.clone(host)
+                val layoutParams = ConstraintLayout.LayoutParams(
+                    ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                    ConstraintLayout.LayoutParams.WRAP_CONTENT
+                )
+
+                positionGuide.leading?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setLeadingConstraints(constraintSet, it, layoutParams, proportionalImageView)
+                }
+                positionGuide.trailing?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setTrailingConstraints(constraintSet, it, layoutParams)
+                }
+                positionGuide.top?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setTopConstraints(constraintSet, it, layoutParams)
+                }
+                positionGuide.bottom?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setBottomConstraints(constraintSet, it, layoutParams, proportionalImageView)
+                }
+                positionGuide.vCenter?.let {
+                    if (it > 50F || it < -50F) {
+                        return@let
+                    }
+                    setVCenterConstraints(layoutParams, it)
+                }
+                positionGuide.hCenter?.let {
+                    if (it > 50F || it < -50F) {
+                        return@let
+                    }
+                    setHCenterConstrains(layoutParams, it)
+                }
+
+                proportionalImageView.layoutParams = layoutParams
+                proportionalImageView.visibility = View.INVISIBLE
+                constraintSet.applyTo(host)
+                host.addView(proportionalImageView)
+
+            }
+
+        }
+
+
+        private fun doAddViewWithNoAnimation(
+            overlayHost: OverlayHost,
+            proportionalImageView: ProportionalImageView,
+            positionGuide: PositionGuide
+        ) {
+            overlayHost.post {
+                val constraintSet = ConstraintSet()
+                constraintSet.clone(overlayHost)
+                val layoutParams = ConstraintLayout.LayoutParams(
+                    ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                    ConstraintLayout.LayoutParams.WRAP_CONTENT
+                )
+
+                positionGuide.leading?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setLeadingConstraints(constraintSet, it, layoutParams, proportionalImageView)
+                }
+                positionGuide.trailing?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setTrailingConstraints(constraintSet, it, layoutParams)
+                }
+                positionGuide.top?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setTopConstraints(constraintSet, it, layoutParams)
+                }
+                positionGuide.bottom?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setBottomConstraints(constraintSet, it, layoutParams, proportionalImageView)
+                }
+                positionGuide.vCenter?.let {
+                    if (it > 50F || it < -50F) {
+                        return@let
+                    }
+                    setVCenterConstraints(layoutParams, it)
+                }
+                positionGuide.hCenter?.let {
+                    if (it > 50F || it < -50F) {
+                        return@let
+                    }
+                    setHCenterConstrains(layoutParams, it)
+                }
+
+                constraintSet.applyTo(overlayHost)
+                proportionalImageView.layoutParams = layoutParams
+
+                overlayHost.addView(proportionalImageView)
+                // todo
+//                viewIdentifierManager.storeViewId(proportionalImageView, overlayEntity.customId!!)
+            }
+        }
+
+        // remove view [checks animation type and calls related functions]
+        fun removalViewWithAnimation(
+            context: Context,
+            overlayHost: OverlayHost,
+            overlayObject: OverlayObject,
+            viewIdentifierManager: ViewIdentifierManager
+        ) {
+
+            when (overlayObject.outroTransitionSpec.animationType) {
+                FADE_OUT -> {
+                    removalViewWithStaticAnimation(overlayHost, overlayObject, viewIdentifierManager)
+                }
+                SLIDE_TO_LEADING,
+                SLIDE_TO_TRAILING -> {
+                    removalViewWithDynamicAnimation(overlayHost, overlayObject, viewIdentifierManager)
+                }
+                else -> {
+                    // should not happen
+                    return
+                }
+
+            }
+
+
+        }
+
+        private fun removalViewWithStaticAnimation(
+            overlayHost: OverlayHost,
+            overlayObject: OverlayObject,
+            viewIdentifierManager: ViewIdentifierManager
+        ) {
+            overlayHost.post {
+                overlayHost.children.filter { it.tag == overlayObject.id }.forEach { view ->
+                    val animation = ObjectAnimator.ofFloat(view, View.ALPHA, 1F, 0F)
+                    animation.duration = overlayObject.outroTransitionSpec.animationDuration
+
+                    animation.addListener(object : Animator.AnimatorListener {
+                        override fun onAnimationStart(animation: Animator?) {
+                        }
+
+                        override fun onAnimationEnd(animation: Animator?) {
+                            overlayHost.removeView(view)
+                        }
+
+                        override fun onAnimationRepeat(animation: Animator?) {
+                        }
+
+                        override fun onAnimationCancel(animation: Animator?) {
+                        }
+
+                    })
+
+                    viewIdentifierManager.addAnimation(animation)
+                    animation.start()
+                }
+            }
+        }
+
+        private fun removalViewWithDynamicAnimation(
+            overlayHost: OverlayHost,
+            overlayObject: OverlayObject,
+            viewIdentifierManager: ViewIdentifierManager
+        ) {
+            overlayHost.post {
+                overlayHost.children.filter { it.tag == overlayObject.id }.forEach { view ->
+
+                    var animation: ObjectAnimator? = null
+
+                    if (overlayObject.outroTransitionSpec.animationType == SLIDE_TO_LEADING) {
+                        animation = ObjectAnimator.ofFloat(
+                            view,
+                            View.X,
+                            view.x,
+                            -view.width.toFloat()
+                        )
+                    } else if (overlayObject.outroTransitionSpec.animationType == SLIDE_TO_TRAILING) {
+                        animation = ObjectAnimator.ofFloat(
+                            view,
+                            View.X,
+                            view.x,
+                            overlayHost.width.toFloat()
+                        )
+
+                    }
+
+                    if (animation == null) {
+                        // should not happen
+                        return@forEach
+                    }
+
+                    animation.duration = overlayObject.outroTransitionSpec.animationDuration
+                    animation.addListener(object : Animator.AnimatorListener {
+                        override fun onAnimationRepeat(animation: Animator?) {
+                        }
+
+                        override fun onAnimationEnd(animation: Animator?) {
+                            overlayHost.removeView(view)
+                        }
+
+                        override fun onAnimationCancel(animation: Animator?) {
+
+                        }
+
+                        override fun onAnimationStart(animation: Animator?) {
+                        }
+
+                    })
+                    viewIdentifierManager.addAnimation(animation)
+                    animation.start()
+                }
+            }
+
+
+        }
+
+        // lingerings
+        fun onLingeringIntroAnimationOverlay(
+            overlayHost: OverlayHost,
+            overlayObject: OverlayObject,
+            animationPosition: Long,
+            isPlaying: Boolean,
+            viewIdentifierManager: ViewIdentifierManager
+        ) {
+            overlayHost.post {
+
+                val proportionalImageView =
+                    OverlayFactory.create(
+                        overlayHost.context,
+                        overlayObject.id,
+                        overlayObject.viewSpec.size!!
+                    )
+
+                try {
+                    val svg = SVG.getFromInputStream(overlayObject.svgData!!.svgInputStream)
+                    svg.setDocumentWidth("100%")
+                    svg.setDocumentHeight("100%")
+                    proportionalImageView.setSVG(svg)
+
+                } catch (e: Exception) {
+                    Log.w("OverlayViewHelper", "Exception => ".plus(e.message))
+                }
+
+
+                (overlayHost as ViewGroup).setOnHierarchyChangeListener(object :
+                    ViewGroup.OnHierarchyChangeListener {
+                    override fun onChildViewRemoved(parent: View?, child: View?) {
+
+                    }
+
+                    override fun onChildViewAdded(parent: View?, child: View?) {
+                        if (child != null && child.tag == proportionalImageView.tag) {
+                            overlayHost.post {
+
+
+                                val x = proportionalImageView.x
+                                val y = proportionalImageView.y
+
+                                when (overlayObject.introTransitionSpec.animationType) {
+                                    FADE_IN -> {
+                                        proportionalImageView.x =
+                                            -proportionalImageView.width.toFloat()
+                                        val animation = ObjectAnimator.ofFloat(
+                                            proportionalImageView,
+                                            View.ALPHA,
+                                            0F,
+                                            1F
+                                        )
+                                        animation.duration =
+                                            overlayObject.introTransitionSpec.animationDuration
+                                        animation.addListener(object : Animator.AnimatorListener {
+                                            override fun onAnimationRepeat(animation: Animator?) {
+                                            }
+
+                                            override fun onAnimationEnd(animation: Animator?) {
+
+                                            }
+
+                                            override fun onAnimationCancel(animation: Animator?) {
+
+                                            }
+
+                                            override fun onAnimationStart(animation: Animator?) {
+                                                proportionalImageView.visibility = View.VISIBLE
+                                            }
+
+                                        })
+
+                                        viewIdentifierManager.addAnimation(animation)
+                                        animation.start()
+                                        animation.currentPlayTime = animationPosition
+                                        if (isPlaying) {
+                                            animation.resume()
+                                        } else {
+                                            animation.pause()
+                                        }
+                                    }
+                                    SLIDE_FROM_LEADING -> {
+                                        proportionalImageView.x =
+                                            -proportionalImageView.width.toFloat()
+                                        val animation = ObjectAnimator.ofFloat(
+                                            proportionalImageView,
+                                            View.X,
+                                            proportionalImageView.x,
+                                            x
+                                        )
+                                        animation.duration =
+                                            overlayObject.introTransitionSpec.animationDuration
+                                        animation.addListener(object : Animator.AnimatorListener {
+                                            override fun onAnimationRepeat(animation: Animator?) {
+                                            }
+
+                                            override fun onAnimationEnd(animation: Animator?) {
+
+                                            }
+
+                                            override fun onAnimationCancel(animation: Animator?) {
+
+                                            }
+
+                                            override fun onAnimationStart(animation: Animator?) {
+                                                proportionalImageView.visibility = View.VISIBLE
+                                            }
+
+                                        })
+
+                                        animation.start()
+                                        animation.currentPlayTime = animationPosition
+                                        if (isPlaying) {
+                                            animation.resume()
+                                        } else {
+                                            animation.pause()
+                                        }
+                                    }
+                                    SLIDE_FROM_TRAILING -> {
+                                        proportionalImageView.x = overlayHost.width.toFloat()
+                                        val animation = ObjectAnimator.ofFloat(
+                                            proportionalImageView,
+                                            View.X,
+                                            proportionalImageView.x,
+                                            x
+                                        )
+                                        animation.duration =
+                                            overlayObject.introTransitionSpec.animationDuration
+                                        animation.addListener(object : Animator.AnimatorListener {
+                                            override fun onAnimationRepeat(animation: Animator?) {
+                                            }
+
+                                            override fun onAnimationEnd(animation: Animator?) {
+
+                                            }
+
+                                            override fun onAnimationCancel(animation: Animator?) {
+
+                                            }
+
+                                            override fun onAnimationStart(animation: Animator?) {
+                                                proportionalImageView.visibility = View.VISIBLE
+
+                                            }
+
+                                        })
+                                        animation.start()
+                                        animation.currentPlayTime = animationPosition
+                                        if (isPlaying) {
+                                            animation.resume()
+                                        } else {
+                                            animation.pause()
+                                        }
+                                    }
+                                    else -> {
+                                        // should not happen
+                                    }
+                                }
+
+                            }
+                        }
+
+                    }
+
+                })
+
+                val constraintSet = ConstraintSet()
+                constraintSet.clone(overlayHost)
+                val layoutParams = ConstraintLayout.LayoutParams(
+                    ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                    ConstraintLayout.LayoutParams.WRAP_CONTENT
+                )
+                val positionGuide = overlayObject.viewSpec.positionGuide
+                if (positionGuide == null) {
+                    // should not happen
+                    return@post
+                }
+                positionGuide.leading?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setLeadingConstraints(constraintSet, it, layoutParams, proportionalImageView)
+                }
+                positionGuide.trailing?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setTrailingConstraints(constraintSet, it, layoutParams)
+                }
+                positionGuide.top?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setTopConstraints(constraintSet, it, layoutParams)
+                }
+                positionGuide.bottom?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setBottomConstraints(constraintSet, it, layoutParams, proportionalImageView)
+                }
+                positionGuide.vCenter?.let {
+                    if (it > 50F || it < -50F) {
+                        return@let
+                    }
+                    setVCenterConstraints(layoutParams, it)
+                }
+                positionGuide.hCenter?.let {
+                    if (it > 50F || it < -50F) {
+                        return@let
+                    }
+                    setHCenterConstrains(layoutParams, it)
+                }
+
+
+                proportionalImageView.layoutParams = layoutParams
+                proportionalImageView.visibility = View.INVISIBLE
+                constraintSet.applyTo(overlayHost)
+                overlayHost.addView(proportionalImageView)
+
+            }
+        }
+
+        fun onLingeringOutroAnimationOverlay(
+            overlayHost: OverlayHost,
+            overlayObject: OverlayObject,
+            animationPosition: Long,
+            isPlaying: Boolean,
+            viewIdentifierManager: ViewIdentifierManager
+        ) {
+            overlayHost.post {
+
+                val proportionalImageView =
+                    OverlayFactory.create(
+                        overlayHost.context,
+                        overlayObject.id,
+                        overlayObject.viewSpec.size!!
+                    )
+
+                try {
+                    val svg = SVG.getFromInputStream(overlayObject.svgData!!.svgInputStream)
+                    svg.setDocumentWidth("100%")
+                    svg.setDocumentHeight("100%")
+                    proportionalImageView.setSVG(svg)
+
+//                    doAddViewWithNoAnimation(
+//                        overlayHost,
+//                        proportionalImageView,
+//                        overlayObject.viewSpec.positionGuide!!
+//                    )
+
+                } catch (e: Exception) {
+                    Log.w("OverlayViewHelper", "Exception => ".plus(e.message))
+                }
+
+                (overlayHost as ViewGroup).setOnHierarchyChangeListener(object :
+                    ViewGroup.OnHierarchyChangeListener {
+                    override fun onChildViewRemoved(parent: View?, child: View?) {
+                    }
+
+                    override fun onChildViewAdded(parent: View?, child: View?) {
+                        if (child != null && child.tag == proportionalImageView.tag) {
+                            overlayHost.post {
+                                when (overlayObject.outroTransitionSpec.animationType) {
+                                    FADE_OUT -> {
+                                        val animation = ObjectAnimator.ofFloat(
+                                            proportionalImageView,
+                                            View.ALPHA,
+                                            1F,
+                                            0F
+                                        )
+                                        animation.duration =
+                                            overlayObject.outroTransitionSpec.animationDuration
+                                        animation.addListener(object : Animator.AnimatorListener {
+                                            override fun onAnimationRepeat(animation: Animator?) {
+                                            }
+
+                                            override fun onAnimationEnd(animation: Animator?) {
+
+                                            }
+
+                                            override fun onAnimationCancel(animation: Animator?) {
+
+                                            }
+
+                                            override fun onAnimationStart(animation: Animator?) {
+                                                proportionalImageView.visibility = View.VISIBLE
+                                            }
+
+                                        })
+
+
+                                        animation.start()
+                                        animation.currentPlayTime = animationPosition
+                                        if (isPlaying) {
+                                            animation.resume()
+                                        } else {
+                                            animation.pause()
+                                        }
+
+                                    }
+                                    SLIDE_TO_LEADING -> {
+
+                                        val animation = ObjectAnimator.ofFloat(
+                                            proportionalImageView,
+                                            View.X,
+                                            proportionalImageView.x,
+                                            -proportionalImageView.width.toFloat()
+                                        )
+                                        animation.duration =
+                                            overlayObject.outroTransitionSpec.animationDuration
+                                        animation.addListener(object : Animator.AnimatorListener {
+                                            override fun onAnimationRepeat(animation: Animator?) {
+                                            }
+
+                                            override fun onAnimationEnd(animation: Animator?) {
+
+                                            }
+
+                                            override fun onAnimationCancel(animation: Animator?) {
+
+                                            }
+
+                                            override fun onAnimationStart(animation: Animator?) {
+                                                proportionalImageView.visibility = View.VISIBLE
+                                            }
+
+                                        })
+
+                                        viewIdentifierManager.addAnimation(animation)
+                                        animation.start()
+                                        animation.currentPlayTime = animationPosition
+                                        if (isPlaying) {
+                                            animation.resume()
+                                        } else {
+                                            animation.pause()
+                                        }
+                                    }
+                                    SLIDE_TO_TRAILING -> {
+                                        val animation = ObjectAnimator.ofFloat(
+                                            proportionalImageView,
+                                            View.X,
+                                            proportionalImageView.x,
+                                            overlayHost.width.toFloat()
+                                        )
+                                        animation.duration =
+                                            overlayObject.outroTransitionSpec.animationDuration
+                                        animation.addListener(object : Animator.AnimatorListener {
+                                            override fun onAnimationRepeat(animation: Animator?) {
+                                            }
+
+                                            override fun onAnimationEnd(animation: Animator?) {
+
+                                            }
+
+                                            override fun onAnimationCancel(animation: Animator?) {
+
+                                            }
+
+                                            override fun onAnimationStart(animation: Animator?) {
+                                                proportionalImageView.visibility = View.VISIBLE
+
+                                            }
+
+                                        })
+
+                                        animation.start()
+                                        animation.currentPlayTime = animationPosition
+                                        if (isPlaying) {
+                                            animation.resume()
+                                        } else {
+                                            animation.pause()
+                                        }
+                                    }
+                                    else -> {
+                                        // should not happen
+                                    }
+                                }
+
+                            }
+                        }
+
+                    }
+
+                })
+
+                val constraintSet = ConstraintSet()
+                constraintSet.clone(overlayHost)
+                val layoutParams = ConstraintLayout.LayoutParams(
+                    ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                    ConstraintLayout.LayoutParams.WRAP_CONTENT
+                )
+                val positionGuide = overlayObject.viewSpec.positionGuide
+                if (positionGuide == null) {
+                    // should not happen
+                    return@post
+                }
+                positionGuide.leading?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setLeadingConstraints(constraintSet, it, layoutParams, proportionalImageView)
+                }
+                positionGuide.trailing?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setTrailingConstraints(constraintSet, it, layoutParams)
+                }
+                positionGuide.top?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setTopConstraints(constraintSet, it, layoutParams)
+                }
+                positionGuide.bottom?.let {
+                    if (it < 0F) {
+                        return@let
+                    }
+                    setBottomConstraints(constraintSet, it, layoutParams, proportionalImageView)
+                }
+                positionGuide.vCenter?.let {
+                    if (it > 50F || it < -50F) {
+                        return@let
+                    }
+                    setVCenterConstraints(layoutParams, it)
+                }
+                positionGuide.hCenter?.let {
+                    if (it > 50F || it < -50F) {
+                        return@let
+                    }
+                    setHCenterConstrains(layoutParams, it)
+                }
+
+                proportionalImageView.layoutParams = layoutParams
+                proportionalImageView.visibility = View.INVISIBLE
+                constraintSet.applyTo(overlayHost)
+                overlayHost.addView(proportionalImageView)
+
+            }
+        }
+
     }
 }

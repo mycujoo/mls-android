@@ -19,5 +19,19 @@ class OverlayFactory {
             proportionalImageView.scaleType = ImageView.ScaleType.FIT_START
             return proportionalImageView
         }
+
+        fun create(
+            context: Context,
+            tag : String,
+            size: Pair<Float, Float>
+        ): ProportionalImageView {
+
+            val proportionalImageView = ProportionalImageView(context, size.first, size.second)
+            proportionalImageView.id = View.generateViewId()
+            proportionalImageView.tag = tag
+            proportionalImageView.adjustViewBounds = true
+            proportionalImageView.scaleType = ImageView.ScaleType.FIT_START
+            return proportionalImageView
+        }
     }
 }

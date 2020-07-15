@@ -4,12 +4,16 @@ import okhttp3.*
 import tv.mycujoo.domain.entity.ActionEntity
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.AnimationType.*
+import tv.mycujoo.domain.entity.OverlayObject
+import tv.mycujoo.domain.entity.SvgData
 import tv.mycujoo.domain.entity.models.ActionType
+import tv.mycujoo.mls.manager.ViewIdentifierManager
 import java.io.IOException
 
 class AnnotationBuilderImpl(
     private val listener: AnnotationListener,
-    private val okHttpClient: OkHttpClient
+    private val okHttpClient: OkHttpClient,
+    private val viewIdentifierManager: ViewIdentifierManager
 ) : AnnotationBuilder() {
 
     /**region Fields*/
@@ -17,8 +21,68 @@ class AnnotationBuilderImpl(
     private var isPlaying: Boolean = false
     private val pendingShowActionEntities = ArrayList<ActionEntity>()
     private val pendingHideActionEntities = ArrayList<ActionEntity>()
+
+    private var overlayObjects = ArrayList<OverlayObject>()
+
     /**endregion */
 
+
+    // re-write
+    override fun addOverlayObjects(overlayObject: List<OverlayObject>) {
+        overlayObjects.addAll(overlayObject)
+    }
+
+
+    override fun buildCurrentTimeRange() {
+        overlayObjects.filter { isNotAttached(it) && additionIsInCurrentTimeRange(it) }
+            .forEach { overlayObject ->
+                downloadSVGThenCallListener(overlayObject) { listener.onNewOverlay(it) }
+            }
+
+        overlayObjects.filter { removalIsInCurrentTimeRange(it) }.forEach {
+            listener.onRemovalOverlay(it)
+        }
+    }
+
+    override fun buildLingerings() {
+        overlayObjects.forEach { overlayObject ->
+            when {
+                isLingeringEndlessOverlay(overlayObject) -> {
+                    downloadSVGThenCallListener(overlayObject) {
+                        listener.onLingeringOverlay(it)
+                    }
+                }
+                isLingeringExcludingAnimationPart(overlayObject) -> {
+                    downloadSVGThenCallListener(overlayObject) {
+                        listener.onLingeringOverlay(it)
+                    }
+                }
+                isLingeringInIntroAnimation(overlayObject) -> {
+                    downloadSVGThenCallListener(overlayObject) {
+                        listener.onLingeringIntroOverlay(
+                            it,
+                            currentTime - overlayObject.introTransitionSpec.offset,
+                            isPlaying
+                        )
+                    }
+                }
+                isLingeringInOutroAnimation(overlayObject) -> {
+                    downloadSVGThenCallListener(overlayObject) {
+                        listener.onLingeringOutroOverlay(
+                            it,
+                            currentTime - (overlayObject.introTransitionSpec.offset + overlayObject.outroTransitionSpec.animationDuration),
+                            isPlaying
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    override fun removeAll() {
+        listener.clearScreen(overlayObjects.map { it.id })
+
+    }
 
     /**region Over-ridden Functions*/
     override fun addPendingShowActions(actions: List<ActionEntity>) {
@@ -197,6 +261,11 @@ class AnnotationBuilderImpl(
             pendingShowActionEntities.filter { hasOutroAnimation(it.introAnimationType) }
                 .mapNotNull { it.customId }.toList()
         )
+
+        // re-write
+        overlayObjects.filter { it.outroTransitionSpec.offset != -1L }.forEach {
+
+        }
     }
 
     override fun buildRemovalAnnotationsUpToCurrentTime() {
@@ -214,6 +283,115 @@ class AnnotationBuilderImpl(
 
 
     /**region Action classifiers*/
+
+    //re-write
+    private fun isNotAttached(overlayObject: OverlayObject): Boolean {
+        return viewIdentifierManager.attachedOverlayList.none { it == overlayObject.id }
+    }
+
+    /**
+     * return true if the action offset is now or in 1 second
+     */
+    private fun additionIsInCurrentTimeRange(overlayObject: OverlayObject): Boolean {
+        return (overlayObject.introTransitionSpec.offset >= currentTime) && (overlayObject.introTransitionSpec.offset < currentTime + 1000L)
+    }
+
+    private fun removalIsInCurrentTimeRange(overlayObject: OverlayObject): Boolean {
+        if (overlayObject.outroTransitionSpec.animationType == UNSPECIFED) {
+            return false
+        }
+
+        return (overlayObject.outroTransitionSpec.offset >= currentTime) && (overlayObject.outroTransitionSpec.offset < currentTime + 1000L)
+    }
+
+
+    private fun isLingeringEndlessOverlay(overlayObject: OverlayObject): Boolean {
+        if (overlayObject.introTransitionSpec.offset > currentTime) {
+            return false
+        }
+
+        if (overlayObject.outroTransitionSpec.offset == -1L) {
+            // it doesn't have ending spec
+            return if (hasEnteringAnimation(overlayObject.introTransitionSpec.animationType)) {
+                currentTime > overlayObject.introTransitionSpec.offset + overlayObject.introTransitionSpec.animationDuration
+            } else {
+                currentTime > overlayObject.introTransitionSpec.offset
+            }
+        }
+        return false
+
+    }
+
+    private fun isLingeringExcludingAnimationPart(overlayObject: OverlayObject): Boolean {
+        if (overlayObject.introTransitionSpec.offset > currentTime) {
+            return false
+        }
+
+        if (overlayObject.outroTransitionSpec.offset == -1L || overlayObject.outroTransitionSpec.animationDuration == 0L) {
+            return false
+        }
+
+        var leftBound = overlayObject.introTransitionSpec.offset
+        var rightBound = 0L
+
+        if (hasEnteringAnimation(overlayObject.introTransitionSpec.animationType)) {
+            leftBound =
+                overlayObject.introTransitionSpec.offset + overlayObject.introTransitionSpec.animationDuration
+        }
+
+        if (hasOutroAnimation(overlayObject.outroTransitionSpec.animationType)) {
+            rightBound = overlayObject.outroTransitionSpec.offset
+        }
+
+        return (currentTime > leftBound) && (currentTime < rightBound)
+    }
+
+    private fun isLingeringInIntroAnimation(overlayObject: OverlayObject): Boolean {
+        if (overlayObject.introTransitionSpec.offset > currentTime) {
+            return false
+        }
+
+        val leftBound = overlayObject.introTransitionSpec.offset
+        val rightBound =
+            overlayObject.introTransitionSpec.offset + overlayObject.introTransitionSpec.animationDuration
+
+        return (leftBound <= currentTime) && (currentTime <= rightBound)
+    }
+
+    private fun isLingeringInOutroAnimation(overlayObject: OverlayObject): Boolean {
+        if (overlayObject.introTransitionSpec.offset > currentTime) {
+            return false
+        }
+
+        if (overlayObject.outroTransitionSpec.animationDuration == -1L || overlayObject.outroTransitionSpec.animationDuration > currentTime) {
+            return false
+        }
+
+        val leftBound = overlayObject.outroTransitionSpec.offset
+        val rightBound =
+            overlayObject.outroTransitionSpec.offset + overlayObject.outroTransitionSpec.animationDuration
+
+        return (leftBound <= currentTime) && (currentTime <= rightBound)
+    }
+
+//    private fun isLingeringExcludingAnimationPart(overlayObject: OverlayObject): Boolean {
+//        if (overlayObject.introTransitionSpec.offset > currentTime) {
+//            return false
+//        }
+
+//        if (actionEntity.duration != null && actionEntity.duration != -1L) {
+//            return (actionEntity.offset <= currentTime && actionEntity.offset + actionEntity.duration >= currentTime)
+//        } else {
+//            // there must be HideAction for this action
+//            return pendingHideActionEntities.firstOrNull { it.customId == actionEntity.customId }
+//                ?.let { hideAction ->
+//                    hideAction.offset > currentTime
+//                } ?: false
+//        }
+//    }
+    //
+
+
     private fun getIntroAnimationPosition(actionEntity: ActionEntity, currentTime: Long): Long {
         return currentTime - actionEntity.offset
     }
@@ -388,6 +566,31 @@ class AnnotationBuilderImpl(
                     callback(
                         actionEntity.copy(
                             svgInputStream = response.body()!!.byteStream()
+                        )
+                    )
+                }
+            }
+        })
+    }
+
+    private fun downloadSVGThenCallListener(
+        overlayObject: OverlayObject,
+        callback: (OverlayObject) -> Unit
+    ) {
+        val svgUrl = overlayObject.svgData!!.svgUrl!!
+        val request: Request = Request.Builder().url(svgUrl).build()
+        okHttpClient.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                println(
+                    "MLS-App AnnotationBuilderImpl - getInputStream() onFailure"
+                )
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful && response.body() != null) {
+                    callback(
+                        overlayObject.copy(
+                            svgData = SvgData(svgUrl, response.body()!!.byteStream())
                         )
                     )
                 }

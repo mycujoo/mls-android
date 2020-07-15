@@ -26,7 +26,7 @@ class ActionMapper {
 
             var introAnimationType = AnimationType.NONE
             var introAnimationDuration = INVALID_LONG_VALUE
-            var outroAnimationType = AnimationType.NONE
+            var outroAnimationType = AnimationType.UNSPECIFED
             var outroAnimationDuration = INVALID_LONG_VALUE
 
 

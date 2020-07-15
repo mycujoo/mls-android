@@ -3,7 +3,8 @@ package tv.mycujoo.mls.helper
 import android.animation.ObjectAnimator
 import android.view.View
 import tv.mycujoo.domain.entity.AnimationType
-import tv.mycujoo.domain.entity.AnimationType.*
+import tv.mycujoo.domain.entity.AnimationType.FADE_IN
+import tv.mycujoo.domain.entity.AnimationType.FADE_OUT
 import tv.mycujoo.mls.widgets.ProportionalImageView
 
 class AnimationFactory {
@@ -17,14 +18,6 @@ class AnimationFactory {
 
             val animation: ObjectAnimator?
             when (animationType) {
-                NONE,
-                SLIDE_FROM_LEADING,
-                SLIDE_FROM_TRAILING,
-                SLIDE_TO_LEADING,
-                SLIDE_TO_TRAILING -> {
-                    // should not happen
-                    animation = null
-                }
                 FADE_IN -> {
                     animation = ObjectAnimator.ofFloat(overlayView, View.ALPHA, 0F, 1F)
                     animation.duration = animationDuration
@@ -33,6 +26,11 @@ class AnimationFactory {
                     animation = ObjectAnimator.ofFloat(overlayView, View.ALPHA, 1F, 0F)
                     animation.duration = animationDuration
                 }
+                else -> {
+                    // should not happen
+                    animation = null
+                }
+
             }
             return animation
         }

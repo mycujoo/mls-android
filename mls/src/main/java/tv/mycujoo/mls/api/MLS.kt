@@ -31,6 +31,7 @@ import tv.mycujoo.mls.data.DataHolder
 import tv.mycujoo.mls.di.DaggerMlsComponent
 import tv.mycujoo.mls.di.NetworkModule
 import tv.mycujoo.mls.manager.IPrefManager
+import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.model.Event
 import tv.mycujoo.mls.model.Stream
 import tv.mycujoo.mls.network.Api
@@ -97,6 +98,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     private lateinit var handler: Handler
 
     private val dataHolder = DataHolder()
+    private val viewIdentifierManager= ViewIdentifierManager()
 
     /**endregion */
 
@@ -147,7 +149,8 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     private fun initAnnotation() {
         handler = Handler()
 
-        coordinator = Coordinator(api)
+        val identifierManager = viewIdentifierManager
+        coordinator = Coordinator(identifierManager, api)
         coordinator.initialize(exoPlayer!!, handler, okHttpClient)
     }
 
@@ -215,6 +218,8 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         if (hasAnnotation) {
             coordinator.playerViewWrapper = playerViewWrapper
         }
+
+        playerViewWrapper.viewIdentifierManager = viewIdentifierManager
 
 //        dataProvider.fetchEvents()
     }
@@ -391,7 +396,11 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         exoPlayer: SimpleExoPlayer?
     ) {
         exoPlayer?.let {
-            VideoPlayerCoordinator(exoPlayer, playerViewWrapper, builder.mlsConfiguration.VideoPlayerConfig)
+            VideoPlayerCoordinator(
+                exoPlayer,
+                playerViewWrapper,
+                builder.mlsConfiguration.VideoPlayerConfig
+            )
         }
     }
 
@@ -414,6 +423,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
             event.streams.isNotEmpty()
         )
     }
+
     private fun setEventInfoToPlayerViewWrapper(event: EventEntity) {
         if (!this::playerViewWrapper.isInitialized) {
             return

@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import dagger.Module
 import dagger.Provides
+import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okio.Buffer
@@ -11,6 +12,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import tv.mycujoo.mls.manager.IPrefManager
 import tv.mycujoo.mls.network.MlsApi
+import java.io.File
 import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 import javax.inject.Named
@@ -19,6 +21,7 @@ import javax.inject.Singleton
 @Module
 class NetworkModule(val context: Context) {
 
+    private val maxAgeInSecond: Int = 60 * 5
     private val publicBaseUrl: String = "https://mls.mycujoo.tv"
     private val mlsApiBaseUrl: String = "https://mls-api.mycujoo.tv"
 
@@ -29,13 +32,20 @@ class NetworkModule(val context: Context) {
     @Provides
     @Singleton
     fun provideOkHttp(prefManager: IPrefManager): OkHttpClient {
+
+        val httpCacheDirectory = File(context.cacheDir, "responses")
+        val cacheSize = 10 * 1024 * 1024 // 10 MiB
+
+        val cache = Cache(httpCacheDirectory, cacheSize.toLong())
+
         val okHttpBuilder = OkHttpClient.Builder()
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .connectTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(Interceptor { chain: Interceptor.Chain ->
                 val newRequest = chain.request().newBuilder()
-                    .addHeader("Authorization", "Bearer " + prefManager.get("PUBLIC_KEY"))
+//                    .addHeader("Authorization", "Bearer " + prefManager.get("PUBLIC_KEY"))
+                    .addHeader("Cache-Control", "public, max-age=$maxAgeInSecond")
                     .build()
                 val requestBody = newRequest.body()
                 if (requestBody != null) {
@@ -53,6 +63,7 @@ class NetworkModule(val context: Context) {
                 }
                 chain.proceed(newRequest)
             })
+            .cache(cache)
 
         return okHttpBuilder.build()
     }

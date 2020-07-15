@@ -26,6 +26,7 @@ import kotlinx.android.synthetic.main.dialog_information_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
 import tv.mycujoo.domain.entity.ActionEntity
 import tv.mycujoo.domain.entity.HideOverlayActionEntity
+import tv.mycujoo.domain.entity.OverlayObject
 import tv.mycujoo.domain.entity.ShowOverlayActionEntity
 import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.domain.usecase.GetAnnotationFromJSONUseCase
@@ -63,7 +64,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
     lateinit var uiEventListener: UIEventListener
     private var isFullScreen = false
 
-    private val viewIdentifierManager = ViewIdentifierManager()
+    lateinit var viewIdentifierManager : ViewIdentifierManager
 
     private lateinit var eventInfoTitle: String
     private lateinit var eventInfoDescription: String
@@ -535,17 +536,17 @@ class PlayerViewWrapper @JvmOverloads constructor(
         )
     }
 
-    fun clearScreen(customIdList: List<String>) {
-        val viewIdentifierToBeCleared =
-            customIdList.map { viewIdentifierManager.getViewId(it) }
-
-        OverlayViewHelper.clearScreen(
-            overlayHost,
-            viewIdentifierToBeCleared,
-            idlingResource
-        )
-
-    }
+//    fun clearScreen(customIdList: List<String>) {
+//        val viewIdentifierToBeCleared =
+//            customIdList.map { viewIdentifierManager.getViewId(it) }
+//
+//        OverlayViewHelper.clearScreen(
+//            overlayHost,
+//            viewIdentifierToBeCleared,
+//            idlingResource
+//        )
+//
+//    }
 
     fun continueOverlayAnimations() {
         viewIdentifierManager.getAnimations().forEach { it.resume() }
@@ -630,6 +631,79 @@ class PlayerViewWrapper @JvmOverloads constructor(
     }
 
     /**endregion */
+
+
+    // re-write
+
+    fun onNewOverlayWithNoAnimation(overlayObject: OverlayObject) {
+        OverlayViewHelper.addViewWithNoAnimation(
+            context,
+            overlayHost,
+            overlayObject,
+            viewIdentifierManager
+        )
+    }
+
+    fun onNewOverlayWithAnimation(overlayObject: OverlayObject) {
+        OverlayViewHelper.addViewWithAnimation(
+            context,
+            overlayHost,
+            overlayObject,
+            viewIdentifierManager
+        )
+    }
+
+    fun onOverlayRemovalWithNoAnimation(overlayObject: OverlayObject) {
+        overlayHost.children.filter { it.tag == overlayObject.id }
+            .forEach { overlayHost.removeView(it) }
+    }
+
+    fun onOverlayRemovalWithAnimation(overlayObject: OverlayObject) {
+        OverlayViewHelper.removalViewWithAnimation(
+            context,
+            overlayHost,
+            overlayObject,
+            viewIdentifierManager
+        )
+    }
+
+    fun clearScreen(idList: List<String>) {
+        overlayHost.children
+            .forEach {
+                if (idList.contains(it.tag)) {
+                    overlayHost.removeView(it)
+                }
+            }
+    }
+
+    fun onLingeringIntroAnimationOverlay(
+        overlayObject: OverlayObject,
+        animationPosition: Long,
+        isPlaying: Boolean
+    ) {
+        OverlayViewHelper.onLingeringIntroAnimationOverlay(
+            overlayHost,
+            overlayObject,
+            animationPosition,
+            isPlaying,
+            viewIdentifierManager
+        )
+    }
+
+    fun onLingeringOutroAnimationOverlay(
+        overlayObject: OverlayObject,
+        animationPosition: Long,
+        isPlaying: Boolean
+    ) {
+        OverlayViewHelper.onLingeringOutroAnimationOverlay(
+            overlayHost,
+            overlayObject,
+            animationPosition,
+            isPlaying,
+            viewIdentifierManager
+        )
+    }
+
 
     /**region Classes*/
 
