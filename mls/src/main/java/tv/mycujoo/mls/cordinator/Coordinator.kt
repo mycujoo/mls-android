@@ -181,10 +181,6 @@ class Coordinator(
                     actionEntity
                 )
             }
-
-//            override fun clearScreen(customIdList: List<String>) {
-//                playerViewWrapper.clearScreen(customIdList)
-//            }
         }
 
 
@@ -199,11 +195,6 @@ class Coordinator(
             val actionList = newAnnotationEntity.actions.map { newActionEntity ->
                 ActionEntityFactory.create(newActionEntity)
             }
-
-            actionList.filter { it.type == SHOW_OVERLAY }
-                .let { showActions -> annotationBuilder.addPendingShowActions(showActions) }
-            actionList.filter { it.type == HIDE_OVERLAY }
-                .let { hideActions -> annotationBuilder.addPendingHideActions(hideActions) }
 
             annotationBuilder.addOverlayObjects(actionList.filter { it.type == SHOW_OVERLAY }
                 .map { createOverlayObject(it) })

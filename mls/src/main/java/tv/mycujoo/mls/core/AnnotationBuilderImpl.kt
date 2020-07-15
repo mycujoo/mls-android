@@ -19,8 +19,6 @@ class AnnotationBuilderImpl(
     /**region Fields*/
     private var currentTime: Long = 0L
     private var isPlaying: Boolean = false
-    private val pendingShowActionEntities = ArrayList<ActionEntity>()
-    private val pendingHideActionEntities = ArrayList<ActionEntity>()
 
     private var overlayObjects = ArrayList<OverlayObject>()
 
@@ -85,15 +83,6 @@ class AnnotationBuilderImpl(
     }
 
     /**region Over-ridden Functions*/
-    override fun addPendingShowActions(actions: List<ActionEntity>) {
-        pendingShowActionEntities.addAll(actions)
-    }
-
-    override fun addPendingHideActions(actions: List<ActionEntity>) {
-        pendingHideActionEntities.addAll(actions)
-    }
-
-
     override fun setCurrentTime(time: Long, playing: Boolean) {
         println("MLS-App AnnotationBuilderImpl - setCurrentTime() $time isPlaying -> $isPlaying")
         currentTime = time
@@ -196,153 +185,6 @@ class AnnotationBuilderImpl(
         return (leftBound <= currentTime) && (currentTime <= rightBound)
     }
 
-//    private fun isLingeringExcludingAnimationPart(overlayObject: OverlayObject): Boolean {
-//        if (overlayObject.introTransitionSpec.offset > currentTime) {
-//            return false
-//        }
-
-//        if (actionEntity.duration != null && actionEntity.duration != -1L) {
-//            return (actionEntity.offset <= currentTime && actionEntity.offset + actionEntity.duration >= currentTime)
-//        } else {
-//            // there must be HideAction for this action
-//            return pendingHideActionEntities.firstOrNull { it.customId == actionEntity.customId }
-//                ?.let { hideAction ->
-//                    hideAction.offset > currentTime
-//                } ?: false
-//        }
-//    }
-    //
-
-
-    private fun getIntroAnimationPosition(actionEntity: ActionEntity, currentTime: Long): Long {
-        return currentTime - actionEntity.offset
-    }
-
-    private fun getOutroAnimationPositionFromSameAction(
-        showAction: ActionEntity,
-        currentTime: Long
-    ): Long? {
-        if (showAction.duration == null) {
-            return null
-        }
-        return currentTime - showAction.offset + showAction.duration
-    }
-
-    private fun getOutroAnimationPositionFromHideAction(
-        ShowAction: ActionEntity,
-        hideAction: ActionEntity,
-        currentTime: Long
-    ): Long? {
-
-        return currentTime - hideAction.offset + hideAction.introAnimationDuration
-    }
-
-    private fun isLingeringWithNoIntroAnimation(actionEntity: ActionEntity): Boolean {
-
-        if (hasEnteringAnimation(actionEntity.introAnimationType)) {
-            return false
-        }
-
-        if (actionEntity.duration == null) {
-            return actionEntity.offset < currentTime
-        }
-
-        return (actionEntity.offset < currentTime) && (actionEntity.offset + actionEntity.duration > currentTime)
-    }
-
-
-    //    private fun isLingeringPostAnimation(actionEntity: ActionEntity): Boolean {
-//        if (actionEntity.duration == null || actionEntity.animationDuration == null) {
-//            return false
-//        }
-//        return (actionEntity.offset + actionEntity.animationDuration < currentTime) && (actionEntity.offset + actionEntity.duration > currentTime)
-//    }
-//
-    private fun isLingeringDuringIntroAnimation(actionEntity: ActionEntity): Boolean {
-        if (actionEntity.introAnimationDuration == -1L) {
-            return false
-        }
-        return (actionEntity.offset < currentTime) && (actionEntity.offset + actionEntity.introAnimationDuration > currentTime)
-    }
-
-    //    private fun isLingeringDuringOutroAnimation(
-//        showAction: ActionEntity,
-//        hideAction: ActionEntity
-//    ): Boolean {
-//        if (showAction.duration == null || hideAction.animationDuration == null) {
-//            return false
-//        }
-//        return (showAction.offset + showAction.duration + hideAction.animationDuration > currentTime) && (showAction.offset + showAction.duration < currentTime)
-//    }
-    private fun isLingeringDuringOutroAnimation(
-        showAction: ActionEntity,
-        hideAction: ActionEntity
-    ): Boolean {
-        if (showAction.duration != null && showAction.outroAnimationDuration != -1L) {
-            return (showAction.offset + showAction.duration + showAction.outroAnimationDuration > currentTime) && (showAction.offset + showAction.duration < currentTime)
-        }
-
-        return (hideAction.offset + hideAction.outroAnimationDuration > currentTime) && (hideAction.offset < currentTime)
-
-    }
-
-    private fun isLingeringDuringOutroAnimation(
-        showAction: ActionEntity
-    ): Boolean {
-        if (showAction.duration != null && showAction.outroAnimationDuration != -1L) {
-            return (showAction.offset + showAction.duration + showAction.outroAnimationDuration > currentTime) && (showAction.offset + showAction.duration < currentTime)
-        } else return false
-    }
-
-    private fun isPendingOutroAnimation(
-        hideAction: ActionEntity
-    ): Boolean {
-        if (hideAction.outroAnimationDuration == -1L) {
-            return false
-        }
-        return (hideAction.offset >= currentTime) && (hideAction.offset < currentTime + 1000L)
-    }
-
-    private fun isLingeringExcludingAnimationPart(actionEntity: ActionEntity): Boolean {
-        if (actionEntity.offset > currentTime) {
-            return false
-        }
-
-        if (actionEntity.duration != null && actionEntity.duration != -1L) {
-            return (actionEntity.offset <= currentTime && actionEntity.offset + actionEntity.duration >= currentTime)
-        } else {
-            // there must be HideAction for this action
-            return pendingHideActionEntities.firstOrNull { it.customId == actionEntity.customId }
-                ?.let { hideAction ->
-                    hideAction.offset > currentTime
-                } ?: false
-        }
-    }
-
-    private fun isLingeringExcludingIntroAnimationPart(actionEntity: ActionEntity): Boolean {
-        if (actionEntity.introAnimationDuration == -1L) {
-            return false
-        }
-
-        if (actionEntity.offset > currentTime) {
-            return false
-        }
-
-        if (actionEntity.duration != null && actionEntity.duration != -1L) {
-            return (actionEntity.offset <= currentTime && actionEntity.offset + actionEntity.introAnimationDuration >= currentTime)
-        } else {
-            // there must be HideAction for this action
-            return false
-        }
-    }
-
-    /**
-     * return true if the action offset is now or in 1 second
-     */
-    private fun isInCurrentTimeRange(actionEntity: ActionEntity): Boolean {
-        return (actionEntity.offset >= currentTime) && (actionEntity.offset < currentTime + 1000L)
-    }
-
     private fun hasEnteringAnimation(animationType: AnimationType): Boolean {
         return when (animationType) {
             FADE_IN,
@@ -363,10 +205,6 @@ class AnnotationBuilderImpl(
             }
             else -> false
         }
-    }
-
-    private fun hasNoRemoveActionUpToThisPoint(actionEntity: ActionEntity): Boolean {
-        return pendingShowActionEntities.any { it.type == ActionType.HIDE_OVERLAY && it.customId == actionEntity.customId && it.offset < actionEntity.offset }
     }
     /**endregion */
 
