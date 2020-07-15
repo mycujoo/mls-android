@@ -12,9 +12,9 @@ data class ActionEntity(
     val svgInputStream: InputStream?,
     val position : PositionGuide?,
     val size: Pair<Float, Float>,
-    val duration: Long?,
+    var duration: Long?,
     val introAnimationType: AnimationType,
     val introAnimationDuration: Long,
-    val outroAnimationType: AnimationType,
-    val outroAnimationDuration: Long
+    var outroAnimationType: AnimationType,
+    var outroAnimationDuration: Long
 )

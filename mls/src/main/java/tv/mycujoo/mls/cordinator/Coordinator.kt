@@ -7,6 +7,7 @@ import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SimpleExoPlayer
 import okhttp3.OkHttpClient
 import tv.mycujoo.domain.entity.*
+import tv.mycujoo.domain.entity.models.ActionType.HIDE_OVERLAY
 import tv.mycujoo.domain.entity.models.ActionType.SHOW_OVERLAY
 import tv.mycujoo.domain.usecase.GetAnnotationFromJSONUseCase
 import tv.mycujoo.mls.core.AnnotationBuilder
@@ -99,14 +100,26 @@ class Coordinator(
         )
 
 
+        val actionsList = ArrayList<ActionEntity>()
+
         GetAnnotationFromJSONUseCase.mappedResult().forEach { newAnnotationEntity ->
-            val actionList = newAnnotationEntity.actions.map { newActionEntity ->
+            actionsList.addAll(newAnnotationEntity.actions.map { newActionEntity ->
                 ActionEntityFactory.create(newActionEntity)
+            })
+        }
+
+        actionsList.filter { it.type == HIDE_OVERLAY }
+            .forEach { hideAction ->
+                actionsList.firstOrNull { showAction -> hideAction.customId == showAction.customId && showAction.type == SHOW_OVERLAY }
+                    ?.let {
+                        it.outroAnimationType = hideAction.outroAnimationType
+                        it.outroAnimationDuration = hideAction.outroAnimationDuration
+                        it.duration = hideAction.offset
+                    }
             }
 
-            annotationBuilder.addOverlayObjects(actionList.filter { it.type == SHOW_OVERLAY }
-                .map { createOverlayObject(it) })
-        }
+        annotationBuilder.addOverlayObjects(actionsList.filter { it.type == SHOW_OVERLAY }
+            .map { createOverlayObject(it) })
 
         val runnable = object : Runnable {
             override fun run() {
@@ -133,9 +146,9 @@ class Coordinator(
         )
 
         val outroTransitionSpec: TransitionSpec =
-            if (actionEntity.duration != null && actionEntity.duration > 0L) {
+            if (actionEntity.duration != null && actionEntity.duration!! > 0L) {
                 TransitionSpec(
-                    actionEntity.offset + actionEntity.duration,
+                    actionEntity.offset + actionEntity.duration!!,
                     if (actionEntity.outroAnimationType == AnimationType.UNSPECIFED) {
                         AnimationType.NONE
                     } else {
