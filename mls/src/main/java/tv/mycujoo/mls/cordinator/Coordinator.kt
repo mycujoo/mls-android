@@ -193,7 +193,6 @@ class Coordinator(
             okHttpClient,
             identifierManager
         )
-        annotationBuilder.buildPendingAnnotationsForCurrentTime()
 
 
         GetAnnotationFromJSONUseCase.mappedResult().forEach { newAnnotationEntity ->
@@ -213,8 +212,6 @@ class Coordinator(
         val runnable = object : Runnable {
             override fun run() {
                 annotationBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
-//                annotationBuilder.buildPendingAnnotationsForCurrentTime()
-//                annotationBuilder.buildPendingOutroAnimations()
                 annotationBuilder.buildCurrentTimeRange()
                 handler.postDelayed(this, 1000L)
             }
@@ -275,16 +272,6 @@ class Coordinator(
                 if (reason == DISCONTINUITY_REASON_SEEK) {
                     hasPendingSeek = true
                 }
-
-//
-//        annotationBuilder.buildRemovalAnnotationsUpToCurrentTime()
-
-//                annotationBuilder.buildLingeringAnnotationsUpToCurrentTime()
-//                annotationBuilder.buildPendingAnnotationsForCurrentTime()
-//
-//
-//                annotationBuilder.buildLingeringIntroAnimations(exoPlayer.isPlaying)
-//                annotationBuilder.buildLingeringOutroAnimations(exoPlayer.isPlaying)
             }
 
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {

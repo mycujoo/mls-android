@@ -23,41 +23,33 @@ abstract class AnnotationBuilder {
      * build Show actions which belongs to current time (now until next second)
      * If the action has animation, it will be handled.
      */
-    abstract fun buildPendingAnnotationsForCurrentTime()
 
     /**
      * build actions, which their 'offset' is passed, but not their entire duration [offset + duration + outro-animation-duration]
      * if the action does not have duration, the possible related HideAction should be considered
      */
-    abstract fun buildLingeringAnnotationsUpToCurrentTime()
 
     /**
      * builds all Removal types of action from start to end
      */
-    abstract fun buildRemovalAnnotations()
 
     /**
      * builds all Removal types of action from start to current time
      */
-    abstract fun buildRemovalAnnotationsUpToCurrentTime()
 
     /**
      * build actions which are about to go to their outro animation.
      * outro-animation can be either in the same action, or in another hide-action object.
      */
-    abstract fun buildPendingOutroAnimations()
 
     /**
      * build actions which are in their Intro animation time
      * intro-animation is always in the same action.
      */
-    abstract fun buildLingeringIntroAnimations(isPlaying: Boolean)
 
     /**
      * build actions which are in their Outro animation time.
      */
-    abstract fun buildLingeringOutroAnimations(isPlaying: Boolean)
-
 
     // re-write
     abstract fun addOverlayObjects(overlayObject: List<OverlayObject>)
