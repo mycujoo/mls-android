@@ -63,12 +63,12 @@ class PositioningTest {
             doesNotExist()
         )
         UiThreadStatement.runOnUiThread {
-            playerViewWrapper.showOverlay(
-                getShowOverlayActionEntity(
-                    1000L,
-                    PositionGuide(hCenter = 0F)
-                )
-            )
+//            playerViewWrapper.showOverlay(
+//                getShowOverlayActionEntity(
+//                    1000L,
+//                    PositionGuide(hCenter = 0F)
+//                )
+//            )
         }
         onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
             matches(
@@ -90,12 +90,12 @@ class PositioningTest {
             doesNotExist()
         )
         UiThreadStatement.runOnUiThread {
-            playerViewWrapper.showOverlay(
-                getShowOverlayActionEntity(
-                    1000L,
-                    PositionGuide(hCenter = 50F)
-                )
-            )
+//            playerViewWrapper.showOverlay(
+//                getShowOverlayActionEntity(
+//                    1000L,
+//                    PositionGuide(hCenter = 50F)
+//                )
+//            )
         }
         onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
             matches(
@@ -117,12 +117,12 @@ class PositioningTest {
             doesNotExist()
         )
         UiThreadStatement.runOnUiThread {
-            playerViewWrapper.showOverlay(
-                getShowOverlayActionEntity(
-                    1000L,
-                    PositionGuide(hCenter = 40F)
-                )
-            )
+//            playerViewWrapper.showOverlay(
+//                getShowOverlayActionEntity(
+//                    1000L,
+//                    PositionGuide(hCenter = 40F)
+//                )
+//            )
         }
         onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
             matches(
@@ -144,12 +144,12 @@ class PositioningTest {
             doesNotExist()
         )
         UiThreadStatement.runOnUiThread {
-            playerViewWrapper.showOverlay(
-                getShowOverlayActionEntity(
-                    1000L,
-                    PositionGuide(hCenter = -50F)
-                )
-            )
+//            playerViewWrapper.showOverlay(
+//                getShowOverlayActionEntity(
+//                    1000L,
+//                    PositionGuide(hCenter = -50F)
+//                )
+//            )
         }
         onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
             matches(
@@ -171,12 +171,12 @@ class PositioningTest {
             doesNotExist()
         )
         UiThreadStatement.runOnUiThread {
-            playerViewWrapper.showOverlay(
-                getShowOverlayActionEntity(
-                    1000L,
-                    PositionGuide(hCenter = -40F)
-                )
-            )
+//            playerViewWrapper.showOverlay(
+//                getShowOverlayActionEntity(
+//                    1000L,
+//                    PositionGuide(hCenter = -40F)
+//                )
+//            )
         }
         onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
             matches(
@@ -198,12 +198,12 @@ class PositioningTest {
             doesNotExist()
         )
         UiThreadStatement.runOnUiThread {
-            playerViewWrapper.showOverlay(
-                getShowOverlayActionEntity(
-                    1000L,
-                    PositionGuide(vCenter = 0F)
-                )
-            )
+//            playerViewWrapper.showOverlay(
+//                getShowOverlayActionEntity(
+//                    1000L,
+//                    PositionGuide(vCenter = 0F)
+//                )
+//            )
         }
         onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
             matches(
@@ -225,12 +225,12 @@ class PositioningTest {
             doesNotExist()
         )
         UiThreadStatement.runOnUiThread {
-            playerViewWrapper.showOverlay(
-                getShowOverlayActionEntity(
-                    1000L,
-                    PositionGuide(vCenter = 50F)
-                )
-            )
+//            playerViewWrapper.showOverlay(
+//                getShowOverlayActionEntity(
+//                    1000L,
+//                    PositionGuide(vCenter = 50F)
+//                )
+//            )
         }
         onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
             matches(
@@ -252,12 +252,12 @@ class PositioningTest {
             doesNotExist()
         )
         UiThreadStatement.runOnUiThread {
-            playerViewWrapper.showOverlay(
-                getShowOverlayActionEntity(
-                    1000L,
-                    PositionGuide(vCenter = 40F)
-                )
-            )
+//            playerViewWrapper.showOverlay(
+//                getShowOverlayActionEntity(
+//                    1000L,
+//                    PositionGuide(vCenter = 40F)
+//                )
+//            )
         }
         onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
             matches(
@@ -279,12 +279,12 @@ class PositioningTest {
             doesNotExist()
         )
         UiThreadStatement.runOnUiThread {
-            playerViewWrapper.showOverlay(
-                getShowOverlayActionEntity(
-                    1000L,
-                    PositionGuide(vCenter = -50F)
-                )
-            )
+//            playerViewWrapper.showOverlay(
+//                getShowOverlayActionEntity(
+//                    1000L,
+//                    PositionGuide(vCenter = -50F)
+//                )
+//            )
         }
         onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
             matches(
@@ -306,12 +306,12 @@ class PositioningTest {
             doesNotExist()
         )
         UiThreadStatement.runOnUiThread {
-            playerViewWrapper.showOverlay(
-                getShowOverlayActionEntity(
-                    1000L,
-                    PositionGuide(vCenter = -40F)
-                )
-            )
+//            playerViewWrapper.showOverlay(
+//                getShowOverlayActionEntity(
+//                    1000L,
+//                    PositionGuide(vCenter = -40F)
+//                )
+//            )
         }
         onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
             matches(

@@ -18,24 +18,19 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.test.espresso.idling.CountingIdlingResource
-import com.caverock.androidsvg.SVG
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
 import com.google.android.exoplayer2.ui.PlayerView
 import kotlinx.android.synthetic.main.dialog_information_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
 import tv.mycujoo.domain.entity.ActionEntity
-import tv.mycujoo.domain.entity.HideOverlayActionEntity
 import tv.mycujoo.domain.entity.OverlayObject
-import tv.mycujoo.domain.entity.ShowOverlayActionEntity
 import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.domain.usecase.GetAnnotationFromJSONUseCase
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.extensions.getDisplaySize
-import tv.mycujoo.mls.helper.AnimationFactory
-import tv.mycujoo.mls.helper.OverlayFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.TimelineMarkerManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
@@ -64,7 +59,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
     lateinit var uiEventListener: UIEventListener
     private var isFullScreen = false
 
-    lateinit var viewIdentifierManager : ViewIdentifierManager
+    lateinit var viewIdentifierManager: ViewIdentifierManager
 
     private lateinit var eventInfoTitle: String
     private lateinit var eventInfoDescription: String
@@ -319,234 +314,9 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     /**region New Annotation structure*/
 
-    fun showOverlay(overlayEntity: ShowOverlayActionEntity) {
-        val proportionalImageView = OverlayFactory.create(context, overlayEntity.size)
-        try {
-            val svg: SVG
-            if (overlayEntity.svgInputStream != null) {
-                svg = SVG.getFromInputStream(overlayEntity.svgInputStream)
-            } else {
-                svg = SVG.getFromString(getTimeSvgString())
-            }
-            svg.setDocumentWidth("100%")
-            svg.setDocumentHeight("100%")
-            proportionalImageView.setSVG(svg)
-
-            val animation = AnimationFactory.createStaticAnimation(
-                proportionalImageView,
-                overlayEntity.introAnimationType,
-                overlayEntity.introAnimationDuration
-            )
-
-            OverlayViewHelper.addView(
-                overlayHost,
-                proportionalImageView,
-                overlayEntity.positionGuide,
-                overlayEntity,
-                animation,
-                viewIdentifierManager,
-                idlingResource
-            )
-
-
-            viewIdentifierManager.storeViewId(proportionalImageView, overlayEntity.customId!!)
-
-        } catch (e: Exception) {
-            Log.e("PlayerView", "e: ${e.message}")
-        }
-    }
-
-    fun hideOverlay(hideOverlayActionEntity: HideOverlayActionEntity) {
-        idlingResource.increment()
-        OverlayViewHelper.removeView(
-            overlayHost,
-            viewIdentifierManager.getViewId(hideOverlayActionEntity.customId!!),
-            hideOverlayActionEntity,
-            idlingResource
-        )
-        //todo: remove animation too
-    }
-
-
     fun getTimeSvgString(): String {
         return "<svg height=\"30\" width=\"200\"><rect width=\"200\" height=\"30\" style=\"fill:rgb(211,211,211);stroke-width:3;stroke:rgb(128, 128, 128)\" /><text x=\"0\" y=\"15\" fill=\"red\">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</text></svg>"
     }
-
-    fun showLingeringOverlay(overlayEntity: ShowOverlayActionEntity) {
-        val proportionalImageView = OverlayFactory.create(context, overlayEntity.size)
-        try {
-            val svg: SVG
-            if (overlayEntity.svgInputStream != null) {
-                svg = SVG.getFromInputStream(overlayEntity.svgInputStream)
-            } else {
-                svg = SVG.getFromString(getTimeSvgString())
-            }
-            svg.setDocumentWidth("100%")
-            svg.setDocumentHeight("100%")
-            proportionalImageView.setSVG(svg)
-
-            OverlayViewHelper.addViewWithNoAnimation(
-                overlayHost,
-                proportionalImageView,
-                overlayEntity.positionGuide,
-                overlayEntity,
-                idlingResource
-            )
-
-
-
-            viewIdentifierManager.storeViewId(proportionalImageView, overlayEntity.customId!!)
-
-        } catch (e: Exception) {
-            Log.e("PlayerView", "e: ${e.message}")
-        }
-    }
-
-
-    fun onLingeringIntroAnimationAvailable(
-        overlayEntity: ShowOverlayActionEntity,
-        animationPosition: Long,
-        isPlaying: Boolean
-    ) {
-        val proportionalImageView = OverlayFactory.create(context, overlayEntity.size)
-        try {
-            val svg: SVG
-            if (overlayEntity.svgInputStream != null) {
-                svg = SVG.getFromInputStream(overlayEntity.svgInputStream)
-            } else {
-                svg = SVG.getFromString(getTimeSvgString())
-            }
-            svg.setDocumentWidth("100%")
-            svg.setDocumentHeight("100%")
-            proportionalImageView.setSVG(svg)
-
-            OverlayViewHelper.addViewWithLingeringIntroAnimation(
-                overlayHost,
-                proportionalImageView,
-                overlayEntity.positionGuide,
-                overlayEntity,
-                animationPosition,
-                isPlaying,
-                viewIdentifierManager,
-                idlingResource
-            )
-
-
-
-            viewIdentifierManager.storeViewId(proportionalImageView, overlayEntity.customId!!)
-
-        } catch (e: Exception) {
-            Log.e("PlayerView", "e: ${e.message}")
-        }
-    }
-
-    fun onLingeringOutroAnimationAvailable(
-        overlayEntity: ShowOverlayActionEntity,
-        hideOverlayActionEntity: HideOverlayActionEntity,
-        animationPosition: Long,
-        isPlaying: Boolean
-    ) {
-        val proportionalImageView = OverlayFactory.create(context, overlayEntity.size)
-        try {
-            val svg: SVG
-            if (overlayEntity.svgInputStream != null) {
-                svg = SVG.getFromInputStream(overlayEntity.svgInputStream)
-            } else {
-                svg = SVG.getFromString(getTimeSvgString())
-            }
-            svg.setDocumentWidth("100%")
-            svg.setDocumentHeight("100%")
-            proportionalImageView.setSVG(svg)
-
-            OverlayViewHelper.addViewWithLingeringOutroAnimation(
-                overlayHost,
-                proportionalImageView,
-                overlayEntity.positionGuide,
-                overlayEntity,
-                hideOverlayActionEntity,
-                animationPosition,
-                isPlaying,
-                viewIdentifierManager,
-                idlingResource
-            )
-
-            viewIdentifierManager.storeViewId(proportionalImageView, overlayEntity.customId!!)
-
-        } catch (e: Exception) {
-            Log.e("PlayerView", "e: ${e.message}")
-        }
-    }
-
-    fun onLingeringOutroAnimationAvailableFromSameCommand(
-        overlayEntity: ShowOverlayActionEntity,
-        animationPosition: Long,
-        isPlaying: Boolean
-    ) {
-        val proportionalImageView = OverlayFactory.create(context, overlayEntity.size)
-        try {
-            val svg: SVG
-            if (overlayEntity.svgInputStream != null) {
-                svg = SVG.getFromInputStream(overlayEntity.svgInputStream)
-            } else {
-                svg = SVG.getFromString(getTimeSvgString())
-            }
-            svg.setDocumentWidth("100%")
-            svg.setDocumentHeight("100%")
-            proportionalImageView.setSVG(svg)
-
-            OverlayViewHelper.addViewWithLingeringOutroAnimationFromSameCommand(
-                overlayHost,
-                proportionalImageView,
-                overlayEntity.positionGuide,
-                overlayEntity,
-                animationPosition,
-                isPlaying,
-                viewIdentifierManager,
-                idlingResource
-            )
-
-            viewIdentifierManager.storeViewId(proportionalImageView, overlayEntity.customId!!)
-
-        } catch (e: Exception) {
-            Log.e("PlayerView", "e: ${e.message}")
-        }
-    }
-
-    fun onNewOutroAnimationAvailable(
-        relatedActionEntity: ActionEntity,
-        hideActionEntity: ActionEntity
-    ) {
-
-        OverlayViewHelper.addOutroAnimationToCurrentOverlay(
-            overlayHost,
-            relatedActionEntity.customId,
-            hideActionEntity,
-            viewIdentifierManager
-        )
-    }
-
-    fun onNewOutroAnimationAvailable(
-        relatedActionEntity: ActionEntity
-    ) {
-
-        OverlayViewHelper.runOutroAnimationOfCurrentOverlaySameCommand(
-            overlayHost,
-            relatedActionEntity,
-            viewIdentifierManager
-        )
-    }
-
-//    fun clearScreen(customIdList: List<String>) {
-//        val viewIdentifierToBeCleared =
-//            customIdList.map { viewIdentifierManager.getViewId(it) }
-//
-//        OverlayViewHelper.clearScreen(
-//            overlayHost,
-//            viewIdentifierToBeCleared,
-//            idlingResource
-//        )
-//
-//    }
 
     fun continueOverlayAnimations() {
         viewIdentifierManager.getAnimations().forEach { it.resume() }
