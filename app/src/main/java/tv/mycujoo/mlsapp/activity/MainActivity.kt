@@ -1,5 +1,7 @@
 package tv.mycujoo.mlsapp.activity
 
+import android.content.pm.ActivityInfo
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +14,7 @@ import tv.mycujoo.mls.api.MLS
 import tv.mycujoo.mls.api.MLSConfiguration
 import tv.mycujoo.mls.api.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
+import tv.mycujoo.mls.widgets.PlayerViewWrapper
 import tv.mycujoo.mlsapp.R
 
 
@@ -37,6 +40,13 @@ class MainActivity : AppCompatActivity() {
         val uiEventListener = object : UIEventListener {
             override fun onFullScreenButtonClicked(fullScreen: Boolean) {
                 Log.d("uiEventListener", "onFullScreenButtonClicked $fullScreen")
+                if (fullScreen){
+                    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE
+                    playerViewWrapper.screenMode(PlayerViewWrapper.ScreenMode.LANDSCAPE)
+                } else {
+                    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT
+                    playerViewWrapper.screenMode(PlayerViewWrapper.ScreenMode.LANDSCAPE)
+                }
             }
         }
 
