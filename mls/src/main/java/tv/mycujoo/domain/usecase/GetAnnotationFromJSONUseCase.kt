@@ -46,7 +46,7 @@ class GetAnnotationFromJSONUseCase {
                         "animatein_type": "fade_in",
                         "custom_id": "scoreboard1",
                         "position": {
-                            "leading": 5.0, 
+                            "left": 5.0, 
                             "top": 5.0
                         }, 
                         "size": {
@@ -66,7 +66,7 @@ class GetAnnotationFromJSONUseCase {
                         "duration": 10000, 
                          "custom_id": "scoreboard2",
                          "position": {
-                             "leading": 5.0, 
+                             "left": 5.0, 
                              "bottom": 5.0
                          }, 
                          "size": {
@@ -91,7 +91,7 @@ class GetAnnotationFromJSONUseCase {
                          "custom_id": "scoreboard3",
                           "duration": 10000, 
                          "position": {
-                             "trailing": 5.0, 
+                             "right": 5.0, 
                              "top": 5.0
                          }, 
                          "size": {
@@ -110,13 +110,13 @@ class GetAnnotationFromJSONUseCase {
                  {
                      "data": {
                          "animatein_duration": 50000, 
-                         "animatein_type": "slide_from_trailing",
+                         "animatein_type": "slide_from_right",
                          "animateout_duration": 50000, 
-                        "animateout_type": "slide_to_trailing", 
+                        "animateout_type": "slide_to_right", 
                          "custom_id": "scoreboard4",
-                          "duration": 50000, 
+                          "duration": 70000, 
                          "position": {
-                             "trailing": 5.0, 
+                             "right": 5.0, 
                              "bottom": 5.0
                          }, 
                          "size": {
@@ -150,13 +150,13 @@ class GetAnnotationFromJSONUseCase {
                 {
                     "data": {
                         "animatein_duration": 5000, 
-                        "animatein_type": "slide_from_leading", 
+                        "animatein_type": "slide_from_left", 
                         "animateout_duration": 5000, 
-                        "animateout_type": "slide_to_leading", 
+                        "animateout_type": "slide_to_left", 
                         "duration": 1000000, 
                         "position": {
                             "bottom": 10.0, 
-                            "leading": 5.0
+                            "left": 5.0
                         }, 
                         "size": {
                             "width": 30.0

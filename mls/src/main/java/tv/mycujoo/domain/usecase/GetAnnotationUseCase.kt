@@ -24,7 +24,7 @@ class GetAnnotationUseCase {
                         "scoreboard0",
                         7000L,
                         5000L,
-                        PositionGuide(leading = 5F, bottom = 5F),
+                        PositionGuide(left = 5F, bottom = 5F),
                         AnimationType.NONE,
                         0L
                     ),
@@ -32,7 +32,7 @@ class GetAnnotationUseCase {
                         "scoreboard1",
                         7000L,
                         50000L,
-                        PositionGuide(trailing = 5F, bottom = 5F),
+                        PositionGuide(right = 5F, bottom = 5F),
                         AnimationType.NONE,
                         0L
                     ),
@@ -40,32 +40,16 @@ class GetAnnotationUseCase {
                         "scoreboard2",
                         7000L,
                         5000L,
-                        PositionGuide(trailing = 5F, top = 5F),
-                        AnimationType.SLIDE_FROM_LEADING,
+                        PositionGuide(right = 5F, top = 5F),
+                        AnimationType.SLIDE_FROM_LEFT,
                         2000L
                     ),
-//                    getShowOverLayAction(
-//                        "scoreboard5",
-//                        8000L,
-//                        120000L,
-//                        PositionGuide(leading = 5F, top = 5F),
-//                        AnimationType.SLIDE_FROM_TRAILING,
-//                        60000L
-//                    ),
-//                    getShowOverLayAction(
-//                        "scoreboard4",
-//                        50000L,
-//                        40000L,
-//                        PositionGuide(leading = 5F, bottom = 5F),
-//                        AnimationType.FADE_IN,
-//                        1000L
-//                    ),
                     getHideOverlayAction("scoreboard0", 12000L, AnimationType.FADE_OUT, 1000L),
                     getHideOverlayAction("scoreboard1", 12000L, AnimationType.NONE, 1000L),
                     getHideOverlayAction(
                         "scoreboard2",
                         12000L,
-                        AnimationType.SLIDE_TO_LEADING,
+                        AnimationType.SLIDE_TO_LEFT,
                         60000L
                     )
 //                    getHideOverlayAction("scoreboard5", 128000L, AnimationType.FADE_OUT)

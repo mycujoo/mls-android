@@ -1,13 +1,14 @@
 package tv.mycujoo.domain.entity
 
 enum class AnimationType {
-    UNSPECIFED,
+    UNSPECIFIED,
     NONE,
     FADE_IN, FADE_OUT,
-    SLIDE_FROM_LEADING, SLIDE_FROM_TRAILING,
-    SLIDE_TO_LEADING, SLIDE_TO_TRAILING;
+    SLIDE_FROM_LEFT, SLIDE_FROM_RIGHT,
+    SLIDE_TO_LEFT, SLIDE_TO_RIGHT;
 
     companion object {
-        fun fromValueOrNone(value: String) = values().firstOrNull { it.name.toLowerCase() == value } ?: NONE
+        fun fromValueOrNone(value: String) =
+            values().firstOrNull { it.name.toLowerCase() == value } ?: NONE
     }
 }

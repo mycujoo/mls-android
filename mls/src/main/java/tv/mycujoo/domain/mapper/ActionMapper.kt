@@ -26,7 +26,7 @@ class ActionMapper {
 
             var introAnimationType = AnimationType.NONE
             var introAnimationDuration = INVALID_LONG_VALUE
-            var outroAnimationType = AnimationType.UNSPECIFED
+            var outroAnimationType = AnimationType.UNSPECIFIED
             var outroAnimationDuration = INVALID_LONG_VALUE
 
 
@@ -135,14 +135,14 @@ class ActionMapper {
                     "top" -> {
                         positionGuide.top = (map[key]!!.toFloat())
                     }
-                    "trailing" -> {
-                        positionGuide.trailing = (map[key]!!.toFloat())
+                    "right" -> {
+                        positionGuide.right = (map[key]!!.toFloat())
                     }
                     "bottom" -> {
                         positionGuide.bottom = (map[key]!!.toFloat())
                     }
-                    "leading" -> {
-                        positionGuide.leading = (map[key]!!.toFloat())
+                    "left" -> {
+                        positionGuide.left = (map[key]!!.toFloat())
                     }
                     "HCenter" -> {
                         positionGuide.hCenter = (map[key]!!.toFloat())

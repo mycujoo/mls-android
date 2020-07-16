@@ -149,7 +149,7 @@ class Coordinator(
             if (actionEntity.duration != null && actionEntity.duration!! > 0L) {
                 TransitionSpec(
                     actionEntity.offset + actionEntity.duration!!,
-                    if (actionEntity.outroAnimationType == AnimationType.UNSPECIFED) {
+                    if (actionEntity.outroAnimationType == AnimationType.UNSPECIFIED) {
                         AnimationType.NONE
                     } else {
                         actionEntity.outroAnimationType
@@ -159,7 +159,7 @@ class Coordinator(
             } else {
                 TransitionSpec(
                     -1L,
-                    AnimationType.UNSPECIFED,
+                    AnimationType.UNSPECIFIED,
                     -1L
                 )
             }

@@ -127,7 +127,7 @@ class AnnotationBuilderImpl(
     }
 
     private fun removalIsInCurrentTimeRange(overlayObject: OverlayObject): Boolean {
-        if (overlayObject.outroTransitionSpec.animationType == UNSPECIFED) {
+        if (overlayObject.outroTransitionSpec.animationType == UNSPECIFIED) {
             return false
         }
 
@@ -207,8 +207,8 @@ class AnnotationBuilderImpl(
     private fun hasEnteringAnimation(animationType: AnimationType): Boolean {
         return when (animationType) {
             FADE_IN,
-            SLIDE_FROM_LEADING,
-            SLIDE_FROM_TRAILING -> {
+            SLIDE_FROM_LEFT,
+            SLIDE_FROM_RIGHT -> {
                 true
             }
             else -> false
@@ -218,8 +218,8 @@ class AnnotationBuilderImpl(
     private fun hasOutroAnimation(animationType: AnimationType): Boolean {
         return when (animationType) {
             FADE_OUT,
-            SLIDE_TO_LEADING,
-            SLIDE_TO_TRAILING -> {
+            SLIDE_TO_LEFT,
+            SLIDE_TO_RIGHT -> {
                 true
             }
             else -> false
