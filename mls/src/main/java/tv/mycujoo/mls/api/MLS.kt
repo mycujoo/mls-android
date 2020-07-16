@@ -20,6 +20,8 @@ import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
+import tv.mycujoo.domain.entity.models.ActionType
+import tv.mycujoo.domain.usecase.GetAnnotationFromJSONUseCase
 import tv.mycujoo.domain.usecase.GetEventsUseCase
 import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
@@ -98,7 +100,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     private lateinit var handler: Handler
 
     private val dataHolder = DataHolder()
-    private val viewIdentifierManager= ViewIdentifierManager()
+    private val viewIdentifierManager = ViewIdentifierManager()
 
     /**endregion */
 
@@ -397,9 +399,11 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     ) {
         exoPlayer?.let {
             VideoPlayerCoordinator(
-                exoPlayer,
-                playerViewWrapper,
-                builder.mlsConfiguration.VideoPlayerConfig
+            exoPlayer,
+            playerViewWrapper,
+            builder.mlsConfiguration.VideoPlayerConfig,
+            GetAnnotationFromJSONUseCase.mappedResult().flatMap { it.actions }
+                .filter { it.type == ActionType.SHOW_TIMELINE_MARKER }
             )
         }
     }

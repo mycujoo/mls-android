@@ -4,13 +4,15 @@ import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ui.TimeBar
+import tv.mycujoo.domain.entity.NEWActionEntity
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
 class VideoPlayerCoordinator(
     private val exoPlayer: SimpleExoPlayer,
     private val playerViewWrapper: PlayerViewWrapper,
-    videoPlayerConfig: VideoPlayerConfig
+    videoPlayerConfig: VideoPlayerConfig,
+    private val timelineMarkerActionEntities: List<NEWActionEntity>
 ) {
 
     init {
@@ -47,6 +49,10 @@ class VideoPlayerCoordinator(
             }
 
             override fun onScrubStop(timeBar: TimeBar, position: Long, canceled: Boolean) {
+                timelineMarkerActionEntities.firstOrNull { position in it.offset - 10000L..it.offset + 10000L }
+                    ?.let {
+                        exoPlayer.seekTo(it.offset)
+                    }
                 handleLiveModeState()
             }
         })
