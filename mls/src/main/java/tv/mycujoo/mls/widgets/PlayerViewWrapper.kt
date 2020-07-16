@@ -421,8 +421,8 @@ class PlayerViewWrapper @JvmOverloads constructor(
             .forEach {
                 overlayHost.removeView(it)
                 if (this::viewIdentifierManager.isInitialized) {
-                    viewIdentifierManager.attachedOverlayList.remove(overlayObject.id)
-                    viewIdentifierManager.attachedAnimationList.remove(overlayObject.id)
+                    viewIdentifierManager.detachOverlayWithTag(overlayObject.id)
+                    viewIdentifierManager.detachAnimationWithTag(overlayObject.id)
                 }
             }
 
@@ -438,16 +438,13 @@ class PlayerViewWrapper @JvmOverloads constructor(
     }
 
     fun clearScreen(idList: List<String>) {
-        // clear all animations
-        viewIdentifierManager.attachedAnimationList.clear()
-
         overlayHost.children
             .forEach {
                 if (idList.contains(it.tag)) {
                     overlayHost.removeView(it)
                     if (this::viewIdentifierManager.isInitialized) {
-                        viewIdentifierManager.attachedOverlayList.remove(it.tag as String)
-                        viewIdentifierManager.attachedAnimationList.clear()
+                        viewIdentifierManager.detachOverlayWithTag(it.tag as String)
+                        viewIdentifierManager.detachAnimationWithTag(it.tag as String)
                     }
                 }
             }

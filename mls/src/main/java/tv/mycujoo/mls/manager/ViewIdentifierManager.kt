@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.manager
 
 import android.animation.ObjectAnimator
+import android.util.Log
 import android.view.View
 
 class ViewIdentifierManager {
@@ -45,6 +46,30 @@ class ViewIdentifierManager {
         }
         return getViewId(customId)?.let { getAnimationByViewId(it) }
 
+    }
+
+    fun attachOverlay(view: View) {
+        if (view.tag == null) {
+            Log.w("ViewIdentifierManager", "overlay tag should not be null")
+            return
+        }
+        attachOverlay(view.tag as String)
+    }
+
+    fun attachOverlay(id: String) {
+        attachedOverlayList.add(id)
+    }
+
+    fun detachOverlayWithTag(tag: String) {
+        attachedOverlayList.remove(tag)
+    }
+
+    fun attachAnimation(id: String) {
+        attachedAnimationList.add(id)
+    }
+
+    fun detachAnimationWithTag(id: String) {
+        attachedAnimationList.remove(id)
     }
 
 }
