@@ -399,11 +399,11 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     ) {
         exoPlayer?.let {
             VideoPlayerCoordinator(
-            exoPlayer,
-            playerViewWrapper,
-            builder.mlsConfiguration.VideoPlayerConfig,
-            GetAnnotationFromJSONUseCase.mappedResult().flatMap { it.actions }
-                .filter { it.type == ActionType.SHOW_TIMELINE_MARKER }
+                exoPlayer,
+                playerViewWrapper,
+                builder.mlsConfiguration.VideoPlayerConfig,
+                GetAnnotationFromJSONUseCase.mappedResult()
+                    .filter { it.type == ActionType.SHOW_TIMELINE_MARKER }
             )
         }
     }

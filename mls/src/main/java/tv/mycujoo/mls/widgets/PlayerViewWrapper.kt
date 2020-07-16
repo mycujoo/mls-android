@@ -145,17 +145,15 @@ class PlayerViewWrapper @JvmOverloads constructor(
         val timelineMarkerManager = TimelineMarkerManager(mlsTimeBar, highlightMarkerTextView)
 
         GetAnnotationFromJSONUseCase.mappedResult()
-            .forEach {
-                it.actions.filter { it.type == ActionType.SHOW_TIMELINE_MARKER }
-                    .forEach { showTimelineMarkerEntity ->
-                        timelineMarkerManager.addTimeLineHighlight(
-                            PointOfInterest(
-                                showTimelineMarkerEntity.offset,
-                                listOf(showTimelineMarkerEntity.label!!),
-                                PointOfInterestType(showTimelineMarkerEntity.color)
-                            )
-                        )
-                    }
+            .filter { it.type == ActionType.SHOW_TIMELINE_MARKER }
+            .forEach { showTimelineMarkerEntity ->
+                timelineMarkerManager.addTimeLineHighlight(
+                    PointOfInterest(
+                        showTimelineMarkerEntity.offset,
+                        listOf(showTimelineMarkerEntity.label!!),
+                        PointOfInterestType(showTimelineMarkerEntity.color)
+                    )
+                )
             }
 
     }

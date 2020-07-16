@@ -1,8 +1,8 @@
 package tv.mycujoo.domain.usecase
 
 import com.google.gson.Gson
-import tv.mycujoo.domain.entity.AnnotationsSourceData
-import tv.mycujoo.domain.entity.NEWAnnotationEntity
+import tv.mycujoo.data.entity.ActionResponse
+import tv.mycujoo.domain.entity.NEWActionEntity
 import tv.mycujoo.domain.mapper.AnnotationMapper
 
 class GetAnnotationFromJSONUseCase {
@@ -12,32 +12,31 @@ class GetAnnotationFromJSONUseCase {
 
     companion object {
 
-        fun result(): AnnotationsSourceData {
+        fun result(): ActionResponse {
 
-            val annotationSourceData = Gson().fromJson<AnnotationsSourceData>(
+            val actionResponse = Gson().fromJson(
                 sourceRawResponse,
-                AnnotationsSourceData::class.java
+                ActionResponse::class.java
             )
 
-            return annotationSourceData
+            return actionResponse
         }
 
-        fun mappedResult(): List<NEWAnnotationEntity> {
-            return AnnotationMapper.mapToAnnotationEntityList(result())
+        fun mappedResult(): List<NEWActionEntity> {
+            return AnnotationMapper.mapToNEWActionEntity(result())
         }
 
 
         val sourceRawResponse = """
        {
-    "annotations": [
-        {
             "actions": [
                 {
                     "data": {
                         "color": "#ffffff", 
                         "label": "Kickoff"
                     }, 
-                    "id": "f4354364q6afd", 
+                    "id": "f4354364q6afd",
+                    "offset": 1000, 
                     "type": "show_timeline_marker"
                 }, 
                 {
@@ -60,10 +59,12 @@ class GetAnnotationFromJSONUseCase {
                         }
                     }, 
                     "id": "54afag35yag", 
-                    "type": "show_overlay"
+                    "type": "show_overlay",
+                     "offset": 66000, 
+                    "timeline_id": "tml_1"
                 },
                  {"data": {
-                        "duration": 10000, 
+                        "duration": 10000,
                          "custom_id": "scoreboard2",
                          "position": {
                              "left": 5.0, 
@@ -80,7 +81,9 @@ class GetAnnotationFromJSONUseCase {
                          }
                      }, 
                      "id": "54afag35yag2", 
-                     "type": "show_overlay"
+                     "type": "show_overlay",
+                      "offset": 5000, 
+                       "timeline_id": "tml_1"
                  },
                  {
                      "data": {
@@ -89,7 +92,7 @@ class GetAnnotationFromJSONUseCase {
                          "animateout_duration": 5000, 
                         "animateout_type": "fade_out",
                          "custom_id": "scoreboard3",
-                          "duration": 10000, 
+                          "duration": 10000,
                          "position": {
                              "right": 5.0, 
                              "top": 5.0
@@ -105,7 +108,9 @@ class GetAnnotationFromJSONUseCase {
                          }
                      }, 
                      "id": "54afag35yag3", 
-                     "type": "show_overlay"
+                     "type": "show_overlay",
+                      "offset": 5000, 
+                      "timeline_id": "tml_1"
                  },
                  {
                      "data": {
@@ -116,7 +121,7 @@ class GetAnnotationFromJSONUseCase {
                          "custom_id": "scoreboard4",
                           "duration": 70000, 
                          "position": {
-                             "right": 5.0, 
+                             "right": 5.0,
                              "bottom": 5.0
                          }, 
                          "size": {
@@ -130,20 +135,16 @@ class GetAnnotationFromJSONUseCase {
                          }
                      }, 
                      "id": "54afag35yagp4", 
-                     "type": "show_overlay"
+                     "type": "show_overlay",
+                     "offset": 5000, 
+                     "timeline_id": "tml_1"
                  }
-            ], 
-            "id": "ann_1", 
-            "offset": 5000, 
-            "timeline_id": "tml_1"
-        }, 
-        {
-            "actions": [
-                {
+                    ,{
                     "data": {
                         "color": "#ffff01", 
                         "label": "Goal"
                     }, 
+                    "offset": 166000,
                     "id": "fda43t943f9a", 
                     "type": "show_timeline_marker"
                 }, 
@@ -153,7 +154,7 @@ class GetAnnotationFromJSONUseCase {
                         "animatein_type": "slide_from_left", 
                         "animateout_duration": 5000, 
                         "animateout_type": "slide_to_left", 
-                        "duration": 1000000, 
+                        "duration": 1000000,
                         "position": {
                             "bottom": 10.0, 
                             "left": 5.0
@@ -164,39 +165,32 @@ class GetAnnotationFromJSONUseCase {
                         "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/announcement_overlay.svg"
                     }, 
                     "id": "gagj9j9agj9a", 
-                    "type": "show_overlay"
-                }
-            ], 
-            "id": "ann_2", 
-            "offset": 66000, 
-            "timeline_id": "tml_1"
-        }, 
-        {
-            "actions": [
-                {
+                    "type": "show_overlay",
+                     "offset": 166000, 
+                     "timeline_id": "tml_1"
+            }
+            ,{
                     "data": {
                         "color": "#de4f1f", 
                         "label": "Fulltime"
                     }, 
-                    "id": "bmb9t49bm34t", 
+                    "id": "bmb9t49bm34t",
+                    "offset": 566000, 
                     "type": "show_timeline_marker"
                 }, 
                 {
                     "data": {
                         "animateout_duration": 300, 
-                        "animateout_type": "fade_out", 
+                        "animateout_type": "fade_out",
                         "custom_id": "scoreboard1"
                     }, 
                     "id": "f43f9ajf9dfjSX", 
-                    "type": "hide_overlay"
+                    "type": "hide_overlay",
+                     "offset": 566000, 
+                     "timeline_id": "tml_1"
                 }
-            ], 
-            "id": "ann_3", 
-            "offset": 850000, 
-            "timeline_id": "tml_1"
+            ]
         }
-    ]
-}
     """.trimIndent()
     }
 }

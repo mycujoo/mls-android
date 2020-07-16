@@ -11,11 +11,11 @@ import kotlin.random.Random
 class ActionMapper {
     companion object {
 
-        const val INVALID_STRING_VALUE = "-1"
-        const val INVALID_LONG_VALUE = -1L
-        const val INVALID_FLOAT_VALUE = -1F
+        private const val INVALID_STRING_VALUE = "-1"
+        private const val INVALID_LONG_VALUE = -1L
+        private const val INVALID_FLOAT_VALUE = -1F
 
-        fun mapToEntity(offset: Long, actionSourceData: ActionSourceData): NEWActionEntity {
+        fun mapToEntity(actionSourceData: ActionSourceData): NEWActionEntity {
 
 
             var customId = INVALID_STRING_VALUE
@@ -92,7 +92,7 @@ class ActionMapper {
 
             return NEWActionEntity(
                 actionSourceData.id!!,
-                offset,
+                actionSourceData.offset ?: INVALID_LONG_VALUE,
                 ActionType.fromValueOrUnknown(actionSourceData.type!!),
                 customId,
                 svgUrl,

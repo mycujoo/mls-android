@@ -102,10 +102,10 @@ class Coordinator(
 
         val actionsList = ArrayList<ActionEntity>()
 
-        GetAnnotationFromJSONUseCase.mappedResult().forEach { newAnnotationEntity ->
-            actionsList.addAll(newAnnotationEntity.actions.map { newActionEntity ->
+        GetAnnotationFromJSONUseCase.mappedResult().forEach { newActionEntity ->
+            actionsList.add(
                 ActionEntityFactory.create(newActionEntity)
-            })
+            )
         }
 
         actionsList.filter { it.type == HIDE_OVERLAY }
