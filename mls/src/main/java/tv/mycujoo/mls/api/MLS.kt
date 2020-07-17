@@ -21,7 +21,7 @@ import okhttp3.OkHttpClient
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.entity.models.ActionType
-import tv.mycujoo.domain.usecase.GetAnnotationFromJSONUseCase
+import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.domain.usecase.GetEventsUseCase
 import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
@@ -403,7 +403,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
                 exoPlayer,
                 playerViewWrapper,
                 builder.mlsConfiguration.VideoPlayerConfig,
-                GetAnnotationFromJSONUseCase.mappedResult()
+                GetActionsFromJSONUseCase.mappedResult()
                     .filter { it.type == ActionType.SHOW_TIMELINE_MARKER }
             )
         }

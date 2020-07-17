@@ -2,7 +2,6 @@ package tv.mycujoo.mls.widgets
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.util.AttributeSet
@@ -26,7 +25,7 @@ import kotlinx.android.synthetic.main.dialog_information_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
 import tv.mycujoo.domain.entity.OverlayObject
 import tv.mycujoo.domain.entity.models.ActionType
-import tv.mycujoo.domain.usecase.GetAnnotationFromJSONUseCase
+import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
@@ -147,7 +146,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
         val timelineMarkerManager = TimelineMarkerManager(mlsTimeBar, highlightMarkerTextView)
 
-        GetAnnotationFromJSONUseCase.mappedResult()
+        GetActionsFromJSONUseCase.mappedResult()
             .filter { it.type == ActionType.SHOW_TIMELINE_MARKER }
             .forEach { showTimelineMarkerEntity ->
                 timelineMarkerManager.addTimeLineHighlight(

@@ -3,9 +3,11 @@ package tv.mycujoo.domain.usecase
 import com.google.gson.Gson
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.NEWActionEntity
-import tv.mycujoo.domain.mapper.AnnotationMapper
+import tv.mycujoo.domain.entity.SetVariableEntity
+import tv.mycujoo.domain.mapper.ActionMapper.Companion.mapToNEWActionEntityList
+import tv.mycujoo.domain.mapper.ActionMapper.Companion.mapToSetVariableEntityList
 
-class GetAnnotationFromJSONUseCase {
+class GetActionsFromJSONUseCase {
 
     // todo : use real use-case abstract class instead of mocking data
 
@@ -13,23 +15,37 @@ class GetAnnotationFromJSONUseCase {
     companion object {
 
         fun result(): ActionResponse {
-
-            val actionResponse = Gson().fromJson(
+            return Gson().fromJson(
                 sourceRawResponse,
                 ActionResponse::class.java
             )
-
-            return actionResponse
         }
 
         fun mappedResult(): List<NEWActionEntity> {
-            return AnnotationMapper.mapToNEWActionEntity(result())
+            return mapToNEWActionEntityList(result())
+        }
+
+        fun mappedSetVariables(): List<SetVariableEntity> {
+            return mapToSetVariableEntityList(result())
         }
 
 
         val sourceRawResponse = """
        {
             "actions": [
+            {
+                    "offset": 2000, 
+					"id": "43faf4j59595959",
+					"type": "set_variable",
+					"data": {
+						"name": "${"$"}homeScore",
+						// Only one of the following three values should be set; the other two are null (or not available on the response)
+						"value": 0,
+						"type": "double", // enum: double, long, string
+						// Double precision is only useful if the type is set to double. Needed to know how to render the double. Null otherwise.
+						"double_precision": 2
+					}
+				},
                 {
                     "data": {
                         "color": "#ffffff", 

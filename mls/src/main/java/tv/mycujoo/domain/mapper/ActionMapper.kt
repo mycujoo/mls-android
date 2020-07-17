@@ -1,9 +1,8 @@
 package tv.mycujoo.domain.mapper
 
-import tv.mycujoo.domain.entity.ActionSourceData
-import tv.mycujoo.domain.entity.AnimationType
-import tv.mycujoo.domain.entity.NEWActionEntity
-import tv.mycujoo.domain.entity.PositionGuide
+import tv.mycujoo.data.entity.ActionResponse
+import tv.mycujoo.domain.entity.*
+import tv.mycujoo.domain.entity.VariableType.*
 import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.mls.model.MutablePair
 import kotlin.random.Random
@@ -13,9 +12,80 @@ class ActionMapper {
 
         private const val INVALID_STRING_VALUE = "-1"
         private const val INVALID_LONG_VALUE = -1L
+        private const val INVALID_INT_VALUE = -1
         private const val INVALID_FLOAT_VALUE = -1F
 
-        fun mapToEntity(actionSourceData: ActionSourceData): NEWActionEntity {
+        fun mapToNEWActionEntityList(actionResponse: ActionResponse): List<NEWActionEntity> {
+
+            return actionResponse.data.map { actionSourceData ->
+                mapToActionEntity(actionSourceData)
+            }
+
+        }
+
+        fun mapToSetVariableEntityList(actionResponse: ActionResponse): List<SetVariableEntity> {
+            return actionResponse.data.mapNotNull { actionSourceData ->
+                mapToSetVariableEntity(actionSourceData)
+            }
+        }
+
+        private fun mapToSetVariableEntity(actionSourceData: ActionSourceData): SetVariableEntity? {
+
+            if (actionSourceData.id == null || actionSourceData.offset == null) {
+                return null
+            }
+
+            if (ActionType.fromValueOrUnknown(actionSourceData.type!!) != ActionType.SET_VARIABLE) {
+                return null
+            }
+
+            var variableName = INVALID_STRING_VALUE
+            var variableType = UNSPECIFIED
+            var variableValue: Any = INVALID_LONG_VALUE
+            var variableDoublePrecision = INVALID_INT_VALUE
+
+            actionSourceData.data?.let { data ->
+                data.keys.forEach { key ->
+                    val any = data[key]
+                    when (key) {
+                        "name" -> {
+                            any?.let { variableName = it as String }
+                        }
+                        "type" -> {
+                            any?.let { variableType = VariableType.fromValueOrNone(it as String) }
+                        }
+                        "double_precision" -> {
+                            any?.let { variableDoublePrecision = (it as Double).toInt() }
+                        }
+                    }
+                }
+            }
+
+            when (variableType) {
+                DOUBLE -> {
+                    variableValue =
+                        actionSourceData.data?.get("value") as? Double ?: INVALID_LONG_VALUE
+                }
+                LONG -> {
+                    variableValue =
+                        actionSourceData.data?.get("value") as? Long ?: INVALID_LONG_VALUE
+                }
+                STRING -> {
+                    variableValue =
+                        actionSourceData.data?.get("value") as? String ?: INVALID_LONG_VALUE
+                }
+                UNSPECIFIED -> {
+                    // should not happen
+                }
+            }
+
+            val variable = Variable(variableName, variableValue)
+
+            return SetVariableEntity(actionSourceData.id, actionSourceData.offset, variable)
+        }
+
+
+        private fun mapToActionEntity(actionSourceData: ActionSourceData): NEWActionEntity {
 
 
             var customId = INVALID_STRING_VALUE

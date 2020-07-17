@@ -4,7 +4,8 @@ enum class ActionType(val type: String) {
     UNKNOWN("unknown"),
     SHOW_OVERLAY("show_overlay"),
     HIDE_OVERLAY("hide_overlay"),
-    SHOW_TIMELINE_MARKER("show_timeline_marker");
+    SHOW_TIMELINE_MARKER("show_timeline_marker"),
+    SET_VARIABLE("set_variable");
 
 
     companion object {

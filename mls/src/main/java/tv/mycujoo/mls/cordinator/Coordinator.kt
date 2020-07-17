@@ -9,7 +9,7 @@ import okhttp3.OkHttpClient
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.models.ActionType.HIDE_OVERLAY
 import tv.mycujoo.domain.entity.models.ActionType.SHOW_OVERLAY
-import tv.mycujoo.domain.usecase.GetAnnotationFromJSONUseCase
+import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.mls.core.AnnotationBuilder
 import tv.mycujoo.mls.core.AnnotationBuilderImpl
 import tv.mycujoo.mls.core.AnnotationListener
@@ -24,12 +24,12 @@ class Coordinator(
     private val okHttpClient: OkHttpClient
 ) : CoordinatorInterface {
 
-    private var hasPendingSeek: Boolean = false
-
     /**region Fields*/
     internal lateinit var playerViewWrapper: PlayerViewWrapper
     internal var annotationBuilder: AnnotationBuilder
     private lateinit var seekInterruptionEventListener: Player.EventListener
+
+    private var hasPendingSeek: Boolean = false
     /**endregion */
 
     /**region Initialization*/
@@ -99,7 +99,7 @@ class Coordinator(
 
         val actionsList = ArrayList<ActionEntity>()
 
-        GetAnnotationFromJSONUseCase.mappedResult().forEach { newActionEntity ->
+        GetActionsFromJSONUseCase.mappedResult().forEach { newActionEntity ->
             actionsList.add(
                 ActionEntityFactory.create(newActionEntity)
             )
@@ -190,6 +190,8 @@ class Coordinator(
                     hasPendingSeek = false
                     annotationBuilder.removeAll()
                     annotationBuilder.buildLingerings()
+
+
                 }
             }
         }
@@ -198,10 +200,6 @@ class Coordinator(
     /**endregion */
 
     /**region Over-ridden Functions*/
-    override fun onSeekHappened(exoPlayer: SimpleExoPlayer) {
-        // remove
-    }
-
     override var onSizeChangedCallback = {
         annotationBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
         annotationBuilder.removeAll()
