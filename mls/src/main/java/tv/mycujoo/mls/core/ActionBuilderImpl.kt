@@ -8,11 +8,11 @@ import tv.mycujoo.domain.entity.SvgData
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import java.io.IOException
 
-class AnnotationBuilderImpl(
+class ActionBuilderImpl(
     private val listener: AnnotationListener,
     private val okHttpClient: OkHttpClient,
     private val viewIdentifierManager: ViewIdentifierManager
-) : AnnotationBuilder() {
+) : ActionBuilder() {
 
     /**region Fields*/
     private var currentTime: Long = 0L

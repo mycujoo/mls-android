@@ -2,7 +2,7 @@ package tv.mycujoo.mls.core
 
 import tv.mycujoo.domain.entity.OverlayObject
 
-abstract class AnnotationBuilder {
+abstract class ActionBuilder {
     /**
      * set current time & playing status of player
      */

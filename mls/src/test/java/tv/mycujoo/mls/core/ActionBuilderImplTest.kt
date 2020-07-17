@@ -7,9 +7,9 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import tv.mycujoo.domain.entity.*
 
-class AnnotationBuilderImplTest {
+class ActionBuilderImplTest {
 
-    private lateinit var annotationBuilderImpl: AnnotationBuilderImpl
+    private lateinit var annotationBuilderImpl: ActionBuilderImpl
 
 
     @Mock

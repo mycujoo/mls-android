@@ -10,8 +10,8 @@ import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.models.ActionType.HIDE_OVERLAY
 import tv.mycujoo.domain.entity.models.ActionType.SHOW_OVERLAY
 import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
-import tv.mycujoo.mls.core.AnnotationBuilder
-import tv.mycujoo.mls.core.AnnotationBuilderImpl
+import tv.mycujoo.mls.core.ActionBuilder
+import tv.mycujoo.mls.core.ActionBuilderImpl
 import tv.mycujoo.mls.core.AnnotationListener
 import tv.mycujoo.mls.helper.ActionEntityFactory
 import tv.mycujoo.mls.manager.ViewIdentifierManager
@@ -26,7 +26,7 @@ class Coordinator(
 
     /**region Fields*/
     internal lateinit var playerViewWrapper: PlayerViewWrapper
-    internal var annotationBuilder: AnnotationBuilder
+    internal var actionBuilder: ActionBuilder
     private lateinit var seekInterruptionEventListener: Player.EventListener
 
     private var hasPendingSeek: Boolean = false
@@ -90,7 +90,7 @@ class Coordinator(
         }
 
 
-        annotationBuilder = AnnotationBuilderImpl(
+        actionBuilder = ActionBuilderImpl(
             annotationListener,
             okHttpClient,
             identifierManager
@@ -115,13 +115,13 @@ class Coordinator(
                     }
             }
 
-        annotationBuilder.addOverlayObjects(actionsList.filter { it.type == SHOW_OVERLAY }
+        actionBuilder.addOverlayObjects(actionsList.filter { it.type == SHOW_OVERLAY }
             .map { createOverlayObject(it) })
 
         val runnable = object : Runnable {
             override fun run() {
-                annotationBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
-                annotationBuilder.buildCurrentTimeRange()
+                actionBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
+                actionBuilder.buildCurrentTimeRange()
                 handler.postDelayed(this, 200L)
             }
         }
@@ -178,7 +178,7 @@ class Coordinator(
 
             override fun onPositionDiscontinuity(reason: Int) {
                 super.onPositionDiscontinuity(reason)
-                annotationBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
+                actionBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
                 if (reason == DISCONTINUITY_REASON_SEEK) {
                     hasPendingSeek = true
                 }
@@ -188,8 +188,8 @@ class Coordinator(
                 super.onPlayerStateChanged(playWhenReady, playbackState)
                 if (playbackState == STATE_READY && hasPendingSeek) {
                     hasPendingSeek = false
-                    annotationBuilder.removeAll()
-                    annotationBuilder.buildLingerings()
+                    actionBuilder.removeAll()
+                    actionBuilder.buildLingerings()
 
 
                 }
@@ -201,9 +201,9 @@ class Coordinator(
 
     /**region Over-ridden Functions*/
     override var onSizeChangedCallback = {
-        annotationBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
-        annotationBuilder.removeAll()
-        annotationBuilder.buildLingerings()
+        actionBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
+        actionBuilder.removeAll()
+        actionBuilder.buildLingerings()
     }
     /**endregion */
 }
