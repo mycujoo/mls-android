@@ -33,21 +33,21 @@ class NetworkModule(val context: Context) {
     @Singleton
     fun provideOkHttp(prefManager: IPrefManager): OkHttpClient {
 
-        val httpCacheDirectory = File(context.cacheDir, "responses")
         val cacheSize = 10 * 1024 * 1024 // 10 MiB
-
-        val cache = Cache(httpCacheDirectory, cacheSize.toLong())
+        val cache = Cache(context.cacheDir, cacheSize.toLong())
 
         val okHttpBuilder = OkHttpClient.Builder()
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .connectTimeout(30, TimeUnit.SECONDS)
-            .addInterceptor(Interceptor { chain: Interceptor.Chain ->
+            .addInterceptor { chain: Interceptor.Chain ->
                 val newRequest = chain.request().newBuilder()
-//                    .addHeader("Authorization", "Bearer " + prefManager.get("PUBLIC_KEY"))
+                    //                    .addHeader("Authorization", "Bearer " + prefManager.get("PUBLIC_KEY"))
+                    .removeHeader("Pragma")
+                    .removeHeader("Cache-Control")
                     .addHeader("Cache-Control", "public, max-age=$maxAgeInSecond")
                     .build()
-                val requestBody = newRequest.body()
+                val requestBody = chain.request().body()
                 if (requestBody != null) {
                     Log.d(
                         "NetworkModule",
@@ -62,7 +62,7 @@ class NetworkModule(val context: Context) {
                     }
                 }
                 chain.proceed(newRequest)
-            })
+            }
             .cache(cache)
 
         return okHttpBuilder.build()
@@ -73,8 +73,8 @@ class NetworkModule(val context: Context) {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder().baseUrl(publicBaseUrl)
-            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
             .build()
     }
 
@@ -83,16 +83,10 @@ class NetworkModule(val context: Context) {
     @Singleton
     fun provideMlsApiRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder().baseUrl(mlsApiBaseUrl)
-            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
             .build()
     }
-
-//    @Provides
-//    @Singleton
-//    fun providePublicApi(@Named("PUBLIC-API") retrofit: Retrofit): MlsApi {
-//        return retrofit.create(MlsApi::class.java)
-//    }
 
     @Provides
     @Singleton
