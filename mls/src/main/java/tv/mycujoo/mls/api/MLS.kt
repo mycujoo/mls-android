@@ -152,8 +152,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         handler = Handler()
 
         val identifierManager = viewIdentifierManager
-        coordinator = Coordinator(identifierManager, api)
-        coordinator.initialize(exoPlayer!!, handler, okHttpClient)
+        coordinator = Coordinator(identifierManager, exoPlayer!!, handler, okHttpClient)
     }
 
 
@@ -215,6 +214,8 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
             }
 
             this.playerViewWrapper = playerViewWrapper
+            playerViewWrapper.onSizeChangedCallback = coordinator.onSizeChangedCallback
+
         }
 
         if (hasAnnotation) {

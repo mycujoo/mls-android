@@ -15,28 +15,25 @@ import tv.mycujoo.mls.core.AnnotationBuilderImpl
 import tv.mycujoo.mls.core.AnnotationListener
 import tv.mycujoo.mls.helper.ActionEntityFactory
 import tv.mycujoo.mls.manager.ViewIdentifierManager
-import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
 class Coordinator(
     private val identifierManager: ViewIdentifierManager,
-    private val api: Api
+    private val exoPlayer: SimpleExoPlayer,
+    private val handler: Handler,
+    private val okHttpClient: OkHttpClient
 ) : CoordinatorInterface {
 
     private var hasPendingSeek: Boolean = false
 
     /**region Fields*/
     internal lateinit var playerViewWrapper: PlayerViewWrapper
-    internal lateinit var annotationBuilder: AnnotationBuilder
-    internal lateinit var seekInterruptionEventListener: Player.EventListener
+    internal var annotationBuilder: AnnotationBuilder
+    private lateinit var seekInterruptionEventListener: Player.EventListener
     /**endregion */
 
     /**region Initialization*/
-    fun initialize(
-        exoPlayer: SimpleExoPlayer,
-        handler: Handler,
-        okHttpClient: OkHttpClient
-    ) {
+    init {
         initEventListener(exoPlayer)
 
         val annotationListener = object : AnnotationListener {
@@ -130,6 +127,7 @@ class Coordinator(
         }
 
         handler.postDelayed(runnable, 200L)
+
     }
 
     private fun createOverlayObject(actionEntity: ActionEntity): OverlayObject {
@@ -202,6 +200,12 @@ class Coordinator(
     /**region Over-ridden Functions*/
     override fun onSeekHappened(exoPlayer: SimpleExoPlayer) {
         // remove
+    }
+
+    override var onSizeChangedCallback = {
+        annotationBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
+        annotationBuilder.removeAll()
+        annotationBuilder.buildLingerings()
     }
     /**endregion */
 }

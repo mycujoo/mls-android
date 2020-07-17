@@ -2,6 +2,7 @@ package tv.mycujoo.mls.widgets
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.util.AttributeSet
@@ -62,6 +63,8 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     private lateinit var eventInfoTitle: String
     private lateinit var eventInfoDescription: String
+
+    var onSizeChangedCallback = {}
 
     @Nullable
     val idlingResource = CountingIdlingResource("displaying_overlays")
@@ -476,6 +479,23 @@ class PlayerViewWrapper @JvmOverloads constructor(
         )
     }
 
+    /**region Over-ridden Functions*/
+    override fun onDraw(canvas: Canvas?) {
+        super.onDraw(canvas)
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (w != 0 && h != 0) {
+            onSizeChangedCallback.invoke()
+        }
+    }
+
+    /**endregion */
 
     /**region Classes*/
 
