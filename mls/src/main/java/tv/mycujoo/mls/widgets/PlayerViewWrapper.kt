@@ -421,7 +421,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             .forEach {
                 overlayHost.removeView(it)
                 if (this::viewIdentifierManager.isInitialized) {
-                    viewIdentifierManager.detachOverlayWithTag(overlayObject.id)
+                    viewIdentifierManager.detachOverlayView(it)
                     viewIdentifierManager.detachAnimationWithTag(overlayObject.id)
                 }
             }
@@ -443,7 +443,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
                 if (idList.contains(it.tag)) {
                     overlayHost.removeView(it)
                     if (this::viewIdentifierManager.isInitialized) {
-                        viewIdentifierManager.detachOverlayWithTag(it.tag as String)
+                        viewIdentifierManager.detachOverlayView(it)
                         viewIdentifierManager.detachAnimationWithTag(it.tag as String)
                     }
                 }

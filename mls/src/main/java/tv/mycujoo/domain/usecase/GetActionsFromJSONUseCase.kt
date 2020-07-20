@@ -33,14 +33,27 @@ class GetActionsFromJSONUseCase {
         val sourceRawResponse = """
        {
             "actions": [
-            {
-                    "offset": 2000, 
+                {
+                    "offset": 4000, 
 					"id": "43faf4j59595959",
 					"type": "set_variable",
 					"data": {
 						"name": "${"$"}homeScore",
 						// Only one of the following three values should be set; the other two are null (or not available on the response)
 						"value": 0,
+						"type": "double", // enum: double, long, string
+						// Double precision is only useful if the type is set to double. Needed to know how to render the double. Null otherwise.
+						"double_precision": 2
+					}
+				},
+                {
+                    "offset": 4000, 
+					"id": "43faf4j59595960",
+					"type": "set_variable",
+					"data": {
+						"name": "${"$"}awayScore",
+						// Only one of the following three values should be set; the other two are null (or not available on the response)
+						"value": 1,
 						"type": "double", // enum: double, long, string
 						// Double precision is only useful if the type is set to double. Needed to know how to render the double. Null otherwise.
 						"double_precision": 2
@@ -70,13 +83,13 @@ class GetActionsFromJSONUseCase {
                         "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg", 
                         "variable_positions": {
                             "###_AWAYSCORE_###": "awayScore", 
-                            "###_HOMESCORE_###": "homeScore", 
+                            "###_HOMESCORE_###": "${"$"}homeScore",
                             "###_TIMER_###": "timer1"
                         }
                     }, 
                     "id": "54afag35yag", 
                     "type": "show_overlay",
-                     "offset": 66000, 
+                     "offset": 3000, 
                     "timeline_id": "tml_1"
                 },
                  {"data": {
@@ -91,14 +104,14 @@ class GetActionsFromJSONUseCase {
                          }, 
                          "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg", 
                          "variable_positions": {
-                             "###_AWAYSCORE_###": "awayScore", 
-                             "###_HOMESCORE_###": "homeScore", 
+                             "###_AWAYSCORE_###": "${"$"}awayScore",
+                             "###_HOMESCORE_###": "${"$"}homeScore",
                              "###_TIMER_###": "timer1"
                          }
                      }, 
                      "id": "54afag35yag2", 
                      "type": "show_overlay",
-                      "offset": 5000, 
+                      "offset": 2000, 
                        "timeline_id": "tml_1"
                  },
                  {
@@ -119,7 +132,7 @@ class GetActionsFromJSONUseCase {
                          "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg", 
                          "variable_positions": {
                              "###_AWAYSCORE_###": "awayScore", 
-                             "###_HOMESCORE_###": "homeScore", 
+                             "###_HOMESCORE_###": "${"$"}homeScore",
                              "###_TIMER_###": "timer1"
                          }
                      }, 
@@ -146,7 +159,7 @@ class GetActionsFromJSONUseCase {
                          "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg", 
                          "variable_positions": {
                              "###_AWAYSCORE_###": "awayScore", 
-                             "###_HOMESCORE_###": "homeScore", 
+                             "###_HOMESCORE_###": "${"$"}homeScore",
                              "###_TIMER_###": "timer1"
                          }
                      }, 

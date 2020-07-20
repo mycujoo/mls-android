@@ -1,10 +1,12 @@
 package tv.mycujoo.domain.entity
 
-data class OverlayObject(
+
+data class Scaffold(
     var id: String,
     var svgData: SvgData?,
     var viewSpec: ViewSpec,
     var introTransitionSpec: TransitionSpec,
     var outroTransitionSpec: TransitionSpec,
-    val variablePlaceHolders: Map<String, String>
+    var svgString: String?,
+    val keywords: ArrayList<String>
 )

@@ -87,6 +87,10 @@ class Coordinator(
             override fun onLingeringOverlay(overlayObject: OverlayObject) {
                 playerViewWrapper.onNewOverlayWithNoAnimation(overlayObject)
             }
+
+            override fun applySetVariable(setVariableEntity: SetVariableEntity) {
+                identifierManager.applySetVariable(setVariableEntity.variable)
+            }
         }
 
 
@@ -118,10 +122,14 @@ class Coordinator(
         actionBuilder.addOverlayObjects(actionsList.filter { it.type == SHOW_OVERLAY }
             .map { createOverlayObject(it) })
 
+        actionBuilder.addVariableObjects(GetActionsFromJSONUseCase.mappedSetVariables())
+
+
         val runnable = object : Runnable {
             override fun run() {
                 actionBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
                 actionBuilder.buildCurrentTimeRange()
+                actionBuilder.buildSetVariables()
                 handler.postDelayed(this, 200L)
             }
         }
@@ -134,7 +142,8 @@ class Coordinator(
 
         val svgData = SvgData(
             actionEntity.svgUrl,
-            actionEntity.svgInputStream
+            actionEntity.svgInputStream,
+            null
         )
         val viewSpec = ViewSpec(actionEntity.position, actionEntity.size)
         val introTransitionSpec = TransitionSpec(
@@ -169,7 +178,8 @@ class Coordinator(
             svgData,
             viewSpec,
             introTransitionSpec,
-            outroTransitionSpec
+            outroTransitionSpec,
+            actionEntity.variablePlaceHolders
         )
     }
 
@@ -190,6 +200,7 @@ class Coordinator(
                     hasPendingSeek = false
                     actionBuilder.removeAll()
                     actionBuilder.buildLingerings()
+                    actionBuilder.buildSetVariables()
 
 
                 }

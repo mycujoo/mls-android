@@ -4,5 +4,6 @@ import java.io.InputStream
 
 data class SvgData(
     val svgUrl: String?,
-    val svgInputStream: InputStream?
+    val svgInputStream: InputStream?,
+    val svgString: String?
 )

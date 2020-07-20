@@ -3,15 +3,18 @@ package tv.mycujoo.mls.manager
 import android.animation.ObjectAnimator
 import android.util.Log
 import android.view.View
+import tv.mycujoo.domain.entity.Variable
+import tv.mycujoo.mls.widgets.ScaffoldView
 
 class ViewIdentifierManager {
-    var viewIdToIdMap = mutableMapOf<String, Int>()
-    var viewIdToAnimationMap = mutableMapOf<Int, ObjectAnimator>()
+    private var viewIdToIdMap = mutableMapOf<String, Int>()
+    private var viewIdToAnimationMap = mutableMapOf<Int, ObjectAnimator>()
 
-    var animations = ArrayList<ObjectAnimator>()
+    private var animations = ArrayList<ObjectAnimator>()
 
-    val attachedOverlayList: ArrayList<String> = ArrayList()
-    val attachedAnimationList: ArrayList<String> = ArrayList()
+    val attachedAnimationIdList: ArrayList<String> = ArrayList()
+
+    val attachedViewList: ArrayList<View> = ArrayList()
 
 
     fun storeViewId(view: View, customId: String) {
@@ -22,15 +25,6 @@ class ViewIdentifierManager {
         return viewIdToIdMap[customId]
     }
 
-    fun storeAnimation(viewId: Int, animation: ObjectAnimator) {
-        viewIdToAnimationMap[viewId] = animation
-    }
-
-    fun getAnimationByViewId(viewId: Int): ObjectAnimator? {
-        return if (viewIdToAnimationMap.containsKey(viewId)) {
-            viewIdToAnimationMap[viewId]
-        } else null
-    }
 
     fun addAnimation(objectAnimator: ObjectAnimator) {
         animations.add(objectAnimator)
@@ -40,36 +34,53 @@ class ViewIdentifierManager {
         return animations
     }
 
-    fun getAnimationByCustomId(customId: String?): ObjectAnimator? {
-        if (customId.isNullOrEmpty()) {
-            return null
-        }
-        return getViewId(customId)?.let { getAnimationByViewId(it) }
-
-    }
-
-    fun attachOverlay(view: View) {
-        if (view.tag == null) {
+    /**region Attached Overlay objects & ids*/
+    fun attachOverlayView(view: View) {
+        if (view.tag == null || (view.tag is String).not()) {
             Log.w("ViewIdentifierManager", "overlay tag should not be null")
             return
         }
-        attachOverlay(view.tag as String)
+
+        if (attachedViewList.any { it.tag == view.tag as String }) {
+            Log.w("ViewIdentifierManager", "Should not add an already active view")
+        } else {
+            attachedViewList.add(view)
+        }
+
     }
 
-    fun attachOverlay(id: String) {
-        attachedOverlayList.add(id)
+    fun detachOverlayView(view: View) {
+        if (view.tag == null || (view.tag is String).not()) {
+            Log.w("ViewIdentifierManager", "overlay tag should not be null [detachOverlay()]")
+            return
+        }
+
+        attachedViewList.remove(view)
     }
 
-    fun detachOverlayWithTag(tag: String) {
-        attachedOverlayList.remove(tag)
-    }
+    /**endregion */
+
 
     fun attachAnimation(id: String) {
-        attachedAnimationList.add(id)
+        attachedAnimationIdList.add(id)
     }
 
     fun detachAnimationWithTag(id: String) {
-        attachedAnimationList.remove(id)
+        attachedAnimationIdList.remove(id)
+    }
+
+    fun overlayObjectIsNotAttached(id: String): Boolean {
+        return attachedViewList.none { it.tag == id }
+    }
+
+    fun overlayObjectIsAttached(id: String): Boolean {
+        return attachedViewList.any { it.tag == id }
+    }
+
+    fun applySetVariable(variable: Variable) {
+        attachedViewList.filterIsInstance<ScaffoldView>().forEach {
+            it.setVariable(variable)
+        }
     }
 
 }

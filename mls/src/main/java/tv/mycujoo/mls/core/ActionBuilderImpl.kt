@@ -4,9 +4,12 @@ import okhttp3.*
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.AnimationType.*
 import tv.mycujoo.domain.entity.OverlayObject
+import tv.mycujoo.domain.entity.SetVariableEntity
 import tv.mycujoo.domain.entity.SvgData
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import java.io.IOException
+import java.util.*
+import kotlin.collections.ArrayList
 
 class ActionBuilderImpl(
     private val listener: AnnotationListener,
@@ -20,6 +23,9 @@ class ActionBuilderImpl(
 
     private var overlayObjects = ArrayList<OverlayObject>()
     private var toBeDownloadedSvgList = ArrayList<String>()
+    private var setVariableActions = ArrayList<SetVariableEntity>()
+
+    private var appliedSetVariableActions = ArrayList<SetVariableEntity>()
 
     /**endregion */
 
@@ -86,7 +92,16 @@ class ActionBuilderImpl(
 
     override fun removeAll() {
         listener.clearScreen(overlayObjects.map { it.id })
+    }
 
+    override fun addVariableObjects(variableObjects: List<SetVariableEntity>) {
+        setVariableActions.addAll(variableObjects)
+    }
+
+    override fun buildSetVariables() {
+        setVariableActions.filter { isNotApplied(it) && isInCurrentTimeRange(it) }.forEach {
+            listener.applySetVariable(it)
+        }
     }
 
     /**region Over-ridden Functions*/
@@ -95,8 +110,9 @@ class ActionBuilderImpl(
         currentTime = time
         isPlaying = playing
     }
+    /**endregion */
 
-
+    /**region SetVariableEntity*/
     /**endregion */
 
 
@@ -108,15 +124,15 @@ class ActionBuilderImpl(
     }
 
     private fun isNotAttached(overlayObject: OverlayObject): Boolean {
-        return viewIdentifierManager.attachedOverlayList.none { it == overlayObject.id }
+        return viewIdentifierManager.overlayObjectIsNotAttached(overlayObject.id)
     }
 
     private fun isAttached(overlayObject: OverlayObject): Boolean {
-        return viewIdentifierManager.attachedOverlayList.any { it == overlayObject.id }
+        return viewIdentifierManager.overlayObjectIsAttached(overlayObject.id)
     }
 
     private fun isNotInDisplayingOutroAnimation(overlayObject: OverlayObject): Boolean {
-        return viewIdentifierManager.attachedAnimationList.none { it == overlayObject.id }
+        return viewIdentifierManager.attachedAnimationIdList.none { it == overlayObject.id }
     }
 
     /**
@@ -227,6 +243,16 @@ class ActionBuilderImpl(
     }
     /**endregion */
 
+    /**region Variables classifiers*/
+    private fun isNotApplied(setVariableEntity: SetVariableEntity): Boolean {
+        return appliedSetVariableActions.none { it == setVariableEntity }
+    }
+
+    private fun isInCurrentTimeRange(setVariableEntity: SetVariableEntity): Boolean {
+        return (setVariableEntity.offset >= currentTime) && (setVariableEntity.offset < currentTime + 1000L)
+    }
+    /**endregion */
+
     /**region msc*/
     private fun downloadSVGThenCallListener(
         overlayObject: OverlayObject,
@@ -248,9 +274,18 @@ class ActionBuilderImpl(
             override fun onResponse(call: Call, response: Response) {
                 toBeDownloadedSvgList.remove(overlayObject.id)
                 if (response.isSuccessful && response.body() != null) {
+
+                    val stringBuilder = StringBuilder()
+
+                    val scanner = Scanner(response.body()!!.byteStream())
+                    while (scanner.hasNext()) {
+                        stringBuilder.append(scanner.nextLine())
+                    }
+                    val svgString = stringBuilder.toString()
+
                     callback(
                         overlayObject.copy(
-                            svgData = SvgData(svgUrl, response.body()!!.byteStream())
+                            svgData = SvgData(svgUrl, null, svgString)
                         )
                     )
                 }

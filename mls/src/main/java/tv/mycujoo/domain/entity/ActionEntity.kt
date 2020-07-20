@@ -16,5 +16,6 @@ data class ActionEntity(
     val introAnimationType: AnimationType,
     val introAnimationDuration: Long,
     var outroAnimationType: AnimationType,
-    var outroAnimationDuration: Long
+    var outroAnimationDuration: Long,
+    val variablePlaceHolders: Map<String, String>
 )

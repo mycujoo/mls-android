@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.core
 
 import tv.mycujoo.domain.entity.OverlayObject
+import tv.mycujoo.domain.entity.SetVariableEntity
 
 abstract class ActionBuilder {
     /**
@@ -30,4 +31,9 @@ abstract class ActionBuilder {
     abstract fun buildLingerings()
 
 
+    /**region Variables*/
+    abstract fun addVariableObjects(variableObjects: List<SetVariableEntity>)
+
+    abstract fun buildSetVariables()
+    /**endregion */
 }

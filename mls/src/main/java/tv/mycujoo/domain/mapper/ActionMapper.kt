@@ -103,6 +103,8 @@ class ActionMapper {
             var label = INVALID_STRING_VALUE
             var color = INVALID_STRING_VALUE
 
+            var variablePlaceHolders = emptyMap<String, String>()
+
 
             actionSourceData.data?.let { data ->
                 data.keys.forEach { key ->
@@ -148,6 +150,9 @@ class ActionMapper {
                         "color" -> {
                             any?.let { color = it as String }
                         }
+                        "variable_positions" -> {
+                            any?.let { variablePlaceHolders = it as Map<String, String> }
+                        }
 
                         else -> {
                         }
@@ -174,7 +179,8 @@ class ActionMapper {
                 outroAnimationType,
                 outroAnimationDuration,
                 label,
-                color
+                color,
+                variablePlaceHolders
             )
         }
 

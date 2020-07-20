@@ -81,7 +81,8 @@ class GetAnnotationUseCase {
                 animationType,
                 animationDuration,
                 AnimationType.NONE,
-                -1L
+                -1L,
+                emptyMap()
             )
         }
 
@@ -104,7 +105,8 @@ class GetAnnotationUseCase {
                 AnimationType.NONE,
                 -1L,
                 animationType,
-                animationDuration
+                animationDuration,
+                emptyMap()
             )
         }
     }

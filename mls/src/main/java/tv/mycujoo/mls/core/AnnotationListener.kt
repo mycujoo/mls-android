@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.core
 
 import tv.mycujoo.domain.entity.OverlayObject
+import tv.mycujoo.domain.entity.SetVariableEntity
 
 interface AnnotationListener {
 
@@ -68,6 +69,8 @@ interface AnnotationListener {
     fun onLingeringOverlay(
         overlayObject: OverlayObject
     )
+
+    fun applySetVariable(setVariableEntity: SetVariableEntity)
 
 
 }

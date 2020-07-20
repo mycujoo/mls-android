@@ -17,5 +17,6 @@ data class NEWActionEntity(
     val outroAnimationType: AnimationType,
     val outroAnimationDuration: Long,
     val label: String?,
-    val color: String?
+    val color: String?,
+    val variablePlaceHolders: Map<String, String>
 )

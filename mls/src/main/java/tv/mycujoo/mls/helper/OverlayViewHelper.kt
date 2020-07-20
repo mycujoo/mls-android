@@ -16,6 +16,7 @@ import tv.mycujoo.domain.entity.AnimationType.*
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ProportionalImageView
+import tv.mycujoo.mls.widgets.ScaffoldView
 
 class OverlayViewHelper {
     companion object {
@@ -101,14 +102,18 @@ class OverlayViewHelper {
             constraintSet: ConstraintSet,
             it: Float,
             layoutParams: ConstraintLayout.LayoutParams,
-            proportionalImageView: ProportionalImageView
+            proportionalImageView: View
         ) {
             val bottomGuideLineId = View.generateViewId()
             constraintSet.create(bottomGuideLineId, ConstraintSet.HORIZONTAL)
             constraintSet.setGuidelinePercent(bottomGuideLineId, 1F - (it / 100))
 
             layoutParams.bottomToBottom = bottomGuideLineId
-            proportionalImageView.scaleType = ImageView.ScaleType.FIT_END
+            if (proportionalImageView is ProportionalImageView) {
+                proportionalImageView.scaleType = ImageView.ScaleType.FIT_END
+            } else {
+                (proportionalImageView as ScaffoldView).setScaleType(ImageView.ScaleType.FIT_END)
+            }
         }
 
         private fun setTopConstraints(
@@ -139,14 +144,18 @@ class OverlayViewHelper {
             constraintSet: ConstraintSet,
             it: Float,
             layoutParams: ConstraintLayout.LayoutParams,
-            proportionalImageView: ProportionalImageView
+            proportionalImageView: View
         ) {
             val leftGuideLineId = View.generateViewId()
             constraintSet.create(leftGuideLineId, ConstraintSet.VERTICAL)
             constraintSet.setGuidelinePercent(leftGuideLineId, it / 100)
 
             layoutParams.leftToLeft = leftGuideLineId
-            proportionalImageView.scaleType = ImageView.ScaleType.FIT_START
+            if (proportionalImageView is ProportionalImageView) {
+                proportionalImageView.scaleType = ImageView.ScaleType.FIT_START
+            } else {
+                (proportionalImageView as ScaffoldView).setScaleType(ImageView.ScaleType.FIT_START)
+            }
         }
 
         /**endregion */
@@ -159,18 +168,28 @@ class OverlayViewHelper {
             overlayObject: OverlayObject,
             viewIdentifierManager: ViewIdentifierManager
         ) {
-            val proportionalImageView =
-                OverlayFactory.create(context, overlayObject.id, overlayObject.viewSpec.size!!)
+            val scaffoldView =
+                OverlayFactory.createScaffold(
+                    context,
+                    overlayObject.id,
+                    overlayObject.viewSpec.size!!
+                )
 
             try {
-                val svg = SVG.getFromInputStream(overlayObject.svgData!!.svgInputStream)
+                var svg: SVG
+                overlayObject.svgData!!.svgString!!.let {
+                    svg = SVG.getFromString(it)
+                }
                 svg.setDocumentWidth("100%")
                 svg.setDocumentHeight("100%")
-                proportionalImageView.setSVG(svg)
+                scaffoldView.setSVG(svg)
+                scaffoldView.setSVGSource(overlayObject.svgData!!.svgString!!)
+
+                scaffoldView.setVariablePlaceHolder(overlayObject.variablePlaceHolders)
 
                 doAddViewWithNoAnimation(
                     overlayHost,
-                    proportionalImageView,
+                    scaffoldView,
                     overlayObject.viewSpec.positionGuide!!,
                     viewIdentifierManager
                 )
@@ -193,7 +212,10 @@ class OverlayViewHelper {
                     OverlayFactory.create(context, overlayObject.id, overlayObject.viewSpec.size!!)
 
                 try {
-                    val svg = SVG.getFromInputStream(overlayObject.svgData!!.svgInputStream)
+                    var svg: SVG
+                    overlayObject.svgData!!.svgString!!.let {
+                        svg = SVG.getFromString(it)
+                    }
                     svg.setDocumentWidth("100%")
                     svg.setDocumentHeight("100%")
                     proportionalImageView.setSVG(svg)
@@ -287,7 +309,7 @@ class OverlayViewHelper {
                 proportionalImageView.layoutParams = layoutParams
 
                 overlayHost.addView(proportionalImageView)
-                viewIdentifierManager.attachOverlay(proportionalImageView)
+                viewIdentifierManager.attachOverlayView(proportionalImageView)
 
                 val animation = AnimationFactory.createStaticAnimation(
                     proportionalImageView,
@@ -436,7 +458,7 @@ class OverlayViewHelper {
                 proportionalImageView.visibility = View.INVISIBLE
                 constraintSet.applyTo(host)
                 host.addView(proportionalImageView)
-                viewIdentifierManager.attachOverlay(proportionalImageView)
+                viewIdentifierManager.attachOverlayView(proportionalImageView)
 
             }
 
@@ -445,7 +467,7 @@ class OverlayViewHelper {
 
         private fun doAddViewWithNoAnimation(
             overlayHost: OverlayHost,
-            proportionalImageView: ProportionalImageView,
+            proportionalImageView: View,
             positionGuide: PositionGuide,
             viewIdentifierManager: ViewIdentifierManager
         ) {
@@ -498,7 +520,7 @@ class OverlayViewHelper {
                 proportionalImageView.layoutParams = layoutParams
 
                 overlayHost.addView(proportionalImageView)
-                viewIdentifierManager.attachOverlay(proportionalImageView)
+                viewIdentifierManager.attachOverlayView(proportionalImageView)
             }
         }
 
@@ -549,7 +571,7 @@ class OverlayViewHelper {
 
                         override fun onAnimationEnd(animation: Animator?) {
                             overlayHost.removeView(view)
-                            viewIdentifierManager.detachOverlayWithTag(overlayObject.id)
+                            viewIdentifierManager.detachOverlayView(view)
                             viewIdentifierManager.detachAnimationWithTag(overlayObject.id)
                         }
 
@@ -562,7 +584,7 @@ class OverlayViewHelper {
                     })
 
                     viewIdentifierManager.addAnimation(animation)
-                    viewIdentifierManager.attachedAnimationList.add(overlayObject.id)
+                    viewIdentifierManager.attachedAnimationIdList.add(overlayObject.id)
                     animation.start()
                 }
             }
@@ -607,7 +629,7 @@ class OverlayViewHelper {
                         override fun onAnimationEnd(animation: Animator?) {
                             overlayHost.removeView(view)
                             viewIdentifierManager.detachAnimationWithTag(overlayObject.id)
-                            viewIdentifierManager.detachOverlayWithTag(overlayObject.id)
+                            viewIdentifierManager.detachOverlayView(view)
 
                         }
 
@@ -644,7 +666,10 @@ class OverlayViewHelper {
                     )
 
                 try {
-                    val svg = SVG.getFromInputStream(overlayObject.svgData!!.svgInputStream)
+                    var svg: SVG
+                    overlayObject.svgData!!.svgString!!.let {
+                        svg = SVG.getFromString(it)
+                    }
                     svg.setDocumentWidth("100%")
                     svg.setDocumentHeight("100%")
                     proportionalImageView.setSVG(svg)
@@ -684,7 +709,7 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationEnd(animation: Animator?) {
-                                                viewIdentifierManager.attachedAnimationList.remove(
+                                                viewIdentifierManager.attachedAnimationIdList.remove(
                                                     overlayObject.id
                                                 )
                                             }
@@ -726,7 +751,7 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationEnd(animation: Animator?) {
-                                                viewIdentifierManager.attachedAnimationList.remove(
+                                                viewIdentifierManager.attachedAnimationIdList.remove(
                                                     overlayObject.id
                                                 )
                                             }
@@ -741,7 +766,7 @@ class OverlayViewHelper {
                                         })
 
                                         viewIdentifierManager.addAnimation(animation)
-                                        viewIdentifierManager.attachedAnimationList.add(
+                                        viewIdentifierManager.attachedAnimationIdList.add(
                                             overlayObject.id
                                         )
                                         animation.start()
@@ -767,7 +792,7 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationEnd(animation: Animator?) {
-                                                viewIdentifierManager.attachedAnimationList.remove(
+                                                viewIdentifierManager.attachedAnimationIdList.remove(
                                                     overlayObject.id
                                                 )
                                             }
@@ -783,7 +808,7 @@ class OverlayViewHelper {
 
                                         })
                                         viewIdentifierManager.addAnimation(animation)
-                                        viewIdentifierManager.attachedAnimationList.add(
+                                        viewIdentifierManager.attachedAnimationIdList.add(
                                             overlayObject.id
                                         )
                                         animation.start()
@@ -859,7 +884,7 @@ class OverlayViewHelper {
                 proportionalImageView.visibility = View.INVISIBLE
                 constraintSet.applyTo(overlayHost)
                 overlayHost.addView(proportionalImageView)
-                viewIdentifierManager.attachOverlay(proportionalImageView)
+                viewIdentifierManager.attachOverlayView(proportionalImageView)
 
             }
         }
@@ -881,7 +906,10 @@ class OverlayViewHelper {
                     )
 
                 try {
-                    val svg = SVG.getFromInputStream(overlayObject.svgData!!.svgInputStream)
+                    var svg: SVG
+                    overlayObject.svgData!!.svgString!!.let {
+                        svg = SVG.getFromString(it)
+                    }
                     svg.setDocumentWidth("100%")
                     svg.setDocumentHeight("100%")
                     proportionalImageView.setSVG(svg)
@@ -915,8 +943,8 @@ class OverlayViewHelper {
                                                 viewIdentifierManager.detachAnimationWithTag(
                                                     overlayObject.id
                                                 )
-                                                viewIdentifierManager.detachOverlayWithTag(
-                                                    overlayObject.id
+                                                viewIdentifierManager.detachOverlayView(
+                                                    child
                                                 )
                                                 overlayHost.removeView(proportionalImageView)
                                             }
@@ -962,8 +990,8 @@ class OverlayViewHelper {
                                                 viewIdentifierManager.detachAnimationWithTag(
                                                     overlayObject.id
                                                 )
-                                                viewIdentifierManager.detachOverlayWithTag(
-                                                    overlayObject.id
+                                                viewIdentifierManager.detachOverlayView(
+                                                    child
                                                 )
                                                 overlayHost.removeView(proportionalImageView)
                                             }
@@ -1008,8 +1036,8 @@ class OverlayViewHelper {
                                                 viewIdentifierManager.detachAnimationWithTag(
                                                     overlayObject.id
                                                 )
-                                                viewIdentifierManager.detachOverlayWithTag(
-                                                    overlayObject.id
+                                                viewIdentifierManager.detachOverlayView(
+                                                    child
                                                 )
                                                 overlayHost.removeView(proportionalImageView)
                                             }
@@ -1099,7 +1127,7 @@ class OverlayViewHelper {
                 proportionalImageView.visibility = View.INVISIBLE
                 constraintSet.applyTo(overlayHost)
                 overlayHost.addView(proportionalImageView)
-                viewIdentifierManager.attachOverlay(overlayObject.id)
+                viewIdentifierManager.attachOverlayView(proportionalImageView)
 
             }
         }

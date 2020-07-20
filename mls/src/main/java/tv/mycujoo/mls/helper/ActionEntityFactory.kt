@@ -23,7 +23,8 @@ class ActionEntityFactory {
                 newActionEntity.introAnimationType,
                 newActionEntity.introAnimationDuration,
                 newActionEntity.outroAnimationType,
-                newActionEntity.outroAnimationDuration
+                newActionEntity.outroAnimationDuration,
+                newActionEntity.variablePlaceHolders
             )
         }
     }
