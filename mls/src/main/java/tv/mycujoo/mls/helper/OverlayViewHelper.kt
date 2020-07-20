@@ -169,7 +169,7 @@ class OverlayViewHelper {
             viewIdentifierManager: ViewIdentifierManager
         ) {
             val scaffoldView =
-                OverlayFactory.createScaffold(
+                OverlayFactory.createScaffoldView(
                     context,
                     overlayObject.id,
                     overlayObject.viewSpec.size!!
@@ -208,8 +208,12 @@ class OverlayViewHelper {
         ) {
 
             overlayHost.post {
-                val proportionalImageView =
-                    OverlayFactory.create(context, overlayObject.id, overlayObject.viewSpec.size!!)
+                val scaffoldView =
+                    OverlayFactory.createScaffoldView(
+                        context,
+                        overlayObject.id,
+                        overlayObject.viewSpec.size!!
+                    )
 
                 try {
                     var svg: SVG
@@ -218,13 +222,14 @@ class OverlayViewHelper {
                     }
                     svg.setDocumentWidth("100%")
                     svg.setDocumentHeight("100%")
-                    proportionalImageView.setSVG(svg)
+                    scaffoldView.setSVG(svg)
+                    scaffoldView.setSVGSource(overlayObject.svgData!!.svgString!!)
 
                     when (overlayObject.introTransitionSpec.animationType) {
                         FADE_IN -> {
                             doAddViewWithStaticAnimation(
                                 overlayHost,
-                                proportionalImageView,
+                                scaffoldView,
                                 overlayObject.viewSpec.positionGuide!!,
                                 overlayObject.introTransitionSpec,
                                 viewIdentifierManager
@@ -235,7 +240,7 @@ class OverlayViewHelper {
 
                             doAddViewWithDynamicAnimation(
                                 overlayHost,
-                                proportionalImageView,
+                                scaffoldView,
                                 overlayObject.viewSpec.positionGuide!!,
                                 overlayObject.introTransitionSpec,
                                 viewIdentifierManager
@@ -255,7 +260,7 @@ class OverlayViewHelper {
 
         private fun doAddViewWithStaticAnimation(
             overlayHost: OverlayHost,
-            proportionalImageView: ProportionalImageView,
+            scaffoldView: View,
             positionGuide: PositionGuide,
             introTransitionSpec: TransitionSpec,
             viewIdentifierManager: ViewIdentifierManager
@@ -273,7 +278,7 @@ class OverlayViewHelper {
                     if (it < 0F) {
                         return@let
                     }
-                    setLeftConstraints(constraintSet, it, layoutParams, proportionalImageView)
+                    setLeftConstraints(constraintSet, it, layoutParams, scaffoldView)
                 }
                 positionGuide.right?.let {
                     if (it < 0F) {
@@ -291,7 +296,7 @@ class OverlayViewHelper {
                     if (it < 0F) {
                         return@let
                     }
-                    setBottomConstraints(constraintSet, it, layoutParams, proportionalImageView)
+                    setBottomConstraints(constraintSet, it, layoutParams, scaffoldView)
                 }
                 positionGuide.vCenter?.let {
                     if (it > 50F || it < -50F) {
@@ -306,13 +311,13 @@ class OverlayViewHelper {
                     setHCenterConstrains(layoutParams, it)
                 }
                 constraintSet.applyTo(overlayHost)
-                proportionalImageView.layoutParams = layoutParams
+                scaffoldView.layoutParams = layoutParams
 
-                overlayHost.addView(proportionalImageView)
-                viewIdentifierManager.attachOverlayView(proportionalImageView)
+                overlayHost.addView(scaffoldView)
+                viewIdentifierManager.attachOverlayView(scaffoldView)
 
                 val animation = AnimationFactory.createStaticAnimation(
-                    proportionalImageView,
+                    scaffoldView,
                     introTransitionSpec.animationType,
                     introTransitionSpec.animationDuration
                 )
@@ -324,7 +329,7 @@ class OverlayViewHelper {
 
         private fun doAddViewWithDynamicAnimation(
             host: OverlayHost,
-            proportionalImageView: ProportionalImageView,
+            scaffoldView: View,
             positionGuide: PositionGuide,
             introTransitionSpec: TransitionSpec,
             viewIdentifierManager: ViewIdentifierManager
@@ -339,19 +344,19 @@ class OverlayViewHelper {
                     }
 
                     override fun onChildViewAdded(parent: View?, child: View?) {
-                        if (child != null && child.id == proportionalImageView.id) {
+                        if (child != null && child.id == scaffoldView.id) {
                             host.post {
-                                val x = proportionalImageView.x
-                                val y = proportionalImageView.y
+                                val x = scaffoldView.x
+                                val y = scaffoldView.y
 
                                 when (introTransitionSpec.animationType) {
                                     SLIDE_FROM_LEFT -> {
-                                        proportionalImageView.x =
-                                            -proportionalImageView.width.toFloat()
+                                        scaffoldView.x =
+                                            -scaffoldView.width.toFloat()
                                         val animation = ObjectAnimator.ofFloat(
-                                            proportionalImageView,
+                                            scaffoldView,
                                             View.X,
-                                            proportionalImageView.x,
+                                            scaffoldView.x,
                                             x
                                         )
                                         animation.duration = introTransitionSpec.animationDuration
@@ -366,18 +371,18 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationStart(animation: Animator?) {
-                                                proportionalImageView.visibility = View.VISIBLE
+                                                scaffoldView.visibility = View.VISIBLE
                                             }
                                         })
 
                                         animation.start()
                                     }
                                     SLIDE_FROM_RIGHT -> {
-                                        proportionalImageView.x = host.width.toFloat()
+                                        scaffoldView.x = host.width.toFloat()
                                         val animation = ObjectAnimator.ofFloat(
-                                            proportionalImageView,
+                                            scaffoldView,
                                             View.X,
-                                            proportionalImageView.x,
+                                            scaffoldView.x,
                                             x
                                         )
                                         animation.duration = introTransitionSpec.animationDuration
@@ -393,8 +398,7 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationStart(animation: Animator?) {
-                                                proportionalImageView.visibility = View.VISIBLE
-
+                                                scaffoldView.visibility = View.VISIBLE
                                             }
 
                                         })
@@ -421,7 +425,7 @@ class OverlayViewHelper {
                     if (it < 0F) {
                         return@let
                     }
-                    setLeftConstraints(constraintSet, it, layoutParams, proportionalImageView)
+                    setLeftConstraints(constraintSet, it, layoutParams, scaffoldView)
                 }
                 positionGuide.right?.let {
                     if (it < 0F) {
@@ -439,7 +443,7 @@ class OverlayViewHelper {
                     if (it < 0F) {
                         return@let
                     }
-                    setBottomConstraints(constraintSet, it, layoutParams, proportionalImageView)
+                    setBottomConstraints(constraintSet, it, layoutParams, scaffoldView)
                 }
                 positionGuide.vCenter?.let {
                     if (it > 50F || it < -50F) {
@@ -454,11 +458,11 @@ class OverlayViewHelper {
                     setHCenterConstrains(layoutParams, it)
                 }
 
-                proportionalImageView.layoutParams = layoutParams
-                proportionalImageView.visibility = View.INVISIBLE
+                scaffoldView.layoutParams = layoutParams
+                scaffoldView.visibility = View.INVISIBLE
                 constraintSet.applyTo(host)
-                host.addView(proportionalImageView)
-                viewIdentifierManager.attachOverlayView(proportionalImageView)
+                host.addView(scaffoldView)
+                viewIdentifierManager.attachOverlayView(scaffoldView)
 
             }
 
@@ -658,8 +662,8 @@ class OverlayViewHelper {
         ) {
             overlayHost.post {
 
-                val proportionalImageView =
-                    OverlayFactory.create(
+                val scaffoldView =
+                    OverlayFactory.createScaffoldView(
                         overlayHost.context,
                         overlayObject.id,
                         overlayObject.viewSpec.size!!
@@ -672,7 +676,8 @@ class OverlayViewHelper {
                     }
                     svg.setDocumentWidth("100%")
                     svg.setDocumentHeight("100%")
-                    proportionalImageView.setSVG(svg)
+                    scaffoldView.setSVG(svg)
+                    scaffoldView.setSVGSource(overlayObject.svgData!!.svgString!!)
                 } catch (e: Exception) {
                     Log.w("OverlayViewHelper", "Exception => ".plus(e.message))
                 }
@@ -685,19 +690,19 @@ class OverlayViewHelper {
                     }
 
                     override fun onChildViewAdded(parent: View?, child: View?) {
-                        if (child != null && child.tag == proportionalImageView.tag) {
+                        if (child != null && child.tag == scaffoldView.tag) {
                             overlayHost.post {
 
 
-                                val x = proportionalImageView.x
-                                val y = proportionalImageView.y
+                                val x = scaffoldView.x
+                                val y = scaffoldView.y
 
                                 when (overlayObject.introTransitionSpec.animationType) {
                                     FADE_IN -> {
-                                        proportionalImageView.x =
-                                            -proportionalImageView.width.toFloat()
+                                        scaffoldView.x =
+                                            -scaffoldView.width.toFloat()
                                         val animation = ObjectAnimator.ofFloat(
-                                            proportionalImageView,
+                                            scaffoldView,
                                             View.ALPHA,
                                             0F,
                                             1F
@@ -718,7 +723,7 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationStart(animation: Animator?) {
-                                                proportionalImageView.visibility = View.VISIBLE
+                                                scaffoldView.visibility = View.VISIBLE
                                             }
 
                                         })
@@ -736,12 +741,12 @@ class OverlayViewHelper {
                                         }
                                     }
                                     SLIDE_FROM_LEFT -> {
-                                        proportionalImageView.x =
-                                            -proportionalImageView.width.toFloat()
+                                        scaffoldView.x =
+                                            -scaffoldView.width.toFloat()
                                         val animation = ObjectAnimator.ofFloat(
-                                            proportionalImageView,
+                                            scaffoldView,
                                             View.X,
-                                            proportionalImageView.x,
+                                            scaffoldView.x,
                                             x
                                         )
                                         animation.duration =
@@ -760,7 +765,7 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationStart(animation: Animator?) {
-                                                proportionalImageView.visibility = View.VISIBLE
+                                                scaffoldView.visibility = View.VISIBLE
                                             }
 
                                         })
@@ -778,11 +783,11 @@ class OverlayViewHelper {
                                         }
                                     }
                                     SLIDE_FROM_RIGHT -> {
-                                        proportionalImageView.x = overlayHost.width.toFloat()
+                                        scaffoldView.x = overlayHost.width.toFloat()
                                         val animation = ObjectAnimator.ofFloat(
-                                            proportionalImageView,
+                                            scaffoldView,
                                             View.X,
-                                            proportionalImageView.x,
+                                            scaffoldView.x,
                                             x
                                         )
                                         animation.duration =
@@ -802,7 +807,7 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationStart(animation: Animator?) {
-                                                proportionalImageView.visibility = View.VISIBLE
+                                                scaffoldView.visibility = View.VISIBLE
 
                                             }
 
@@ -846,7 +851,7 @@ class OverlayViewHelper {
                     if (it < 0F) {
                         return@let
                     }
-                    setLeftConstraints(constraintSet, it, layoutParams, proportionalImageView)
+                    setLeftConstraints(constraintSet, it, layoutParams, scaffoldView)
                 }
                 positionGuide.right?.let {
                     if (it < 0F) {
@@ -864,7 +869,7 @@ class OverlayViewHelper {
                     if (it < 0F) {
                         return@let
                     }
-                    setBottomConstraints(constraintSet, it, layoutParams, proportionalImageView)
+                    setBottomConstraints(constraintSet, it, layoutParams, scaffoldView)
                 }
                 positionGuide.vCenter?.let {
                     if (it > 50F || it < -50F) {
@@ -880,11 +885,11 @@ class OverlayViewHelper {
                 }
 
 
-                proportionalImageView.layoutParams = layoutParams
-                proportionalImageView.visibility = View.INVISIBLE
+                scaffoldView.layoutParams = layoutParams
+                scaffoldView.visibility = View.INVISIBLE
                 constraintSet.applyTo(overlayHost)
-                overlayHost.addView(proportionalImageView)
-                viewIdentifierManager.attachOverlayView(proportionalImageView)
+                overlayHost.addView(scaffoldView)
+                viewIdentifierManager.attachOverlayView(scaffoldView)
 
             }
         }
@@ -898,8 +903,8 @@ class OverlayViewHelper {
         ) {
             overlayHost.post {
 
-                val proportionalImageView =
-                    OverlayFactory.create(
+                val scaffoldView =
+                    OverlayFactory.createScaffoldView(
                         overlayHost.context,
                         overlayObject.id,
                         overlayObject.viewSpec.size!!
@@ -912,7 +917,8 @@ class OverlayViewHelper {
                     }
                     svg.setDocumentWidth("100%")
                     svg.setDocumentHeight("100%")
-                    proportionalImageView.setSVG(svg)
+                    scaffoldView.setSVG(svg)
+                    scaffoldView.setSVGSource(overlayObject.svgData!!.svgString!!)
                 } catch (e: Exception) {
                     Log.w("OverlayViewHelper", "Exception => ".plus(e.message))
                 }
@@ -923,12 +929,12 @@ class OverlayViewHelper {
                     }
 
                     override fun onChildViewAdded(parent: View?, child: View?) {
-                        if (child != null && child.tag == proportionalImageView.tag) {
+                        if (child != null && child.tag == scaffoldView.tag) {
                             overlayHost.post {
                                 when (overlayObject.outroTransitionSpec.animationType) {
                                     FADE_OUT -> {
                                         val animation = ObjectAnimator.ofFloat(
-                                            proportionalImageView,
+                                            scaffoldView,
                                             View.ALPHA,
                                             1F,
                                             0F
@@ -946,7 +952,7 @@ class OverlayViewHelper {
                                                 viewIdentifierManager.detachOverlayView(
                                                     child
                                                 )
-                                                overlayHost.removeView(proportionalImageView)
+                                                overlayHost.removeView(scaffoldView)
                                             }
 
                                             override fun onAnimationCancel(animation: Animator?) {
@@ -954,7 +960,7 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationStart(animation: Animator?) {
-                                                proportionalImageView.visibility = View.VISIBLE
+                                                scaffoldView.visibility = View.VISIBLE
                                             }
 
                                         })
@@ -975,10 +981,10 @@ class OverlayViewHelper {
                                     SLIDE_TO_LEFT -> {
 
                                         val animation = ObjectAnimator.ofFloat(
-                                            proportionalImageView,
+                                            scaffoldView,
                                             View.X,
-                                            proportionalImageView.x,
-                                            -proportionalImageView.width.toFloat()
+                                            scaffoldView.x,
+                                            -scaffoldView.width.toFloat()
                                         )
                                         animation.duration =
                                             overlayObject.outroTransitionSpec.animationDuration
@@ -993,7 +999,7 @@ class OverlayViewHelper {
                                                 viewIdentifierManager.detachOverlayView(
                                                     child
                                                 )
-                                                overlayHost.removeView(proportionalImageView)
+                                                overlayHost.removeView(scaffoldView)
                                             }
 
                                             override fun onAnimationCancel(animation: Animator?) {
@@ -1001,7 +1007,7 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationStart(animation: Animator?) {
-                                                proportionalImageView.visibility = View.VISIBLE
+                                                scaffoldView.visibility = View.VISIBLE
                                             }
 
                                         })
@@ -1020,9 +1026,9 @@ class OverlayViewHelper {
                                     }
                                     SLIDE_TO_RIGHT -> {
                                         val animation = ObjectAnimator.ofFloat(
-                                            proportionalImageView,
+                                            scaffoldView,
                                             View.X,
-                                            proportionalImageView.x,
+                                            scaffoldView.x,
                                             overlayHost.width.toFloat()
                                         )
                                         animation.duration =
@@ -1039,7 +1045,7 @@ class OverlayViewHelper {
                                                 viewIdentifierManager.detachOverlayView(
                                                     child
                                                 )
-                                                overlayHost.removeView(proportionalImageView)
+                                                overlayHost.removeView(scaffoldView)
                                             }
 
                                             override fun onAnimationCancel(animation: Animator?) {
@@ -1047,7 +1053,7 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationStart(animation: Animator?) {
-                                                proportionalImageView.visibility = View.VISIBLE
+                                                scaffoldView.visibility = View.VISIBLE
                                             }
 
                                         })
@@ -1090,7 +1096,7 @@ class OverlayViewHelper {
                     if (it < 0F) {
                         return@let
                     }
-                    setLeftConstraints(constraintSet, it, layoutParams, proportionalImageView)
+                    setLeftConstraints(constraintSet, it, layoutParams, scaffoldView)
                 }
                 positionGuide.right?.let {
                     if (it < 0F) {
@@ -1108,7 +1114,7 @@ class OverlayViewHelper {
                     if (it < 0F) {
                         return@let
                     }
-                    setBottomConstraints(constraintSet, it, layoutParams, proportionalImageView)
+                    setBottomConstraints(constraintSet, it, layoutParams, scaffoldView)
                 }
                 positionGuide.vCenter?.let {
                     if (it > 50F || it < -50F) {
@@ -1123,11 +1129,11 @@ class OverlayViewHelper {
                     setHCenterConstrains(layoutParams, it)
                 }
 
-                proportionalImageView.layoutParams = layoutParams
-                proportionalImageView.visibility = View.INVISIBLE
+                scaffoldView.layoutParams = layoutParams
+                scaffoldView.visibility = View.INVISIBLE
                 constraintSet.applyTo(overlayHost)
-                overlayHost.addView(proportionalImageView)
-                viewIdentifierManager.attachOverlayView(proportionalImageView)
+                overlayHost.addView(scaffoldView)
+                viewIdentifierManager.attachOverlayView(scaffoldView)
 
             }
         }

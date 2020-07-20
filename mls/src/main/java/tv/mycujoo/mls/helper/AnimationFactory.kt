@@ -5,13 +5,12 @@ import android.view.View
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.AnimationType.FADE_IN
 import tv.mycujoo.domain.entity.AnimationType.FADE_OUT
-import tv.mycujoo.mls.widgets.ProportionalImageView
 
 class AnimationFactory {
 
     companion object {
         fun createStaticAnimation(
-            overlayView: ProportionalImageView,
+            overlayView: View,
             animationType: AnimationType,
             animationDuration: Long
         ): ObjectAnimator? {
