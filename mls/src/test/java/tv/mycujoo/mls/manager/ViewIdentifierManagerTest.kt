@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.manager
 
 import android.view.View
+import kotlinx.coroutines.CoroutineScope
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -18,10 +19,13 @@ class ViewIdentifierManagerTest {
     @Mock
     lateinit var view1: View
 
+    @Mock
+    lateinit var dispatcher: CoroutineScope
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        viewIdentifierManager = ViewIdentifierManager()
+        viewIdentifierManager = ViewIdentifierManager(dispatcher)
     }
 
     @Test

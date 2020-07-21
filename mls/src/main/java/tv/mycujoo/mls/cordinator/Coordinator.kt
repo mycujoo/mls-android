@@ -99,10 +99,6 @@ class Coordinator(
             override fun onLingeringOverlay(overlayObject: OverlayObject) {
                 playerViewWrapper.onNewOverlayWithNoAnimation(overlayObject)
             }
-
-            override fun applySetVariable(setVariableEntity: SetVariableEntity) {
-                identifierManager.applySetVariable(setVariableEntity.variable)
-            }
         }
 
 
@@ -135,13 +131,16 @@ class Coordinator(
             .map { createOverlayObject(it) })
 
         actionBuilder.addSetVariableEntities(GetActionsFromJSONUseCase.mappedSetVariables())
+        actionBuilder.addIncrementVariableEntities(GetActionsFromJSONUseCase.mappedIncrementVariables())
 
 
         val runnable = object : Runnable {
             override fun run() {
                 actionBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
                 actionBuilder.buildCurrentTimeRange()
-//                actionBuilder.buildSetVariables()
+
+                actionBuilder.computeVariableNameValueTillNow()
+
                 handler.postDelayed(this, 200L)
             }
         }
@@ -215,7 +214,9 @@ class Coordinator(
                     actionBuilder.buildCurrentTimeRange()
 
                     actionBuilder.buildLingerings()
-                    actionBuilder.buildSetVariables()
+
+//                    actionBuilder.buildSetVariables()
+                    actionBuilder.computeVariableNameValueTillNow()
 
 
                 }
@@ -229,6 +230,7 @@ class Coordinator(
     override var onSizeChangedCallback = {
         actionBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
         actionBuilder.removeAll()
+        actionBuilder.buildCurrentTimeRange()
         actionBuilder.buildLingerings()
     }
     /**endregion */

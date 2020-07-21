@@ -3,14 +3,15 @@ package tv.mycujoo.mls.manager
 import android.animation.ObjectAnimator
 import android.util.Log
 import android.view.View
-import tv.mycujoo.domain.entity.Variable
-import tv.mycujoo.mls.widgets.ScaffoldView
+import kotlinx.coroutines.CoroutineScope
 
-class ViewIdentifierManager {
+class ViewIdentifierManager(dispatcher: CoroutineScope) {
     private var viewIdToIdMap = mutableMapOf<String, Int>()
     private var animations = ArrayList<Pair<String, ObjectAnimator>>()
 
     private val attachedViewList: ArrayList<View> = ArrayList()
+
+    val variableTranslator = VariableTranslator(dispatcher)
 
 
     fun storeViewId(view: View, customId: String) {
@@ -77,12 +78,6 @@ class ViewIdentifierManager {
 
     fun overlayObjectIsAttached(id: String): Boolean {
         return attachedViewList.any { it.tag == id }
-    }
-
-    fun applySetVariable(variable: Variable) {
-        attachedViewList.filterIsInstance<ScaffoldView>().forEach {
-            it.setVariable(variable)
-        }
     }
 
     fun clearAll() {

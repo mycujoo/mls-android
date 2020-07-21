@@ -6,10 +6,11 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import com.caverock.androidsvg.SVG
 import tv.mycujoo.domain.entity.Variable
+import tv.mycujoo.mls.manager.VariableTranslator
 
 class ScaffoldView @JvmOverloads constructor(
-    private val widthPercentage: Float = -1F,
-    private val heightPercentage: Float = -1F,
+    widthPercentage: Float = -1F,
+    heightPercentage: Float = -1F,
     context: Context,
     attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
@@ -36,7 +37,7 @@ class ScaffoldView @JvmOverloads constructor(
 
 
     fun setSVG(svg: SVG) {
-        proportionalImageView.setSVG(svg)
+        post { proportionalImageView.setSVG(svg) }
     }
 
     fun setSVGSource(svgString: String) {
@@ -56,7 +57,6 @@ class ScaffoldView @JvmOverloads constructor(
                 svgString = svgString.replace(entry.key, variable.value.toString())
                 setSVG(SVG.getFromString(svgString))
             }
-
         }
 
     }
@@ -65,4 +65,23 @@ class ScaffoldView @JvmOverloads constructor(
     fun setVariablePlaceHolder(variablePlaceHolders: Map<String, String>) {
         this.variablePlaceHolder = variablePlaceHolders
     }
+
+    fun onVariableUpdated(
+        variableTranslator: VariableTranslator
+    ) {
+        if (this::variablePlaceHolder.isInitialized.not() || this::svgString.isInitialized.not()) {
+            return
+        }
+
+        var svgString = this.svgString
+        variablePlaceHolder.forEach { entry ->
+            val value = variableTranslator.getValue(entry.value)
+            value?.let {
+                svgString = svgString.replace(entry.key, value.toString())
+            }
+        }
+        setSVG(SVG.getFromString(svgString))
+    }
+
+
 }

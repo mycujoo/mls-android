@@ -19,7 +19,7 @@ class ActionVariableHelper {
                 var initialValue = setVariableEntity.variable.value
                 updatedVariables[setVariableEntity.variable.name] = initialValue
 
-                incrementVariableEntityList.filter { it.name == setVariableEntity.variable.name }
+                incrementVariableEntityList.filter { it.name == setVariableEntity.variable.name && it.offset < currentTime }
                     .forEach {
                         when (setVariableEntity.variable.type) {
                             DOUBLE -> {
@@ -28,8 +28,8 @@ class ActionVariableHelper {
                                 }
                             }
                             LONG -> {
-                                if (it.amount is Long) {
-                                    initialValue = (initialValue as Long) + it.amount
+                                if (it.amount is Double) {
+                                    initialValue = (initialValue as Long) + it.amount.toLong()
                                 }
                             }
                             STRING,

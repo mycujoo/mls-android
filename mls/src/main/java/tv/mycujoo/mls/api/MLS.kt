@@ -100,7 +100,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     private lateinit var handler: Handler
 
     private val dataHolder = DataHolder()
-    private val viewIdentifierManager = ViewIdentifierManager()
+    private var viewIdentifierManager: ViewIdentifierManager
 
     /**endregion */
 
@@ -119,6 +119,8 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         val dependencyGraph =
             DaggerMlsComponent.builder().networkModule(NetworkModule(context)).build()
         dependencyGraph.inject(this)
+
+        viewIdentifierManager = ViewIdentifierManager(dispatcher)
 
         persistPublicKey(this.builder.publicKey)
 

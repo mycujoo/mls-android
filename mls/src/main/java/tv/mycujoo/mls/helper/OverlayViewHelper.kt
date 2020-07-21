@@ -171,8 +171,8 @@ class OverlayViewHelper {
             val scaffoldView =
                 OverlayFactory.createScaffoldView(
                     context,
-                    overlayObject.id,
-                    overlayObject.viewSpec.size!!
+                    overlayObject,
+                    viewIdentifierManager.variableTranslator
                 )
 
             try {
@@ -211,8 +211,8 @@ class OverlayViewHelper {
                 val scaffoldView =
                     OverlayFactory.createScaffoldView(
                         context,
-                        overlayObject.id,
-                        overlayObject.viewSpec.size!!
+                        overlayObject,
+                        viewIdentifierManager.variableTranslator
                     )
 
                 try {
@@ -224,6 +224,8 @@ class OverlayViewHelper {
                     svg.setDocumentHeight("100%")
                     scaffoldView.setSVG(svg)
                     scaffoldView.setSVGSource(overlayObject.svgData!!.svgString!!)
+                    scaffoldView.setVariablePlaceHolder(overlayObject.variablePlaceHolders)
+
 
                     when (overlayObject.introTransitionSpec.animationType) {
                         FADE_IN -> {
@@ -665,8 +667,8 @@ class OverlayViewHelper {
                 val scaffoldView =
                     OverlayFactory.createScaffoldView(
                         overlayHost.context,
-                        overlayObject.id,
-                        overlayObject.viewSpec.size!!
+                        overlayObject,
+                        viewIdentifierManager.variableTranslator
                     )
 
                 try {
@@ -678,6 +680,8 @@ class OverlayViewHelper {
                     svg.setDocumentHeight("100%")
                     scaffoldView.setSVG(svg)
                     scaffoldView.setSVGSource(overlayObject.svgData!!.svgString!!)
+                    scaffoldView.setVariablePlaceHolder(overlayObject.variablePlaceHolders)
+
                 } catch (e: Exception) {
                     Log.w("OverlayViewHelper", "Exception => ".plus(e.message))
                 }
@@ -899,8 +903,8 @@ class OverlayViewHelper {
                 val scaffoldView =
                     OverlayFactory.createScaffoldView(
                         overlayHost.context,
-                        overlayObject.id,
-                        overlayObject.viewSpec.size!!
+                        overlayObject,
+                        viewIdentifierManager.variableTranslator
                     )
 
                 try {
@@ -912,6 +916,8 @@ class OverlayViewHelper {
                     svg.setDocumentHeight("100%")
                     scaffoldView.setSVG(svg)
                     scaffoldView.setSVGSource(overlayObject.svgData!!.svgString!!)
+                    scaffoldView.setVariablePlaceHolder(overlayObject.variablePlaceHolders)
+
                 } catch (e: Exception) {
                     Log.w("OverlayViewHelper", "Exception => ".plus(e.message))
                 }

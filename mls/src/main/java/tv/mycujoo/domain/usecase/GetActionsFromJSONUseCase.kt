@@ -36,17 +36,17 @@ class GetActionsFromJSONUseCase {
         }
 
 
-        val sourceRawResponse = """
+        private val sourceRawResponse = """
        {
             "actions": [
                 {
-                    "offset": 4000, 
+                    "offset": 2000, 
 					"id": "43faf4j59595959",
 					"type": "set_variable",
 					"data": {
 						"name": "${"$"}homeScore",
 						"value": 0,
-						"type": "double", // enum: double, long, string
+						"type": "long", // enum: double, long, string
 						"double_precision": 2
 					}
 				},
@@ -57,12 +57,21 @@ class GetActionsFromJSONUseCase {
 					"data": {
 						"name": "${"$"}awayScore",
 						"value": 0,
-						"type": "double", // enum: double, long, string
+						"type": "long", // enum: double, long, string
 						"double_precision": 2
 					}
 				},
                 {
-                    "offset": 60000, 
+                    "offset": 6000, 
+					"id": "43faf4j59595961",
+					"type": "increment_variable",
+					"data": {
+						"name": "${"$"}awayScore",
+						"amount": 1
+					}
+				},                
+                {
+                    "offset": 70000, 
 					"id": "43faf4j59595961",
 					"type": "increment_variable",
 					"data": {
@@ -93,7 +102,7 @@ class GetActionsFromJSONUseCase {
                         }, 
                         "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg", 
                         "variable_positions": {
-                            "###_AWAYSCORE_###": "awayScore", 
+                            "###_AWAYSCORE_###": "${"$"}awayScore", 
                             "###_HOMESCORE_###": "${"$"}homeScore",
                             "###_TIMER_###": "timer1"
                         }
@@ -220,13 +229,13 @@ class GetActionsFromJSONUseCase {
                 }, 
                 {
                     "data": {
-                        "animateout_duration": 300, 
+                        "animateout_duration": 3000, 
                         "animateout_type": "fade_out",
                         "custom_id": "scoreboard1"
                     }, 
                     "id": "f43f9ajf9dfjSX", 
                     "type": "hide_overlay",
-                     "offset": 566000, 
+                     "offset": 16000, 
                      "timeline_id": "tml_1"
                 }
             ]

@@ -3,6 +3,7 @@ package tv.mycujoo.mls.core
 import okhttp3.*
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.AnimationType.*
+import tv.mycujoo.mls.helper.ActionVariableHelper
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import java.io.IOException
 import java.util.*
@@ -32,6 +33,14 @@ class ActionBuilderImpl(
     // re-write
     override fun addOverlayObjects(overlayObject: List<OverlayObject>) {
         overlayObjects.addAll(overlayObject)
+    }
+
+    override fun addSetVariableEntities(setVariables: List<SetVariableEntity>) {
+        setVariableActions.addAll(setVariables)
+    }
+
+    override fun addIncrementVariableEntities(incrementVariables: List<IncrementVariableEntity>) {
+        incrementVariableActions.addAll(incrementVariables)
     }
 
 
@@ -144,19 +153,14 @@ class ActionBuilderImpl(
         }
     }
 
-    override fun addSetVariableEntities(setVariables: List<SetVariableEntity>) {
-//        setVariableActions.addAll(setVariables)
-    }
+    override fun computeVariableNameValueTillNow() {
+        val variablesTillNow = ActionVariableHelper.buildVariablesTillNow(
+            currentTime,
+            setVariableActions,
+            incrementVariableActions
+        )
+        viewIdentifierManager.variableTranslator.setVariablesNameValueIfDifferent(variablesTillNow)
 
-    override fun addIncrementVariableEntities(incrementVariables: List<IncrementVariableEntity>) {
-//        incrementVariableActions.addAll(incrementVariables)
-    }
-
-    override fun buildSetVariables() {
-
-        setVariableActions.filter { isNotApplied(it) && isInCurrentTimeRange(it) }.forEach {
-            listener.applySetVariable(it)
-        }
     }
 
     /**region Over-ridden Functions*/

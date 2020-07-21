@@ -68,7 +68,7 @@ class ActionMapper {
                 }
                 LONG -> {
                     variableValue =
-                        actionSourceData.data?.get("value") as? Long ?: INVALID_LONG_VALUE
+                        (actionSourceData.data?.get("value") as? Double)?.toLong() ?: INVALID_LONG_VALUE
                 }
                 STRING -> {
                     variableValue =

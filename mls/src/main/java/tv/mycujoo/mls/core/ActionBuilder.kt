@@ -42,7 +42,10 @@ abstract class ActionBuilder {
     abstract fun addSetVariableEntities(setVariables: List<SetVariableEntity>)
     abstract fun addIncrementVariableEntities(incrementVariables: List<IncrementVariableEntity>)
 
-    abstract fun buildSetVariables()
+    /**
+     * compute all variables from the beginning until current time
+     */
+    abstract fun computeVariableNameValueTillNow()
     /**endregion */
 
 }
