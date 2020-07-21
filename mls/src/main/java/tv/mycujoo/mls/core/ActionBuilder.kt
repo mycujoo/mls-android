@@ -27,6 +27,12 @@ abstract class ActionBuilder {
     abstract fun removeAll()
 
     /**
+     * remove those overlay which should not be displayed in current time
+     */
+    abstract fun removeLeftOvers()
+
+
+    /**
      * build all actions which are lingering from past
      */
     abstract fun buildLingerings()
@@ -38,4 +44,5 @@ abstract class ActionBuilder {
 
     abstract fun buildSetVariables()
     /**endregion */
+
 }
