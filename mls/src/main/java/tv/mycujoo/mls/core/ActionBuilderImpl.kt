@@ -36,22 +36,30 @@ class ActionBuilderImpl(
 
 
     override fun buildCurrentTimeRange() {
-        overlayObjects.filter {
-            isNotDownloading(it)
-                    && isNotAttached(it)
-                    && additionIsInCurrentTimeRange(it)
-        }
-            .forEach { overlayObject ->
+
+        overlayObjects.forEach { overlayObject ->
+            if (isNotDownloading(overlayObject)
+                && isNotAttached(overlayObject)
+                && additionIsInCurrentTimeRange(overlayObject)
+            ) {
                 downloadSVGThenCallListener(overlayObject) { listener.onNewOverlay(it) }
+            } else if (isNotDownloading(overlayObject) && isAttached(overlayObject) && shouldNotBeOnScreen(
+                    overlayObject
+                ) && isNotInDisplayingAnimation(overlayObject)
+            ) {
+                listener.onRemovalOverlay(overlayObject)
             }
+        }
+
 
         overlayObjects.filter {
-            isNotInDisplayingOutroAnimation(it) && isAttached(it) && removalIsInCurrentTimeRange(
+            isNotInDisplayingAnimation(it) && isAttached(it) && removalIsInCurrentTimeRange(
                 it
             )
         }.forEach {
             listener.onRemovalOverlay(it)
         }
+
     }
 
     override fun buildLingerings() {
@@ -59,30 +67,59 @@ class ActionBuilderImpl(
             when {
                 isLingeringEndlessOverlay(overlayObject) -> {
                     downloadSVGThenCallListener(overlayObject) {
-                        listener.onLingeringOverlay(it)
+                        if (viewIdentifierManager.overlayObjectIsAttached(overlayObject.id)) {
+                            // do nothing
+                        } else {
+                            listener.onLingeringOverlay(it)
+                        }
                     }
                 }
                 isLingeringExcludingAnimationPart(overlayObject) -> {
                     downloadSVGThenCallListener(overlayObject) {
-                        listener.onLingeringOverlay(it)
+                        if (viewIdentifierManager.overlayObjectIsAttached(overlayObject.id)) {
+                            // do nothing
+                        } else {
+                            listener.onLingeringOverlay(it)
+                        }
                     }
                 }
                 isLingeringInIntroAnimation(overlayObject) -> {
                     downloadSVGThenCallListener(overlayObject) {
-                        listener.onLingeringIntroOverlay(
-                            it,
-                            currentTime - overlayObject.introTransitionSpec.offset,
-                            isPlaying
-                        )
+
+                        if (viewIdentifierManager.overlayObjectIsAttached(overlayObject.id)) {
+                            listener.updateLingeringOverlay(
+                                it,
+                                currentTime - overlayObject.introTransitionSpec.offset,
+                                isPlaying
+                            )
+                        } else {
+                            listener.onLingeringIntroOverlay(
+                                it,
+                                currentTime - overlayObject.introTransitionSpec.offset,
+                                isPlaying
+                            )
+
+                        }
+
                     }
                 }
                 isLingeringInOutroAnimation(overlayObject) -> {
                     downloadSVGThenCallListener(overlayObject) {
-                        listener.onLingeringOutroOverlay(
-                            it,
-                            currentTime - (overlayObject.introTransitionSpec.offset + overlayObject.outroTransitionSpec.animationDuration),
-                            isPlaying
-                        )
+                        if (viewIdentifierManager.overlayObjectIsAttached(overlayObject.id)) {
+                            listener.updateLingeringOverlay(
+                                it,
+                                currentTime - (overlayObject.introTransitionSpec.offset + overlayObject.outroTransitionSpec.animationDuration),
+                                isPlaying
+                            )
+                        } else {
+                            listener.onLingeringOutroOverlay(
+                                it,
+                                currentTime - (overlayObject.introTransitionSpec.offset + overlayObject.outroTransitionSpec.animationDuration),
+                                isPlaying
+                            )
+
+                        }
+
                     }
                 }
             }
@@ -96,12 +133,23 @@ class ActionBuilderImpl(
         appliedSetVariableActions.clear()
     }
 
+    override fun removeLeftOvers() {
+        overlayObjects.forEach { overlayObject ->
+            if (isNotDownloading(overlayObject) &&
+                isAttached(overlayObject) &&
+                shouldNotBeOnScreen(overlayObject)
+            ) {
+                listener.onRemovalOverlay(overlayObject)
+            }
+        }
+    }
+
     override fun addSetVariableEntities(setVariables: List<SetVariableEntity>) {
-        setVariableActions.addAll(setVariables)
+//        setVariableActions.addAll(setVariables)
     }
 
     override fun addIncrementVariableEntities(incrementVariables: List<IncrementVariableEntity>) {
-        incrementVariableActions.addAll(incrementVariables)
+//        incrementVariableActions.addAll(incrementVariables)
     }
 
     override fun buildSetVariables() {
@@ -138,9 +186,25 @@ class ActionBuilderImpl(
         return viewIdentifierManager.overlayObjectIsAttached(overlayObject.id)
     }
 
-    private fun isNotInDisplayingOutroAnimation(overlayObject: OverlayObject): Boolean {
-        return viewIdentifierManager.attachedAnimationIdList.none { it == overlayObject.id }
+    private fun isNotInDisplayingAnimation(overlayObject: OverlayObject): Boolean {
+        return viewIdentifierManager.hasNoActiveAnimation(overlayObject.id)
     }
+
+    private fun shouldNotBeOnScreen(overlayObject: OverlayObject): Boolean {
+        if (currentTime < overlayObject.introTransitionSpec.offset - 1000) {
+            return true
+        }
+
+        if (hasOutroAnimation(overlayObject.outroTransitionSpec.animationType)) {
+            return currentTime > overlayObject.outroTransitionSpec.offset + overlayObject.outroTransitionSpec.animationDuration
+        } else {
+            if (overlayObject.outroTransitionSpec.offset != -1L) {
+                return currentTime > overlayObject.outroTransitionSpec.offset
+            }
+            return false
+        }
+    }
+
 
     /**
      * return true if the action offset is now or in 1 second

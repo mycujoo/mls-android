@@ -421,7 +421,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             .forEach {
                 if (this::viewIdentifierManager.isInitialized) {
                     viewIdentifierManager.detachOverlayView(it)
-                    viewIdentifierManager.detachAnimationWithTag(overlayObject.id)
+                    viewIdentifierManager.removeAnimation(overlayObject.id)
                 }
                 overlayHost.removeView(it)
             }
@@ -443,7 +443,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
                 if (idList.contains(it.tag)) {
                     if (this::viewIdentifierManager.isInitialized) {
                         viewIdentifierManager.detachOverlayView(it)
-                        viewIdentifierManager.detachAnimationWithTag(it.tag as String)
+                        viewIdentifierManager.removeAnimation(it.tag as String)
                     }
                     overlayHost.removeView(it)
                 }
@@ -485,6 +485,26 @@ class PlayerViewWrapper @JvmOverloads constructor(
         super.onSizeChanged(w, h, oldw, oldh)
         if (w != 0 && h != 0) {
             onSizeChangedCallback.invoke()
+        }
+    }
+
+    fun updateLingeringOverlay(
+        overlayObject: OverlayObject,
+        animationPosition: Long,
+        isPlaying: Boolean
+    ) {
+        post {
+            viewIdentifierManager.getAnimationWithTag(overlayObject.id)?.let {
+
+                it.currentPlayTime = animationPosition
+
+                if (isPlaying) {
+                    it.resume()
+                } else {
+                    it.pause()
+                }
+            }
+
         }
     }
 

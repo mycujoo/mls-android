@@ -321,7 +321,7 @@ class OverlayViewHelper {
                     introTransitionSpec.animationType,
                     introTransitionSpec.animationDuration
                 )
-                viewIdentifierManager.addAnimation(animation!!)
+                viewIdentifierManager.addAnimation(scaffoldView.tag as String, animation!!)
                 animation.start()
 
             }
@@ -402,7 +402,10 @@ class OverlayViewHelper {
                                             }
 
                                         })
-                                        viewIdentifierManager.addAnimation(animation)
+                                        viewIdentifierManager.addAnimation(
+                                            scaffoldView.tag as String,
+                                            animation
+                                        )
                                         animation.start()
                                     }
                                     else -> {
@@ -576,7 +579,7 @@ class OverlayViewHelper {
                         override fun onAnimationEnd(animation: Animator?) {
                             overlayHost.removeView(view)
                             viewIdentifierManager.detachOverlayView(view)
-                            viewIdentifierManager.detachAnimationWithTag(overlayObject.id)
+                            viewIdentifierManager.removeAnimation(overlayObject.id)
                         }
 
                         override fun onAnimationRepeat(animation: Animator?) {
@@ -587,8 +590,7 @@ class OverlayViewHelper {
 
                     })
 
-                    viewIdentifierManager.addAnimation(animation)
-                    viewIdentifierManager.attachedAnimationIdList.add(overlayObject.id)
+                    viewIdentifierManager.addAnimation(overlayObject.id, animation)
                     animation.start()
                 }
             }
@@ -632,9 +634,8 @@ class OverlayViewHelper {
 
                         override fun onAnimationEnd(animation: Animator?) {
                             overlayHost.removeView(view)
-                            viewIdentifierManager.detachAnimationWithTag(overlayObject.id)
                             viewIdentifierManager.detachOverlayView(view)
-
+                            viewIdentifierManager.removeAnimation(overlayObject.id)
                         }
 
                         override fun onAnimationCancel(animation: Animator?) {
@@ -645,8 +646,7 @@ class OverlayViewHelper {
                         }
 
                     })
-                    viewIdentifierManager.addAnimation(animation)
-                    viewIdentifierManager.attachAnimation(overlayObject.id)
+                    viewIdentifierManager.addAnimation(overlayObject.id, animation)
                     animation.start()
                 }
             }
@@ -714,9 +714,7 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationEnd(animation: Animator?) {
-                                                viewIdentifierManager.attachedAnimationIdList.remove(
-                                                    overlayObject.id
-                                                )
+                                                viewIdentifierManager.removeAnimation(overlayObject.id)
                                             }
 
                                             override fun onAnimationCancel(animation: Animator?) {
@@ -727,10 +725,9 @@ class OverlayViewHelper {
                                             }
 
                                         })
-
-                                        viewIdentifierManager.addAnimation(animation)
-                                        viewIdentifierManager.attachAnimation(
-                                            overlayObject.id
+                                        viewIdentifierManager.addAnimation(
+                                            overlayObject.id,
+                                            animation
                                         )
                                         animation.start()
                                         animation.currentPlayTime = animationPosition
@@ -756,9 +753,7 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationEnd(animation: Animator?) {
-                                                viewIdentifierManager.attachedAnimationIdList.remove(
-                                                    overlayObject.id
-                                                )
+                                                viewIdentifierManager.removeAnimation(overlayObject.id)
                                             }
 
                                             override fun onAnimationCancel(animation: Animator?) {
@@ -770,9 +765,9 @@ class OverlayViewHelper {
 
                                         })
 
-                                        viewIdentifierManager.addAnimation(animation)
-                                        viewIdentifierManager.attachedAnimationIdList.add(
-                                            overlayObject.id
+                                        viewIdentifierManager.addAnimation(
+                                            overlayObject.id,
+                                            animation
                                         )
                                         animation.start()
                                         animation.currentPlayTime = animationPosition
@@ -797,9 +792,7 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationEnd(animation: Animator?) {
-                                                viewIdentifierManager.attachedAnimationIdList.remove(
-                                                    overlayObject.id
-                                                )
+                                                viewIdentifierManager.removeAnimation(overlayObject.id)
                                             }
 
                                             override fun onAnimationCancel(animation: Animator?) {
@@ -812,9 +805,9 @@ class OverlayViewHelper {
                                             }
 
                                         })
-                                        viewIdentifierManager.addAnimation(animation)
-                                        viewIdentifierManager.attachedAnimationIdList.add(
-                                            overlayObject.id
+                                        viewIdentifierManager.addAnimation(
+                                            overlayObject.id,
+                                            animation
                                         )
                                         animation.start()
                                         animation.currentPlayTime = animationPosition
@@ -946,9 +939,7 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationEnd(animation: Animator?) {
-                                                viewIdentifierManager.detachAnimationWithTag(
-                                                    overlayObject.id
-                                                )
+                                                viewIdentifierManager.removeAnimation(overlayObject.id)
                                                 viewIdentifierManager.detachOverlayView(
                                                     child
                                                 )
@@ -965,9 +956,9 @@ class OverlayViewHelper {
 
                                         })
 
-                                        viewIdentifierManager.addAnimation(animation)
-                                        viewIdentifierManager.attachAnimation(
-                                            overlayObject.id
+                                        viewIdentifierManager.addAnimation(
+                                            overlayObject.id,
+                                            animation
                                         )
                                         animation.start()
                                         animation.currentPlayTime = animationPosition
@@ -993,9 +984,7 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationEnd(animation: Animator?) {
-                                                viewIdentifierManager.detachAnimationWithTag(
-                                                    overlayObject.id
-                                                )
+                                                viewIdentifierManager.removeAnimation(overlayObject.id)
                                                 viewIdentifierManager.detachOverlayView(
                                                     child
                                                 )
@@ -1012,9 +1001,9 @@ class OverlayViewHelper {
 
                                         })
 
-                                        viewIdentifierManager.addAnimation(animation)
-                                        viewIdentifierManager.attachAnimation(
-                                            overlayObject.id
+                                        viewIdentifierManager.addAnimation(
+                                            overlayObject.id,
+                                            animation
                                         )
                                         animation.start()
                                         animation.currentPlayTime = animationPosition
@@ -1038,10 +1027,7 @@ class OverlayViewHelper {
                                             }
 
                                             override fun onAnimationEnd(animation: Animator?) {
-
-                                                viewIdentifierManager.detachAnimationWithTag(
-                                                    overlayObject.id
-                                                )
+                                                viewIdentifierManager.removeAnimation(overlayObject.id)
                                                 viewIdentifierManager.detachOverlayView(
                                                     child
                                                 )
@@ -1058,9 +1044,9 @@ class OverlayViewHelper {
 
                                         })
 
-                                        viewIdentifierManager.addAnimation(animation)
-                                        viewIdentifierManager.attachAnimation(
-                                            overlayObject.id
+                                        viewIdentifierManager.addAnimation(
+                                            overlayObject.id,
+                                            animation
                                         )
                                         animation.start()
                                         animation.currentPlayTime = animationPosition

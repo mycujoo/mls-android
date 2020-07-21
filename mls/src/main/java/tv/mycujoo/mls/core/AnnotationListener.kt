@@ -56,6 +56,18 @@ interface AnnotationListener {
         isPlaying: Boolean
     )
 
+    /**
+     * updates an overlay which:
+     *
+     * it's already added to view,
+     * [known bug: jumping from intro-animation to outro-animation needs to be handled] todo
+     */
+    fun updateLingeringOverlay(
+        overlayObject: OverlayObject,
+        animationPosition: Long,
+        isPlaying: Boolean
+    )
+
 
     /**
      * add an overlay which:

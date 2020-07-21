@@ -72,6 +72,18 @@ class Coordinator(
                 )
             }
 
+            override fun updateLingeringOverlay(
+                overlayObject: OverlayObject,
+                animationPosition: Long,
+                isPlaying: Boolean
+            ) {
+                playerViewWrapper.updateLingeringOverlay(
+                    overlayObject,
+                    animationPosition,
+                    isPlaying
+                )
+            }
+
             override fun onLingeringOutroOverlay(
                 overlayObject: OverlayObject,
                 animationPosition: Long,
@@ -129,7 +141,7 @@ class Coordinator(
             override fun run() {
                 actionBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
                 actionBuilder.buildCurrentTimeRange()
-                actionBuilder.buildSetVariables()
+//                actionBuilder.buildSetVariables()
                 handler.postDelayed(this, 200L)
             }
         }
@@ -198,7 +210,10 @@ class Coordinator(
                 super.onPlayerStateChanged(playWhenReady, playbackState)
                 if (playbackState == STATE_READY && hasPendingSeek) {
                     hasPendingSeek = false
-                    actionBuilder.removeAll()
+//                    actionBuilder.removeAll()
+                    actionBuilder.removeLeftOvers()
+                    actionBuilder.buildCurrentTimeRange()
+
                     actionBuilder.buildLingerings()
                     actionBuilder.buildSetVariables()
 

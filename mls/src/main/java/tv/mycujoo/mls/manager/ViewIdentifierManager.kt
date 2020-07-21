@@ -8,13 +8,9 @@ import tv.mycujoo.mls.widgets.ScaffoldView
 
 class ViewIdentifierManager {
     private var viewIdToIdMap = mutableMapOf<String, Int>()
-    private var viewIdToAnimationMap = mutableMapOf<Int, ObjectAnimator>()
+    private var animations = ArrayList<Pair<String, ObjectAnimator>>()
 
-    private var animations = ArrayList<ObjectAnimator>()
-
-    val attachedAnimationIdList: ArrayList<String> = ArrayList()
-
-    val attachedViewList: ArrayList<View> = ArrayList()
+    private val attachedViewList: ArrayList<View> = ArrayList()
 
 
     fun storeViewId(view: View, customId: String) {
@@ -26,12 +22,24 @@ class ViewIdentifierManager {
     }
 
 
-    fun addAnimation(objectAnimator: ObjectAnimator) {
-        animations.add(objectAnimator)
+    fun addAnimation(
+        id: String,
+        objectAnimator: ObjectAnimator
+    ) {
+        animations.add(Pair(id, objectAnimator))
+    }
+
+    fun removeAnimation(id: String) {
+        val pair = animations.firstOrNull { it.first == id }
+        animations.remove(pair)
     }
 
     fun getAnimations(): List<ObjectAnimator> {
-        return animations
+        return animations.map { it.second }
+    }
+
+    fun hasNoActiveAnimation(id: String): Boolean {
+        return animations.any { it.first == id }
     }
 
     /**region Attached Overlay objects & ids*/
@@ -59,14 +67,8 @@ class ViewIdentifierManager {
     }
 
     /**endregion */
-
-
-    fun attachAnimation(id: String) {
-        attachedAnimationIdList.add(id)
-    }
-
-    fun detachAnimationWithTag(id: String) {
-        attachedAnimationIdList.remove(id)
+    fun getAnimationWithTag(id: String): ObjectAnimator? {
+        return animations.firstOrNull { it.first == id }?.second
     }
 
     fun overlayObjectIsNotAttached(id: String): Boolean {
@@ -85,9 +87,9 @@ class ViewIdentifierManager {
 
     fun clearAll() {
         attachedViewList.clear()
-        attachedAnimationIdList.clear()
         animations.clear()
         viewIdToIdMap.clear()
     }
+
 
 }

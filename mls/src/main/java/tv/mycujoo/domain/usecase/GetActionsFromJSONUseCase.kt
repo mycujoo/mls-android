@@ -159,7 +159,7 @@ class GetActionsFromJSONUseCase {
                          "animateout_duration": 50000, 
                         "animateout_type": "slide_to_right", 
                          "custom_id": "scoreboard4",
-                          "duration": 70000, 
+                          "duration": 1000000, 
                          "position": {
                              "right": 5.0,
                              "bottom": 5.0
