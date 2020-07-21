@@ -122,7 +122,7 @@ class Coordinator(
         actionBuilder.addOverlayObjects(actionsList.filter { it.type == SHOW_OVERLAY }
             .map { createOverlayObject(it) })
 
-        actionBuilder.addVariableObjects(GetActionsFromJSONUseCase.mappedSetVariables())
+        actionBuilder.addSetVariableEntities(GetActionsFromJSONUseCase.mappedSetVariables())
 
 
         val runnable = object : Runnable {

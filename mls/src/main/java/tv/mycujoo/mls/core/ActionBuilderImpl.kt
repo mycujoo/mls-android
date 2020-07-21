@@ -1,11 +1,8 @@
 package tv.mycujoo.mls.core
 
 import okhttp3.*
-import tv.mycujoo.domain.entity.AnimationType
+import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.AnimationType.*
-import tv.mycujoo.domain.entity.OverlayObject
-import tv.mycujoo.domain.entity.SetVariableEntity
-import tv.mycujoo.domain.entity.SvgData
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import java.io.IOException
 import java.util.*
@@ -23,7 +20,9 @@ class ActionBuilderImpl(
 
     private var overlayObjects = ArrayList<OverlayObject>()
     private var toBeDownloadedSvgList = ArrayList<String>()
+
     private var setVariableActions = ArrayList<SetVariableEntity>()
+    private var incrementVariableActions = ArrayList<IncrementVariableEntity>()
 
     private var appliedSetVariableActions = ArrayList<SetVariableEntity>()
 
@@ -92,13 +91,21 @@ class ActionBuilderImpl(
 
     override fun removeAll() {
         listener.clearScreen(overlayObjects.map { it.id })
+
+        toBeDownloadedSvgList.clear()
+        appliedSetVariableActions.clear()
     }
 
-    override fun addVariableObjects(variableObjects: List<SetVariableEntity>) {
-        setVariableActions.addAll(variableObjects)
+    override fun addSetVariableEntities(setVariables: List<SetVariableEntity>) {
+        setVariableActions.addAll(setVariables)
+    }
+
+    override fun addIncrementVariableEntities(incrementVariables: List<IncrementVariableEntity>) {
+        incrementVariableActions.addAll(incrementVariables)
     }
 
     override fun buildSetVariables() {
+
         setVariableActions.filter { isNotApplied(it) && isInCurrentTimeRange(it) }.forEach {
             listener.applySetVariable(it)
         }

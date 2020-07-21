@@ -419,11 +419,11 @@ class PlayerViewWrapper @JvmOverloads constructor(
     fun onOverlayRemovalWithNoAnimation(overlayObject: OverlayObject) {
         overlayHost.children.filter { it.tag == overlayObject.id }
             .forEach {
-                overlayHost.removeView(it)
                 if (this::viewIdentifierManager.isInitialized) {
                     viewIdentifierManager.detachOverlayView(it)
                     viewIdentifierManager.detachAnimationWithTag(overlayObject.id)
                 }
+                overlayHost.removeView(it)
             }
 
     }
@@ -441,13 +441,15 @@ class PlayerViewWrapper @JvmOverloads constructor(
         overlayHost.children
             .forEach {
                 if (idList.contains(it.tag)) {
-                    overlayHost.removeView(it)
                     if (this::viewIdentifierManager.isInitialized) {
                         viewIdentifierManager.detachOverlayView(it)
                         viewIdentifierManager.detachAnimationWithTag(it.tag as String)
                     }
+                    overlayHost.removeView(it)
                 }
             }
+
+        viewIdentifierManager.clearAll()
     }
 
     fun onLingeringIntroAnimationOverlay(

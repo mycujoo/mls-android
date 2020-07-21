@@ -2,8 +2,10 @@ package tv.mycujoo.domain.usecase
 
 import com.google.gson.Gson
 import tv.mycujoo.data.entity.ActionResponse
+import tv.mycujoo.domain.entity.IncrementVariableEntity
 import tv.mycujoo.domain.entity.NEWActionEntity
 import tv.mycujoo.domain.entity.SetVariableEntity
+import tv.mycujoo.domain.mapper.ActionMapper.Companion.mapToIncrementVariableEntityList
 import tv.mycujoo.domain.mapper.ActionMapper.Companion.mapToNEWActionEntityList
 import tv.mycujoo.domain.mapper.ActionMapper.Companion.mapToSetVariableEntityList
 
@@ -29,6 +31,10 @@ class GetActionsFromJSONUseCase {
             return mapToSetVariableEntityList(result())
         }
 
+        fun mappedIncrementVariables(): List<IncrementVariableEntity> {
+            return mapToIncrementVariableEntityList(result())
+        }
+
 
         val sourceRawResponse = """
        {
@@ -39,10 +45,8 @@ class GetActionsFromJSONUseCase {
 					"type": "set_variable",
 					"data": {
 						"name": "${"$"}homeScore",
-						// Only one of the following three values should be set; the other two are null (or not available on the response)
 						"value": 0,
 						"type": "double", // enum: double, long, string
-						// Double precision is only useful if the type is set to double. Needed to know how to render the double. Null otherwise.
 						"double_precision": 2
 					}
 				},
@@ -52,11 +56,18 @@ class GetActionsFromJSONUseCase {
 					"type": "set_variable",
 					"data": {
 						"name": "${"$"}awayScore",
-						// Only one of the following three values should be set; the other two are null (or not available on the response)
-						"value": 1,
+						"value": 0,
 						"type": "double", // enum: double, long, string
-						// Double precision is only useful if the type is set to double. Needed to know how to render the double. Null otherwise.
 						"double_precision": 2
+					}
+				},
+                {
+                    "offset": 60000, 
+					"id": "43faf4j59595961",
+					"type": "increment_variable",
+					"data": {
+						"name": "${"$"}awayScore",
+						"amount": 1
 					}
 				},
                 {
@@ -93,7 +104,7 @@ class GetActionsFromJSONUseCase {
                     "timeline_id": "tml_1"
                 },
                  {"data": {
-                        "duration": 10000,
+                        "duration": 150000,
                          "custom_id": "scoreboard2",
                          "position": {
                              "left": 5.0, 

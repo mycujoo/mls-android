@@ -83,4 +83,11 @@ class ViewIdentifierManager {
         }
     }
 
+    fun clearAll() {
+        attachedViewList.clear()
+        attachedAnimationIdList.clear()
+        animations.clear()
+        viewIdToIdMap.clear()
+    }
+
 }

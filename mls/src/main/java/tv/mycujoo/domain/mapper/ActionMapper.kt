@@ -79,9 +79,52 @@ class ActionMapper {
                 }
             }
 
-            val variable = Variable(variableName, variableValue)
+            val variable = Variable(variableName, variableType, variableValue)
 
             return SetVariableEntity(actionSourceData.id, actionSourceData.offset, variable)
+        }
+
+        fun mapToIncrementVariableEntityList(actionResponse: ActionResponse): List<IncrementVariableEntity> {
+            return actionResponse.data.mapNotNull { actionSourceData ->
+                mapToIncrementVariableEntity(actionSourceData)
+            }
+        }
+
+        private fun mapToIncrementVariableEntity(actionSourceData: ActionSourceData): IncrementVariableEntity? {
+            if (actionSourceData.id == null || actionSourceData.offset == null) {
+                return null
+            }
+
+            if (ActionType.fromValueOrUnknown(actionSourceData.type!!) != ActionType.INCREMENT_VARIABLE) {
+                return null
+            }
+
+            var variableName = INVALID_STRING_VALUE
+            var variableAmount: Any = INVALID_FLOAT_VALUE
+
+
+            actionSourceData.data?.let { data ->
+                data.keys.forEach { key ->
+                    val any = data[key]
+                    when (key) {
+                        "name" -> {
+                            any?.let { variableName = it as String }
+                        }
+                        "amount" -> {
+                            any?.let {
+                                variableAmount = it as Double
+                            }
+                        }
+                    }
+                }
+            }
+
+            return IncrementVariableEntity(
+                actionSourceData.id,
+                actionSourceData.offset,
+                variableName,
+                variableAmount
+            )
         }
 
 

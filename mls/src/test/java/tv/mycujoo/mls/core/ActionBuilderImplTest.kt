@@ -23,6 +23,7 @@ class ActionBuilderImplTest {
         MockitoAnnotations.initMocks(this)
         val svgData = SvgData(
             "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg",
+            null,
             null
         )
         val viewSpec = ViewSpec(PositionGuide(left = 10F, top = 10F), Pair(30F, 0F))
