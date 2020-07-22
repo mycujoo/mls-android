@@ -1,5 +1,6 @@
 package tv.mycujoo.domain.mapper
 
+import tv.mycujoo.data.entity.ActionCollections
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.VariableType.*
@@ -15,19 +16,34 @@ class ActionMapper {
         private const val INVALID_INT_VALUE = -1
         private const val INVALID_FLOAT_VALUE = -1F
 
-        fun mapToNEWActionEntityList(actionResponse: ActionResponse): List<NEWActionEntity> {
+        fun mapToActionCollections(actionResponse: ActionResponse): ActionCollections {
 
-            return actionResponse.data.map { actionSourceData ->
+            val actionEntityList = actionResponse.data.map { actionSourceData ->
                 mapToActionEntity(actionSourceData)
             }
 
-        }
-
-        fun mapToSetVariableEntityList(actionResponse: ActionResponse): List<SetVariableEntity> {
-            return actionResponse.data.mapNotNull { actionSourceData ->
+            val setVariableList = actionResponse.data.mapNotNull { actionSourceData ->
                 mapToSetVariableEntity(actionSourceData)
             }
+
+            val incrementVariableList = actionResponse.data.mapNotNull { actionSourceData ->
+                mapToIncrementVariableEntity(actionSourceData)
+            }
+
+
+            val timelineMarkerEntityList = actionResponse.data.mapNotNull { actionSourceData ->
+                mapToTimelineMarkerEntity(actionSourceData)
+            }
+
+            return ActionCollections(
+                actionEntityList,
+                setVariableList,
+                incrementVariableList,
+                timelineMarkerEntityList
+            )
+
         }
+
 
         private fun mapToSetVariableEntity(actionSourceData: ActionSourceData): SetVariableEntity? {
 
@@ -68,7 +84,8 @@ class ActionMapper {
                 }
                 LONG -> {
                     variableValue =
-                        (actionSourceData.data?.get("value") as? Double)?.toLong() ?: INVALID_LONG_VALUE
+                        (actionSourceData.data?.get("value") as? Double)?.toLong()
+                            ?: INVALID_LONG_VALUE
                 }
                 STRING -> {
                     variableValue =
@@ -82,12 +99,6 @@ class ActionMapper {
             val variable = Variable(variableName, variableType, variableValue)
 
             return SetVariableEntity(actionSourceData.id, actionSourceData.offset, variable)
-        }
-
-        fun mapToIncrementVariableEntityList(actionResponse: ActionResponse): List<IncrementVariableEntity> {
-            return actionResponse.data.mapNotNull { actionSourceData ->
-                mapToIncrementVariableEntity(actionSourceData)
-            }
         }
 
         private fun mapToIncrementVariableEntity(actionSourceData: ActionSourceData): IncrementVariableEntity? {
@@ -128,7 +139,7 @@ class ActionMapper {
         }
 
 
-        private fun mapToActionEntity(actionSourceData: ActionSourceData): NEWActionEntity {
+        private fun mapToActionEntity(actionSourceData: ActionSourceData): ActionEntity {
 
 
             var customId = INVALID_STRING_VALUE
@@ -207,22 +218,20 @@ class ActionMapper {
                 customId = Random.nextLong().toString()
             }
 
-
-            return NEWActionEntity(
+            return ActionEntity(
                 actionSourceData.id!!,
                 actionSourceData.offset ?: INVALID_LONG_VALUE,
                 ActionType.fromValueOrUnknown(actionSourceData.type!!),
                 customId,
                 svgUrl,
+                null,
                 positionGuide,
-                sizePair,
+                Pair(sizePair.first, sizePair.second),
                 duration,
                 introAnimationType,
                 introAnimationDuration,
                 outroAnimationType,
                 outroAnimationDuration,
-                label,
-                color,
                 variablePlaceHolders
             )
         }
@@ -274,6 +283,43 @@ class ActionMapper {
                     }
                 }
             }
+        }
+
+
+        private fun mapToTimelineMarkerEntity(actionSourceData: ActionSourceData): TimelineMarkerEntity? {
+            if (actionSourceData.id == null || actionSourceData.offset == null || actionSourceData.type == null) {
+                return null
+            }
+
+            val actionType = ActionType.fromValueOrUnknown(actionSourceData.type)
+            if (actionType != ActionType.SHOW_TIMELINE_MARKER) {
+                return null
+            }
+
+            var label = INVALID_STRING_VALUE
+            var color = INVALID_STRING_VALUE
+
+            actionSourceData.data?.let { data ->
+                data.keys.forEach { key ->
+                    val any = data[key]
+                    when (key) {
+
+                        "label" -> {
+                            any?.let { label = it as String }
+                        }
+
+                        "color" -> {
+                            any?.let { color = it as String }
+                        }
+                        else -> {
+                        }
+                    }
+                }
+            }
+
+
+
+            return TimelineMarkerEntity(actionSourceData.id, actionSourceData.offset, label, color)
         }
     }
 }

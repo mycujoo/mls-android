@@ -13,7 +13,6 @@ import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.mls.core.ActionBuilder
 import tv.mycujoo.mls.core.ActionBuilderImpl
 import tv.mycujoo.mls.core.AnnotationListener
-import tv.mycujoo.mls.helper.ActionEntityFactory
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
@@ -111,11 +110,12 @@ class Coordinator(
 
         val actionsList = ArrayList<ActionEntity>()
 
-        GetActionsFromJSONUseCase.mappedResult().forEach { newActionEntity ->
-            actionsList.add(
-                ActionEntityFactory.create(newActionEntity)
-            )
-        }
+        actionsList.addAll(GetActionsFromJSONUseCase.mappedActionCollections().actionEntityList)
+//        GetActionsFromJSONUseCase.mappedResult().forEach { newActionEntity ->
+//            actionsList.add(
+//                ActionEntityFactory.create(newActionEntity)
+//            )
+//        }
 
         actionsList.filter { it.type == HIDE_OVERLAY }
             .forEach { hideAction ->
@@ -130,8 +130,8 @@ class Coordinator(
         actionBuilder.addOverlayObjects(actionsList.filter { it.type == SHOW_OVERLAY }
             .map { createOverlayObject(it) })
 
-        actionBuilder.addSetVariableEntities(GetActionsFromJSONUseCase.mappedSetVariables())
-        actionBuilder.addIncrementVariableEntities(GetActionsFromJSONUseCase.mappedIncrementVariables())
+        actionBuilder.addSetVariableEntities(GetActionsFromJSONUseCase.mappedActionCollections().setVariableEntityList)
+        actionBuilder.addIncrementVariableEntities(GetActionsFromJSONUseCase.mappedActionCollections().incrementVariableEntityList)
 
 
         val runnable = object : Runnable {

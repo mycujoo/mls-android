@@ -24,7 +24,6 @@ import com.google.android.exoplayer2.ui.PlayerView
 import kotlinx.android.synthetic.main.dialog_information_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
 import tv.mycujoo.domain.entity.OverlayObject
-import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.UIEventListener
@@ -146,18 +145,16 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
         val timelineMarkerManager = TimelineMarkerManager(mlsTimeBar, highlightMarkerTextView)
 
-        GetActionsFromJSONUseCase.mappedResult()
-            .filter { it.type == ActionType.SHOW_TIMELINE_MARKER }
-            .forEach { showTimelineMarkerEntity ->
-                timelineMarkerManager.addTimeLineHighlight(
-                    PointOfInterest(
-                        showTimelineMarkerEntity.offset,
-                        listOf(showTimelineMarkerEntity.label!!),
-                        PointOfInterestType(showTimelineMarkerEntity.color)
-                    )
-                )
-            }
 
+        GetActionsFromJSONUseCase.mappedActionCollections().timelineMarkerActionList.forEach { showTimelineMarkerEntity ->
+            timelineMarkerManager.addTimeLineHighlight(
+                PointOfInterest(
+                    showTimelineMarkerEntity.offset,
+                    listOf(showTimelineMarkerEntity.label),
+                    PointOfInterestType(showTimelineMarkerEntity.color)
+                )
+            )
+        }
     }
     /**endregion */
 

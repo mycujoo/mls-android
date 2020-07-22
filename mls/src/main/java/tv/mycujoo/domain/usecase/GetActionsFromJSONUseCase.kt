@@ -1,13 +1,9 @@
 package tv.mycujoo.domain.usecase
 
 import com.google.gson.Gson
+import tv.mycujoo.data.entity.ActionCollections
 import tv.mycujoo.data.entity.ActionResponse
-import tv.mycujoo.domain.entity.IncrementVariableEntity
-import tv.mycujoo.domain.entity.NEWActionEntity
-import tv.mycujoo.domain.entity.SetVariableEntity
-import tv.mycujoo.domain.mapper.ActionMapper.Companion.mapToIncrementVariableEntityList
-import tv.mycujoo.domain.mapper.ActionMapper.Companion.mapToNEWActionEntityList
-import tv.mycujoo.domain.mapper.ActionMapper.Companion.mapToSetVariableEntityList
+import tv.mycujoo.domain.mapper.ActionMapper.Companion.mapToActionCollections
 
 class GetActionsFromJSONUseCase {
 
@@ -23,18 +19,9 @@ class GetActionsFromJSONUseCase {
             )
         }
 
-        fun mappedResult(): List<NEWActionEntity> {
-            return mapToNEWActionEntityList(result())
+        fun mappedActionCollections(): ActionCollections {
+            return mapToActionCollections(result())
         }
-
-        fun mappedSetVariables(): List<SetVariableEntity> {
-            return mapToSetVariableEntityList(result())
-        }
-
-        fun mappedIncrementVariables(): List<IncrementVariableEntity> {
-            return mapToIncrementVariableEntityList(result())
-        }
-
 
         private val sourceRawResponse = """
        {

@@ -4,7 +4,7 @@ import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ui.TimeBar
-import tv.mycujoo.domain.entity.NEWActionEntity
+import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
@@ -12,7 +12,7 @@ class VideoPlayerCoordinator(
     private val exoPlayer: SimpleExoPlayer,
     private val playerViewWrapper: PlayerViewWrapper,
     videoPlayerConfig: VideoPlayerConfig,
-    private val timelineMarkerActionEntities: List<NEWActionEntity>
+    private val timelineMarkerActionEntities: List<TimelineMarkerEntity>
 ) {
 
     init {

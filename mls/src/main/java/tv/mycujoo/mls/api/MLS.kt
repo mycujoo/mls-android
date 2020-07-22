@@ -405,8 +405,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
                 exoPlayer,
                 playerViewWrapper,
                 builder.mlsConfiguration.VideoPlayerConfig,
-                GetActionsFromJSONUseCase.mappedResult()
-                    .filter { it.type == ActionType.SHOW_TIMELINE_MARKER }
+                GetActionsFromJSONUseCase.mappedActionCollections().timelineMarkerActionList
             )
         }
     }
