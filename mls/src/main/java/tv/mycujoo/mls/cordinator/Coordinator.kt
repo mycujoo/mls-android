@@ -111,11 +111,6 @@ class Coordinator(
         val actionsList = ArrayList<ActionEntity>()
 
         actionsList.addAll(GetActionsFromJSONUseCase.mappedActionCollections().actionEntityList)
-//        GetActionsFromJSONUseCase.mappedResult().forEach { newActionEntity ->
-//            actionsList.add(
-//                ActionEntityFactory.create(newActionEntity)
-//            )
-//        }
 
         actionsList.filter { it.type == HIDE_OVERLAY }
             .forEach { hideAction ->
@@ -132,6 +127,7 @@ class Coordinator(
 
         actionBuilder.addSetVariableEntities(GetActionsFromJSONUseCase.mappedActionCollections().setVariableEntityList)
         actionBuilder.addIncrementVariableEntities(GetActionsFromJSONUseCase.mappedActionCollections().incrementVariableEntityList)
+
 
 
         val runnable = object : Runnable {
@@ -215,7 +211,6 @@ class Coordinator(
 
                     actionBuilder.buildLingerings()
 
-//                    actionBuilder.buildSetVariables()
                     actionBuilder.computeVariableNameValueTillNow()
 
 

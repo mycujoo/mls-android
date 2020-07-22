@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.core
 
+import tv.mycujoo.data.entity.ActionCollections
 import tv.mycujoo.domain.entity.IncrementVariableEntity
 import tv.mycujoo.domain.entity.OverlayObject
 import tv.mycujoo.domain.entity.SetVariableEntity
@@ -42,10 +43,12 @@ abstract class ActionBuilder {
     abstract fun addSetVariableEntities(setVariables: List<SetVariableEntity>)
     abstract fun addIncrementVariableEntities(incrementVariables: List<IncrementVariableEntity>)
 
+    abstract fun addActionCollections(actionCollections: ActionCollections)
+
+
     /**
      * compute all variables from the beginning until current time
      */
     abstract fun computeVariableNameValueTillNow()
     /**endregion */
-
 }

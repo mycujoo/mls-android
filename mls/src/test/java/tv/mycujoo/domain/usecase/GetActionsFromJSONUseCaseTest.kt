@@ -17,7 +17,7 @@ class GetActionsFromJSONUseCaseTest {
 
     @Test
     fun `given valid response, should convert to source data`() {
-        val mappedSetVariables = GetActionsFromJSONUseCase.mappedSetVariables()
+        val mappedSetVariables = GetActionsFromJSONUseCase.mappedActionCollections()
         assertNotNull(mappedSetVariables)
     }
 

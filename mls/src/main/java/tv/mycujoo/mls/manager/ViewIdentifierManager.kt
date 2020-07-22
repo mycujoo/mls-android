@@ -12,6 +12,7 @@ class ViewIdentifierManager(dispatcher: CoroutineScope) {
     private val attachedViewList: ArrayList<View> = ArrayList()
 
     val variableTranslator = VariableTranslator(dispatcher)
+    val timeKeeper = TimeKeeper(dispatcher)
 
 
     fun storeViewId(view: View, customId: String) {

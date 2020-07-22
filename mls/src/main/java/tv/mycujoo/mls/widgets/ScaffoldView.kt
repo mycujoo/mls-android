@@ -6,7 +6,6 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import com.caverock.androidsvg.SVG
 import tv.mycujoo.domain.entity.Variable
-import tv.mycujoo.mls.manager.VariableTranslator
 
 class ScaffoldView @JvmOverloads constructor(
     widthPercentage: Float = -1F,
@@ -17,6 +16,7 @@ class ScaffoldView @JvmOverloads constructor(
 
     private lateinit var svgString: String
     private lateinit var variablePlaceHolder: Map<String, String>
+    private lateinit var latestVariableValue: MutableMap<String, Any>
 
     private var proportionalImageView: ProportionalImageView =
         ProportionalImageView(context, widthPercentage, heightPercentage, attrs, defStyleAttr)
@@ -64,22 +64,30 @@ class ScaffoldView @JvmOverloads constructor(
 
     fun setVariablePlaceHolder(variablePlaceHolders: Map<String, String>) {
         this.variablePlaceHolder = variablePlaceHolders
+        this.latestVariableValue = mutableMapOf()
     }
 
     fun onVariableUpdated(
-        variableTranslator: VariableTranslator
+        updatedPair: Pair<String, Any>
     ) {
-        if (this::variablePlaceHolder.isInitialized.not() || this::svgString.isInitialized.not()) {
+        if (this::variablePlaceHolder.isInitialized.not() || this::latestVariableValue.isInitialized.not() || this::svgString.isInitialized.not()) {
             return
         }
 
+        if (!variablePlaceHolder.containsValue(updatedPair.first)) {
+            return
+        }
+
+        latestVariableValue[updatedPair.first] = updatedPair.second
+
         var svgString = this.svgString
-        variablePlaceHolder.forEach { entry ->
-            val value = variableTranslator.getValue(entry.value)
-            value?.let {
-                svgString = svgString.replace(entry.key, value.toString())
+        variablePlaceHolder.filter { latestVariableValue.contains(it.value) }.forEach { entry ->
+            latestVariableValue[entry.value]?.let { value ->
+                svgString =
+                    svgString.replace(entry.key, value.toString())
             }
         }
+
         setSVG(SVG.getFromString(svgString))
     }
 

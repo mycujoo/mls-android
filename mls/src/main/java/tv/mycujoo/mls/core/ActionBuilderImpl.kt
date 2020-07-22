@@ -1,10 +1,12 @@
 package tv.mycujoo.mls.core
 
 import okhttp3.*
+import tv.mycujoo.data.entity.ActionCollections
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.AnimationType.*
 import tv.mycujoo.mls.helper.ActionVariableHelper
 import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.widgets.CreateTimerEntity
 import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
@@ -27,6 +29,10 @@ class ActionBuilderImpl(
 
     private var appliedSetVariableActions = ArrayList<SetVariableEntity>()
 
+    private lateinit var actionCollections: ActionCollections
+    private var appliedCreateTimer = ArrayList<String>()
+
+
     /**endregion */
 
 
@@ -43,6 +49,9 @@ class ActionBuilderImpl(
         incrementVariableActions.addAll(incrementVariables)
     }
 
+    override fun addActionCollections(actionCollections: ActionCollections) {
+        this.actionCollections = actionCollections
+    }
 
     override fun buildCurrentTimeRange() {
 
@@ -67,6 +76,27 @@ class ActionBuilderImpl(
             )
         }.forEach {
             listener.onRemovalOverlay(it)
+        }
+
+        // todo [WIP]
+        if (this::actionCollections.isInitialized) {
+            actionCollections.createTimerEntityList
+                .forEach {
+                    if (isInCurrentTimeRange(it.offset) && !isTimerCreated(it.name)) {
+                        createTimer(it)
+                    } else {
+                        if (shouldBeKilled(it)) {
+                            clearTimer(it)
+                        }
+                    }
+                }
+
+            actionCollections.startTimerEntityList.forEach {
+                if (isInCurrentTimeRange(it.offset) && isTimerCreated(it.name)){
+                    startTimer(it.name)
+                }
+            }
+
         }
 
     }
@@ -325,6 +355,39 @@ class ActionBuilderImpl(
 
     private fun isInCurrentTimeRange(setVariableEntity: SetVariableEntity): Boolean {
         return (setVariableEntity.offset >= currentTime) && (setVariableEntity.offset < currentTime + 1000L)
+    }
+
+
+    /**endregion */
+
+    /**region Timer classifier and helpers*/
+    private fun isInCurrentTimeRange(offset: Long): Boolean {
+        return (offset >= currentTime) && (offset < currentTime + 1000L)
+    }
+
+    private fun isTimerCreated(name: String): Boolean {
+        return appliedCreateTimer.any { it == name }
+    }
+
+    private fun shouldBeKilled(createTimerEntity: CreateTimerEntity): Boolean {
+        if (currentTime < createTimerEntity.offset - 1000) {
+            return false
+        }
+        return true
+    }
+
+    private fun createTimer(createTimerEntity: CreateTimerEntity) {
+        appliedCreateTimer.add(createTimerEntity.name)
+        viewIdentifierManager.timeKeeper.createTimer(createTimerEntity)
+    }
+
+
+    private fun startTimer(name: String) {
+        viewIdentifierManager.timeKeeper.startTimer(name)
+    }
+
+    private fun clearTimer(createTimerEntity: CreateTimerEntity) {
+        appliedCreateTimer.remove(createTimerEntity.name)
     }
     /**endregion */
 

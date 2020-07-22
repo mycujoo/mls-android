@@ -6,6 +6,9 @@ import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.VariableType.*
 import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.mls.model.MutablePair
+import tv.mycujoo.mls.model.ScreenTimerDirection
+import tv.mycujoo.mls.model.ScreenTimerFormat
+import tv.mycujoo.mls.widgets.*
 import kotlin.random.Random
 
 class ActionMapper {
@@ -30,16 +33,40 @@ class ActionMapper {
                 mapToIncrementVariableEntity(actionSourceData)
             }
 
-
             val timelineMarkerEntityList = actionResponse.data.mapNotNull { actionSourceData ->
                 mapToTimelineMarkerEntity(actionSourceData)
+            }
+
+            val createScreenTimerEntityList = actionResponse.data.mapNotNull { actionSourceData ->
+                mapToCreateScreenTimerEntity(actionSourceData)
+            }
+
+            val startScreenTimerEntityList = actionResponse.data.mapNotNull { actionSourceData ->
+                mapToStartScreenTimerEntity(actionSourceData)
+            }
+
+            val pauseTimerEntityList = actionResponse.data.mapNotNull { actionSourceData ->
+                mapToPauseTimerEntity(actionSourceData)
+            }
+
+            val adjustTimerEntityList = actionResponse.data.mapNotNull { actionSourceData ->
+                mapToAdjustTimerEntity(actionSourceData)
+            }
+
+            val skipTimerEntityList = actionResponse.data.mapNotNull { actionSourceData ->
+                mapToSkipTimerEntity(actionSourceData)
             }
 
             return ActionCollections(
                 actionEntityList,
                 setVariableList,
                 incrementVariableList,
-                timelineMarkerEntityList
+                timelineMarkerEntityList,
+                createScreenTimerEntityList,
+                startScreenTimerEntityList,
+                pauseTimerEntityList,
+                adjustTimerEntityList,
+                skipTimerEntityList
             )
 
         }
@@ -321,5 +348,201 @@ class ActionMapper {
 
             return TimelineMarkerEntity(actionSourceData.id, actionSourceData.offset, label, color)
         }
+
+        private fun mapToCreateScreenTimerEntity(actionSourceData: ActionSourceData): CreateTimerEntity? {
+            if (actionSourceData.id == null || actionSourceData.offset == null || actionSourceData.type == null) {
+                return null
+            }
+
+            val actionType = ActionType.fromValueOrUnknown(actionSourceData.type)
+            if (actionType != ActionType.CREATE_TIMER) {
+                return null
+            }
+
+            var name = INVALID_STRING_VALUE
+            var format = ScreenTimerFormat.MINUTES_SECONDS
+            var direction = ScreenTimerDirection.UP
+            var startValue = INVALID_LONG_VALUE
+            var step = INVALID_LONG_VALUE
+            var capValue = INVALID_LONG_VALUE
+
+            actionSourceData.data?.let { data ->
+                data.keys.forEach { key ->
+                    val any = data[key]
+                    when (key) {
+
+                        "name" -> {
+                            any?.let { name = it as String }
+                        }
+                        "format" -> {
+                            any?.let { format = ScreenTimerFormat.fromValueOrUnknown(it as String) }
+                        }
+                        "direction" -> {
+                            any?.let { direction = ScreenTimerDirection.fromValue(it as String) }
+                        }
+                        "startValue" -> {
+                            any?.let { startValue = (it as Double).toLong() }
+                        }
+                        "step" -> {
+                            any?.let { step = (it as Double).toLong() }
+                        }
+                        "capValue" -> {
+                            any?.let { capValue = (it as Double).toLong() }
+                        }
+                        else -> {
+                        }
+                    }
+                }
+            }
+
+            return CreateTimerEntity(
+                name,
+                actionSourceData.offset,
+                format,
+                direction,
+                startValue,
+                step,
+                capValue
+            )
+        }
+
+        private fun mapToStartScreenTimerEntity(actionSourceData: ActionSourceData): StartTimerEntity? {
+            if (actionSourceData.id == null || actionSourceData.offset == null || actionSourceData.type == null) {
+                return null
+            }
+
+            val actionType = ActionType.fromValueOrUnknown(actionSourceData.type)
+            if (actionType != ActionType.START_TIMER) {
+                return null
+            }
+
+            var name = INVALID_STRING_VALUE
+
+            actionSourceData.data?.let { data ->
+                data.keys.forEach { key ->
+                    val any = data[key]
+                    when (key) {
+
+                        "name" -> {
+                            any?.let { name = it as String }
+                        }
+                        else -> {
+                        }
+                    }
+                }
+            }
+
+            return StartTimerEntity(
+                name,
+                actionSourceData.offset
+            )
+        }
+
+        private fun mapToPauseTimerEntity(actionSourceData: ActionSourceData): PauseTimerEntity? {
+            if (actionSourceData.id == null || actionSourceData.offset == null || actionSourceData.type == null) {
+                return null
+            }
+
+            val actionType = ActionType.fromValueOrUnknown(actionSourceData.type)
+            if (actionType != ActionType.PAUSE_TIMER) {
+                return null
+            }
+
+            var name = INVALID_STRING_VALUE
+
+            actionSourceData.data?.let { data ->
+                data.keys.forEach { key ->
+                    val any = data[key]
+                    when (key) {
+
+                        "name" -> {
+                            any?.let { name = it as String }
+                        }
+                        else -> {
+                        }
+                    }
+                }
+            }
+
+            return PauseTimerEntity(
+                name,
+                actionSourceData.offset
+            )
+        }
+
+        private fun mapToAdjustTimerEntity(actionSourceData: ActionSourceData): AdjustTimerEntity? {
+            if (actionSourceData.id == null || actionSourceData.offset == null || actionSourceData.type == null) {
+                return null
+            }
+
+            val actionType = ActionType.fromValueOrUnknown(actionSourceData.type)
+            if (actionType != ActionType.ADJUST_TIMER) {
+                return null
+            }
+
+            var name = INVALID_STRING_VALUE
+            var value = INVALID_LONG_VALUE
+
+            actionSourceData.data?.let { data ->
+                data.keys.forEach { key ->
+                    val any = data[key]
+                    when (key) {
+
+                        "name" -> {
+                            any?.let { name = it as String }
+                        }
+                        "value" -> {
+                            any?.let { value = (it as Double).toLong() }
+                        }
+                        else -> {
+                        }
+                    }
+                }
+            }
+
+            return AdjustTimerEntity(
+                name,
+                actionSourceData.offset,
+                value
+            )
+        }
+
+        private fun mapToSkipTimerEntity(actionSourceData: ActionSourceData): SkipTimerEntity? {
+            if (actionSourceData.id == null || actionSourceData.offset == null || actionSourceData.type == null) {
+                return null
+            }
+
+            val actionType = ActionType.fromValueOrUnknown(actionSourceData.type)
+            if (actionType != ActionType.SKIP_TIMER) {
+                return null
+            }
+
+            var name = INVALID_STRING_VALUE
+            var value = INVALID_LONG_VALUE
+
+            actionSourceData.data?.let { data ->
+                data.keys.forEach { key ->
+                    val any = data[key]
+                    when (key) {
+
+                        "name" -> {
+                            any?.let { name = it as String }
+                        }
+                        "value" -> {
+                            any?.let { value = (it as Double).toLong() }
+                        }
+                        else -> {
+                        }
+                    }
+                }
+            }
+
+            return SkipTimerEntity(
+                name,
+                actionSourceData.offset,
+                value
+            )
+        }
+
     }
 }

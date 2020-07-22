@@ -172,7 +172,8 @@ class OverlayViewHelper {
                 OverlayFactory.createScaffoldView(
                     context,
                     overlayObject,
-                    viewIdentifierManager.variableTranslator
+                    viewIdentifierManager.variableTranslator,
+                    viewIdentifierManager.timeKeeper
                 )
 
             try {

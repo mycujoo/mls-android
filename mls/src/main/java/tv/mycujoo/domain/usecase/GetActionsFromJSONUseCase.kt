@@ -91,7 +91,7 @@ class GetActionsFromJSONUseCase {
                         "variable_positions": {
                             "###_AWAYSCORE_###": "${"$"}awayScore", 
                             "###_HOMESCORE_###": "${"$"}homeScore",
-                            "###_TIMER_###": "timer1"
+                            "###_TIMER_###": "${"$"}scoreboardTimer"
                         }
                     }, 
                     "id": "54afag35yag", 
@@ -113,7 +113,7 @@ class GetActionsFromJSONUseCase {
                          "variable_positions": {
                              "###_AWAYSCORE_###": "${"$"}awayScore",
                              "###_HOMESCORE_###": "${"$"}homeScore",
-                             "###_TIMER_###": "timer1"
+                             "###_TIMER_###": "${"$"}scoreboardTimer"
                          }
                      }, 
                      "id": "54afag35yag2", 
@@ -224,7 +224,38 @@ class GetActionsFromJSONUseCase {
                     "type": "hide_overlay",
                      "offset": 16000, 
                      "timeline_id": "tml_1"
-                }
+                },
+                {
+                	"id": "bbaaaa4444sssstg",
+                    "offset": 1000,
+                	"type": "create_timer",
+                	"data": {
+                		// A custom name that is defined by the customer, simply to label their timer for later referencing.
+                		"name": "${"$"}scoreboardTimer",
+                		// The format indicates how the ms value is textually represented. Options:
+                		// - ms: Minutes (if > 0) and seconds, each separated by a colon (e.g. 40:01)
+                		// - s:  Seconds
+                		"format": "ms",
+                		// Indicates whether the clock counts "up" or "down"
+                		"direction": "down",
+                		// 45 minutes, represented in milliseconds
+                		"start_value": 2700000,
+                		// Step size
+                		"step": 1000,
+                		// capValue is a value at which the timer should continue counting, 
+                		// but the visual representation is stuck at this value.
+                		// Useful for ensuring a visual representation doesn't go negative, or useful for capping e.g. at 45 minutes to prevent overtime from showing.
+                		// The capValue is dependent on the direction (up/down)
+                		"cap_value": 0
+                	}
+                },
+                {
+					"id": "4fdaf5tygfhfhffha",
+					"type": "start_timer",
+					"data": {
+						"name": "${"$"}scoreboardTimer"
+					}
+				}
             ]
         }
     """.trimIndent()

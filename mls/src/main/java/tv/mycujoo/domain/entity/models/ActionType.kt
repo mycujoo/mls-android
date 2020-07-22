@@ -6,7 +6,12 @@ enum class ActionType(val type: String) {
     HIDE_OVERLAY("hide_overlay"),
     SHOW_TIMELINE_MARKER("show_timeline_marker"),
     SET_VARIABLE("set_variable"),
-    INCREMENT_VARIABLE("increment_variable");
+    INCREMENT_VARIABLE("increment_variable"),
+    CREATE_TIMER("create_timer"),
+    START_TIMER("start_timer"),
+    PAUSE_TIMER("pause_timer"),
+    ADJUST_TIMER("adjust_timer"),
+    SKIP_TIMER("skip_timer");
 
 
     companion object {
