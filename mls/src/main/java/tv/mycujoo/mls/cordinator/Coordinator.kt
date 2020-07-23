@@ -128,6 +128,7 @@ class Coordinator(
         actionBuilder.addSetVariableEntities(GetActionsFromJSONUseCase.mappedActionCollections().setVariableEntityList)
         actionBuilder.addIncrementVariableEntities(GetActionsFromJSONUseCase.mappedActionCollections().incrementVariableEntityList)
 
+        actionBuilder.addActionCollections(GetActionsFromJSONUseCase.mappedActionCollections())
 
 
         val runnable = object : Runnable {

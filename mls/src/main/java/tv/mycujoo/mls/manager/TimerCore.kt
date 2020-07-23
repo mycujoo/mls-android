@@ -53,6 +53,9 @@ class TimerCore(
         timerRelay: BehaviorRelay<String>,
         dispatcher: CoroutineScope
     ) {
+        if (isTicking) {
+            return
+        }
         isTicking = true
         currentTime -= step
         dispatcher.launch {

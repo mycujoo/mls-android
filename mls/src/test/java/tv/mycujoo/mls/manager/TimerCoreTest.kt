@@ -199,6 +199,28 @@ class TimerCoreTest {
     }
 
     @Test
+    fun `given multiple start commands, should only take effect for the first one`() {
+        val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
+            ScreenTimerFormat.SECONDS,
+            0L,
+            1000L
+        )
+        timeKeeper.createTimer(createScreenTimerEntity)
+        var actualValue = ""
+
+        timeKeeper.observe(sampleName) { actualValue = it.second }
+        timeKeeper.startTimer(sampleName)
+
+        timeKeeper.startTimer(sampleName)
+        timeKeeper.startTimer(sampleName)
+
+        testCoroutineScope.advanceTimeBy(60000)
+
+
+        assertEquals("60", actualValue)
+    }
+
+    @Test
     fun `given pause command, should not change time afterward`() {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,

@@ -30,7 +30,9 @@ class TimeKeeper(private val dispatcher: CoroutineScope) {
         dispatcher.launch {
             timerRelayList.firstOrNull { it.timerCore.name == timerName }
                 ?.let { variableRelay ->
-                    variableRelay.timerValue.subscribe { callback.invoke(Pair(timerName, it)) }
+                    variableRelay.timerValue.subscribe {
+                        callback.invoke(Pair(timerName, variableRelay.timerCore.getFormattedTime()))
+                    }
                 }
         }
     }
