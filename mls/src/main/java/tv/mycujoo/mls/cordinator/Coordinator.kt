@@ -213,6 +213,7 @@ class Coordinator(
                     actionBuilder.buildLingerings()
 
                     actionBuilder.computeVariableNameValueTillNow()
+                    actionBuilder.recalculateTimers()
 
 
                 }

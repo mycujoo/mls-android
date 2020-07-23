@@ -57,6 +57,36 @@ class ActionMapper {
                 mapToSkipTimerEntity(actionSourceData)
             }
 
+            val timerEntityList = ArrayList<TimerEntity>()
+            createScreenTimerEntityList.forEach { createTimerEntity ->
+
+                val createCommands = ArrayList<CreateTimerEntity>()
+                val startCommands = ArrayList<StartTimerEntity>()
+                val pauseCommands = ArrayList<PauseTimerEntity>()
+                val adjustCommands = ArrayList<AdjustTimerEntity>()
+
+                startScreenTimerEntityList.filter { it.name == createTimerEntity.name }.forEach {
+                    startCommands.add(it)
+                }
+                pauseTimerEntityList.filter { it.name == createTimerEntity.name }.forEach {
+                    pauseCommands.add(it)
+                }
+                adjustTimerEntityList.filter { it.name == createTimerEntity.name }.forEach {
+                    adjustCommands.add(it)
+                }
+
+
+                val timerEntity = TimerEntity(
+                    createTimerEntity.name,
+                    createTimerEntity,
+                    startCommands,
+                    pauseCommands,
+                    adjustCommands
+                )
+                timerEntityList.add(timerEntity)
+            }
+
+
             return ActionCollections(
                 actionEntityList,
                 setVariableList,
@@ -66,7 +96,8 @@ class ActionMapper {
                 startScreenTimerEntityList,
                 pauseTimerEntityList,
                 adjustTimerEntityList,
-                skipTimerEntityList
+                skipTimerEntityList,
+                timerEntityList
             )
 
         }

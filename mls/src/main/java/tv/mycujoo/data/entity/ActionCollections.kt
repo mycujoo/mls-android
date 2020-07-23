@@ -15,5 +15,6 @@ data class ActionCollections(
     var startTimerEntityList: List<StartTimerEntity>,
     var pauseTimerEntityList: List<PauseTimerEntity>,
     var adjustTimerEntityList: List<AdjustTimerEntity>,
-    var skipTimerEntityList: List<SkipTimerEntity>
+    var skipTimerEntityList: List<SkipTimerEntity>,
+    var timerEntity: List<TimerEntity>
 )

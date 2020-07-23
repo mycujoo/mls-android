@@ -67,10 +67,31 @@ class TimeKeeper(private val dispatcher: CoroutineScope) {
     }
 
     fun getValue(name: String): String {
-        return timerRelayList.firstOrNull { it.timerCore.name == name }?.let { timerRelay ->
-            timerRelay.timerCore.getFormattedTime()
-        } ?: ""
+        return timerRelayList.firstOrNull { it.timerCore.name == name }?.timerCore?.getFormattedTime()
+            ?: ""
     }
 
+    /**
+     * calculates difference between current time and given offset,
+     *
+     */
+    fun fineTune(
+        timerName: String,
+        givenOffset: Long,
+        currentTime: Long
+    ) {
+        dispatcher.launch {
+            timerRelayList.firstOrNull { it.timerCore.name == timerName }?.let { timerRelay ->
+                timerRelay.timerCore.fineTuneTime(
+                    currentTime,
+                    givenOffset,
+                    timerRelay.timerValue,
+                    dispatcher
+                )
+            }
+        }
+
+
+    }
 
 }

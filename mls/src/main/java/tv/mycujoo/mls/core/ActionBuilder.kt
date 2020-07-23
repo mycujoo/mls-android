@@ -51,4 +51,10 @@ abstract class ActionBuilder {
      */
     abstract fun computeVariableNameValueTillNow()
     /**endregion */
+
+    /**
+     * re-calculate timers, on seek timers need to be calculated considering current-time
+     */
+    abstract fun recalculateTimers()
+
 }

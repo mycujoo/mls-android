@@ -92,7 +92,7 @@ class ActionBuilderImpl(
                 }
 
             actionCollections.startTimerEntityList.forEach {
-                if (isInCurrentTimeRange(it.offset) && isTimerCreated(it.name)){
+                if (isInCurrentTimeRange(it.offset) && isTimerCreated(it.name)) {
                     startTimer(it.name)
                 }
             }
@@ -191,6 +191,68 @@ class ActionBuilderImpl(
         )
         viewIdentifierManager.variableTranslator.setVariablesNameValueIfDifferent(variablesTillNow)
 
+    }
+
+    override fun recalculateTimers() {
+
+        appliedCreateTimer.clear()
+
+        if (this::actionCollections.isInitialized) {
+            actionCollections.createTimerEntityList.forEach {
+                if (isUpUntilNow(it.offset) && !isTimerCreated(it.name)) {
+                    createTimer(it)
+                }
+            }
+
+            appliedCreateTimer.forEach { appliedCreateTimer ->
+
+
+                actionCollections.timerEntity.firstOrNull { it.name == appliedCreateTimer }
+                    ?.let { timerEntity ->
+
+                        // start or pause
+                        val lastStartTimerEntity =
+                            timerEntity.startCommand.filter { it.name == appliedCreateTimer }
+                                .maxBy { it.offset }
+
+                        val lastPauseTimerEntity =
+                            timerEntity.pauseCommand.filter { it.name == appliedCreateTimer }
+                                .maxBy { it.offset }
+
+                        lastStartTimerEntity?.let {
+                            if (lastPauseTimerEntity != null && lastPauseTimerEntity.offset > it.offset) {
+                                pauseTimer(it.name)
+                            } else {
+                                startTimer(it.name)
+                                viewIdentifierManager.timeKeeper.fineTune(
+                                    appliedCreateTimer,
+                                    it.offset,
+                                    currentTime
+                                )
+                            }
+                        }
+
+                        // adjust
+                        timerEntity.adjustCommand.filter { isUpUntilNow(timerEntity.createCommand.offset) }
+                            .maxBy {
+                                it.offset
+                            }?.let {
+                                // todo [WIP]
+//                                viewIdentifierManager.timeKeeper.fineTune(
+//                                    appliedCreateTimer,
+//                                    it.offset,
+//                                    currentTime
+//                                )
+                            }
+
+
+                    }
+            }
+
+        }
+
+
+//        viewIdentifierManager.timeKeeper.recalculate(currentTime)
     }
 
     /**region Over-ridden Functions*/
@@ -365,6 +427,10 @@ class ActionBuilderImpl(
         return (offset >= currentTime) && (offset < currentTime + 1000L)
     }
 
+    private fun isUpUntilNow(offset: Long): Boolean {
+        return offset < currentTime
+    }
+
     private fun isTimerCreated(name: String): Boolean {
         return appliedCreateTimer.any { it == name }
     }
@@ -384,6 +450,10 @@ class ActionBuilderImpl(
 
     private fun startTimer(name: String) {
         viewIdentifierManager.timeKeeper.startTimer(name)
+    }
+
+    private fun pauseTimer(name: String) {
+        viewIdentifierManager.timeKeeper.pauseTimer(name)
     }
 
     private fun clearTimer(createTimerEntity: CreateTimerEntity) {

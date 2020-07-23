@@ -86,4 +86,18 @@ class TimerCore(
         }
     }
 
+    fun fineTuneTime(
+        now: Long,
+        givenOffset: Long,
+        timerRelay: BehaviorRelay<String>,
+        dispatcher: CoroutineScope
+    ) {
+        dispatcher.launch {
+            currentTime = now
+            val dif = currentTime - givenOffset
+            currentTime = (dif / 1000L) * step
+            timerRelay.accept(getFormattedTime())
+        }
+    }
+
 }

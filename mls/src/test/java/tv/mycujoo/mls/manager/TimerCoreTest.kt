@@ -311,6 +311,39 @@ class TimerCoreTest {
         assertEquals("20", actualValue)
     }
 
+    @Test
+    fun `given an create or adjust action offset, should fine tune time`() {
+        val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
+            ScreenTimerFormat.SECONDS,
+            0L,
+            1000L
+        )
+        timeKeeper.createTimer(createScreenTimerEntity)
+        var actualValue = ""
+
+        timeKeeper.observe(sampleName) { actualValue = it.second }
+        timeKeeper.fineTune(sampleName, 0L, 20000L)
+
+        assertEquals("20", actualValue)
+    }
+
+    @Test
+    fun `given multiple tune commands, should return last one`() {
+        val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
+            ScreenTimerFormat.SECONDS,
+            0L,
+            1000L
+        )
+        timeKeeper.createTimer(createScreenTimerEntity)
+        var actualValue = ""
+
+        timeKeeper.observe(sampleName) { actualValue = it.second }
+        timeKeeper.fineTune(sampleName, 0L, 10000L)
+        timeKeeper.fineTune(sampleName, 0L, 20000L)
+        timeKeeper.fineTune(sampleName, 0L, 30000L)
+
+        assertEquals("30", actualValue)
+    }
 
     private fun getSampleCreateScreenTimerEntity(
         format: ScreenTimerFormat,

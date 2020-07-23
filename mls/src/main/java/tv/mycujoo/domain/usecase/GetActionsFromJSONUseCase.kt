@@ -100,7 +100,7 @@ class GetActionsFromJSONUseCase {
                     "timeline_id": "tml_1"
                 },
                  {"data": {
-                        "duration": 150000,
+                        "duration": 990000,
                          "custom_id": "scoreboard2",
                          "position": {
                              "left": 5.0, 
