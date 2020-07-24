@@ -4,6 +4,7 @@ import okhttp3.*
 import tv.mycujoo.data.entity.ActionCollections
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.AnimationType.*
+import tv.mycujoo.domain.entity.OverlayAct.*
 import tv.mycujoo.mls.helper.ActionVariableHelper
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.CreateTimerEntity
@@ -32,6 +33,8 @@ class ActionBuilderImpl(
     private lateinit var actionCollections: ActionCollections
     private var appliedCreateTimer = ArrayList<String>()
 
+    private var overlayEntityList = ArrayList<OverlayEntity>()
+
 
     /**endregion */
 
@@ -39,6 +42,10 @@ class ActionBuilderImpl(
     // re-write
     override fun addOverlayObjects(overlayObject: List<OverlayObject>) {
         overlayObjects.addAll(overlayObject)
+        overlayObject.forEach {
+            overlayEntityList.add(it.toOverlayEntity())
+        }
+
     }
 
     override fun addSetVariableEntities(setVariables: List<SetVariableEntity>) {
@@ -54,6 +61,27 @@ class ActionBuilderImpl(
     }
 
     override fun buildCurrentTimeRange() {
+
+        // todo [WIP]
+        overlayEntityList.forEach {
+            val act = it.update(currentTime)
+            when (act) {
+                DO_NOTHING -> {
+                    // do nothing
+                }
+                INTRO -> {
+
+                }
+                OUTRO -> {
+
+                }
+                LINGERING_INTRO,
+                LINGERING_MIDWAY,
+                LINGERING_OUTRO -> {
+                    // should not happen
+                }
+            }
+        }
 
         overlayObjects.forEach { overlayObject ->
             if (isNotDownloading(overlayObject)

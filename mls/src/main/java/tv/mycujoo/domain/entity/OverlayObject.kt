@@ -7,4 +7,15 @@ data class OverlayObject(
     var introTransitionSpec: TransitionSpec,
     var outroTransitionSpec: TransitionSpec,
     val variablePlaceHolders: Map<String, String>
-)
+) {
+    fun toOverlayEntity(): OverlayEntity {
+        return OverlayEntity(
+            id,
+            svgData,
+            viewSpec,
+            introTransitionSpec,
+            outroTransitionSpec,
+            variablePlaceHolders
+        )
+    }
+}
