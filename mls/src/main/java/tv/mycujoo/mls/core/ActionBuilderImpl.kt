@@ -224,25 +224,25 @@ class ActionBuilderImpl(
                                 pauseTimer(it.name)
                             } else {
                                 startTimer(it.name)
-                                viewIdentifierManager.timeKeeper.fineTune(
+                                viewIdentifierManager.timeKeeper.tuneWithStartEntity(
                                     appliedCreateTimer,
-                                    it.offset,
+                                    it,
                                     currentTime
                                 )
                             }
                         }
 
                         // adjust
-                        timerEntity.adjustCommand.filter { isUpUntilNow(timerEntity.createCommand.offset) }
+                        timerEntity.adjustCommand.filter { isUpUntilNow(it.offset) }
                             .maxBy {
                                 it.offset
                             }?.let {
                                 // todo [WIP]
-//                                viewIdentifierManager.timeKeeper.fineTune(
-//                                    appliedCreateTimer,
-//                                    it.offset,
-//                                    currentTime
-//                                )
+                                viewIdentifierManager.timeKeeper.tuneWithAdjustEntity(
+                                    appliedCreateTimer,
+                                    it,
+                                    currentTime
+                                )
                             }
 
 
@@ -251,8 +251,6 @@ class ActionBuilderImpl(
 
         }
 
-
-//        viewIdentifierManager.timeKeeper.recalculate(currentTime)
     }
 
     /**region Over-ridden Functions*/

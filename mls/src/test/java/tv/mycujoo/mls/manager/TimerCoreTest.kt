@@ -7,6 +7,7 @@ import org.junit.Test
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerFormat
 import tv.mycujoo.mls.widgets.CreateTimerEntity
+import tv.mycujoo.mls.widgets.StartTimerEntity
 import kotlin.test.assertEquals
 
 @ExperimentalCoroutinesApi
@@ -312,7 +313,7 @@ class TimerCoreTest {
     }
 
     @Test
-    fun `given an create or adjust action offset, should fine tune time`() {
+    fun `given a start command, should tune time`() {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
             0L,
@@ -320,15 +321,17 @@ class TimerCoreTest {
         )
         timeKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
-
         timeKeeper.observe(sampleName) { actualValue = it.second }
-        timeKeeper.fineTune(sampleName, 0L, 20000L)
+
+
+        timeKeeper.tuneWithStartEntity(sampleName, StartTimerEntity(sampleName, 0L), 20000L)
+
 
         assertEquals("20", actualValue)
     }
 
     @Test
-    fun `given multiple tune commands, should return last one`() {
+    fun `given multiple start commands, should return last one`() {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
             0L,
@@ -336,11 +339,13 @@ class TimerCoreTest {
         )
         timeKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
-
         timeKeeper.observe(sampleName) { actualValue = it.second }
-        timeKeeper.fineTune(sampleName, 0L, 10000L)
-        timeKeeper.fineTune(sampleName, 0L, 20000L)
-        timeKeeper.fineTune(sampleName, 0L, 30000L)
+
+
+        timeKeeper.tuneWithStartEntity(sampleName, StartTimerEntity(sampleName, 0L), 10000L)
+        timeKeeper.tuneWithStartEntity(sampleName, StartTimerEntity(sampleName, 0L), 20000L)
+        timeKeeper.tuneWithStartEntity(sampleName, StartTimerEntity(sampleName, 0L), 30000L)
+
 
         assertEquals("30", actualValue)
     }

@@ -256,6 +256,15 @@ class GetActionsFromJSONUseCase {
 					"data": {
 						"name": "${"$"}scoreboardTimer"
 					}
+				},
+				{
+					"id": "436ggg54wt5ty45t4w",
+                    "offset": 120000,
+					"type": "adjust_timer",
+					"data": {
+						"name": "${"$"}scoreboardTimer",
+						"value": 30000
+					}
 				}
             ]
         }

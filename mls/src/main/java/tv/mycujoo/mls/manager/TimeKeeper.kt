@@ -3,7 +3,9 @@ package tv.mycujoo.mls.manager
 import com.jakewharton.rxrelay3.BehaviorRelay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import tv.mycujoo.mls.widgets.AdjustTimerEntity
 import tv.mycujoo.mls.widgets.CreateTimerEntity
+import tv.mycujoo.mls.widgets.StartTimerEntity
 
 class TimeKeeper(private val dispatcher: CoroutineScope) {
 
@@ -72,19 +74,42 @@ class TimeKeeper(private val dispatcher: CoroutineScope) {
     }
 
     /**
-     * calculates difference between current time and given offset,
+     * calculates difference between current time and given StartTimerEntity,
      *
      */
-    fun fineTune(
+    fun tuneWithStartEntity(
         timerName: String,
-        givenOffset: Long,
+        startTimerEntity: StartTimerEntity,
         currentTime: Long
     ) {
         dispatcher.launch {
             timerRelayList.firstOrNull { it.timerCore.name == timerName }?.let { timerRelay ->
-                timerRelay.timerCore.fineTuneTime(
+                timerRelay.timerCore.tuneWithStartEntity(
                     currentTime,
-                    givenOffset,
+                    startTimerEntity,
+                    timerRelay.timerValue,
+                    dispatcher
+                )
+            }
+        }
+
+
+    }
+
+    /**
+     * calculates difference between current time and given AdjustTimerEntity,
+     *
+     */
+    fun tuneWithAdjustEntity(
+        timerName: String,
+        adjustTimerEntity: AdjustTimerEntity,
+        currentTime: Long
+    ) {
+        dispatcher.launch {
+            timerRelayList.firstOrNull { it.timerCore.name == timerName }?.let { timerRelay ->
+                timerRelay.timerCore.tuneWithAdjustEntity(
+                    currentTime,
+                    adjustTimerEntity,
                     timerRelay.timerValue,
                     dispatcher
                 )

@@ -7,6 +7,8 @@ import kotlinx.coroutines.launch
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerFormat
 import tv.mycujoo.mls.model.ScreenTimerFormat.*
+import tv.mycujoo.mls.widgets.AdjustTimerEntity
+import tv.mycujoo.mls.widgets.StartTimerEntity
 
 class TimerCore(
     val name: String,
@@ -86,16 +88,30 @@ class TimerCore(
         }
     }
 
-    fun fineTuneTime(
+    fun tuneWithStartEntity(
         now: Long,
-        givenOffset: Long,
+        startTimerEntity: StartTimerEntity,
         timerRelay: BehaviorRelay<String>,
         dispatcher: CoroutineScope
     ) {
         dispatcher.launch {
             currentTime = now
-            val dif = currentTime - givenOffset
+            val dif = currentTime - startTimerEntity.offset
             currentTime = (dif / 1000L) * step
+            timerRelay.accept(getFormattedTime())
+        }
+    }
+
+    fun tuneWithAdjustEntity(
+        now: Long,
+        adjustTimerEntity: AdjustTimerEntity,
+        timerRelay: BehaviorRelay<String>,
+        dispatcher: CoroutineScope
+    ) {
+        dispatcher.launch {
+            val passedTimeFromAdjust = now - adjustTimerEntity.offset
+            currentTime = (passedTimeFromAdjust / 1000L) * step
+            currentTime += adjustTimerEntity.value
             timerRelay.accept(getFormattedTime())
         }
     }
