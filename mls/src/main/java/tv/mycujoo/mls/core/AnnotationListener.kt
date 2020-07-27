@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.core
 
+import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.OverlayObject
 
 interface AnnotationListener {
@@ -12,15 +13,12 @@ interface AnnotationListener {
      * might or might not have intro animation
      *
      */
-    fun onNewOverlay(overlayObject: OverlayObject)
-
     /**
      * removes an overlay which:
      * is already displayed,
      * might or might not have outro animation
      *
      */
-    fun onRemovalOverlay(overlayObject: OverlayObject)
 
     /**
      * clears entire screen
@@ -81,4 +79,6 @@ interface AnnotationListener {
         overlayObject: OverlayObject
     )
 
+    fun addOverlay(overlayEntity: OverlayEntity)
+    fun removeOverlay(overlayEntity: OverlayEntity)
 }

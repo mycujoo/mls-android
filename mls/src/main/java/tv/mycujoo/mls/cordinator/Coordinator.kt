@@ -37,22 +37,24 @@ class Coordinator(
 
         val annotationListener = object : AnnotationListener {
 
-            // re-write
-            override fun onNewOverlay(overlayObject: OverlayObject) {
-                if (overlayObject.introTransitionSpec.animationType == AnimationType.NONE) {
-                    playerViewWrapper.onNewOverlayWithNoAnimation(overlayObject)
+            override fun addOverlay(overlayEntity: OverlayEntity) {
+                if (overlayEntity.introTransitionSpec.animationType == AnimationType.NONE) {
+                    playerViewWrapper.onNewOverlayWithNoAnimation(overlayEntity)
                 } else {
-                    playerViewWrapper.onNewOverlayWithAnimation(overlayObject)
+                    playerViewWrapper.onNewOverlayWithAnimation(overlayEntity)
                 }
             }
 
-            override fun onRemovalOverlay(overlayObject: OverlayObject) {
-                if (overlayObject.outroTransitionSpec.animationType == AnimationType.NONE) {
-                    playerViewWrapper.onOverlayRemovalWithNoAnimation(overlayObject)
+            override fun removeOverlay(overlayEntity: OverlayEntity) {
+                overlayEntity.isOnScreen = false
+                if (overlayEntity.outroTransitionSpec.animationType == AnimationType.NONE) {
+                    playerViewWrapper.onOverlayRemovalWithNoAnimation(overlayEntity)
                 } else {
-                    playerViewWrapper.onOverlayRemovalWithAnimation(overlayObject)
+                    playerViewWrapper.onOverlayRemovalWithAnimation(overlayEntity)
                 }
             }
+
+            // re-write
 
             override fun clearScreen(idList: List<String>) {
                 playerViewWrapper.clearScreen(idList)

@@ -23,12 +23,14 @@ import com.google.android.exoplayer2.ui.AspectRatioFrameLayout.RESIZE_MODE_FIXED
 import com.google.android.exoplayer2.ui.PlayerView
 import kotlinx.android.synthetic.main.dialog_information_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
+import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.OverlayObject
 import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.extensions.getDisplaySize
+import tv.mycujoo.mls.helper.OverlayEntityViewHelper
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.TimelineMarkerManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
@@ -392,8 +394,51 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     /**endregion */
 
+    // using overlay-entity
+
+    fun onNewOverlayWithNoAnimation(overlayEntity: OverlayEntity) {
+        OverlayEntityViewHelper.addViewWithNoAnimation(
+            context,
+            overlayHost,
+            overlayEntity,
+            viewIdentifierManager
+        )
+    }
+
+
+    fun onNewOverlayWithAnimation(overlayEntity: OverlayEntity) {
+        OverlayEntityViewHelper.addViewWithAnimation(
+            context,
+            overlayHost,
+            overlayEntity,
+            viewIdentifierManager
+        )
+    }
+
+    fun onOverlayRemovalWithNoAnimation(overlayEntity: OverlayEntity) {
+        overlayHost.children.filter { it.tag == overlayEntity.id }
+            .forEach {
+                if (this::viewIdentifierManager.isInitialized) {
+                    viewIdentifierManager.detachOverlayView(it)
+                    viewIdentifierManager.removeAnimation(overlayEntity.id)
+                }
+                overlayHost.removeView(it)
+            }
+
+    }
+
+    fun onOverlayRemovalWithAnimation(overlayEntity: OverlayEntity) {
+        OverlayEntityViewHelper.removalViewWithAnimation(
+            context,
+            overlayHost,
+            overlayEntity,
+            viewIdentifierManager
+        )
+    }
+
 
     // re-write
+
 
     fun onNewOverlayWithNoAnimation(overlayObject: OverlayObject) {
         OverlayViewHelper.addViewWithNoAnimation(

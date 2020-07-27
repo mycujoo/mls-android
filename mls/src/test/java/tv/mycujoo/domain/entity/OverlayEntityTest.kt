@@ -14,7 +14,7 @@ class OverlayEntityTest {
 
     /**region Regular play mode*/
     @Test
-    fun `given update in 1 second range of intro offset, should return INTRO act`() {
+    fun `given update() in 1 second range of intro offset, should return INTRO act`() {
         val sampleOverlayEntity = getSampleOverlayEntity(ONE_SECONDS, FIVE_SECONDS)
 
 
@@ -27,7 +27,7 @@ class OverlayEntityTest {
     }
 
     @Test
-    fun `given update in 1 second range of intro offset, should not return INTRO act if its onscreen`() {
+    fun `given update() in 1 second range of intro offset, should not return INTRO act if its onscreen`() {
         val sampleOverlayEntity = getSampleOverlayEntity(ONE_SECONDS, FIVE_SECONDS)
         sampleOverlayEntity.isOnScreen = true
 
@@ -41,7 +41,7 @@ class OverlayEntityTest {
     }
 
     @Test
-    fun `given update out of 1 second range of intro offset, should not return INTRO act`() {
+    fun `given update() out of 1 second range of intro offset, should not return INTRO act`() {
         val sampleOverlayEntity = getSampleOverlayEntity(ONE_SECONDS, FIVE_SECONDS)
 
 
@@ -54,7 +54,7 @@ class OverlayEntityTest {
     }
 
     @Test
-    fun `given update in 1 second range of outro offset, should return OUTRO act`() {
+    fun `given update() in 1 second range of outro offset, should return OUTRO act`() {
         val sampleOverlayEntity = getSampleOverlayEntity(ONE_SECONDS, FIVE_SECONDS)
         sampleOverlayEntity.isOnScreen = true
 
@@ -68,20 +68,20 @@ class OverlayEntityTest {
     }
 
     @Test
-    fun `given update out of 1 second range of outro offset, should not return OUTRO act if its offscreen `() {
+    fun `given update() out of 1 second range of outro offset, should return DO_NOTHING`() {
         val sampleOverlayEntity = getSampleOverlayEntity(ONE_SECONDS, FIVE_SECONDS)
 
 
-        val overlayAct4001ms = sampleOverlayEntity.update(4001L)
-        val overlayAct5000ms = sampleOverlayEntity.update(5000L)
+        val overlayAct6000ms = sampleOverlayEntity.update(6000L)
+        val overlayAct7000ms = sampleOverlayEntity.update(7000L)
 
 
-        assertNotEquals(OverlayAct.OUTRO, overlayAct4001ms)
-        assertNotEquals(OverlayAct.OUTRO, overlayAct5000ms)
+        assertEquals(OverlayAct.DO_NOTHING, overlayAct6000ms)
+        assertEquals(OverlayAct.DO_NOTHING, overlayAct7000ms)
     }
 
     @Test
-    fun `given update before 1 second range of intro offset, should return DO_NOTHING act`() {
+    fun `given update() before 1 second range of intro offset, should return DO_NOTHING act`() {
         val sampleOverlayEntity = getSampleOverlayEntity(FIFTEEN_SECONDS, TWENTY_FIVE_SECONDS)
 
 
@@ -96,23 +96,54 @@ class OverlayEntityTest {
 
     /**region Seek or Jumped play mode*/
     @Test
-    fun `given forceUpdate before 1 second range of intro offset, should return DO_NOTHING`() {
+    fun `given forceUpdate before 1 second range of intro offset, should return LINGERING_REMOVE`() {
         val sampleOverlayEntity = getSampleOverlayEntity(FIFTEEN_SECONDS, TWENTY_FIVE_SECONDS)
 
 
         val overlayAct0ms = sampleOverlayEntity.forceUpdate(0L)
-        val overlayAct1400ms = sampleOverlayEntity.forceUpdate(1400L)
+        val overlayAct1400ms = sampleOverlayEntity.forceUpdate(14000L)
 
 
-        assertEquals(OverlayAct.DO_NOTHING, overlayAct0ms)
-        assertEquals(OverlayAct.DO_NOTHING, overlayAct1400ms)
+        assertEquals(OverlayAct.LINGERING_REMOVE, overlayAct0ms)
+        assertEquals(OverlayAct.LINGERING_REMOVE, overlayAct1400ms)
+    }
+
+    @Test
+    fun `given forceUpdate after outro offset without animation, should return LINGERING_REMOVE`() {
+        val introTransitionSpec = TransitionSpec(FIFTEEN_SECONDS, AnimationType.NONE, ONE_SECONDS)
+        val outroTransitionSpec =
+            TransitionSpec(TWENTY_FIVE_SECONDS, AnimationType.NONE, 0L)
+        val sampleOverlayEntity = getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
+
+
+        val overlayAct20001ms = sampleOverlayEntity.forceUpdate(20001L)
+        val overlayAct26000ms = sampleOverlayEntity.forceUpdate(26000L)
+
+
+        assertEquals(OverlayAct.LINGERING_REMOVE, overlayAct20001ms)
+        assertEquals(OverlayAct.LINGERING_REMOVE, overlayAct26000ms)
+    }
+
+    @Test
+    fun `given forceUpdate after outro animation range, should return LINGERING_REMOVE`() {
+        val introTransitionSpec = TransitionSpec(FIFTEEN_SECONDS, AnimationType.NONE, ONE_SECONDS)
+        val outroTransitionSpec =
+            TransitionSpec(TWENTY_FIVE_SECONDS, AnimationType.FADE_OUT, ONE_SECONDS)
+        val sampleOverlayEntity = getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
+
+
+        val overlayAct26000ms = sampleOverlayEntity.forceUpdate(26000L)
+        val overlayAct27000ms = sampleOverlayEntity.forceUpdate(27000L)
+
+
+        assertEquals(OverlayAct.LINGERING_REMOVE, overlayAct26000ms)
+        assertEquals(OverlayAct.LINGERING_REMOVE, overlayAct27000ms)
     }
 
     @Test
     fun `given forceUpdate in intro animation range, should return LINGERING_INTRO`() {
         val introTransitionSpec = TransitionSpec(FIFTEEN_SECONDS, AnimationType.NONE, ONE_SECONDS)
         val sampleOverlayEntity = getSampleOverlayEntity(introTransitionSpec, TWENTY_FIVE_SECONDS)
-        sampleOverlayEntity.isOnScreen = true
 
 
         val overlayAct15000ms = sampleOverlayEntity.forceUpdate(15000L)
@@ -124,12 +155,42 @@ class OverlayEntityTest {
     }
 
     @Test
+    fun `given forceUpdate after into offset and before outro offset, should return LINGERING_MIDWAY`() {
+        val introTransitionSpec = TransitionSpec(FIFTEEN_SECONDS, AnimationType.NONE, ONE_SECONDS)
+        val outroTransitionSpec =
+            TransitionSpec(TWENTY_FIVE_SECONDS, AnimationType.FADE_OUT, ONE_SECONDS)
+        val sampleOverlayEntity = getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
+
+
+        val overlayAct16000ms = sampleOverlayEntity.forceUpdate(16000L)
+        val overlayAct24999ms = sampleOverlayEntity.forceUpdate(24999L)
+
+
+        assertEquals(OverlayAct.LINGERING_MIDWAY, overlayAct16000ms)
+        assertEquals(OverlayAct.LINGERING_MIDWAY, overlayAct24999ms)
+    }
+
+    @Test
+    fun `given forceUpdate after into offset when no outro offset is available, should return LINGERING_MIDWAY`() {
+        val introTransitionSpec = TransitionSpec(FIFTEEN_SECONDS, AnimationType.NONE, ONE_SECONDS)
+        val outroTransitionSpec = TransitionSpec(INVALID, AnimationType.UNSPECIFIED, 0L)
+        val sampleOverlayEntity = getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
+
+
+        val overlayAct16000ms = sampleOverlayEntity.forceUpdate(16000L)
+        val overlayAct1000000ms = sampleOverlayEntity.forceUpdate(1000000L)
+
+
+        assertEquals(OverlayAct.LINGERING_MIDWAY, overlayAct16000ms)
+        assertEquals(OverlayAct.LINGERING_MIDWAY, overlayAct1000000ms)
+    }
+
+    @Test
     fun `given forceUpdate in outro animation range, should return LINGERING_OUTRO if outro has valid animation`() {
         val introTransitionSpec = TransitionSpec(FIFTEEN_SECONDS, AnimationType.NONE, ONE_SECONDS)
         val outroTransitionSpec =
             TransitionSpec(TWENTY_FIVE_SECONDS, AnimationType.FADE_OUT, ONE_SECONDS)
         val sampleOverlayEntity = getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
-        sampleOverlayEntity.isOnScreen = true
 
 
         val overlayAct15000ms = sampleOverlayEntity.forceUpdate(25000L)
@@ -146,7 +207,6 @@ class OverlayEntityTest {
         val outroTransitionSpec =
             TransitionSpec(TWENTY_FIVE_SECONDS, AnimationType.NONE, ONE_SECONDS)
         val sampleOverlayEntity = getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
-        sampleOverlayEntity.isOnScreen = true
 
 
         val overlayAct15000ms = sampleOverlayEntity.forceUpdate(25000L)
@@ -163,7 +223,6 @@ class OverlayEntityTest {
         val outroTransitionSpec =
             TransitionSpec(TWENTY_FIVE_SECONDS, AnimationType.NONE, ONE_SECONDS)
         val sampleOverlayEntity = getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
-        sampleOverlayEntity.isOnScreen = true
 
 
         val overlayAct0ms = sampleOverlayEntity.forceUpdate(0L)
@@ -182,8 +241,9 @@ class OverlayEntityTest {
 
     /**endregion */
 
-
+    /**region Inner class*/
     companion object {
+        private const val INVALID = -1L
         private const val ONE_SECONDS = 1000L
         private const val FIVE_SECONDS = 5000L
         private const val FIFTEEN_SECONDS = 15000L
@@ -242,4 +302,5 @@ class OverlayEntityTest {
             emptyMap()
         )
     }
+    /**endregion */
 }

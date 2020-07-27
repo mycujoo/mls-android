@@ -63,69 +63,48 @@ class ActionBuilderImpl(
     override fun buildCurrentTimeRange() {
 
         // todo [WIP]
-        overlayEntityList.forEach {
-            val act = it.update(currentTime)
+        overlayEntityList.forEach { overlayEntity ->
+            val act = overlayEntity.update(currentTime)
             when (act) {
                 DO_NOTHING -> {
                     // do nothing
                 }
                 INTRO -> {
-
+                    downloadSVGThenCallListener(overlayEntity) { listener.addOverlay(it) }
                 }
                 OUTRO -> {
-
+                    listener.removeOverlay(overlayEntity)
                 }
+
                 LINGERING_INTRO,
                 LINGERING_MIDWAY,
-                LINGERING_OUTRO -> {
+                LINGERING_OUTRO,
+                LINGERING_REMOVE -> {
                     // should not happen
                 }
             }
         }
 
-        overlayObjects.forEach { overlayObject ->
-            if (isNotDownloading(overlayObject)
-                && isNotAttached(overlayObject)
-                && additionIsInCurrentTimeRange(overlayObject)
-            ) {
-                downloadSVGThenCallListener(overlayObject) { listener.onNewOverlay(it) }
-            } else if (isNotDownloading(overlayObject) && isAttached(overlayObject) && shouldNotBeOnScreen(
-                    overlayObject
-                ) && isNotInDisplayingAnimation(overlayObject)
-            ) {
-                listener.onRemovalOverlay(overlayObject)
-            }
-        }
-
-
-        overlayObjects.filter {
-            isNotInDisplayingAnimation(it) && isAttached(it) && removalIsInCurrentTimeRange(
-                it
-            )
-        }.forEach {
-            listener.onRemovalOverlay(it)
-        }
-
-        // todo [WIP]
-        if (this::actionCollections.isInitialized) {
-            actionCollections.createTimerEntityList
-                .forEach {
-                    if (isInCurrentTimeRange(it.offset) && !isTimerCreated(it.name)) {
-                        createTimer(it)
-                    } else {
-                        if (shouldBeKilled(it)) {
-                            clearTimer(it)
-                        }
-                    }
-                }
-
-            actionCollections.startTimerEntityList.forEach {
-                if (isInCurrentTimeRange(it.offset) && isTimerCreated(it.name)) {
-                    startTimer(it.name)
-                }
-            }
-
-        }
+        // timer todo [WIP]
+//        if (this::actionCollections.isInitialized) {
+//            actionCollections.createTimerEntityList
+//                .forEach {
+//                    if (isInCurrentTimeRange(it.offset) && !isTimerCreated(it.name)) {
+//                        createTimer(it)
+//                    } else {
+//                        if (shouldBeKilled(it)) {
+//                            clearTimer(it)
+//                        }
+//                    }
+//                }
+//
+//            actionCollections.startTimerEntityList.forEach {
+//                if (isInCurrentTimeRange(it.offset) && isTimerCreated(it.name)) {
+//                    startTimer(it.name)
+//                }
+//            }
+//
+//        }
 
     }
 
@@ -206,7 +185,7 @@ class ActionBuilderImpl(
                 isAttached(overlayObject) &&
                 shouldNotBeOnScreen(overlayObject)
             ) {
-                listener.onRemovalOverlay(overlayObject)
+                listener.removeOverlay(overlayObject.toOverlayEntity())
             }
         }
     }
@@ -519,6 +498,48 @@ class ActionBuilderImpl(
 
                     callback(
                         overlayObject.copy(
+                            svgData = SvgData(svgUrl, null, svgString)
+                        )
+                    )
+                }
+            }
+        })
+    }
+
+    private fun downloadSVGThenCallListener(
+        overlayEntity: OverlayEntity,
+        callback: (OverlayEntity) -> Unit
+    ) {
+        overlayEntity.isDownloading = true
+
+        val svgUrl = overlayEntity.svgData!!.svgUrl!!
+        val request: Request = Request.Builder().url(svgUrl).build()
+        okHttpClient.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                overlayEntity.isDownloading = false
+
+                println(
+                    "MLS-App AnnotationBuilderImpl - getInputStream() onFailure"
+                )
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+
+                if (response.isSuccessful && response.body() != null) {
+
+                    val stringBuilder = StringBuilder()
+
+                    val scanner = Scanner(response.body()!!.byteStream())
+                    while (scanner.hasNext()) {
+                        stringBuilder.append(scanner.nextLine())
+                    }
+                    val svgString = stringBuilder.toString()
+
+                    overlayEntity.isDownloading = false
+                    overlayEntity.isOnScreen = true
+
+                    callback(
+                        overlayEntity.copy(
                             svgData = SvgData(svgUrl, null, svgString)
                         )
                     )

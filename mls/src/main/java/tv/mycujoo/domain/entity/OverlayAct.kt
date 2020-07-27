@@ -10,6 +10,7 @@ enum class OverlayAct {
     // seek or jump play mode
     LINGERING_INTRO,
     LINGERING_MIDWAY,
-    LINGERING_OUTRO;
+    LINGERING_OUTRO,
+    LINGERING_REMOVE;
 
 }

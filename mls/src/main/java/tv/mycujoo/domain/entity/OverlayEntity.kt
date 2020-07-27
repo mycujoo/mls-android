@@ -43,7 +43,7 @@ data class OverlayEntity(
             return OverlayAct.LINGERING_OUTRO
         }
 
-        return OverlayAct.DO_NOTHING
+        return OverlayAct.LINGERING_REMOVE
     }
 
 
@@ -75,7 +75,7 @@ data class OverlayEntity(
         val rightBound =
             introTransitionSpec.offset + introTransitionSpec.animationDuration
 
-        return (leftBound <= currentTime) && (currentTime <= rightBound)
+        return (leftBound <= currentTime) && (currentTime < rightBound)
     }
 
     private fun isLingeringInMidway(currentTime: Long): Boolean {
@@ -140,7 +140,7 @@ data class OverlayEntity(
         val rightBound =
             outroTransitionSpec.offset + outroTransitionSpec.animationDuration
 
-        return (leftBound <= currentTime) && (currentTime <= rightBound)
+        return (leftBound <= currentTime) && (currentTime < rightBound)
     }
 
     private fun hasEnteringAnimation(animationType: AnimationType): Boolean {
