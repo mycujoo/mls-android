@@ -134,7 +134,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         exoPlayer: SimpleExoPlayer
     ) {
         if (BuildConfig.DEBUG) {
-            YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE)
+//            YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE)
         }
         val youboraOptions = Options()
         //todo : use mls specific Youbora account

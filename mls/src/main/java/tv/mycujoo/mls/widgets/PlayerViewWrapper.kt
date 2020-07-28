@@ -24,14 +24,12 @@ import com.google.android.exoplayer2.ui.PlayerView
 import kotlinx.android.synthetic.main.dialog_information_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
 import tv.mycujoo.domain.entity.OverlayEntity
-import tv.mycujoo.domain.entity.OverlayObject
 import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.extensions.getDisplaySize
 import tv.mycujoo.mls.helper.OverlayEntityViewHelper
-import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.TimelineMarkerManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.PlayerViewWrapper.LiveState.*
@@ -396,6 +394,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     // using overlay-entity
 
+    //regular play-mode
     fun onNewOverlayWithNoAnimation(overlayEntity: OverlayEntity) {
         OverlayEntityViewHelper.addViewWithNoAnimation(
             context,
@@ -419,7 +418,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         overlayHost.children.filter { it.tag == overlayEntity.id }
             .forEach {
                 if (this::viewIdentifierManager.isInitialized) {
-                    viewIdentifierManager.detachOverlayView(it)
+                    viewIdentifierManager.detachOverlayView(it as ScaffoldView)
                     viewIdentifierManager.removeAnimation(overlayEntity.id)
                 }
                 overlayHost.removeView(it)
@@ -436,47 +435,92 @@ class PlayerViewWrapper @JvmOverloads constructor(
         )
     }
 
-
-    // re-write
-
-
-    fun onNewOverlayWithNoAnimation(overlayObject: OverlayObject) {
-        OverlayViewHelper.addViewWithNoAnimation(
-            context,
+    // seek or jump play-mode
+    fun addLingeringIntroOverlay(
+        overlayEntity: OverlayEntity,
+        animationPosition: Long,
+        isPlaying: Boolean
+    ) {
+        OverlayEntityViewHelper.addLingeringIntroOverlay(
             overlayHost,
-            overlayObject,
+            overlayEntity,
+            animationPosition,
+            isPlaying,
             viewIdentifierManager
         )
     }
 
-    fun onNewOverlayWithAnimation(overlayObject: OverlayObject) {
-        OverlayViewHelper.addViewWithAnimation(
-            context,
+
+    fun updateLingeringIntroOverlay(
+        overlayEntity: OverlayEntity,
+        animationPosition: Long,
+        isPlaying: Boolean
+    ) {
+        OverlayEntityViewHelper.updateLingeringIntroOverlay(
             overlayHost,
-            overlayObject,
+            overlayEntity,
+            animationPosition,
+            isPlaying,
             viewIdentifierManager
         )
     }
 
-    fun onOverlayRemovalWithNoAnimation(overlayObject: OverlayObject) {
-        overlayHost.children.filter { it.tag == overlayObject.id }
+
+    fun addLingeringOutroOverlay(
+        overlayEntity: OverlayEntity,
+        animationPosition: Long,
+        isPlaying: Boolean
+    ) {
+        OverlayEntityViewHelper.addLingeringOutroOverlay(
+            overlayHost,
+            overlayEntity,
+            animationPosition,
+            isPlaying,
+            viewIdentifierManager
+        )
+    }
+
+
+    fun updateLingeringOutroOverlay(
+        overlayEntity: OverlayEntity,
+        animationPosition: Long,
+        isPlaying: Boolean
+    ) {
+        OverlayEntityViewHelper.updateLingeringOutroOverlay(
+            overlayHost,
+            overlayEntity,
+            animationPosition,
+            isPlaying,
+            viewIdentifierManager
+        )
+    }
+
+    fun addLingeringMidwayOverlay(overlayEntity: OverlayEntity) {
+        OverlayEntityViewHelper.addViewWithNoAnimation(
+            context,
+            overlayHost,
+            overlayEntity,
+            viewIdentifierManager
+        )
+    }
+
+    fun updateLingeringMidwayOverlay(overlayEntity: OverlayEntity) {
+        OverlayEntityViewHelper.updateLingeringMidwayOverlay(
+            overlayHost,
+            overlayEntity,
+            viewIdentifierManager
+        )
+    }
+
+    fun removeLingeringOverlay(overlayEntity: OverlayEntity) {
+        overlayHost.children.filter { it.tag == overlayEntity.id }
             .forEach {
                 if (this::viewIdentifierManager.isInitialized) {
-                    viewIdentifierManager.detachOverlayView(it)
-                    viewIdentifierManager.removeAnimation(overlayObject.id)
+                    viewIdentifierManager.detachOverlayView(it as ScaffoldView)
+                    viewIdentifierManager.removeAnimation(overlayEntity.id)
                 }
                 overlayHost.removeView(it)
             }
-
-    }
-
-    fun onOverlayRemovalWithAnimation(overlayObject: OverlayObject) {
-        OverlayViewHelper.removalViewWithAnimation(
-            context,
-            overlayHost,
-            overlayObject,
-            viewIdentifierManager
-        )
     }
 
     fun clearScreen(idList: List<String>) {
@@ -484,7 +528,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             .forEach {
                 if (idList.contains(it.tag)) {
                     if (this::viewIdentifierManager.isInitialized) {
-                        viewIdentifierManager.detachOverlayView(it)
+                        viewIdentifierManager.detachOverlayView(it as ScaffoldView)
                         viewIdentifierManager.removeAnimation(it.tag as String)
                     }
                     overlayHost.removeView(it)
@@ -494,33 +538,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
         viewIdentifierManager.clearAll()
     }
 
-    fun onLingeringIntroAnimationOverlay(
-        overlayObject: OverlayObject,
-        animationPosition: Long,
-        isPlaying: Boolean
-    ) {
-        OverlayViewHelper.onLingeringIntroAnimationOverlay(
-            overlayHost,
-            overlayObject,
-            animationPosition,
-            isPlaying,
-            viewIdentifierManager
-        )
-    }
-
-    fun onLingeringOutroAnimationOverlay(
-        overlayObject: OverlayObject,
-        animationPosition: Long,
-        isPlaying: Boolean
-    ) {
-        OverlayViewHelper.onLingeringOutroAnimationOverlay(
-            overlayHost,
-            overlayObject,
-            animationPosition,
-            isPlaying,
-            viewIdentifierManager
-        )
-    }
 
     /**region Over-ridden Functions*/
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -529,27 +546,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
             onSizeChangedCallback.invoke()
         }
     }
-
-    fun updateLingeringOverlay(
-        overlayObject: OverlayObject,
-        animationPosition: Long,
-        isPlaying: Boolean
-    ) {
-        post {
-            viewIdentifierManager.getAnimationWithTag(overlayObject.id)?.let {
-
-                it.currentPlayTime = animationPosition
-
-                if (isPlaying) {
-                    it.resume()
-                } else {
-                    it.pause()
-                }
-            }
-
-        }
-    }
-
     /**endregion */
 
     /**region Classes*/

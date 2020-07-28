@@ -27,14 +27,14 @@ class OverlayFactory {
 
             overlayObject.variablePlaceHolders.forEach { entry ->
                 // VALUE of place-holder, is the KEY in the set_variable map
-                variableTranslator.createVariableLiveEventIfNotExisted(entry.value)
+                variableTranslator.createVariableLiveEventIfNotExisted(entry)
                 variableTranslator.observe(
-                    entry.value
+                    entry
                 ) { scaffoldView.onVariableUpdated(it) }
             }
 
             overlayObject.variablePlaceHolders.forEach { entry ->
-                timeKeeper.observe(entry.value) { scaffoldView.onVariableUpdated(it) }
+                timeKeeper.observe(entry) { scaffoldView.onVariableUpdated(it) }
             }
 
             return scaffoldView
@@ -56,14 +56,14 @@ class OverlayFactory {
 
             overlayEntity.variablePlaceHolders.forEach { entry ->
                 // VALUE of place-holder, is the KEY in the set_variable map
-                variableTranslator.createVariableLiveEventIfNotExisted(entry.value)
+                variableTranslator.createVariableLiveEventIfNotExisted(entry)
                 variableTranslator.observe(
-                    entry.value
+                    entry
                 ) { scaffoldView.onVariableUpdated(it) }
             }
 
             overlayEntity.variablePlaceHolders.forEach { entry ->
-                timeKeeper.observe(entry.value) { scaffoldView.onVariableUpdated(it) }
+                timeKeeper.observe(entry) { scaffoldView.onVariableUpdated(it) }
             }
 
             return scaffoldView
@@ -84,9 +84,9 @@ class OverlayFactory {
 
             overlayObject.variablePlaceHolders.forEach { entry ->
                 // VALUE of place-holder, is the KEY in the set_variable map
-                variableTranslator.createVariableLiveEventIfNotExisted(entry.value)
+                variableTranslator.createVariableLiveEventIfNotExisted(entry)
                 variableTranslator.observe(
-                    entry.value
+                    entry
                 ) { scaffoldView.onVariableUpdated(it) }
             }
 

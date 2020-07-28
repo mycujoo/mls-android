@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.core
 
+import android.util.Log
 import okhttp3.*
 import tv.mycujoo.data.entity.ActionCollections
 import tv.mycujoo.domain.entity.*
@@ -86,87 +87,70 @@ class ActionBuilderImpl(
         }
 
         // timer todo [WIP]
-//        if (this::actionCollections.isInitialized) {
-//            actionCollections.createTimerEntityList
-//                .forEach {
-//                    if (isInCurrentTimeRange(it.offset) && !isTimerCreated(it.name)) {
-//                        createTimer(it)
-//                    } else {
-//                        if (shouldBeKilled(it)) {
-//                            clearTimer(it)
-//                        }
-//                    }
-//                }
-//
-//            actionCollections.startTimerEntityList.forEach {
-//                if (isInCurrentTimeRange(it.offset) && isTimerCreated(it.name)) {
-//                    startTimer(it.name)
-//                }
-//            }
-//
-//        }
+        if (this::actionCollections.isInitialized) {
+            actionCollections.createTimerEntityList
+                .forEach {
+                    if (isInCurrentTimeRange(it.offset) && !isTimerCreated(it.name)) {
+                        createTimer(it)
+                    } else {
+                        if (shouldBeKilled(it)) {
+                            clearTimer(it)
+                        }
+                    }
+                }
+
+            actionCollections.startTimerEntityList.forEach {
+                if (isInCurrentTimeRange(it.offset) && isTimerCreated(it.name)) {
+                    startTimer(it.name)
+                }
+            }
+
+        }
 
     }
 
     override fun buildLingerings() {
-        overlayObjects.forEach { overlayObject ->
-            when {
-                isLingeringEndlessOverlay(overlayObject) -> {
-                    downloadSVGThenCallListener(overlayObject) {
-                        if (viewIdentifierManager.overlayObjectIsAttached(overlayObject.id)) {
-                            // do nothing
-                        } else {
-                            listener.onLingeringOverlay(it)
-                        }
+
+        overlayEntityList.forEach { overlayEntity ->
+            when (overlayEntity.forceUpdate(currentTime)) {
+                LINGERING_INTRO -> {
+
+                    downloadSVGThenCallListener(overlayEntity) {
+                        listener.addOrUpdateLingeringIntroOverlay(
+                            it,
+                            currentTime - it.introTransitionSpec.offset,
+                            isPlaying
+                        )
                     }
+
                 }
-                isLingeringExcludingAnimationPart(overlayObject) -> {
-                    downloadSVGThenCallListener(overlayObject) {
-                        if (viewIdentifierManager.overlayObjectIsAttached(overlayObject.id)) {
-                            // do nothing
-                        } else {
-                            listener.onLingeringOverlay(it)
-                        }
+                LINGERING_MIDWAY -> {
+
+                    downloadSVGThenCallListener(overlayEntity) {
+                        listener.addOrUpdateLingeringMidwayOverlay(
+                            it
+                        )
                     }
+
                 }
-                isLingeringInIntroAnimation(overlayObject) -> {
-                    downloadSVGThenCallListener(overlayObject) {
+                LINGERING_OUTRO -> {
 
-                        if (viewIdentifierManager.overlayObjectIsAttached(overlayObject.id)) {
-                            listener.updateLingeringOverlay(
-                                it,
-                                currentTime - overlayObject.introTransitionSpec.offset,
-                                isPlaying
-                            )
-                        } else {
-                            listener.onLingeringIntroOverlay(
-                                it,
-                                currentTime - overlayObject.introTransitionSpec.offset,
-                                isPlaying
-                            )
-
-                        }
-
+                    downloadSVGThenCallListener(overlayEntity) {
+                        listener.addOrUpdateLingeringOutroOverlay(
+                            it,
+                            currentTime - (overlayEntity.introTransitionSpec.offset + overlayEntity.outroTransitionSpec.animationDuration),
+                            isPlaying
+                        )
                     }
+
                 }
-                isLingeringInOutroAnimation(overlayObject) -> {
-                    downloadSVGThenCallListener(overlayObject) {
-                        if (viewIdentifierManager.overlayObjectIsAttached(overlayObject.id)) {
-                            listener.updateLingeringOverlay(
-                                it,
-                                currentTime - (overlayObject.introTransitionSpec.offset + overlayObject.outroTransitionSpec.animationDuration),
-                                isPlaying
-                            )
-                        } else {
-                            listener.onLingeringOutroOverlay(
-                                it,
-                                currentTime - (overlayObject.introTransitionSpec.offset + overlayObject.outroTransitionSpec.animationDuration),
-                                isPlaying
-                            )
-
-                        }
-
-                    }
+                LINGERING_REMOVE -> {
+                    listener.removeLingeringOverlay(overlayEntity)
+                }
+                DO_NOTHING,
+                INTRO,
+                OUTRO -> {
+                    // should not happen
                 }
             }
         }
@@ -262,7 +246,7 @@ class ActionBuilderImpl(
 
     /**region Over-ridden Functions*/
     override fun setCurrentTime(time: Long, playing: Boolean) {
-        println("MLS-App AnnotationBuilderImpl - setCurrentTime() $time isPlaying -> $isPlaying")
+//        println("MLS-App AnnotationBuilderImpl - setCurrentTime() $time isPlaying -> $isPlaying")
         currentTime = time
         isPlaying = playing
     }
@@ -468,45 +452,6 @@ class ActionBuilderImpl(
 
     /**region msc*/
     private fun downloadSVGThenCallListener(
-        overlayObject: OverlayObject,
-        callback: (OverlayObject) -> Unit
-    ) {
-        toBeDownloadedSvgList.add(overlayObject.id)
-
-        val svgUrl = overlayObject.svgData!!.svgUrl!!
-        val request: Request = Request.Builder().url(svgUrl).build()
-        okHttpClient.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                toBeDownloadedSvgList.remove(overlayObject.id)
-
-                println(
-                    "MLS-App AnnotationBuilderImpl - getInputStream() onFailure"
-                )
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                toBeDownloadedSvgList.remove(overlayObject.id)
-                if (response.isSuccessful && response.body() != null) {
-
-                    val stringBuilder = StringBuilder()
-
-                    val scanner = Scanner(response.body()!!.byteStream())
-                    while (scanner.hasNext()) {
-                        stringBuilder.append(scanner.nextLine())
-                    }
-                    val svgString = stringBuilder.toString()
-
-                    callback(
-                        overlayObject.copy(
-                            svgData = SvgData(svgUrl, null, svgString)
-                        )
-                    )
-                }
-            }
-        })
-    }
-
-    private fun downloadSVGThenCallListener(
         overlayEntity: OverlayEntity,
         callback: (OverlayEntity) -> Unit
     ) {
@@ -518,9 +463,7 @@ class ActionBuilderImpl(
             override fun onFailure(call: Call, e: IOException) {
                 overlayEntity.isDownloading = false
 
-                println(
-                    "MLS-App AnnotationBuilderImpl - getInputStream() onFailure"
-                )
+                Log.e("downloadSVGThenCallLis", "downloadSVGThenCallListener() - onFailure()")
             }
 
             override fun onResponse(call: Call, response: Response) {

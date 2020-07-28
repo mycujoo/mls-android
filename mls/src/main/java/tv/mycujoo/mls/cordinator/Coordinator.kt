@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.cordinator
 
 import android.os.Handler
+import android.util.Log
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.DISCONTINUITY_REASON_SEEK
 import com.google.android.exoplayer2.Player.STATE_READY
@@ -38,6 +39,7 @@ class Coordinator(
         val annotationListener = object : AnnotationListener {
 
             override fun addOverlay(overlayEntity: OverlayEntity) {
+                overlayEntity.isOnScreen = true
                 if (overlayEntity.introTransitionSpec.animationType == AnimationType.NONE) {
                     playerViewWrapper.onNewOverlayWithNoAnimation(overlayEntity)
                 } else {
@@ -46,6 +48,8 @@ class Coordinator(
             }
 
             override fun removeOverlay(overlayEntity: OverlayEntity) {
+                Log.d("Coordinator", "removeOverlay() for overlayEntity ${overlayEntity.id}")
+
                 overlayEntity.isOnScreen = false
                 if (overlayEntity.outroTransitionSpec.animationType == AnimationType.NONE) {
                     playerViewWrapper.onOverlayRemovalWithNoAnimation(overlayEntity)
@@ -54,51 +58,66 @@ class Coordinator(
                 }
             }
 
-            // re-write
+
+            override fun addOrUpdateLingeringIntroOverlay(
+                overlayEntity: OverlayEntity,
+                animationPosition: Long,
+                isPlaying: Boolean
+            ) {
+                overlayEntity.isOnScreen = true
+                if (identifierManager.overlayObjectIsAttached(overlayEntity.id)) {
+                    playerViewWrapper.updateLingeringIntroOverlay(
+                        overlayEntity,
+                        animationPosition,
+                        isPlaying
+                    )
+                } else {
+                    playerViewWrapper.addLingeringIntroOverlay(
+                        overlayEntity,
+                        animationPosition,
+                        isPlaying
+                    )
+                }
+            }
+
+            override fun addOrUpdateLingeringOutroOverlay(
+                overlayEntity: OverlayEntity,
+                animationPosition: Long,
+                isPlaying: Boolean
+            ) {
+                overlayEntity.isOnScreen = true
+                if (identifierManager.overlayObjectIsAttached(overlayEntity.id)) {
+                    playerViewWrapper.updateLingeringOutroOverlay(
+                        overlayEntity,
+                        animationPosition,
+                        isPlaying
+                    )
+                } else {
+                    playerViewWrapper.addLingeringOutroOverlay(
+                        overlayEntity,
+                        animationPosition,
+                        isPlaying
+                    )
+                }
+
+            }
+
+            override fun addOrUpdateLingeringMidwayOverlay(overlayEntity: OverlayEntity) {
+                overlayEntity.isOnScreen = true
+                if (identifierManager.overlayObjectIsAttached(overlayEntity.id)) {
+                    playerViewWrapper.updateLingeringMidwayOverlay(overlayEntity)
+                } else {
+                    playerViewWrapper.addLingeringMidwayOverlay(overlayEntity)
+                }
+            }
+
+            override fun removeLingeringOverlay(overlayEntity: OverlayEntity) {
+                overlayEntity.isOnScreen = false
+                playerViewWrapper.removeLingeringOverlay(overlayEntity)
+            }
 
             override fun clearScreen(idList: List<String>) {
                 playerViewWrapper.clearScreen(idList)
-            }
-
-
-            override fun onLingeringIntroOverlay(
-                overlayObject: OverlayObject,
-                animationPosition: Long,
-                isPlaying: Boolean
-            ) {
-                playerViewWrapper.onLingeringIntroAnimationOverlay(
-                    overlayObject,
-                    animationPosition,
-                    isPlaying
-                )
-            }
-
-            override fun updateLingeringOverlay(
-                overlayObject: OverlayObject,
-                animationPosition: Long,
-                isPlaying: Boolean
-            ) {
-                playerViewWrapper.updateLingeringOverlay(
-                    overlayObject,
-                    animationPosition,
-                    isPlaying
-                )
-            }
-
-            override fun onLingeringOutroOverlay(
-                overlayObject: OverlayObject,
-                animationPosition: Long,
-                isPlaying: Boolean
-            ) {
-                playerViewWrapper.onLingeringOutroAnimationOverlay(
-                    overlayObject,
-                    animationPosition,
-                    isPlaying
-                )
-            }
-
-            override fun onLingeringOverlay(overlayObject: OverlayObject) {
-                playerViewWrapper.onNewOverlayWithNoAnimation(overlayObject)
             }
         }
 
@@ -208,11 +227,10 @@ class Coordinator(
                 super.onPlayerStateChanged(playWhenReady, playbackState)
                 if (playbackState == STATE_READY && hasPendingSeek) {
                     hasPendingSeek = false
-//                    actionBuilder.removeAll()
-                    actionBuilder.removeLeftOvers()
-                    actionBuilder.buildCurrentTimeRange()
 
                     actionBuilder.buildLingerings()
+
+                    actionBuilder.buildCurrentTimeRange()
 
                     actionBuilder.computeVariableNameValueTillNow()
                     actionBuilder.recalculateTimers()

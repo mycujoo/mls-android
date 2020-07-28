@@ -4,12 +4,13 @@ import android.animation.ObjectAnimator
 import android.util.Log
 import android.view.View
 import kotlinx.coroutines.CoroutineScope
+import tv.mycujoo.mls.widgets.ScaffoldView
 
 class ViewIdentifierManager(dispatcher: CoroutineScope) {
     private var viewIdToIdMap = mutableMapOf<String, Int>()
     private var animations = ArrayList<Pair<String, ObjectAnimator>>()
 
-    private val attachedViewList: ArrayList<View> = ArrayList()
+    private val attachedViewList: ArrayList<ScaffoldView> = ArrayList()
 
     val variableTranslator = VariableTranslator(dispatcher)
     val timeKeeper = TimeKeeper(dispatcher)
@@ -45,7 +46,7 @@ class ViewIdentifierManager(dispatcher: CoroutineScope) {
     }
 
     /**region Attached Overlay objects & ids*/
-    fun attachOverlayView(view: View) {
+    fun attachOverlayView(view: ScaffoldView) {
         if (view.tag == null || (view.tag is String).not()) {
             Log.w("ViewIdentifierManager", "overlay tag should not be null")
             return
@@ -59,13 +60,17 @@ class ViewIdentifierManager(dispatcher: CoroutineScope) {
 
     }
 
-    fun detachOverlayView(view: View) {
+    fun detachOverlayView(view: ScaffoldView) {
         if (view.tag == null || (view.tag is String).not()) {
             Log.w("ViewIdentifierManager", "overlay tag should not be null [detachOverlay()]")
             return
         }
 
         attachedViewList.remove(view)
+    }
+
+    fun getOverlayView(id: String): ScaffoldView? {
+        return attachedViewList.firstOrNull { it.tag == id }
     }
 
     /**endregion */

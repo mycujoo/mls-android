@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
 import android.widget.ImageView
+import androidx.annotation.UiThread
 import com.caverock.androidsvg.SVG
 import tv.mycujoo.domain.entity.Variable
 
@@ -15,7 +16,7 @@ class ScaffoldView @JvmOverloads constructor(
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     private lateinit var svgString: String
-    private lateinit var variablePlaceHolder: Map<String, String>
+    private lateinit var variablePlaceHolder: List<String>
     private lateinit var latestVariableValue: MutableMap<String, Any>
 
     private var proportionalImageView: ProportionalImageView =
@@ -32,12 +33,12 @@ class ScaffoldView @JvmOverloads constructor(
                 LayoutParams.MATCH_PARENT
             )
         )
-
     }
 
 
+    @UiThread
     fun setSVG(svg: SVG) {
-        post { proportionalImageView.setSVG(svg) }
+        proportionalImageView.setSVG(svg)
     }
 
     fun setSVGSource(svgString: String) {
@@ -52,17 +53,19 @@ class ScaffoldView @JvmOverloads constructor(
         if (this::variablePlaceHolder.isInitialized.not() || this::svgString.isInitialized.not()) {
             return
         }
-        if (variablePlaceHolder.containsValue(variable.name)) {
-            variablePlaceHolder.entries.firstOrNull { it.value == variable.name }?.let { entry ->
-                svgString = svgString.replace(entry.key, variable.value.toString())
-                setSVG(SVG.getFromString(svgString))
-            }
+        if (variablePlaceHolder.contains(variable.name)) {
+
+            // TODO: 28/07/2020
+//            variablePlaceHolder.entries.firstOrNull { it.value == variable.name }?.let { entry ->
+//                svgString = svgString.replace(entry.key, variable.value.toString())
+//                setSVG(SVG.getFromString(svgString))
+//            }
         }
 
     }
 
 
-    fun setVariablePlaceHolder(variablePlaceHolders: Map<String, String>) {
+    fun setVariablePlaceHolder(variablePlaceHolders: List<String>) {
         this.variablePlaceHolder = variablePlaceHolders
         this.latestVariableValue = mutableMapOf()
     }
@@ -74,21 +77,23 @@ class ScaffoldView @JvmOverloads constructor(
             return
         }
 
-        if (!variablePlaceHolder.containsValue(updatedPair.first)) {
+        if (!variablePlaceHolder.contains(updatedPair.first)) {
             return
         }
 
         latestVariableValue[updatedPair.first] = updatedPair.second
 
         var svgString = this.svgString
-        variablePlaceHolder.filter { latestVariableValue.contains(it.value) }.forEach { entry ->
-            latestVariableValue[entry.value]?.let { value ->
+        variablePlaceHolder.filter { latestVariableValue.contains(it) }.forEach { entry ->
+            latestVariableValue[entry]?.let { value ->
                 svgString =
-                    svgString.replace(entry.key, value.toString())
+                    svgString.replace(entry, value.toString())
             }
         }
 
-        setSVG(SVG.getFromString(svgString))
+        post {
+            setSVG(SVG.getFromString(svgString))
+        }
     }
 
 
