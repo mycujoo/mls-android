@@ -6,7 +6,7 @@ data class OverlayEntity(
     var viewSpec: ViewSpec,
     var introTransitionSpec: TransitionSpec,
     var outroTransitionSpec: TransitionSpec,
-    val variablePlaceHolders: Map<String, String>
+    val variablePlaceHolders: List<String>
 ) {
 
     var isDownloading = false
@@ -85,7 +85,7 @@ data class OverlayEntity(
             }
 
             // there is no outro specified at all
-            if (outroTransitionSpec.animationType == AnimationType.UNSPECIFIED) {
+            if (outroTransitionSpec.animationType == AnimationType.UNSPECIFIED || outroTransitionSpec.animationDuration == -1L) {
                 return if (hasEnteringAnimation(introTransitionSpec.animationType)) {
                     currentTime > introTransitionSpec.offset + introTransitionSpec.animationDuration
                 } else {

@@ -6,7 +6,7 @@ data class OverlayObject(
     var viewSpec: ViewSpec,
     var introTransitionSpec: TransitionSpec,
     var outroTransitionSpec: TransitionSpec,
-    val variablePlaceHolders: Map<String, String>
+    val variablePlaceHolders: List<String>
 ) {
     fun toOverlayEntity(): OverlayEntity {
         return OverlayEntity(

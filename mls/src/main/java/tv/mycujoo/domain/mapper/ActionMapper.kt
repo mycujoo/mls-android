@@ -21,7 +21,7 @@ class ActionMapper {
 
         fun mapToActionCollections(actionResponse: ActionResponse): ActionCollections {
 
-            val actionEntityList = actionResponse.data.map { actionSourceData ->
+            val actionEntityList = actionResponse.data.mapNotNull { actionSourceData ->
                 mapToActionEntity(actionSourceData)
             }
 
@@ -103,9 +103,9 @@ class ActionMapper {
         }
 
 
-        private fun mapToSetVariableEntity(actionSourceData: ActionSourceData): SetVariableEntity? {
+        private fun mapToSetVariableEntity(actionSourceData: ActionSourceData?): SetVariableEntity? {
 
-            if (actionSourceData.id == null || actionSourceData.offset == null) {
+            if (actionSourceData?.id == null || actionSourceData.offset == null) {
                 return null
             }
 
@@ -159,8 +159,8 @@ class ActionMapper {
             return SetVariableEntity(actionSourceData.id, actionSourceData.offset, variable)
         }
 
-        private fun mapToIncrementVariableEntity(actionSourceData: ActionSourceData): IncrementVariableEntity? {
-            if (actionSourceData.id == null || actionSourceData.offset == null) {
+        private fun mapToIncrementVariableEntity(actionSourceData: ActionSourceData?): IncrementVariableEntity? {
+            if (actionSourceData?.id == null || actionSourceData.offset == null) {
                 return null
             }
 
@@ -197,8 +197,10 @@ class ActionMapper {
         }
 
 
-        private fun mapToActionEntity(actionSourceData: ActionSourceData): ActionEntity {
-
+        private fun mapToActionEntity(actionSourceData: ActionSourceData?): ActionEntity? {
+            if (actionSourceData == null || actionSourceData.data.isNullOrEmpty()) {
+                return null
+            }
 
             var customId = INVALID_STRING_VALUE
             var svgUrl = INVALID_STRING_VALUE
@@ -215,10 +217,10 @@ class ActionMapper {
             var label = INVALID_STRING_VALUE
             var color = INVALID_STRING_VALUE
 
-            var variablePlaceHolders = emptyMap<String, String>()
+            var variablePlaceHolders = emptyList<String>()
 
 
-            actionSourceData.data?.let { data ->
+            actionSourceData.data.let { data ->
                 data.keys.forEach { key ->
                     val any = data[key]
                     when (key) {
@@ -263,7 +265,7 @@ class ActionMapper {
                             any?.let { color = it as String }
                         }
                         "variable_positions" -> {
-                            any?.let { variablePlaceHolders = it as Map<String, String> }
+                            any?.let { variablePlaceHolders = it as List<String> }
                         }
 
                         else -> {
@@ -344,8 +346,8 @@ class ActionMapper {
         }
 
 
-        private fun mapToTimelineMarkerEntity(actionSourceData: ActionSourceData): TimelineMarkerEntity? {
-            if (actionSourceData.id == null || actionSourceData.offset == null || actionSourceData.type == null) {
+        private fun mapToTimelineMarkerEntity(actionSourceData: ActionSourceData?): TimelineMarkerEntity? {
+            if (actionSourceData?.id == null || actionSourceData.offset == null || actionSourceData.type == null) {
                 return null
             }
 
@@ -380,8 +382,8 @@ class ActionMapper {
             return TimelineMarkerEntity(actionSourceData.id, actionSourceData.offset, label, color)
         }
 
-        private fun mapToCreateScreenTimerEntity(actionSourceData: ActionSourceData): CreateTimerEntity? {
-            if (actionSourceData.id == null || actionSourceData.offset == null || actionSourceData.type == null) {
+        private fun mapToCreateScreenTimerEntity(actionSourceData: ActionSourceData?): CreateTimerEntity? {
+            if (actionSourceData?.id == null || actionSourceData.offset == null || actionSourceData.type == null) {
                 return null
             }
 
@@ -437,8 +439,8 @@ class ActionMapper {
             )
         }
 
-        private fun mapToStartScreenTimerEntity(actionSourceData: ActionSourceData): StartTimerEntity? {
-            if (actionSourceData.id == null || actionSourceData.offset == null || actionSourceData.type == null) {
+        private fun mapToStartScreenTimerEntity(actionSourceData: ActionSourceData?): StartTimerEntity? {
+            if (actionSourceData?.id == null || actionSourceData.offset == null || actionSourceData.type == null) {
                 return null
             }
 
@@ -469,8 +471,8 @@ class ActionMapper {
             )
         }
 
-        private fun mapToPauseTimerEntity(actionSourceData: ActionSourceData): PauseTimerEntity? {
-            if (actionSourceData.id == null || actionSourceData.offset == null || actionSourceData.type == null) {
+        private fun mapToPauseTimerEntity(actionSourceData: ActionSourceData?): PauseTimerEntity? {
+            if (actionSourceData?.id == null || actionSourceData.offset == null || actionSourceData.type == null) {
                 return null
             }
 
@@ -501,8 +503,8 @@ class ActionMapper {
             )
         }
 
-        private fun mapToAdjustTimerEntity(actionSourceData: ActionSourceData): AdjustTimerEntity? {
-            if (actionSourceData.id == null || actionSourceData.offset == null || actionSourceData.type == null) {
+        private fun mapToAdjustTimerEntity(actionSourceData: ActionSourceData?): AdjustTimerEntity? {
+            if (actionSourceData?.id == null || actionSourceData.offset == null || actionSourceData.type == null) {
                 return null
             }
 
@@ -538,8 +540,8 @@ class ActionMapper {
             )
         }
 
-        private fun mapToSkipTimerEntity(actionSourceData: ActionSourceData): SkipTimerEntity? {
-            if (actionSourceData.id == null || actionSourceData.offset == null || actionSourceData.type == null) {
+        private fun mapToSkipTimerEntity(actionSourceData: ActionSourceData?): SkipTimerEntity? {
+            if (actionSourceData?.id == null || actionSourceData.offset == null || actionSourceData.type == null) {
                 return null
             }
 

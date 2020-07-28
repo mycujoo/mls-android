@@ -23,6 +23,35 @@ class GetActionsFromJSONUseCase {
             return mapToActionCollections(result())
         }
 
+        private val sourceRawResponse2 = """
+            {
+            "actions": [
+                        {
+                         "data": {
+                             "animatein_duration": 3000, 
+                             "animatein_type": "slide_from_right",
+                             "animateout_duration": 5000, 
+                            "animateout_type": "fade_out",
+                             "custom_id": "scoreboard3",
+                              "duration": 10000,
+                             "position": {
+                                 "right": 5.0, 
+                                 "top": 5.0
+                             }, 
+                             "size": {
+                                 "width": 25.0
+                             }, 
+                             "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg"
+                         }, 
+                         "id": "54afag35yag3", 
+                         "type": "show_overlay",
+                          "offset": 5000, 
+                          "timeline_id": "tml_1"
+                            },
+                        ]
+            }
+            """
+
         private val sourceRawResponse = """
        {
             "actions": [
@@ -87,12 +116,8 @@ class GetActionsFromJSONUseCase {
                         "size": {
                             "width": 25.0
                         }, 
-                        "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg", 
-                        "variable_positions": {
-                            "###_AWAYSCORE_###": "${"$"}awayScore", 
-                            "###_HOMESCORE_###": "${"$"}homeScore",
-                            "###_TIMER_###": "${"$"}scoreboardTimer"
-                        }
+                        "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg",
+                         "variable_positions": ["${"$"}awayScore","${"$"}homeScore", "${"$"}scoreboardTimer"]
                     }, 
                     "id": "54afag35yag", 
                     "type": "show_overlay",
@@ -109,22 +134,18 @@ class GetActionsFromJSONUseCase {
                          "size": {
                              "width": 25.0
                          }, 
-                         "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg", 
-                         "variable_positions": {
-                             "###_AWAYSCORE_###": "${"$"}awayScore",
-                             "###_HOMESCORE_###": "${"$"}homeScore",
-                             "###_TIMER_###": "${"$"}scoreboardTimer"
-                         }
+                         "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg",
+                         "variable_positions": ["${"$"}awayScore","${"$"}homeScore", "${"$"}scoreboardTimer"]
                      }, 
                      "id": "54afag35yag2", 
                      "type": "show_overlay",
-                      "offset": 2000, 
+                      "offset": 5000, 
                        "timeline_id": "tml_1"
                  },
                  {
                      "data": {
                          "animatein_duration": 3000, 
-                         "animatein_type": "fade_in",
+                         "animatein_type": "slide_from_right",
                          "animateout_duration": 5000, 
                         "animateout_type": "fade_out",
                          "custom_id": "scoreboard3",
@@ -136,12 +157,8 @@ class GetActionsFromJSONUseCase {
                          "size": {
                              "width": 25.0
                          }, 
-                         "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg", 
-                         "variable_positions": {
-                             "###_AWAYSCORE_###": "awayScore", 
-                             "###_HOMESCORE_###": "${"$"}homeScore",
-                             "###_TIMER_###": "timer1"
-                         }
+                         "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg",
+                         "variable_positions": ["${"$"}awayScore","${"$"}homeScore", "${"$"}scoreboardTimer"]
                      }, 
                      "id": "54afag35yag3", 
                      "type": "show_overlay",
@@ -150,12 +167,12 @@ class GetActionsFromJSONUseCase {
                  },
                  {
                      "data": {
-                         "animatein_duration": 50000, 
+                         "animatein_duration": 5000, 
                          "animatein_type": "slide_from_right",
-                         "animateout_duration": 50000, 
+                         "animateout_duration": 5000, 
                         "animateout_type": "slide_to_right", 
                          "custom_id": "scoreboard4",
-                          "duration": 1000000, 
+                          "duration": 12000, 
                          "position": {
                              "right": 5.0,
                              "bottom": 5.0
@@ -164,11 +181,7 @@ class GetActionsFromJSONUseCase {
                              "width": 25.0
                          }, 
                          "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg", 
-                         "variable_positions": {
-                             "###_AWAYSCORE_###": "awayScore", 
-                             "###_HOMESCORE_###": "${"$"}homeScore",
-                             "###_TIMER_###": "timer1"
-                         }
+                         "variable_positions": ["${"$"}awayScore", "${"$"}homeScore", "${"$"}scoreboardTimer"]
                      }, 
                      "id": "54afag35yagp4", 
                      "type": "show_overlay",
@@ -183,28 +196,7 @@ class GetActionsFromJSONUseCase {
                     "offset": 166000,
                     "id": "fda43t943f9a", 
                     "type": "show_timeline_marker"
-                }, 
-                {
-                    "data": {
-                        "animatein_duration": 5000, 
-                        "animatein_type": "slide_from_left", 
-                        "animateout_duration": 5000, 
-                        "animateout_type": "slide_to_left", 
-                        "duration": 1000000,
-                        "position": {
-                            "bottom": 10.0, 
-                            "left": 5.0
-                        }, 
-                        "size": {
-                            "width": 30.0
-                        }, 
-                        "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/announcement_overlay.svg"
-                    }, 
-                    "id": "gagj9j9agj9a", 
-                    "type": "show_overlay",
-                     "offset": 166000, 
-                     "timeline_id": "tml_1"
-            }
+                }
             ,{
                     "data": {
                         "color": "#de4f1f", 
