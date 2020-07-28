@@ -264,7 +264,7 @@ class OverlayEntityTest {
             viewSpec,
             introTransitionSpec,
             outroTransitionSpec,
-            emptyMap()
+            emptyList()
         )
     }
 
@@ -282,7 +282,7 @@ class OverlayEntityTest {
             viewSpec,
             introTransitionSpec,
             outroTransitionSpec,
-            emptyMap()
+            emptyList()
         )
     }
 
@@ -299,7 +299,7 @@ class OverlayEntityTest {
             viewSpec,
             introTransitionSpec,
             outroTransitionSpec,
-            emptyMap()
+            emptyList()
         )
     }
     /**endregion */

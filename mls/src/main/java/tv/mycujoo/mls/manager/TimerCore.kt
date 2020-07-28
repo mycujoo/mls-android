@@ -15,7 +15,7 @@ class TimerCore(
     private val offset: Long,
     private val format: ScreenTimerFormat,
     private val direction: ScreenTimerDirection,
-    private val startValue: Long,
+    startValue: Long,
     private val step: Long,
     private val capValue: Long
 ) {
@@ -27,10 +27,18 @@ class TimerCore(
     fun getFormattedTime(): String {
         return when (format) {
             MINUTES_SECONDS -> {
-                getTimeInMinutesSecondFormat()
+                if (timeIsWithinCapValue()) {
+                    getTimeInMinutesSecondFormat(currentTime)
+                } else {
+                    getTimeInMinutesSecondFormat(capValue)
+                }
             }
             SECONDS -> {
-                (currentTime / 1000L).toString()
+                if (timeIsWithinCapValue()) {
+                    getTimeInSecondFormat(currentTime)
+                } else {
+                    getTimeInSecondFormat(capValue)
+                }
             }
             UNKNOWN -> {
                 ""
@@ -38,17 +46,29 @@ class TimerCore(
         }
     }
 
-    private fun getTimeInMinutesSecondFormat(): String {
-        return if (currentTime >= 6000L) {
+    private fun getTimeInMinutesSecondFormat(time: Long): String {
+        return if (time >= 6000L) {
             // 1 minute or more, so M is present
-            val minutes = currentTime / 60000L
-            val seconds = ((currentTime % 60000L) / 1000L).toString()
+            val minutes = time / 60000L
+            val seconds = ((time % 60000L) / 1000L).toString()
             "$minutes:${seconds.padStart(2, '0')}"
         } else {
-            val seconds = (currentTime / 1000L).toString()
+            val seconds = (time / 1000L).toString()
 
             "0:${seconds.padStart(2, '0')}"
         }
+    }
+
+    private fun getTimeInSecondFormat(time: Long) = (time / 1000L).toString()
+
+    private fun timeIsWithinCapValue(): Boolean {
+        if (direction == ScreenTimerDirection.UP && currentTime <= capValue) {
+            return true
+        }
+        if (direction == ScreenTimerDirection.DOWN && currentTime >= capValue) {
+            return true
+        }
+        return false
     }
 
     fun start(
@@ -59,12 +79,20 @@ class TimerCore(
             return
         }
         isTicking = true
-        currentTime -= step
+
         dispatcher.launch {
             while (isTicking) {
-                currentTime += step
-                timerRelay.accept(getFormattedTime())
                 delay(step)
+
+                if (direction == ScreenTimerDirection.UP) {
+                    currentTime += step
+                } else {
+                    currentTime -= step
+                }
+
+                if (timeIsWithinCapValue()) {
+                    timerRelay.accept(getFormattedTime())
+                }
             }
         }
     }

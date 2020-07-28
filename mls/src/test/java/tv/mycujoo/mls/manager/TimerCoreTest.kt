@@ -350,6 +350,126 @@ class TimerCoreTest {
         assertEquals("30", actualValue)
     }
 
+
+    @Test
+    fun `given direction=up, should increase time`() {
+        val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
+            ScreenTimerFormat.SECONDS,
+            ScreenTimerDirection.UP,
+            30000L
+        )
+        timeKeeper.createTimer(createScreenTimerEntity)
+        var actualValue = ""
+        timeKeeper.observe(sampleName) { actualValue = it.second }
+        timeKeeper.startTimer(sampleName)
+
+
+        testCoroutineScope.advanceTimeBy(30000L)
+
+
+        assertEquals("60", actualValue)
+    }
+
+    @Test
+    fun `given direction=down, should decrease time`() {
+        val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
+            ScreenTimerFormat.SECONDS,
+            ScreenTimerDirection.DOWN,
+            30000L,
+            0L
+        )
+        timeKeeper.createTimer(createScreenTimerEntity)
+        var actualValue = ""
+        timeKeeper.observe(sampleName) { actualValue = it.second }
+        timeKeeper.startTimer(sampleName)
+
+        testCoroutineScope.advanceTimeBy(30000L)
+
+        assertEquals("0", actualValue)
+    }
+
+    @Test
+    fun `given capValue with direction=up, should not exceed above capValue`() {
+        val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
+            ScreenTimerFormat.SECONDS,
+            ScreenTimerDirection.UP,
+            0L,
+            30000L
+
+        )
+        timeKeeper.createTimer(createScreenTimerEntity)
+        var actualValue = ""
+        timeKeeper.observe(sampleName) { actualValue = it.second }
+        timeKeeper.startTimer(sampleName)
+
+
+        testCoroutineScope.advanceTimeBy(50000L)
+
+
+        assertEquals("30", actualValue)
+    }
+
+    @Test
+    fun `given capValue with direction=down, should not exceed below capValue`() {
+        val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
+            ScreenTimerFormat.SECONDS,
+            ScreenTimerDirection.DOWN,
+            50000L,
+            30000L
+
+        )
+        timeKeeper.createTimer(createScreenTimerEntity)
+        var actualValue = ""
+        timeKeeper.observe(sampleName) { actualValue = it.second }
+        timeKeeper.startTimer(sampleName)
+
+
+        testCoroutineScope.advanceTimeBy(50000L)
+
+
+        assertEquals("30", actualValue)
+    }
+
+    @Test
+    fun `given capValue with direction=up, when time passes beyond capValue, should return capValue on direct getTime() calls`() {
+        val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
+            ScreenTimerFormat.SECONDS,
+            ScreenTimerDirection.UP,
+            0L,
+            30000L
+
+        )
+        timeKeeper.createTimer(createScreenTimerEntity)
+        timeKeeper.startTimer(sampleName)
+
+
+        testCoroutineScope.advanceTimeBy(50000L)
+        val actualValue = timeKeeper.getValue(sampleName)
+
+
+        assertEquals("30", actualValue)
+    }
+
+    @Test
+    fun `given capValue with direction=down, when time passes below capValue, should return capValue on direct getTime() calls`() {
+        val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
+            ScreenTimerFormat.SECONDS,
+            ScreenTimerDirection.DOWN,
+            40000L,
+            30000L
+
+        )
+        timeKeeper.createTimer(createScreenTimerEntity)
+        timeKeeper.startTimer(sampleName)
+
+
+        testCoroutineScope.advanceTimeBy(50000L)
+        val actualValue = timeKeeper.getValue(sampleName)
+
+
+        assertEquals("30", actualValue)
+    }
+
     private fun getSampleCreateScreenTimerEntity(
         format: ScreenTimerFormat,
         startValue: Long,
@@ -363,6 +483,39 @@ class TimerCoreTest {
             startValue,
             step,
             500000L
+        )
+    }
+
+    private fun getSampleCreateScreenTimerEntity(
+        format: ScreenTimerFormat,
+        screenTimerDirection: ScreenTimerDirection,
+        startValue: Long
+    ): CreateTimerEntity {
+        return CreateTimerEntity(
+            sampleName,
+            1000L,
+            format,
+            screenTimerDirection,
+            startValue,
+            1000L,
+            500000L
+        )
+    }
+
+    private fun getSampleCreateScreenTimerEntity(
+        format: ScreenTimerFormat,
+        screenTimerDirection: ScreenTimerDirection,
+        startValue: Long,
+        capValue: Long
+    ): CreateTimerEntity {
+        return CreateTimerEntity(
+            sampleName,
+            1000L,
+            format,
+            screenTimerDirection,
+            startValue,
+            1000L,
+            capValue
         )
     }
 }
