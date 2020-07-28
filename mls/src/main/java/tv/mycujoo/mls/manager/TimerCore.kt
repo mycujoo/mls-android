@@ -16,12 +16,12 @@ class TimerCore(
     private val format: ScreenTimerFormat,
     private val direction: ScreenTimerDirection,
     startValue: Long,
-    private val step: Long,
     private val capValue: Long
 ) {
     //todo [wip] [mind capValue!]
     private var currentTime = startValue
     private var isTicking = false
+    private val step = 1000L
 
 
     fun getFormattedTime(): String {
@@ -62,6 +62,10 @@ class TimerCore(
     private fun getTimeInSecondFormat(time: Long) = (time / 1000L).toString()
 
     private fun timeIsWithinCapValue(): Boolean {
+        if (capValue == -1L) {
+            return true
+        }
+
         if (direction == ScreenTimerDirection.UP && currentTime <= capValue) {
             return true
         }

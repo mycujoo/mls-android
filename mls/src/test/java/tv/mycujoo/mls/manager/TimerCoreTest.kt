@@ -27,7 +27,7 @@ class TimerCoreTest {
 
 
     @Test
-    fun `given startTime of 0 milli-sec & SECOND format, should return '0'`() {
+    fun `given startTime of 0ms & SECOND format, should return '0'`() {
 
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
@@ -44,7 +44,7 @@ class TimerCoreTest {
     }
 
     @Test
-    fun `given startTime of 10000 milli-sec & SECOND format, should return '10'`() {
+    fun `given startTime of 10000ms & SECOND format, should return '10'`() {
 
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
@@ -61,7 +61,7 @@ class TimerCoreTest {
     }
 
     @Test
-    fun `given startTime of 60000 milli-sec & SECOND format, should return '60'`() {
+    fun `given startTime of 60000ms & SECOND format, should return '60'`() {
 
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
@@ -78,7 +78,7 @@ class TimerCoreTest {
     }
 
     @Test
-    fun `given startTime of 1200000 milli-sec & SECOND format, should return '120'`() {
+    fun `given startTime of 1200000ms & SECOND format, should return '120'`() {
 
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
@@ -96,7 +96,7 @@ class TimerCoreTest {
 
 
     @Test
-    fun `given startTime of 0 milli-sec & MINTUES_SECOND format, should return '0_00'`() {
+    fun `given startTime of 0ms & MINTUES_SECOND format, should return '0_00'`() {
 
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.MINUTES_SECONDS,
@@ -113,7 +113,7 @@ class TimerCoreTest {
     }
 
     @Test
-    fun `given startTime of 10000 milli-sec & MINTUES_SECOND format, should return '0_10'`() {
+    fun `given startTime of 10000ms & MINTUES_SECOND format, should return '0_10'`() {
 
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.MINUTES_SECONDS,
@@ -130,7 +130,7 @@ class TimerCoreTest {
     }
 
     @Test
-    fun `given startTime of 60000 milli-sec & MINTUES_SECOND format, should return '1_00'`() {
+    fun `given startTime of 60000ms & MINTUES_SECOND format, should return '1_00'`() {
 
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.MINUTES_SECONDS,
@@ -147,7 +147,7 @@ class TimerCoreTest {
     }
 
     @Test
-    fun `given startTime of 120000 milli-sec & MINTUES_SECOND format, should return '2_00'`() {
+    fun `given startTime of 120000ms & MINTUES_SECOND format, should return '2_00'`() {
 
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.MINUTES_SECONDS,
@@ -164,7 +164,7 @@ class TimerCoreTest {
     }
 
     @Test
-    fun `given startTime of 10000, step of 1000, and 5 second, should display '15'`() {
+    fun `given startTime of 10000ms, step of 1000, and 5 second, should display '15'`() {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
             10000L,
@@ -182,7 +182,7 @@ class TimerCoreTest {
     }
 
     @Test
-    fun `given startTime of 10000, step of 1000, and 60 second, should display '70'`() {
+    fun `given startTime of 10000ms, step of 1000, and 60 second, should display '70'`() {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
             10000L,

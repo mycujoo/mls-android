@@ -19,7 +19,6 @@ class TimeKeeper(private val dispatcher: CoroutineScope) {
                 createTimerEntity.format,
                 createTimerEntity.direction,
                 createTimerEntity.startValue,
-                createTimerEntity.step,
                 createTimerEntity.capValue
             ),
             BehaviorRelay.createDefault(createTimerEntity.startValue.toString())

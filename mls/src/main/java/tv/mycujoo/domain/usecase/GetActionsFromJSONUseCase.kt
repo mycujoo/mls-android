@@ -238,7 +238,7 @@ class GetActionsFromJSONUseCase {
                 		// but the visual representation is stuck at this value.
                 		// Useful for ensuring a visual representation doesn't go negative, or useful for capping e.g. at 45 minutes to prevent overtime from showing.
                 		// The capValue is dependent on the direction (up/down)
-                		"cap_value": 0
+                		"cap_value": -1
                 	}
                 },
                 {

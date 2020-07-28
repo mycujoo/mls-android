@@ -419,7 +419,7 @@ class ActionMapper {
                         "step" -> {
                             any?.let { step = (it as Double).toLong() }
                         }
-                        "capValue" -> {
+                        "cap_value" -> {
                             any?.let { capValue = (it as Double).toLong() }
                         }
                         else -> {
