@@ -5,13 +5,13 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
+import com.caverock.androidsvg.SVG
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
-import com.npaw.youbora.lib6.YouboraLog
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
@@ -20,7 +20,6 @@ import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
-import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.domain.usecase.GetEventsUseCase
 import tv.mycujoo.mls.BuildConfig
@@ -32,6 +31,7 @@ import tv.mycujoo.mls.core.VideoPlayerCoordinator
 import tv.mycujoo.mls.data.DataHolder
 import tv.mycujoo.mls.di.DaggerMlsComponent
 import tv.mycujoo.mls.di.NetworkModule
+import tv.mycujoo.mls.helper.SVGAssetResolver
 import tv.mycujoo.mls.manager.IPrefManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.model.Event
@@ -126,6 +126,14 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
 
         api = RemoteApi()
 
+        initSvgRenderingLibrary()
+
+    }
+
+    private fun initSvgRenderingLibrary() {
+        SVG.registerExternalFileResolver(
+            SVGAssetResolver(this.context.assets)
+        )
     }
 
     private fun initAnalytic(

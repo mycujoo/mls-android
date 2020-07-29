@@ -1,4 +1,4 @@
-package tv.mycujoo.mls.helper
+package tv.mycujoo.mls.extensions
 
 import android.content.res.Resources
 
