@@ -3,6 +3,7 @@ package tv.mycujoo.mls.helper
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.content.Context
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -195,52 +196,8 @@ class OverlayEntityViewHelper {
                     ConstraintLayout.LayoutParams.WRAP_CONTENT
                 )
 
-                positionGuide.left?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setLeftConstraints(
-                        constraintSet,
-                        it,
-                        layoutParams,
-                        scaffoldView
-                    )
-                }
-                positionGuide.right?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setRightConstraints(constraintSet, it, layoutParams)
-                }
-                positionGuide.top?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setTopConstraints(constraintSet, it, layoutParams)
-                }
-                positionGuide.bottom?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setBottomConstraints(
-                        constraintSet,
-                        it,
-                        layoutParams,
-                        scaffoldView
-                    )
-                }
-                positionGuide.vCenter?.let {
-                    if (it > 50F || it < -50F) {
-                        return@let
-                    }
-                    setVCenterConstraints(layoutParams, it)
-                }
-                positionGuide.hCenter?.let {
-                    if (it > 50F || it < -50F) {
-                        return@let
-                    }
-                    setHCenterConstrains(layoutParams, it)
-                }
+                applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
+
 
                 constraintSet.applyTo(overlayHost)
                 scaffoldView.layoutParams = layoutParams
@@ -312,52 +269,9 @@ class OverlayEntityViewHelper {
                     ConstraintLayout.LayoutParams.WRAP_CONTENT
                 )
 
-                positionGuide.left?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setLeftConstraints(
-                        constraintSet,
-                        it,
-                        layoutParams,
-                        scaffoldView
-                    )
-                }
-                positionGuide.right?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setRightConstraints(constraintSet, it, layoutParams)
-                }
-                positionGuide.top?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setTopConstraints(constraintSet, it, layoutParams)
-                }
-                positionGuide.bottom?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setBottomConstraints(
-                        constraintSet,
-                        it,
-                        layoutParams,
-                        scaffoldView
-                    )
-                }
-                positionGuide.vCenter?.let {
-                    if (it > 50F || it < -50F) {
-                        return@let
-                    }
-                    setVCenterConstraints(layoutParams, it)
-                }
-                positionGuide.hCenter?.let {
-                    if (it > 50F || it < -50F) {
-                        return@let
-                    }
-                    setHCenterConstrains(layoutParams, it)
-                }
+                applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
+
+
                 constraintSet.applyTo(overlayHost)
                 scaffoldView.layoutParams = layoutParams
 
@@ -389,52 +303,7 @@ class OverlayEntityViewHelper {
                 ConstraintLayout.LayoutParams.WRAP_CONTENT
             )
 
-            positionGuide.left?.let {
-                if (it < 0F) {
-                    return@let
-                }
-                setLeftConstraints(
-                    constraintSet,
-                    it,
-                    layoutParams,
-                    scaffoldView
-                )
-            }
-            positionGuide.right?.let {
-                if (it < 0F) {
-                    return@let
-                }
-                setRightConstraints(constraintSet, it, layoutParams)
-            }
-            positionGuide.top?.let {
-                if (it < 0F) {
-                    return@let
-                }
-                setTopConstraints(constraintSet, it, layoutParams)
-            }
-            positionGuide.bottom?.let {
-                if (it < 0F) {
-                    return@let
-                }
-                setBottomConstraints(
-                    constraintSet,
-                    it,
-                    layoutParams,
-                    scaffoldView
-                )
-            }
-            positionGuide.vCenter?.let {
-                if (it > 50F || it < -50F) {
-                    return@let
-                }
-                setVCenterConstraints(layoutParams, it)
-            }
-            positionGuide.hCenter?.let {
-                if (it > 50F || it < -50F) {
-                    return@let
-                }
-                setHCenterConstrains(layoutParams, it)
-            }
+            applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
 
             scaffoldView.layoutParams = layoutParams
             scaffoldView.visibility = View.INVISIBLE
@@ -658,6 +527,7 @@ class OverlayEntityViewHelper {
                     val x = scaffoldView.x
                     val y = scaffoldView.y
 
+                    val animation: ObjectAnimator? = null
                     when (overlayEntity.introTransitionSpec.animationType) {
                         FADE_IN -> {
                             scaffoldView.x =
@@ -686,17 +556,6 @@ class OverlayEntityViewHelper {
                                 }
 
                             })
-                            viewIdentifierManager.addAnimation(
-                                overlayEntity.id,
-                                animation
-                            )
-                            animation.start()
-                            animation.currentPlayTime = animationPosition
-                            if (isPlaying) {
-                                animation.resume()
-                            } else {
-                                animation.pause()
-                            }
                         }
                         SLIDE_FROM_LEFT -> {
                             scaffoldView.x =
@@ -726,17 +585,6 @@ class OverlayEntityViewHelper {
 
                             })
 
-                            viewIdentifierManager.addAnimation(
-                                overlayEntity.id,
-                                animation
-                            )
-                            animation.start()
-                            animation.currentPlayTime = animationPosition
-                            if (isPlaying) {
-                                animation.resume()
-                            } else {
-                                animation.pause()
-                            }
                         }
                         SLIDE_FROM_RIGHT -> {
                             scaffoldView.x = overlayHost.width.toFloat()
@@ -766,21 +614,27 @@ class OverlayEntityViewHelper {
                                 }
 
                             })
-                            viewIdentifierManager.addAnimation(
-                                overlayEntity.id,
-                                animation
-                            )
-                            animation.start()
-                            animation.currentPlayTime = animationPosition
-                            if (isPlaying) {
-                                animation.resume()
-                            } else {
-                                animation.pause()
-                            }
                         }
                         else -> {
                             // should not happen
                         }
+                    }
+
+                    if (animation == null) {
+                        Log.e("OverlayEntityView", "animation must not be null")
+                        return@doOnLayout
+                    }
+
+                    viewIdentifierManager.addAnimation(
+                        overlayEntity.id,
+                        animation
+                    )
+                    animation.start()
+                    animation.currentPlayTime = animationPosition
+                    if (isPlaying) {
+                        animation.resume()
+                    } else {
+                        animation.pause()
                     }
 
                 }
@@ -791,57 +645,17 @@ class OverlayEntityViewHelper {
                     ConstraintLayout.LayoutParams.WRAP_CONTENT,
                     ConstraintLayout.LayoutParams.WRAP_CONTENT
                 )
+
+
                 val positionGuide = overlayEntity.viewSpec.positionGuide
                 if (positionGuide == null) {
                     // should not happen
+                    Log.e("OverlayEntityView", "animation must not be null")
                     return@post
                 }
-                positionGuide.left?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setLeftConstraints(
-                        constraintSet,
-                        it,
-                        layoutParams,
-                        scaffoldView
-                    )
-                }
-                positionGuide.right?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setRightConstraints(constraintSet, it, layoutParams)
-                }
-                positionGuide.top?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setTopConstraints(constraintSet, it, layoutParams)
-                }
-                positionGuide.bottom?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setBottomConstraints(
-                        constraintSet,
-                        it,
-                        layoutParams,
-                        scaffoldView
-                    )
-                }
-                positionGuide.vCenter?.let {
-                    if (it > 50F || it < -50F) {
-                        return@let
-                    }
-                    setVCenterConstraints(layoutParams, it)
-                }
-                positionGuide.hCenter?.let {
-                    if (it > 50F || it < -50F) {
-                        return@let
-                    }
-                    setHCenterConstrains(layoutParams, it)
-                }
+
+
+                applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
 
 
                 scaffoldView.layoutParams = layoutParams
@@ -852,6 +666,61 @@ class OverlayEntityViewHelper {
 
             }
 
+        }
+
+        private fun applyPositionGuide(
+            positionGuide: PositionGuide,
+            constraintSet: ConstraintSet,
+            layoutParams: ConstraintLayout.LayoutParams,
+            scaffoldView: ScaffoldView
+        ) {
+
+            positionGuide.left?.let {
+                if (it < 0F) {
+                    return@let
+                }
+                setLeftConstraints(
+                    constraintSet,
+                    it,
+                    layoutParams,
+                    scaffoldView
+                )
+            }
+            positionGuide.right?.let {
+                if (it < 0F) {
+                    return@let
+                }
+                setRightConstraints(constraintSet, it, layoutParams)
+            }
+            positionGuide.top?.let {
+                if (it < 0F) {
+                    return@let
+                }
+                setTopConstraints(constraintSet, it, layoutParams)
+            }
+            positionGuide.bottom?.let {
+                if (it < 0F) {
+                    return@let
+                }
+                setBottomConstraints(
+                    constraintSet,
+                    it,
+                    layoutParams,
+                    scaffoldView
+                )
+            }
+            positionGuide.vCenter?.let {
+                if (it > 50F || it < -50F) {
+                    return@let
+                }
+                setVCenterConstraints(layoutParams, it)
+            }
+            positionGuide.hCenter?.let {
+                if (it > 50F || it < -50F) {
+                    return@let
+                }
+                setHCenterConstrains(layoutParams, it)
+            }
         }
 
         fun updateLingeringIntroOverlay(
@@ -908,52 +777,8 @@ class OverlayEntityViewHelper {
 
                 val positionGuide = overlayEntity.viewSpec.positionGuide!!
 
-                positionGuide.left?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setLeftConstraints(
-                        constraintSet,
-                        it,
-                        layoutParams,
-                        scaffoldView
-                    )
-                }
-                positionGuide.right?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setRightConstraints(constraintSet, it, layoutParams)
-                }
-                positionGuide.top?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setTopConstraints(constraintSet, it, layoutParams)
-                }
-                positionGuide.bottom?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setBottomConstraints(
-                        constraintSet,
-                        it,
-                        layoutParams,
-                        scaffoldView
-                    )
-                }
-                positionGuide.vCenter?.let {
-                    if (it > 50F || it < -50F) {
-                        return@let
-                    }
-                    setVCenterConstraints(layoutParams, it)
-                }
-                positionGuide.hCenter?.let {
-                    if (it > 50F || it < -50F) {
-                        return@let
-                    }
-                    setHCenterConstrains(layoutParams, it)
-                }
+                applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
+
 
                 scaffoldView.layoutParams = layoutParams
 
@@ -1132,52 +957,8 @@ class OverlayEntityViewHelper {
                     // should not happen
                     return@post
                 }
-                positionGuide.left?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setLeftConstraints(
-                        constraintSet,
-                        it,
-                        layoutParams,
-                        scaffoldView
-                    )
-                }
-                positionGuide.right?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setRightConstraints(constraintSet, it, layoutParams)
-                }
-                positionGuide.top?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setTopConstraints(constraintSet, it, layoutParams)
-                }
-                positionGuide.bottom?.let {
-                    if (it < 0F) {
-                        return@let
-                    }
-                    setBottomConstraints(
-                        constraintSet,
-                        it,
-                        layoutParams,
-                        scaffoldView
-                    )
-                }
-                positionGuide.vCenter?.let {
-                    if (it > 50F || it < -50F) {
-                        return@let
-                    }
-                    setVCenterConstraints(layoutParams, it)
-                }
-                positionGuide.hCenter?.let {
-                    if (it > 50F || it < -50F) {
-                        return@let
-                    }
-                    setHCenterConstrains(layoutParams, it)
-                }
+
+                applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
 
                 scaffoldView.layoutParams = layoutParams
                 scaffoldView.visibility = View.INVISIBLE
