@@ -60,7 +60,11 @@ class ViewIdentifierManager(dispatcher: CoroutineScope) {
 
     }
 
-    fun detachOverlayView(view: ScaffoldView) {
+    fun detachOverlayView(view: ScaffoldView?) {
+        if (view == null){
+            return
+        }
+
         if (view.tag == null || (view.tag is String).not()) {
             Log.w("ViewIdentifierManager", "overlay tag should not be null [detachOverlay()]")
             return

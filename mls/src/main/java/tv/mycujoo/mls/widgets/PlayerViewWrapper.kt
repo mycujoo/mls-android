@@ -428,7 +428,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     fun onOverlayRemovalWithAnimation(overlayEntity: OverlayEntity) {
         OverlayEntityViewHelper.removalViewWithAnimation(
-            context,
             overlayHost,
             overlayEntity,
             viewIdentifierManager

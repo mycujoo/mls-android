@@ -1,7 +1,5 @@
 package tv.mycujoo.mls.helper
 
-import android.animation.Animator
-import android.animation.ObjectAnimator
 import android.content.Context
 import android.util.Log
 import android.view.View
@@ -10,8 +8,10 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 import androidx.core.view.doOnLayout
-import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.AnimationType.*
+import tv.mycujoo.domain.entity.OverlayEntity
+import tv.mycujoo.domain.entity.PositionGuide
+import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ProportionalImageView
@@ -21,64 +21,6 @@ class OverlayEntityViewHelper {
     companion object {
 
         /**region Private Functions*/
-
-        private fun hasNoAnimation(overlayEntity: HideOverlayActionEntity): Boolean {
-            return overlayEntity.outroAnimationType == NONE
-        }
-
-        private fun hasNoAnimation(overlayEntity: ShowOverlayActionEntity): Boolean {
-            return overlayEntity.introAnimationType == NONE
-        }
-
-        private fun hasDynamicIntroAnimation(animationType: AnimationType): Boolean {
-            return when (animationType) {
-                SLIDE_FROM_LEFT,
-                SLIDE_FROM_RIGHT -> {
-                    true
-                }
-                else -> {
-                    false
-                }
-            }
-        }
-
-        private fun hasStaticIntroAnimation(animationType: AnimationType): Boolean {
-            return when (animationType) {
-                FADE_IN -> {
-                    true
-                }
-
-                else -> {
-                    false
-                }
-            }
-        }
-
-        private fun hasDynamicOutroAnimation(animationType: AnimationType): Boolean {
-            return when (animationType) {
-                SLIDE_TO_LEFT,
-                SLIDE_TO_RIGHT -> {
-                    true
-                }
-
-                else -> {
-                    false
-                }
-            }
-        }
-
-        private fun hasStaticOutroAnimation(animationType: AnimationType): Boolean {
-            return when (animationType) {
-                FADE_OUT -> {
-                    true
-                }
-
-                else -> {
-                    false
-                }
-            }
-        }
-
         private fun setHCenterConstrains(
             layoutParams: ConstraintLayout.LayoutParams,
             it: Float
@@ -312,79 +254,20 @@ class OverlayEntityViewHelper {
             viewIdentifierManager.attachOverlayView(scaffoldView)
 
             scaffoldView.doOnLayout {
-                val x = scaffoldView.x
-                val y = scaffoldView.y
 
-                when (introTransitionSpec.animationType) {
-                    SLIDE_FROM_LEFT -> {
-                        scaffoldView.x =
-                            -scaffoldView.width.toFloat()
-                        val animation = ObjectAnimator.ofFloat(
-                            scaffoldView,
-                            View.X,
-                            scaffoldView.x,
-                            x
-                        )
-                        animation.duration = introTransitionSpec.animationDuration
-                        animation.addListener(object : Animator.AnimatorListener {
-                            override fun onAnimationRepeat(animation: Animator?) {
-                            }
+                val anim = AnimationFactory.createAddViewDynamicAnimation(
+                    host,
+                    scaffoldView,
+                    introTransitionSpec,
+                    viewIdentifierManager
+                )
 
-                            override fun onAnimationEnd(animation: Animator?) {
-                            }
-
-                            override fun onAnimationCancel(animation: Animator?) {
-                            }
-
-                            override fun onAnimationStart(animation: Animator?) {
-                                scaffoldView.visibility = View.VISIBLE
-                            }
-                        })
-
-                        animation.start()
-                    }
-                    SLIDE_FROM_RIGHT -> {
-                        scaffoldView.x = host.width.toFloat()
-                        val animation = ObjectAnimator.ofFloat(
-                            scaffoldView,
-                            View.X,
-                            scaffoldView.x,
-                            x
-                        )
-                        animation.duration = introTransitionSpec.animationDuration
-                        animation.addListener(object : Animator.AnimatorListener {
-                            override fun onAnimationRepeat(animation: Animator?) {
-                            }
-
-                            override fun onAnimationEnd(animation: Animator?) {
-                            }
-
-                            override fun onAnimationCancel(animation: Animator?) {
-
-                            }
-
-                            override fun onAnimationStart(animation: Animator?) {
-                                scaffoldView.visibility = View.VISIBLE
-                            }
-
-                        })
-                        viewIdentifierManager.addAnimation(
-                            scaffoldView.tag as String,
-                            animation
-                        )
-                        animation.start()
-                    }
-                    else -> {
-                        // should not happen
-                    }
-                }
-
+                anim?.start()
             }
 
         }
 
         fun removalViewWithAnimation(
-            context: Context,
             overlayHost: OverlayHost,
             overlayEntity: OverlayEntity,
             viewIdentifierManager: ViewIdentifierManager
@@ -422,28 +305,14 @@ class OverlayEntityViewHelper {
             overlayHost.post {
                 overlayHost.children.filter { it.tag == overlayEntity.id }.forEach { view ->
                     view as ScaffoldView
-                    val animation = ObjectAnimator.ofFloat(view, View.ALPHA, 1F, 0F)
-                    animation.duration = overlayEntity.outroTransitionSpec.animationDuration
 
-                    animation.addListener(object : Animator.AnimatorListener {
-                        override fun onAnimationStart(animation: Animator?) {
-                        }
+                    val animation = AnimationFactory.createRemoveViewStaticAnimation(
+                        overlayHost,
+                        overlayEntity,
+                        view,
+                        viewIdentifierManager
+                    )
 
-                        override fun onAnimationEnd(animation: Animator?) {
-                            overlayHost.removeView(view)
-                            viewIdentifierManager.detachOverlayView(view)
-                            viewIdentifierManager.removeAnimation(overlayEntity.id)
-                        }
-
-                        override fun onAnimationRepeat(animation: Animator?) {
-                        }
-
-                        override fun onAnimationCancel(animation: Animator?) {
-                        }
-
-                    })
-
-                    viewIdentifierManager.addAnimation(overlayEntity.id, animation)
                     animation.start()
                 }
             }
@@ -457,50 +326,23 @@ class OverlayEntityViewHelper {
             overlayHost.post {
                 overlayHost.children.filter { it.tag == overlayEntity.id }.forEach { view ->
                     view as ScaffoldView
-                    var animation: ObjectAnimator? = null
 
-                    if (overlayEntity.outroTransitionSpec.animationType == SLIDE_TO_LEFT) {
-                        animation = ObjectAnimator.ofFloat(
-                            view,
-                            View.X,
-                            view.x,
-                            -view.width.toFloat()
-                        )
-                    } else if (overlayEntity.outroTransitionSpec.animationType == SLIDE_TO_RIGHT) {
-                        animation = ObjectAnimator.ofFloat(
-                            view,
-                            View.X,
-                            view.x,
-                            overlayHost.width.toFloat()
-                        )
 
-                    }
+                    val animation = AnimationFactory.createRemoveViewDynamicAnimation(
+                        overlayHost,
+                        overlayEntity,
+                        view,
+                        viewIdentifierManager
+                    )
+
 
                     if (animation == null) {
                         // should not happen
+                        Log.e("OverlayEntityView", "animation must not be null")
                         return@forEach
                     }
 
-                    animation.duration = overlayEntity.outroTransitionSpec.animationDuration
-                    animation.addListener(object : Animator.AnimatorListener {
-                        override fun onAnimationRepeat(animation: Animator?) {
-                        }
 
-                        override fun onAnimationEnd(animation: Animator?) {
-                            overlayHost.removeView(view)
-                            viewIdentifierManager.detachOverlayView(view)
-                            viewIdentifierManager.removeAnimation(overlayEntity.id)
-                        }
-
-                        override fun onAnimationCancel(animation: Animator?) {
-
-                        }
-
-                        override fun onAnimationStart(animation: Animator?) {
-                        }
-
-                    })
-                    viewIdentifierManager.addAnimation(overlayEntity.id, animation)
                     animation.start()
                 }
             }
@@ -524,117 +366,19 @@ class OverlayEntityViewHelper {
                     )
 
                 scaffoldView.doOnLayout {
-                    val x = scaffoldView.x
-                    val y = scaffoldView.y
 
-                    val animation: ObjectAnimator? = null
-                    when (overlayEntity.introTransitionSpec.animationType) {
-                        FADE_IN -> {
-                            scaffoldView.x =
-                                -scaffoldView.width.toFloat()
-                            val animation = ObjectAnimator.ofFloat(
-                                scaffoldView,
-                                View.ALPHA,
-                                0F,
-                                1F
-                            )
-                            animation.duration =
-                                overlayEntity.introTransitionSpec.animationDuration
-                            animation.addListener(object : Animator.AnimatorListener {
-                                override fun onAnimationRepeat(animation: Animator?) {
-                                }
-
-                                override fun onAnimationEnd(animation: Animator?) {
-                                    viewIdentifierManager.removeAnimation(overlayEntity.id)
-                                }
-
-                                override fun onAnimationCancel(animation: Animator?) {
-                                }
-
-                                override fun onAnimationStart(animation: Animator?) {
-                                    scaffoldView.visibility = View.VISIBLE
-                                }
-
-                            })
-                        }
-                        SLIDE_FROM_LEFT -> {
-                            scaffoldView.x =
-                                -scaffoldView.width.toFloat()
-                            val animation = ObjectAnimator.ofFloat(
-                                scaffoldView,
-                                View.X,
-                                scaffoldView.x,
-                                x
-                            )
-                            animation.duration =
-                                overlayEntity.introTransitionSpec.animationDuration
-                            animation.addListener(object : Animator.AnimatorListener {
-                                override fun onAnimationRepeat(animation: Animator?) {
-                                }
-
-                                override fun onAnimationEnd(animation: Animator?) {
-                                    viewIdentifierManager.removeAnimation(overlayEntity.id)
-                                }
-
-                                override fun onAnimationCancel(animation: Animator?) {
-                                }
-
-                                override fun onAnimationStart(animation: Animator?) {
-                                    scaffoldView.visibility = View.VISIBLE
-                                }
-
-                            })
-
-                        }
-                        SLIDE_FROM_RIGHT -> {
-                            scaffoldView.x = overlayHost.width.toFloat()
-                            val animation = ObjectAnimator.ofFloat(
-                                scaffoldView,
-                                View.X,
-                                scaffoldView.x,
-                                x
-                            )
-                            animation.duration =
-                                overlayEntity.introTransitionSpec.animationDuration
-                            animation.addListener(object : Animator.AnimatorListener {
-                                override fun onAnimationRepeat(animation: Animator?) {
-                                }
-
-                                override fun onAnimationEnd(animation: Animator?) {
-                                    viewIdentifierManager.removeAnimation(overlayEntity.id)
-                                }
-
-                                override fun onAnimationCancel(animation: Animator?) {
-
-                                }
-
-                                override fun onAnimationStart(animation: Animator?) {
-                                    scaffoldView.visibility = View.VISIBLE
-
-                                }
-
-                            })
-                        }
-                        else -> {
-                            // should not happen
-                        }
-                    }
+                    val animation = AnimationFactory.createLingeringIntroAnimation(
+                        overlayHost,
+                        scaffoldView,
+                        overlayEntity,
+                        animationPosition,
+                        isPlaying,
+                        viewIdentifierManager
+                    )
 
                     if (animation == null) {
                         Log.e("OverlayEntityView", "animation must not be null")
                         return@doOnLayout
-                    }
-
-                    viewIdentifierManager.addAnimation(
-                        overlayEntity.id,
-                        animation
-                    )
-                    animation.start()
-                    animation.currentPlayTime = animationPosition
-                    if (isPlaying) {
-                        animation.resume()
-                    } else {
-                        animation.pause()
                     }
 
                 }
@@ -667,6 +411,7 @@ class OverlayEntityViewHelper {
             }
 
         }
+
 
         private fun applyPositionGuide(
             positionGuide: PositionGuide,
@@ -807,142 +552,17 @@ class OverlayEntityViewHelper {
                     )
 
                 scaffoldView.doOnLayout {
-                    when (overlayEntity.outroTransitionSpec.animationType) {
-                        FADE_OUT -> {
-                            val animation = ObjectAnimator.ofFloat(
-                                scaffoldView,
-                                View.ALPHA,
-                                1F,
-                                0F
-                            )
-                            animation.duration =
-                                overlayEntity.outroTransitionSpec.animationDuration
-                            animation.addListener(object : Animator.AnimatorListener {
-                                override fun onAnimationRepeat(animation: Animator?) {
-                                }
 
-                                override fun onAnimationEnd(animation: Animator?) {
-                                    viewIdentifierManager.removeAnimation(overlayEntity.id)
-                                    viewIdentifierManager.detachOverlayView(
-                                        it as ScaffoldView
-                                    )
-                                    overlayHost.removeView(scaffoldView)
-                                }
+                    val animation =
+                        AnimationFactory.createLingeringOutroAnimation(
+                            overlayHost,
+                            scaffoldView,
+                            overlayEntity,
+                            animationPosition,
+                            isPlaying,
+                            viewIdentifierManager
+                        )
 
-                                override fun onAnimationCancel(animation: Animator?) {
-
-                                }
-
-                                override fun onAnimationStart(animation: Animator?) {
-                                    scaffoldView.visibility = View.VISIBLE
-                                }
-
-                            })
-
-                            viewIdentifierManager.addAnimation(
-                                overlayEntity.id,
-                                animation
-                            )
-                            animation.start()
-                            animation.currentPlayTime = animationPosition
-                            if (isPlaying) {
-                                animation.resume()
-                            } else {
-                                animation.pause()
-                            }
-
-                        }
-                        SLIDE_TO_LEFT -> {
-
-                            val animation = ObjectAnimator.ofFloat(
-                                scaffoldView,
-                                View.X,
-                                scaffoldView.x,
-                                -scaffoldView.width.toFloat()
-                            )
-                            animation.duration =
-                                overlayEntity.outroTransitionSpec.animationDuration
-                            animation.addListener(object : Animator.AnimatorListener {
-                                override fun onAnimationRepeat(animation: Animator?) {
-                                }
-
-                                override fun onAnimationEnd(animation: Animator?) {
-                                    viewIdentifierManager.removeAnimation(overlayEntity.id)
-                                    viewIdentifierManager.detachOverlayView(
-                                        it as ScaffoldView
-                                    )
-                                    overlayHost.removeView(scaffoldView)
-                                }
-
-                                override fun onAnimationCancel(animation: Animator?) {
-
-                                }
-
-                                override fun onAnimationStart(animation: Animator?) {
-                                    scaffoldView.visibility = View.VISIBLE
-                                }
-
-                            })
-
-                            viewIdentifierManager.addAnimation(
-                                overlayEntity.id,
-                                animation
-                            )
-                            animation.start()
-                            animation.currentPlayTime = animationPosition
-                            if (isPlaying) {
-                                animation.resume()
-                            } else {
-                                animation.pause()
-                            }
-                        }
-                        SLIDE_TO_RIGHT -> {
-                            val animation = ObjectAnimator.ofFloat(
-                                scaffoldView,
-                                View.X,
-                                scaffoldView.x,
-                                overlayHost.width.toFloat()
-                            )
-                            animation.duration =
-                                overlayEntity.outroTransitionSpec.animationDuration
-                            animation.addListener(object : Animator.AnimatorListener {
-                                override fun onAnimationRepeat(animation: Animator?) {
-                                }
-
-                                override fun onAnimationEnd(animation: Animator?) {
-                                    viewIdentifierManager.removeAnimation(overlayEntity.id)
-                                    viewIdentifierManager.detachOverlayView(
-                                        it as ScaffoldView
-                                    )
-                                    overlayHost.removeView(scaffoldView)
-                                }
-
-                                override fun onAnimationCancel(animation: Animator?) {
-
-                                }
-
-                                override fun onAnimationStart(animation: Animator?) {
-                                    scaffoldView.visibility = View.VISIBLE
-                                }
-
-                            })
-
-                            viewIdentifierManager.addAnimation(
-                                overlayEntity.id,
-                                animation
-                            )
-                            animation.start()
-                            animation.currentPlayTime = animationPosition
-                            if (isPlaying) {
-                                animation.resume()
-                            } else {
-                                animation.pause()
-                            }
-                        }
-                        else -> {
-                            // should not happen
-                        }
-                    }
 
                 }
 
@@ -990,7 +610,7 @@ class OverlayEntityViewHelper {
                 viewIdentifierManager.detachOverlayView(
                     viewIdentifierManager.getOverlayView(
                         overlayEntity.id
-                    )!!
+                    )
                 )
 
                 addLingeringOutroOverlay(
