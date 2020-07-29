@@ -221,55 +221,6 @@ class TimerCoreTest {
         assertEquals("60", actualValue)
     }
 
-    @Test
-    fun `given pause command, should not change time afterward`() {
-        val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
-            ScreenTimerFormat.SECONDS,
-            0L,
-            1000L
-        )
-        timeKeeper.createTimer(createScreenTimerEntity)
-        var actualValue = ""
-
-        timeKeeper.observe(sampleName) { actualValue = it.second }
-        timeKeeper.startTimer(sampleName)
-
-        testCoroutineScope.advanceTimeBy(60000)
-
-        timeKeeper.pauseTimer(sampleName)
-        val valueBeforePauseCommand = actualValue
-
-        testCoroutineScope.advanceTimeBy(60000)
-
-
-        assertEquals("60", valueBeforePauseCommand)
-    }
-
-
-    @Test
-    fun `given resume command after pause command, should continue changing time`() {
-        val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
-            ScreenTimerFormat.SECONDS,
-            0L,
-            1000L
-        )
-        timeKeeper.createTimer(createScreenTimerEntity)
-        var actualValue = ""
-
-        timeKeeper.observe(sampleName) { actualValue = it.second }
-        timeKeeper.startTimer(sampleName)
-
-        testCoroutineScope.advanceTimeBy(60000)
-
-
-        timeKeeper.pauseTimer(sampleName)
-        timeKeeper.resumeTimer(sampleName)
-
-        testCoroutineScope.advanceTimeBy(60000)
-
-
-        assertEquals("120", actualValue)
-    }
 
     @Test
     fun `given adjust command to 10000ms, should return '10'`() {

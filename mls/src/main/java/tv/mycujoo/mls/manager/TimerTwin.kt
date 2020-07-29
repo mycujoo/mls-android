@@ -2,7 +2,7 @@ package tv.mycujoo.mls.manager
 
 import com.jakewharton.rxrelay3.BehaviorRelay
 
-data class TimerRelay(
+data class TimerTwin(
     val timerCore: TimerCore,
-    val timerValue: BehaviorRelay<String>
+    val timerRelay: BehaviorRelay<String>
 )

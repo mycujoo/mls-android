@@ -56,7 +56,7 @@ class GetActionsFromJSONUseCase {
        {
             "actions": [
                 {
-                    "offset": 2000, 
+                    "offset": 6000, 
 					"id": "43faf4j59595959",
 					"type": "set_variable",
 					"data": {
@@ -67,7 +67,7 @@ class GetActionsFromJSONUseCase {
 					}
 				},
                 {
-                    "offset": 4000, 
+                    "offset": 8000, 
 					"id": "43faf4j59595960",
 					"type": "set_variable",
 					"data": {
@@ -78,7 +78,7 @@ class GetActionsFromJSONUseCase {
 					}
 				},
                 {
-                    "offset": 6000, 
+                    "offset": 60000, 
 					"id": "43faf4j59595961",
 					"type": "increment_variable",
 					"data": {
@@ -87,7 +87,16 @@ class GetActionsFromJSONUseCase {
 					}
 				},                
                 {
-                    "offset": 70000, 
+                    "offset": 120000, 
+					"id": "43faf4j59595961",
+					"type": "increment_variable",
+					"data": {
+						"name": "${"$"}awayScore",
+						"amount": 1
+					}
+				},                
+                    {
+                    "offset": 180000, 
 					"id": "43faf4j59595961",
 					"type": "increment_variable",
 					"data": {
@@ -106,7 +115,7 @@ class GetActionsFromJSONUseCase {
                 }, 
                 {
                     "data": {
-                        "animatein_duration": 3000, 
+                        "animatein_duration": 1000, 
                         "animatein_type": "fade_in",
                         "custom_id": "scoreboard1",
                         "position": {
@@ -132,7 +141,7 @@ class GetActionsFromJSONUseCase {
                              "bottom": 5.0
                          }, 
                          "size": {
-                             "width": 25.0
+                             "width": 50.0
                          }, 
                          "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg",
                          "variable_positions": ["${"$"}awayScore","${"$"}homeScore", "${"$"}scoreboardTimer"]
@@ -229,9 +238,9 @@ class GetActionsFromJSONUseCase {
                 		// - s:  Seconds
                 		"format": "ms",
                 		// Indicates whether the clock counts "up" or "down"
-                		"direction": "down",
+                		"direction": "up",
                 		// 45 minutes, represented in milliseconds
-                		"start_value": 2700000,
+                		"start_value": 0,
                 		// Step size
                 		"step": 1000,
                 		// capValue is a value at which the timer should continue counting, 
@@ -251,13 +260,23 @@ class GetActionsFromJSONUseCase {
 				},
 				{
 					"id": "436ggg54wt5ty45t4w",
-                    "offset": 120000,
+                    "offset": 15000,
 					"type": "adjust_timer",
 					"data": {
 						"name": "${"$"}scoreboardTimer",
 						"value": 30000
 					}
+				},
+				{
+					"id": "ok6ggg54wt5ty45tke",
+                    "offset": 22000,
+					"type": "skip_timer",
+					"data": {
+						"name": "${"$"}scoreboardTimer",
+						"value": 30000
+					}
 				}
+
             ]
         }
     """.trimIndent()

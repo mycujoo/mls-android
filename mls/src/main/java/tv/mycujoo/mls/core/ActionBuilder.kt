@@ -53,8 +53,8 @@ abstract class ActionBuilder {
     /**endregion */
 
     /**
-     * re-calculate timers, on seek timers need to be calculated considering current-time
+     * compute all timer related actions until current time
      */
-    abstract fun recalculateTimers()
+    abstract fun computeTimersTillNow()
 
 }

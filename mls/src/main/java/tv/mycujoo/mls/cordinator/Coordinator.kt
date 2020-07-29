@@ -155,15 +155,21 @@ class Coordinator(
         val runnable = object : Runnable {
             override fun run() {
                 actionBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
-                actionBuilder.buildCurrentTimeRange()
 
-                actionBuilder.computeVariableNameValueTillNow()
+                if (exoPlayer.isPlaying){
+                    actionBuilder.buildCurrentTimeRange()
 
-                handler.postDelayed(this, 200L)
+                    actionBuilder.computeTimersTillNow()
+
+                    actionBuilder.computeVariableNameValueTillNow()
+                }
+
+
+                handler.postDelayed(this, 1000L)
             }
         }
 
-        handler.postDelayed(runnable, 200L)
+        handler.postDelayed(runnable, 1000L)
 
     }
 
@@ -233,10 +239,16 @@ class Coordinator(
                     actionBuilder.buildCurrentTimeRange()
 
                     actionBuilder.computeVariableNameValueTillNow()
-                    actionBuilder.recalculateTimers()
 
-
+                    actionBuilder.computeTimersTillNow()
                 }
+            }
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                super.onIsPlayingChanged(isPlaying)
+
+                actionBuilder.computeTimersTillNow()
+
             }
         }
         exoPlayer.addListener(seekInterruptionEventListener)

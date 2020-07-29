@@ -20,6 +20,15 @@ class TimeRangeHelper {
 
             return (currentTime >= left) && (currentTime <= right)
         }
+
+        fun isOffsetInRange(currentTime: Long, offset: Long): Boolean {
+            return (currentTime + 1000L >= offset) && (currentTime <= offset)
+        }
+
+        fun isOffsetUntilNow(currentTime: Long, offset: Long): Boolean {
+            return currentTime >= offset
+        }
+
     }
 
 }

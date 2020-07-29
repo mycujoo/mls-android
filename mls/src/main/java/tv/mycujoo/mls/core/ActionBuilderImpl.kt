@@ -7,8 +7,9 @@ import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.AnimationType.*
 import tv.mycujoo.domain.entity.OverlayAct.*
 import tv.mycujoo.mls.helper.ActionVariableHelper
+import tv.mycujoo.mls.manager.TimerEntity
 import tv.mycujoo.mls.manager.ViewIdentifierManager
-import tv.mycujoo.mls.widgets.CreateTimerEntity
+import tv.mycujoo.mls.widgets.*
 import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
@@ -40,7 +41,6 @@ class ActionBuilderImpl(
     /**endregion */
 
 
-    // re-write
     override fun addOverlayObjects(overlayObject: List<OverlayObject>) {
         overlayObjects.addAll(overlayObject)
         overlayObject.forEach {
@@ -63,7 +63,6 @@ class ActionBuilderImpl(
 
     override fun buildCurrentTimeRange() {
 
-        // todo [WIP]
         overlayEntityList.forEach { overlayEntity ->
             val act = overlayEntity.update(currentTime)
             when (act) {
@@ -84,27 +83,6 @@ class ActionBuilderImpl(
                     // should not happen
                 }
             }
-        }
-
-        // timer todo [WIP]
-        if (this::actionCollections.isInitialized) {
-            actionCollections.createTimerEntityList
-                .forEach {
-                    if (isInCurrentTimeRange(it.offset) && !isTimerCreated(it.name)) {
-                        createTimer(it)
-                    } else {
-                        if (shouldBeKilled(it)) {
-                            clearTimer(it)
-                        }
-                    }
-                }
-
-            actionCollections.startTimerEntityList.forEach {
-                if (isInCurrentTimeRange(it.offset) && isTimerCreated(it.name)) {
-                    startTimer(it.name)
-                }
-            }
-
         }
 
     }
@@ -184,65 +162,52 @@ class ActionBuilderImpl(
 
     }
 
-    override fun recalculateTimers() {
 
-        appliedCreateTimer.clear()
+    override fun computeTimersTillNow() {
 
-        if (this::actionCollections.isInitialized) {
-            actionCollections.createTimerEntityList.forEach {
-                if (isUpUntilNow(it.offset) && !isTimerCreated(it.name)) {
-                    createTimer(it)
-                }
-            }
+        actionCollections.timerCollection.forEach { timerEntity ->
 
-            appliedCreateTimer.forEach { appliedCreateTimer ->
+            val toBeNotified = mutableSetOf<String>()
 
-
-                actionCollections.timerEntity.firstOrNull { it.name == appliedCreateTimer }
-                    ?.let { timerEntity ->
-
-                        // start or pause
-                        val lastStartTimerEntity =
-                            timerEntity.startCommand.filter { it.name == appliedCreateTimer }
-                                .maxBy { it.offset }
-
-                        val lastPauseTimerEntity =
-                            timerEntity.pauseCommand.filter { it.name == appliedCreateTimer }
-                                .maxBy { it.offset }
-
-                        lastStartTimerEntity?.let {
-                            if (lastPauseTimerEntity != null && lastPauseTimerEntity.offset > it.offset) {
-                                pauseTimer(it.name)
-                            } else {
-                                startTimer(it.name)
-                                viewIdentifierManager.timeKeeper.tuneWithStartEntity(
-                                    appliedCreateTimer,
-                                    it,
-                                    currentTime
-                                )
-                            }
+            timerEntity.getAllActionsUntil(currentTime).forEach { action ->
+                when (action) {
+                    is TimerEntity.CreateTimer -> {
+                        if (!isTimerCreated(action.createTimerEntity.name)) {
+                            createTimer(action.createTimerEntity)
                         }
-
-                        // adjust
-                        timerEntity.adjustCommand.filter { isUpUntilNow(it.offset) }
-                            .maxBy {
-                                it.offset
-                            }?.let {
-                                // todo [WIP]
-                                viewIdentifierManager.timeKeeper.tuneWithAdjustEntity(
-                                    appliedCreateTimer,
-                                    it,
-                                    currentTime
-                                )
-                            }
-
+                    }
+                    is TimerEntity.StartTimer -> {
+                        startTimer(action.startTimerEntity)
+                        toBeNotified.add(action.startTimerEntity.name)
+                    }
+                    is TimerEntity.PauseTimer -> {
+//                        pauseTimer(action.pauseTimerEntity)
+//                        toBeNotified.add(action.pauseTimerEntity.name)
+                    }
+                    is TimerEntity.AdjustTimer -> {
+                        adjustTimer(action.adjustTimerEntity)
+                        toBeNotified.add(action.adjustTimerEntity.name)
 
                     }
+                    is TimerEntity.SkipTimer -> {
+                        skipTimer(action.skipTimerEntity)
+                        toBeNotified.add(action.skipTimerEntity.name)
+
+                    }
+                    is TimerEntity.KillTimer -> {
+                        clearTimer(action.timerName)
+                    }
+                }
+
+            }
+
+            toBeNotified.forEach {
+                notifyTimerObservers(it)
             }
 
         }
-
     }
+
 
     /**region Over-ridden Functions*/
     override fun setCurrentTime(time: Long, playing: Boolean) {
@@ -252,13 +217,9 @@ class ActionBuilderImpl(
     }
     /**endregion */
 
-    /**region SetVariableEntity*/
-    /**endregion */
-
 
     /**region Action classifiers*/
 
-    //re-write
     private fun isNotDownloading(overlayObject: OverlayObject): Boolean {
         return toBeDownloadedSvgList.none { it == overlayObject.id }
     }
@@ -269,10 +230,6 @@ class ActionBuilderImpl(
 
     private fun isAttached(overlayObject: OverlayObject): Boolean {
         return viewIdentifierManager.overlayObjectIsAttached(overlayObject.id)
-    }
-
-    private fun isNotInDisplayingAnimation(overlayObject: OverlayObject): Boolean {
-        return viewIdentifierManager.hasNoActiveAnimation(overlayObject.id)
     }
 
     private fun shouldNotBeOnScreen(overlayObject: OverlayObject): Boolean {
@@ -294,98 +251,6 @@ class ActionBuilderImpl(
     /**
      * return true if the action offset is now or in 1 second
      */
-    private fun additionIsInCurrentTimeRange(overlayObject: OverlayObject): Boolean {
-        return (overlayObject.introTransitionSpec.offset >= currentTime) && (overlayObject.introTransitionSpec.offset < currentTime + 1000L)
-    }
-
-    private fun removalIsInCurrentTimeRange(overlayObject: OverlayObject): Boolean {
-        if (overlayObject.outroTransitionSpec.animationType == UNSPECIFIED) {
-            return false
-        }
-
-        return (overlayObject.outroTransitionSpec.offset >= currentTime) && (overlayObject.outroTransitionSpec.offset < currentTime + 1000L)
-    }
-
-
-    private fun isLingeringEndlessOverlay(overlayObject: OverlayObject): Boolean {
-        if (overlayObject.introTransitionSpec.offset > currentTime) {
-            return false
-        }
-
-        if (overlayObject.outroTransitionSpec.offset == -1L) {
-            // it doesn't have ending spec
-            return if (hasEnteringAnimation(overlayObject.introTransitionSpec.animationType)) {
-                currentTime > overlayObject.introTransitionSpec.offset + overlayObject.introTransitionSpec.animationDuration
-            } else {
-                currentTime > overlayObject.introTransitionSpec.offset
-            }
-        }
-        return false
-
-    }
-
-    private fun isLingeringExcludingAnimationPart(overlayObject: OverlayObject): Boolean {
-        if (overlayObject.introTransitionSpec.offset > currentTime) {
-            return false
-        }
-
-        if (overlayObject.outroTransitionSpec.offset == -1L || overlayObject.outroTransitionSpec.animationDuration == 0L) {
-            return false
-        }
-
-        var leftBound = overlayObject.introTransitionSpec.offset
-        var rightBound = 0L
-
-        if (hasEnteringAnimation(overlayObject.introTransitionSpec.animationType)) {
-            leftBound =
-                overlayObject.introTransitionSpec.offset + overlayObject.introTransitionSpec.animationDuration
-        }
-
-        if (hasOutroAnimation(overlayObject.outroTransitionSpec.animationType)) {
-            rightBound = overlayObject.outroTransitionSpec.offset
-        }
-
-        return (currentTime > leftBound) && (currentTime < rightBound)
-    }
-
-    private fun isLingeringInIntroAnimation(overlayObject: OverlayObject): Boolean {
-        if (overlayObject.introTransitionSpec.offset > currentTime) {
-            return false
-        }
-
-        val leftBound = overlayObject.introTransitionSpec.offset
-        val rightBound =
-            overlayObject.introTransitionSpec.offset + overlayObject.introTransitionSpec.animationDuration
-
-        return (leftBound <= currentTime) && (currentTime <= rightBound)
-    }
-
-    private fun isLingeringInOutroAnimation(overlayObject: OverlayObject): Boolean {
-        if (overlayObject.introTransitionSpec.offset > currentTime) {
-            return false
-        }
-
-        if (overlayObject.outroTransitionSpec.animationDuration == -1L || overlayObject.outroTransitionSpec.animationDuration > currentTime) {
-            return false
-        }
-
-        val leftBound = overlayObject.outroTransitionSpec.offset
-        val rightBound =
-            overlayObject.outroTransitionSpec.offset + overlayObject.outroTransitionSpec.animationDuration
-
-        return (leftBound <= currentTime) && (currentTime <= rightBound)
-    }
-
-    private fun hasEnteringAnimation(animationType: AnimationType): Boolean {
-        return when (animationType) {
-            FADE_IN,
-            SLIDE_FROM_LEFT,
-            SLIDE_FROM_RIGHT -> {
-                true
-            }
-            else -> false
-        }
-    }
 
     private fun hasOutroAnimation(animationType: AnimationType): Boolean {
         return when (animationType) {
@@ -437,17 +302,46 @@ class ActionBuilderImpl(
     }
 
 
-    private fun startTimer(name: String) {
-        viewIdentifierManager.timeKeeper.startTimer(name)
+    private fun startTimer(startTimerEntity: StartTimerEntity) {
+        viewIdentifierManager.timeKeeper.timerRelayList.firstOrNull { it.timerCore.name == startTimerEntity.name }
+            ?.let { timerTwin ->
+                timerTwin.timerCore.tuneWithStartEntity(currentTime, startTimerEntity)
+            }
     }
 
-    private fun pauseTimer(name: String) {
-        viewIdentifierManager.timeKeeper.pauseTimer(name)
+    private fun pauseTimer(pauseTimerEntity: PauseTimerEntity) {
+        viewIdentifierManager.timeKeeper.timerRelayList.firstOrNull { it.timerCore.name == pauseTimerEntity.name }
+            ?.let { timerTwin ->
+//                timerTwin.timerCore.pause(currentTime, pauseTimerEntity)
+            }
     }
 
-    private fun clearTimer(createTimerEntity: CreateTimerEntity) {
-        appliedCreateTimer.remove(createTimerEntity.name)
+    private fun adjustTimer(adjustTimerEntity: AdjustTimerEntity) {
+        viewIdentifierManager.timeKeeper.timerRelayList.firstOrNull { it.timerCore.name == adjustTimerEntity.name }
+            ?.let { timerTwin ->
+                timerTwin.timerCore.tuneWithAdjustEntity(currentTime, adjustTimerEntity)
+            }
     }
+
+    private fun skipTimer(skipTimerEntity: SkipTimerEntity) {
+        viewIdentifierManager.timeKeeper.timerRelayList.firstOrNull { it.timerCore.name == skipTimerEntity.name }
+            ?.let { timerTwin ->
+                timerTwin.timerCore.tuneWithSkipEntity(skipTimerEntity)
+            }
+    }
+
+
+    private fun clearTimer(timerName: String) {
+        appliedCreateTimer.remove(timerName)
+    }
+
+    private fun notifyTimerObservers(timerName: String) {
+        viewIdentifierManager.timeKeeper.timerRelayList.filter { it.timerCore.name == timerName }
+            .forEach { timerRelay ->
+                timerRelay.timerCore.notifyObservers(timerRelay)
+            }
+    }
+
     /**endregion */
 
     /**region msc*/

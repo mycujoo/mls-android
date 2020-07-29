@@ -926,10 +926,8 @@ class OverlayEntityViewHelper {
             isPlaying: Boolean,
             viewIdentifierManager: ViewIdentifierManager
         ) {
-            // TODO: 27/07/2020
-            // todo cancel former animation
             overlayHost.post {
-                overlayHost.children.firstOrNull { it.tag == overlayEntity.id }?.let {  view ->
+                overlayHost.children.firstOrNull { it.tag == overlayEntity.id }?.let { view ->
 
 
                     viewIdentifierManager.getAnimationWithTag(overlayEntity.id)?.let {
@@ -937,117 +935,23 @@ class OverlayEntityViewHelper {
                     }
                     viewIdentifierManager.removeAnimation(overlayEntity.id)
 
-                    viewIdentifierManager.detachOverlayView(
-                        viewIdentifierManager.getOverlayView(
-                            overlayEntity.id
-                        )!!
+                    val scaffoldView = viewIdentifierManager.getOverlayView(
+                        overlayEntity.id
                     )
+                    scaffoldView?.let {
+                        viewIdentifierManager.detachOverlayView(
+                            it
+                        )
+                    }
 
-                    addLingeringIntroOverlay(overlayHost, overlayEntity, animationPosition, isPlaying, viewIdentifierManager)
-//
-//                    val x = view.x
-//                    val y = view.y
-//
-//                    when (overlayEntity.introTransitionSpec.animationType) {
-//                        FADE_IN -> {
-//                            val animation =
-//                                createFadeInAnimationForLingeringIntroOverlay(
-//                                    overlayEntity,
-//                                    viewIdentifierManager,
-//                                    view
-//                                )
-//                            animation.start()
-//                            animation.currentPlayTime = animationPosition
-//                            if (isPlaying) {
-//                                animation.resume()
-//                            } else {
-//                                animation.pause()
-//                            }
-//                        }
-//                        SLIDE_FROM_LEFT -> {
-//                            view.x =
-//                                -view.width.toFloat()
-//                            val animation = ObjectAnimator.ofFloat(
-//                                view,
-//                                View.X,
-//                                view.x,
-//                                x
-//                            )
-//                            animation.duration =
-//                                overlayEntity.introTransitionSpec.animationDuration
-//                            animation.addListener(object : Animator.AnimatorListener {
-//                                override fun onAnimationRepeat(animation: Animator?) {
-//                                }
-//
-//                                override fun onAnimationEnd(animation: Animator?) {
-//                                    viewIdentifierManager.removeAnimation(overlayEntity.id)
-//                                }
-//
-//                                override fun onAnimationCancel(animation: Animator?) {
-//                                }
-//
-//                                override fun onAnimationStart(animation: Animator?) {
-//                                    view.visibility = View.VISIBLE
-//                                }
-//
-//                            })
-//
-//                            viewIdentifierManager.addAnimation(
-//                                overlayEntity.id,
-//                                animation
-//                            )
-//                            animation.start()
-//                            animation.currentPlayTime = animationPosition
-//                            if (isPlaying) {
-//                                animation.resume()
-//                            } else {
-//                                animation.pause()
-//                            }
-//                        }
-//                        SLIDE_FROM_RIGHT -> {
-//                            view.x = overlayHost.width.toFloat()
-//                            val animation = ObjectAnimator.ofFloat(
-//                                view,
-//                                View.X,
-//                                view.x,
-//                                x
-//                            )
-//                            animation.duration =
-//                                overlayEntity.introTransitionSpec.animationDuration
-//                            animation.addListener(object : Animator.AnimatorListener {
-//                                override fun onAnimationRepeat(animation: Animator?) {
-//                                }
-//
-//                                override fun onAnimationEnd(animation: Animator?) {
-//                                    viewIdentifierManager.removeAnimation(overlayEntity.id)
-//                                }
-//
-//                                override fun onAnimationCancel(animation: Animator?) {
-//
-//                                }
-//
-//                                override fun onAnimationStart(animation: Animator?) {
-//                                    view.visibility = View.VISIBLE
-//                                }
-//
-//                            })
-//                            viewIdentifierManager.addAnimation(
-//                                overlayEntity.id,
-//                                animation
-//                            )
-//                            animation.start()
-//                            animation.currentPlayTime = animationPosition
-//                            if (isPlaying) {
-//                                animation.resume()
-//                            } else {
-//                                animation.pause()
-//                            }
-//                        }
-//
-//                        else -> {
-//                            // should not happen
-//                        }
-//                    }
+
+                    addLingeringIntroOverlay(
+                        overlayHost,
+                        overlayEntity,
+                        animationPosition,
+                        isPlaying,
+                        viewIdentifierManager
+                    )
                 }
             }
         }
