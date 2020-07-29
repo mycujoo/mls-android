@@ -1,9 +1,10 @@
 package tv.mycujoo.mls.helper
 
 import android.content.Context
+import android.util.Log
 import android.view.View
+import com.caverock.androidsvg.SVG
 import tv.mycujoo.domain.entity.OverlayEntity
-import tv.mycujoo.domain.entity.OverlayObject
 import tv.mycujoo.mls.manager.TimeKeeper
 import tv.mycujoo.mls.manager.VariableTranslator
 import tv.mycujoo.mls.widgets.ScaffoldView
@@ -11,36 +12,6 @@ import tv.mycujoo.mls.widgets.ScaffoldView
 class OverlayFactory {
 
     companion object {
-        //todo [WIP]
-        fun createScaffoldView(
-            context: Context,
-            overlayObject: OverlayObject,
-            variableTranslator: VariableTranslator,
-            timeKeeper: TimeKeeper
-        ): ScaffoldView {
-
-            val size = overlayObject.viewSpec.size!!
-
-            val scaffoldView = ScaffoldView(size.first, size.second, context)
-            scaffoldView.id = View.generateViewId()
-            scaffoldView.tag = overlayObject.id
-
-            overlayObject.variablePlaceHolders.forEach { entry ->
-                // VALUE of place-holder, is the KEY in the set_variable map
-                variableTranslator.createVariableLiveEventIfNotExisted(entry)
-                variableTranslator.observe(
-                    entry
-                ) { scaffoldView.onVariableUpdated(it) }
-            }
-
-            overlayObject.variablePlaceHolders.forEach { entry ->
-                timeKeeper.observe(entry) { scaffoldView.onVariableUpdated(it) }
-            }
-
-            return scaffoldView
-
-        }
-
         fun createScaffoldView(
             context: Context,
             overlayEntity: OverlayEntity,
@@ -54,45 +25,50 @@ class OverlayFactory {
             scaffoldView.id = View.generateViewId()
             scaffoldView.tag = overlayEntity.id
 
+            scaffoldView.setVariablePlaceHolder(overlayEntity.variablePlaceHolders)
+
+
             overlayEntity.variablePlaceHolders.forEach { entry ->
                 // VALUE of place-holder, is the KEY in the set_variable map
                 variableTranslator.createVariableLiveEventIfNotExisted(entry)
                 variableTranslator.observe(
                     entry
                 ) { scaffoldView.onVariableUpdated(it) }
+
+                variableTranslator.getValue(entry)?.let {
+                    scaffoldView.initialVariables(Pair(entry, it))
+                }
             }
 
             overlayEntity.variablePlaceHolders.forEach { entry ->
                 timeKeeper.observe(entry) { scaffoldView.onVariableUpdated(it) }
             }
 
-            return scaffoldView
 
-        }
+            try {
+                val svg: SVG
+                var rawString = overlayEntity.svgData!!.svgString!!
 
-        fun createScaffoldView(
-            context: Context,
-            overlayObject: OverlayObject,
-            variableTranslator: VariableTranslator
-        ): ScaffoldView {
+                overlayEntity.variablePlaceHolders.forEach { placeHolder ->
+                    val value = variableTranslator.getValue(placeHolder)
+                    rawString =
+                        rawString.replace(placeHolder, value.toString())
+                }
 
-            val size = overlayObject.viewSpec.size!!
+                svg = SVG.getFromString(rawString)
 
-            val scaffoldView = ScaffoldView(size.first, size.second, context)
-            scaffoldView.id = View.generateViewId()
-            scaffoldView.tag = overlayObject.id
+                svg.setDocumentWidth("100%")
+                svg.setDocumentHeight("100%")
+                scaffoldView.setSVG(svg)
+                scaffoldView.setSVGSource(overlayEntity.svgData!!.svgString!!)
 
-            overlayObject.variablePlaceHolders.forEach { entry ->
-                // VALUE of place-holder, is the KEY in the set_variable map
-                variableTranslator.createVariableLiveEventIfNotExisted(entry)
-                variableTranslator.observe(
-                    entry
-                ) { scaffoldView.onVariableUpdated(it) }
+
+            } catch (e: Exception) {
+                Log.w("OverlayViewHelper", "Exception => ".plus(e.message))
             }
 
             return scaffoldView
 
         }
-
     }
 }

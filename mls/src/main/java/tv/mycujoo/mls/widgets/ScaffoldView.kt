@@ -2,11 +2,11 @@ package tv.mycujoo.mls.widgets
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.annotation.UiThread
 import com.caverock.androidsvg.SVG
-import tv.mycujoo.domain.entity.Variable
 
 class ScaffoldView @JvmOverloads constructor(
     widthPercentage: Float = -1F,
@@ -49,25 +49,22 @@ class ScaffoldView @JvmOverloads constructor(
         proportionalImageView.scaleType = scaleType
     }
 
-    fun setVariable(variable: Variable) {
-        if (this::variablePlaceHolder.isInitialized.not() || this::svgString.isInitialized.not()) {
-            return
-        }
-        if (variablePlaceHolder.contains(variable.name)) {
-
-            // TODO: 28/07/2020
-//            variablePlaceHolder.entries.firstOrNull { it.value == variable.name }?.let { entry ->
-//                svgString = svgString.replace(entry.key, variable.value.toString())
-//                setSVG(SVG.getFromString(svgString))
-//            }
-        }
-
-    }
-
 
     fun setVariablePlaceHolder(variablePlaceHolders: List<String>) {
         this.variablePlaceHolder = variablePlaceHolders
         this.latestVariableValue = mutableMapOf()
+    }
+
+    fun initialVariables(updatedPair: Pair<String, Any>) {
+        if (this::variablePlaceHolder.isInitialized.not() || this::latestVariableValue.isInitialized.not()) {
+            return
+        }
+        if (!variablePlaceHolder.contains(updatedPair.first)) {
+            return
+        }
+
+        latestVariableValue[updatedPair.first] = updatedPair.second
+
     }
 
     fun onVariableUpdated(

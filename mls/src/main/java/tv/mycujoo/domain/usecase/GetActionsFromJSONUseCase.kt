@@ -56,7 +56,7 @@ class GetActionsFromJSONUseCase {
        {
             "actions": [
                 {
-                    "offset": 6000, 
+                    "offset": 2000, 
 					"id": "43faf4j59595959",
 					"type": "set_variable",
 					"data": {
@@ -67,7 +67,7 @@ class GetActionsFromJSONUseCase {
 					}
 				},
                 {
-                    "offset": 8000, 
+                    "offset": 2000, 
 					"id": "43faf4j59595960",
 					"type": "set_variable",
 					"data": {
@@ -126,7 +126,7 @@ class GetActionsFromJSONUseCase {
                             "width": 25.0
                         }, 
                         "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg",
-                         "variable_positions": ["${"$"}awayScore","${"$"}homeScore", "${"$"}scoreboardTimer"]
+                         "variable_positions": ["${"$"}awayScore", "${"$"}homeScore", "${"$"}scoreboardTimer"]
                     }, 
                     "id": "54afag35yag", 
                     "type": "show_overlay",
@@ -144,7 +144,7 @@ class GetActionsFromJSONUseCase {
                              "width": 50.0
                          }, 
                          "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg",
-                         "variable_positions": ["${"$"}awayScore","${"$"}homeScore", "${"$"}scoreboardTimer"]
+                         "variable_positions": ["${"$"}awayScore", "${"$"}homeScore", "${"$"}scoreboardTimer"]
                      }, 
                      "id": "54afag35yag2", 
                      "type": "show_overlay",
@@ -256,24 +256,6 @@ class GetActionsFromJSONUseCase {
 					"type": "start_timer",
 					"data": {
 						"name": "${"$"}scoreboardTimer"
-					}
-				},
-				{
-					"id": "436ggg54wt5ty45t4w",
-                    "offset": 15000,
-					"type": "adjust_timer",
-					"data": {
-						"name": "${"$"}scoreboardTimer",
-						"value": 30000
-					}
-				},
-				{
-					"id": "ok6ggg54wt5ty45tke",
-                    "offset": 22000,
-					"type": "skip_timer",
-					"data": {
-						"name": "${"$"}scoreboardTimer",
-						"value": 30000
 					}
 				}
 

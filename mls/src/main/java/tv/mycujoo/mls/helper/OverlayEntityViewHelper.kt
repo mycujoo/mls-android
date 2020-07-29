@@ -3,7 +3,6 @@ package tv.mycujoo.mls.helper
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.content.Context
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -11,7 +10,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 import androidx.core.view.doOnLayout
-import com.caverock.androidsvg.SVG
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.AnimationType.*
 import tv.mycujoo.mls.manager.ViewIdentifierManager
@@ -175,28 +173,13 @@ class OverlayEntityViewHelper {
                     viewIdentifierManager.timeKeeper
                 )
 
-            try {
-                var svg: SVG
-                overlayEntity.svgData!!.svgString!!.let {
-                    svg = SVG.getFromString(it)
-                }
-                svg.setDocumentWidth("100%")
-                svg.setDocumentHeight("100%")
-                scaffoldView.setSVG(svg)
-                scaffoldView.setSVGSource(overlayEntity.svgData!!.svgString!!)
+            doAddViewWithNoAnimation(
+                overlayHost,
+                scaffoldView,
+                overlayEntity.viewSpec.positionGuide!!,
+                viewIdentifierManager
+            )
 
-                scaffoldView.setVariablePlaceHolder(overlayEntity.variablePlaceHolders)
-
-                doAddViewWithNoAnimation(
-                    overlayHost,
-                    scaffoldView,
-                    overlayEntity.viewSpec.positionGuide!!,
-                    viewIdentifierManager
-                )
-
-            } catch (e: Exception) {
-                Log.w("OverlayViewHelper", "Exception => ".plus(e.message))
-            }
         }
 
         private fun doAddViewWithNoAnimation(
@@ -285,46 +268,30 @@ class OverlayEntityViewHelper {
                         viewIdentifierManager.timeKeeper
                     )
 
-                try {
-                    var svg: SVG
-                    overlayEntity.svgData!!.svgString!!.let {
-                        svg = SVG.getFromString(it)
+                when (overlayEntity.introTransitionSpec.animationType) {
+                    FADE_IN -> {
+                        doAddViewWithStaticAnimation(
+                            overlayHost,
+                            scaffoldView,
+                            overlayEntity.viewSpec.positionGuide!!,
+                            overlayEntity.introTransitionSpec,
+                            viewIdentifierManager
+                        )
                     }
-                    svg.setDocumentWidth("100%")
-                    svg.setDocumentHeight("100%")
-                    scaffoldView.setSVG(svg)
-                    scaffoldView.setSVGSource(overlayEntity.svgData!!.svgString!!)
-                    scaffoldView.setVariablePlaceHolder(overlayEntity.variablePlaceHolders)
+                    SLIDE_FROM_LEFT,
+                    SLIDE_FROM_RIGHT -> {
 
-
-                    when (overlayEntity.introTransitionSpec.animationType) {
-                        FADE_IN -> {
-                            doAddViewWithStaticAnimation(
-                                overlayHost,
-                                scaffoldView,
-                                overlayEntity.viewSpec.positionGuide!!,
-                                overlayEntity.introTransitionSpec,
-                                viewIdentifierManager
-                            )
-                        }
-                        SLIDE_FROM_LEFT,
-                        SLIDE_FROM_RIGHT -> {
-
-                            doAddViewWithDynamicAnimation(
-                                overlayHost,
-                                scaffoldView,
-                                overlayEntity.viewSpec.positionGuide!!,
-                                overlayEntity.introTransitionSpec,
-                                viewIdentifierManager
-                            )
-                        }
-                        else -> {
-                            // should not happen
-                        }
+                        doAddViewWithDynamicAnimation(
+                            overlayHost,
+                            scaffoldView,
+                            overlayEntity.viewSpec.positionGuide!!,
+                            overlayEntity.introTransitionSpec,
+                            viewIdentifierManager
+                        )
                     }
-
-                } catch (e: Exception) {
-                    Log.w("OverlayViewHelper", "Exception => ".plus(e.message))
+                    else -> {
+                        // should not happen
+                    }
                 }
 
             }
@@ -687,22 +654,6 @@ class OverlayEntityViewHelper {
                         viewIdentifierManager.variableTranslator,
                         viewIdentifierManager.timeKeeper
                     )
-
-                try {
-                    var svg: SVG
-                    overlayEntity.svgData!!.svgString!!.let {
-                        svg = SVG.getFromString(it)
-                    }
-                    svg.setDocumentWidth("100%")
-                    svg.setDocumentHeight("100%")
-                    scaffoldView.setSVG(svg)
-                    scaffoldView.setSVGSource(overlayEntity.svgData!!.svgString!!)
-                    scaffoldView.setVariablePlaceHolder(overlayEntity.variablePlaceHolders)
-
-                } catch (e: Exception) {
-                    Log.w("OverlayViewHelper", "Exception => ".plus(e.message))
-                }
-
 
                 (overlayHost as ViewGroup).setOnHierarchyChangeListener(object :
                     ViewGroup.OnHierarchyChangeListener {
@@ -1087,20 +1038,6 @@ class OverlayEntityViewHelper {
                         viewIdentifierManager.timeKeeper
                     )
 
-                try {
-                    var svg: SVG
-                    overlayEntity.svgData!!.svgString!!.let {
-                        svg = SVG.getFromString(it)
-                    }
-                    svg.setDocumentWidth("100%")
-                    svg.setDocumentHeight("100%")
-                    scaffoldView.setSVG(svg)
-                    scaffoldView.setSVGSource(overlayEntity.svgData!!.svgString!!)
-                    scaffoldView.setVariablePlaceHolder(overlayEntity.variablePlaceHolders)
-
-                } catch (e: Exception) {
-                    Log.w("OverlayViewHelper", "Exception => ".plus(e.message))
-                }
 
                 (overlayHost as ViewGroup).setOnHierarchyChangeListener(object :
                     ViewGroup.OnHierarchyChangeListener {

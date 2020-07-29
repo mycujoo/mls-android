@@ -26,10 +26,16 @@ class ActionVariableHelper {
                                 if (it.amount is Double) {
                                     initialValue = (initialValue as Double) + it.amount
                                 }
+                                if (it.amount is Long) {
+                                    initialValue = (initialValue as Double) + it.amount.toDouble()
+                                }
                             }
                             LONG -> {
                                 if (it.amount is Double) {
                                     initialValue = (initialValue as Long) + it.amount.toLong()
+                                }
+                                if (it.amount is Long) {
+                                    initialValue = (initialValue as Long) + it.amount
                                 }
                             }
                             STRING,
