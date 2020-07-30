@@ -478,7 +478,7 @@ class OverlayEntityViewHelper {
             overlayHost.post {
                 overlayHost.children.firstOrNull { it.tag == overlayEntity.id }?.let { view ->
 
-
+                    overlayHost.removeView(view)
                     viewIdentifierManager.getAnimationWithTag(overlayEntity.id)?.let {
                         it.cancel()
                     }
@@ -553,16 +553,14 @@ class OverlayEntityViewHelper {
 
                 scaffoldView.doOnLayout {
 
-                    val animation =
-                        AnimationFactory.createLingeringOutroAnimation(
-                            overlayHost,
-                            scaffoldView,
-                            overlayEntity,
-                            animationPosition,
-                            isPlaying,
-                            viewIdentifierManager
-                        )
-
+                    AnimationFactory.createLingeringOutroAnimation(
+                        overlayHost,
+                        scaffoldView,
+                        overlayEntity,
+                        animationPosition,
+                        isPlaying,
+                        viewIdentifierManager
+                    )
 
                 }
 
@@ -597,20 +595,17 @@ class OverlayEntityViewHelper {
             isPlaying: Boolean,
             viewIdentifierManager: ViewIdentifierManager
         ) {
-            // TODO: 27/07/2020
             val scaffoldView = viewIdentifierManager.getOverlayView(overlayEntity.id) ?: return
 
             overlayHost.post {
-
                 viewIdentifierManager.getAnimationWithTag(overlayEntity.id)?.let {
                     it.cancel()
                 }
                 viewIdentifierManager.removeAnimation(overlayEntity.id)
 
+                overlayHost.removeView(scaffoldView)
                 viewIdentifierManager.detachOverlayView(
-                    viewIdentifierManager.getOverlayView(
-                        overlayEntity.id
-                    )
+                    scaffoldView
                 )
 
                 addLingeringOutroOverlay(
