@@ -53,8 +53,8 @@ abstract class ActionBuilder {
     /**endregion */
 
     /**
-     * compute all timer related actions until current time
+     * process all timer related actions until current time
      */
-    abstract fun computeTimersTillNow()
+    abstract fun processTimers()
 
 }

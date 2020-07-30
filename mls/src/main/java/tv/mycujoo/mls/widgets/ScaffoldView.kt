@@ -59,7 +59,7 @@ class ScaffoldView @JvmOverloads constructor(
         if (this::variablePlaceHolder.isInitialized.not() || this::latestVariableValue.isInitialized.not()) {
             return
         }
-        if (!variablePlaceHolder.contains(updatedPair.first)) {
+        if (!variablePlaceHolder.contains(updatedPair.first) || updatedPair.second == "") {
             return
         }
 

@@ -1,17 +1,18 @@
 package tv.mycujoo.mls.manager
 
-import com.jakewharton.rxrelay3.BehaviorRelay
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import tv.mycujoo.mls.model.ScreenTimerDirection
+import tv.mycujoo.mls.model.ScreenTimerDirection.*
 import tv.mycujoo.mls.model.ScreenTimerFormat
 import tv.mycujoo.mls.model.ScreenTimerFormat.*
 import tv.mycujoo.mls.widgets.AdjustTimerEntity
 import tv.mycujoo.mls.widgets.SkipTimerEntity
 import tv.mycujoo.mls.widgets.StartTimerEntity
 
+/**
+ * TimerCore is where a Timer times, direction, format and other attributes are stored.
+ *
+ * Mind that applying any entity on this class will make it act as Alive.
+ */
 class TimerCore(
     val name: String,
     private val offset: Long,
@@ -20,14 +21,28 @@ class TimerCore(
     private val startValue: Long,
     private val capValue: Long
 ) {
-    private lateinit var timerRelay: BehaviorRelay<String>
     private var currentTime = startValue
-    private lateinit var ticker: Job
-    private var isTicking = false
-    private val step = 1000L
+    private var isAlive = false
+    private val step: Long
+
+
+    init {
+        if (direction == UP) {
+            step = 1000L
+        } else {
+            step = -1000L
+
+        }
+    }
 
 
     fun getFormattedTime(): String {
+
+        if (isAlive.not()) {
+            return ""
+        }
+
+
         return when (format) {
             MINUTES_SECONDS -> {
                 if (timeIsWithinCapValue()) {
@@ -69,72 +84,13 @@ class TimerCore(
             return true
         }
 
-        if (direction == ScreenTimerDirection.UP && currentTime <= capValue) {
+        if (direction == UP && currentTime <= capValue) {
             return true
         }
-        if (direction == ScreenTimerDirection.DOWN && currentTime >= capValue) {
+        if (direction == DOWN && currentTime >= capValue) {
             return true
         }
         return false
-    }
-
-    fun start(
-        timerRelay: BehaviorRelay<String>,
-        dispatcher: CoroutineScope
-    ) {
-        if (isTicking) {
-            return
-        }
-        isTicking = true
-        this.timerRelay = timerRelay
-
-        ticker = dispatcher.launch {
-            tick(timerRelay)
-        }
-    }
-
-    private suspend fun tick(timerRelay: BehaviorRelay<String>) {
-        while (isTicking) {
-            delay(step)
-
-            if (isTicking.not()) {
-                return
-            }
-            if (direction == ScreenTimerDirection.UP) {
-                currentTime += step
-            } else {
-                currentTime -= step
-            }
-
-            if (timeIsWithinCapValue()) {
-                timerRelay.accept(getFormattedTime())
-            }
-        }
-    }
-
-    fun adjustTime(
-        time: Long,
-        timerRelay: BehaviorRelay<String>,
-        dispatcher: CoroutineScope
-    ) {
-        dispatcher.launch {
-            currentTime = time
-            timerRelay.accept(getFormattedTime())
-        }
-    }
-
-    fun tuneWithStartEntity(
-        now: Long,
-        startTimerEntity: StartTimerEntity,
-        timerRelay: BehaviorRelay<String>,
-        dispatcher: CoroutineScope
-    ) {
-        dispatcher.launch {
-            currentTime = now
-            val dif = currentTime - startTimerEntity.offset
-            currentTime = (dif / 1000L) * step
-            timerRelay.accept(getFormattedTime())
-        }
     }
 
 
@@ -143,28 +99,41 @@ class TimerCore(
     }
 
 
-    fun tuneWithStartEntity(
-        now: Long,
-        startTimerEntity: StartTimerEntity
+    fun setTime(
+        startTimerEntity: StartTimerEntity,
+        now: Long
     ) {
-        currentTime = now
-        val dif = currentTime - startTimerEntity.offset
-        currentTime = (dif / 1000L) * step
+        isAlive = true
+        when (direction) {
+            UP -> {
+                currentTime = now + startValue
+                val dif = currentTime - startTimerEntity.offset
+                currentTime = (dif / 1000L) * step
+            }
+            DOWN -> {
+                currentTime = now - startValue
+                val dif = currentTime - startTimerEntity.offset
+                currentTime = (dif / 1000L) * step
+            }
+        }
+
     }
 
-    fun tuneWithAdjustEntity(
-        now: Long,
-        adjustTimerEntity: AdjustTimerEntity
-    ) {
+    fun setTime(adjustTimerEntity: AdjustTimerEntity, now: Long) {
+        isAlive = true
         val passedTimeFromAdjust = now - adjustTimerEntity.offset
         currentTime = (passedTimeFromAdjust / 1000L) * step
         currentTime += adjustTimerEntity.value
     }
 
-    fun tuneWithSkipEntity(
-        skipTimerEntity: SkipTimerEntity
-    ) {
+    fun setTime(skipTimerEntity: SkipTimerEntity) {
+        isAlive = true
         currentTime += skipTimerEntity.value
     }
+
+    fun kill() {
+        isAlive = false
+    }
+
 
 }

@@ -234,14 +234,14 @@ class Coordinator(
 
                     actionBuilder.computeVariableNameValueTillNow()
 
-                    actionBuilder.computeTimersTillNow()
+                    actionBuilder.processTimers()
                 }
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 super.onIsPlayingChanged(isPlaying)
 
-                actionBuilder.computeTimersTillNow()
+                actionBuilder.processTimers()
 
             }
         }

@@ -252,10 +252,28 @@ class GetActionsFromJSONUseCase {
                 },
                 {
 					"id": "4fdaf5tygfhfhffha",
-                    "offset": 1000,
+                    "offset": 2000,
 					"type": "start_timer",
 					"data": {
 						"name": "${"$"}scoreboardTimer"
+					}
+				},
+				{
+					"id": "436ggg54wt5ty45t4w",
+                    "offset": 15000,
+					"type": "adjust_timer",
+					"data": {
+						"name": "${"$"}scoreboardTimer",
+						"value": 30000
+					}
+				},
+				{
+					"id": "ok6ggg54wt5ty45tke",
+                    "offset": 25000,
+					"type": "skip_timer",
+					"data": {
+						"name": "${"$"}scoreboardTimer",
+						"value": 30000
 					}
 				}
 

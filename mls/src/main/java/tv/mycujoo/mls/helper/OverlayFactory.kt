@@ -42,6 +42,8 @@ class OverlayFactory {
 
             overlayEntity.variablePlaceHolders.forEach { entry ->
                 timeKeeper.observe(entry) { scaffoldView.onVariableUpdated(it) }
+
+                scaffoldView.initialVariables(Pair(entry, timeKeeper.getValue(entry)))
             }
 
 
@@ -50,7 +52,10 @@ class OverlayFactory {
                 var rawString = overlayEntity.svgData!!.svgString!!
 
                 overlayEntity.variablePlaceHolders.forEach { placeHolder ->
-                    val value = variableTranslator.getValue(placeHolder)
+                    var value = variableTranslator.getValue(placeHolder)
+                    if (value == null) {
+                        value = timeKeeper.getValue(placeHolder)
+                    }
                     rawString =
                         rawString.replace(placeHolder, value.toString())
                 }

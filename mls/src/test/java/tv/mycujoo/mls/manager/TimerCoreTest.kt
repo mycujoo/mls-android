@@ -6,6 +6,7 @@ import org.junit.Before
 import org.junit.Test
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerFormat
+import tv.mycujoo.mls.widgets.AdjustTimerEntity
 import tv.mycujoo.mls.widgets.CreateTimerEntity
 import tv.mycujoo.mls.widgets.StartTimerEntity
 import kotlin.test.assertEquals
@@ -16,8 +17,6 @@ class TimerCoreTest {
     private lateinit var timeKeeper: TimeKeeper
     private lateinit var testCoroutineScope: TestCoroutineScope
 
-    private val sampleName = "name_0"
-
 
     @Before
     fun setUp() {
@@ -27,7 +26,7 @@ class TimerCoreTest {
 
 
     @Test
-    fun `given startTime of 0ms & SECOND format, should return '0'`() {
+    fun `given startValue of 0ms & SECOND format, should return '0'`() {
 
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
@@ -36,15 +35,18 @@ class TimerCoreTest {
         )
         timeKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
-        timeKeeper.observe(sampleName) { actualValue = it.second }
-        timeKeeper.startTimer(sampleName)
+        timeKeeper.observe(SAMPLE_NAME_0) { actualValue = it.second }
+
+
+        timeKeeper.startTimer(StartTimerEntity(SAMPLE_NAME_0, ZERO_SECONDS), ZERO_SECONDS)
+        timeKeeper.notify(SAMPLE_NAME_0)
 
 
         assertEquals("0", actualValue)
     }
 
     @Test
-    fun `given startTime of 10000ms & SECOND format, should return '10'`() {
+    fun `given startValue of 10000ms & SECOND format, should return '10'`() {
 
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
@@ -53,15 +55,18 @@ class TimerCoreTest {
         )
         timeKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
-        timeKeeper.observe(sampleName) { actualValue = it.second }
-        timeKeeper.startTimer(sampleName)
+        timeKeeper.observe(SAMPLE_NAME_0) { actualValue = it.second }
+
+
+        timeKeeper.startTimer(StartTimerEntity(SAMPLE_NAME_0, ZERO_SECONDS), ZERO_SECONDS)
+        timeKeeper.notify(SAMPLE_NAME_0)
 
 
         assertEquals("10", actualValue)
     }
 
     @Test
-    fun `given startTime of 60000ms & SECOND format, should return '60'`() {
+    fun `given startValue of 60000ms & SECOND format, should return '60'`() {
 
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
@@ -70,15 +75,18 @@ class TimerCoreTest {
         )
         timeKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
-        timeKeeper.observe(sampleName) { actualValue = it.second }
-        timeKeeper.startTimer(sampleName)
+        timeKeeper.observe(SAMPLE_NAME_0) { actualValue = it.second }
+
+
+        timeKeeper.startTimer(StartTimerEntity(SAMPLE_NAME_0, ZERO_SECONDS), ZERO_SECONDS)
+        timeKeeper.notify(SAMPLE_NAME_0)
 
 
         assertEquals("60", actualValue)
     }
 
     @Test
-    fun `given startTime of 1200000ms & SECOND format, should return '120'`() {
+    fun `given startValue of 1200000ms & SECOND format, should return '120'`() {
 
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
@@ -87,8 +95,11 @@ class TimerCoreTest {
         )
         timeKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
-        timeKeeper.observe(sampleName) { actualValue = it.second }
-        timeKeeper.startTimer(sampleName)
+        timeKeeper.observe(SAMPLE_NAME_0) { actualValue = it.second }
+
+
+        timeKeeper.startTimer(StartTimerEntity(SAMPLE_NAME_0, ZERO_SECONDS), ZERO_SECONDS)
+        timeKeeper.notify(SAMPLE_NAME_0)
 
 
         assertEquals("120", actualValue)
@@ -96,7 +107,7 @@ class TimerCoreTest {
 
 
     @Test
-    fun `given startTime of 0ms & MINTUES_SECOND format, should return '0_00'`() {
+    fun `given startValue of 0ms & MINTUES_SECOND format, should return '0_00'`() {
 
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.MINUTES_SECONDS,
@@ -105,15 +116,18 @@ class TimerCoreTest {
         )
         timeKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
-        timeKeeper.observe(sampleName) { actualValue = it.second }
-        timeKeeper.startTimer(sampleName)
+        timeKeeper.observe(SAMPLE_NAME_0) { actualValue = it.second }
+
+
+        timeKeeper.startTimer(StartTimerEntity(SAMPLE_NAME_0, ZERO_SECONDS), ZERO_SECONDS)
+        timeKeeper.notify(SAMPLE_NAME_0)
 
 
         assertEquals("0:00", actualValue)
     }
 
     @Test
-    fun `given startTime of 10000ms & MINTUES_SECOND format, should return '0_10'`() {
+    fun `given startValue of 10000ms & MINTUES_SECOND format, should return '0_10'`() {
 
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.MINUTES_SECONDS,
@@ -122,15 +136,18 @@ class TimerCoreTest {
         )
         timeKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
-        timeKeeper.observe(sampleName) { actualValue = it.second }
-        timeKeeper.startTimer(sampleName)
+        timeKeeper.observe(SAMPLE_NAME_0) { actualValue = it.second }
+
+
+        timeKeeper.startTimer(StartTimerEntity(SAMPLE_NAME_0, ZERO_SECONDS), ZERO_SECONDS)
+        timeKeeper.notify(SAMPLE_NAME_0)
 
 
         assertEquals("0:10", actualValue)
     }
 
     @Test
-    fun `given startTime of 60000ms & MINTUES_SECOND format, should return '1_00'`() {
+    fun `given startValue of 60000ms & MINTUES_SECOND format, should return '1_00'`() {
 
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.MINUTES_SECONDS,
@@ -139,15 +156,18 @@ class TimerCoreTest {
         )
         timeKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
-        timeKeeper.observe(sampleName) { actualValue = it.second }
-        timeKeeper.startTimer(sampleName)
+        timeKeeper.observe(SAMPLE_NAME_0) { actualValue = it.second }
+
+
+        timeKeeper.startTimer(StartTimerEntity(SAMPLE_NAME_0, ZERO_SECONDS), ZERO_SECONDS)
+        timeKeeper.notify(SAMPLE_NAME_0)
 
 
         assertEquals("1:00", actualValue)
     }
 
     @Test
-    fun `given startTime of 120000ms & MINTUES_SECOND format, should return '2_00'`() {
+    fun `given startValue of 120000ms & MINTUES_SECOND format, should return '2_00'`() {
 
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.MINUTES_SECONDS,
@@ -156,69 +176,14 @@ class TimerCoreTest {
         )
         timeKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
-        timeKeeper.observe(sampleName) { actualValue = it.second }
-        timeKeeper.startTimer(sampleName)
+        timeKeeper.observe(SAMPLE_NAME_0) { actualValue = it.second }
+
+
+        timeKeeper.startTimer(StartTimerEntity(SAMPLE_NAME_0, ZERO_SECONDS), ZERO_SECONDS)
+        timeKeeper.notify(SAMPLE_NAME_0)
 
 
         assertEquals("2:00", actualValue)
-    }
-
-    @Test
-    fun `given startTime of 10000ms, step of 1000, and 5 second, should display '15'`() {
-        val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
-            ScreenTimerFormat.SECONDS,
-            10000L,
-            1000L
-        )
-        timeKeeper.createTimer(createScreenTimerEntity)
-        var actualValue = ""
-        timeKeeper.observe(sampleName) { actualValue = it.second }
-        timeKeeper.startTimer(sampleName)
-
-        testCoroutineScope.advanceTimeBy(3000)
-
-
-        assertEquals("13", actualValue)
-    }
-
-    @Test
-    fun `given startTime of 10000ms, step of 1000, and 60 second, should display '70'`() {
-        val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
-            ScreenTimerFormat.SECONDS,
-            10000L,
-            1000L
-        )
-        timeKeeper.createTimer(createScreenTimerEntity)
-        var actualValue = ""
-        timeKeeper.observe(sampleName) { actualValue = it.second }
-        timeKeeper.startTimer(sampleName)
-
-        testCoroutineScope.advanceTimeBy(60000)
-
-
-        assertEquals("70", actualValue)
-    }
-
-    @Test
-    fun `given multiple start commands, should only take effect for the first one`() {
-        val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
-            ScreenTimerFormat.SECONDS,
-            0L,
-            1000L
-        )
-        timeKeeper.createTimer(createScreenTimerEntity)
-        var actualValue = ""
-
-        timeKeeper.observe(sampleName) { actualValue = it.second }
-        timeKeeper.startTimer(sampleName)
-
-        timeKeeper.startTimer(sampleName)
-        timeKeeper.startTimer(sampleName)
-
-        testCoroutineScope.advanceTimeBy(60000)
-
-
-        assertEquals("60", actualValue)
     }
 
 
@@ -232,10 +197,14 @@ class TimerCoreTest {
         timeKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
 
-        timeKeeper.observe(sampleName) { actualValue = it.second }
+        timeKeeper.observe(SAMPLE_NAME_0) { actualValue = it.second }
 
 
-        timeKeeper.adjustTime(sampleName, 10000L)
+        timeKeeper.adjustTimer(
+            AdjustTimerEntity(SAMPLE_NAME_0, ONE_SECONDS, TEN_SECONDS),
+            ONE_SECONDS
+        )
+        timeKeeper.notify(SAMPLE_NAME_0)
 
 
         assertEquals("10", actualValue)
@@ -251,16 +220,35 @@ class TimerCoreTest {
         timeKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
 
-        timeKeeper.observe(sampleName) { actualValue = it.second }
+        timeKeeper.observe(SAMPLE_NAME_0) { actualValue = it.second }
 
 
-        timeKeeper.adjustTime(sampleName, 10000L)
-        timeKeeper.adjustTime(sampleName, 20000L)
-        timeKeeper.adjustTime(sampleName, 30000L)
-        timeKeeper.adjustTime(sampleName, 20000L)
+        //timeKeeper.adjustTime(SAMPLE_NAME_0, 10000L)
+//        timeKeeper.adjustTime(SAMPLE_NAME_0, 20000L)
+//        timeKeeper.adjustTime(SAMPLE_NAME_0, 30000L)
+//        timeKeeper.adjustTime(SAMPLE_NAME_0, 20000L)
+
+        timeKeeper.adjustTimer(
+            AdjustTimerEntity(SAMPLE_NAME_0, ONE_SECONDS, ONE_SECONDS),
+            ONE_SECONDS
+        )
+        timeKeeper.adjustTimer(
+            AdjustTimerEntity(SAMPLE_NAME_0, ONE_SECONDS, TWO_SECONDS),
+            ONE_SECONDS
+        )
+        timeKeeper.adjustTimer(
+            AdjustTimerEntity(SAMPLE_NAME_0, ONE_SECONDS, FIVE_SECONDS),
+            ONE_SECONDS
+        )
+        timeKeeper.adjustTimer(
+            AdjustTimerEntity(SAMPLE_NAME_0, ONE_SECONDS, TWO_SECONDS),
+            ONE_SECONDS
+        )
+        timeKeeper.notify(SAMPLE_NAME_0)
 
 
-        assertEquals("20", actualValue)
+
+        assertEquals("2", actualValue)
     }
 
     @Test
@@ -272,33 +260,13 @@ class TimerCoreTest {
         )
         timeKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
-        timeKeeper.observe(sampleName) { actualValue = it.second }
+        timeKeeper.observe(SAMPLE_NAME_0) { actualValue = it.second }
+
+        timeKeeper.startTimer(StartTimerEntity(SAMPLE_NAME_0, TWO_SECONDS), TWENTY_FIVE_SECONDS)
+        timeKeeper.notify(SAMPLE_NAME_0)
 
 
-        timeKeeper.tuneWithStartEntity(sampleName, StartTimerEntity(sampleName, 0L), 20000L)
-
-
-        assertEquals("20", actualValue)
-    }
-
-    @Test
-    fun `given multiple start commands, should return last one`() {
-        val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
-            ScreenTimerFormat.SECONDS,
-            0L,
-            1000L
-        )
-        timeKeeper.createTimer(createScreenTimerEntity)
-        var actualValue = ""
-        timeKeeper.observe(sampleName) { actualValue = it.second }
-
-
-        timeKeeper.tuneWithStartEntity(sampleName, StartTimerEntity(sampleName, 0L), 10000L)
-        timeKeeper.tuneWithStartEntity(sampleName, StartTimerEntity(sampleName, 0L), 20000L)
-        timeKeeper.tuneWithStartEntity(sampleName, StartTimerEntity(sampleName, 0L), 30000L)
-
-
-        assertEquals("30", actualValue)
+        assertEquals("23", actualValue)
     }
 
 
@@ -311,14 +279,15 @@ class TimerCoreTest {
         )
         timeKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
-        timeKeeper.observe(sampleName) { actualValue = it.second }
-        timeKeeper.startTimer(sampleName)
+        timeKeeper.observe(SAMPLE_NAME_0) { actualValue = it.second }
 
 
-        testCoroutineScope.advanceTimeBy(30000L)
+        timeKeeper.startTimer(StartTimerEntity(SAMPLE_NAME_0, FIFTEEN_SECONDS), SIXTY_SECONDS)
+        timeKeeper.notify(SAMPLE_NAME_0)
 
 
-        assertEquals("60", actualValue)
+
+        assertEquals("75", actualValue)
     }
 
     @Test
@@ -331,12 +300,14 @@ class TimerCoreTest {
         )
         timeKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
-        timeKeeper.observe(sampleName) { actualValue = it.second }
-        timeKeeper.startTimer(sampleName)
+        timeKeeper.observe(SAMPLE_NAME_0) { actualValue = it.second }
 
-        testCoroutineScope.advanceTimeBy(30000L)
 
-        assertEquals("0", actualValue)
+        timeKeeper.startTimer(StartTimerEntity(SAMPLE_NAME_0, FIFTEEN_SECONDS), TWENTY_FIVE_SECONDS)
+        timeKeeper.notify(SAMPLE_NAME_0)
+
+
+        assertEquals("20", actualValue)
     }
 
     @Test
@@ -350,11 +321,12 @@ class TimerCoreTest {
         )
         timeKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
-        timeKeeper.observe(sampleName) { actualValue = it.second }
-        timeKeeper.startTimer(sampleName)
+        timeKeeper.observe(SAMPLE_NAME_0) { actualValue = it.second }
 
 
-        testCoroutineScope.advanceTimeBy(50000L)
+        timeKeeper.startTimer(StartTimerEntity(SAMPLE_NAME_0, ONE_SECONDS), SIXTY_SECONDS)
+        timeKeeper.notify(SAMPLE_NAME_0)
+
 
 
         assertEquals("30", actualValue)
@@ -371,51 +343,11 @@ class TimerCoreTest {
         )
         timeKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
-        timeKeeper.observe(sampleName) { actualValue = it.second }
-        timeKeeper.startTimer(sampleName)
+        timeKeeper.observe(SAMPLE_NAME_0) { actualValue = it.second }
 
 
-        testCoroutineScope.advanceTimeBy(50000L)
-
-
-        assertEquals("30", actualValue)
-    }
-
-    @Test
-    fun `given capValue with direction=up, when time passes beyond capValue, should return capValue on direct getTime() calls`() {
-        val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
-            ScreenTimerFormat.SECONDS,
-            ScreenTimerDirection.UP,
-            0L,
-            30000L
-
-        )
-        timeKeeper.createTimer(createScreenTimerEntity)
-        timeKeeper.startTimer(sampleName)
-
-
-        testCoroutineScope.advanceTimeBy(50000L)
-        val actualValue = timeKeeper.getValue(sampleName)
-
-
-        assertEquals("30", actualValue)
-    }
-
-    @Test
-    fun `given capValue with direction=down, when time passes below capValue, should return capValue on direct getTime() calls`() {
-        val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
-            ScreenTimerFormat.SECONDS,
-            ScreenTimerDirection.DOWN,
-            40000L,
-            30000L
-
-        )
-        timeKeeper.createTimer(createScreenTimerEntity)
-        timeKeeper.startTimer(sampleName)
-
-
-        testCoroutineScope.advanceTimeBy(50000L)
-        val actualValue = timeKeeper.getValue(sampleName)
+        timeKeeper.startTimer(StartTimerEntity(SAMPLE_NAME_0, ONE_SECONDS), SIXTY_SECONDS)
+        timeKeeper.notify(SAMPLE_NAME_0)
 
 
         assertEquals("30", actualValue)
@@ -427,7 +359,7 @@ class TimerCoreTest {
         step: Long
     ): CreateTimerEntity {
         return CreateTimerEntity(
-            sampleName,
+            SAMPLE_NAME_0,
             1000L,
             format,
             ScreenTimerDirection.UP,
@@ -443,7 +375,7 @@ class TimerCoreTest {
         startValue: Long
     ): CreateTimerEntity {
         return CreateTimerEntity(
-            sampleName,
+            SAMPLE_NAME_0,
             1000L,
             format,
             screenTimerDirection,
@@ -460,7 +392,7 @@ class TimerCoreTest {
         capValue: Long
     ): CreateTimerEntity {
         return CreateTimerEntity(
-            sampleName,
+            SAMPLE_NAME_0,
             1000L,
             format,
             screenTimerDirection,
@@ -468,5 +400,19 @@ class TimerCoreTest {
             1000L,
             capValue
         )
+    }
+
+    companion object {
+        const val SAMPLE_NAME_0 = "sample_name_0"
+
+        private const val INVALID = -1L
+        private const val ZERO_SECONDS = 0L
+        private const val ONE_SECONDS = 1000L
+        private const val TWO_SECONDS = 2000L
+        private const val FIVE_SECONDS = 5000L
+        private const val TEN_SECONDS = 10000L
+        private const val FIFTEEN_SECONDS = 15000L
+        private const val TWENTY_FIVE_SECONDS = 25000L
+        private const val SIXTY_SECONDS = 60000L
     }
 }

@@ -162,7 +162,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         handler = Handler()
 
         val identifierManager = viewIdentifierManager
-        coordinator = Coordinator(identifierManager, exoPlayer!!, handler, okHttpClient)
+        coordinator = Coordinator(identifierManager, exoPlayer!!, okHttpClient)
     }
 
 

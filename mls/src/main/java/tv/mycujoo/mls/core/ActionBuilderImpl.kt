@@ -7,9 +7,8 @@ import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.AnimationType.*
 import tv.mycujoo.domain.entity.OverlayAct.*
 import tv.mycujoo.mls.helper.ActionVariableHelper
-import tv.mycujoo.mls.manager.TimerEntity
+import tv.mycujoo.mls.manager.TimerProcessor
 import tv.mycujoo.mls.manager.ViewIdentifierManager
-import tv.mycujoo.mls.widgets.*
 import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
@@ -37,6 +36,8 @@ class ActionBuilderImpl(
 
     private var overlayEntityList = ArrayList<OverlayEntity>()
 
+    private lateinit var timerProcessor: TimerProcessor
+
 
     /**endregion */
 
@@ -59,6 +60,11 @@ class ActionBuilderImpl(
 
     override fun addActionCollections(actionCollections: ActionCollections) {
         this.actionCollections = actionCollections
+        timerProcessor = TimerProcessor(
+            actionCollections.timerCollection,
+            viewIdentifierManager.timeKeeper,
+            appliedCreateTimer
+        )
     }
 
     override fun buildCurrentTimeRange() {
@@ -163,49 +169,15 @@ class ActionBuilderImpl(
     }
 
 
-    override fun computeTimersTillNow() {
+    override fun processTimers() {
+        val toBeNotified = timerProcessor.process(
+            currentTime
+        )
 
-        actionCollections.timerCollection.forEach { timerEntity ->
-
-            val toBeNotified = mutableSetOf<String>()
-
-            timerEntity.getAllActionsUntil(currentTime).forEach { action ->
-                when (action) {
-                    is TimerEntity.CreateTimer -> {
-                        if (!isTimerCreated(action.createTimerEntity.name)) {
-                            createTimer(action.createTimerEntity)
-                        }
-                    }
-                    is TimerEntity.StartTimer -> {
-                        startTimer(action.startTimerEntity)
-                        toBeNotified.add(action.startTimerEntity.name)
-                    }
-                    is TimerEntity.PauseTimer -> {
-//                        pauseTimer(action.pauseTimerEntity)
-//                        toBeNotified.add(action.pauseTimerEntity.name)
-                    }
-                    is TimerEntity.AdjustTimer -> {
-                        adjustTimer(action.adjustTimerEntity)
-                        toBeNotified.add(action.adjustTimerEntity.name)
-
-                    }
-                    is TimerEntity.SkipTimer -> {
-                        skipTimer(action.skipTimerEntity)
-                        toBeNotified.add(action.skipTimerEntity.name)
-
-                    }
-                    is TimerEntity.KillTimer -> {
-                        clearTimer(action.timerName)
-                    }
-                }
-
-            }
-
-            toBeNotified.forEach {
-                notifyTimerObservers(it)
-            }
-
+        toBeNotified.forEach { timerName ->
+            viewIdentifierManager.timeKeeper.notify(timerName)
         }
+
     }
 
 
@@ -262,86 +234,6 @@ class ActionBuilderImpl(
             else -> false
         }
     }
-    /**endregion */
-
-    /**region Variables classifiers*/
-    private fun isNotApplied(setVariableEntity: SetVariableEntity): Boolean {
-        return appliedSetVariableActions.none { it == setVariableEntity }
-    }
-
-    private fun isInCurrentTimeRange(setVariableEntity: SetVariableEntity): Boolean {
-        return (setVariableEntity.offset >= currentTime) && (setVariableEntity.offset < currentTime + 1000L)
-    }
-
-
-    /**endregion */
-
-    /**region Timer classifier and helpers*/
-    private fun isInCurrentTimeRange(offset: Long): Boolean {
-        return (offset >= currentTime) && (offset < currentTime + 1000L)
-    }
-
-    private fun isUpUntilNow(offset: Long): Boolean {
-        return offset < currentTime
-    }
-
-    private fun isTimerCreated(name: String): Boolean {
-        return appliedCreateTimer.any { it == name }
-    }
-
-    private fun shouldBeKilled(createTimerEntity: CreateTimerEntity): Boolean {
-        if (currentTime < createTimerEntity.offset - 1000) {
-            return false
-        }
-        return true
-    }
-
-    private fun createTimer(createTimerEntity: CreateTimerEntity) {
-        appliedCreateTimer.add(createTimerEntity.name)
-        viewIdentifierManager.timeKeeper.createTimer(createTimerEntity)
-    }
-
-
-    private fun startTimer(startTimerEntity: StartTimerEntity) {
-        viewIdentifierManager.timeKeeper.timerRelayList.firstOrNull { it.timerCore.name == startTimerEntity.name }
-            ?.let { timerTwin ->
-                timerTwin.timerCore.tuneWithStartEntity(currentTime, startTimerEntity)
-            }
-    }
-
-    private fun pauseTimer(pauseTimerEntity: PauseTimerEntity) {
-        viewIdentifierManager.timeKeeper.timerRelayList.firstOrNull { it.timerCore.name == pauseTimerEntity.name }
-            ?.let { timerTwin ->
-//                timerTwin.timerCore.pause(currentTime, pauseTimerEntity)
-            }
-    }
-
-    private fun adjustTimer(adjustTimerEntity: AdjustTimerEntity) {
-        viewIdentifierManager.timeKeeper.timerRelayList.firstOrNull { it.timerCore.name == adjustTimerEntity.name }
-            ?.let { timerTwin ->
-                timerTwin.timerCore.tuneWithAdjustEntity(currentTime, adjustTimerEntity)
-            }
-    }
-
-    private fun skipTimer(skipTimerEntity: SkipTimerEntity) {
-        viewIdentifierManager.timeKeeper.timerRelayList.firstOrNull { it.timerCore.name == skipTimerEntity.name }
-            ?.let { timerTwin ->
-                timerTwin.timerCore.tuneWithSkipEntity(skipTimerEntity)
-            }
-    }
-
-
-    private fun clearTimer(timerName: String) {
-        appliedCreateTimer.remove(timerName)
-    }
-
-    private fun notifyTimerObservers(timerName: String) {
-        viewIdentifierManager.timeKeeper.timerRelayList.filter { it.timerCore.name == timerName }
-            .forEach { timerRelay ->
-                timerRelay.timerCore.notifyObservers(timerRelay)
-            }
-    }
-
     /**endregion */
 
     /**region msc*/
