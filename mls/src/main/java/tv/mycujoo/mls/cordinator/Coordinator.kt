@@ -1,6 +1,5 @@
 package tv.mycujoo.mls.cordinator
 
-import android.os.Handler
 import android.util.Log
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.DISCONTINUITY_REASON_SEEK
@@ -16,11 +15,13 @@ import tv.mycujoo.mls.core.ActionBuilderImpl
 import tv.mycujoo.mls.core.AnnotationListener
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 
 class Coordinator(
     private val identifierManager: ViewIdentifierManager,
     private val exoPlayer: SimpleExoPlayer,
-    private val handler: Handler,
     private val okHttpClient: OkHttpClient
 ) : CoordinatorInterface {
 
@@ -151,25 +152,18 @@ class Coordinator(
 
         actionBuilder.addActionCollections(GetActionsFromJSONUseCase.mappedActionCollections())
 
+        val scheduler: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
+        val runnable = Runnable {
+            actionBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
+            if (exoPlayer.isPlaying) {
+                actionBuilder.buildCurrentTimeRange()
 
-        val runnable = object : Runnable {
-            override fun run() {
-                actionBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
+                actionBuilder.processTimers()
 
-                if (exoPlayer.isPlaying){
-                    actionBuilder.buildCurrentTimeRange()
-
-                    actionBuilder.computeTimersTillNow()
-
-                    actionBuilder.computeVariableNameValueTillNow()
-                }
-
-
-                handler.postDelayed(this, 1000L)
+                actionBuilder.computeVariableNameValueTillNow()
             }
         }
-
-        handler.postDelayed(runnable, 1000L)
+        scheduler.scheduleAtFixedRate(runnable, 1000L, 1000L, TimeUnit.MILLISECONDS)
 
     }
 
