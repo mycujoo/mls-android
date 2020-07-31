@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.view.View
 import tv.mycujoo.domain.entity.AnimationType
+import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.OverlayHost
@@ -96,6 +97,92 @@ open class AnimationHelper {
             )
         }
 
+        return animation
+
+    }
+
+    open fun createRemoveViewStaticAnimation(
+        overlayHost: OverlayHost,
+        overlayEntity: OverlayEntity,
+        overlayView: ScaffoldView,
+        viewIdentifierManager: ViewIdentifierManager
+    ): ObjectAnimator {
+        val animation = ObjectAnimator.ofFloat(overlayView, View.ALPHA, 1F, 0F)
+        animation.duration = overlayEntity.outroTransitionSpec.animationDuration
+
+        animation.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationStart(animation: Animator?) {
+            }
+
+            override fun onAnimationEnd(animation: Animator?) {
+                overlayHost.removeView(overlayView)
+                viewIdentifierManager.detachOverlayView(overlayView)
+                viewIdentifierManager.removeAnimation(overlayEntity.id)
+            }
+
+            override fun onAnimationRepeat(animation: Animator?) {
+            }
+
+            override fun onAnimationCancel(animation: Animator?) {
+            }
+
+        })
+
+        viewIdentifierManager.addAnimation(overlayEntity.id, animation)
+
+        return animation
+
+    }
+
+    open fun createRemoveViewDynamicAnimation(
+        overlayHost: OverlayHost,
+        overlayEntity: OverlayEntity,
+        view: ScaffoldView,
+        viewIdentifierManager: ViewIdentifierManager
+    ): ObjectAnimator? {
+        var animation: ObjectAnimator? = null
+
+        if (overlayEntity.outroTransitionSpec.animationType == AnimationType.SLIDE_TO_LEFT) {
+            animation = ObjectAnimator.ofFloat(
+                view,
+                View.X,
+                view.x,
+                -view.width.toFloat()
+            )
+        } else if (overlayEntity.outroTransitionSpec.animationType == AnimationType.SLIDE_TO_RIGHT) {
+            animation = ObjectAnimator.ofFloat(
+                view,
+                View.X,
+                view.x,
+                overlayHost.width.toFloat()
+            )
+
+        }
+
+        if (animation != null) {
+            animation.addListener(object : Animator.AnimatorListener {
+                override fun onAnimationRepeat(animation: Animator?) {
+                }
+
+                override fun onAnimationEnd(animation: Animator?) {
+                    overlayHost.removeView(view)
+                    viewIdentifierManager.detachOverlayView(view)
+                    viewIdentifierManager.removeAnimation(overlayEntity.id)
+                }
+
+                override fun onAnimationCancel(animation: Animator?) {
+
+                }
+
+                override fun onAnimationStart(animation: Animator?) {
+                }
+
+            })
+
+            animation.duration = overlayEntity.outroTransitionSpec.animationDuration
+            viewIdentifierManager.addAnimation(overlayEntity.id, animation)
+
+        }
         return animation
 
     }

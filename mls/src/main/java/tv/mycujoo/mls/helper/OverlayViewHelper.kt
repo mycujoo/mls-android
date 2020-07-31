@@ -1,10 +1,12 @@
 package tv.mycujoo.mls.helper
 
 import android.content.Context
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.children
 import androidx.core.view.doOnLayout
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.OverlayEntity
@@ -17,7 +19,7 @@ import tv.mycujoo.mls.widgets.ScaffoldView
 
 class OverlayViewHelper(private val animationHelper: AnimationHelper) {
 
-    /**region With animation*/
+    /**region Add view with animation*/
     fun addViewWithAnimation(
         context: Context,
         overlayHost: OverlayHost,
@@ -58,6 +60,9 @@ class OverlayViewHelper(private val animationHelper: AnimationHelper) {
                 }
                 else -> {
                     // should not happen
+                    if (!viewIdentifierManager.idlingResource.isIdleNow) {
+                        viewIdentifierManager.idlingResource.decrement()
+                    }
                 }
             }
 
@@ -151,7 +156,7 @@ class OverlayViewHelper(private val animationHelper: AnimationHelper) {
     /**endregion */
 
 
-    /**region With no animation*/
+    /**region Add view with NO animation*/
     fun addViewWithNoAnimation(
         context: Context,
         overlayHost: OverlayHost,
@@ -213,6 +218,102 @@ class OverlayViewHelper(private val animationHelper: AnimationHelper) {
         }
 
     }
+    /**endregion */
+
+
+    /**region Remove view with animation*/
+    fun removeViewWithAnimation(
+        overlayHost: OverlayHost,
+        overlayEntity: OverlayEntity,
+        viewIdentifierManager: ViewIdentifierManager
+    ) {
+        viewIdentifierManager.idlingResource.increment()
+
+        when (overlayEntity.outroTransitionSpec.animationType) {
+            AnimationType.FADE_OUT -> {
+                removeViewWithStaticAnimation(
+                    overlayHost,
+                    overlayEntity,
+                    viewIdentifierManager
+                )
+            }
+            AnimationType.SLIDE_TO_LEFT,
+            AnimationType.SLIDE_TO_RIGHT -> {
+                removeViewWithDynamicAnimation(
+                    overlayHost,
+                    overlayEntity,
+                    viewIdentifierManager
+                )
+            }
+            else -> {
+                // should not happen
+                if (!viewIdentifierManager.idlingResource.isIdleNow) {
+                    viewIdentifierManager.idlingResource.decrement()
+                }
+                return
+            }
+
+        }
+
+    }
+
+    private fun removeViewWithStaticAnimation(
+        overlayHost: OverlayHost,
+        overlayEntity: OverlayEntity,
+        viewIdentifierManager: ViewIdentifierManager
+    ) {
+        overlayHost.post {
+            overlayHost.children.filter { it.tag == overlayEntity.id }.forEach { view ->
+                view as ScaffoldView
+
+                val animation = animationHelper.createRemoveViewStaticAnimation(
+                    overlayHost,
+                    overlayEntity,
+                    view,
+                    viewIdentifierManager
+                )
+
+                animation.start()
+            }
+            if (!viewIdentifierManager.idlingResource.isIdleNow) {
+                viewIdentifierManager.idlingResource.decrement()
+            }
+        }
+    }
+
+    private fun removeViewWithDynamicAnimation(
+        overlayHost: OverlayHost,
+        overlayEntity: OverlayEntity,
+        viewIdentifierManager: ViewIdentifierManager
+    ) {
+        overlayHost.post {
+            overlayHost.children.filter { it.tag == overlayEntity.id }.forEach { view ->
+                view as ScaffoldView
+
+
+                val animation = animationHelper.createRemoveViewDynamicAnimation(
+                    overlayHost,
+                    overlayEntity,
+                    view,
+                    viewIdentifierManager
+                )
+
+                if (animation == null) {
+                    // should not happen
+                    Log.e("OverlayEntityView", "animation must not be null")
+                    return@forEach
+                }
+
+                animation.start()
+            }
+
+            if (!viewIdentifierManager.idlingResource.isIdleNow) {
+                viewIdentifierManager.idlingResource.decrement()
+            }
+        }
+    }
+
+
     /**endregion */
 
 

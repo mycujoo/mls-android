@@ -7,7 +7,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 import androidx.core.view.doOnLayout
-import tv.mycujoo.domain.entity.AnimationType.*
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.PositionGuide
 import tv.mycujoo.mls.manager.ViewIdentifierManager
@@ -98,89 +97,6 @@ class OverlayEntityViewHelper {
         }
 
         /**endregion */
-
-
-        fun removalViewWithAnimation(
-            overlayHost: OverlayHost,
-            overlayEntity: OverlayEntity,
-            viewIdentifierManager: ViewIdentifierManager
-        ) {
-            when (overlayEntity.outroTransitionSpec.animationType) {
-                FADE_OUT -> {
-                    removalViewWithStaticAnimation(
-                        overlayHost,
-                        overlayEntity,
-                        viewIdentifierManager
-                    )
-                }
-                SLIDE_TO_LEFT,
-                SLIDE_TO_RIGHT -> {
-                    removalViewWithDynamicAnimation(
-                        overlayHost,
-                        overlayEntity,
-                        viewIdentifierManager
-                    )
-                }
-                else -> {
-                    // should not happen
-                    return
-                }
-
-            }
-
-        }
-
-        private fun removalViewWithStaticAnimation(
-            overlayHost: OverlayHost,
-            overlayEntity: OverlayEntity,
-            viewIdentifierManager: ViewIdentifierManager
-        ) {
-            overlayHost.post {
-                overlayHost.children.filter { it.tag == overlayEntity.id }.forEach { view ->
-                    view as ScaffoldView
-
-                    val animation = AnimationFactory.createRemoveViewStaticAnimation(
-                        overlayHost,
-                        overlayEntity,
-                        view,
-                        viewIdentifierManager
-                    )
-
-                    animation.start()
-                }
-            }
-        }
-
-        private fun removalViewWithDynamicAnimation(
-            overlayHost: OverlayHost,
-            overlayEntity: OverlayEntity,
-            viewIdentifierManager: ViewIdentifierManager
-        ) {
-            overlayHost.post {
-                overlayHost.children.filter { it.tag == overlayEntity.id }.forEach { view ->
-                    view as ScaffoldView
-
-
-                    val animation = AnimationFactory.createRemoveViewDynamicAnimation(
-                        overlayHost,
-                        overlayEntity,
-                        view,
-                        viewIdentifierManager
-                    )
-
-
-                    if (animation == null) {
-                        // should not happen
-                        Log.e("OverlayEntityView", "animation must not be null")
-                        return@forEach
-                    }
-
-
-                    animation.start()
-                }
-            }
-        }
-
         fun addLingeringIntroOverlay(
             overlayHost: OverlayHost,
             overlayEntity: OverlayEntity,

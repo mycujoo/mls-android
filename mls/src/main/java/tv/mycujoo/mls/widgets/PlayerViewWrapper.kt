@@ -403,8 +403,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     /**endregion */
 
-    // using overlay-entity
-
     //regular play-mode
     fun onNewOverlayWithNoAnimation(overlayEntity: OverlayEntity) {
         overlayViewHelper.addViewWithNoAnimation(
@@ -438,7 +436,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
     }
 
     fun onOverlayRemovalWithAnimation(overlayEntity: OverlayEntity) {
-        OverlayEntityViewHelper.removalViewWithAnimation(
+        overlayViewHelper.removeViewWithAnimation(
             overlayHost,
             overlayEntity,
             viewIdentifierManager

@@ -86,7 +86,6 @@ class OverlayEntityViewHelperTest {
             )
     }
 
-
     @Test
     fun addOverlayWithNoAnimation_shouldNotMakeAnimation() {
         playerViewWrapper.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
@@ -109,12 +108,17 @@ class OverlayEntityViewHelperTest {
             )
     }
 
-
     @Test
     fun addOverlayWithAnimation_shouldMakeStaticIntroAnimation() {
         val overlayEntity = getSampleOverlayEntity(AnimationType.FADE_IN)
         playerViewWrapper.onNewOverlayWithAnimation(overlayEntity)
 
+        Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
+            .check(
+                ViewAssertions.matches(
+                    ViewMatchers.withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)
+                )
+            )
 
         val animationRecipe = animationHelper.animationRecipe
         assertEquals(overlayEntity.introTransitionSpec.animationType, animationRecipe?.animationType)
@@ -138,16 +142,94 @@ class OverlayEntityViewHelperTest {
         assertEquals(overlayEntity.introTransitionSpec.animationDuration, animationRecipe?.animationDuration)
     }
 
+    @Test
+    fun addOverlayWithWrongAnimation_shouldNotAddOverlayOrMakeAnimation() {
+        val overlayEntity = getSampleOverlayEntity(AnimationType.FADE_OUT)
+        playerViewWrapper.onNewOverlayWithAnimation(overlayEntity)
 
+        Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
+            .check(
+                ViewAssertions.doesNotExist()
+            )
+
+        assertNull(animationHelper.animationRecipe)
+    }
+
+
+    @Test
+    fun removeOverlayWithStaticAnimation_shouldMakeAnimation() {
+        playerViewWrapper.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
+        val overlayEntity = getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.FADE_OUT)
+
+
+        playerViewWrapper.onOverlayRemovalWithAnimation(overlayEntity)
+
+
+        Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
+            .check(
+                ViewAssertions.matches(
+                    ViewMatchers.withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)
+                )
+            )
+
+        val animationRecipe = animationHelper.animationRecipe
+        assertEquals(overlayEntity.outroTransitionSpec.animationType, animationRecipe?.animationType)
+        assertEquals(overlayEntity.outroTransitionSpec.animationDuration, animationRecipe?.animationDuration)
+    }
+
+    @Test
+    fun removeOverlayWithDynamicAnimation_shouldMakeAnimation() {
+        playerViewWrapper.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
+        val overlayEntity = getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.SLIDE_TO_LEFT)
+
+
+        playerViewWrapper.onOverlayRemovalWithAnimation(overlayEntity)
+
+
+        Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
+            .check(
+                ViewAssertions.matches(
+                    ViewMatchers.withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)
+                )
+            )
+
+        val animationRecipe = animationHelper.animationRecipe
+        assertEquals(overlayEntity.outroTransitionSpec.animationType, animationRecipe?.animationType)
+        assertEquals(overlayEntity.outroTransitionSpec.animationDuration, animationRecipe?.animationDuration)
+    }
+
+    @Test
+    fun removeOverlayWithWrongAnimation_shouldNotMakeAnimation() {
+        playerViewWrapper.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
+        val overlayEntity = getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.FADE_IN)
+
+
+        playerViewWrapper.onOverlayRemovalWithAnimation(overlayEntity)
+
+
+        Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
+            .check(
+                ViewAssertions.matches(
+                    ViewMatchers.withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)
+                )
+            )
+
+        assertNull(animationHelper.animationRecipe)
+    }
+
+
+    /**region Test data*/
     private fun getSampleOverlayEntity(): OverlayEntity {
         val viewSpec = ViewSpec(PositionGuide(left = 10F, top = 10F), Pair(30F, 0F))
+
+        val svgData = SvgData(null, null, sampleSvgString)
 
         val introTransitionSpec = TransitionSpec(1000L, AnimationType.NONE, 0L)
         val outroTransitionSpec = TransitionSpec(2000L, AnimationType.NONE, 0L)
 
         return OverlayEntity(
-            "id_1001",
-            null,
+            SAMPLE_ID,
+            svgData,
             viewSpec,
             introTransitionSpec,
             outroTransitionSpec,
@@ -160,11 +242,11 @@ class OverlayEntityViewHelperTest {
 
         val svgData = SvgData(null, null, sampleSvgString)
 
-        val introTransitionSpec = TransitionSpec(1000L, introAnimationType, 0L)
-        val outroTransitionSpec = TransitionSpec(2000L, AnimationType.NONE, 0L)
+        val introTransitionSpec = TransitionSpec(1000L, introAnimationType, 600L)
+        val outroTransitionSpec = TransitionSpec(2000L, AnimationType.NONE, 3000L)
 
         return OverlayEntity(
-            "id_1001",
+            SAMPLE_ID,
             svgData,
             viewSpec,
             introTransitionSpec,
@@ -172,4 +254,31 @@ class OverlayEntityViewHelperTest {
             emptyList()
         )
     }
+
+    private fun getSampleOverlayEntity(
+        introAnimationType: AnimationType,
+        outroAnimationType: AnimationType
+    ): OverlayEntity {
+        val viewSpec = ViewSpec(PositionGuide(left = 10F, top = 10F), Pair(30F, 0F))
+
+        val svgData = SvgData(null, null, sampleSvgString)
+
+        val introTransitionSpec = TransitionSpec(1000L, introAnimationType, 300L)
+        val outroTransitionSpec = TransitionSpec(2000L, outroAnimationType, 600L)
+
+        return OverlayEntity(
+            SAMPLE_ID,
+            svgData,
+            viewSpec,
+            introTransitionSpec,
+            outroTransitionSpec,
+            emptyList()
+        )
+    }
+
+    companion object {
+        const val SAMPLE_ID = "id_1001"
+    }
+
+    /**endregion */
 }
