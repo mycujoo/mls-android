@@ -3,6 +3,8 @@ package tv.mycujoo.mls.manager
 import android.animation.ObjectAnimator
 import android.util.Log
 import android.view.View
+import androidx.annotation.Nullable
+import androidx.test.espresso.idling.CountingIdlingResource
 import kotlinx.coroutines.CoroutineScope
 import tv.mycujoo.mls.widgets.ScaffoldView
 
@@ -14,6 +16,9 @@ class ViewIdentifierManager(dispatcher: CoroutineScope) {
 
     val variableTranslator = VariableTranslator(dispatcher)
     val timeKeeper = TimeKeeper(dispatcher)
+
+    @Nullable
+    val idlingResource = CountingIdlingResource("ViewIdentifierManager")
 
 
     fun storeViewId(view: View, customId: String) {

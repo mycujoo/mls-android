@@ -30,6 +30,7 @@ import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.extensions.getDisplaySize
 import tv.mycujoo.mls.helper.OverlayEntityViewHelper
+import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.TimelineMarkerManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.PlayerViewWrapper.LiveState.*
@@ -57,15 +58,17 @@ class PlayerViewWrapper @JvmOverloads constructor(
     lateinit var uiEventListener: UIEventListener
     private var isFullScreen = false
 
-    lateinit var viewIdentifierManager: ViewIdentifierManager
+    private lateinit var viewIdentifierManager: ViewIdentifierManager
 
     private lateinit var eventInfoTitle: String
     private lateinit var eventInfoDescription: String
 
     var onSizeChangedCallback = {}
 
+    private lateinit var overlayViewHelper: OverlayViewHelper
+
     @Nullable
-    val idlingResource = CountingIdlingResource("displaying_overlays")
+    lateinit var idlingResource: CountingIdlingResource
     /**endregion */
 
     /**region Initializing*/
@@ -113,6 +116,14 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
         initMlsTimeBar()
 
+    }
+
+    fun prepare(
+        overlayViewHelper: OverlayViewHelper,
+        viewIdentifierManager: ViewIdentifierManager
+    ) {
+        this.overlayViewHelper = overlayViewHelper
+        this.viewIdentifierManager = viewIdentifierManager
     }
 
     private fun initAttributes(attrs: AttributeSet?, context: Context) {
@@ -396,7 +407,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     //regular play-mode
     fun onNewOverlayWithNoAnimation(overlayEntity: OverlayEntity) {
-        OverlayEntityViewHelper.addViewWithNoAnimation(
+        overlayViewHelper.addViewWithNoAnimation(
             context,
             overlayHost,
             overlayEntity,
@@ -406,7 +417,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
 
     fun onNewOverlayWithAnimation(overlayEntity: OverlayEntity) {
-        OverlayEntityViewHelper.addViewWithAnimation(
+        overlayViewHelper.addViewWithAnimation(
             context,
             overlayHost,
             overlayEntity,
@@ -495,7 +506,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
     }
 
     fun addLingeringMidwayOverlay(overlayEntity: OverlayEntity) {
-        OverlayEntityViewHelper.addViewWithNoAnimation(
+        overlayViewHelper.addViewWithNoAnimation(
             context,
             overlayHost,
             overlayEntity,

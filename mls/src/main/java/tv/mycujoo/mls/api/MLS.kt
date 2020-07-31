@@ -31,6 +31,8 @@ import tv.mycujoo.mls.core.VideoPlayerCoordinator
 import tv.mycujoo.mls.data.DataHolder
 import tv.mycujoo.mls.di.DaggerMlsComponent
 import tv.mycujoo.mls.di.NetworkModule
+import tv.mycujoo.mls.helper.AnimationHelper
+import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.SVGAssetResolver
 import tv.mycujoo.mls.manager.IPrefManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
@@ -232,7 +234,8 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
             coordinator.playerViewWrapper = playerViewWrapper
         }
 
-        playerViewWrapper.viewIdentifierManager = viewIdentifierManager
+        playerViewWrapper.idlingResource = viewIdentifierManager.idlingResource
+        playerViewWrapper.prepare(OverlayViewHelper(AnimationHelper()), viewIdentifierManager)
 
 //        dataProvider.fetchEvents()
     }

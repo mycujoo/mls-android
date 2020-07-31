@@ -1,6 +1,5 @@
 package tv.mycujoo.mls.helper
 
-import android.content.Context
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
@@ -11,7 +10,6 @@ import androidx.core.view.doOnLayout
 import tv.mycujoo.domain.entity.AnimationType.*
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.PositionGuide
-import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ProportionalImageView
@@ -101,171 +99,6 @@ class OverlayEntityViewHelper {
 
         /**endregion */
 
-        fun addViewWithNoAnimation(
-            context: Context,
-            overlayHost: OverlayHost,
-            overlayEntity: OverlayEntity,
-            viewIdentifierManager: ViewIdentifierManager
-        ) {
-            val scaffoldView =
-                OverlayFactory.createScaffoldView(
-                    context,
-                    overlayEntity,
-                    viewIdentifierManager.variableTranslator,
-                    viewIdentifierManager.timeKeeper
-                )
-
-            doAddViewWithNoAnimation(
-                overlayHost,
-                scaffoldView,
-                overlayEntity.viewSpec.positionGuide!!,
-                viewIdentifierManager
-            )
-
-        }
-
-        private fun doAddViewWithNoAnimation(
-            overlayHost: OverlayHost,
-            scaffoldView: ScaffoldView,
-            positionGuide: PositionGuide,
-            viewIdentifierManager: ViewIdentifierManager
-        ) {
-            overlayHost.post {
-                val constraintSet = ConstraintSet()
-                constraintSet.clone(overlayHost)
-                val layoutParams = ConstraintLayout.LayoutParams(
-                    ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                    ConstraintLayout.LayoutParams.WRAP_CONTENT
-                )
-
-                applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
-
-
-                constraintSet.applyTo(overlayHost)
-                scaffoldView.layoutParams = layoutParams
-
-                overlayHost.addView(scaffoldView)
-                viewIdentifierManager.attachOverlayView(scaffoldView)
-            }
-        }
-
-
-        fun addViewWithAnimation(
-            context: Context,
-            overlayHost: OverlayHost,
-            overlayEntity: OverlayEntity,
-            viewIdentifierManager: ViewIdentifierManager
-        ) {
-
-            overlayHost.post {
-                val scaffoldView =
-                    OverlayFactory.createScaffoldView(
-                        context,
-                        overlayEntity,
-                        viewIdentifierManager.variableTranslator,
-                        viewIdentifierManager.timeKeeper
-                    )
-
-                when (overlayEntity.introTransitionSpec.animationType) {
-                    FADE_IN -> {
-                        doAddViewWithStaticAnimation(
-                            overlayHost,
-                            scaffoldView,
-                            overlayEntity.viewSpec.positionGuide!!,
-                            overlayEntity.introTransitionSpec,
-                            viewIdentifierManager
-                        )
-                    }
-                    SLIDE_FROM_LEFT,
-                    SLIDE_FROM_RIGHT -> {
-
-                        doAddViewWithDynamicAnimation(
-                            overlayHost,
-                            scaffoldView,
-                            overlayEntity.viewSpec.positionGuide!!,
-                            overlayEntity.introTransitionSpec,
-                            viewIdentifierManager
-                        )
-                    }
-                    else -> {
-                        // should not happen
-                    }
-                }
-
-            }
-        }
-
-        private fun doAddViewWithStaticAnimation(
-            overlayHost: OverlayHost,
-            scaffoldView: ScaffoldView,
-            positionGuide: PositionGuide,
-            introTransitionSpec: TransitionSpec,
-            viewIdentifierManager: ViewIdentifierManager
-        ) {
-            overlayHost.post {
-
-                val constraintSet = ConstraintSet()
-                constraintSet.clone(overlayHost)
-                val layoutParams = ConstraintLayout.LayoutParams(
-                    ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                    ConstraintLayout.LayoutParams.WRAP_CONTENT
-                )
-
-                applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
-
-
-                constraintSet.applyTo(overlayHost)
-                scaffoldView.layoutParams = layoutParams
-
-                overlayHost.addView(scaffoldView)
-                viewIdentifierManager.attachOverlayView(scaffoldView)
-
-                val animation = AnimationFactory.createStaticAnimation(
-                    scaffoldView,
-                    introTransitionSpec.animationType,
-                    introTransitionSpec.animationDuration
-                )
-                viewIdentifierManager.addAnimation(scaffoldView.tag as String, animation!!)
-                animation.start()
-
-            }
-        }
-
-        private fun doAddViewWithDynamicAnimation(
-            host: OverlayHost,
-            scaffoldView: ScaffoldView,
-            positionGuide: PositionGuide,
-            introTransitionSpec: TransitionSpec,
-            viewIdentifierManager: ViewIdentifierManager
-        ) {
-            val constraintSet = ConstraintSet()
-            constraintSet.clone(host)
-            val layoutParams = ConstraintLayout.LayoutParams(
-                ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                ConstraintLayout.LayoutParams.WRAP_CONTENT
-            )
-
-            applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
-
-            scaffoldView.layoutParams = layoutParams
-            scaffoldView.visibility = View.INVISIBLE
-            constraintSet.applyTo(host)
-            host.addView(scaffoldView)
-            viewIdentifierManager.attachOverlayView(scaffoldView)
-
-            scaffoldView.doOnLayout {
-
-                val anim = AnimationFactory.createAddViewDynamicAnimation(
-                    host,
-                    scaffoldView,
-                    introTransitionSpec,
-                    viewIdentifierManager
-                )
-
-                anim?.start()
-            }
-
-        }
 
         fun removalViewWithAnimation(
             overlayHost: OverlayHost,

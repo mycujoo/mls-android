@@ -33,16 +33,12 @@ class PlayerTest {
     @Before
     fun setUp() {
         val intent = Intent(ApplicationProvider.getApplicationContext(), BlankActivity::class.java)
-            .putExtra("key", "value")
         val scenario = launchActivity<BlankActivity>(intent)
         scenario.onActivity { activity ->
-            // do some stuff with the Activity
-            println("RUNNING")
             val linearLayout = activity.findViewById<LinearLayout>(R.id.blankActivity_rootView)
             playerViewWrapper = PlayerViewWrapper(linearLayout.context)
             playerViewWrapper.id = View.generateViewId()
             linearLayout.addView(playerViewWrapper)
-
         }
 
     }
