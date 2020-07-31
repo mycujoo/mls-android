@@ -1,11 +1,9 @@
 package tv.mycujoo.mls.helper
 
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.view.children
 import androidx.core.view.doOnLayout
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.PositionGuide
@@ -97,70 +95,6 @@ class OverlayEntityViewHelper {
         }
 
         /**endregion */
-        fun addLingeringIntroOverlay(
-            overlayHost: OverlayHost,
-            overlayEntity: OverlayEntity,
-            animationPosition: Long,
-            isPlaying: Boolean,
-            viewIdentifierManager: ViewIdentifierManager
-        ) {
-            overlayHost.post {
-
-                val scaffoldView =
-                    OverlayFactory.createScaffoldView(
-                        overlayHost.context,
-                        overlayEntity,
-                        viewIdentifierManager.variableTranslator,
-                        viewIdentifierManager.timeKeeper
-                    )
-
-                scaffoldView.doOnLayout {
-
-                    val animation = AnimationFactory.createLingeringIntroAnimation(
-                        overlayHost,
-                        scaffoldView,
-                        overlayEntity,
-                        animationPosition,
-                        isPlaying,
-                        viewIdentifierManager
-                    )
-
-                    if (animation == null) {
-                        Log.e("OverlayEntityView", "animation must not be null")
-                        return@doOnLayout
-                    }
-
-                }
-
-                val constraintSet = ConstraintSet()
-                constraintSet.clone(overlayHost)
-                val layoutParams = ConstraintLayout.LayoutParams(
-                    ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                    ConstraintLayout.LayoutParams.WRAP_CONTENT
-                )
-
-
-                val positionGuide = overlayEntity.viewSpec.positionGuide
-                if (positionGuide == null) {
-                    // should not happen
-                    Log.e("OverlayEntityView", "animation must not be null")
-                    return@post
-                }
-
-
-                applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
-
-
-                scaffoldView.layoutParams = layoutParams
-                scaffoldView.visibility = View.INVISIBLE
-                constraintSet.applyTo(overlayHost)
-                overlayHost.addView(scaffoldView)
-                viewIdentifierManager.attachOverlayView(scaffoldView)
-
-            }
-
-        }
-
 
         private fun applyPositionGuide(
             positionGuide: PositionGuide,
@@ -214,43 +148,6 @@ class OverlayEntityViewHelper {
                     return@let
                 }
                 setHCenterConstrains(layoutParams, it)
-            }
-        }
-
-        fun updateLingeringIntroOverlay(
-            overlayHost: OverlayHost,
-            overlayEntity: OverlayEntity,
-            animationPosition: Long,
-            isPlaying: Boolean,
-            viewIdentifierManager: ViewIdentifierManager
-        ) {
-            overlayHost.post {
-                overlayHost.children.firstOrNull { it.tag == overlayEntity.id }?.let { view ->
-
-                    overlayHost.removeView(view)
-                    viewIdentifierManager.getAnimationWithTag(overlayEntity.id)?.let {
-                        it.cancel()
-                    }
-                    viewIdentifierManager.removeAnimation(overlayEntity.id)
-
-                    val scaffoldView = viewIdentifierManager.getOverlayView(
-                        overlayEntity.id
-                    )
-                    scaffoldView?.let {
-                        viewIdentifierManager.detachOverlayView(
-                            it
-                        )
-                    }
-
-
-                    addLingeringIntroOverlay(
-                        overlayHost,
-                        overlayEntity,
-                        animationPosition,
-                        isPlaying,
-                        viewIdentifierManager
-                    )
-                }
             }
         }
 

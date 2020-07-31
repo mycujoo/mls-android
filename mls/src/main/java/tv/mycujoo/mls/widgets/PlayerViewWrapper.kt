@@ -449,7 +449,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         animationPosition: Long,
         isPlaying: Boolean
     ) {
-        OverlayEntityViewHelper.addLingeringIntroOverlay(
+        overlayViewHelper.addLingeringIntroViewWithAnimation(
             overlayHost,
             overlayEntity,
             animationPosition,
@@ -464,7 +464,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         animationPosition: Long,
         isPlaying: Boolean
     ) {
-        OverlayEntityViewHelper.updateLingeringIntroOverlay(
+        overlayViewHelper.updateLingeringIntroOverlay(
             overlayHost,
             overlayEntity,
             animationPosition,
@@ -479,7 +479,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         animationPosition: Long,
         isPlaying: Boolean
     ) {
-        OverlayEntityViewHelper.addLingeringOutroOverlay(
+        overlayViewHelper.addLingeringOutroViewWithAnimation(
             overlayHost,
             overlayEntity,
             animationPosition,

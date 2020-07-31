@@ -70,10 +70,70 @@ class FakeAnimationHelper : AnimationHelper() {
         return super.createRemoveViewDynamicAnimation(overlayHost, overlayEntity, overlayView, viewIdentifierManager)
     }
 
+    override fun createLingeringIntroViewAnimation(
+        overlayHost: OverlayHost,
+        scaffoldView: ScaffoldView,
+        overlayEntity: OverlayEntity,
+        animationPosition: Long,
+        isPlaying: Boolean,
+        viewIdentifierManager: ViewIdentifierManager
+    ): ObjectAnimator? {
+        val introTransitionSpec = overlayEntity.introTransitionSpec
+
+        animationRecipe =
+            AnimationRecipe(
+                scaffoldView,
+                introTransitionSpec.animationType,
+                introTransitionSpec.animationDuration,
+                animationPosition,
+                isPlaying
+            )
+
+        return super.createLingeringIntroViewAnimation(
+            overlayHost,
+            scaffoldView,
+            overlayEntity,
+            animationPosition,
+            isPlaying,
+            viewIdentifierManager
+        )
+    }
+
+    override fun createLingeringOutroAnimation(
+        overlayHost: OverlayHost,
+        scaffoldView: ScaffoldView,
+        overlayEntity: OverlayEntity,
+        animationPosition: Long,
+        isPlaying: Boolean,
+        viewIdentifierManager: ViewIdentifierManager
+    ): ObjectAnimator? {
+        val outroTransitionSpec = overlayEntity.outroTransitionSpec
+
+        animationRecipe =
+            AnimationRecipe(
+                scaffoldView,
+                outroTransitionSpec.animationType,
+                outroTransitionSpec.animationDuration,
+                animationPosition,
+                isPlaying
+            )
+
+        return super.createLingeringOutroAnimation(
+            overlayHost,
+            scaffoldView,
+            overlayEntity,
+            animationPosition,
+            isPlaying,
+            viewIdentifierManager
+        )
+    }
+
     data class AnimationRecipe(
         val scaffoldView: ScaffoldView,
         val animationType: AnimationType,
-        val animationDuration: Long
+        val animationDuration: Long,
+        val animationPosition: Long = -1L,
+        val isPlaying: Boolean = false
     )
 
 }

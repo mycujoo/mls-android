@@ -10,6 +10,7 @@ import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.internal.runner.junit4.statement.UiThreadStatement
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -216,6 +217,113 @@ class OverlayEntityViewHelperTest {
 
         assertNull(animationHelper.animationRecipe)
     }
+
+    /**region Lingerings*/
+    @Test
+    fun addLingeringIntroOverlayWithAnimation_shouldMakeLingeringIntroAnimation_staticAnimation() {
+        val overlayEntity = getSampleOverlayEntity(AnimationType.FADE_IN)
+        playerViewWrapper.addLingeringIntroOverlay(overlayEntity, 100L, true)
+
+
+        Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
+            .check(
+                ViewAssertions.matches(
+                    ViewMatchers.withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)
+                )
+            )
+
+        val animationRecipe = animationHelper.animationRecipe
+        assertEquals(overlayEntity.introTransitionSpec.animationType, animationRecipe?.animationType)
+        assertEquals(overlayEntity.introTransitionSpec.animationDuration, animationRecipe?.animationDuration)
+        assertEquals(100L, animationRecipe?.animationPosition)
+        assertEquals(true, animationRecipe?.isPlaying)
+    }
+
+    @Test
+    fun updateLingeringIntroOverlayWithAnimation_shouldMakeLingeringIntroAnimation_staticAnimation() {
+        viewIdentifierManager.idlingResource.dumpStateToLogs()
+        playerViewWrapper.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
+        val overlayEntity = getSampleOverlayEntity(AnimationType.FADE_IN)
+        UiThreadStatement.runOnUiThread {
+            playerViewWrapper.updateLingeringIntroOverlay(overlayEntity, 100L, true)
+
+        }
+
+
+        Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
+            .check(
+                ViewAssertions.matches(
+                    ViewMatchers.withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)
+                )
+            )
+
+        val animationRecipe = animationHelper.animationRecipe
+        assertEquals(overlayEntity.introTransitionSpec.animationType, animationRecipe?.animationType)
+        assertEquals(overlayEntity.introTransitionSpec.animationDuration, animationRecipe?.animationDuration)
+        assertEquals(100L, animationRecipe?.animationPosition)
+        assertEquals(true, animationRecipe?.isPlaying)
+    }
+
+    @Test
+    fun addLingeringIntroOverlayWithAnimation_shouldMakeLingeringIntroAnimation_dynamicAnimation() {
+        val overlayEntity = getSampleOverlayEntity(AnimationType.SLIDE_FROM_LEFT)
+        playerViewWrapper.addLingeringIntroOverlay(overlayEntity, 100L, true)
+
+
+        Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
+            .check(
+                ViewAssertions.matches(
+                    ViewMatchers.withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)
+                )
+            )
+
+        val animationRecipe = animationHelper.animationRecipe
+        assertEquals(overlayEntity.introTransitionSpec.animationType, animationRecipe?.animationType)
+        assertEquals(overlayEntity.introTransitionSpec.animationDuration, animationRecipe?.animationDuration)
+        assertEquals(100L, animationRecipe?.animationPosition)
+        assertEquals(true, animationRecipe?.isPlaying)
+    }
+
+    @Test
+    fun addLingeringOutroOverlayWithAnimation_shouldMakeLingeringOutroAnimation_staticAnimation() {
+        val overlayEntity = getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.FADE_OUT)
+        playerViewWrapper.addLingeringOutroOverlay(overlayEntity, 100L, true)
+
+
+        Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
+            .check(
+                ViewAssertions.matches(
+                    ViewMatchers.withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)
+                )
+            )
+
+        val animationRecipe = animationHelper.animationRecipe
+        assertEquals(overlayEntity.outroTransitionSpec.animationType, animationRecipe?.animationType)
+        assertEquals(overlayEntity.outroTransitionSpec.animationDuration, animationRecipe?.animationDuration)
+        assertEquals(100L, animationRecipe?.animationPosition)
+        assertEquals(true, animationRecipe?.isPlaying)
+    }
+
+    @Test
+    fun addLingeringOutroOverlayWithAnimation_shouldMakeLingeringOutroAnimation_dynamicAnimation() {
+        val overlayEntity = getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.SLIDE_TO_LEFT)
+        playerViewWrapper.addLingeringOutroOverlay(overlayEntity, 100L, true)
+
+
+        Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
+            .check(
+                ViewAssertions.matches(
+                    ViewMatchers.withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)
+                )
+            )
+
+        val animationRecipe = animationHelper.animationRecipe
+        assertEquals(overlayEntity.outroTransitionSpec.animationType, animationRecipe?.animationType)
+        assertEquals(overlayEntity.outroTransitionSpec.animationDuration, animationRecipe?.animationDuration)
+        assertEquals(100L, animationRecipe?.animationPosition)
+        assertEquals(true, animationRecipe?.isPlaying)
+    }
+    /**endregion */
 
 
     /**region Test data*/

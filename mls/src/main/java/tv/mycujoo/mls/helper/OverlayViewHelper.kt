@@ -316,6 +316,180 @@ class OverlayViewHelper(private val animationHelper: AnimationHelper) {
 
     /**endregion */
 
+    /**region Add lingering view with animation*/
+    fun addLingeringIntroViewWithAnimation(
+        overlayHost: OverlayHost,
+        overlayEntity: OverlayEntity,
+        animationPosition: Long,
+        isPlaying: Boolean,
+        viewIdentifierManager: ViewIdentifierManager
+    ) {
+        viewIdentifierManager.idlingResource.increment()
+
+        overlayHost.post {
+
+            val scaffoldView =
+                OverlayFactory.createScaffoldView(
+                    overlayHost.context,
+                    overlayEntity,
+                    viewIdentifierManager.variableTranslator,
+                    viewIdentifierManager.timeKeeper
+                )
+
+            scaffoldView.doOnLayout {
+
+                val animation = animationHelper.createLingeringIntroViewAnimation(
+                    overlayHost,
+                    scaffoldView,
+                    overlayEntity,
+                    animationPosition,
+                    isPlaying,
+                    viewIdentifierManager
+                )
+
+                if (animation == null) {
+                    Log.e("OverlayEntityView", "animation must not be null")
+                    return@doOnLayout
+                }
+
+                if (!viewIdentifierManager.idlingResource.isIdleNow) {
+                    viewIdentifierManager.idlingResource.decrement()
+                }
+
+            }
+
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(overlayHost)
+            val layoutParams = ConstraintLayout.LayoutParams(
+                ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                ConstraintLayout.LayoutParams.WRAP_CONTENT
+            )
+
+
+            val positionGuide = overlayEntity.viewSpec.positionGuide
+            if (positionGuide == null) {
+                // should not happen
+                Log.e("OverlayEntityView", "animation must not be null")
+                return@post
+            }
+
+
+            applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
+
+
+            scaffoldView.layoutParams = layoutParams
+            scaffoldView.visibility = View.INVISIBLE
+            constraintSet.applyTo(overlayHost)
+            overlayHost.addView(scaffoldView)
+            viewIdentifierManager.attachOverlayView(scaffoldView)
+
+        }
+
+
+    }
+
+    fun updateLingeringIntroOverlay(
+        overlayHost: OverlayHost,
+        overlayEntity: OverlayEntity,
+        animationPosition: Long,
+        isPlaying: Boolean,
+        viewIdentifierManager: ViewIdentifierManager
+    ) {
+        viewIdentifierManager.idlingResource.increment()
+
+        overlayHost.post {
+            overlayHost.children.firstOrNull { it.tag == overlayEntity.id }?.let { view ->
+
+                overlayHost.removeView(view)
+                viewIdentifierManager.getAnimationWithTag(overlayEntity.id)?.let {
+                    it.cancel()
+                }
+                viewIdentifierManager.removeAnimation(overlayEntity.id)
+
+                val scaffoldView = viewIdentifierManager.getOverlayView(
+                    overlayEntity.id
+                )
+                scaffoldView?.let {
+                    viewIdentifierManager.detachOverlayView(
+                        it
+                    )
+                }
+
+
+                addLingeringIntroViewWithAnimation(
+                    overlayHost,
+                    overlayEntity,
+                    animationPosition,
+                    isPlaying,
+                    viewIdentifierManager
+                )
+            }
+            if (!viewIdentifierManager.idlingResource.isIdleNow) {
+                viewIdentifierManager.idlingResource.decrement()
+            }
+        }
+
+    }
+
+
+    fun addLingeringOutroViewWithAnimation(
+        overlayHost: OverlayHost,
+        overlayEntity: OverlayEntity,
+        animationPosition: Long,
+        isPlaying: Boolean,
+        viewIdentifierManager: ViewIdentifierManager
+    ) {
+        overlayHost.post {
+
+            val scaffoldView =
+                OverlayFactory.createScaffoldView(
+                    overlayHost.context,
+                    overlayEntity,
+                    viewIdentifierManager.variableTranslator,
+                    viewIdentifierManager.timeKeeper
+                )
+
+            scaffoldView.doOnLayout {
+
+                animationHelper.createLingeringOutroAnimation(
+                    overlayHost,
+                    scaffoldView,
+                    overlayEntity,
+                    animationPosition,
+                    isPlaying,
+                    viewIdentifierManager
+                )
+
+            }
+
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(overlayHost)
+            val layoutParams = ConstraintLayout.LayoutParams(
+                ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                ConstraintLayout.LayoutParams.WRAP_CONTENT
+            )
+            val positionGuide = overlayEntity.viewSpec.positionGuide
+            if (positionGuide == null) {
+                // should not happen
+                return@post
+            }
+
+            applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
+
+            scaffoldView.layoutParams = layoutParams
+            scaffoldView.visibility = View.INVISIBLE
+            constraintSet.applyTo(overlayHost)
+            overlayHost.addView(scaffoldView)
+            viewIdentifierManager.attachOverlayView(scaffoldView)
+
+        }
+
+
+    }
+
+
+    /**endregion */
+
 
     /**region Positioning Functions*/
     private fun applyPositionGuide(
