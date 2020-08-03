@@ -2,6 +2,7 @@ package tv.mycujoo.mls.core
 
 import tv.mycujoo.data.entity.ActionCollections
 import tv.mycujoo.domain.entity.IncrementVariableEntity
+import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.OverlayObject
 import tv.mycujoo.domain.entity.SetVariableEntity
 
@@ -13,8 +14,10 @@ abstract class ActionBuilder {
 
     /**
      * adds OverlayObject which will be processed to create Show Overlays
+     * Or directly add OverlayEntity list.
      */
     abstract fun addOverlayObjects(overlayObject: List<OverlayObject>)
+    abstract fun addOverlayEntities(overlayEntities: List<OverlayEntity>)
 
     /**
      * build All actions (Show or Hide) which belongs to current time (now until next second)

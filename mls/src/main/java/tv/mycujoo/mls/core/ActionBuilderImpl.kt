@@ -1,21 +1,20 @@
 package tv.mycujoo.mls.core
 
-import android.util.Log
-import okhttp3.*
 import tv.mycujoo.data.entity.ActionCollections
-import tv.mycujoo.domain.entity.*
+import tv.mycujoo.domain.entity.IncrementVariableEntity
 import tv.mycujoo.domain.entity.OverlayAct.*
+import tv.mycujoo.domain.entity.OverlayEntity
+import tv.mycujoo.domain.entity.OverlayObject
+import tv.mycujoo.domain.entity.SetVariableEntity
 import tv.mycujoo.mls.helper.ActionVariableHelper
 import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasOutroAnimation
+import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.manager.TimerProcessor
 import tv.mycujoo.mls.manager.ViewIdentifierManager
-import java.io.IOException
-import java.util.*
-import kotlin.collections.ArrayList
 
 class ActionBuilderImpl(
     private val listener: AnnotationListener,
-    private val okHttpClient: OkHttpClient,
+    private val downloaderClient: DownloaderClient,
     private val viewIdentifierManager: ViewIdentifierManager
 ) : ActionBuilder() {
 
@@ -47,7 +46,10 @@ class ActionBuilderImpl(
         overlayObject.forEach {
             overlayEntityList.add(it.toOverlayEntity())
         }
+    }
 
+    override fun addOverlayEntities(overlayEntities: List<OverlayEntity>) {
+        overlayEntityList.addAll(overlayEntities)
     }
 
     override fun addSetVariableEntities(setVariables: List<SetVariableEntity>) {
@@ -76,7 +78,7 @@ class ActionBuilderImpl(
                     // do nothing
                 }
                 INTRO -> {
-                    downloadSVGThenCallListener(overlayEntity) { listener.addOverlay(it) }
+                    downloaderClient.download(overlayEntity) { listener.addOverlay(it) }
                 }
                 OUTRO -> {
                     listener.removeOverlay(overlayEntity)
@@ -99,7 +101,7 @@ class ActionBuilderImpl(
             when (overlayEntity.forceUpdate(currentTime)) {
                 LINGERING_INTRO -> {
 
-                    downloadSVGThenCallListener(overlayEntity) {
+                    downloaderClient.download(overlayEntity) {
                         listener.addOrUpdateLingeringIntroOverlay(
                             it,
                             currentTime - it.introTransitionSpec.offset,
@@ -110,7 +112,7 @@ class ActionBuilderImpl(
                 }
                 LINGERING_MIDWAY -> {
 
-                    downloadSVGThenCallListener(overlayEntity) {
+                    downloaderClient.download(overlayEntity) {
                         listener.addOrUpdateLingeringMidwayOverlay(
                             it
                         )
@@ -119,7 +121,7 @@ class ActionBuilderImpl(
                 }
                 LINGERING_OUTRO -> {
 
-                    downloadSVGThenCallListener(overlayEntity) {
+                    downloaderClient.download(overlayEntity) {
                         listener.addOrUpdateLingeringOutroOverlay(
                             it,
                             currentTime - (overlayEntity.introTransitionSpec.offset + overlayEntity.outroTransitionSpec.animationDuration),
@@ -218,47 +220,5 @@ class ActionBuilderImpl(
             return false
         }
     }
-
-    /**region msc*/
-    private fun downloadSVGThenCallListener(
-        overlayEntity: OverlayEntity,
-        callback: (OverlayEntity) -> Unit
-    ) {
-        overlayEntity.isDownloading = true
-
-        val svgUrl = overlayEntity.svgData!!.svgUrl!!
-        val request: Request = Request.Builder().url(svgUrl).build()
-        okHttpClient.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                overlayEntity.isDownloading = false
-
-                Log.e("downloadSVGThenCallLis", "downloadSVGThenCallListener() - onFailure()")
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-
-                if (response.isSuccessful && response.body() != null) {
-
-                    val stringBuilder = StringBuilder()
-
-                    val scanner = Scanner(response.body()!!.byteStream())
-                    while (scanner.hasNext()) {
-                        stringBuilder.append(scanner.nextLine())
-                    }
-                    val svgString = stringBuilder.toString()
-
-                    overlayEntity.isDownloading = false
-                    overlayEntity.isOnScreen = true
-
-                    callback(
-                        overlayEntity.copy(
-                            svgData = SvgData(svgUrl, null, svgString)
-                        )
-                    )
-                }
-            }
-        })
-    }
-    /**endregion */
 
 }

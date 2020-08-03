@@ -209,16 +209,15 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
 
     fun hideOverlay(viewId: String) {
-        viewIdentifierManager.getViewId(viewId)?.let {
-            findViewById<ViewGroup>(it)?.visibility = View.INVISIBLE
-
-        }
+//        viewIdentifierManager.getViewId(viewId)?.let {
+//            findViewById<ViewGroup>(it)?.visibility = View.INVISIBLE
+//        }
     }
 
     fun removeOverlay(viewId: String) {
-        viewIdentifierManager.getViewId(viewId)?.let {
-            findViewById<ViewGroup>(it)?.let { overlayView -> overlayHost.removeView(overlayView) }
-        }
+//        viewIdentifierManager.getViewId(viewId)?.let {
+//            findViewById<ViewGroup>(it)?.let { overlayView -> overlayHost.removeView(overlayView) }
+//        }
     }
 
 

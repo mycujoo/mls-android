@@ -13,6 +13,7 @@ import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.mls.core.ActionBuilder
 import tv.mycujoo.mls.core.ActionBuilderImpl
 import tv.mycujoo.mls.core.AnnotationListener
+import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 import java.util.concurrent.Executors
@@ -125,7 +126,7 @@ class Coordinator(
 
         actionBuilder = ActionBuilderImpl(
             annotationListener,
-            okHttpClient,
+            DownloaderClient(okHttpClient),
             identifierManager
         )
 
