@@ -29,7 +29,6 @@ import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.extensions.getDisplaySize
-import tv.mycujoo.mls.helper.OverlayEntityViewHelper
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.TimelineMarkerManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
@@ -513,7 +512,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
     }
 
     fun updateLingeringMidwayOverlay(overlayEntity: OverlayEntity) {
-        OverlayEntityViewHelper.updateLingeringMidwayOverlay(
+        overlayViewHelper.updateLingeringMidwayOverlay(
             overlayHost,
             overlayEntity,
             viewIdentifierManager

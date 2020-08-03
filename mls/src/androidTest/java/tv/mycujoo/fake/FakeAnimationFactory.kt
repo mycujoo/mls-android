@@ -4,12 +4,12 @@ import android.animation.ObjectAnimator
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.TransitionSpec
-import tv.mycujoo.mls.helper.AnimationHelper
+import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ScaffoldView
 
-class FakeAnimationHelper : AnimationHelper() {
+class FakeAnimationFactory : AnimationFactory() {
 
     var animationRecipe: AnimationRecipe? = null
 

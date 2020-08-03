@@ -21,7 +21,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import tv.mycujoo.domain.entity.*
-import tv.mycujoo.fake.FakeAnimationHelper
+import tv.mycujoo.fake.FakeAnimationFactory
 import tv.mycujoo.matchers.TypeMatcher
 import tv.mycujoo.mls.BlankActivity
 import tv.mycujoo.mls.R
@@ -33,12 +33,12 @@ import tv.mycujoo.sampleSvgString
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
-class OverlayEntityViewHelperTest {
+class OverlayViewHelperTest {
 
     private lateinit var playerViewWrapper: PlayerViewWrapper
     private var viewIdentifierManager = ViewIdentifierManager(GlobalScope)
 
-    private var animationHelper = FakeAnimationHelper()
+    private var animationHelper = FakeAnimationFactory()
 
 
     @Before

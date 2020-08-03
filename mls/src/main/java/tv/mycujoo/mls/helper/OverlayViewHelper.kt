@@ -17,7 +17,7 @@ import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ProportionalImageView
 import tv.mycujoo.mls.widgets.ScaffoldView
 
-class OverlayViewHelper(private val animationHelper: AnimationHelper) {
+class OverlayViewHelper(private val animationFactory: AnimationFactory) {
 
     /**region Add view with animation*/
     fun addViewWithAnimation(
@@ -99,7 +99,7 @@ class OverlayViewHelper(private val animationHelper: AnimationHelper) {
 
         scaffoldView.doOnLayout {
 
-            val anim = animationHelper.createAddViewDynamicAnimation(
+            val anim = animationFactory.createAddViewDynamicAnimation(
                 overlayHost,
                 scaffoldView,
                 introTransitionSpec,
@@ -141,7 +141,7 @@ class OverlayViewHelper(private val animationHelper: AnimationHelper) {
         overlayHost.addView(scaffoldView)
         viewIdentifierManager.attachOverlayView(scaffoldView)
 
-        val animation = animationHelper.createStaticAnimation(
+        val animation = animationFactory.createStaticAnimation(
             scaffoldView,
             introTransitionSpec.animationType,
             introTransitionSpec.animationDuration
@@ -266,7 +266,7 @@ class OverlayViewHelper(private val animationHelper: AnimationHelper) {
             overlayHost.children.filter { it.tag == overlayEntity.id }.forEach { view ->
                 view as ScaffoldView
 
-                val animation = animationHelper.createRemoveViewStaticAnimation(
+                val animation = animationFactory.createRemoveViewStaticAnimation(
                     overlayHost,
                     overlayEntity,
                     view,
@@ -291,7 +291,7 @@ class OverlayViewHelper(private val animationHelper: AnimationHelper) {
                 view as ScaffoldView
 
 
-                val animation = animationHelper.createRemoveViewDynamicAnimation(
+                val animation = animationFactory.createRemoveViewDynamicAnimation(
                     overlayHost,
                     overlayEntity,
                     view,
@@ -338,7 +338,7 @@ class OverlayViewHelper(private val animationHelper: AnimationHelper) {
 
             scaffoldView.doOnLayout {
 
-                val animation = animationHelper.createLingeringIntroViewAnimation(
+                val animation = animationFactory.createLingeringIntroViewAnimation(
                     overlayHost,
                     scaffoldView,
                     overlayEntity,
@@ -451,7 +451,7 @@ class OverlayViewHelper(private val animationHelper: AnimationHelper) {
 
             scaffoldView.doOnLayout {
 
-                animationHelper.createLingeringOutroAnimation(
+                animationFactory.createLingeringOutroAnimation(
                     overlayHost,
                     scaffoldView,
                     overlayEntity,
@@ -514,6 +514,35 @@ class OverlayViewHelper(private val animationHelper: AnimationHelper) {
                 isPlaying,
                 viewIdentifierManager
             )
+        }
+
+    }
+
+    fun updateLingeringMidwayOverlay(
+        overlayHost: OverlayHost,
+        overlayEntity: OverlayEntity,
+        viewIdentifierManager: ViewIdentifierManager
+    ) {
+        val scaffoldView = viewIdentifierManager.getOverlayView(overlayEntity.id) ?: return
+
+        overlayHost.post {
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(overlayHost)
+            val layoutParams = ConstraintLayout.LayoutParams(
+                ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                ConstraintLayout.LayoutParams.WRAP_CONTENT
+            )
+
+            val positionGuide = overlayEntity.viewSpec.positionGuide!!
+
+            applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
+
+
+            scaffoldView.layoutParams = layoutParams
+
+
+            scaffoldView.visibility = View.VISIBLE
+            constraintSet.applyTo(overlayHost)
         }
 
     }
