@@ -8,6 +8,7 @@ import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.assertion.ViewAssertions
+import androidx.test.espresso.idling.CountingIdlingResource
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.internal.runner.junit4.statement.UiThreadStatement
@@ -36,7 +37,10 @@ import tv.mycujoo.sampleSvgString
 class OverlayViewHelperTest {
 
     private lateinit var playerViewWrapper: PlayerViewWrapper
-    private var viewIdentifierManager = ViewIdentifierManager(GlobalScope)
+    private var viewIdentifierManager = ViewIdentifierManager(
+        GlobalScope,
+        CountingIdlingResource("ViewIdentifierManager")
+    )
 
     private var animationHelper = FakeAnimationFactory()
 

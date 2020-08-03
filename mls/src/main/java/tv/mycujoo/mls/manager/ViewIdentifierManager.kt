@@ -2,13 +2,16 @@ package tv.mycujoo.mls.manager
 
 import android.animation.ObjectAnimator
 import android.util.Log
-import android.view.View
-import androidx.annotation.Nullable
 import androidx.test.espresso.idling.CountingIdlingResource
 import kotlinx.coroutines.CoroutineScope
 import tv.mycujoo.mls.widgets.ScaffoldView
 
-class ViewIdentifierManager(dispatcher: CoroutineScope) {
+class ViewIdentifierManager(
+    dispatcher: CoroutineScope,
+    val idlingResource: CountingIdlingResource
+) {
+
+    /**region Fields*/
     private var viewIdToIdMap = mutableMapOf<String, Int>()
     private var animations = ArrayList<Pair<String, ObjectAnimator>>()
 
@@ -17,19 +20,9 @@ class ViewIdentifierManager(dispatcher: CoroutineScope) {
     val variableTranslator = VariableTranslator(dispatcher)
     val timeKeeper = TimeKeeper(dispatcher)
 
-    @Nullable
-    val idlingResource = CountingIdlingResource("ViewIdentifierManager")
+    /**endregion */
 
-
-    fun storeViewId(view: View, customId: String) {
-        viewIdToIdMap[customId] = view.id
-    }
-
-    fun getViewId(customId: String): Int? {
-        return viewIdToIdMap[customId]
-    }
-
-
+    /**region Animation*/
     fun addAnimation(
         id: String,
         objectAnimator: ObjectAnimator
@@ -46,11 +39,12 @@ class ViewIdentifierManager(dispatcher: CoroutineScope) {
         return animations.map { it.second }
     }
 
-    fun hasNoActiveAnimation(id: String): Boolean {
-        return animations.any { it.first == id }
+    fun getAnimationWithTag(id: String): ObjectAnimator? {
+        return animations.firstOrNull { it.first == id }?.second
     }
+    /**endregion */
 
-    /**region Attached Overlay objects & ids*/
+    /**region Overlay views*/
     fun attachOverlayView(view: ScaffoldView) {
         if (view.tag == null || (view.tag is String).not()) {
             Log.w("ViewIdentifierManager", "overlay tag should not be null")
@@ -66,7 +60,7 @@ class ViewIdentifierManager(dispatcher: CoroutineScope) {
     }
 
     fun detachOverlayView(view: ScaffoldView?) {
-        if (view == null){
+        if (view == null) {
             return
         }
 
@@ -83,9 +77,9 @@ class ViewIdentifierManager(dispatcher: CoroutineScope) {
     }
 
     /**endregion */
-    fun getAnimationWithTag(id: String): ObjectAnimator? {
-        return animations.firstOrNull { it.first == id }?.second
-    }
+
+    /**region Overlay objects*/
+
 
     fun overlayObjectIsNotAttached(id: String): Boolean {
         return attachedViewList.none { it.tag == id }
@@ -95,11 +89,17 @@ class ViewIdentifierManager(dispatcher: CoroutineScope) {
         return attachedViewList.any { it.tag == id }
     }
 
+    /**endregion */
+
+    /**region msc*/
+
     fun clearAll() {
         attachedViewList.clear()
         animations.clear()
         viewIdToIdMap.clear()
     }
+
+    /**endregion */
 
 
 }

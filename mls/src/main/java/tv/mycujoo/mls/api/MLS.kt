@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
+import androidx.test.espresso.idling.CountingIdlingResource
 import com.caverock.androidsvg.SVG
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.SeekParameters
@@ -122,7 +123,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
             DaggerMlsComponent.builder().networkModule(NetworkModule(context)).build()
         dependencyGraph.inject(this)
 
-        viewIdentifierManager = ViewIdentifierManager(dispatcher)
+        viewIdentifierManager = ViewIdentifierManager(dispatcher, CountingIdlingResource("ViewIdentifierManager"))
 
         persistPublicKey(this.builder.publicKey)
 
