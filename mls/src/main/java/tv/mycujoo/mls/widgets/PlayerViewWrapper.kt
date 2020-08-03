@@ -494,7 +494,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         animationPosition: Long,
         isPlaying: Boolean
     ) {
-        OverlayEntityViewHelper.updateLingeringOutroOverlay(
+        overlayViewHelper.updateLingeringOutroOverlay(
             overlayHost,
             overlayEntity,
             animationPosition,

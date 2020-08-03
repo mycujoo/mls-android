@@ -487,6 +487,37 @@ class OverlayViewHelper(private val animationHelper: AnimationHelper) {
 
     }
 
+    fun updateLingeringOutroOverlay(
+        overlayHost: OverlayHost,
+        overlayEntity: OverlayEntity,
+        animationPosition: Long,
+        isPlaying: Boolean,
+        viewIdentifierManager: ViewIdentifierManager
+    ) {
+        val scaffoldView = viewIdentifierManager.getOverlayView(overlayEntity.id) ?: return
+
+        overlayHost.post {
+            viewIdentifierManager.getAnimationWithTag(overlayEntity.id)?.let {
+                it.cancel()
+            }
+            viewIdentifierManager.removeAnimation(overlayEntity.id)
+
+            overlayHost.removeView(scaffoldView)
+            viewIdentifierManager.detachOverlayView(
+                scaffoldView
+            )
+
+            addLingeringOutroViewWithAnimation(
+                overlayHost,
+                overlayEntity,
+                animationPosition,
+                isPlaying,
+                viewIdentifierManager
+            )
+        }
+
+    }
+
 
     /**endregion */
 

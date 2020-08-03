@@ -323,6 +323,34 @@ class OverlayEntityViewHelperTest {
         assertEquals(100L, animationRecipe?.animationPosition)
         assertEquals(true, animationRecipe?.isPlaying)
     }
+
+    @Test
+    fun updateLingeringOutroOverlayWithAnimation_shouldMakeLingeringIntroAnimation_staticAnimation() {
+        viewIdentifierManager.idlingResource.dumpStateToLogs()
+        playerViewWrapper.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
+
+
+        val overlayEntity = getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.SLIDE_TO_LEFT)
+        UiThreadStatement.runOnUiThread {
+            playerViewWrapper.updateLingeringOutroOverlay(overlayEntity, 100L, true)
+        }
+
+
+        Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
+            .check(
+                ViewAssertions.matches(
+                    ViewMatchers.withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)
+                )
+            )
+
+        val animationRecipe = animationHelper.animationRecipe
+        assertEquals(overlayEntity.outroTransitionSpec.animationType, animationRecipe?.animationType)
+        assertEquals(overlayEntity.outroTransitionSpec.animationDuration, animationRecipe?.animationDuration)
+        assertEquals(100L, animationRecipe?.animationPosition)
+        assertEquals(true, animationRecipe?.isPlaying)
+    }
+
+
     /**endregion */
 
 
