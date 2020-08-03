@@ -1,5 +1,8 @@
 package tv.mycujoo.domain.entity
 
+import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasIntroAnimation
+import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasOutroAnimation
+
 data class OverlayEntity(
     var id: String,
     var svgData: SvgData?,
@@ -86,7 +89,7 @@ data class OverlayEntity(
 
             // there is no outro specified at all
             if (outroTransitionSpec.animationType == AnimationType.UNSPECIFIED || outroTransitionSpec.animationDuration == -1L) {
-                return if (hasEnteringAnimation(introTransitionSpec.animationType)) {
+                return if (hasIntroAnimation(introTransitionSpec.animationType)) {
                     currentTime > introTransitionSpec.offset + introTransitionSpec.animationDuration
                 } else {
                     currentTime > introTransitionSpec.offset
@@ -107,7 +110,7 @@ data class OverlayEntity(
             var leftBound = introTransitionSpec.offset
             var rightBound = 0L
 
-            if (hasEnteringAnimation(introTransitionSpec.animationType)) {
+            if (hasIntroAnimation(introTransitionSpec.animationType)) {
                 leftBound =
                     introTransitionSpec.offset + introTransitionSpec.animationDuration
             }
@@ -143,25 +146,4 @@ data class OverlayEntity(
         return (leftBound <= currentTime) && (currentTime < rightBound)
     }
 
-    private fun hasEnteringAnimation(animationType: AnimationType): Boolean {
-        return when (animationType) {
-            AnimationType.FADE_IN,
-            AnimationType.SLIDE_FROM_LEFT,
-            AnimationType.SLIDE_FROM_RIGHT -> {
-                true
-            }
-            else -> false
-        }
-    }
-
-    private fun hasOutroAnimation(animationType: AnimationType): Boolean {
-        return when (animationType) {
-            AnimationType.FADE_OUT,
-            AnimationType.SLIDE_TO_LEFT,
-            AnimationType.SLIDE_TO_RIGHT -> {
-                true
-            }
-            else -> false
-        }
-    }
 }

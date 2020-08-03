@@ -4,9 +4,9 @@ import android.util.Log
 import okhttp3.*
 import tv.mycujoo.data.entity.ActionCollections
 import tv.mycujoo.domain.entity.*
-import tv.mycujoo.domain.entity.AnimationType.*
 import tv.mycujoo.domain.entity.OverlayAct.*
 import tv.mycujoo.mls.helper.ActionVariableHelper
+import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasOutroAnimation
 import tv.mycujoo.mls.manager.TimerProcessor
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import java.io.IOException
@@ -218,23 +218,6 @@ class ActionBuilderImpl(
             return false
         }
     }
-
-
-    /**
-     * return true if the action offset is now or in 1 second
-     */
-
-    private fun hasOutroAnimation(animationType: AnimationType): Boolean {
-        return when (animationType) {
-            FADE_OUT,
-            SLIDE_TO_LEFT,
-            SLIDE_TO_RIGHT -> {
-                true
-            }
-            else -> false
-        }
-    }
-    /**endregion */
 
     /**region msc*/
     private fun downloadSVGThenCallListener(

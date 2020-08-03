@@ -59,6 +59,16 @@ open class AnimationFactory {
                 )
 
             }
+            AnimationType.SLIDE_FROM_TOP -> {
+                scaffoldView.y =
+                    -scaffoldView.height.toFloat()
+                animation = ObjectAnimator.ofFloat(
+                    scaffoldView,
+                    View.Y,
+                    scaffoldView.y,
+                    y
+                )
+            }
             AnimationType.SLIDE_FROM_RIGHT -> {
                 scaffoldView.x = overlayHost.width.toFloat()
                 animation = ObjectAnimator.ofFloat(
@@ -66,6 +76,16 @@ open class AnimationFactory {
                     View.X,
                     scaffoldView.x,
                     x
+                )
+            }
+            AnimationType.SLIDE_FROM_BOTTOM -> {
+                scaffoldView.y =
+                    overlayHost.height.toFloat()
+                animation = ObjectAnimator.ofFloat(
+                    scaffoldView,
+                    View.Y,
+                    scaffoldView.y,
+                    y
                 )
             }
             else -> {
@@ -142,21 +162,42 @@ open class AnimationFactory {
     ): ObjectAnimator? {
         var animation: ObjectAnimator? = null
 
-        if (overlayEntity.outroTransitionSpec.animationType == AnimationType.SLIDE_TO_LEFT) {
-            animation = ObjectAnimator.ofFloat(
-                view,
-                View.X,
-                view.x,
-                -view.width.toFloat()
-            )
-        } else if (overlayEntity.outroTransitionSpec.animationType == AnimationType.SLIDE_TO_RIGHT) {
-            animation = ObjectAnimator.ofFloat(
-                view,
-                View.X,
-                view.x,
-                overlayHost.width.toFloat()
-            )
-
+        when (overlayEntity.outroTransitionSpec.animationType) {
+            AnimationType.SLIDE_TO_LEFT -> {
+                animation = ObjectAnimator.ofFloat(
+                    view,
+                    View.X,
+                    view.x,
+                    -view.width.toFloat()
+                )
+            }
+            AnimationType.SLIDE_TO_TOP -> {
+                animation = ObjectAnimator.ofFloat(
+                    view,
+                    View.Y,
+                    view.y,
+                    -view.height.toFloat()
+                )
+            }
+            AnimationType.SLIDE_TO_RIGHT -> {
+                animation = ObjectAnimator.ofFloat(
+                    view,
+                    View.X,
+                    view.x,
+                    overlayHost.width.toFloat()
+                )
+            }
+            AnimationType.SLIDE_TO_BOTTOM -> {
+                animation = ObjectAnimator.ofFloat(
+                    view,
+                    View.Y,
+                    view.y,
+                    overlayHost.height.toFloat()
+                )
+            }
+            else -> {
+                // should not happen
+            }
         }
 
         if (animation != null) {
@@ -222,6 +263,16 @@ open class AnimationFactory {
                     x
                 )
             }
+            AnimationType.SLIDE_FROM_TOP -> {
+                scaffoldView.y =
+                    -scaffoldView.height.toFloat()
+                animation = ObjectAnimator.ofFloat(
+                    scaffoldView,
+                    View.Y,
+                    scaffoldView.y,
+                    y
+                )
+            }
             AnimationType.SLIDE_FROM_RIGHT -> {
                 scaffoldView.x = overlayHost.width.toFloat()
                 animation = ObjectAnimator.ofFloat(
@@ -230,7 +281,16 @@ open class AnimationFactory {
                     scaffoldView.x,
                     x
                 )
-
+            }
+            AnimationType.SLIDE_FROM_BOTTOM -> {
+                scaffoldView.y =
+                    overlayHost.height.toFloat()
+                animation = ObjectAnimator.ofFloat(
+                    scaffoldView,
+                    View.Y,
+                    scaffoldView.y,
+                    y
+                )
             }
             else -> {
                 // should not happen
@@ -313,6 +373,14 @@ open class AnimationFactory {
                     overlayHost.width.toFloat()
                 )
 
+            }
+            AnimationType.SLIDE_TO_BOTTOM -> {
+                animation = ObjectAnimator.ofFloat(
+                    scaffoldView,
+                    View.Y,
+                    scaffoldView.y,
+                    overlayHost.height.toFloat()
+                )
             }
             else -> {
                 // should not happen

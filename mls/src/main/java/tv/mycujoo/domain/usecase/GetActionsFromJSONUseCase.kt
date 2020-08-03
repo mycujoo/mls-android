@@ -116,7 +116,7 @@ class GetActionsFromJSONUseCase {
                 {
                     "data": {
                         "animatein_duration": 1000, 
-                        "animatein_type": "fade_in",
+                        "animatein_type": "slide_from_top",
                         "custom_id": "scoreboard1",
                         "position": {
                             "left": 5.0, 
@@ -156,7 +156,7 @@ class GetActionsFromJSONUseCase {
                          "animatein_duration": 3000, 
                          "animatein_type": "slide_from_right",
                          "animateout_duration": 5000, 
-                        "animateout_type": "fade_out",
+                        "animateout_type": "slide_to_top",
                          "custom_id": "scoreboard3",
                           "duration": 10000,
                          "position": {
@@ -177,9 +177,9 @@ class GetActionsFromJSONUseCase {
                  {
                      "data": {
                          "animatein_duration": 5000, 
-                         "animatein_type": "slide_from_right",
+                         "animatein_type": "slide_from_bottom",
                          "animateout_duration": 5000, 
-                        "animateout_type": "slide_to_right", 
+                        "animateout_type": "slide_to_top", 
                          "custom_id": "scoreboard4",
                           "duration": 12000, 
                          "position": {

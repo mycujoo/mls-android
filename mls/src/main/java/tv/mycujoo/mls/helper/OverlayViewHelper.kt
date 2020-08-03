@@ -48,7 +48,9 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
                     )
                 }
                 AnimationType.SLIDE_FROM_LEFT,
-                AnimationType.SLIDE_FROM_RIGHT -> {
+                AnimationType.SLIDE_FROM_TOP,
+                AnimationType.SLIDE_FROM_RIGHT,
+                AnimationType.SLIDE_FROM_BOTTOM -> {
 
                     doAddViewWithDynamicAnimation(
                         overlayHost,
@@ -238,7 +240,9 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
                 )
             }
             AnimationType.SLIDE_TO_LEFT,
-            AnimationType.SLIDE_TO_RIGHT -> {
+            AnimationType.SLIDE_TO_TOP,
+            AnimationType.SLIDE_TO_RIGHT,
+            AnimationType.SLIDE_TO_BOTTOM -> {
                 removeViewWithDynamicAnimation(
                     overlayHost,
                     overlayEntity,

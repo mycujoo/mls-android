@@ -14,9 +14,41 @@ class AnimationClassifierHelper {
             return overlayEntity.introAnimationType == AnimationType.NONE
         }
 
+        fun hasIntroAnimation(animationType: AnimationType): Boolean {
+            return when (animationType) {
+                AnimationType.FADE_IN,
+                AnimationType.SLIDE_FROM_LEFT,
+                AnimationType.SLIDE_FROM_TOP,
+                AnimationType.SLIDE_FROM_RIGHT,
+                AnimationType.SLIDE_FROM_BOTTOM -> {
+                    true
+                }
+                else -> false
+            }
+        }
+
+
+        fun hasOutroAnimation(animationType: AnimationType): Boolean {
+            return when (animationType) {
+                AnimationType.FADE_OUT,
+                AnimationType.SLIDE_TO_LEFT,
+                AnimationType.SLIDE_TO_TOP,
+                AnimationType.SLIDE_TO_RIGHT,
+                AnimationType.SLIDE_TO_BOTTOM -> {
+                    true
+                }
+
+                else -> {
+                    false
+                }
+            }
+        }
+
         private fun hasDynamicIntroAnimation(animationType: AnimationType): Boolean {
             return when (animationType) {
                 AnimationType.SLIDE_FROM_LEFT,
+                AnimationType.SLIDE_FROM_TOP,
+                AnimationType.SLIDE_FROM_BOTTOM,
                 AnimationType.SLIDE_FROM_RIGHT -> {
                     true
                 }
@@ -41,7 +73,9 @@ class AnimationClassifierHelper {
         private fun hasDynamicOutroAnimation(animationType: AnimationType): Boolean {
             return when (animationType) {
                 AnimationType.SLIDE_TO_LEFT,
-                AnimationType.SLIDE_TO_RIGHT -> {
+                AnimationType.SLIDE_TO_TOP,
+                AnimationType.SLIDE_TO_RIGHT,
+                AnimationType.SLIDE_TO_BOTTOM -> {
                     true
                 }
 
