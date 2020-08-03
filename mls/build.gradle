@@ -42,6 +42,10 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        debug {
+            testCoverageEnabled true
+        }
+
     }
 
     testOptions {
@@ -75,7 +79,7 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:1.1.0"
 
     implementation 'com.github.bumptech.glide:glide:4.11.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
+    kapt 'com.github.bumptech.glide:compiler:4.11.0'
 
     implementation 'com.google.android.exoplayer:exoplayer:2.11.2'
 
