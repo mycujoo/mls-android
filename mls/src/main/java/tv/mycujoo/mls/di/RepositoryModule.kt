@@ -7,11 +7,11 @@ import tv.mycujoo.mls.network.MlsApi
 import javax.inject.Singleton
 
 @Module
-class RepositoryModule {
+open class RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideEventsRepository(api: MlsApi): EventsRepository {
+    open fun provideEventsRepository(api: MlsApi): EventsRepository {
         return tv.mycujoo.data.repository.EventsRepository(api)
     }
 }

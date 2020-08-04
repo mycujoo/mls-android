@@ -2,10 +2,10 @@ package tv.mycujoo.mls.api
 
 import android.app.Activity
 import android.content.Context
+import android.content.res.AssetManager
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
-import androidx.test.espresso.idling.CountingIdlingResource
 import com.caverock.androidsvg.SVG
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.SeekParameters
@@ -21,17 +21,15 @@ import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
+import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.domain.usecase.GetEventsUseCase
 import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.cordinator.Coordinator
-import tv.mycujoo.mls.core.PlayerEventsListener
-import tv.mycujoo.mls.core.UIEventListener
+import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.core.VideoPlayerCoordinator
 import tv.mycujoo.mls.data.DataHolder
-import tv.mycujoo.mls.di.DaggerMlsComponent
-import tv.mycujoo.mls.di.NetworkModule
 import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.SVGAssetResolver
@@ -44,10 +42,9 @@ import tv.mycujoo.mls.network.RemoteApi
 import tv.mycujoo.mls.widgets.OnTimeLineChangeListener
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 import tv.mycujoo.mls.widgets.TimeLineSeekBar
-import javax.inject.Inject
 
 
-class MLS private constructor(builder: Builder) : MLSAbstract() {
+class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
 
     /**region Exo-player fields*/
@@ -61,30 +58,15 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     private var playbackPosition: Long = -1L
     /**endregion */
 
-    /**region Initializing fields*/
-    private var builder: Builder
-
-    /**endregion */
-
-    /**region DI fields*/
-    @Inject
-    lateinit var eventsRepository: tv.mycujoo.domain.repository.EventsRepository
-
-    @Inject
-    lateinit var dispatcher: CoroutineScope
-
-    @Inject
-    lateinit var okHttpClient: OkHttpClient
-
-    @Inject
-    lateinit var dataProvider: DataProviderImpl
-
-    @Inject
-    lateinit var prefManager: IPrefManager
-
-    /**endregion */
-
     /**region MLS fields*/
+    private lateinit var eventsRepository: EventsRepository
+
+    private lateinit var dispatcher: CoroutineScope
+    private lateinit var okHttpClient: OkHttpClient
+
+    private lateinit var dataProvider: DataProviderImpl
+
+    private lateinit var prefManager: IPrefManager
     private var context: Context
 
     private var api: Api
@@ -103,7 +85,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
     private lateinit var handler: Handler
 
     private val dataHolder = DataHolder()
-    private var viewIdentifierManager: ViewIdentifierManager
+    private lateinit var viewIdentifierManager: ViewIdentifierManager
 
     /**endregion */
 
@@ -117,25 +99,26 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         checkNotNull(builder.activity)
         this.dataHolder
         this.context = builder.activity!!
-        this.builder = builder
-
-        val dependencyGraph =
-            DaggerMlsComponent.builder().networkModule(NetworkModule(context)).build()
-        dependencyGraph.inject(this)
-
-        viewIdentifierManager = ViewIdentifierManager(dispatcher, CountingIdlingResource("ViewIdentifierManager"))
-
-        persistPublicKey(this.builder.publicKey)
 
         api = RemoteApi()
 
-        initSvgRenderingLibrary()
-
     }
 
-    private fun initSvgRenderingLibrary() {
+    fun initialize(internalBuilder: InternalBuilder) {
+        this.eventsRepository = internalBuilder.eventsRepository
+        this.dispatcher = internalBuilder.dispatcher
+        this.okHttpClient = internalBuilder.okHttpClient
+        this.dataProvider = internalBuilder.dataProvider
+        this.prefManager = internalBuilder.prefManager
+        this.viewIdentifierManager = internalBuilder.viewIdentifierManager
+
+        persistPublicKey(this.builder.publicKey)
+        initSvgRenderingLibrary(internalBuilder.getAssetManager())
+    }
+
+    private fun initSvgRenderingLibrary(assetManager: AssetManager) {
         SVG.registerExternalFileResolver(
-            SVGAssetResolver(this.context.assets)
+            SVGAssetResolver(assetManager)
         )
     }
 
@@ -382,6 +365,8 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
 
             it.release()
             exoPlayer = null
+
+            coordinator.release()
         }
     }
 
@@ -459,63 +444,4 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         playerViewWrapper.hideEventInfoDialog()
     }
     /**endregion */
-
-    /**region Inner-classes*/
-    class Builder {
-        internal var publicKey: String = ""
-            private set
-        internal var activity: Activity? = null
-            private set
-        internal var hasDefaultController: Boolean = true
-            private set
-        internal var highlightListParams: HighlightListParams? = null
-            private set
-        internal var playerEventsListener: PlayerEventsListener? = null
-            private set
-        internal var uiEventListener: UIEventListener? = null
-            private set
-        internal var mlsConfiguration: MLSConfiguration = MLSConfiguration()
-            private set
-
-        internal var hasAnnotation: Boolean = true
-            private set
-        internal var hasAnalytic: Boolean = true
-            private set
-
-        fun publicKey(publicKey: String) = apply { this.publicKey = publicKey }
-
-        fun withActivity(activity: Activity) = apply { this.activity = activity }
-
-        fun defaultPlayerController(defaultController: Boolean) =
-            apply { this.hasDefaultController = defaultController }
-
-        fun highlightList(highlightListParams: HighlightListParams) =
-            apply { this.highlightListParams = highlightListParams }
-
-        fun setPlayerEventsListener(playerEventsListener: tv.mycujoo.mls.api.PlayerEventsListener) =
-            apply { this.playerEventsListener = PlayerEventsListener(playerEventsListener) }
-
-        fun setUIEventListener(uiEventListener: UIEventListener) =
-            apply { this.uiEventListener = uiEventListener }
-
-
-        fun hasAnnotation(hasAnnotation: Boolean) =
-            apply { this.hasAnnotation = hasAnnotation }
-
-        fun hasAnalyticPlugin(hasAnalytic: Boolean) =
-            apply { this.hasAnalytic = hasAnalytic }
-
-        fun build() = MLS(this)
-        fun setConfiguration(mlsConfiguration: MLSConfiguration) = apply {
-            this.mlsConfiguration = mlsConfiguration
-        }
-
-    }
-
-    companion object {
-
-        const val PUBLIC_KEY = "pk_test_123"
-    }
-    /**endregion */
-
 }

@@ -29,6 +29,8 @@ class Coordinator(
     private val okHttpClient: OkHttpClient
 ) : CoordinatorInterface {
 
+    private var scheduler: ScheduledExecutorService
+
     /**region Fields*/
     internal lateinit var playerViewWrapper: PlayerViewWrapper
     internal var actionBuilder: ActionBuilder
@@ -158,7 +160,7 @@ class Coordinator(
 
 
         val handler = Handler(Looper.getMainLooper())
-        val scheduler: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
+        scheduler = Executors.newScheduledThreadPool(1)
 
         val exoRunnable = Runnable {
             if (exoPlayer.isPlaying) {
@@ -184,6 +186,10 @@ class Coordinator(
 
     override fun initPlayerView(playerViewWrapper: PlayerViewWrapper) {
         this.playerViewWrapper = playerViewWrapper
+    }
+
+    override fun release() {
+        scheduler.shutdown()
     }
 
     private fun createOverlayObject(actionEntity: ActionEntity): OverlayObject {

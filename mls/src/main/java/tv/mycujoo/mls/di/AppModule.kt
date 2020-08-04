@@ -13,19 +13,19 @@ import tv.mycujoo.mls.manager.PrefManager
 import javax.inject.Singleton
 
 @Module
-class AppModule() {
+open class AppModule() {
 
 
     @Provides
     @Singleton
-    fun providePrefManager(context: Context): IPrefManager {
+    open fun providePrefManager(context: Context): IPrefManager {
         return PrefManager(context.getSharedPreferences("MLS", Context.MODE_PRIVATE))
     }
 
     @ObsoleteCoroutinesApi
     @Provides
     @Singleton
-    fun provideCoroutineScope(): CoroutineScope {
+    open fun provideCoroutineScope(): CoroutineScope {
 
         val job = SupervisorJob()
 
