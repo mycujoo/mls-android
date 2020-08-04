@@ -1,5 +1,7 @@
 package tv.mycujoo.mls.cordinator
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.DISCONTINUITY_REASON_SEEK
@@ -19,6 +21,7 @@ import tv.mycujoo.mls.widgets.PlayerViewWrapper
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
+
 
 class Coordinator(
     private val identifierManager: ViewIdentifierManager,
@@ -153,18 +156,26 @@ class Coordinator(
 
         actionBuilder.addActionCollections(GetActionsFromJSONUseCase.mappedActionCollections())
 
+
+        val handler = Handler(Looper.getMainLooper())
         val scheduler: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
-        val runnable = Runnable {
-            actionBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
+
+        val exoRunnable = Runnable {
             if (exoPlayer.isPlaying) {
+                actionBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
                 actionBuilder.buildCurrentTimeRange()
 
                 actionBuilder.processTimers()
 
                 actionBuilder.computeVariableNameValueTillNow()
+
             }
         }
-        scheduler.scheduleAtFixedRate(runnable, 1000L, 1000L, TimeUnit.MILLISECONDS)
+
+        val scheduledRunnable = Runnable {
+            handler.post(exoRunnable)
+        }
+        scheduler.scheduleAtFixedRate(scheduledRunnable, 1000L, 1000L, TimeUnit.MILLISECONDS)
 
     }
 
