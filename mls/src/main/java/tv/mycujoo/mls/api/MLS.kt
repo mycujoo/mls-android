@@ -236,7 +236,11 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
         }
 
         playerViewWrapper.idlingResource = viewIdentifierManager.idlingResource
-        playerViewWrapper.prepare(OverlayViewHelper(AnimationFactory()), viewIdentifierManager)
+        playerViewWrapper.prepare(
+            OverlayViewHelper(AnimationFactory()),
+            viewIdentifierManager,
+            GetActionsFromJSONUseCase.mappedActionCollections().timelineMarkerActionList
+        )
 
 //        dataProvider.fetchEvents()
     }

@@ -56,7 +56,11 @@ class OverlayViewHelperTest {
             frameLayout.addView(playerViewWrapper)
 
             playerViewWrapper.idlingResource = viewIdentifierManager.idlingResource
-            playerViewWrapper.prepare(OverlayViewHelper(animationHelper), viewIdentifierManager)
+            playerViewWrapper.prepare(
+                OverlayViewHelper(animationHelper),
+                viewIdentifierManager,
+                emptyList()
+            )
         }
     }
 

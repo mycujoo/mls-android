@@ -24,7 +24,7 @@ import com.google.android.exoplayer2.ui.PlayerView
 import kotlinx.android.synthetic.main.dialog_information_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
 import tv.mycujoo.domain.entity.OverlayEntity
-import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
+import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
@@ -113,16 +113,18 @@ class PlayerViewWrapper @JvmOverloads constructor(
             }
         }
 
-        initMlsTimeBar()
+
 
     }
 
     fun prepare(
         overlayViewHelper: OverlayViewHelper,
-        viewIdentifierManager: ViewIdentifierManager
+        viewIdentifierManager: ViewIdentifierManager,
+        timelineMarkers: List<TimelineMarkerEntity>
     ) {
         this.overlayViewHelper = overlayViewHelper
         this.viewIdentifierManager = viewIdentifierManager
+        initMlsTimeBar(timelineMarkers)
     }
 
     private fun initAttributes(attrs: AttributeSet?, context: Context) {
@@ -147,7 +149,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         findViewById<ImageButton>(R.id.controller_fullscreenImageButton).visibility = View.GONE
     }
 
-    private fun initMlsTimeBar() {
+    private fun initMlsTimeBar(list: List<TimelineMarkerEntity>) {
         val mlsTimeBar = findViewById<MLSTimeBar>(R.id.exo_progress)
         mlsTimeBar.setPlayedColor(Color.BLUE)
         val highlightMarkerTextView =
@@ -156,7 +158,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         val timelineMarkerManager = TimelineMarkerManager(mlsTimeBar, highlightMarkerTextView)
 
 
-        GetActionsFromJSONUseCase.mappedActionCollections().timelineMarkerActionList.forEach { showTimelineMarkerEntity ->
+        list.forEach { showTimelineMarkerEntity ->
             timelineMarkerManager.addTimeLineHighlight(
                 PointOfInterest(
                     showTimelineMarkerEntity.offset,
