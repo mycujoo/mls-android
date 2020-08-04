@@ -42,13 +42,17 @@ class VideoPlayerCoordinator(
         playerViewWrapper.getTimeBar().addListener(object : TimeBar.OnScrubListener {
             override fun onScrubMove(timeBar: TimeBar, position: Long) {
                 //do nothing
+                playerViewWrapper.scrubbedTo(position)
             }
 
             override fun onScrubStart(timeBar: TimeBar, position: Long) {
                 //do nothing
+                playerViewWrapper.scrubStartedAt(position)
+
             }
 
             override fun onScrubStop(timeBar: TimeBar, position: Long, canceled: Boolean) {
+                playerViewWrapper.scrubStopAt(position)
                 timelineMarkerActionEntities.firstOrNull { position in it.offset - 10000L..it.offset + 10000L }
                     ?.let {
                         exoPlayer.seekTo(it.offset)

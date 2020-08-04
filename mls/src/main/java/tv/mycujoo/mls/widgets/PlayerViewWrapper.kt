@@ -37,6 +37,7 @@ import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterest
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterestType
 import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarker
+import java.util.*
 
 
 class PlayerViewWrapper @JvmOverloads constructor(
@@ -65,6 +66,10 @@ class PlayerViewWrapper @JvmOverloads constructor(
     var onSizeChangedCallback = {}
 
     private lateinit var overlayViewHelper: OverlayViewHelper
+
+    private var timeFormatBuilder = StringBuilder()
+    private var timeFormatter = Formatter(timeFormatBuilder, Locale.getDefault())
+    private var isScrubbing = false
 
     @Nullable
     lateinit var idlingResource: CountingIdlingResource
@@ -112,7 +117,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
                 uiEventListener.onFullScreenButtonClicked(isFullScreen)
             }
         }
-
 
 
     }
@@ -307,9 +311,55 @@ class PlayerViewWrapper @JvmOverloads constructor(
         }
     }
 
-
     fun getTimeBar(): MLSTimeBar {
         return findViewById(R.id.exo_progress)
+    }
+
+    fun updateTime(time: Long, duration: Long) {
+        if (isScrubbing) {
+            return
+        }
+        positionTextView.text = getStringForTime(time)
+
+        durationTextView.text = getStringForTime(duration)
+    }
+
+    fun scrubStopAt(position: Long) {
+        isScrubbing = false
+        scrubbedTo(position)
+    }
+
+    fun scrubStartedAt(position: Long) {
+        isScrubbing = true
+        scrubbedTo(position)
+    }
+
+    fun scrubbedTo(position: Long) {
+        positionTextView.text = getStringForTime(position)
+    }
+    /**endregion */
+
+    /**region Private functions*/
+    /**
+     * Returns the specified millisecond time formatted as a string.
+     *
+     * @param timeMs The time to format as a string, in milliseconds.
+     * @return The time formatted as a string.
+     */
+    private fun getStringForTime(
+        timeMs: Long
+    ): String? {
+        var timeMs = timeMs
+        if (timeMs == C.TIME_UNSET) {
+            timeMs = 0
+        }
+        val totalSeconds = timeMs / 1000
+        val seconds = totalSeconds % 60
+        val minutes = totalSeconds / 60 % 60
+        val hours = totalSeconds / 3600
+        this.timeFormatBuilder.setLength(0)
+        return if (hours > 0) timeFormatter.format("%d:%02d:%02d", hours, minutes, seconds)
+            .toString() else timeFormatter.format("%02d:%02d", minutes, seconds).toString()
     }
     /**endregion */
 
@@ -554,6 +604,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             onSizeChangedCallback.invoke()
         }
     }
+
     /**endregion */
 
     /**region Classes*/

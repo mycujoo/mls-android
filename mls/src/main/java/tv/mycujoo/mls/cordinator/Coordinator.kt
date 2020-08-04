@@ -32,8 +32,8 @@ class Coordinator(
     /**region Fields*/
     internal lateinit var playerViewWrapper: PlayerViewWrapper
     internal var actionBuilder: ActionBuilder
-    private lateinit var seekInterruptionEventListener: Player.EventListener
 
+    private lateinit var seekInterruptionEventListener: Player.EventListener
     private var hasPendingSeek: Boolean = false
     /**endregion */
 
@@ -162,13 +162,16 @@ class Coordinator(
 
         val exoRunnable = Runnable {
             if (exoPlayer.isPlaying) {
-                actionBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
+                val currentPosition = exoPlayer.currentPosition
+
+                actionBuilder.setCurrentTime(currentPosition, exoPlayer.isPlaying)
                 actionBuilder.buildCurrentTimeRange()
 
                 actionBuilder.processTimers()
 
                 actionBuilder.computeVariableNameValueTillNow()
 
+                playerViewWrapper.updateTime(currentPosition, exoPlayer.duration)
             }
         }
 
@@ -177,6 +180,10 @@ class Coordinator(
         }
         scheduler.scheduleAtFixedRate(scheduledRunnable, 1000L, 1000L, TimeUnit.MILLISECONDS)
 
+    }
+
+    override fun initPlayerView(playerViewWrapper: PlayerViewWrapper) {
+        this.playerViewWrapper = playerViewWrapper
     }
 
     private fun createOverlayObject(actionEntity: ActionEntity): OverlayObject {
@@ -229,14 +236,24 @@ class Coordinator(
 
             override fun onPositionDiscontinuity(reason: Int) {
                 super.onPositionDiscontinuity(reason)
-                actionBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
+                val time = exoPlayer.currentPosition
+
+                actionBuilder.setCurrentTime(time, exoPlayer.isPlaying)
+
                 if (reason == DISCONTINUITY_REASON_SEEK) {
                     hasPendingSeek = true
                 }
+
+                playerViewWrapper.updateTime(time, exoPlayer.duration)
             }
 
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 super.onPlayerStateChanged(playWhenReady, playbackState)
+
+                if (playbackState == STATE_READY) {
+                    playerViewWrapper.updateTime(exoPlayer.currentPosition, exoPlayer.duration)
+                }
+
                 if (playbackState == STATE_READY && hasPendingSeek) {
                     hasPendingSeek = false
 
@@ -254,7 +271,6 @@ class Coordinator(
                 super.onIsPlayingChanged(isPlaying)
 
                 actionBuilder.processTimers()
-
             }
         }
         exoPlayer.addListener(seekInterruptionEventListener)

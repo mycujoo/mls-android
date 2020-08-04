@@ -231,9 +231,7 @@ class MLS private constructor(builder: Builder) : MLSAbstract() {
 
         }
 
-        if (hasAnnotation) {
-            coordinator.playerViewWrapper = playerViewWrapper
-        }
+        coordinator.initPlayerView(playerViewWrapper)
 
         playerViewWrapper.idlingResource = viewIdentifierManager.idlingResource
         playerViewWrapper.prepare(
