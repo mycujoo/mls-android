@@ -1,6 +1,6 @@
 package tv.mycujoo.mls.widgets.mlstimebar
 
-import java.util.ArrayList
+import java.util.*
 
 interface TimelineMarkerPosition {
     fun onScrubMove(
@@ -8,4 +8,6 @@ interface TimelineMarkerPosition {
         videoDuration: Long,
         poiPositionOnTimeBarArrayList: ArrayList<Int>
     )
+
+    fun update(position: Long, videoDuration: Long)
 }

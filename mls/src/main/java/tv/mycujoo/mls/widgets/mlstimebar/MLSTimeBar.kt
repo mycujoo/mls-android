@@ -165,6 +165,9 @@ class MLSTimeBar @JvmOverloads constructor(
     override fun setPosition(position: Long) {
         this.position = position
         contentDescription = progressText
+
+        timelineMarkerPositionListener.update(position, duration)
+
         update()
     }
 

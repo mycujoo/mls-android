@@ -3,10 +3,10 @@ package tv.mycujoo.mls.manager
 import android.util.Log
 import android.view.View
 import tv.mycujoo.mls.helper.TimeRangeHelper.Companion.isInRange
-import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarker
-import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarkerPosition
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterest
+import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarker
+import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarkerPosition
 
 class TimelineMarkerManager(
     private val mlsTimeBar: MLSTimeBar,
@@ -44,6 +44,15 @@ class TimelineMarkerManager(
                     timelineMarker.visibility = View.INVISIBLE
                     timelineMarker.removeTexts()
                 }
+            }
+
+            override fun update(position: Long, videoDuration: Long) {
+
+                if (pointOfInterestList.none { isInRange(position, videoDuration, it.offset) }) {
+                    timelineMarker.visibility = View.INVISIBLE
+                    timelineMarker.removeTexts()
+                }
+
             }
         })
     }
