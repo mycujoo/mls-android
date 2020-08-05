@@ -1,11 +1,12 @@
 package tv.mycujoo.domain.usecase
 
+import tv.mycujoo.domain.entity.Events
+import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.repository.EventsRepository
-import tv.mycujoo.mls.model.Event
 
 class GetEventsUseCase(private val repository: EventsRepository) :
-    AbstractUseCase<tv.mycujoo.domain.entity.Result<Exception, List<Event>>>() {
-    override suspend fun build(): tv.mycujoo.domain.entity.Result<Exception, List<Event>> {
+    AbstractUseCase<Result<Exception, Events>>() {
+    override suspend fun build(): Result<Exception, Events> {
         return repository.getEventsList()
     }
 }
