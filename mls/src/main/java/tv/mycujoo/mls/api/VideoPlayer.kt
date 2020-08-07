@@ -1,10 +1,16 @@
 package tv.mycujoo.mls.api
 
+import android.net.Uri
 import com.google.android.exoplayer2.SimpleExoPlayer
+import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
+import tv.mycujoo.mls.core.VideoPlayerCoordinator
 
-class VideoPlayer(private val exoPlayer: SimpleExoPlayer) : PlayerController, PlayerStatus {
+class VideoPlayer(
+    private val exoPlayer: SimpleExoPlayer,
+    private val videoPlayerCoordinator: VideoPlayerCoordinator
+) : PlayerController, PlayerStatus {
 
     var playerEventsListener: PlayerEventsListener? = null
         set(value) {
@@ -13,6 +19,16 @@ class VideoPlayer(private val exoPlayer: SimpleExoPlayer) : PlayerController, Pl
         }
 
     lateinit var uiEventListener: UIEventListener
+
+    /**region Player Higher level control*/
+    fun playVideo(event: EventEntity) {
+//        videoPlayerCoordinator.playVideo(event, )
+    }
+
+    fun playVideo(uri: Uri) {
+        videoPlayerCoordinator.playVideo(uri)
+    }
+    /**endregion */
 
 
     /**region PlayerController*/

@@ -41,7 +41,7 @@ open class NetworkModule(val context: Context) {
             .connectTimeout(30, TimeUnit.SECONDS)
             .addInterceptor { chain: Interceptor.Chain ->
                 val newRequest = chain.request().newBuilder()
-                    .addHeader("Authorization", "Bearer " + prefManager.get("PUBLIC_KEY"))
+//                    .addHeader("Authorization", "Bearer " + prefManager.get("PUBLIC_KEY"))
                     .removeHeader("Pragma")
                     .removeHeader("Cache-Control")
                     .addHeader("Cache-Control", "public, max-age=$maxAgeInSecond")

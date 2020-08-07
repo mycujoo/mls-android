@@ -1,83 +1,76 @@
 package tv.mycujoo.mls.core
 
+import android.app.Activity
+import android.net.Uri
+import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.Player.STATE_READY
+import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.ui.TimeBar
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
+import com.google.android.exoplayer2.util.Util
+import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
+import com.npaw.youbora.lib6.plugin.Options
+import com.npaw.youbora.lib6.plugin.Plugin
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
+import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
+import tv.mycujoo.mls.BuildConfig
+import tv.mycujoo.mls.analytic.YouboraClient
+import tv.mycujoo.mls.api.MLSBuilder
+import tv.mycujoo.mls.api.VideoPlayer
+import tv.mycujoo.mls.data.DataHolder
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
+import tv.mycujoo.mls.helper.AnimationFactory
+import tv.mycujoo.mls.helper.OverlayViewHelper
+import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.model.Event
+import tv.mycujoo.mls.model.Stream
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
 class VideoPlayerCoordinator(
-    private val exoPlayer: SimpleExoPlayer,
-    private val playerViewWrapper: PlayerViewWrapper,
-    videoPlayerConfig: VideoPlayerConfig,
+    private val videoPlayerConfig: VideoPlayerConfig,
+    private val viewIdentifierManager: ViewIdentifierManager,
+    private val dataHolder: DataHolder,
     private val timelineMarkerActionEntities: List<TimelineMarkerEntity>
 ) {
 
-    init {
-        val mainEventListener = object : MainEventListener {
-            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                super.onPlayerStateChanged(playWhenReady, playbackState)
+    private var hasAnalytic = false
+    private lateinit var playerViewWrapper: PlayerViewWrapper
 
-                handleBufferingProgressBarVisibility(playbackState, playWhenReady)
+    /**region Fields*/
+    private var exoPlayer: SimpleExoPlayer? = null
+    internal lateinit var videoPlayer: VideoPlayer
 
-                handleLiveModeState()
+    private var resumePosition: Long = C.INDEX_UNSET.toLong()
+    private var resumeWindow: Int = C.INDEX_UNSET
 
-                handlePlayStatusOfOverlayAnimationsWhileBuffering(playbackState, playWhenReady)
+    private var playWhenReady: Boolean = false
+    private var playbackPosition: Long = -1L
 
-            }
+    private lateinit var youboraClient: YouboraClient
 
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                super.onIsPlayingChanged(isPlaying)
 
-                handlePlayStatusOfOverlayAnimationsOnPlayPause(isPlaying)
-
-            }
-
-        }
-
-        exoPlayer.addListener(mainEventListener)
-
-        playerViewWrapper.getTimeBar().addListener(object : TimeBar.OnScrubListener {
-            override fun onScrubMove(timeBar: TimeBar, position: Long) {
-                //do nothing
-                playerViewWrapper.scrubbedTo(position)
-            }
-
-            override fun onScrubStart(timeBar: TimeBar, position: Long) {
-                //do nothing
-                playerViewWrapper.scrubStartedAt(position)
-
-            }
-
-            override fun onScrubStop(timeBar: TimeBar, position: Long, canceled: Boolean) {
-                playerViewWrapper.scrubStopAt(position)
-                timelineMarkerActionEntities.firstOrNull { position in it.offset - 10000L..it.offset + 10000L }
-                    ?.let {
-                        exoPlayer.seekTo(it.offset)
-                    }
-                handleLiveModeState()
-            }
-        })
-
-        playerViewWrapper.config(videoPlayerConfig)
-
-    }
+    /**endregion */
 
     private fun handleLiveModeState() {
-        if (exoPlayer.isCurrentWindowDynamic) {
-            // live stream
-            if (exoPlayer.currentPosition + 15000L >= exoPlayer.duration) {
-                playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.LIVE_ON_THE_EDGE)
-            } else {
-                playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.LIVE_TRAILING)
-            }
+        exoPlayer?.let {
+            if (it.isCurrentWindowDynamic) {
+                // live stream
+                if (it.currentPosition + 15000L >= it.duration) {
+                    playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.LIVE_ON_THE_EDGE)
+                } else {
+                    playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.LIVE_TRAILING)
+                }
 
-        } else {
-            // VOD
-            playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.VOD)
+            } else {
+                // VOD
+                playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.VOD)
+            }
         }
+
+
     }
 
     private fun handlePlayStatusOfOverlayAnimationsOnPlayPause(isPlaying: Boolean) {
@@ -110,6 +103,220 @@ class VideoPlayerCoordinator(
         } else {
             playerViewWrapper.hideBuffering()
         }
+    }
+
+    //    fun playVideo(event: EventEntity?, uri: Uri) {
+    fun playVideo(uri: Uri) {
+//        this.uri = uri
+        dataHolder.eventLiveData = (
+                Event(
+                    "101",
+                    Stream(listOf(uri)),
+                    "Sample name",
+                    "Sample location",
+                    "started"
+                )
+                )
+
+        val mediaSource =
+            HlsMediaSource.Factory(DefaultHttpDataSourceFactory(Util.getUserAgent(playerViewWrapper.context, "mls")))
+                .createMediaSource(uri)
+
+        if (playbackPosition != -1L) {
+            exoPlayer?.seekTo(playbackPosition)
+        }
+
+        val haveResumePosition = resumeWindow != C.INDEX_UNSET
+        if (haveResumePosition) {
+            exoPlayer?.seekTo(resumeWindow, resumePosition)
+        }
+
+        exoPlayer?.prepare(mediaSource)
+        exoPlayer?.playWhenReady = playWhenReady or this.playWhenReady
+        exoPlayer?.playWhenReady = true // todo remove this!
+
+
+        if (hasAnalytic) {
+            youboraClient.logEvent(dataHolder.getEvent())
+        }
+    }
+
+    private fun updateResumePosition() {
+        exoPlayer?.let {
+            resumeWindow = it.currentWindowIndex
+            resumePosition = if (it.isCurrentWindowSeekable) Math.max(
+                0,
+                it.currentPosition
+            ) else C.POSITION_UNSET.toLong()
+        }
+
+    }
+
+    fun release() {
+        exoPlayer?.let {
+            updateResumePosition()
+            playWhenReady = it.playWhenReady
+            playbackPosition = it.currentPosition
+
+            if (hasAnalytic) {
+                youboraClient.stop()
+            }
+
+            it.release()
+            exoPlayer = null
+        }
+
+    }
+
+    fun initialize(playerViewWrapper: PlayerViewWrapper, builder: MLSBuilder) {
+        this.playerViewWrapper = playerViewWrapper
+        if (exoPlayer == null) {
+
+            exoPlayer = SimpleExoPlayer.Builder(playerViewWrapper.context).build()
+
+            exoPlayer?.let {
+
+                videoPlayer = VideoPlayer(it, this)
+
+                builder.mlsConfiguration.accuracy?.let { accuracy ->
+                    if (accuracy > 0) {
+                        it.setSeekParameters(
+                            SeekParameters(
+                                accuracy / 2,
+                                accuracy / 2
+                            )
+                        )
+                    }
+                }
+
+
+//                dispatcher.launch {
+//                    when (val result = GetEventsUseCase(eventsRepository).execute()) {
+//                        is Result.Success -> {
+//                        }
+//                        is Result.NetworkError -> {
+//                        }
+//                        is Result.GenericError -> {
+//                        }
+//                    }
+//                }
+
+
+                builder.playerEventsListener?.let { playerEventsListener ->
+                    it.addListener(playerEventsListener)
+                    videoPlayer.playerEventsListener = playerEventsListener
+                }
+                builder.uiEventListener?.let { uiEventCallback ->
+                    videoPlayer.uiEventListener = uiEventCallback
+                    playerViewWrapper.uiEventListener = uiEventCallback
+
+                }
+
+//                hasDefaultPlayerController = builder.hasDefaultController
+
+                hasAnalytic = builder.hasAnalytic
+                if (builder.hasAnalytic) {
+                    initAnalytic(builder.publicKey, builder.activity!!, it)
+                }
+            }
+
+            this.playerViewWrapper = playerViewWrapper
+//            playerViewWrapper.onSizeChangedCallback = coordinator.onSizeChangedCallback
+
+            playerViewWrapper.prepare(
+                OverlayViewHelper(AnimationFactory()),
+                viewIdentifierManager,
+                GetActionsFromJSONUseCase.mappedActionCollections().timelineMarkerActionList
+            )
+
+
+            // self
+            val mainEventListener = object : MainEventListener {
+                override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+                    super.onPlayerStateChanged(playWhenReady, playbackState)
+
+                    handleBufferingProgressBarVisibility(playbackState, playWhenReady)
+
+                    handleLiveModeState()
+
+                    handlePlayStatusOfOverlayAnimationsWhileBuffering(playbackState, playWhenReady)
+
+                }
+
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    super.onIsPlayingChanged(isPlaying)
+
+                    handlePlayStatusOfOverlayAnimationsOnPlayPause(isPlaying)
+
+                }
+
+            }
+
+            exoPlayer?.addListener(mainEventListener)
+
+            playerViewWrapper.getTimeBar().addListener(object : TimeBar.OnScrubListener {
+                override fun onScrubMove(timeBar: TimeBar, position: Long) {
+                    //do nothing
+                    playerViewWrapper.scrubbedTo(position)
+                }
+
+                override fun onScrubStart(timeBar: TimeBar, position: Long) {
+                    //do nothing
+                    playerViewWrapper.scrubStartedAt(position)
+
+                }
+
+                override fun onScrubStop(timeBar: TimeBar, position: Long, canceled: Boolean) {
+                    playerViewWrapper.scrubStopAt(position)
+                    timelineMarkerActionEntities.firstOrNull { position in it.offset - 10000L..it.offset + 10000L }
+                        ?.let {
+                            exoPlayer?.seekTo(it.offset)
+                        }
+                    handleLiveModeState()
+                }
+            })
+
+            playerViewWrapper.config(videoPlayerConfig)
+
+
+        }
+
+    }
+
+    fun attachPlayer(playerViewWrapper: PlayerViewWrapper) {
+        playerViewWrapper.playerView.player = exoPlayer
+//        playerViewWrapper.defaultController(hasDefaultPlayerController)
+
+        playerViewWrapper.screenMode(PlayerViewWrapper.ScreenMode.PORTRAIT)
+
+        if (hasAnalytic) {
+            youboraClient.start()
+        }
+
+    }
+
+    fun getPlayer(): SimpleExoPlayer? {
+        return exoPlayer
+    }
+
+    private fun initAnalytic(
+        publicKey: String,
+        activity: Activity,
+        exoPlayer: SimpleExoPlayer
+    ) {
+        if (BuildConfig.DEBUG) {
+//            YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE)
+        }
+        val youboraOptions = Options()
+        //todo : use mls specific Youbora account
+        youboraOptions.accountCode = "mycujoodev"
+        youboraOptions.isAutoDetectBackground = true
+
+        val plugin = Plugin(youboraOptions, activity)
+        plugin.activity = activity
+        plugin.adapter = Exoplayer2Adapter(exoPlayer)
+
+        youboraClient = YouboraClient(publicKey, plugin)
     }
 
 }
