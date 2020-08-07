@@ -14,8 +14,14 @@ import com.google.android.exoplayer2.util.Util
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import tv.mycujoo.domain.entity.EventEntity
+import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
+import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
+import tv.mycujoo.domain.usecase.GetEventDetailUseCase
 import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
@@ -32,6 +38,8 @@ import tv.mycujoo.mls.widgets.PlayerViewWrapper
 class VideoPlayerCoordinator(
     private val videoPlayerConfig: VideoPlayerConfig,
     private val viewIdentifierManager: ViewIdentifierManager,
+    private val dispatcher: CoroutineScope,
+    private val eventsRepository: EventsRepository,
     private val dataHolder: DataHolder,
     private val timelineMarkerActionEntities: List<TimelineMarkerEntity>
 ) {
@@ -54,120 +62,7 @@ class VideoPlayerCoordinator(
 
     /**endregion */
 
-    private fun handleLiveModeState() {
-        exoPlayer?.let {
-            if (it.isCurrentWindowDynamic) {
-                // live stream
-                if (it.currentPosition + 15000L >= it.duration) {
-                    playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.LIVE_ON_THE_EDGE)
-                } else {
-                    playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.LIVE_TRAILING)
-                }
-
-            } else {
-                // VOD
-                playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.VOD)
-            }
-        }
-
-
-    }
-
-    private fun handlePlayStatusOfOverlayAnimationsOnPlayPause(isPlaying: Boolean) {
-        if (isPlaying) {
-            playerViewWrapper.continueOverlayAnimations()
-        } else {
-            playerViewWrapper.freezeOverlayAnimations()
-        }
-    }
-
-    private fun handlePlayStatusOfOverlayAnimationsWhileBuffering(
-        playbackState: Int,
-        playWhenReady: Boolean
-    ) {
-        if (playbackState == STATE_BUFFERING && playWhenReady) {
-            playerViewWrapper.freezeOverlayAnimations()
-
-        } else if (playbackState == STATE_READY && playWhenReady) {
-            playerViewWrapper.continueOverlayAnimations()
-
-        }
-    }
-
-    private fun handleBufferingProgressBarVisibility(
-        playbackState: Int,
-        playWhenReady: Boolean
-    ) {
-        if (playbackState == STATE_BUFFERING && playWhenReady) {
-            playerViewWrapper.showBuffering()
-        } else {
-            playerViewWrapper.hideBuffering()
-        }
-    }
-
-    //    fun playVideo(event: EventEntity?, uri: Uri) {
-    fun playVideo(uri: Uri) {
-//        this.uri = uri
-        dataHolder.eventLiveData = (
-                Event(
-                    "101",
-                    Stream(listOf(uri)),
-                    "Sample name",
-                    "Sample location",
-                    "started"
-                )
-                )
-
-        val mediaSource =
-            HlsMediaSource.Factory(DefaultHttpDataSourceFactory(Util.getUserAgent(playerViewWrapper.context, "mls")))
-                .createMediaSource(uri)
-
-        if (playbackPosition != -1L) {
-            exoPlayer?.seekTo(playbackPosition)
-        }
-
-        val haveResumePosition = resumeWindow != C.INDEX_UNSET
-        if (haveResumePosition) {
-            exoPlayer?.seekTo(resumeWindow, resumePosition)
-        }
-
-        exoPlayer?.prepare(mediaSource)
-        exoPlayer?.playWhenReady = playWhenReady or this.playWhenReady
-        exoPlayer?.playWhenReady = true // todo remove this!
-
-
-        if (hasAnalytic) {
-            youboraClient.logEvent(dataHolder.getEvent())
-        }
-    }
-
-    private fun updateResumePosition() {
-        exoPlayer?.let {
-            resumeWindow = it.currentWindowIndex
-            resumePosition = if (it.isCurrentWindowSeekable) Math.max(
-                0,
-                it.currentPosition
-            ) else C.POSITION_UNSET.toLong()
-        }
-
-    }
-
-    fun release() {
-        exoPlayer?.let {
-            updateResumePosition()
-            playWhenReady = it.playWhenReady
-            playbackPosition = it.currentPosition
-
-            if (hasAnalytic) {
-                youboraClient.stop()
-            }
-
-            it.release()
-            exoPlayer = null
-        }
-
-    }
-
+    /**region Initialization*/
     fun initialize(playerViewWrapper: PlayerViewWrapper, builder: MLSBuilder) {
         this.playerViewWrapper = playerViewWrapper
         if (exoPlayer == null) {
@@ -188,18 +83,6 @@ class VideoPlayerCoordinator(
                         )
                     }
                 }
-
-
-//                dispatcher.launch {
-//                    when (val result = GetEventsUseCase(eventsRepository).execute()) {
-//                        is Result.Success -> {
-//                        }
-//                        is Result.NetworkError -> {
-//                        }
-//                        is Result.GenericError -> {
-//                        }
-//                    }
-//                }
 
 
                 builder.playerEventsListener?.let { playerEventsListener ->
@@ -230,7 +113,6 @@ class VideoPlayerCoordinator(
             )
 
 
-            // self
             val mainEventListener = object : MainEventListener {
                 override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                     super.onPlayerStateChanged(playWhenReady, playbackState)
@@ -295,10 +177,6 @@ class VideoPlayerCoordinator(
 
     }
 
-    fun getPlayer(): SimpleExoPlayer? {
-        return exoPlayer
-    }
-
     private fun initAnalytic(
         publicKey: String,
         activity: Activity,
@@ -318,5 +196,146 @@ class VideoPlayerCoordinator(
 
         youboraClient = YouboraClient(publicKey, plugin)
     }
+
+    /**endregion */
+
+    /**region Playback functions*/
+    fun playVideo(event: EventEntity) {
+        dispatcher.launch {
+            when (val result = GetEventDetailUseCase(eventsRepository).execute(event.id)) {
+                is Success -> {
+                }
+                is NetworkError -> {
+                }
+                is GenericError -> {
+                }
+            }
+        }
+    }
+
+    fun playVideo(eventId: String) {
+    }
+
+    private fun playVideo(uri: Uri) {
+//        this.uri = uri
+        dataHolder.eventLiveData = (
+                Event(
+                    "101",
+                    Stream(listOf(uri)),
+                    "Sample name",
+                    "Sample location",
+                    "started"
+                )
+                )
+
+        val mediaSource =
+            HlsMediaSource.Factory(DefaultHttpDataSourceFactory(Util.getUserAgent(playerViewWrapper.context, "mls")))
+                .createMediaSource(uri)
+
+        if (playbackPosition != -1L) {
+            exoPlayer?.seekTo(playbackPosition)
+        }
+
+        val haveResumePosition = resumeWindow != C.INDEX_UNSET
+        if (haveResumePosition) {
+            exoPlayer?.seekTo(resumeWindow, resumePosition)
+        }
+
+        exoPlayer?.prepare(mediaSource)
+        exoPlayer?.playWhenReady = playWhenReady or this.playWhenReady
+        exoPlayer?.playWhenReady = true // todo remove this!
+
+
+        if (hasAnalytic) {
+            youboraClient.logEvent(dataHolder.getEvent())
+        }
+    }
+
+    /**endregion */
+
+    private fun handleLiveModeState() {
+        exoPlayer?.let {
+            if (it.isCurrentWindowDynamic) {
+                // live stream
+                if (it.currentPosition + 15000L >= it.duration) {
+                    playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.LIVE_ON_THE_EDGE)
+                } else {
+                    playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.LIVE_TRAILING)
+                }
+
+            } else {
+                // VOD
+                playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.VOD)
+            }
+        }
+
+
+    }
+
+    private fun handlePlayStatusOfOverlayAnimationsOnPlayPause(isPlaying: Boolean) {
+        if (isPlaying) {
+            playerViewWrapper.continueOverlayAnimations()
+        } else {
+            playerViewWrapper.freezeOverlayAnimations()
+        }
+    }
+
+    private fun handlePlayStatusOfOverlayAnimationsWhileBuffering(
+        playbackState: Int,
+        playWhenReady: Boolean
+    ) {
+        if (playbackState == STATE_BUFFERING && playWhenReady) {
+            playerViewWrapper.freezeOverlayAnimations()
+
+        } else if (playbackState == STATE_READY && playWhenReady) {
+            playerViewWrapper.continueOverlayAnimations()
+
+        }
+    }
+
+    private fun handleBufferingProgressBarVisibility(
+        playbackState: Int,
+        playWhenReady: Boolean
+    ) {
+        if (playbackState == STATE_BUFFERING && playWhenReady) {
+            playerViewWrapper.showBuffering()
+        } else {
+            playerViewWrapper.hideBuffering()
+        }
+    }
+
+
+    private fun updateResumePosition() {
+        exoPlayer?.let {
+            resumeWindow = it.currentWindowIndex
+            resumePosition = if (it.isCurrentWindowSeekable) Math.max(
+                0,
+                it.currentPosition
+            ) else C.POSITION_UNSET.toLong()
+        }
+
+    }
+
+    fun release() {
+        exoPlayer?.let {
+            updateResumePosition()
+            playWhenReady = it.playWhenReady
+            playbackPosition = it.currentPosition
+
+            if (hasAnalytic) {
+                youboraClient.stop()
+            }
+
+            it.release()
+            exoPlayer = null
+        }
+
+    }
+
+
+    fun getPlayer(): SimpleExoPlayer? {
+        return exoPlayer
+    }
+
 
 }

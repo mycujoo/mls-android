@@ -1,6 +1,5 @@
 package tv.mycujoo.mls.api
 
-import android.net.Uri
 import com.google.android.exoplayer2.SimpleExoPlayer
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.mls.core.PlayerEventsListener
@@ -22,11 +21,11 @@ class VideoPlayer(
 
     /**region Player Higher level control*/
     fun playVideo(event: EventEntity) {
-//        videoPlayerCoordinator.playVideo(event, )
+        videoPlayerCoordinator.playVideo(event)
     }
 
-    fun playVideo(uri: Uri) {
-        videoPlayerCoordinator.playVideo(uri)
+    fun playVideo(eventId: String) {
+        videoPlayerCoordinator.playVideo(eventId)
     }
     /**endregion */
 

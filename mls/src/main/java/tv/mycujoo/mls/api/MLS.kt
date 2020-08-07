@@ -71,6 +71,8 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         videoPlayerCoordinator = VideoPlayerCoordinator(
             builder.mlsConfiguration.VideoPlayerConfig,
             viewIdentifierManager,
+            internalBuilder.dispatcher,
+            internalBuilder.eventsRepository,
             dataHolder,
             GetActionsFromJSONUseCase.mappedActionCollections().timelineMarkerActionList
         )
