@@ -387,50 +387,57 @@ class PlayerViewWrapper @JvmOverloads constructor(
     fun displayEventInformationDialog(title: String, description: String, cancelable: Boolean) {
         playerView.hideController()
 
-        val informationDialog =
-            LayoutInflater.from(context).inflate(R.layout.dialog_information_layout, this, false)
-        addView(informationDialog)
+        eventInfoTitle = title
+        eventInfoDescription = description
 
-        val constraintSet = ConstraintSet()
-        constraintSet.clone(this)
+        post {
+            val informationDialog =
+                LayoutInflater.from(context).inflate(R.layout.dialog_information_layout, this, false)
+            addView(informationDialog)
 
-        constraintSet.connect(
-            informationDialog.id,
-            ConstraintSet.TOP,
-            ConstraintSet.PARENT_ID,
-            ConstraintSet.TOP
-        )
-        constraintSet.connect(
-            informationDialog.id,
-            ConstraintSet.BOTTOM,
-            ConstraintSet.PARENT_ID,
-            ConstraintSet.BOTTOM
-        )
-        constraintSet.connect(
-            informationDialog.id,
-            ConstraintSet.START,
-            ConstraintSet.PARENT_ID,
-            ConstraintSet.START
-        )
-        constraintSet.connect(
-            informationDialog.id,
-            ConstraintSet.END,
-            ConstraintSet.PARENT_ID,
-            ConstraintSet.END
-        )
-        constraintSet.applyTo(this)
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(this)
 
-        informationDialog.informationDialog_titleTextView.text = title
-        informationDialog.informationDialog_bodyTextView.text = description
+            constraintSet.connect(
+                informationDialog.id,
+                ConstraintSet.TOP,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.TOP
+            )
+            constraintSet.connect(
+                informationDialog.id,
+                ConstraintSet.BOTTOM,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.BOTTOM
+            )
+            constraintSet.connect(
+                informationDialog.id,
+                ConstraintSet.START,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.START
+            )
+            constraintSet.connect(
+                informationDialog.id,
+                ConstraintSet.END,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.END
+            )
+            constraintSet.applyTo(this)
 
-        if (cancelable) {
-            informationDialog.setOnClickListener {
-                if (it.parent is ViewGroup) {
-                    (it.parent as ViewGroup).removeView(it)
+            informationDialog.informationDialog_titleTextView.text = title
+            informationDialog.informationDialog_bodyTextView.text = description
+
+            if (cancelable) {
+                informationDialog.setOnClickListener {
+                    if (it.parent is ViewGroup) {
+                        (it.parent as ViewGroup).removeView(it)
+                    }
+                    playerView.showController()
                 }
-                playerView.showController()
             }
         }
+
+
     }
 
     fun hideEventInfoDialog() {

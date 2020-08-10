@@ -1,6 +1,11 @@
 package tv.mycujoo.mls.api
 
 import android.app.Activity
+import android.content.Context
+import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.source.hls.HlsMediaSource
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
+import com.google.android.exoplayer2.util.Util
 import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
@@ -65,6 +70,21 @@ open class MLSBuilder {
 
     fun setConfiguration(mlsConfiguration: MLSConfiguration) = apply {
         this.mlsConfiguration = mlsConfiguration
+    }
+
+    fun createExoPlayer(context: Context): SimpleExoPlayer? {
+        return SimpleExoPlayer.Builder(context).build()
+    }
+
+    fun createMediaFactory(context: Context): HlsMediaSource.Factory {
+        return HlsMediaSource.Factory(
+            DefaultHttpDataSourceFactory(
+                Util.getUserAgent(
+                    context,
+                    "mls"
+                )
+            )
+        )
     }
 
 }

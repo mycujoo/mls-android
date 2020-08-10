@@ -9,8 +9,6 @@ import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.ui.TimeBar
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
-import com.google.android.exoplayer2.util.Util
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
@@ -26,13 +24,11 @@ import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.VideoPlayer
-import tv.mycujoo.mls.data.DataHolder
+import tv.mycujoo.mls.data.IDataHolder
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.ViewIdentifierManager
-import tv.mycujoo.mls.model.Event
-import tv.mycujoo.mls.model.Stream
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
 class VideoPlayerCoordinator(
@@ -40,7 +36,7 @@ class VideoPlayerCoordinator(
     private val viewIdentifierManager: ViewIdentifierManager,
     private val dispatcher: CoroutineScope,
     private val eventsRepository: EventsRepository,
-    private val dataHolder: DataHolder,
+    private val dataHolder: IDataHolder,
     private val timelineMarkerActionEntities: List<TimelineMarkerEntity>
 ) {
 
@@ -49,6 +45,7 @@ class VideoPlayerCoordinator(
 
     /**region Fields*/
     private var exoPlayer: SimpleExoPlayer? = null
+    private lateinit var mediaFactory: HlsMediaSource.Factory
     internal lateinit var videoPlayer: VideoPlayer
 
     private var resumePosition: Long = C.INDEX_UNSET.toLong()
@@ -67,7 +64,8 @@ class VideoPlayerCoordinator(
         this.playerViewWrapper = playerViewWrapper
         if (exoPlayer == null) {
 
-            exoPlayer = SimpleExoPlayer.Builder(playerViewWrapper.context).build()
+            mediaFactory = builder.createMediaFactory(playerViewWrapper.context)
+            exoPlayer = builder.createExoPlayer(playerViewWrapper.context)
 
             exoPlayer?.let {
 
@@ -204,6 +202,7 @@ class VideoPlayerCoordinator(
         dispatcher.launch {
             when (val result = GetEventDetailUseCase(eventsRepository).execute(event.id)) {
                 is Success -> {
+                    playVideoIfPossible(result.value)
                 }
                 is NetworkError -> {
                 }
@@ -214,41 +213,59 @@ class VideoPlayerCoordinator(
     }
 
     fun playVideo(eventId: String) {
+        dispatcher.launch {
+            val result = GetEventDetailUseCase(eventsRepository).execute(eventId)
+            when (result) {
+                is Success -> {
+                    playVideoIfPossible(result.value)
+                }
+                is NetworkError -> {
+                }
+                is GenericError -> {
+                }
+            }
+        }
     }
 
-    private fun playVideo(uri: Uri) {
+    private fun playVideoIfPossible(event: EventEntity) {
+
+        if (event.streams.firstOrNull()?.fullUrl != null) {
+            val mediaSource = mediaFactory.createMediaSource(Uri.parse(event.streams.first().fullUrl))
+
+            if (playbackPosition != -1L) {
+                exoPlayer?.seekTo(playbackPosition)
+            }
+
+            val haveResumePosition = resumeWindow != C.INDEX_UNSET
+            if (haveResumePosition) {
+                exoPlayer?.seekTo(resumeWindow, resumePosition)
+            }
+
+            exoPlayer?.prepare(mediaSource)
+            exoPlayer?.playWhenReady = playWhenReady or this.playWhenReady
+            exoPlayer?.playWhenReady = true // todo remove this!
+
+
+            if (hasAnalytic) {
+                youboraClient.logEvent(dataHolder.getEvent())
+            }
+        } else {
+            // display event info
+            playerViewWrapper.displayEventInformationDialog(event.title, event.description, false)
+
+        }
 //        this.uri = uri
-        dataHolder.eventLiveData = (
-                Event(
-                    "101",
-                    Stream(listOf(uri)),
-                    "Sample name",
-                    "Sample location",
-                    "started"
-                )
-                )
-
-        val mediaSource =
-            HlsMediaSource.Factory(DefaultHttpDataSourceFactory(Util.getUserAgent(playerViewWrapper.context, "mls")))
-                .createMediaSource(uri)
-
-        if (playbackPosition != -1L) {
-            exoPlayer?.seekTo(playbackPosition)
-        }
-
-        val haveResumePosition = resumeWindow != C.INDEX_UNSET
-        if (haveResumePosition) {
-            exoPlayer?.seekTo(resumeWindow, resumePosition)
-        }
-
-        exoPlayer?.prepare(mediaSource)
-        exoPlayer?.playWhenReady = playWhenReady or this.playWhenReady
-        exoPlayer?.playWhenReady = true // todo remove this!
+//        dataHolder.eventLiveData = (
+//                Event(
+//                    "101",
+//                    Stream(listOf(uri)),
+//                    "Sample name",
+//                    "Sample location",
+//                    "started"
+//                )
+//                )
 
 
-        if (hasAnalytic) {
-            youboraClient.logEvent(dataHolder.getEvent())
-        }
     }
 
     /**endregion */

@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.api
 
 import com.google.android.exoplayer2.SimpleExoPlayer
+import tv.mycujoo.domain.entity.EventEntity
 
 class PlayerControllerImpl(private val exoPlayer: SimpleExoPlayer?) : PlayerController {
     override fun play() {
@@ -17,5 +18,9 @@ class PlayerControllerImpl(private val exoPlayer: SimpleExoPlayer?) : PlayerCont
 
     override fun previous() {
         exoPlayer?.previous()
+    }
+
+    override fun displayEventInfo(eventEntity: EventEntity) {
+        // todo
     }
 }

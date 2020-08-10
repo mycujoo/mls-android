@@ -27,6 +27,11 @@ class VideoPlayer(
     fun playVideo(eventId: String) {
         videoPlayerCoordinator.playVideo(eventId)
     }
+
+    override fun displayEventInfo(eventEntity: EventEntity) {
+
+    }
+
     /**endregion */
 
 

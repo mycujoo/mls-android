@@ -20,4 +20,9 @@ public class Log {
         System.out.println("ERROR: " + tag + ": " + msg);
         return 0;
     }
+
+    public static int w(String tag, String msg, Throwable tr) {
+        System.out.println("ERROR: " + tag + ": " + msg + ", -> " + tr.getLocalizedMessage());
+        return 0;
+    }
 }
