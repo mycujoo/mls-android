@@ -167,11 +167,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         }
 
         playerViewWrapper.hideEventInfoButton()
-        playerViewWrapper.displayEventInformationDialog(
-            event.title,
-            event.description,
-            event.streams.isNotEmpty()
-        )
+        playerViewWrapper.displayEventInformationPreEventDialog()
     }
 
     private fun setEventInfoToPlayerViewWrapper(event: EventEntity) {
@@ -179,7 +175,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
             return
         }
 
-        playerViewWrapper.setVideoInfo(event.title, event.description)
+        playerViewWrapper.setEventInfo(event.title, event.description)
     }
 
     private fun hidePreviewMode() {

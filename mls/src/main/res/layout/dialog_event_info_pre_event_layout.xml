@@ -5,9 +5,11 @@
     android:id="@+id/informationDialog_rootLayout"
     android:layout_width="0dp"
     android:layout_height="0dp"
-    android:tag="event_info_dialog"
     android:layout_gravity="center"
     android:background="@android:color/transparent"
+    android:clickable="true"
+    android:focusable="true"
+    android:tag="event_info_dialog"
     tools:layout_height="match_parent"
     tools:layout_width="match_parent">
 
@@ -26,19 +28,19 @@
 
 
         <TextView
-            android:id="@+id/informationDialog_titleTextView"
+            android:id="@+id/eventInfoPreEventDialog_titleTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:paddingStart="16dp"
+            android:paddingLeft="16dp"
             android:paddingTop="32dp"
             android:paddingRight="16dp"
-            android:text="Super Champions League 2020"
             android:textColor="@color/white"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Super Champions League 2020" />
 
 
         <TextView
@@ -46,16 +48,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:paddingStart="16dp"
+            android:paddingLeft="16dp"
             android:paddingTop="4dp"
             android:paddingRight="16dp"
             android:paddingBottom="32dp"
-            android:text="The most important competition in the world will be streamed here.  Have fun!"
             android:textColor="@color/white"
             android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/informationDialog_titleTextView" />
+            app:layout_constraintTop_toBottomOf="@id/eventInfoPreEventDialog_titleTextView"
+            tools:text="The most important competition in the world will be streamed here.  Have fun!" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

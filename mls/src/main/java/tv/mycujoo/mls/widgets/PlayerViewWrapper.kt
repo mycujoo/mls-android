@@ -21,7 +21,8 @@ import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
 import com.google.android.exoplayer2.ui.PlayerView
-import kotlinx.android.synthetic.main.dialog_information_layout.view.*
+import kotlinx.android.synthetic.main.dialog_event_info_pre_event_layout.view.*
+import kotlinx.android.synthetic.main.dialog_event_info_started_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
@@ -90,9 +91,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         playerView.resizeMode = RESIZE_MODE_FIXED_WIDTH
 
         findViewById<ImageButton>(R.id.controller_informationButton).setOnClickListener {
-            if (this::eventInfoTitle.isInitialized && this::eventInfoDescription.isInitialized) {
-                displayEventInformationDialog(eventInfoTitle, eventInfoDescription, true)
-            }
+            displayEventInfoForStartedEvents()
         }
 
 
@@ -379,20 +378,17 @@ class PlayerViewWrapper @JvmOverloads constructor(
     /**endregion */
 
     /**region Event Info related functions*/
-    fun setVideoInfo(title: String, description: String) {
+    fun setEventInfo(title: String, description: String) {
         eventInfoTitle = title
         eventInfoDescription = description
     }
 
-    fun displayEventInformationDialog(title: String, description: String, cancelable: Boolean) {
-        playerView.hideController()
-
-        eventInfoTitle = title
-        eventInfoDescription = description
-
+    fun displayEventInformationPreEventDialog() {
         post {
+            playerView.hideController()
+
             val informationDialog =
-                LayoutInflater.from(context).inflate(R.layout.dialog_information_layout, this, false)
+                LayoutInflater.from(context).inflate(R.layout.dialog_event_info_pre_event_layout, this, false)
             addView(informationDialog)
 
             val constraintSet = ConstraintSet()
@@ -424,16 +420,60 @@ class PlayerViewWrapper @JvmOverloads constructor(
             )
             constraintSet.applyTo(this)
 
-            informationDialog.informationDialog_titleTextView.text = title
-            informationDialog.informationDialog_bodyTextView.text = description
+            informationDialog.eventInfoPreEventDialog_titleTextView.text = eventInfoTitle
+            informationDialog.informationDialog_bodyTextView.text = eventInfoDescription
 
-            if (cancelable) {
-                informationDialog.setOnClickListener {
-                    if (it.parent is ViewGroup) {
-                        (it.parent as ViewGroup).removeView(it)
-                    }
-                    playerView.showController()
+        }
+
+
+    }
+
+    fun displayEventInfoForStartedEvents() {
+        if (this::eventInfoTitle.isInitialized.not() && this::eventInfoDescription.isInitialized.not()) {
+            return
+        }
+        post {
+            val eventInfoDialog =
+                LayoutInflater.from(context).inflate(R.layout.dialog_event_info_started_layout, this, false)
+            addView(eventInfoDialog)
+
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(this)
+
+            constraintSet.connect(
+                eventInfoDialog.id,
+                ConstraintSet.TOP,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.TOP
+            )
+            constraintSet.connect(
+                eventInfoDialog.id,
+                ConstraintSet.BOTTOM,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.BOTTOM
+            )
+            constraintSet.connect(
+                eventInfoDialog.id,
+                ConstraintSet.START,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.START
+            )
+            constraintSet.connect(
+                eventInfoDialog.id,
+                ConstraintSet.END,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.END
+            )
+            constraintSet.applyTo(this)
+
+            eventInfoDialog.eventInfoStartedEventDialog_titleTextView.text = eventInfoTitle
+            eventInfoDialog.eventInfoStartedEventDialog_bodyTextView.text = eventInfoDescription
+
+            eventInfoDialog.setOnClickListener {
+                if (it.parent is ViewGroup) {
+                    (it.parent as ViewGroup).removeView(it)
                 }
+                playerView.showController()
             }
         }
 

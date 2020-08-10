@@ -164,37 +164,40 @@ class VideoPlayerCoordinatorTest {
 
         videoPlayerCoordinator.playVideo(event)
 
-        verify(playerViewWrapper).displayEventInformationDialog(event.title, event.description, false)
+        verify(playerViewWrapper).displayEventInformationPreEventDialog()
     }
 
     /**region Fake data*/
-    private fun getSampleStreamList(): List<Stream> {
-        return listOf(Stream("stream_url"))
-    }
+    companion object {
+        private fun getSampleStreamList(): List<Stream> {
+            return listOf(Stream("stream_url"))
+        }
 
-    private fun getSampleEventEntity(streams: List<Stream>): EventEntity {
+        fun getSampleEventEntity(streams: List<Stream>): EventEntity {
 //        EventEntity(id=1eUBgUbXhriLFCT6A8E5a6Lv0R7, title=Test Title 0, description=Desc txt, thumbnail_url=,
 //        location=Location(physical=Physical(city=Amsterdam, continent_code=EU, coordinates=Coordinates(latitude=52.3666969, longitude=4.8945398), country_code=NL, venue=)),
 //        organiser=Org text, start_time=2020-07-11T07:32:46Z, status=EVENT_STATUS_SCHEDULED, streams=[Stream(fullUrl=https://rendered-europe-west.mls.mycujoo.tv/shervin/ckcfwmo4g000j0131mvc1zchu/master.m3u8)],
 //        timezone=America/Los_Angeles, timeline_ids=[], metadata=tv.mycujoo.domain.entity.Metadata@ea3de11, is_test=false)
 
-        val location = Location(Physical("", "", Coordinates(0.toDouble(), 0.toDouble()), "", ""))
-        return EventEntity(
-            "42",
-            "",
-            "",
-            "",
-            location,
-            "",
-            "",
-            "",
-            streams,
-            "",
-            emptyList(),
-            Metadata(),
-            false
-        )
+            val location = Location(Physical("", "", Coordinates(0.toDouble(), 0.toDouble()), "", ""))
+            return EventEntity(
+                "42",
+                "",
+                "",
+                "",
+                location,
+                "",
+                "",
+                "",
+                streams,
+                "",
+                emptyList(),
+                Metadata(),
+                false
+            )
+        }
     }
+
     /**endregion */
 
 

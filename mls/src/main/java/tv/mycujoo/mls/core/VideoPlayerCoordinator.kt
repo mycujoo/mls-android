@@ -229,6 +229,8 @@ class VideoPlayerCoordinator(
 
     private fun playVideoIfPossible(event: EventEntity) {
 
+        playerViewWrapper.setEventInfo(event.title, event.description)
+
         if (event.streams.firstOrNull()?.fullUrl != null) {
             val mediaSource = mediaFactory.createMediaSource(Uri.parse(event.streams.first().fullUrl))
 
@@ -251,7 +253,7 @@ class VideoPlayerCoordinator(
             }
         } else {
             // display event info
-            playerViewWrapper.displayEventInformationDialog(event.title, event.description, false)
+            playerViewWrapper.displayEventInformationPreEventDialog()
 
         }
 //        this.uri = uri
