@@ -13,6 +13,7 @@ import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
@@ -169,6 +170,8 @@ class VideoPlayerCoordinator(
 
         playerViewWrapper.screenMode(PlayerViewWrapper.ScreenMode.PORTRAIT)
 
+        playerViewWrapper.playerView.hideController()
+
         if (hasAnalytic) {
             youboraClient.start()
         }
@@ -213,7 +216,7 @@ class VideoPlayerCoordinator(
     }
 
     fun playVideo(eventId: String) {
-        dispatcher.launch {
+        dispatcher.launch(context = Dispatchers.Main) {
             val result = GetEventDetailUseCase(eventsRepository).execute(eventId)
             when (result) {
                 is Success -> {

@@ -110,6 +110,9 @@ class PlayerViewWrapperTest {
             GetActionsFromJSONUseCase.mappedActionCollections().timelineMarkerActionList
         )
         videoPlayerCoordinator.initialize(playerViewWrapper, MLSBuilder)
+
+        UiThreadStatement.runOnUiThread { videoPlayerCoordinator.attachPlayer(playerViewWrapper) }
+
     }
 
     @Before
@@ -120,6 +123,16 @@ class PlayerViewWrapperTest {
     @After
     fun unregisterIdlingResource() {
         IdlingRegistry.getInstance().unregister(viewIdentifierManager.idlingResource)
+    }
+
+    @Test
+    fun initializing_withoutLoadOrPlayVideo_shouldHideController() {
+        setupPlayer()
+
+
+        onView(withClassName(TypeMatcher(PlayerControlView::class.java.canonicalName))).check(
+            matches(withEffectiveVisibility(Visibility.GONE))
+        )
     }
 
     @Test
