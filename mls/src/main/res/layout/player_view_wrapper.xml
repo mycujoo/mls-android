@@ -17,5 +17,14 @@
         app:layout_constraintTop_toTopOf="parent"
         app:rewind_increment="10000" />
 
+    <FrameLayout
+        android:id="@+id/eventInfoDialogContainerLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/playerView"
+        app:layout_constraintEnd_toEndOf="@id/playerView"
+        app:layout_constraintStart_toStartOf="@id/playerView"
+        app:layout_constraintTop_toTopOf="@id/playerView" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

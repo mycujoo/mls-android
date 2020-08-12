@@ -14,7 +14,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.test.espresso.idling.CountingIdlingResource
@@ -24,6 +23,7 @@ import com.google.android.exoplayer2.ui.PlayerView
 import kotlinx.android.synthetic.main.dialog_event_info_pre_event_layout.view.*
 import kotlinx.android.synthetic.main.dialog_event_info_started_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
+import kotlinx.android.synthetic.main.player_view_wrapper.view.*
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mls.R
@@ -392,36 +392,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
             val informationDialog =
                 LayoutInflater.from(context).inflate(R.layout.dialog_event_info_pre_event_layout, this, false)
-            addView(informationDialog)
-
-            val constraintSet = ConstraintSet()
-            constraintSet.clone(this)
-
-            constraintSet.connect(
-                informationDialog.id,
-                ConstraintSet.TOP,
-                ConstraintSet.PARENT_ID,
-                ConstraintSet.TOP
-            )
-            constraintSet.connect(
-                informationDialog.id,
-                ConstraintSet.BOTTOM,
-                ConstraintSet.PARENT_ID,
-                ConstraintSet.BOTTOM
-            )
-            constraintSet.connect(
-                informationDialog.id,
-                ConstraintSet.START,
-                ConstraintSet.PARENT_ID,
-                ConstraintSet.START
-            )
-            constraintSet.connect(
-                informationDialog.id,
-                ConstraintSet.END,
-                ConstraintSet.PARENT_ID,
-                ConstraintSet.END
-            )
-            constraintSet.applyTo(this)
+            eventInfoDialogContainerLayout.addView(informationDialog)
 
             informationDialog.eventInfoPreEventDialog_titleTextView.text = eventInfoTitle
             informationDialog.informationDialog_bodyTextView.text = eventInfoDescription
@@ -439,36 +410,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         post {
             val eventInfoDialog =
                 LayoutInflater.from(context).inflate(R.layout.dialog_event_info_started_layout, this, false)
-            addView(eventInfoDialog)
-
-            val constraintSet = ConstraintSet()
-            constraintSet.clone(this)
-
-            constraintSet.connect(
-                eventInfoDialog.id,
-                ConstraintSet.TOP,
-                ConstraintSet.PARENT_ID,
-                ConstraintSet.TOP
-            )
-            constraintSet.connect(
-                eventInfoDialog.id,
-                ConstraintSet.BOTTOM,
-                ConstraintSet.PARENT_ID,
-                ConstraintSet.BOTTOM
-            )
-            constraintSet.connect(
-                eventInfoDialog.id,
-                ConstraintSet.START,
-                ConstraintSet.PARENT_ID,
-                ConstraintSet.START
-            )
-            constraintSet.connect(
-                eventInfoDialog.id,
-                ConstraintSet.END,
-                ConstraintSet.PARENT_ID,
-                ConstraintSet.END
-            )
-            constraintSet.applyTo(this)
+            eventInfoDialogContainerLayout.addView(eventInfoDialog)
 
             eventInfoDialog.eventInfoStartedEventDialog_titleTextView.text = eventInfoTitle
             eventInfoDialog.eventInfoStartedEventDialog_bodyTextView.text =

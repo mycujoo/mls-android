@@ -3,15 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/informationDialog_rootLayout"
-    android:layout_width="0dp"
-    android:layout_height="0dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:layout_gravity="center"
     android:background="@android:color/transparent"
     android:clickable="true"
     android:focusable="true"
-    android:tag="event_info_dialog"
-    tools:layout_height="match_parent"
-    tools:layout_width="match_parent">
+    android:tag="event_info_dialog">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="0dp"

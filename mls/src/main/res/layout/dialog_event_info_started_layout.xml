@@ -3,13 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/informationDialog_rootLayout"
-    android:layout_width="0dp"
-    android:layout_height="0dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:layout_gravity="center"
     android:background="@android:color/transparent"
-    android:tag="event_info_dialog"
-    tools:layout_height="match_parent"
-    tools:layout_width="match_parent">
+    android:tag="event_info_dialog">
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -27,6 +25,7 @@
             android:id="@+id/centerPoint"
             android:layout_width="1dp"
             android:layout_height="1dp"
+            android:layout_marginLeft="32dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -37,7 +36,7 @@
             android:id="@+id/eventInfoStartedEventDialog_titleTextView"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginLeft="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:gravity="left|center_vertical"
@@ -59,7 +58,7 @@
             android:id="@+id/eventInfoStartedEventDialog_bodyTextView"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginLeft="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:gravity="left"
@@ -80,7 +79,7 @@
             android:id="@+id/eventInfoStartedEventDialog_dateTimeTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginLeft="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:gravity="left"
