@@ -32,6 +32,7 @@ import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.network.socket.ReactorCallback
 import tv.mycujoo.mls.network.socket.ReactorSocket
+import tv.mycujoo.mls.utils.StringUtils
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
 class VideoPlayerCoordinator(
@@ -78,7 +79,7 @@ class VideoPlayerCoordinator(
 
             override fun onCounterUpdate(counts: String) {
                 if (isLive) {
-                    playerViewWrapper.updateViewersCounter(counts)
+                    playerViewWrapper.updateViewersCounter(StringUtils.getNumberOfViewers(counts))
                 } else {
                     playerViewWrapper.hideViewersCounter()
                 }
