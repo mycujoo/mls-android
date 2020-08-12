@@ -50,7 +50,7 @@ class VideoPlayerTest {
             location,
             "",
             "",
-            "",
+            EventStatus.EVENT_STATUS_UNSPECIFIED,
             emptyList(),
             "",
             emptyList(),

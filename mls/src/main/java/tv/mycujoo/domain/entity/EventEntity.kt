@@ -10,7 +10,7 @@ data class EventEntity(
     @SerializedName("location") val location: Location,
     @SerializedName("organiser") val organiser: String,
     @SerializedName("start_time") val start_time: String,
-    @SerializedName("status") val status: String,
+    @SerializedName("status") val status: EventStatus,
     @SerializedName("streams") val streams: List<Stream>,
     @SerializedName("timezone") val timezone: String,
     @SerializedName("timeline_ids") val timeline_ids: List<Any>,
