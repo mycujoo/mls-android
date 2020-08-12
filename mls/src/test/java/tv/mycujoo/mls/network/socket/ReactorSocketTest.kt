@@ -56,30 +56,31 @@ class ReactorSocketTest {
         verify(webSocket, never()).send(any<ByteString>())
     }
 
-//    @Test
-//    fun `received updateEvent, should call onEventUpdate of callback`() {
-//        whenever(webSocket.send(any<String>())).then {
-//            reactorListener.onMessage(webSocket, "eventUpdate;EVENT_ID;UPDATE_ID")
-//            true
-//        }
-//
-//
-//        reactorSocket.connect(EVENT_ID)
-//
-//
-//        verify(reactorCallback).onEventUpdate("EVENT_ID", "UPDATE_ID")
-//    }
-//
-//
-//    @Test
-//    fun `received eventTotal, should call onCounterUpdate of callback`() {
-//        reactorSocket.connect(EVENT_ID)
-//
-//        reactorListener.onMessage(webSocket, "eventTotal;ck2343whlc43k0g90i92grc0u;17")
-//
-//
-//        verify(reactorCallback).onCounterUpdate("17")
-//    }
+    @Test
+    fun `received updateEvent, should call onEventUpdate of callback`() {
+        reactorSocket.initialize(reactorListener)
+        whenever(webSocket.send(any<String>())).then {
+            reactorListener.onMessage(webSocket, "eventUpdate;EVENT_ID;UPDATE_ID")
+            true
+        }
+
+
+        reactorSocket.connect(EVENT_ID)
+
+
+        verify(reactorCallback).onEventUpdate("EVENT_ID", "UPDATE_ID")
+    }
+
+
+    @Test
+    fun `received eventTotal, should call onCounterUpdate of callback`() {
+        reactorSocket.connect(EVENT_ID)
+
+        reactorListener.onMessage(webSocket, "eventTotal;ck2343whlc43k0g90i92grc0u;17")
+
+
+        verify(reactorCallback).onCounterUpdate("17")
+    }
 
 
     companion object {
