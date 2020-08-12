@@ -137,7 +137,7 @@ class PlayerViewWrapperTest {
 
     @Test
     fun displayEventInfoForPreEvent_shouldDisplayEventInfo() {
-        playerViewWrapper.setEventInfo("title_0", "desc_0")
+        playerViewWrapper.setEventInfo("title_0", "desc_0", "")
 
 
         playerViewWrapper.displayEventInformationPreEventDialog()
@@ -149,7 +149,7 @@ class PlayerViewWrapperTest {
 
     @Test
     fun whileDisplayingPreEventDialog_shouldNotTogglePlayerVisibilityOnClick() {
-        playerViewWrapper.setEventInfo("title_0", "desc_0")
+        playerViewWrapper.setEventInfo("title_0", "desc_0", "")
 
 
         playerViewWrapper.displayEventInformationPreEventDialog()
@@ -165,7 +165,7 @@ class PlayerViewWrapperTest {
 
     @Test
     fun displayEventInfoForStartedEvent_shouldDisplayEventInfo() {
-        playerViewWrapper.setEventInfo("title_0", "desc_0")
+        playerViewWrapper.setEventInfo("title_0", "desc_0", "")
 
 
         playerViewWrapper.displayEventInfoForStartedEvents()
@@ -178,7 +178,7 @@ class PlayerViewWrapperTest {
 
     @Test
     fun whileDisplayingStartedEventDialog_shouldDismissDialogOnClick() {
-        playerViewWrapper.setEventInfo("title_0", "desc_0")
+        playerViewWrapper.setEventInfo("title_0", "desc_0", "")
 
 
         playerViewWrapper.displayEventInfoForStartedEvents()
@@ -202,7 +202,7 @@ class PlayerViewWrapperTest {
 
     @Test
     fun whileDisplayingStartedEventDialog_shouldTogglePlayerVisibilityOnClick() {
-        playerViewWrapper.setEventInfo("title_0", "desc_0")
+        playerViewWrapper.setEventInfo("title_0", "desc_0", "")
         setupPlayer()
         playerViewWrapper.displayEventInfoForStartedEvents()
 
@@ -218,7 +218,7 @@ class PlayerViewWrapperTest {
 
     @Test
     fun clickOnEventInfoButton_shouldDisplayEventInfo() {
-        playerViewWrapper.setEventInfo("title_0", "desc_0")
+        playerViewWrapper.setEventInfo("title_0", "desc_0", "")
         setupPlayer()
 
 

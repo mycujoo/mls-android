@@ -232,7 +232,7 @@ class VideoPlayerCoordinator(
 
     private fun playVideoIfPossible(event: EventEntity) {
 
-        playerViewWrapper.setEventInfo(event.title, event.description)
+        playerViewWrapper.setEventInfo(event.title, event.description, event.start_time)
 
         if (event.streams.firstOrNull()?.fullUrl != null) {
             val mediaSource = mediaFactory.createMediaSource(Uri.parse(event.streams.first().fullUrl))

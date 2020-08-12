@@ -30,6 +30,7 @@ import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.extensions.getDisplaySize
+import tv.mycujoo.mls.helper.DateTimeHelper
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.TimelineMarkerManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
@@ -63,6 +64,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     private lateinit var eventInfoTitle: String
     private lateinit var eventInfoDescription: String
+    private lateinit var eventDateTime: String
 
     var onSizeChangedCallback = {}
 
@@ -378,9 +380,10 @@ class PlayerViewWrapper @JvmOverloads constructor(
     /**endregion */
 
     /**region Event Info related functions*/
-    fun setEventInfo(title: String, description: String) {
+    fun setEventInfo(title: String, description: String, startTime: String) {
         eventInfoTitle = title
         eventInfoDescription = description
+        eventDateTime = startTime
     }
 
     fun displayEventInformationPreEventDialog() {
@@ -422,6 +425,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
             informationDialog.eventInfoPreEventDialog_titleTextView.text = eventInfoTitle
             informationDialog.informationDialog_bodyTextView.text = eventInfoDescription
+            informationDialog.informationDialog_dateTimeTextView.text = DateTimeHelper.getDateTime(eventDateTime)
 
         }
 
@@ -467,7 +471,10 @@ class PlayerViewWrapper @JvmOverloads constructor(
             constraintSet.applyTo(this)
 
             eventInfoDialog.eventInfoStartedEventDialog_titleTextView.text = eventInfoTitle
-            eventInfoDialog.eventInfoStartedEventDialog_bodyTextView.text = eventInfoDescription
+            eventInfoDialog.eventInfoStartedEventDialog_bodyTextView.text =
+                eventInfoDescription
+            eventInfoDialog.eventInfoStartedEventDialog_dateTimeTextView.text =
+                DateTimeHelper.getDateTime(eventDateTime)
 
             eventInfoDialog.setOnClickListener {
                 if (it.parent is ViewGroup) {

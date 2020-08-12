@@ -175,7 +175,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
             return
         }
 
-        playerViewWrapper.setEventInfo(event.title, event.description)
+        playerViewWrapper.setEventInfo(event.title, event.description, event.start_time)
     }
 
     private fun hidePreviewMode() {
