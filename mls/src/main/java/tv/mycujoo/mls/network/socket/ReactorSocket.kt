@@ -4,7 +4,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
 
-class ReactorSocket(okHttpClient: OkHttpClient, private val mainSocketListener: MainWebSocketListener) {
+class ReactorSocket(okHttpClient: OkHttpClient, private val mainSocketListener: MainWebSocketListener) : IReactorSocket {
 
 
     private var webSocket: WebSocket
@@ -14,16 +14,16 @@ class ReactorSocket(okHttpClient: OkHttpClient, private val mainSocketListener: 
         webSocket = okHttpClient.newWebSocket(request, mainSocketListener)
     }
 
-    fun addListener(reactorCallback: ReactorCallback) {
+    override fun addListener(reactorCallback: ReactorCallback) {
         mainSocketListener.addListener(ReactorListener(reactorCallback))
     }
 
 
-    fun connect(eventId: String) {
+    override fun connect(eventId: String) {
         webSocket.send("joinEvent;$eventId")
     }
 
-    fun disconnect(eventId: String) {
+    override fun disconnect(eventId: String) {
         webSocket.send("leaveEvent;$eventId")
     }
 

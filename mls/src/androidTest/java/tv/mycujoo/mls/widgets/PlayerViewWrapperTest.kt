@@ -41,6 +41,8 @@ import tv.mycujoo.mls.data.IDataHolder
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.model.Event
+import tv.mycujoo.mls.network.socket.IReactorSocket
+import tv.mycujoo.mls.network.socket.ReactorCallback
 
 
 @ExperimentalCoroutinesApi
@@ -99,11 +101,27 @@ class PlayerViewWrapperTest {
             }
         }
 
+        val reactorSocket = object : IReactorSocket{
+            override fun addListener(reactorCallback: ReactorCallback) {
+
+            }
+
+            override fun connect(eventId: String) {
+
+            }
+
+            override fun disconnect(eventId: String) {
+
+            }
+
+        }
+
 
 
         videoPlayerCoordinator = VideoPlayerCoordinator(
             defaultVideoPlayerConfig(),
             viewIdentifierManager,
+            reactorSocket,
             GlobalScope,
             eventRepository,
             dataHolder,
@@ -137,7 +155,7 @@ class PlayerViewWrapperTest {
 
     @Test
     fun displayEventInfoForPreEvent_shouldDisplayEventInfo() {
-        playerViewWrapper.setEventInfo("title_0", "desc_0", "")
+        playerViewWrapper.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
         playerViewWrapper.displayEventInformationPreEventDialog()
@@ -149,7 +167,7 @@ class PlayerViewWrapperTest {
 
     @Test
     fun whileDisplayingPreEventDialog_shouldNotTogglePlayerVisibilityOnClick() {
-        playerViewWrapper.setEventInfo("title_0", "desc_0", "")
+        playerViewWrapper.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
         playerViewWrapper.displayEventInformationPreEventDialog()
@@ -165,7 +183,7 @@ class PlayerViewWrapperTest {
 
     @Test
     fun displayEventInfoForStartedEvent_shouldDisplayEventInfo() {
-        playerViewWrapper.setEventInfo("title_0", "desc_0", "")
+        playerViewWrapper.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
         playerViewWrapper.displayEventInfoForStartedEvents()
@@ -178,7 +196,7 @@ class PlayerViewWrapperTest {
 
     @Test
     fun whileDisplayingStartedEventDialog_shouldDismissDialogOnClick() {
-        playerViewWrapper.setEventInfo("title_0", "desc_0", "")
+        playerViewWrapper.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
         playerViewWrapper.displayEventInfoForStartedEvents()
@@ -202,7 +220,7 @@ class PlayerViewWrapperTest {
 
     @Test
     fun whileDisplayingStartedEventDialog_shouldTogglePlayerVisibilityOnClick() {
-        playerViewWrapper.setEventInfo("title_0", "desc_0", "")
+        playerViewWrapper.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
         setupPlayer()
         playerViewWrapper.displayEventInfoForStartedEvents()
 
@@ -218,7 +236,7 @@ class PlayerViewWrapperTest {
 
     @Test
     fun clickOnEventInfoButton_shouldDisplayEventInfo() {
-        playerViewWrapper.setEventInfo("title_0", "desc_0", "")
+        playerViewWrapper.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
         setupPlayer()
 
 
@@ -270,7 +288,7 @@ class PlayerViewWrapperTest {
                 location,
                 "",
                 "",
-                "",
+                EventStatus.EVENT_STATUS_UNSPECIFIED,
                 streams,
                 "",
                 emptyList(),

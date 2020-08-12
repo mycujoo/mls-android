@@ -208,7 +208,7 @@ class VideoPlayerCoordinatorTest {
         videoPlayerCoordinator.playVideo(event)
 
 
-        verify(reactorSocket).connect(event.id)
+        verify(webSocket).send("joinEvent;${event.id}")
     }
 
     @Ignore("Event Status is not done on server yet")

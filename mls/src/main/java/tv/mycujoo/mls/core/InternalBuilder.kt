@@ -10,6 +10,7 @@ import tv.mycujoo.mls.di.DaggerMlsComponent
 import tv.mycujoo.mls.di.NetworkModule
 import tv.mycujoo.mls.manager.IPrefManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.MainWebSocketListener
 import tv.mycujoo.mls.network.socket.ReactorSocket
 import javax.inject.Inject
@@ -32,7 +33,7 @@ open class InternalBuilder(private val activity: Activity) {
 
     lateinit var viewIdentifierManager: ViewIdentifierManager
 
-    lateinit var reactorSocket: ReactorSocket
+    lateinit var reactorSocket: IReactorSocket
     lateinit var mainWebSocketListener: MainWebSocketListener
 
     open fun initialize() {

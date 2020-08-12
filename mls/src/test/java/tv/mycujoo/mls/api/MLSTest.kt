@@ -34,6 +34,8 @@ class MLSTest {
                 .withActivity(activity)
                 .setConfiguration(MLSConfiguration(accuracy = 1000L))
                 .build()
-    }
 
+        MLS.onStart(playerViewWrapper)
+
+    }
 }
