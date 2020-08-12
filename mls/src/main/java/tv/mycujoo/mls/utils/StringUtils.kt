@@ -1,6 +1,8 @@
 package tv.mycujoo.mls.utils
 
 import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.*
 
 class StringUtils {
     companion object {
@@ -22,11 +24,21 @@ class StringUtils {
                 number < 1000000 -> {
                     val decimalFormat = DecimalFormat()
                     decimalFormat.maximumFractionDigits = 1
+                    val decimalFormatSymbols = DecimalFormatSymbols(Locale.ENGLISH).apply {
+                        decimalSeparator = '.'
+                        groupingSeparator = '.'
+                    }
+                    decimalFormat.decimalFormatSymbols = decimalFormatSymbols
                     decimalFormat.format(number / 1000f) + "K"
                 }
                 else -> {
                     val decimalFormat = DecimalFormat()
                     decimalFormat.maximumFractionDigits = 1
+                    val decimalFormatSymbols = DecimalFormatSymbols(Locale.ENGLISH).apply {
+                        decimalSeparator = '.'
+                        groupingSeparator = '.'
+                    }
+                    decimalFormat.decimalFormatSymbols = decimalFormatSymbols
                     decimalFormat.format(number / 1000000f) + "M"
                 }
             }

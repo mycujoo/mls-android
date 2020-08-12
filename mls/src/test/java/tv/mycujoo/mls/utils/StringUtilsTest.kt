@@ -49,7 +49,7 @@ class StringUtilsTest{
         assertEquals("1.1K", resultOf1051)
         assertEquals("1.1K", resultOf1100)
         assertEquals("2K", resultOf2000)
-        assertEquals("1,000K", resultOf999999)
+        assertEquals("1.000K", resultOf999999)
     }
 
     @Test
