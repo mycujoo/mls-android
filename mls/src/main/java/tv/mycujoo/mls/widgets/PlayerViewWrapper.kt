@@ -312,6 +312,15 @@ class PlayerViewWrapper @JvmOverloads constructor(
         }
     }
 
+    fun updateViewersCounter(count: String) {
+        controller_viewersCountLayout.visibility = View.VISIBLE
+        controller_viewersCountTextView.text = count
+    }
+
+    fun hideViewersCounter() {
+        controller_viewersCountLayout.visibility = View.GONE
+    }
+
     fun getTimeBar(): MLSTimeBar {
         return findViewById(R.id.exo_progress)
     }

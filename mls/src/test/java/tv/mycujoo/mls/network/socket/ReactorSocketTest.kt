@@ -1,12 +1,10 @@
 package tv.mycujoo.mls.network.socket
 
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import okhttp3.OkHttpClient
 import okhttp3.WebSocket
-import okio.ByteString
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -15,7 +13,7 @@ import org.mockito.MockitoAnnotations
 class ReactorSocketTest {
 
     private lateinit var reactorSocket: ReactorSocket
-    private lateinit var reactorListener: ReactorListener
+    private lateinit var mainWebSocketListener: MainWebSocketListener
 
     @Mock
     lateinit var okHttpClient: OkHttpClient
@@ -32,15 +30,13 @@ class ReactorSocketTest {
 
         whenever(okHttpClient.newWebSocket(any(), any())).thenReturn(webSocket)
 
-        reactorSocket = ReactorSocket(okHttpClient)
-        reactorListener = ReactorListener(reactorCallback)
+        mainWebSocketListener = MainWebSocketListener()
+        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener)
+        reactorSocket.addListener(reactorCallback)
     }
 
     @Test
     fun `given connect command when initialized, should connect to webSocket`() {
-        reactorSocket.initialize(reactorListener)
-
-
         reactorSocket.connect(EVENT_ID)
 
 
@@ -48,19 +44,9 @@ class ReactorSocketTest {
     }
 
     @Test
-    fun `given connect command when not initialized, should not connect to webSocket`() {
-        reactorSocket.connect(EVENT_ID)
-
-
-        verify(webSocket, never()).send(any<String>())
-        verify(webSocket, never()).send(any<ByteString>())
-    }
-
-    @Test
     fun `received updateEvent, should call onEventUpdate of callback`() {
-        reactorSocket.initialize(reactorListener)
         whenever(webSocket.send(any<String>())).then {
-            reactorListener.onMessage(webSocket, "eventUpdate;EVENT_ID;UPDATE_ID")
+            mainWebSocketListener.onMessage(webSocket, "eventUpdate;EVENT_ID;UPDATE_ID")
             true
         }
 
@@ -76,7 +62,8 @@ class ReactorSocketTest {
     fun `received eventTotal, should call onCounterUpdate of callback`() {
         reactorSocket.connect(EVENT_ID)
 
-        reactorListener.onMessage(webSocket, "eventTotal;ck2343whlc43k0g90i92grc0u;17")
+
+        mainWebSocketListener.onMessage(webSocket, "eventTotal;ck2343whlc43k0g90i92grc0u;17")
 
 
         verify(reactorCallback).onCounterUpdate("17")

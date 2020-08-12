@@ -30,11 +30,14 @@ import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.network.socket.ReactorCallback
+import tv.mycujoo.mls.network.socket.ReactorSocket
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
 class VideoPlayerCoordinator(
     private val videoPlayerConfig: VideoPlayerConfig,
     private val viewIdentifierManager: ViewIdentifierManager,
+    private val reactorSocket: ReactorSocket,
     private val dispatcher: CoroutineScope,
     private val eventsRepository: EventsRepository,
     private val dataHolder: IDataHolder,
@@ -55,6 +58,9 @@ class VideoPlayerCoordinator(
     private var playWhenReady: Boolean = false
     private var playbackPosition: Long = -1L
 
+    private var isLive = false
+
+
     private lateinit var youboraClient: YouboraClient
 
 
@@ -63,6 +69,22 @@ class VideoPlayerCoordinator(
     /**region Initialization*/
     fun initialize(playerViewWrapper: PlayerViewWrapper, builder: MLSBuilder) {
         this.playerViewWrapper = playerViewWrapper
+
+
+        reactorSocket.addListener(object : ReactorCallback {
+            override fun onEventUpdate(eventId: String, updatedEventId: String) {
+
+            }
+
+            override fun onCounterUpdate(counts: String) {
+                if (isLive) {
+                    playerViewWrapper.updateViewersCounter(counts)
+                } else {
+                    playerViewWrapper.hideViewersCounter()
+                }
+            }
+        })
+
         if (exoPlayer == null) {
 
             mediaFactory = builder.createMediaFactory(playerViewWrapper.context)
@@ -202,25 +224,18 @@ class VideoPlayerCoordinator(
 
     /**region Playback functions*/
     fun playVideo(event: EventEntity) {
-        dispatcher.launch {
-            when (val result = GetEventDetailUseCase(eventsRepository).execute(event.id)) {
-                is Success -> {
-                    playVideoIfPossible(result.value)
-                }
-                is NetworkError -> {
-                }
-                is GenericError -> {
-                }
-            }
-        }
+        playVideo(event.id)
     }
 
     fun playVideo(eventId: String) {
+        isLive = false
+
         dispatcher.launch(context = Dispatchers.Main) {
             val result = GetEventDetailUseCase(eventsRepository).execute(eventId)
             when (result) {
                 is Success -> {
-                    playVideoIfPossible(result.value)
+                    playVideoOrDisplayEventInfo(result.value)
+                    connectToReactor(result.value)
                 }
                 is NetworkError -> {
                 }
@@ -230,11 +245,11 @@ class VideoPlayerCoordinator(
         }
     }
 
-    private fun playVideoIfPossible(event: EventEntity) {
+    private fun playVideoOrDisplayEventInfo(event: EventEntity) {
 
         playerViewWrapper.setEventInfo(event.title, event.description, event.start_time)
 
-        if (event.streams.firstOrNull()?.fullUrl != null) {
+        if (mayPlayVideo(event)) {
             val mediaSource = mediaFactory.createMediaSource(Uri.parse(event.streams.first().fullUrl))
 
             if (playbackPosition != -1L) {
@@ -273,12 +288,24 @@ class VideoPlayerCoordinator(
 
     }
 
+    private fun mayPlayVideo(event: EventEntity) = event.streams.firstOrNull()?.fullUrl != null
+
+    /**endregion */
+
+
+    /**region Reactor function*/
+
+    private fun connectToReactor(event: EventEntity) {
+        reactorSocket.connect(event.id)
+    }
+
     /**endregion */
 
     private fun handleLiveModeState() {
         exoPlayer?.let {
             if (it.isCurrentWindowDynamic) {
                 // live stream
+                isLive = true
                 if (it.currentPosition + 15000L >= it.duration) {
                     playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.LIVE_ON_THE_EDGE)
                 } else {
@@ -287,6 +314,7 @@ class VideoPlayerCoordinator(
 
             } else {
                 // VOD
+                isLive = false
                 playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.VOD)
             }
         }

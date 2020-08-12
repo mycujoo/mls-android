@@ -9,6 +9,8 @@ import com.google.android.exoplayer2.util.Util
 import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
+import tv.mycujoo.mls.network.socket.ReactorCallback
+import tv.mycujoo.mls.network.socket.ReactorListener
 
 open class MLSBuilder {
 
@@ -85,6 +87,10 @@ open class MLSBuilder {
                 )
             )
         )
+    }
+
+    fun createReactorListener(reactorCallback: ReactorCallback): ReactorListener {
+        return ReactorListener(reactorCallback)
     }
 
 }

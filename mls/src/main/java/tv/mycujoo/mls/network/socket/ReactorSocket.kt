@@ -4,23 +4,28 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
 
-class ReactorSocket(private val okHttpClient: OkHttpClient) {
+class ReactorSocket(okHttpClient: OkHttpClient, private val mainSocketListener: MainWebSocketListener) {
 
 
-    private lateinit var webSocket: WebSocket
+    private var webSocket: WebSocket
 
-    fun initialize(reactorListener: ReactorListener) {
+    init {
         val request = Request.Builder().url("wss://mls-rt.mycujoo.tv").build()
-        webSocket = okHttpClient.newWebSocket(request, reactorListener)
+        webSocket = okHttpClient.newWebSocket(request, mainSocketListener)
+    }
+
+    fun addListener(reactorCallback: ReactorCallback) {
+        mainSocketListener.addListener(ReactorListener(reactorCallback))
     }
 
 
     fun connect(eventId: String) {
-        if (this::webSocket.isInitialized.not()) {
-            return
-        }
-
         webSocket.send("joinEvent;$eventId")
     }
+
+    fun disconnect(eventId: String) {
+        webSocket.send("leaveEvent;$eventId")
+    }
+
 
 }
