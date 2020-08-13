@@ -1,7 +1,6 @@
 package tv.mycujoo.mls.widgets
 
 import android.content.Intent
-import android.net.Uri
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageButton
@@ -40,7 +39,6 @@ import tv.mycujoo.mls.core.VideoPlayerCoordinator
 import tv.mycujoo.mls.data.IDataHolder
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.ViewIdentifierManager
-import tv.mycujoo.mls.model.Event
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.ReactorCallback
 
@@ -96,12 +94,14 @@ class PlayerViewWrapperTest {
         }
 
         val dataHolder = object : IDataHolder {
-            override fun getCurrentEvent(): Event? {
-                return getSampleEvent()
-            }
+
+            override var currentEvent: EventEntity?
+                get() = getSampleEventEntity(emptyList())
+                set(value) {}
+
         }
 
-        val reactorSocket = object : IReactorSocket{
+        val reactorSocket = object : IReactorSocket {
 
             override fun setUUID(uuid: String) {
             }
@@ -295,19 +295,6 @@ class PlayerViewWrapperTest {
                 emptyList(),
                 Metadata(),
                 false
-            )
-        }
-
-
-        fun getSampleEvent(): Event {
-            return Event(
-                "id_0",
-                tv.mycujoo.mls.model.Stream(
-                    listOf(Uri.parse("111"))
-                ),
-                "name_0",
-                "location",
-                "status"
             )
         }
     }

@@ -61,6 +61,8 @@ class VideoPlayerCoordinator(
 
     private var isLive = false
 
+    private var eventMayBeStreamed = false
+
 
     private lateinit var youboraClient: YouboraClient
 
@@ -74,7 +76,7 @@ class VideoPlayerCoordinator(
 
         reactorSocket.addListener(object : ReactorCallback {
             override fun onEventUpdate(eventId: String, updatedEventId: String) {
-
+                onEventUpdateAvailable(updatedEventId)
             }
 
             override fun onCounterUpdate(counts: String) {
@@ -223,6 +225,25 @@ class VideoPlayerCoordinator(
 
     /**endregion */
 
+    fun onEventUpdateAvailable(eventId: String) {
+        dispatcher.launch(context = Dispatchers.Main) {
+            val result = GetEventDetailUseCase(eventsRepository).execute(eventId)
+            when (result) {
+                is Success -> {
+                    dataHolder.currentEvent = result.value
+                    if (eventMayBeStreamed.not()) {
+                        playVideoOrDisplayEventInfo(result.value)
+                    }
+                }
+                is NetworkError -> {
+                }
+                is GenericError -> {
+                }
+            }
+        }
+
+    }
+
     /**region Playback functions*/
     fun playVideo(event: EventEntity) {
         playVideo(event.id)
@@ -268,7 +289,7 @@ class VideoPlayerCoordinator(
 
 
             if (hasAnalytic) {
-                youboraClient.logEvent(dataHolder.getCurrentEvent())
+                youboraClient.logEvent(dataHolder.currentEvent)
             }
         } else {
             // display event info
@@ -289,7 +310,10 @@ class VideoPlayerCoordinator(
 
     }
 
-    private fun mayPlayVideo(event: EventEntity) = event.streams.firstOrNull()?.fullUrl != null
+    private fun mayPlayVideo(event: EventEntity): Boolean {
+        eventMayBeStreamed = event.streams.firstOrNull()?.fullUrl != null
+        return eventMayBeStreamed
+    }
 
     /**endregion */
 

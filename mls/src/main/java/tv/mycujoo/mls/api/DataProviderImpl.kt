@@ -6,7 +6,6 @@ import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.EventStatus
 import tv.mycujoo.domain.entity.OrderByEventsParam
 import tv.mycujoo.mls.data.IDataHolder
-import tv.mycujoo.mls.model.Event
 import tv.mycujoo.mls.model.SingleLiveEvent
 import tv.mycujoo.mls.network.MlsApi
 import javax.inject.Inject
@@ -18,7 +17,7 @@ class DataProviderImpl @Inject constructor(val scope: CoroutineScope) : DataProv
     lateinit var mlsApi: MlsApi
 
     private val events = SingleLiveEvent<List<EventEntity>>()
-    private var currentEvent: Event? = null
+    override var currentEvent: EventEntity? = null
     /**endregion */
 
 
@@ -41,12 +40,6 @@ class DataProviderImpl @Inject constructor(val scope: CoroutineScope) : DataProv
                 eventsResponse.events
             )
         }
-    }
-    /**endregion */
-
-    /**region Data Holder*/
-    override fun getCurrentEvent(): Event? {
-        return currentEvent
     }
     /**endregion */
 }

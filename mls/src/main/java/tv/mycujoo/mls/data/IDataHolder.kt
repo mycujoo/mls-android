@@ -1,7 +1,7 @@
 package tv.mycujoo.mls.data
 
-import tv.mycujoo.mls.model.Event
+import tv.mycujoo.domain.entity.EventEntity
 
 interface IDataHolder {
-    fun getCurrentEvent(): Event?
+    var currentEvent: EventEntity?
 }
