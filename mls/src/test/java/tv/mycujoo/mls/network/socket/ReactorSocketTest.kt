@@ -38,7 +38,7 @@ class ReactorSocketTest {
         reactorSocket.connect(EVENT_ID)
 
 
-        verify(webSocket).send("joinEvent;$EVENT_ID")
+        verify(webSocket).send("$JOIN_EVENT$EVENT_ID")
     }
 
     @Test
@@ -46,7 +46,7 @@ class ReactorSocketTest {
         reactorSocket.disconnect(EVENT_ID)
 
 
-        verify(webSocket).send("leaveEvent;$EVENT_ID")
+        verify(webSocket).send("$LEAVE_EVENT$EVENT_ID")
     }
 
     @Test
@@ -57,7 +57,7 @@ class ReactorSocketTest {
         reactorSocket.connect(EVENT_ID_NEW)
 
 
-        verify(webSocket).send("leaveEvent;$EVENT_ID")
+        verify(webSocket).send("$LEAVE_EVENT$EVENT_ID")
     }
 
     @Test
@@ -69,7 +69,7 @@ class ReactorSocketTest {
         reactorSocket.connect(EVENT_ID_NEW)
 
 
-        verify(webSocket, times(1)).send("leaveEvent;$EVENT_ID")
+        verify(webSocket, times(1)).send("$LEAVE_EVENT$EVENT_ID")
     }
 
 
@@ -99,6 +99,16 @@ class ReactorSocketTest {
         verify(reactorCallback).onCounterUpdate("17")
     }
 
+    @Test
+    fun `given invalid message, should not call reactor callback`() {
+        mainWebSocketListener.onMessage(webSocket, "")
+        mainWebSocketListener.onMessage(webSocket, " ")
+        mainWebSocketListener.onMessage(webSocket, "1")
+        mainWebSocketListener.onMessage(webSocket, "a")
+
+        verify(reactorCallback, never()).onEventUpdate(any(), any())
+        verify(reactorCallback, never()).onCounterUpdate(any())
+    }
 
     companion object {
         const val EVENT_ID = "ck2343whlc43k0g90i92grc0u"

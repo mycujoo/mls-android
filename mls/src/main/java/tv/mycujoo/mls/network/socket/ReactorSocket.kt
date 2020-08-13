@@ -27,12 +27,12 @@ class ReactorSocket(okHttpClient: OkHttpClient, private val mainSocketListener: 
             disconnect(this.eventId)
         }
         this.eventId = eventId
-        webSocket.send("joinEvent;$eventId")
+        webSocket.send("$JOIN_EVENT$eventId")
         connected = true
     }
 
     override fun disconnect(eventId: String) {
-        webSocket.send("leaveEvent;$eventId")
+        webSocket.send("$LEAVE_EVENT$eventId")
         connected = false
     }
 
