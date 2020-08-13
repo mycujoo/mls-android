@@ -236,7 +236,7 @@ class VideoPlayerCoordinator(
             when (result) {
                 is Success -> {
                     playVideoOrDisplayEventInfo(result.value)
-                    connectToReactor(result.value)
+                    joinToReactor(result.value)
                 }
                 is NetworkError -> {
                 }
@@ -296,8 +296,8 @@ class VideoPlayerCoordinator(
 
     /**region Reactor function*/
 
-    private fun connectToReactor(event: EventEntity) {
-        reactorSocket.connect(event.id)
+    private fun joinToReactor(event: EventEntity) {
+        reactorSocket.join(event.id)
     }
 
     /**endregion */

@@ -105,6 +105,7 @@ class VideoPlayerCoordinatorTest {
         whenever(okHttpClient.newWebSocket(any(), any())).thenReturn(webSocket)
         mainWebSocketListener = MainWebSocketListener()
         reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener)
+        reactorSocket.setUUID("SAMPLE_UUID")
 
         whenever(MLSBuilder.activity).thenReturn(activity)
         whenever(MLSBuilder.createExoPlayer(any())).thenReturn(exoPlayer)
@@ -230,7 +231,7 @@ class VideoPlayerCoordinatorTest {
         videoPlayerCoordinator.playVideo(getSampleEventEntity(emptyList(), EventStatus.EVENT_STATUS_UNSPECIFIED))
 
 
-        verify(reactorSocket, never()).connect(any())
+        verify(reactorSocket, never()).join(any())
     }
 
     @Test
@@ -297,6 +298,9 @@ class VideoPlayerCoordinatorTest {
                 false
             )
         }
+
+        const val SAMPLE_UUID = "aa-bb-cc-dd-ee"
+
     }
 
     /**endregion */

@@ -13,6 +13,7 @@ import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.MainWebSocketListener
 import tv.mycujoo.mls.network.socket.ReactorSocket
+import java.util.*
 import javax.inject.Inject
 
 open class InternalBuilder(private val activity: Activity) {
@@ -34,7 +35,9 @@ open class InternalBuilder(private val activity: Activity) {
     lateinit var viewIdentifierManager: ViewIdentifierManager
 
     lateinit var reactorSocket: IReactorSocket
-    lateinit var mainWebSocketListener: MainWebSocketListener
+    private lateinit var mainWebSocketListener: MainWebSocketListener
+
+    var uuid = UUID.randomUUID().toString()
 
     open fun initialize() {
         val dependencyGraph =

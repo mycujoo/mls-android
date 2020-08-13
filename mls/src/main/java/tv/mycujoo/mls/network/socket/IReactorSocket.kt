@@ -4,7 +4,7 @@ interface IReactorSocket {
 
     fun addListener(reactorCallback: ReactorCallback)
 
-    fun connect(eventId: String)
-    fun disconnect(eventId: String)
-
+    fun setUUID(uuid: String)
+    fun join(eventId: String)
+    fun leave(destroyAfter: Boolean)
 }

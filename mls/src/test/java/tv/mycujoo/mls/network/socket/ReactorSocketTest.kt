@@ -7,6 +7,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import kotlin.test.assertFailsWith
 
 class ReactorSocketTest {
 
@@ -34,39 +35,77 @@ class ReactorSocketTest {
     }
 
     @Test
-    fun `given connect command, should connect to webSocket`() {
-        reactorSocket.connect(EVENT_ID)
+    fun `given join command before setting UUID, should throw UninitializedPropertyAccessException`() {
+        assertFailsWith<UninitializedPropertyAccessException> { reactorSocket.join(EVENT_ID) }
+    }
+
+    @Test
+    fun `given join command after setting UUID, should join`() {
+        reactorSocket.setUUID("SAMPLE_UUID")
+
+
+        reactorSocket.join(EVENT_ID)
 
 
         verify(webSocket).send("$JOIN_EVENT$EVENT_ID")
     }
 
     @Test
-    fun `given disconnect command, should disconnect from webSocket`() {
-        reactorSocket.disconnect(EVENT_ID)
+    fun `given leave command without destroy after, should disconnect from webSocket but not destroy client`() {
+        reactorSocket.setUUID("SAMPLE_UUID")
+        reactorSocket.join(EVENT_ID)
+
+
+        reactorSocket.leave(false)
+
+
+        verify(webSocket).send("$LEAVE_EVENT$EVENT_ID")
+        verify(webSocket, never()).close(any(), any())
+    }
+
+    @Test
+    fun `given leave command with destroy after, should disconnect from webSocket & destroy socket client`() {
+        reactorSocket.setUUID("SAMPLE_UUID")
+        reactorSocket.join(EVENT_ID)
+
+
+        reactorSocket.leave(true)
+
+
+        verify(webSocket).send("$LEAVE_EVENT$EVENT_ID")
+        verify(webSocket).close(NORMAL_CLOSURE_STATUS_CODE, null)
+    }
+
+    @Test
+    fun `given leave command when not initialized through connect, should do nothing`() {
+        reactorSocket.setUUID("SAMPLE_UUID")
+        reactorSocket.leave(false)
+
+
+        verify(webSocket, never()).send(any<String>())
+        verify(webSocket, never()).close(any(), any())
+    }
+
+    @Test
+    fun `given join command when active connection exist, should leave from active connection`() {
+        reactorSocket.setUUID("SAMPLE_UUID")
+        reactorSocket.join(EVENT_ID)
+
+
+        reactorSocket.join(EVENT_ID_NEW)
 
 
         verify(webSocket).send("$LEAVE_EVENT$EVENT_ID")
     }
 
     @Test
-    fun `given connect command when active connection exist, should disconnect from active connection`() {
-        reactorSocket.connect(EVENT_ID)
+    fun `given join command after leave, should not leave again`() {
+        reactorSocket.setUUID("SAMPLE_UUID")
+        reactorSocket.join(EVENT_ID)
+        reactorSocket.leave(false)
 
 
-        reactorSocket.connect(EVENT_ID_NEW)
-
-
-        verify(webSocket).send("$LEAVE_EVENT$EVENT_ID")
-    }
-
-    @Test
-    fun `given connect command after disconnecting, should not disconnect again`() {
-        reactorSocket.connect(EVENT_ID)
-        reactorSocket.disconnect(EVENT_ID)
-
-
-        reactorSocket.connect(EVENT_ID_NEW)
+        reactorSocket.join(EVENT_ID_NEW)
 
 
         verify(webSocket, times(1)).send("$LEAVE_EVENT$EVENT_ID")
@@ -75,13 +114,7 @@ class ReactorSocketTest {
 
     @Test
     fun `received updateEvent, should call onEventUpdate of callback`() {
-        whenever(webSocket.send(any<String>())).then {
-            mainWebSocketListener.onMessage(webSocket, "eventUpdate;EVENT_ID;UPDATE_ID")
-            true
-        }
-
-
-        reactorSocket.connect(EVENT_ID)
+        mainWebSocketListener.onMessage(webSocket, "eventUpdate;EVENT_ID;UPDATE_ID")
 
 
         verify(reactorCallback).onEventUpdate("EVENT_ID", "UPDATE_ID")
@@ -90,9 +123,6 @@ class ReactorSocketTest {
 
     @Test
     fun `received eventTotal, should call onCounterUpdate of callback`() {
-        reactorSocket.connect(EVENT_ID)
-
-
         mainWebSocketListener.onMessage(webSocket, "eventTotal;ck2343whlc43k0g90i92grc0u;17")
 
 
@@ -111,6 +141,7 @@ class ReactorSocketTest {
     }
 
     companion object {
+        const val SAMPLE_UUID = "aa-bb-cc-dd-ee"
         const val EVENT_ID = "ck2343whlc43k0g90i92grc0u"
         const val EVENT_ID_NEW = "kjlhuwhlcjui90i92gretyu"
     }

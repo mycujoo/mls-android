@@ -13,7 +13,6 @@ import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.mls.cordinator.Coordinator
 import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.core.VideoPlayerCoordinator
-import tv.mycujoo.mls.data.DataHolder
 import tv.mycujoo.mls.helper.SVGAssetResolver
 import tv.mycujoo.mls.manager.IPrefManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
@@ -64,6 +63,10 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         this.viewIdentifierManager = internalBuilder.viewIdentifierManager
 
         persistPublicKey(this.builder.publicKey)
+
+        persistUUIDIfNotStoredAlready(internalBuilder.uuid)
+        internalBuilder.reactorSocket.setUUID(prefManager.get("UUID") ?: internalBuilder.uuid)
+
         initSvgRenderingLibrary(internalBuilder.getAssetManager())
 
         videoPlayerCoordinator = VideoPlayerCoordinator(
@@ -158,6 +161,13 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
     /**region msc Functions*/
     private fun persistPublicKey(publicKey: String) {
         prefManager.persist("PUBLIC_KEY", publicKey)
+    }
+
+    private fun persistUUIDIfNotStoredAlready(uuid: String) {
+        val storedUUID = prefManager.get("UUID")
+        if (storedUUID == null) {
+            prefManager.persist("UUID", uuid)
+        }
     }
 
     private fun displayPreviewModeWithEventInfo(event: EventEntity) {

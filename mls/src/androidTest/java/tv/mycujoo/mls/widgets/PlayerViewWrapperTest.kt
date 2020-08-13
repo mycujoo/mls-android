@@ -102,18 +102,19 @@ class PlayerViewWrapperTest {
         }
 
         val reactorSocket = object : IReactorSocket{
+
+            override fun setUUID(uuid: String) {
+            }
+
+            override fun join(eventId: String) {
+            }
+
+            override fun leave(destroyAfter: Boolean) {
+            }
+
             override fun addListener(reactorCallback: ReactorCallback) {
 
             }
-
-            override fun connect(eventId: String) {
-
-            }
-
-            override fun disconnect(eventId: String) {
-
-            }
-
         }
 
 
