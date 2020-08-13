@@ -5,20 +5,24 @@ import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.EventStatus
 import tv.mycujoo.domain.entity.OrderByEventsParam
+import tv.mycujoo.mls.data.IDataHolder
+import tv.mycujoo.mls.model.Event
 import tv.mycujoo.mls.model.SingleLiveEvent
 import tv.mycujoo.mls.network.MlsApi
 import javax.inject.Inject
 
-class DataProviderImpl @Inject constructor(val scope: CoroutineScope) : DataProvider {
+class DataProviderImpl @Inject constructor(val scope: CoroutineScope) : DataProvider, IDataHolder {
 
+    /**region Fields*/
     @Inject
     lateinit var mlsApi: MlsApi
 
-    /**region Events*/
-    val events = SingleLiveEvent<List<EventEntity>>()
-
+    private val events = SingleLiveEvent<List<EventEntity>>()
+    private var currentEvent: Event? = null
     /**endregion */
 
+
+    /**region Data Provider*/
     override fun getEventsLiveData(): SingleLiveEvent<List<EventEntity>> {
         return events
     }
@@ -38,4 +42,11 @@ class DataProviderImpl @Inject constructor(val scope: CoroutineScope) : DataProv
             )
         }
     }
+    /**endregion */
+
+    /**region Data Holder*/
+    override fun getCurrentEvent(): Event? {
+        return currentEvent
+    }
+    /**endregion */
 }

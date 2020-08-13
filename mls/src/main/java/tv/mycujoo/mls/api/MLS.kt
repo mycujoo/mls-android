@@ -43,14 +43,12 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
     private lateinit var videoPlayerCoordinator: VideoPlayerCoordinator
     private lateinit var coordinator: Coordinator
 
-    private val dataHolder = DataHolder()
     private lateinit var viewIdentifierManager: ViewIdentifierManager
     /**endregion */
 
     /**region Initializing*/
     init {
         checkNotNull(builder.activity)
-        this.dataHolder
         this.context = builder.activity!!
 
         api = RemoteApi()
@@ -74,7 +72,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
             internalBuilder.reactorSocket,
             internalBuilder.dispatcher,
             internalBuilder.eventsRepository,
-            dataHolder,
+            dataProvider,
             GetActionsFromJSONUseCase.mappedActionCollections().timelineMarkerActionList
         )
     }

@@ -268,7 +268,7 @@ class VideoPlayerCoordinator(
 
 
             if (hasAnalytic) {
-                youboraClient.logEvent(dataHolder.getEvent())
+                youboraClient.logEvent(dataHolder.getCurrentEvent())
             }
         } else {
             // display event info

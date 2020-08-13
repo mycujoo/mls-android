@@ -3,5 +3,5 @@ package tv.mycujoo.mls.data
 import tv.mycujoo.mls.model.Event
 
 interface IDataHolder {
-    fun getEvent(): Event?
+    fun getCurrentEvent(): Event?
 }

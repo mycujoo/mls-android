@@ -96,7 +96,7 @@ class PlayerViewWrapperTest {
         }
 
         val dataHolder = object : IDataHolder {
-            override fun getEvent(): Event? {
+            override fun getCurrentEvent(): Event? {
                 return getSampleEvent()
             }
         }
