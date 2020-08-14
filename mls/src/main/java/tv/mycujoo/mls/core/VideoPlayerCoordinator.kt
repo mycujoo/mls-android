@@ -285,7 +285,7 @@ class VideoPlayerCoordinator(
                 exoPlayer?.seekTo(resumeWindow, resumePosition)
             }
 
-            exoPlayer?.prepare(mediaSource)
+            exoPlayer?.prepare(mediaSource, false, false)
             exoPlayer?.playWhenReady = playWhenReady or this.playWhenReady
             exoPlayer?.playWhenReady = true // todo remove this!
 
