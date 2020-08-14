@@ -19,6 +19,7 @@ import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.network.RemoteApi
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
+import java.util.*
 
 
 class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
@@ -64,8 +65,9 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
         persistPublicKey(this.builder.publicKey)
 
-        persistUUIDIfNotStoredAlready(internalBuilder.uuid)
-        internalBuilder.reactorSocket.setUUID(prefManager.get("UUID") ?: internalBuilder.uuid)
+        internalBuilder.uuid = prefManager.get("UUID") ?: UUID.randomUUID().toString()
+        persistUUIDIfNotStoredAlready(internalBuilder.uuid!!)
+        internalBuilder.reactorSocket.setUUID(internalBuilder.uuid!!)
 
         initSvgRenderingLibrary(internalBuilder.getAssetManager())
 

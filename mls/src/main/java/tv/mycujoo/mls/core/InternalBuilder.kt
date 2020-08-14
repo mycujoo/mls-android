@@ -37,7 +37,7 @@ open class InternalBuilder(private val activity: Activity) {
     lateinit var reactorSocket: IReactorSocket
     private lateinit var mainWebSocketListener: MainWebSocketListener
 
-    var uuid = UUID.randomUUID().toString()
+    var uuid : String? = null
 
     open fun initialize() {
         val dependencyGraph =

@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
+import tv.mycujoo.domain.params.EventIdPairParam
 import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.domain.usecase.GetEventDetailUseCase
@@ -123,7 +124,7 @@ class VideoPlayerCoordinator(
 
                 hasAnalytic = builder.hasAnalytic
                 if (builder.hasAnalytic) {
-                    initAnalytic(builder.publicKey, builder.activity!!, it)
+                    initAnalytic(builder.publicKey, builder.internalBuilder.uuid!!, builder.activity!!, it)
                 }
             }
 
@@ -205,6 +206,7 @@ class VideoPlayerCoordinator(
 
     private fun initAnalytic(
         publicKey: String,
+        uuid: String,
         activity: Activity,
         exoPlayer: SimpleExoPlayer
     ) {
@@ -220,14 +222,14 @@ class VideoPlayerCoordinator(
         plugin.activity = activity
         plugin.adapter = Exoplayer2Adapter(exoPlayer)
 
-        youboraClient = YouboraClient(publicKey, plugin)
+        youboraClient = YouboraClient(publicKey, uuid, plugin)
     }
 
     /**endregion */
 
-    fun onEventUpdateAvailable(eventId: String) {
+    fun onEventUpdateAvailable(updateId: String) {
         dispatcher.launch(context = Dispatchers.Main) {
-            val result = GetEventDetailUseCase(eventsRepository).execute(eventId)
+            val result = GetEventDetailUseCase(eventsRepository).execute(EventIdPairParam(updateId, updateId))
             when (result) {
                 is Success -> {
                     dataHolder.currentEvent = result.value
@@ -253,7 +255,7 @@ class VideoPlayerCoordinator(
         isLive = false
 
         dispatcher.launch(context = Dispatchers.Main) {
-            val result = GetEventDetailUseCase(eventsRepository).execute(eventId)
+            val result = GetEventDetailUseCase(eventsRepository).execute(EventIdPairParam(eventId))
             when (result) {
                 is Success -> {
                     playVideoOrDisplayEventInfo(result.value)
