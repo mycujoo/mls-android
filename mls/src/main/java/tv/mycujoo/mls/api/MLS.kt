@@ -9,7 +9,6 @@ import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.repository.EventsRepository
-import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.mls.cordinator.Coordinator
 import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.core.VideoPlayerCoordinator
@@ -78,7 +77,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
             internalBuilder.dispatcher,
             internalBuilder.eventsRepository,
             dataProvider,
-            GetActionsFromJSONUseCase.mappedActionCollections().timelineMarkerActionList
+            emptyList()
         )
     }
 
@@ -92,13 +91,9 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
     private fun initializeCoordinators(
         playerViewWrapper: PlayerViewWrapper
     ) {
-
-
         videoPlayerCoordinator.initialize(playerViewWrapper, builder)
         coordinator = Coordinator(viewIdentifierManager, videoPlayerCoordinator.getPlayer()!!, okHttpClient)
         coordinator.initPlayerView(playerViewWrapper)
-
-
     }
     /**endregion */
 

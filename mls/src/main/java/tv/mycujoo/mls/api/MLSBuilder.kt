@@ -21,10 +21,6 @@ open class MLSBuilder {
         private set
     internal var activity: Activity? = null
         private set
-    internal var hasDefaultController: Boolean = true
-        private set
-    internal var highlightListParams: HighlightListParams? = null
-        private set
     internal var playerEventsListener: PlayerEventsListener? = null
         private set
     internal var uiEventListener: UIEventListener? = null
@@ -32,7 +28,7 @@ open class MLSBuilder {
     internal var mlsConfiguration: MLSConfiguration = MLSConfiguration()
         private set
 
-    internal var hasAnnotation: Boolean = true
+    internal var hasAnnotation: Boolean = false
         private set
     internal var hasAnalytic: Boolean = true
         private set
@@ -41,11 +37,6 @@ open class MLSBuilder {
 
     fun withActivity(activity: Activity) = apply { this.activity = activity }
 
-    fun defaultPlayerController(defaultController: Boolean) =
-        apply { this.hasDefaultController = defaultController }
-
-    fun highlightList(highlightListParams: HighlightListParams) =
-        apply { this.highlightListParams = highlightListParams }
 
     fun setPlayerEventsListener(playerEventsListener: tv.mycujoo.mls.api.PlayerEventsListener) =
         apply { this.playerEventsListener = PlayerEventsListener(playerEventsListener) }
@@ -53,12 +44,6 @@ open class MLSBuilder {
     fun setUIEventListener(uiEventListener: UIEventListener) =
         apply { this.uiEventListener = uiEventListener }
 
-
-    fun hasAnnotation(hasAnnotation: Boolean) =
-        apply { this.hasAnnotation = hasAnnotation }
-
-    fun hasAnalyticPlugin(hasAnalytic: Boolean) =
-        apply { this.hasAnalytic = hasAnalytic }
 
     open fun build(): MLS {
 
