@@ -3,11 +3,9 @@ package tv.mycujoo.mls.analytic
 import android.util.Log
 import com.npaw.youbora.lib6.plugin.Plugin
 import tv.mycujoo.domain.entity.EventEntity
+import tv.mycujoo.domain.entity.EventStatus
 
-class YouboraClient(var publicKey: String, val uuid: String, val plugin: Plugin) {
-
-
-    val userName: String? = null
+class YouboraClient(private val uuid: String, private val plugin: Plugin) {
 
     fun logEvent(event: EventEntity?) {
         if (event == null) {
@@ -17,14 +15,12 @@ class YouboraClient(var publicKey: String, val uuid: String, val plugin: Plugin)
         plugin.options.username = uuid
         plugin.options.contentTitle = event.title
         plugin.options.contentResource = event.streams.firstOrNull()?.toString()
+        plugin.options.contentIsLive = event.status == EventStatus.EVENT_STATUS_STARTED
 
-        plugin.options.adCustomDimension1 = publicKey
-        plugin.options.adCustomDimension2 = event.id
 
+        plugin.options.contentCustomDimension2 = event.id
         plugin.options.contentCustomDimension14 = "MLS"
-
-//        plugin.options.adCustomDimension3 = event.location
-//        plugin.options.adCustomDimension4 = event.status
+        plugin.options.contentCustomDimension15 = event.streams.firstOrNull()?.id
     }
 
     fun stop() {

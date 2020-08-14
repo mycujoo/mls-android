@@ -19,6 +19,7 @@ data class EventEntity(
 )
 
 data class Stream(
+    @SerializedName("id") val id: String,
     @SerializedName("full_url") val fullUrl: String
 )
 

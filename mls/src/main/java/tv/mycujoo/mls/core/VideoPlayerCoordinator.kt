@@ -125,7 +125,7 @@ class VideoPlayerCoordinator(
 
                 hasAnalytic = builder.hasAnalytic
                 if (builder.hasAnalytic) {
-                    initAnalytic(builder.publicKey, builder.internalBuilder.uuid!!, builder.activity!!, it)
+                    initAnalytic(builder.internalBuilder.uuid!!, builder.activity!!, it)
                 }
             }
 
@@ -206,7 +206,6 @@ class VideoPlayerCoordinator(
     }
 
     private fun initAnalytic(
-        publicKey: String,
         uuid: String,
         activity: Activity,
         exoPlayer: SimpleExoPlayer
@@ -223,7 +222,7 @@ class VideoPlayerCoordinator(
         plugin.activity = activity
         plugin.adapter = Exoplayer2Adapter(exoPlayer)
 
-        youboraClient = YouboraClient(publicKey, uuid, plugin)
+        youboraClient = YouboraClient(uuid, plugin)
     }
 
     /**endregion */
