@@ -30,6 +30,8 @@ import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.network.socket.MainWebSocketListener
 import tv.mycujoo.mls.network.socket.ReactorListener
 import tv.mycujoo.mls.network.socket.ReactorSocket
+import tv.mycujoo.mls.player.IPlayer
+import tv.mycujoo.mls.player.Player
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
 
@@ -80,6 +82,8 @@ class VideoPlayerCoordinatorTest {
     @Mock
     lateinit var activity: AppCompatActivity
 
+
+    lateinit var player: IPlayer
     @Mock
     lateinit var exoPlayer: SimpleExoPlayer
     private lateinit var exoPlayerMainEventListener: MainEventListener
@@ -121,6 +125,9 @@ class VideoPlayerCoordinatorTest {
 
         whenever(dispatcher.coroutineContext).thenReturn(coroutineTestRule.testDispatcher)
 
+        player = Player()
+        player.create(mediaFactory, exoPlayer)
+
 
         whenever(exoPlayer.addListener(any())).then { storeExoPlayerListener(it) }
         videoPlayerCoordinator = VideoPlayerCoordinator(
@@ -132,7 +139,7 @@ class VideoPlayerCoordinatorTest {
             dataHolder,
             GetActionsFromJSONUseCase.mappedActionCollections().timelineMarkerActionList
         )
-        videoPlayerCoordinator.initialize(playerViewWrapper, MLSBuilder)
+        videoPlayerCoordinator.initialize(playerViewWrapper, player, MLSBuilder)
     }
 
     private fun storeExoPlayerListener(it: InvocationOnMock) {
@@ -172,7 +179,7 @@ class VideoPlayerCoordinatorTest {
         videoPlayerCoordinator.playVideo(eventEntityDetails)
 
 
-        verify(exoPlayer).prepare(any())
+        verify(exoPlayer).prepare(any(), any(), any())
     }
 
     @Test

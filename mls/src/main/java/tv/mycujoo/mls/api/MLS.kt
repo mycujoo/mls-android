@@ -17,6 +17,9 @@ import tv.mycujoo.mls.manager.IPrefManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.network.RemoteApi
+import tv.mycujoo.mls.player.Player
+import tv.mycujoo.mls.player.Player.Companion.createExoPlayer
+import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 import java.util.*
 
@@ -39,8 +42,10 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
     private lateinit var playerViewWrapper: PlayerViewWrapper
 
+    private var coordinatorInitialized = false
     private lateinit var videoPlayerCoordinator: VideoPlayerCoordinator
     private lateinit var coordinator: Coordinator
+    private lateinit var player: Player
 
     private lateinit var viewIdentifierManager: ViewIdentifierManager
     /**endregion */
@@ -79,6 +84,13 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
             dataProvider,
             emptyList()
         )
+
+        player = Player().apply {
+            create(
+                createMediaFactory(context),
+                createExoPlayer(context)
+            )
+        }
     }
 
     private fun initSvgRenderingLibrary(assetManager: AssetManager) {
@@ -91,7 +103,13 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
     private fun initializeCoordinators(
         playerViewWrapper: PlayerViewWrapper
     ) {
-        videoPlayerCoordinator.initialize(playerViewWrapper, builder)
+        if (coordinatorInitialized) {
+            videoPlayerCoordinator.reInitialize(playerViewWrapper)
+            return
+        }
+        coordinatorInitialized = true
+
+        videoPlayerCoordinator.initialize(playerViewWrapper, player, builder)
         coordinator = Coordinator(viewIdentifierManager, videoPlayerCoordinator.getPlayer()!!, okHttpClient)
         coordinator.initPlayerView(playerViewWrapper)
     }

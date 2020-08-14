@@ -41,6 +41,10 @@ import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.ReactorCallback
+import tv.mycujoo.mls.player.IPlayer
+import tv.mycujoo.mls.player.Player
+import tv.mycujoo.mls.player.Player.Companion.createExoPlayer
+import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
 
 
 @ExperimentalCoroutinesApi
@@ -56,6 +60,8 @@ class PlayerViewWrapperTest {
     private var animationHelper = FakeAnimationFactory()
 
     private lateinit var videoPlayerCoordinator: VideoPlayerCoordinator
+    lateinit var player: IPlayer
+
     lateinit var MLSBuilder: MLSBuilder
 
 
@@ -119,6 +125,8 @@ class PlayerViewWrapperTest {
         }
 
 
+        player = Player()
+        player.create(createMediaFactory(playerViewWrapper.context), createExoPlayer(playerViewWrapper.context))
 
         videoPlayerCoordinator = VideoPlayerCoordinator(
             defaultVideoPlayerConfig(),
@@ -129,7 +137,7 @@ class PlayerViewWrapperTest {
             dataHolder,
             GetActionsFromJSONUseCase.mappedActionCollections().timelineMarkerActionList
         )
-        videoPlayerCoordinator.initialize(playerViewWrapper, MLSBuilder)
+        videoPlayerCoordinator.initialize(playerViewWrapper, player, MLSBuilder)
 
         UiThreadStatement.runOnUiThread { videoPlayerCoordinator.attachPlayer(playerViewWrapper) }
 
@@ -272,7 +280,7 @@ class PlayerViewWrapperTest {
     /**region Fake data*/
     companion object {
         private fun getSampleStreamList(): List<Stream> {
-            return listOf(Stream("stream_id_0","stream_url"))
+            return listOf(Stream("stream_id_0", "stream_url"))
         }
 
         fun getSampleEventEntity(streams: List<Stream>): EventEntity {

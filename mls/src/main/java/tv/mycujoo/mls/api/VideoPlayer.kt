@@ -1,13 +1,13 @@
 package tv.mycujoo.mls.api
 
-import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.ExoPlayer
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.core.VideoPlayerCoordinator
 
 class VideoPlayer(
-    private val exoPlayer: SimpleExoPlayer,
+    private val exoPlayer: ExoPlayer,
     private val videoPlayerCoordinator: VideoPlayerCoordinator
 ) : PlayerController, PlayerStatus {
 
