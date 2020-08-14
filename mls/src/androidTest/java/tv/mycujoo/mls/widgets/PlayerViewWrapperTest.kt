@@ -88,7 +88,7 @@ class PlayerViewWrapperTest {
                 return Result.Success(Events(emptyList()))
             }
 
-            override suspend fun getEventDetails(eventId: String): Result<Exception, EventEntity> {
+            override suspend fun getEventDetails(eventId: String, updatedId: String?): Result<Exception, EventEntity> {
                 return Result.Success(getSampleEventEntity(emptyList()))
             }
         }

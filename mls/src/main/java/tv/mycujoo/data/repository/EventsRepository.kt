@@ -15,7 +15,7 @@ class EventsRepository(val api: MlsApi) : AbstractRepository(),
 
     }
 
-    override suspend fun getEventDetails(eventId: String): Result<Exception, EventEntity> {
-        return safeApiCall { api.getEventDetails(eventId) }
+    override suspend fun getEventDetails(eventId: String, updatedId: String?): Result<Exception, EventEntity> {
+        return safeApiCall { api.getEventDetails(eventId, updatedId) }
     }
 }

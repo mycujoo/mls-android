@@ -7,8 +7,6 @@ import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Events
 
 interface MlsApi {
-//    @GET("api/events")
-//    suspend fun getEventList(): List<Event>
 
     @GET("bff/events/v1beta1")
     suspend fun getEvents(
@@ -20,6 +18,7 @@ interface MlsApi {
 
     @GET("bff/events/v1beta1/{id}")
     suspend fun getEventDetails(
-        @Path("id") id: String
+        @Path("id") id: String,
+        @Query("update_id") updateId: String? = null
     ): EventEntity
 }
