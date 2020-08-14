@@ -221,7 +221,7 @@
                 android:visibility="gone"
                 tools:visibility="visible" />
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/controller_viewersCountLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -231,21 +231,44 @@
                 tools:visibility="visible">
 
                 <ImageView
+
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginLeft="2dp"
-                    android:background="@drawable/ic_eye_icon" />
+                    android:layout_marginTop="2dp"
+                    android:layout_marginRight="4dp"
+                    android:background="@drawable/ic_eye_icon"
+                    app:layout_constraintBottom_toBottomOf="@id/controller_viewersCountTextView"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toLeftOf="@id/controller_viewersCountTextView"
+                    app:layout_constraintTop_toTopOf="@id/controller_viewersCountTextView" />
 
                 <TextView
                     android:id="@+id/controller_viewersCountTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_margin="4dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:textSize="12sp"
                     android:gravity="center"
                     android:textColor="@color/white"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
                     tools:text="823" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <LinearLayout
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center">
+
+
             </LinearLayout>
 
 

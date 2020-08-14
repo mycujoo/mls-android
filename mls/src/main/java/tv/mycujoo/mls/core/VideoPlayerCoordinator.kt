@@ -30,6 +30,7 @@ import tv.mycujoo.mls.data.IDataHolder
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
+import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.ReactorCallback
@@ -81,7 +82,7 @@ class VideoPlayerCoordinator(
             }
 
             override fun onCounterUpdate(counts: String) {
-                if (isLive) {
+                if (isLive && isViewersCountValid(counts)) {
                     playerViewWrapper.updateViewersCounter(StringUtils.getNumberOfViewers(counts))
                 } else {
                     playerViewWrapper.hideViewersCounter()
