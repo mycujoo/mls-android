@@ -37,7 +37,7 @@ class YouboraClientTest {
 
     @Test
     fun `null event should not be logged`() {
-        youboraClient.logEvent(null)
+        youboraClient.logEvent(null, false)
 
         verify(plugin, never()).options
     }
@@ -46,11 +46,11 @@ class YouboraClientTest {
     fun `given valid event, should log needed params`() {
         val eventEntity = getSampleEventEntity(getSampleStreamList())
 
-        youboraClient.logEvent(eventEntity)
+        youboraClient.logEvent(eventEntity, false)
 
         assertEquals(eventEntity.title, options.contentTitle)
         assertEquals(eventEntity.streams.firstOrNull()?.toString(), options.contentResource)
-        assertEquals(eventEntity.status == EventStatus.EVENT_STATUS_STARTED, options.contentIsLive)
+        assertEquals(false, options.contentIsLive)
 
 
         assertEquals(eventEntity.id, options.contentCustomDimension2)

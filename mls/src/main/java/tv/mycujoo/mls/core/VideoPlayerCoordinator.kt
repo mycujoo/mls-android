@@ -7,9 +7,7 @@ import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ui.TimeBar
-import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Options
-import com.npaw.youbora.lib6.plugin.Plugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -47,22 +45,20 @@ class VideoPlayerCoordinator(
     private val timelineMarkerActionEntities: List<TimelineMarkerEntity>
 ) {
 
-    private var hasAnalytic = false
-    private lateinit var playerViewWrapper: PlayerViewWrapper
+
 
     /**region Fields*/
     private lateinit var player: IPlayer
-
     internal lateinit var videoPlayer: VideoPlayer
+    private lateinit var playerViewWrapper: PlayerViewWrapper
 
+    private var hasAnalytic = false
+    private lateinit var youboraClient: YouboraClient
+    private var logged = false
 
     private var isLive = false
 
     private var eventMayBeStreamed = false
-
-
-    private lateinit var youboraClient: YouboraClient
-
 
     /**endregion */
 
@@ -113,7 +109,7 @@ class VideoPlayerCoordinator(
 
             hasAnalytic = builder.hasAnalytic
             if (builder.hasAnalytic) {
-                initAnalytic(builder.internalBuilder.uuid!!, builder.activity!!, it)
+                initAnalytic(builder.internalBuilder, builder.activity!!, it)
             }
 
             initPlayerViewWrapper(playerViewWrapper, player)
@@ -139,6 +135,8 @@ class VideoPlayerCoordinator(
                 handleLiveModeState()
 
                 handlePlayStatusOfOverlayAnimationsWhileBuffering(playbackState, playWhenReady)
+
+                logEventIfNeeded(playbackState)
 
             }
 
@@ -202,7 +200,7 @@ class VideoPlayerCoordinator(
     }
 
     private fun initAnalytic(
-        uuid: String,
+        internalBuilder: InternalBuilder,
         activity: Activity,
         exoPlayer: ExoPlayer
     ) {
@@ -214,11 +212,12 @@ class VideoPlayerCoordinator(
         youboraOptions.accountCode = "mycujoodev"
         youboraOptions.isAutoDetectBackground = true
 
-        val plugin = Plugin(youboraOptions, activity)
-        plugin.activity = activity
-        plugin.adapter = Exoplayer2Adapter(exoPlayer)
+        val plugin = internalBuilder.createYouboraPlugin(youboraOptions, activity)
 
-        youboraClient = YouboraClient(uuid, plugin)
+        plugin.activity = activity
+        plugin.adapter = internalBuilder.createExoPlayerAdapter(exoPlayer)
+
+        youboraClient = internalBuilder.createYouboraClient(plugin)
     }
 
     /**endregion */
@@ -267,22 +266,16 @@ class VideoPlayerCoordinator(
     }
 
     private fun playVideoOrDisplayEventInfo(event: EventEntity) {
-
         playerViewWrapper.setEventInfo(event.title, event.description, event.start_time)
 
         if (mayPlayVideo(event)) {
+            logged = false
 
             player.play(event.streams.first().fullUrl)
-
-            if (hasAnalytic) {
-                youboraClient.logEvent(dataHolder.currentEvent)
-            }
         } else {
             // display event info
             playerViewWrapper.displayEventInformationPreEventDialog()
-
         }
-
     }
 
     private fun mayPlayVideo(event: EventEntity): Boolean {
@@ -347,6 +340,19 @@ class VideoPlayerCoordinator(
             playerViewWrapper.showBuffering()
         } else {
             playerViewWrapper.hideBuffering()
+        }
+    }
+
+    private fun logEventIfNeeded(playbackState: Int) {
+        if (!hasAnalytic) {
+            return
+        }
+        if (logged) {
+            return
+        }
+        if (playbackState == STATE_READY) {
+            youboraClient.logEvent(dataHolder.currentEvent, player.isLive())
+            logged = true
         }
     }
 

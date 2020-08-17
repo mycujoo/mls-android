@@ -3,8 +3,13 @@ package tv.mycujoo.mls.core
 import android.app.Activity
 import android.content.res.AssetManager
 import androidx.test.espresso.idling.CountingIdlingResource
+import com.google.android.exoplayer2.ExoPlayer
+import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
+import com.npaw.youbora.lib6.plugin.Options
+import com.npaw.youbora.lib6.plugin.Plugin
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
+import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.DataProviderImpl
 import tv.mycujoo.mls.di.DaggerMlsComponent
 import tv.mycujoo.mls.di.NetworkModule
@@ -13,7 +18,6 @@ import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.MainWebSocketListener
 import tv.mycujoo.mls.network.socket.ReactorSocket
-import java.util.*
 import javax.inject.Inject
 
 open class InternalBuilder(private val activity: Activity) {
@@ -37,7 +41,8 @@ open class InternalBuilder(private val activity: Activity) {
     lateinit var reactorSocket: IReactorSocket
     private lateinit var mainWebSocketListener: MainWebSocketListener
 
-    var uuid : String? = null
+    var uuid: String? = null
+
 
     open fun initialize() {
         val dependencyGraph =
@@ -52,4 +57,16 @@ open class InternalBuilder(private val activity: Activity) {
     }
 
     fun getAssetManager(): AssetManager = activity.assets
+
+    fun createYouboraClient(plugin: Plugin): YouboraClient {
+        return YouboraClient(uuid!!, plugin)
+    }
+
+    fun createYouboraPlugin(youboraOptions: Options, activity: Activity): Plugin {
+        return Plugin(youboraOptions, activity)
+    }
+
+    fun createExoPlayerAdapter(exoPlayer: ExoPlayer): Exoplayer2Adapter {
+        return Exoplayer2Adapter(exoPlayer)
+    }
 }

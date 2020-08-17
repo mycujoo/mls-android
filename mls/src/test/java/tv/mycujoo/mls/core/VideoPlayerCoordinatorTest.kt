@@ -1,12 +1,12 @@
 package tv.mycujoo.mls.core
 
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.exoplayer2.Player.*
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
+import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
+import com.npaw.youbora.lib6.plugin.Plugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -22,6 +22,7 @@ import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.mls.CoroutineTestRule
+import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.MLSConfiguration
 import tv.mycujoo.mls.data.IDataHolder
@@ -51,6 +52,9 @@ class VideoPlayerCoordinatorTest {
 
     @Mock
     lateinit var MLSBuilder: MLSBuilder
+
+    @Mock
+    lateinit var internalBuilder: InternalBuilder
 
 
     @Mock
@@ -84,6 +88,7 @@ class VideoPlayerCoordinatorTest {
 
 
     lateinit var player: IPlayer
+
     @Mock
     lateinit var exoPlayer: SimpleExoPlayer
     private lateinit var exoPlayerMainEventListener: MainEventListener
@@ -100,6 +105,15 @@ class VideoPlayerCoordinatorTest {
 
     @Mock
     lateinit var okHttpClient: OkHttpClient
+
+    @Mock
+    lateinit var youboraClient: YouboraClient
+
+    @Mock
+    lateinit var youboraPlugin: Plugin
+
+    @Mock
+    lateinit var exoplayer2Adapter: Exoplayer2Adapter
 
 
     @Before
@@ -118,7 +132,12 @@ class VideoPlayerCoordinatorTest {
 
         whenever(MLSBuilder.createReactorListener(any())).thenReturn(reactorListener)
         whenever(MLSBuilder.mlsConfiguration).thenReturn(MLSConfiguration())
-        whenever(MLSBuilder.hasAnalytic).thenReturn(false)
+        whenever(MLSBuilder.hasAnalytic).thenReturn(true)
+
+        whenever(MLSBuilder.internalBuilder).thenReturn(internalBuilder)
+        whenever(internalBuilder.createYouboraPlugin(any(), any())).thenReturn(youboraPlugin)
+        whenever(internalBuilder.createExoPlayerAdapter(any())).thenReturn(exoplayer2Adapter)
+        whenever(internalBuilder.createYouboraClient(any())).thenReturn(youboraClient)
 
         whenever(playerViewWrapper.context).thenReturn(activity)
         whenever(playerViewWrapper.getTimeBar()).thenReturn(timeBar)
@@ -273,10 +292,49 @@ class VideoPlayerCoordinatorTest {
         verify(playerViewWrapper).updateViewersCounter("17")
     }
 
+    @Test
+    fun `given ready player state, should log event if needed`() {
+        val event = getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_STARTED)
+        whenever(dataHolder.currentEvent).thenReturn(event)
+
+
+        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_READY)
+
+
+        verify(youboraClient).logEvent(event, false)
+    }
+
+    @Test
+    fun `given ready player state, should log event only once`() {
+        val event = getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_STARTED)
+        whenever(dataHolder.currentEvent).thenReturn(event)
+
+
+        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_READY)
+        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_READY)
+        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_READY)
+
+
+        verify(youboraClient, times(1)).logEvent(event, false)
+    }
+    @Test
+    fun `given player with any state other than ready, should not log event`() {
+        val event = getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_STARTED)
+        whenever(dataHolder.currentEvent).thenReturn(event)
+
+
+        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_IDLE)
+        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_BUFFERING)
+        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_ENDED)
+
+
+        verify(youboraClient, never()).logEvent(any(), any())
+    }
+
     /**region Fake data*/
     companion object {
         private fun getSampleStreamList(): List<Stream> {
-            return listOf(Stream("stream_id_0","stream_url"))
+            return listOf(Stream("stream_id_0", "stream_url"))
         }
 
         fun getSampleEventEntity(

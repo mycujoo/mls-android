@@ -54,7 +54,12 @@ class Player : IPlayer {
     }
 
     override fun isLive(): Boolean {
-        return exoPlayer?.isCurrentWindowDynamic ?: false
+        exoPlayer?.let {
+            return (it.isCurrentWindowDynamic) || (it.duration == C.POSITION_UNSET.toLong())
+        }
+
+        return false
+
     }
 
     private fun updateResumePosition() {
