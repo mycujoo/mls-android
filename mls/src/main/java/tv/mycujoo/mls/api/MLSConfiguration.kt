@@ -14,7 +14,7 @@ fun defaultVideoPlayerConfig(): VideoPlayerConfig {
         true,
         80F,
         true,
-        liveViewers = false,
+        liveViewers = true,
         eventInfoButton = true
     )
 }

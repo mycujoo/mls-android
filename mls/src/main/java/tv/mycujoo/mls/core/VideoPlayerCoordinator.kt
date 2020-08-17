@@ -191,7 +191,7 @@ class VideoPlayerCoordinator(
     fun attachPlayer(playerViewWrapper: PlayerViewWrapper) {
         playerViewWrapper.playerView.player = player.getDirectInstance()
 
-        playerViewWrapper.screenMode(PlayerViewWrapper.ScreenMode.PORTRAIT)
+        playerViewWrapper.screenMode(PlayerViewWrapper.ScreenMode.Portrait(PlayerViewWrapper.RESIZE_MODE_FILL))
 
         playerViewWrapper.playerView.hideController()
 

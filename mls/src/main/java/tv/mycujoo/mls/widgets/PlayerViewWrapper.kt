@@ -18,7 +18,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
 import com.google.android.exoplayer2.ui.PlayerView
 import kotlinx.android.synthetic.main.dialog_event_info_pre_event_layout.view.*
 import kotlinx.android.synthetic.main.dialog_event_info_started_layout.view.*
@@ -176,10 +175,10 @@ class PlayerViewWrapper @JvmOverloads constructor(
     /**endregion */
 
     /**region UI*/
-
     fun screenMode(screenMode: ScreenMode) {
         when (screenMode) {
-            ScreenMode.PORTRAIT -> {
+            is ScreenMode.Portrait -> {
+                playerView.resizeMode = screenMode.resizeMode
 
                 val displaySize = context.getDisplaySize()
                 val layoutParams = layoutParams as ViewGroup.LayoutParams
@@ -187,13 +186,31 @@ class PlayerViewWrapper @JvmOverloads constructor(
                 layoutParams.height = displaySize.width * 9 / 16
 
                 setLayoutParams(layoutParams)
-
             }
-            ScreenMode.LANDSCAPE -> {
+            is ScreenMode.Landscape -> {
+                playerView.resizeMode = screenMode.resizeMode
 
                 val layoutParams = layoutParams as ViewGroup.LayoutParams
-                layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
-                layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+
+                when (screenMode.resizeMode) {
+                    RESIZE_MODE_FIT -> {
+                        layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
+                        layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                    }
+                    RESIZE_MODE_FIXED_WIDTH -> {
+                        layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+                        layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                    }
+                    RESIZE_MODE_FIXED_HEIGHT -> {
+                        layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
+                        layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+                    }
+
+                    RESIZE_MODE_FILL -> {
+                        layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+                        layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+                    }
+                }
 
                 setLayoutParams(layoutParams)
             }
@@ -212,19 +229,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
             longArray,
             booleanArray
         )
-    }
-
-
-    fun hideOverlay(viewId: String) {
-//        viewIdentifierManager.getViewId(viewId)?.let {
-//            findViewById<ViewGroup>(it)?.visibility = View.INVISIBLE
-//        }
-    }
-
-    fun removeOverlay(viewId: String) {
-//        viewIdentifierManager.getViewId(viewId)?.let {
-//            findViewById<ViewGroup>(it)?.let { overlayView -> overlayHost.removeView(overlayView) }
-//        }
     }
 
 
@@ -614,9 +618,11 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     /**region Classes*/
 
-    enum class ScreenMode {
-        PORTRAIT,
-        LANDSCAPE
+    sealed class ScreenMode {
+        data class Portrait(val resizeMode: Int = 0) :
+            ScreenMode()
+
+        data class Landscape(val resizeMode: Int = 0) : ScreenMode()
     }
 
     enum class LiveState {
@@ -624,7 +630,30 @@ class PlayerViewWrapper @JvmOverloads constructor(
         LIVE_TRAILING,
         VOD
     }
+
     /**endregion */
+
+    companion object {
+        /**
+         * Either the width or height is decreased to obtain the desired aspect ratio.
+         */
+        const val RESIZE_MODE_FIT = 0
+
+        /**
+         * The width is fixed and the height is increased or decreased to obtain the desired aspect ratio.
+         */
+        const val RESIZE_MODE_FIXED_WIDTH = 1
+
+        /**
+         * The height is fixed and the width is increased or decreased to obtain the desired aspect ratio.
+         */
+        const val RESIZE_MODE_FIXED_HEIGHT = 2
+
+        /**
+         * The specified aspect ratio is ignored.
+         */
+        const val RESIZE_MODE_FILL = 3
+    }
 
 
 }
