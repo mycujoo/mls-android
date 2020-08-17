@@ -22,4 +22,5 @@ interface IPlayer {
     fun release()
 
     fun play(uriString: String)
+    fun loadLastVideo()
 }

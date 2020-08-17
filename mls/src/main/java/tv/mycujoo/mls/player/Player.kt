@@ -22,6 +22,8 @@ class Player : IPlayer {
     private var playWhenReady: Boolean = false
     private var playbackPosition: Long = -1L
 
+    private var uri: Uri? = null
+
     override fun create(mediaFactory: HlsMediaSource.Factory, exoPlayer: SimpleExoPlayer) {
         this.mediaFactory = mediaFactory
         this.exoPlayer = exoPlayer
@@ -80,7 +82,14 @@ class Player : IPlayer {
 
 
     override fun play(uriString: String) {
-        val mediaSource = mediaFactory.createMediaSource(Uri.parse(uriString))
+        this.uri = Uri.parse(uriString)
+        this.uri?.let {
+            play(it, true)
+        }
+    }
+
+    private fun play(uri: Uri, playWhenReady: Boolean) {
+        val mediaSource = mediaFactory.createMediaSource(uri)
 
         if (playbackPosition != -1L) {
             exoPlayer!!.seekTo(playbackPosition)
@@ -96,8 +105,14 @@ class Player : IPlayer {
             exoPlayer?.prepare(mediaSource, true, false)
         }
 
+        exoPlayer?.playWhenReady = playWhenReady
 
-        exoPlayer?.playWhenReady = true
+    }
+
+    override fun loadLastVideo() {
+        uri?.let {
+            play(it, false)
+        }
     }
 
     companion object {

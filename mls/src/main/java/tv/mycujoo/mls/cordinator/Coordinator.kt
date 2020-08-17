@@ -186,6 +186,7 @@ class Coordinator(
 
     override fun initPlayerView(playerViewWrapper: PlayerViewWrapper) {
         this.playerViewWrapper = playerViewWrapper
+        playerViewWrapper.onSizeChangedCallback = onSizeChangedCallback
     }
 
     override fun release() {
