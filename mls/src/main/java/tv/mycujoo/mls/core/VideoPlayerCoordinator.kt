@@ -183,6 +183,9 @@ class VideoPlayerCoordinator(
         player.create(createMediaFactory(playerViewWrapper.context), createExoPlayer(playerViewWrapper.context))
 
         initPlayerViewWrapper(playerViewWrapper, player)
+        dataHolder.currentEvent?.let {
+            joinToReactor(it)
+        }
     }
 
     fun attachPlayer(playerViewWrapper: PlayerViewWrapper) {
@@ -251,6 +254,7 @@ class VideoPlayerCoordinator(
             val result = GetEventDetailUseCase(eventsRepository).execute(EventIdPairParam(eventId))
             when (result) {
                 is Success -> {
+                    dataHolder.currentEvent = result.value
                     playVideoOrDisplayEventInfo(result.value)
                     joinToReactor(result.value)
                 }
@@ -268,9 +272,7 @@ class VideoPlayerCoordinator(
 
         if (mayPlayVideo(event)) {
 
-
             player.play(event.streams.first().fullUrl)
-
 
             if (hasAnalytic) {
                 youboraClient.logEvent(dataHolder.currentEvent)
@@ -354,6 +356,7 @@ class VideoPlayerCoordinator(
         if (hasAnalytic) {
             youboraClient.stop()
         }
+        reactorSocket.leave(true)
     }
 
 
