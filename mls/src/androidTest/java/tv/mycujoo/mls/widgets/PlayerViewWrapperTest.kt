@@ -60,9 +60,9 @@ class PlayerViewWrapperTest {
     private var animationHelper = FakeAnimationFactory()
 
     private lateinit var videoPlayerCoordinator: VideoPlayerCoordinator
-    lateinit var player: IPlayer
+    private lateinit var player: IPlayer
 
-    lateinit var MLSBuilder: MLSBuilder
+    private lateinit var MLSBuilder: MLSBuilder
 
 
     @Before
@@ -124,22 +124,27 @@ class PlayerViewWrapperTest {
             }
         }
 
+        UiThreadStatement.runOnUiThread {
+            player = Player()
+            player.create(createMediaFactory(playerViewWrapper.context), createExoPlayer(playerViewWrapper.context))
 
-        player = Player()
-        player.create(createMediaFactory(playerViewWrapper.context), createExoPlayer(playerViewWrapper.context))
+            videoPlayerCoordinator = VideoPlayerCoordinator(
+                defaultVideoPlayerConfig(),
+                viewIdentifierManager,
+                reactorSocket,
+                GlobalScope,
+                eventRepository,
+                dataHolder,
+                GetActionsFromJSONUseCase.mappedActionCollections().timelineMarkerActionList
+            )
+            videoPlayerCoordinator.initialize(
+                playerViewWrapper,
+                player,
+                MLSBuilder
+            )
 
-        videoPlayerCoordinator = VideoPlayerCoordinator(
-            defaultVideoPlayerConfig(),
-            viewIdentifierManager,
-            reactorSocket,
-            GlobalScope,
-            eventRepository,
-            dataHolder,
-            GetActionsFromJSONUseCase.mappedActionCollections().timelineMarkerActionList
-        )
-        videoPlayerCoordinator.initialize(playerViewWrapper, player, MLSBuilder)
-
-        UiThreadStatement.runOnUiThread { videoPlayerCoordinator.attachPlayer(playerViewWrapper) }
+            videoPlayerCoordinator.attachPlayer(playerViewWrapper)
+        }
 
     }
 
@@ -151,6 +156,13 @@ class PlayerViewWrapperTest {
     @After
     fun unregisterIdlingResource() {
         IdlingRegistry.getInstance().unregister(viewIdentifierManager.idlingResource)
+    }
+
+    @Test
+    fun initializing_withoutLoadOrPlayVideo_shouldHideLoadingProgressBar() {
+        setupPlayer()
+
+        onView(withId(R.id.controller_buffering)).check(matches(withEffectiveVisibility(Visibility.INVISIBLE)))
     }
 
     @Test
