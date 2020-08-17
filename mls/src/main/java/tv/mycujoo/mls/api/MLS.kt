@@ -148,20 +148,6 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         return videoPlayerCoordinator.videoPlayer
     }
 
-//    override fun loadVideo(event: EventEntity) {
-//        event.streams.firstOrNull()?.fullUrl?.let {
-//            playVideo(Uri.parse(it), false)
-//        } ?: displayPreviewModeWithEventInfo(event)
-//
-//        setEventInfoToPlayerViewWrapper(event)
-//    }
-//
-//    override fun playVideo(event: EventEntity) {
-//        event.streams.firstOrNull()?.fullUrl?.let {
-//            playVideo(Uri.parse(it), true)
-//        } ?: displayPreviewModeWithEventInfo(event)
-//    }
-
     override fun getDataProvider(): DataProvider {
         return dataProvider
     }

@@ -116,8 +116,6 @@ class VideoPlayerCoordinator(
                 initAnalytic(builder.internalBuilder.uuid!!, builder.activity!!, it)
             }
 
-//            playerViewWrapper.onSizeChangedCallback = coordinator.onSizeChangedCallback
-
             initPlayerViewWrapper(playerViewWrapper, player)
         }
     }
@@ -154,6 +152,7 @@ class VideoPlayerCoordinator(
         }
 
         player.addListener(mainEventListener)
+        player.loadLastVideo()
 
         playerViewWrapper.getTimeBar().addListener(object : TimeBar.OnScrubListener {
             override fun onScrubMove(timeBar: TimeBar, position: Long) {
@@ -188,7 +187,6 @@ class VideoPlayerCoordinator(
 
     fun attachPlayer(playerViewWrapper: PlayerViewWrapper) {
         playerViewWrapper.playerView.player = player.getDirectInstance()
-//        playerViewWrapper.defaultController(hasDefaultPlayerController)
 
         playerViewWrapper.screenMode(PlayerViewWrapper.ScreenMode.PORTRAIT)
 
@@ -282,17 +280,6 @@ class VideoPlayerCoordinator(
             playerViewWrapper.displayEventInformationPreEventDialog()
 
         }
-//        this.uri = uri
-//        dataHolder.eventLiveData = (
-//                Event(
-//                    "101",
-//                    Stream(listOf(uri)),
-//                    "Sample name",
-//                    "Sample location",
-//                    "started"
-//                )
-//                )
-
 
     }
 
