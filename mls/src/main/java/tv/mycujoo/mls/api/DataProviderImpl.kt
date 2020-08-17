@@ -12,12 +12,14 @@ import javax.inject.Inject
 
 class DataProviderImpl @Inject constructor(val scope: CoroutineScope) : DataProvider, IDataHolder {
 
+
     /**region Fields*/
     @Inject
     lateinit var mlsApi: MlsApi
 
     private val events = SingleLiveEvent<List<EventEntity>>()
     override var currentEvent: EventEntity? = null
+    private var fetchEventCallback: ((List<EventEntity>) -> Unit)? = null
     /**endregion */
 
 
@@ -26,19 +28,23 @@ class DataProviderImpl @Inject constructor(val scope: CoroutineScope) : DataProv
         return events
     }
 
-
     override fun fetchEvents(
         pageSize: Int?,
         pageToken: String?,
         eventStatus: List<EventStatus>?,
-        orderBy: OrderByEventsParam?
+        orderBy: OrderByEventsParam?,
+        fetchEventCallback: ((List<EventEntity>) -> Unit)?
     ) {
+        this.fetchEventCallback = fetchEventCallback
         scope.launch {
             val eventsResponse =
                 mlsApi.getEvents(pageSize, pageToken, eventStatus?.map { it.name }, orderBy?.name)
             events.postValue(
                 eventsResponse.events
             )
+            fetchEventCallback?.let {
+                it.invoke(eventsResponse.events)
+            }
         }
     }
     /**endregion */
