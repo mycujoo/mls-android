@@ -5,7 +5,6 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SeekParameters
-import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ui.TimeBar
 import com.npaw.youbora.lib6.plugin.Options
 import kotlinx.coroutines.CoroutineScope
@@ -360,9 +359,8 @@ class VideoPlayerCoordinator(
         reactorSocket.leave(true)
     }
 
-
-    fun getPlayer(): SimpleExoPlayer? {
-        return player.getDirectInstance() as SimpleExoPlayer
+    fun getPlayer(): IPlayer {
+        return player
     }
 
 

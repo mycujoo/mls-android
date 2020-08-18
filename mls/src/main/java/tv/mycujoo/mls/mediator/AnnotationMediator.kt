@@ -5,7 +5,6 @@ import android.os.Looper
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.DISCONTINUITY_REASON_SEEK
 import com.google.android.exoplayer2.Player.STATE_READY
-import com.google.android.exoplayer2.SimpleExoPlayer
 import tv.mycujoo.domain.entity.ActionEntity
 import tv.mycujoo.domain.entity.models.ActionType.HIDE_OVERLAY
 import tv.mycujoo.domain.entity.models.ActionType.SHOW_OVERLAY
@@ -15,6 +14,7 @@ import tv.mycujoo.mls.core.AnnotationListener
 import tv.mycujoo.mls.core.IActionBuilder
 import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.player.IPlayer
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit
 class AnnotationMediator(
     private var playerViewWrapper: PlayerViewWrapper,
     identifierManager: ViewIdentifierManager,
-    private val exoPlayer: SimpleExoPlayer,
+    player: IPlayer,
     downloaderClient: DownloaderClient
 ) : IAnnotationMediator {
 
@@ -33,13 +33,13 @@ class AnnotationMediator(
     /**region Fields*/
     internal var actionBuilder: IActionBuilder
 
-    private lateinit var seekInterruptionEventListener: Player.EventListener
+    private lateinit var eventListener: Player.EventListener
     private var hasPendingSeek: Boolean = false
     /**endregion */
 
     /**region Initialization*/
     init {
-        initEventListener(exoPlayer)
+        initEventListener(player)
 
         val annotationListener = AnnotationListener(playerViewWrapper, identifierManager)
 
@@ -49,7 +49,34 @@ class AnnotationMediator(
             identifierManager
         )
 
+        feed()
 
+        val handler = Handler(Looper.getMainLooper())
+        scheduler = Executors.newScheduledThreadPool(1)
+
+        val exoRunnable = Runnable {
+            if (player.isPlaying()) {
+                val currentPosition = player.currentPosition()
+
+                actionBuilder.setCurrentTime(currentPosition, player.isPlaying())
+                actionBuilder.buildCurrentTimeRange()
+
+                actionBuilder.processTimers()
+
+                actionBuilder.computeVariableNameValueTillNow()
+
+                playerViewWrapper.updateTime(currentPosition, player.duration())
+            }
+        }
+
+        val scheduledRunnable = Runnable {
+            handler.post(exoRunnable)
+        }
+        scheduler.scheduleAtFixedRate(scheduledRunnable, 1000L, 1000L, TimeUnit.MILLISECONDS)
+
+    }
+
+    private fun feed() {
         val actionsList = ArrayList<ActionEntity>()
 
         actionsList.addAll(GetActionsFromJSONUseCase.mappedActionCollections().actionEntityList)
@@ -71,63 +98,29 @@ class AnnotationMediator(
         actionBuilder.addIncrementVariableEntities(GetActionsFromJSONUseCase.mappedActionCollections().incrementVariableEntityList)
 
         actionBuilder.addActionCollections(GetActionsFromJSONUseCase.mappedActionCollections())
-
-
-        val handler = Handler(Looper.getMainLooper())
-        scheduler = Executors.newScheduledThreadPool(1)
-
-        val exoRunnable = Runnable {
-            if (exoPlayer.isPlaying) {
-                val currentPosition = exoPlayer.currentPosition
-
-                actionBuilder.setCurrentTime(currentPosition, exoPlayer.isPlaying)
-                actionBuilder.buildCurrentTimeRange()
-
-                actionBuilder.processTimers()
-
-                actionBuilder.computeVariableNameValueTillNow()
-
-                playerViewWrapper.updateTime(currentPosition, exoPlayer.duration)
-            }
-        }
-
-        val scheduledRunnable = Runnable {
-            handler.post(exoRunnable)
-        }
-        scheduler.scheduleAtFixedRate(scheduledRunnable, 1000L, 1000L, TimeUnit.MILLISECONDS)
-
     }
 
-    override fun initPlayerView(playerViewWrapper: PlayerViewWrapper) {
-        this.playerViewWrapper = playerViewWrapper
-        playerViewWrapper.onSizeChangedCallback = onSizeChangedCallback
-    }
-
-    override fun release() {
-        scheduler.shutdown()
-    }
-
-    private fun initEventListener(exoPlayer: SimpleExoPlayer) {
-        seekInterruptionEventListener = object : Player.EventListener {
+    private fun initEventListener(player: IPlayer) {
+        eventListener = object : Player.EventListener {
 
             override fun onPositionDiscontinuity(reason: Int) {
                 super.onPositionDiscontinuity(reason)
-                val time = exoPlayer.currentPosition
+                val time = player.currentPosition()
 
-                actionBuilder.setCurrentTime(time, exoPlayer.isPlaying)
+                actionBuilder.setCurrentTime(time, player.isPlaying())
 
                 if (reason == DISCONTINUITY_REASON_SEEK) {
                     hasPendingSeek = true
                 }
 
-                playerViewWrapper.updateTime(time, exoPlayer.duration)
+                playerViewWrapper.updateTime(time, player.duration())
             }
 
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 super.onPlayerStateChanged(playWhenReady, playbackState)
 
                 if (playbackState == STATE_READY) {
-                    playerViewWrapper.updateTime(exoPlayer.currentPosition, exoPlayer.duration)
+                    playerViewWrapper.updateTime(player.currentPosition(), player.duration())
                 }
 
                 if (playbackState == STATE_READY && hasPendingSeek) {
@@ -149,13 +142,22 @@ class AnnotationMediator(
                 actionBuilder.processTimers()
             }
         }
-        exoPlayer.addListener(seekInterruptionEventListener)
+        player.addListener(eventListener)
+    }
+
+    override fun initPlayerView(playerViewWrapper: PlayerViewWrapper) {
+        this.playerViewWrapper = playerViewWrapper
+        playerViewWrapper.onSizeChangedCallback = onSizeChangedCallback
     }
     /**endregion */
 
     /**region Over-ridden Functions*/
+    override fun release() {
+        scheduler.shutdown()
+    }
+
     override var onSizeChangedCallback = {
-        actionBuilder.setCurrentTime(exoPlayer.currentPosition, exoPlayer.isPlaying)
+        actionBuilder.setCurrentTime(player.currentPosition(), player.isPlaying())
         actionBuilder.removeAll()
         actionBuilder.buildCurrentTimeRange()
         actionBuilder.buildLingerings()

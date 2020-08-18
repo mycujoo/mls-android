@@ -151,6 +151,23 @@ class PlayerTest {
         assertEquals(false, player.isLive())
     }
 
+    @Test
+    fun `while exo player is playing, should return is playing true`() {
+        initPlayer()
+        whenever(exoPlayer.isPlaying).thenReturn(true)
+
+
+        assert(player.isPlaying())
+    }
+
+    @Test
+    fun `while exo player is not playing, should return is playing false`() {
+        initPlayer()
+        whenever(exoPlayer.isPlaying).thenReturn(false)
+
+
+        assert(player.isPlaying().not())
+    }
 
     @Test
     fun `given uri to play when no resume data is available, should start from the beginning`() {

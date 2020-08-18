@@ -62,6 +62,14 @@ class Player : IPlayer {
 
     }
 
+    override fun isPlaying(): Boolean {
+        exoPlayer?.let {
+            return it.isPlaying
+        }
+
+        return false
+    }
+
     private fun updateResumePosition() {
         if (exoPlayer == null) {
             return

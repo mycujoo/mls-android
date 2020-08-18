@@ -114,7 +114,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         annotationMediator = AnnotationMediator(
             playerViewWrapper,
             viewIdentifierManager,
-            videoPlayerCoordinator.getPlayer()!!,
+            videoPlayerCoordinator.getPlayer(),
             DownloaderClient(okHttpClient)
         )
 //        annotationMediator.initPlayerView(playerViewWrapper)

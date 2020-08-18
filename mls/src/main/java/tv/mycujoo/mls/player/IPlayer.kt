@@ -18,6 +18,7 @@ interface IPlayer {
     fun currentPosition(): Long
     fun duration(): Long
     fun isLive(): Boolean
+    fun isPlaying(): Boolean
 
     fun release()
 
