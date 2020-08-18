@@ -109,7 +109,7 @@ class ViewIdentifierManagerTest {
         Mockito.`when`(view0.tag).thenReturn(SAMPLE_TAG)
         viewIdentifierManager.attachOverlayView(view0)
 
-        assert(viewIdentifierManager.overlayObjectIsAttached(SAMPLE_TAG))
+        assert(viewIdentifierManager.overlayBlueprintIsAttached(SAMPLE_TAG))
     }
 
     @Test
@@ -117,17 +117,17 @@ class ViewIdentifierManagerTest {
         Mockito.`when`(view0.tag).thenReturn(SAMPLE_TAG)
         viewIdentifierManager.attachOverlayView(view0)
 
-        assertFalse(viewIdentifierManager.overlayObjectIsNotAttached(SAMPLE_TAG))
+        assertFalse(viewIdentifierManager.overlayBlueprintIsNotAttached(SAMPLE_TAG))
     }
 
     @Test
     fun `given detached overlay object, should return false for isAttached()`() {
-        assertFalse(viewIdentifierManager.overlayObjectIsAttached(SAMPLE_TAG))
+        assertFalse(viewIdentifierManager.overlayBlueprintIsAttached(SAMPLE_TAG))
     }
 
     @Test
     fun `given detached overlay object, should return true for isNotAttached()`() {
-        assertTrue(viewIdentifierManager.overlayObjectIsNotAttached(SAMPLE_TAG))
+        assertTrue(viewIdentifierManager.overlayBlueprintIsNotAttached(SAMPLE_TAG))
     }
 
     @Test

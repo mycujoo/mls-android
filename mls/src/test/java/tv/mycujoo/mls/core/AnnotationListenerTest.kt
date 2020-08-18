@@ -114,7 +114,7 @@ class AnnotationListenerTest {
     fun `given lingering-intro overlay which is attached, should update it`() {
         val introTransitionSpec = TransitionSpec(15000L, AnimationType.NONE, 2000L)
         val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, 25000L)
-        whenever(identifierManager.overlayObjectIsAttached(overlayEntity.id)).thenReturn(true)
+        whenever(identifierManager.overlayBlueprintIsAttached(overlayEntity.id)).thenReturn(true)
 
 
         annotationListener.addOrUpdateLingeringIntroOverlay(overlayEntity, 123L, true)
@@ -127,7 +127,7 @@ class AnnotationListenerTest {
     fun `given lingering-intro overlay which is not attached, should add it as lingering`() {
         val introTransitionSpec = TransitionSpec(15000L, AnimationType.NONE, 2000L)
         val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, 25000L)
-        whenever(identifierManager.overlayObjectIsAttached(overlayEntity.id)).thenReturn(false)
+        whenever(identifierManager.overlayBlueprintIsAttached(overlayEntity.id)).thenReturn(false)
 
 
         annotationListener.addOrUpdateLingeringIntroOverlay(overlayEntity, 123L, true)
@@ -157,7 +157,7 @@ class AnnotationListenerTest {
         val introTransitionSpec = TransitionSpec(15000L, AnimationType.FADE_IN, 2000L)
         val outroTransitionSpec = TransitionSpec(25000L, AnimationType.NONE, 2000L)
         val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
-        whenever(identifierManager.overlayObjectIsAttached(overlayEntity.id)).thenReturn(true)
+        whenever(identifierManager.overlayBlueprintIsAttached(overlayEntity.id)).thenReturn(true)
 
 
         annotationListener.addOrUpdateLingeringOutroOverlay(overlayEntity, 123L, true)
@@ -171,7 +171,7 @@ class AnnotationListenerTest {
         val introTransitionSpec = TransitionSpec(15000L, AnimationType.FADE_IN, 2000L)
         val outroTransitionSpec = TransitionSpec(25000L, AnimationType.NONE, 2000L)
         val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
-        whenever(identifierManager.overlayObjectIsAttached(overlayEntity.id)).thenReturn(false)
+        whenever(identifierManager.overlayBlueprintIsAttached(overlayEntity.id)).thenReturn(false)
 
 
         annotationListener.addOrUpdateLingeringOutroOverlay(overlayEntity, 123L, true)
@@ -201,7 +201,7 @@ class AnnotationListenerTest {
         val introTransitionSpec = TransitionSpec(15000L, AnimationType.UNSPECIFIED, -1L)
         val outroTransitionSpec = TransitionSpec(25000L, AnimationType.UNSPECIFIED, -1L)
         val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
-        whenever(identifierManager.overlayObjectIsAttached(overlayEntity.id)).thenReturn(true)
+        whenever(identifierManager.overlayBlueprintIsAttached(overlayEntity.id)).thenReturn(true)
 
 
         annotationListener.addOrUpdateLingeringMidwayOverlay(overlayEntity)
@@ -215,7 +215,7 @@ class AnnotationListenerTest {
         val introTransitionSpec = TransitionSpec(15000L, AnimationType.UNSPECIFIED, -1L)
         val outroTransitionSpec = TransitionSpec(25000L, AnimationType.UNSPECIFIED, -1L)
         val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
-        whenever(identifierManager.overlayObjectIsAttached(overlayEntity.id)).thenReturn(false)
+        whenever(identifierManager.overlayBlueprintIsAttached(overlayEntity.id)).thenReturn(false)
 
 
         annotationListener.addOrUpdateLingeringMidwayOverlay(overlayEntity)

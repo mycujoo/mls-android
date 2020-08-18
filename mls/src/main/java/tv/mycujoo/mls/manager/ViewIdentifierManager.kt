@@ -81,11 +81,11 @@ class ViewIdentifierManager(
     /**region Overlay objects*/
 
 
-    fun overlayObjectIsNotAttached(id: String): Boolean {
+    fun overlayBlueprintIsNotAttached(id: String): Boolean {
         return attachedViewList.none { it.tag == id }
     }
 
-    fun overlayObjectIsAttached(id: String): Boolean {
+    fun overlayBlueprintIsAttached(id: String): Boolean {
         return attachedViewList.any { it.tag == id }
     }
 

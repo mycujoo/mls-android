@@ -4,7 +4,7 @@ import tv.mycujoo.data.entity.ActionCollections
 import tv.mycujoo.domain.entity.IncrementVariableEntity
 import tv.mycujoo.domain.entity.OverlayAct.*
 import tv.mycujoo.domain.entity.OverlayEntity
-import tv.mycujoo.domain.entity.OverlayObject
+import tv.mycujoo.domain.entity.OverlayBlueprint
 import tv.mycujoo.domain.entity.SetVariableEntity
 import tv.mycujoo.mls.helper.ActionVariableHelper
 import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasOutroAnimation
@@ -22,7 +22,7 @@ class ActionBuilder(
     private var currentTime: Long = 0L
     private var isPlaying: Boolean = false
 
-    private var overlayObjects = ArrayList<OverlayObject>()
+    private var overlayBlueprints = ArrayList<OverlayBlueprint>()
     private var toBeDownloadedSvgList = ArrayList<String>()
 
     private var setVariableActions = ArrayList<SetVariableEntity>()
@@ -41,9 +41,9 @@ class ActionBuilder(
     /**endregion */
 
 
-    override fun addOverlayObjects(overlayObject: List<OverlayObject>) {
-        overlayObjects.addAll(overlayObject)
-        overlayObject.forEach {
+    override fun addOverlayBlueprints(overlayBlueprint: List<OverlayBlueprint>) {
+        overlayBlueprints.addAll(overlayBlueprint)
+        overlayBlueprint.forEach {
             overlayEntityList.add(it.toOverlayEntity())
         }
     }
@@ -143,19 +143,19 @@ class ActionBuilder(
     }
 
     override fun removeAll() {
-        listener.clearScreen(overlayObjects.map { it.id })
+        listener.clearScreen(overlayBlueprints.map { it.id })
 
         toBeDownloadedSvgList.clear()
         appliedSetVariableActions.clear()
     }
 
     override fun removeLeftOvers() {
-        overlayObjects.forEach { overlayObject ->
-            if (isNotDownloading(overlayObject) &&
-                isAttached(overlayObject) &&
-                shouldNotBeOnScreen(overlayObject)
+        overlayBlueprints.forEach { overlayBlueprint ->
+            if (isNotDownloading(overlayBlueprint) &&
+                isAttached(overlayBlueprint) &&
+                shouldNotBeOnScreen(overlayBlueprint)
             ) {
-                listener.removeOverlay(overlayObject.toOverlayEntity())
+                listener.removeOverlay(overlayBlueprint.toOverlayEntity())
             }
         }
     }
@@ -194,28 +194,28 @@ class ActionBuilder(
 
     /**region Action classifiers*/
 
-    private fun isNotDownloading(overlayObject: OverlayObject): Boolean {
-        return toBeDownloadedSvgList.none { it == overlayObject.id }
+    private fun isNotDownloading(overlayBlueprint: OverlayBlueprint): Boolean {
+        return toBeDownloadedSvgList.none { it == overlayBlueprint.id }
     }
 
-    private fun isNotAttached(overlayObject: OverlayObject): Boolean {
-        return viewIdentifierManager.overlayObjectIsNotAttached(overlayObject.id)
+    private fun isNotAttached(overlayBlueprint: OverlayBlueprint): Boolean {
+        return viewIdentifierManager.overlayBlueprintIsNotAttached(overlayBlueprint.id)
     }
 
-    private fun isAttached(overlayObject: OverlayObject): Boolean {
-        return viewIdentifierManager.overlayObjectIsAttached(overlayObject.id)
+    private fun isAttached(overlayBlueprint: OverlayBlueprint): Boolean {
+        return viewIdentifierManager.overlayBlueprintIsAttached(overlayBlueprint.id)
     }
 
-    private fun shouldNotBeOnScreen(overlayObject: OverlayObject): Boolean {
-        if (currentTime < overlayObject.introTransitionSpec.offset - 1000) {
+    private fun shouldNotBeOnScreen(overlayBlueprint: OverlayBlueprint): Boolean {
+        if (currentTime < overlayBlueprint.introTransitionSpec.offset - 1000) {
             return true
         }
 
-        if (hasOutroAnimation(overlayObject.outroTransitionSpec.animationType)) {
-            return currentTime > overlayObject.outroTransitionSpec.offset + overlayObject.outroTransitionSpec.animationDuration
+        if (hasOutroAnimation(overlayBlueprint.outroTransitionSpec.animationType)) {
+            return currentTime > overlayBlueprint.outroTransitionSpec.offset + overlayBlueprint.outroTransitionSpec.animationDuration
         } else {
-            if (overlayObject.outroTransitionSpec.offset != -1L) {
-                return currentTime > overlayObject.outroTransitionSpec.offset
+            if (overlayBlueprint.outroTransitionSpec.offset != -1L) {
+                return currentTime > overlayBlueprint.outroTransitionSpec.offset
             }
             return false
         }

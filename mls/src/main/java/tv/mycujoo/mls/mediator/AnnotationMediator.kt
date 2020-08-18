@@ -6,13 +6,13 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.DISCONTINUITY_REASON_SEEK
 import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SimpleExoPlayer
-import tv.mycujoo.domain.entity.*
+import tv.mycujoo.domain.entity.ActionEntity
 import tv.mycujoo.domain.entity.models.ActionType.HIDE_OVERLAY
 import tv.mycujoo.domain.entity.models.ActionType.SHOW_OVERLAY
 import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
-import tv.mycujoo.mls.core.IActionBuilder
 import tv.mycujoo.mls.core.ActionBuilder
 import tv.mycujoo.mls.core.AnnotationListener
+import tv.mycujoo.mls.core.IActionBuilder
 import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
@@ -64,8 +64,8 @@ class AnnotationMediator(
                     }
             }
 
-        actionBuilder.addOverlayObjects(actionsList.filter { it.type == SHOW_OVERLAY }
-            .map { createOverlayObject(it) })
+        actionBuilder.addOverlayBlueprints(actionsList.filter { it.type == SHOW_OVERLAY }
+            .map { it.toOverlayBlueprint() })
 
         actionBuilder.addSetVariableEntities(GetActionsFromJSONUseCase.mappedActionCollections().setVariableEntityList)
         actionBuilder.addIncrementVariableEntities(GetActionsFromJSONUseCase.mappedActionCollections().incrementVariableEntityList)
@@ -105,51 +105,6 @@ class AnnotationMediator(
 
     override fun release() {
         scheduler.shutdown()
-    }
-
-    private fun createOverlayObject(actionEntity: ActionEntity): OverlayObject {
-
-        val svgData = SvgData(
-            actionEntity.svgUrl,
-            actionEntity.svgInputStream,
-            null
-        )
-        val viewSpec = ViewSpec(actionEntity.position, actionEntity.size)
-        val introTransitionSpec = TransitionSpec(
-            actionEntity.offset,
-            actionEntity.introAnimationType,
-            actionEntity.introAnimationDuration
-        )
-
-        val outroTransitionSpec: TransitionSpec =
-            if (actionEntity.duration != null && actionEntity.duration!! > 0L) {
-                TransitionSpec(
-                    actionEntity.offset + actionEntity.duration!!,
-                    if (actionEntity.outroAnimationType == AnimationType.UNSPECIFIED) {
-                        AnimationType.NONE
-                    } else {
-                        actionEntity.outroAnimationType
-                    },
-                    actionEntity.outroAnimationDuration
-                )
-            } else {
-                TransitionSpec(
-                    -1L,
-                    AnimationType.UNSPECIFIED,
-                    -1L
-                )
-            }
-
-
-
-        return OverlayObject(
-            actionEntity.id,
-            svgData,
-            viewSpec,
-            introTransitionSpec,
-            outroTransitionSpec,
-            actionEntity.variablePlaceHolders
-        )
     }
 
     private fun initEventListener(exoPlayer: SimpleExoPlayer) {

@@ -1,6 +1,6 @@
 package tv.mycujoo.domain.entity
 
-data class OverlayObject(
+data class OverlayBlueprint(
     var id: String,
     var svgData: SvgData?,
     var viewSpec: ViewSpec,

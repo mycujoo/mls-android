@@ -3,7 +3,7 @@ package tv.mycujoo.mls.core
 import tv.mycujoo.data.entity.ActionCollections
 import tv.mycujoo.domain.entity.IncrementVariableEntity
 import tv.mycujoo.domain.entity.OverlayEntity
-import tv.mycujoo.domain.entity.OverlayObject
+import tv.mycujoo.domain.entity.OverlayBlueprint
 import tv.mycujoo.domain.entity.SetVariableEntity
 
 abstract class IActionBuilder {
@@ -13,10 +13,10 @@ abstract class IActionBuilder {
     abstract fun setCurrentTime(time: Long, playing: Boolean)
 
     /**
-     * adds OverlayObject which will be processed to create Show Overlays
+     * adds OverlayBlueprints which will be processed to create Show Overlays
      * Or directly add OverlayEntity list.
      */
-    abstract fun addOverlayObjects(overlayObject: List<OverlayObject>)
+    abstract fun addOverlayBlueprints(overlayBlueprint: List<OverlayBlueprint>)
     abstract fun addOverlayEntities(overlayEntities: List<OverlayEntity>)
 
     /**
