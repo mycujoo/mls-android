@@ -9,7 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.repository.EventsRepository
-import tv.mycujoo.mls.cordinator.Coordinator
+import tv.mycujoo.mls.cordinator.AnnotationMediator
 import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.core.VideoPlayerCoordinator
 import tv.mycujoo.mls.data.IDataManager
@@ -45,7 +45,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
     private var coordinatorInitialized = false
     private lateinit var videoPlayerCoordinator: VideoPlayerCoordinator
-    private lateinit var coordinator: Coordinator
+    private lateinit var annotationMediator: AnnotationMediator
     private lateinit var player: Player
 
     private lateinit var viewIdentifierManager: ViewIdentifierManager
@@ -110,8 +110,8 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         coordinatorInitialized = true
 
         videoPlayerCoordinator.initialize(playerViewWrapper, player, builder)
-        coordinator = Coordinator(viewIdentifierManager, videoPlayerCoordinator.getPlayer()!!, okHttpClient)
-        coordinator.initPlayerView(playerViewWrapper)
+        annotationMediator = AnnotationMediator(viewIdentifierManager, videoPlayerCoordinator.getPlayer()!!, okHttpClient)
+        annotationMediator.initPlayerView(playerViewWrapper)
     }
     /**endregion */
 
@@ -156,7 +156,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
     private fun release() {
         videoPlayerCoordinator.release()
-        coordinator.release()
+        annotationMediator.release()
     }
 
     /**region msc Functions*/

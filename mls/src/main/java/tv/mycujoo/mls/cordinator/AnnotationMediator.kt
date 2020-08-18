@@ -23,11 +23,11 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
 
-class Coordinator(
+class AnnotationMediator(
     private val identifierManager: ViewIdentifierManager,
     private val exoPlayer: SimpleExoPlayer,
     private val okHttpClient: OkHttpClient
-) : CoordinatorInterface {
+) : IAnnotationMediator {
 
     private var scheduler: ScheduledExecutorService
 
