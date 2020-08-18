@@ -2,7 +2,7 @@ package tv.mycujoo.mls.core
 
 import tv.mycujoo.domain.entity.OverlayEntity
 
-interface AnnotationListener {
+interface IAnnotationListener {
 
     fun addOverlay(overlayEntity: OverlayEntity)
     fun removeOverlay(overlayEntity: OverlayEntity)

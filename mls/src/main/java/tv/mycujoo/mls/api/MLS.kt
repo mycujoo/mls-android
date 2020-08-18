@@ -9,13 +9,14 @@ import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.repository.EventsRepository
-import tv.mycujoo.mls.cordinator.AnnotationMediator
 import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.core.VideoPlayerCoordinator
 import tv.mycujoo.mls.data.IDataManager
+import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.SVGAssetResolver
 import tv.mycujoo.mls.manager.IPrefManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.mediator.AnnotationMediator
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.network.RemoteApi
 import tv.mycujoo.mls.player.Player
@@ -110,8 +111,13 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         coordinatorInitialized = true
 
         videoPlayerCoordinator.initialize(playerViewWrapper, player, builder)
-        annotationMediator = AnnotationMediator(viewIdentifierManager, videoPlayerCoordinator.getPlayer()!!, okHttpClient)
-        annotationMediator.initPlayerView(playerViewWrapper)
+        annotationMediator = AnnotationMediator(
+            playerViewWrapper,
+            viewIdentifierManager,
+            videoPlayerCoordinator.getPlayer()!!,
+            DownloaderClient(okHttpClient)
+        )
+//        annotationMediator.initPlayerView(playerViewWrapper)
     }
     /**endregion */
 

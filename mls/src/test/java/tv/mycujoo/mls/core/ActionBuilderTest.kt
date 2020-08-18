@@ -11,13 +11,13 @@ import tv.mycujoo.domain.entity.*
 import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 
-class ActionBuilderImplTest {
+class ActionBuilderTest {
 
-    private lateinit var annotationBuilderImpl: ActionBuilderImpl
+    private lateinit var actionBuilder: ActionBuilder
 
 
     @Mock
-    lateinit var annotationListener: AnnotationListener
+    lateinit var annotationListener: IAnnotationListener
 
     @Mock
     lateinit var downloaderClient: DownloaderClient
@@ -29,19 +29,14 @@ class ActionBuilderImplTest {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        val viewSpec = ViewSpec(PositionGuide(left = 10F, top = 10F), Pair(30F, 0F))
-        val introTransitionSpec = TransitionSpec(1000L, AnimationType.FADE_IN, 1000L)
-
-
-        annotationBuilderImpl = ActionBuilderImpl(annotationListener, downloaderClient, viewIdentifierManager)
-
+        actionBuilder = ActionBuilder(annotationListener, downloaderClient, viewIdentifierManager)
     }
 
 
     @Test
     fun `regular play mode, add overlay with animation`() {
-        annotationBuilderImpl.setCurrentTime(900L, true)
-        annotationBuilderImpl.buildCurrentTimeRange()
+        actionBuilder.setCurrentTime(900L, true)
+        actionBuilder.buildCurrentTimeRange()
     }
 
 
@@ -50,12 +45,12 @@ class ActionBuilderImplTest {
         Mockito.`when`(downloaderClient.download(any(), any()))
             .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
         val overlayEntity = getSampleOverlayEntity(ONE_SECONDS, FIFTEEN_SECONDS)
-        annotationBuilderImpl.addOverlayEntities(listOf(overlayEntity))
-        annotationBuilderImpl.setCurrentTime(1L, true)
+        actionBuilder.addOverlayEntities(listOf(overlayEntity))
+        actionBuilder.setCurrentTime(1L, true)
 
 
 
-        annotationBuilderImpl.buildCurrentTimeRange()
+        actionBuilder.buildCurrentTimeRange()
 
 
         Mockito.verify(annotationListener).addOverlay(overlayEntity)
@@ -66,12 +61,12 @@ class ActionBuilderImplTest {
         Mockito.`when`(downloaderClient.download(any(), any()))
             .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
         val overlayEntity = getSampleOverlayEntity(ONE_SECONDS, FIFTEEN_SECONDS)
-        annotationBuilderImpl.addOverlayEntities(listOf(overlayEntity))
-        annotationBuilderImpl.setCurrentTime(1001L, true)
+        actionBuilder.addOverlayEntities(listOf(overlayEntity))
+        actionBuilder.setCurrentTime(1001L, true)
 
 
 
-        annotationBuilderImpl.buildCurrentTimeRange()
+        actionBuilder.buildCurrentTimeRange()
 
 
         Mockito.verify(annotationListener, never()).addOverlay(overlayEntity)
@@ -83,12 +78,12 @@ class ActionBuilderImplTest {
             .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
         val overlayEntity = getSampleOverlayEntity(ONE_SECONDS, FIFTEEN_SECONDS)
         overlayEntity.isOnScreen = true
-        annotationBuilderImpl.addOverlayEntities(listOf(overlayEntity))
-        annotationBuilderImpl.setCurrentTime(14001L, true)
+        actionBuilder.addOverlayEntities(listOf(overlayEntity))
+        actionBuilder.setCurrentTime(14001L, true)
 
 
 
-        annotationBuilderImpl.buildCurrentTimeRange()
+        actionBuilder.buildCurrentTimeRange()
 
 
         Mockito.verify(annotationListener).removeOverlay(overlayEntity)
@@ -100,12 +95,12 @@ class ActionBuilderImplTest {
             .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
         val overlayEntity = getSampleOverlayEntity(ONE_SECONDS, FIFTEEN_SECONDS)
         overlayEntity.isOnScreen = true
-        annotationBuilderImpl.addOverlayEntities(listOf(overlayEntity))
-        annotationBuilderImpl.setCurrentTime(15001L, true)
+        actionBuilder.addOverlayEntities(listOf(overlayEntity))
+        actionBuilder.setCurrentTime(15001L, true)
 
 
 
-        annotationBuilderImpl.buildCurrentTimeRange()
+        actionBuilder.buildCurrentTimeRange()
 
 
         Mockito.verify(annotationListener, never()).removeOverlay(overlayEntity)

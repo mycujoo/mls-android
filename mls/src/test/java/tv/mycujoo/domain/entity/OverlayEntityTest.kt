@@ -249,58 +249,60 @@ class OverlayEntityTest {
         private const val FIFTEEN_SECONDS = 15000L
         private const val TWENTY_FIVE_SECONDS = 25000L
 
+
+        fun getSampleOverlayEntity(introOffset: Long, outroOffset: Long): OverlayEntity {
+            val viewSpec = ViewSpec(null, null)
+
+            val introTransitionSpec = TransitionSpec(introOffset, AnimationType.NONE, 0L)
+            val outroTransitionSpec = TransitionSpec(outroOffset, AnimationType.NONE, 0L)
+
+            return OverlayEntity(
+                "id_1001",
+                null,
+                viewSpec,
+                introTransitionSpec,
+                outroTransitionSpec,
+                emptyList()
+            )
+        }
+
+        fun getSampleOverlayEntity(
+            introTransitionSpec: TransitionSpec,
+            outroOffset: Long
+        ): OverlayEntity {
+            val viewSpec = ViewSpec(null, null)
+
+            val outroTransitionSpec = TransitionSpec(outroOffset, AnimationType.NONE, 0L)
+
+            return OverlayEntity(
+                "id_1001",
+                null,
+                viewSpec,
+                introTransitionSpec,
+                outroTransitionSpec,
+                emptyList()
+            )
+        }
+
+        fun getSampleOverlayEntity(
+            introTransitionSpec: TransitionSpec,
+            outroTransitionSpec: TransitionSpec
+
+        ): OverlayEntity {
+            val viewSpec = ViewSpec(null, null)
+
+            return OverlayEntity(
+                "id_1001",
+                null,
+                viewSpec,
+                introTransitionSpec,
+                outroTransitionSpec,
+                emptyList()
+            )
+        }
+
     }
 
 
-    private fun getSampleOverlayEntity(introOffset: Long, outroOffset: Long): OverlayEntity {
-        val viewSpec = ViewSpec(null, null)
-
-        val introTransitionSpec = TransitionSpec(introOffset, AnimationType.NONE, 0L)
-        val outroTransitionSpec = TransitionSpec(outroOffset, AnimationType.NONE, 0L)
-
-        return OverlayEntity(
-            "id_1001",
-            null,
-            viewSpec,
-            introTransitionSpec,
-            outroTransitionSpec,
-            emptyList()
-        )
-    }
-
-    private fun getSampleOverlayEntity(
-        introTransitionSpec: TransitionSpec,
-        outroOffset: Long
-    ): OverlayEntity {
-        val viewSpec = ViewSpec(null, null)
-
-        val outroTransitionSpec = TransitionSpec(outroOffset, AnimationType.NONE, 0L)
-
-        return OverlayEntity(
-            "id_1001",
-            null,
-            viewSpec,
-            introTransitionSpec,
-            outroTransitionSpec,
-            emptyList()
-        )
-    }
-
-    private fun getSampleOverlayEntity(
-        introTransitionSpec: TransitionSpec,
-        outroTransitionSpec: TransitionSpec
-
-    ): OverlayEntity {
-        val viewSpec = ViewSpec(null, null)
-
-        return OverlayEntity(
-            "id_1001",
-            null,
-            viewSpec,
-            introTransitionSpec,
-            outroTransitionSpec,
-            emptyList()
-        )
-    }
     /**endregion */
 }

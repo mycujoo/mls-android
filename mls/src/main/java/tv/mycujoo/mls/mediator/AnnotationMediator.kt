@@ -1,19 +1,17 @@
-package tv.mycujoo.mls.cordinator
+package tv.mycujoo.mls.mediator
 
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.DISCONTINUITY_REASON_SEEK
 import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SimpleExoPlayer
-import okhttp3.OkHttpClient
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.models.ActionType.HIDE_OVERLAY
 import tv.mycujoo.domain.entity.models.ActionType.SHOW_OVERLAY
 import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
+import tv.mycujoo.mls.core.IActionBuilder
 import tv.mycujoo.mls.core.ActionBuilder
-import tv.mycujoo.mls.core.ActionBuilderImpl
 import tv.mycujoo.mls.core.AnnotationListener
 import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.manager.ViewIdentifierManager
@@ -24,16 +22,16 @@ import java.util.concurrent.TimeUnit
 
 
 class AnnotationMediator(
-    private val identifierManager: ViewIdentifierManager,
+    private var playerViewWrapper: PlayerViewWrapper,
+    identifierManager: ViewIdentifierManager,
     private val exoPlayer: SimpleExoPlayer,
-    private val okHttpClient: OkHttpClient
+    downloaderClient: DownloaderClient
 ) : IAnnotationMediator {
 
     private var scheduler: ScheduledExecutorService
 
     /**region Fields*/
-    internal lateinit var playerViewWrapper: PlayerViewWrapper
-    internal var actionBuilder: ActionBuilder
+    internal var actionBuilder: IActionBuilder
 
     private lateinit var seekInterruptionEventListener: Player.EventListener
     private var hasPendingSeek: Boolean = false
@@ -43,95 +41,11 @@ class AnnotationMediator(
     init {
         initEventListener(exoPlayer)
 
-        val annotationListener = object : AnnotationListener {
+        val annotationListener = AnnotationListener(playerViewWrapper, identifierManager)
 
-            override fun addOverlay(overlayEntity: OverlayEntity) {
-                overlayEntity.isOnScreen = true
-                if (overlayEntity.introTransitionSpec.animationType == AnimationType.NONE) {
-                    playerViewWrapper.onNewOverlayWithNoAnimation(overlayEntity)
-                } else {
-                    playerViewWrapper.onNewOverlayWithAnimation(overlayEntity)
-                }
-            }
-
-            override fun removeOverlay(overlayEntity: OverlayEntity) {
-                Log.d("Coordinator", "removeOverlay() for overlayEntity ${overlayEntity.id}")
-
-                overlayEntity.isOnScreen = false
-                if (overlayEntity.outroTransitionSpec.animationType == AnimationType.NONE) {
-                    playerViewWrapper.onOverlayRemovalWithNoAnimation(overlayEntity)
-                } else {
-                    playerViewWrapper.onOverlayRemovalWithAnimation(overlayEntity)
-                }
-            }
-
-
-            override fun addOrUpdateLingeringIntroOverlay(
-                overlayEntity: OverlayEntity,
-                animationPosition: Long,
-                isPlaying: Boolean
-            ) {
-                overlayEntity.isOnScreen = true
-                if (identifierManager.overlayObjectIsAttached(overlayEntity.id)) {
-                    playerViewWrapper.updateLingeringIntroOverlay(
-                        overlayEntity,
-                        animationPosition,
-                        isPlaying
-                    )
-                } else {
-                    playerViewWrapper.addLingeringIntroOverlay(
-                        overlayEntity,
-                        animationPosition,
-                        isPlaying
-                    )
-                }
-            }
-
-            override fun addOrUpdateLingeringOutroOverlay(
-                overlayEntity: OverlayEntity,
-                animationPosition: Long,
-                isPlaying: Boolean
-            ) {
-                overlayEntity.isOnScreen = true
-                if (identifierManager.overlayObjectIsAttached(overlayEntity.id)) {
-                    playerViewWrapper.updateLingeringOutroOverlay(
-                        overlayEntity,
-                        animationPosition,
-                        isPlaying
-                    )
-                } else {
-                    playerViewWrapper.addLingeringOutroOverlay(
-                        overlayEntity,
-                        animationPosition,
-                        isPlaying
-                    )
-                }
-
-            }
-
-            override fun addOrUpdateLingeringMidwayOverlay(overlayEntity: OverlayEntity) {
-                overlayEntity.isOnScreen = true
-                if (identifierManager.overlayObjectIsAttached(overlayEntity.id)) {
-                    playerViewWrapper.updateLingeringMidwayOverlay(overlayEntity)
-                } else {
-                    playerViewWrapper.addLingeringMidwayOverlay(overlayEntity)
-                }
-            }
-
-            override fun removeLingeringOverlay(overlayEntity: OverlayEntity) {
-                overlayEntity.isOnScreen = false
-                playerViewWrapper.removeLingeringOverlay(overlayEntity)
-            }
-
-            override fun clearScreen(idList: List<String>) {
-                playerViewWrapper.clearScreen(idList)
-            }
-        }
-
-
-        actionBuilder = ActionBuilderImpl(
+        actionBuilder = ActionBuilder(
             annotationListener,
-            DownloaderClient(okHttpClient),
+            downloaderClient,
             identifierManager
         )
 

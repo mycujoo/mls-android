@@ -1,4 +1,4 @@
-package tv.mycujoo.mls.cordinator
+package tv.mycujoo.mls.mediator
 
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
