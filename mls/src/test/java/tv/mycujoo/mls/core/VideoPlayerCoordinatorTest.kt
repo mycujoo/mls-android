@@ -19,13 +19,12 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.invocation.InvocationOnMock
 import tv.mycujoo.domain.entity.*
-import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.mls.CoroutineTestRule
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.MLSConfiguration
-import tv.mycujoo.mls.data.IDataHolder
+import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.network.socket.MainWebSocketListener
@@ -78,10 +77,7 @@ class VideoPlayerCoordinatorTest {
     lateinit var dispatcher: CoroutineScope
 
     @Mock
-    lateinit var eventsRepository: EventsRepository
-
-    @Mock
-    lateinit var dataHolder: IDataHolder
+    lateinit var dataManager: IDataManager
 
     @Mock
     lateinit var activity: AppCompatActivity
@@ -154,8 +150,7 @@ class VideoPlayerCoordinatorTest {
             viewIdentifierManager,
             reactorSocket,
             dispatcher,
-            eventsRepository,
-            dataHolder,
+            dataManager,
             GetActionsFromJSONUseCase.mappedActionCollections().timelineMarkerActionList
         )
         videoPlayerCoordinator.initialize(playerViewWrapper, player, MLSBuilder)
@@ -175,7 +170,7 @@ class VideoPlayerCoordinatorTest {
         videoPlayerCoordinator.playVideo("1eUBgUbXhriLFCT6A8E5a6Lv0R7")
 
 
-        verify(eventsRepository).getEventDetails("1eUBgUbXhriLFCT6A8E5a6Lv0R7")
+        verify(dataManager).getEventDetails("1eUBgUbXhriLFCT6A8E5a6Lv0R7")
     }
 
     @Test
@@ -184,14 +179,13 @@ class VideoPlayerCoordinatorTest {
         videoPlayerCoordinator.playVideo(event)
 
 
-        verify(eventsRepository).getEventDetails(event.id)
+        verify(dataManager).getEventDetails(event.id)
     }
 
     @Test
     fun `given event with streamUrl, should play video`() = runBlockingTest {
-        val event: EventEntity = getSampleEventEntity(emptyList())
         val eventEntityDetails = getSampleEventEntity(getSampleStreamList())
-        whenever(eventsRepository.getEventDetails(event.id)).thenReturn(Result.Success(eventEntityDetails))
+        whenever(dataManager.getEventDetails(eventEntityDetails.id)).thenReturn(Result.Success(eventEntityDetails))
         whenever(mediaFactory.createMediaSource(any())).thenReturn(hlsMediaSource)
 
 
@@ -204,7 +198,7 @@ class VideoPlayerCoordinatorTest {
     @Test
     fun `given event without streamUrl, should not play video`() = runBlockingTest {
         val event: EventEntity = getSampleEventEntity(emptyList())
-        whenever(eventsRepository.getEventDetails(event.id)).thenReturn(Result.Success(event))
+        whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
         whenever(mediaFactory.createMediaSource(any())).thenReturn(hlsMediaSource)
 
 
@@ -218,7 +212,7 @@ class VideoPlayerCoordinatorTest {
     @Test
     fun `given event without streamUrl, should display event info`() = runBlockingTest {
         val event: EventEntity = getSampleEventEntity(emptyList())
-        whenever(eventsRepository.getEventDetails(event.id)).thenReturn(Result.Success(event))
+        whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
         whenever(mediaFactory.createMediaSource(any())).thenReturn(hlsMediaSource)
 
         videoPlayerCoordinator.playVideo(event)
@@ -229,7 +223,7 @@ class VideoPlayerCoordinatorTest {
     @Test
     fun `given event to play, should connect to reactor`() = runBlockingTest {
         val event: EventEntity = getSampleEventEntity(emptyList())
-        whenever(eventsRepository.getEventDetails(event.id)).thenReturn(Result.Success(event))
+        whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
 
 
         videoPlayerCoordinator.playVideo(event)
@@ -242,7 +236,8 @@ class VideoPlayerCoordinatorTest {
     @Test
     fun `given event with anything but Started status to play, should not connect to reactor`() = runBlockingTest {
         val event = getSampleEventEntity(emptyList(), EventStatus.EVENT_STATUS_SCHEDULED)
-        whenever(eventsRepository.getEventDetails(event.id)).thenReturn(Result.Success(event))
+        whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
+
 
 
         videoPlayerCoordinator.playVideo(event)
@@ -263,7 +258,8 @@ class VideoPlayerCoordinatorTest {
     @Test
     fun `update viewers counter in VOD stream, should hide viewers counter in player wrapper`() = runBlockingTest {
         val event = getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_SCHEDULED)
-        whenever(eventsRepository.getEventDetails(event.id)).thenReturn(Result.Success(event))
+        whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
+
 
         whenever(exoPlayer.isCurrentWindowDynamic).thenReturn(false)
 
@@ -279,7 +275,8 @@ class VideoPlayerCoordinatorTest {
     @Test
     fun `update viewers counter in LIVE stream, should update player wrapper`() = runBlockingTest {
         val event = getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_SCHEDULED)
-        whenever(eventsRepository.getEventDetails(event.id)).thenReturn(Result.Success(event))
+        whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
+
 
         whenever(exoPlayer.isCurrentWindowDynamic).thenReturn(true)
 
@@ -295,7 +292,7 @@ class VideoPlayerCoordinatorTest {
     @Test
     fun `given ready player state, should log event if needed`() {
         val event = getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_STARTED)
-        whenever(dataHolder.currentEvent).thenReturn(event)
+        whenever(dataManager.currentEvent).thenReturn(event)
 
 
         exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_READY)
@@ -307,7 +304,7 @@ class VideoPlayerCoordinatorTest {
     @Test
     fun `given ready player state, should log event only once`() {
         val event = getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_STARTED)
-        whenever(dataHolder.currentEvent).thenReturn(event)
+        whenever(dataManager.currentEvent).thenReturn(event)
 
 
         exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_READY)
@@ -317,10 +314,11 @@ class VideoPlayerCoordinatorTest {
 
         verify(youboraClient, times(1)).logEvent(event, false)
     }
+
     @Test
     fun `given player with any state other than ready, should not log event`() {
         val event = getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_STARTED)
-        whenever(dataHolder.currentEvent).thenReturn(event)
+        whenever(dataManager.currentEvent).thenReturn(event)
 
 
         exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_IDLE)

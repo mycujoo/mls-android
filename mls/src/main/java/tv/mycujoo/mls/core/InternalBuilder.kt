@@ -10,7 +10,7 @@ import com.npaw.youbora.lib6.plugin.Plugin
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import tv.mycujoo.mls.analytic.YouboraClient
-import tv.mycujoo.mls.api.DataProviderImpl
+import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.di.DaggerMlsComponent
 import tv.mycujoo.mls.di.NetworkModule
 import tv.mycujoo.mls.manager.IPrefManager
@@ -31,7 +31,7 @@ open class InternalBuilder(private val activity: Activity) {
     lateinit var okHttpClient: OkHttpClient
 
     @Inject
-    lateinit var dataProvider: DataProviderImpl
+    lateinit var dataManager: IDataManager
 
     @Inject
     lateinit var prefManager: IPrefManager

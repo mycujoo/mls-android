@@ -6,11 +6,55 @@ import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Before
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import tv.mycujoo.domain.repository.EventsRepository
+import tv.mycujoo.mls.CoroutineTestRule
+import tv.mycujoo.mls.core.VideoPlayerCoordinator
+import tv.mycujoo.mls.data.IInternalDataProvider
+import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
+import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.player.IPlayer
+import tv.mycujoo.mls.player.Player
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
 class MLSTest {
 
     lateinit var MLS: MLS
+    private lateinit var mLSTestBuilder: MLSBuilder
+
+
+    @Mock
+    lateinit var videoPlayerCoordinator: VideoPlayerCoordinator
+
+    @Mock
+    lateinit var playerViewWrapper: PlayerViewWrapper
+
+
+    @Mock
+    lateinit var MLSBuilder: MLSBuilder
+
+
+    @Mock
+    lateinit var videoPlayerConfig: VideoPlayerConfig
+
+    @Mock
+    lateinit var viewIdentifierManager: ViewIdentifierManager
+
+    @Mock
+    lateinit var dispatcher: CoroutineScope
+
+    @Mock
+    lateinit var eventsRepository: EventsRepository
+
+    @Mock
+    lateinit var internalDataProvider: IInternalDataProvider
+
+    @Mock
+    lateinit var activity: AppCompatActivity
+
+    lateinit var player: IPlayer
+
+    @Mock
+    lateinit var exoPlayer: SimpleExoPlayer
 
     @Mock
     lateinit var activity: Activity

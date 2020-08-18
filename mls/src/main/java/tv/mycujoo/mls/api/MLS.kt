@@ -12,6 +12,7 @@ import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.mls.cordinator.Coordinator
 import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.core.VideoPlayerCoordinator
+import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.helper.SVGAssetResolver
 import tv.mycujoo.mls.manager.IPrefManager
 import tv.mycujoo.mls.manager.ViewIdentifierManager
@@ -33,7 +34,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
     private lateinit var dispatcher: CoroutineScope
     private lateinit var okHttpClient: OkHttpClient
 
-    private lateinit var dataProvider: DataProviderImpl
+    private lateinit var dataManager: IDataManager
 
     private lateinit var prefManager: IPrefManager
     private var context: Context
@@ -63,7 +64,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         this.eventsRepository = internalBuilder.eventsRepository
         this.dispatcher = internalBuilder.dispatcher
         this.okHttpClient = internalBuilder.okHttpClient
-        this.dataProvider = internalBuilder.dataProvider
+        this.dataManager = internalBuilder.dataManager
         this.prefManager = internalBuilder.prefManager
         this.viewIdentifierManager = internalBuilder.viewIdentifierManager
 
@@ -80,8 +81,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
             viewIdentifierManager,
             internalBuilder.reactorSocket,
             internalBuilder.dispatcher,
-            internalBuilder.eventsRepository,
-            dataProvider,
+            dataManager,
             emptyList()
         )
 
@@ -149,7 +149,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
     }
 
     override fun getDataProvider(): DataProvider {
-        return dataProvider
+        return dataManager
     }
 
     /**endregion */

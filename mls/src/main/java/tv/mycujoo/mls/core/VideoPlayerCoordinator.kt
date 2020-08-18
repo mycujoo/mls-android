@@ -14,14 +14,11 @@ import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
-import tv.mycujoo.domain.params.EventIdPairParam
-import tv.mycujoo.domain.repository.EventsRepository
-import tv.mycujoo.domain.usecase.GetEventDetailUseCase
 import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.VideoPlayer
-import tv.mycujoo.mls.data.IDataHolder
+import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
@@ -40,11 +37,9 @@ class VideoPlayerCoordinator(
     private val viewIdentifierManager: ViewIdentifierManager,
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
-    private val eventsRepository: EventsRepository,
-    private val dataHolder: IDataHolder,
+    private val dataManager: IDataManager,
     private val timelineMarkerActionEntities: List<TimelineMarkerEntity>
 ) {
-
 
 
     /**region Fields*/
@@ -181,7 +176,7 @@ class VideoPlayerCoordinator(
         player.create(createMediaFactory(playerViewWrapper.context), createExoPlayer(playerViewWrapper.context))
 
         initPlayerViewWrapper(playerViewWrapper, player)
-        dataHolder.currentEvent?.let {
+        dataManager.currentEvent?.let {
             joinToReactor(it)
         }
     }
@@ -224,10 +219,10 @@ class VideoPlayerCoordinator(
 
     fun onEventUpdateAvailable(updateId: String) {
         dispatcher.launch(context = Dispatchers.Main) {
-            val result = GetEventDetailUseCase(eventsRepository).execute(EventIdPairParam(updateId, updateId))
+            val result = dataManager.getEventDetails(updateId)
             when (result) {
                 is Success -> {
-                    dataHolder.currentEvent = result.value
+                    dataManager.currentEvent = result.value
                     if (eventMayBeStreamed.not()) {
                         playVideoOrDisplayEventInfo(result.value)
                     }
@@ -238,8 +233,8 @@ class VideoPlayerCoordinator(
                 }
             }
         }
-
     }
+
 
     /**region Playback functions*/
     fun playVideo(event: EventEntity) {
@@ -250,10 +245,10 @@ class VideoPlayerCoordinator(
         isLive = false
 
         dispatcher.launch(context = Dispatchers.Main) {
-            val result = GetEventDetailUseCase(eventsRepository).execute(EventIdPairParam(eventId))
+            val result = dataManager.getEventDetails(eventId)
             when (result) {
                 is Success -> {
-                    dataHolder.currentEvent = result.value
+                    dataManager.currentEvent = result.value
                     playVideoOrDisplayEventInfo(result.value)
                     joinToReactor(result.value)
                 }
@@ -351,7 +346,7 @@ class VideoPlayerCoordinator(
             return
         }
         if (playbackState == STATE_READY) {
-            youboraClient.logEvent(dataHolder.currentEvent, player.isLive())
+            youboraClient.logEvent(dataManager.currentEvent, player.isLive())
             logged = true
         }
     }

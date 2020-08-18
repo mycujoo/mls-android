@@ -5,23 +5,38 @@ import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.EventStatus
 import tv.mycujoo.domain.entity.OrderByEventsParam
-import tv.mycujoo.mls.data.IDataHolder
+import tv.mycujoo.domain.entity.Result
+import tv.mycujoo.domain.params.EventIdPairParam
+import tv.mycujoo.domain.repository.EventsRepository
+import tv.mycujoo.domain.usecase.GetEventDetailUseCase
+import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.model.SingleLiveEvent
 import tv.mycujoo.mls.network.MlsApi
-import javax.inject.Inject
 
-class DataProviderImpl @Inject constructor(val scope: CoroutineScope) : DataProvider, IDataHolder {
+/**
+ * Serves client as Data Provider
+ * Serves internal use as Internal Data Provider
+ */
+class DataManager(
+    private val scope: CoroutineScope,
+    private val eventsRepository: EventsRepository,
+    private var mlsApi: MlsApi
+) : IDataManager {
 
 
     /**region Fields*/
-    @Inject
-    lateinit var mlsApi: MlsApi
-
     private val events = SingleLiveEvent<List<EventEntity>>()
     override var currentEvent: EventEntity? = null
     private var fetchEventCallback: ((List<EventEntity>) -> Unit)? = null
+
     /**endregion */
 
+
+    /**region InternalDataProvider*/
+    override suspend fun getEventDetails(eventId: String): Result<Exception, EventEntity> {
+        return GetEventDetailUseCase(eventsRepository).execute(EventIdPairParam(eventId))
+    }
+    /**endregion */
 
     /**region Data Provider*/
     override fun getEventsLiveData(): SingleLiveEvent<List<EventEntity>> {
@@ -39,12 +54,15 @@ class DataProviderImpl @Inject constructor(val scope: CoroutineScope) : DataProv
         scope.launch {
             val eventsResponse =
                 mlsApi.getEvents(pageSize, pageToken, eventStatus?.map { it.name }, orderBy?.name)
-            events.postValue(
-                eventsResponse.events
-            )
-            fetchEventCallback?.let {
-                it.invoke(eventsResponse.events)
+            eventsResponse?.let { response ->
+                events.postValue(
+                    response.events
+                )
+                fetchEventCallback?.let {
+                    it.invoke(response.events)
+                }
             }
+
         }
     }
     /**endregion */

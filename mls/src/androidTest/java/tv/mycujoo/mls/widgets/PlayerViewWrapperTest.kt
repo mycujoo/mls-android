@@ -36,9 +36,10 @@ import tv.mycujoo.mls.R
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.defaultVideoPlayerConfig
 import tv.mycujoo.mls.core.VideoPlayerCoordinator
-import tv.mycujoo.mls.data.IDataHolder
+import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.model.SingleLiveEvent
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.ReactorCallback
 import tv.mycujoo.mls.player.IPlayer
@@ -100,7 +101,25 @@ class PlayerViewWrapperTest {
             }
         }
 
-        val dataHolder = object : IDataHolder {
+        val dataManager = object : IDataManager {
+
+            override suspend fun getEventDetails(eventId: String): Result<Exception, EventEntity> {
+                TODO("Not yet implemented")
+            }
+
+            override fun getEventsLiveData(): SingleLiveEvent<List<EventEntity>> {
+                TODO("Not yet implemented")
+            }
+
+            override fun fetchEvents(
+                pageSize: Int?,
+                pageToken: String?,
+                eventStatus: List<EventStatus>?,
+                orderBy: OrderByEventsParam?,
+                fetchEventCallback: ((List<EventEntity>) -> Unit)?
+            ) {
+                TODO("Not yet implemented")
+            }
 
             override var currentEvent: EventEntity?
                 get() = getSampleEventEntity(emptyList())
@@ -133,8 +152,7 @@ class PlayerViewWrapperTest {
                 viewIdentifierManager,
                 reactorSocket,
                 GlobalScope,
-                eventRepository,
-                dataHolder,
+                dataManager,
                 GetActionsFromJSONUseCase.mappedActionCollections().timelineMarkerActionList
             )
             videoPlayerCoordinator.initialize(
