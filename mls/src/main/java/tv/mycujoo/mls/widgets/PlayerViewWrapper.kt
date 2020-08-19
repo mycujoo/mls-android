@@ -32,7 +32,6 @@ import tv.mycujoo.mls.extensions.getDisplaySize
 import tv.mycujoo.mls.helper.DateTimeHelper
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.TimelineMarkerManager
-import tv.mycujoo.mls.manager.ViewHandler
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.widgets.PlayerViewWrapper.LiveState.*
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
@@ -473,8 +472,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         overlayViewHelper.addViewWithNoAnimation(
             context,
             overlayHost,
-            overlayEntity,
-            viewHandler
+            overlayEntity
         )
     }
 
@@ -483,8 +481,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         overlayViewHelper.addViewWithAnimation(
             context,
             overlayHost,
-            overlayEntity,
-            viewHandler
+            overlayEntity
         )
     }
 
@@ -503,8 +500,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
     fun onOverlayRemovalWithAnimation(overlayEntity: OverlayEntity) {
         overlayViewHelper.removeViewWithAnimation(
             overlayHost,
-            overlayEntity,
-            viewHandler
+            overlayEntity
         )
     }
 
@@ -518,8 +514,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             overlayHost,
             overlayEntity,
             animationPosition,
-            isPlaying,
-            viewHandler
+            isPlaying
         )
     }
 
@@ -533,8 +528,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             overlayHost,
             overlayEntity,
             animationPosition,
-            isPlaying,
-            viewHandler
+            isPlaying
         )
     }
 
@@ -548,8 +542,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             overlayHost,
             overlayEntity,
             animationPosition,
-            isPlaying,
-            viewHandler
+            isPlaying
         )
     }
 
@@ -563,8 +556,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             overlayHost,
             overlayEntity,
             animationPosition,
-            isPlaying,
-            viewHandler
+            isPlaying
         )
     }
 
@@ -572,16 +564,14 @@ class PlayerViewWrapper @JvmOverloads constructor(
         overlayViewHelper.addViewWithNoAnimation(
             context,
             overlayHost,
-            overlayEntity,
-            viewHandler
+            overlayEntity
         )
     }
 
     fun updateLingeringMidwayOverlay(overlayEntity: OverlayEntity) {
         overlayViewHelper.updateLingeringMidwayOverlay(
             overlayHost,
-            overlayEntity,
-            viewHandler
+            overlayEntity
         )
     }
 

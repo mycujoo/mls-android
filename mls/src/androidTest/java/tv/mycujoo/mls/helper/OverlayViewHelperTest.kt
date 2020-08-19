@@ -37,7 +37,7 @@ import tv.mycujoo.sampleSvgString
 class OverlayViewHelperTest {
 
     private lateinit var playerViewWrapper: PlayerViewWrapper
-    private var viewIdentifierManager = ViewHandler(
+    private var viewHandler = ViewHandler(
         GlobalScope,
         CountingIdlingResource("ViewIdentifierManager")
     )
@@ -55,10 +55,10 @@ class OverlayViewHelperTest {
             playerViewWrapper.id = View.generateViewId()
             frameLayout.addView(playerViewWrapper)
 
-            playerViewWrapper.idlingResource = viewIdentifierManager.idlingResource
+            playerViewWrapper.idlingResource = viewHandler.idlingResource
             playerViewWrapper.prepare(
-                OverlayViewHelper(animationHelper),
-                viewIdentifierManager,
+                OverlayViewHelper(viewHandler, animationHelper),
+                viewHandler,
                 emptyList()
             )
         }
@@ -66,12 +66,12 @@ class OverlayViewHelperTest {
 
     @Before
     fun registerIdlingResource() {
-        IdlingRegistry.getInstance().register(viewIdentifierManager.idlingResource)
+        IdlingRegistry.getInstance().register(viewHandler.idlingResource)
     }
 
     @After
     fun unregisterIdlingResource() {
-        IdlingRegistry.getInstance().unregister(viewIdentifierManager.idlingResource)
+        IdlingRegistry.getInstance().unregister(viewHandler.idlingResource)
     }
 
     @Test
@@ -249,7 +249,7 @@ class OverlayViewHelperTest {
 
     @Test
     fun updateLingeringIntroOverlayWithAnimation_shouldMakeLingeringIntroAnimation_staticAnimation() {
-        viewIdentifierManager.idlingResource.dumpStateToLogs()
+        viewHandler.idlingResource.dumpStateToLogs()
         playerViewWrapper.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
         val overlayEntity = getSampleOverlayEntity(AnimationType.FADE_IN)
         UiThreadStatement.runOnUiThread {
@@ -334,7 +334,7 @@ class OverlayViewHelperTest {
 
     @Test
     fun updateLingeringOutroOverlayWithAnimation_shouldMakeLingeringIntroAnimation_staticAnimation() {
-        viewIdentifierManager.idlingResource.dumpStateToLogs()
+        viewHandler.idlingResource.dumpStateToLogs()
         playerViewWrapper.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
 
 

@@ -17,14 +17,16 @@ import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ProportionalImageView
 import tv.mycujoo.mls.widgets.ScaffoldView
 
-class OverlayViewHelper(private val animationFactory: AnimationFactory) {
+class OverlayViewHelper(
+    private val viewHandler: IViewHandler,
+    private val animationFactory: AnimationFactory
+) {
 
     /**region Add view with animation*/
     fun addViewWithAnimation(
         context: Context,
         overlayHost: OverlayHost,
-        overlayEntity: OverlayEntity,
-        viewHandler: IViewHandler
+        overlayEntity: OverlayEntity
     ) {
         viewHandler.incrementIdlingResource()
 
@@ -43,8 +45,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
                         overlayHost,
                         scaffoldView,
                         overlayEntity.viewSpec.positionGuide!!,
-                        overlayEntity.introTransitionSpec,
-                        viewHandler
+                        overlayEntity.introTransitionSpec
                     )
                 }
                 AnimationType.SLIDE_FROM_LEFT,
@@ -56,8 +57,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
                         overlayHost,
                         scaffoldView,
                         overlayEntity.viewSpec.positionGuide!!,
-                        overlayEntity.introTransitionSpec,
-                        viewHandler
+                        overlayEntity.introTransitionSpec
                     )
                 }
                 else -> {
@@ -74,8 +74,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
         overlayHost: OverlayHost,
         scaffoldView: ScaffoldView,
         positionGuide: PositionGuide,
-        introTransitionSpec: TransitionSpec,
-        viewHandler: IViewHandler
+        introTransitionSpec: TransitionSpec
     ) {
         val constraintSet = ConstraintSet()
         constraintSet.clone(overlayHost)
@@ -115,8 +114,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
         overlayHost: OverlayHost,
         scaffoldView: ScaffoldView,
         positionGuide: PositionGuide,
-        introTransitionSpec: TransitionSpec,
-        viewHandler: IViewHandler
+        introTransitionSpec: TransitionSpec
     ) {
         val constraintSet = ConstraintSet()
         constraintSet.clone(overlayHost)
@@ -155,8 +153,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
     fun addViewWithNoAnimation(
         context: Context,
         overlayHost: OverlayHost,
-        overlayEntity: OverlayEntity,
-        viewHandler: IViewHandler
+        overlayEntity: OverlayEntity
     ) {
         viewHandler.incrementIdlingResource()
 
@@ -171,8 +168,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
         doAddViewWithNoAnimation(
             overlayHost,
             scaffoldView,
-            overlayEntity.viewSpec.positionGuide!!,
-            viewHandler
+            overlayEntity.viewSpec.positionGuide!!
         )
 
     }
@@ -181,8 +177,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
     private fun doAddViewWithNoAnimation(
         overlayHost: OverlayHost,
         scaffoldView: ScaffoldView,
-        positionGuide: PositionGuide,
-        viewHandler: IViewHandler
+        positionGuide: PositionGuide
     ) {
         overlayHost.post {
             val constraintSet = ConstraintSet()
@@ -217,8 +212,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
     /**region Remove view with animation*/
     fun removeViewWithAnimation(
         overlayHost: OverlayHost,
-        overlayEntity: OverlayEntity,
-        viewHandler: IViewHandler
+        overlayEntity: OverlayEntity
     ) {
         viewHandler.incrementIdlingResource()
 
@@ -226,8 +220,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
             AnimationType.FADE_OUT -> {
                 removeViewWithStaticAnimation(
                     overlayHost,
-                    overlayEntity,
-                    viewHandler
+                    overlayEntity
                 )
             }
             AnimationType.SLIDE_TO_LEFT,
@@ -236,8 +229,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
             AnimationType.SLIDE_TO_BOTTOM -> {
                 removeViewWithDynamicAnimation(
                     overlayHost,
-                    overlayEntity,
-                    viewHandler
+                    overlayEntity
                 )
             }
             else -> {
@@ -252,8 +244,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
 
     private fun removeViewWithStaticAnimation(
         overlayHost: OverlayHost,
-        overlayEntity: OverlayEntity,
-        viewHandler: IViewHandler
+        overlayEntity: OverlayEntity
     ) {
         overlayHost.post {
             overlayHost.children.filter { it.tag == overlayEntity.id }.forEach { view ->
@@ -274,8 +265,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
 
     private fun removeViewWithDynamicAnimation(
         overlayHost: OverlayHost,
-        overlayEntity: OverlayEntity,
-        viewHandler: IViewHandler
+        overlayEntity: OverlayEntity
     ) {
         overlayHost.post {
             overlayHost.children.filter { it.tag == overlayEntity.id }.forEach { view ->
@@ -310,8 +300,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
         overlayHost: OverlayHost,
         overlayEntity: OverlayEntity,
         animationPosition: Long,
-        isPlaying: Boolean,
-        viewHandler: IViewHandler
+        isPlaying: Boolean
     ) {
         viewHandler.incrementIdlingResource()
 
@@ -378,8 +367,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
         overlayHost: OverlayHost,
         overlayEntity: OverlayEntity,
         animationPosition: Long,
-        isPlaying: Boolean,
-        viewHandler: IViewHandler
+        isPlaying: Boolean
     ) {
         viewHandler.incrementIdlingResource()
 
@@ -406,8 +394,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
                     overlayHost,
                     overlayEntity,
                     animationPosition,
-                    isPlaying,
-                    viewHandler
+                    isPlaying
                 )
             }
             viewHandler.decrementIdlingResource()
@@ -420,8 +407,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
         overlayHost: OverlayHost,
         overlayEntity: OverlayEntity,
         animationPosition: Long,
-        isPlaying: Boolean,
-        viewHandler: IViewHandler
+        isPlaying: Boolean
     ) {
         overlayHost.post {
 
@@ -475,8 +461,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
         overlayHost: OverlayHost,
         overlayEntity: OverlayEntity,
         animationPosition: Long,
-        isPlaying: Boolean,
-        viewHandler: IViewHandler
+        isPlaying: Boolean
     ) {
         val scaffoldView = viewHandler.getOverlayView(overlayEntity.id) ?: return
 
@@ -495,8 +480,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
                 overlayHost,
                 overlayEntity,
                 animationPosition,
-                isPlaying,
-                viewHandler
+                isPlaying
             )
         }
 
@@ -504,8 +488,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
 
     fun updateLingeringMidwayOverlay(
         overlayHost: OverlayHost,
-        overlayEntity: OverlayEntity,
-        viewHandler: IViewHandler
+        overlayEntity: OverlayEntity
     ) {
         val scaffoldView = viewHandler.getOverlayView(overlayEntity.id) ?: return
 

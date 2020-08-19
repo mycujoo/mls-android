@@ -22,7 +22,6 @@ import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
-import tv.mycujoo.mls.manager.ViewHandler
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.ReactorCallback
@@ -116,7 +115,7 @@ class VideoPlayerCoordinator(
         player: IPlayer
     ) {
         playerViewWrapper.prepare(
-            OverlayViewHelper(AnimationFactory()),
+            OverlayViewHelper(viewHandler, AnimationFactory()),
             viewHandler,
             emptyList()
         )

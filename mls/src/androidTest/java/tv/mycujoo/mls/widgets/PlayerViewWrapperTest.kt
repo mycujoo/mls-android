@@ -52,7 +52,7 @@ import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
 class PlayerViewWrapperTest {
 
     private lateinit var playerViewWrapper: PlayerViewWrapper
-    private var viewIdentifierManager = ViewHandler(
+    private var viewHandler = ViewHandler(
         GlobalScope,
         CountingIdlingResource("ViewIdentifierManager")
     )
@@ -75,10 +75,10 @@ class PlayerViewWrapperTest {
             playerViewWrapper.id = View.generateViewId()
             frameLayout.addView(playerViewWrapper)
 
-            playerViewWrapper.idlingResource = viewIdentifierManager.idlingResource
+            playerViewWrapper.idlingResource = viewHandler.idlingResource
             playerViewWrapper.prepare(
-                OverlayViewHelper(animationHelper),
-                viewIdentifierManager,
+                OverlayViewHelper(viewHandler, animationHelper),
+                viewHandler,
                 emptyList()
             )
 
@@ -137,7 +137,7 @@ class PlayerViewWrapperTest {
 
             videoPlayerCoordinator = VideoPlayerCoordinator(
                 defaultVideoPlayerConfig(),
-                viewIdentifierManager,
+                viewHandler,
                 reactorSocket,
                 GlobalScope,
                 dataManager,
@@ -156,12 +156,12 @@ class PlayerViewWrapperTest {
 
     @Before
     fun registerIdlingResource() {
-        IdlingRegistry.getInstance().register(viewIdentifierManager.idlingResource)
+        IdlingRegistry.getInstance().register(viewHandler.idlingResource)
     }
 
     @After
     fun unregisterIdlingResource() {
-        IdlingRegistry.getInstance().unregister(viewIdentifierManager.idlingResource)
+        IdlingRegistry.getInstance().unregister(viewHandler.idlingResource)
     }
 
     @Test
