@@ -8,10 +8,13 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 import androidx.core.view.doOnLayout
-import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.PositionGuide
 import tv.mycujoo.domain.entity.TransitionSpec
+import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasDynamicIntroAnimation
+import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasDynamicOutroAnimation
+import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasStaticIntroAnimation
+import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasStaticOutroAnimation
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ProportionalImageView
@@ -39,8 +42,8 @@ class OverlayViewHelper(
                     viewHandler.getTimeKeeper()
                 )
 
-            when (overlayEntity.introTransitionSpec.animationType) {
-                AnimationType.FADE_IN -> {
+            when {
+                hasStaticIntroAnimation(overlayEntity.introTransitionSpec.animationType) -> {
                     doAddViewWithStaticAnimation(
                         overlayHost,
                         scaffoldView,
@@ -48,11 +51,7 @@ class OverlayViewHelper(
                         overlayEntity.introTransitionSpec
                     )
                 }
-                AnimationType.SLIDE_FROM_LEFT,
-                AnimationType.SLIDE_FROM_TOP,
-                AnimationType.SLIDE_FROM_RIGHT,
-                AnimationType.SLIDE_FROM_BOTTOM -> {
-
+                hasDynamicIntroAnimation(overlayEntity.introTransitionSpec.animationType) -> {
                     doAddViewWithDynamicAnimation(
                         overlayHost,
                         scaffoldView,
@@ -65,7 +64,6 @@ class OverlayViewHelper(
                     viewHandler.decrementIdlingResource()
                 }
             }
-
         }
 
     }
@@ -216,17 +214,14 @@ class OverlayViewHelper(
     ) {
         viewHandler.incrementIdlingResource()
 
-        when (overlayEntity.outroTransitionSpec.animationType) {
-            AnimationType.FADE_OUT -> {
+        when {
+            hasStaticOutroAnimation(overlayEntity.outroTransitionSpec.animationType) -> {
                 removeViewWithStaticAnimation(
                     overlayHost,
                     overlayEntity
                 )
             }
-            AnimationType.SLIDE_TO_LEFT,
-            AnimationType.SLIDE_TO_TOP,
-            AnimationType.SLIDE_TO_RIGHT,
-            AnimationType.SLIDE_TO_BOTTOM -> {
+            hasDynamicOutroAnimation(overlayEntity.outroTransitionSpec.animationType) -> {
                 removeViewWithDynamicAnimation(
                     overlayHost,
                     overlayEntity
@@ -235,11 +230,8 @@ class OverlayViewHelper(
             else -> {
                 // should not happen
                 viewHandler.decrementIdlingResource()
-                return
             }
-
         }
-
     }
 
     private fun removeViewWithStaticAnimation(
@@ -294,6 +286,7 @@ class OverlayViewHelper(
 
 
     /**endregion */
+
 
     /**region Add lingering view with animation*/
     fun addLingeringIntroViewWithAnimation(

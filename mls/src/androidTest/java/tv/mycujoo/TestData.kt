@@ -38,14 +38,6 @@ fun getShowOverlayActionEntity(
     )
 }
 
-fun getHideOverlayActionEntity(offset: Long): HideOverlayActionEntity {
-    return HideOverlayActionEntity(
-        "random_id_1002", "custom_id_1001",
-        AnimationType.NONE,
-        -1L
-    )
-}
-
 val sampleSvgString = """
         <?xml version="1.0" encoding="UTF-8"?>
         <svg width="457px" height="69px" viewBox="0 0 457 69" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">

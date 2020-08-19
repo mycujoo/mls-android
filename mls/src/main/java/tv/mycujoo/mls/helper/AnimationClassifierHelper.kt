@@ -44,7 +44,7 @@ class AnimationClassifierHelper {
             }
         }
 
-        private fun hasDynamicIntroAnimation(animationType: AnimationType): Boolean {
+        fun hasDynamicIntroAnimation(animationType: AnimationType): Boolean {
             return when (animationType) {
                 AnimationType.SLIDE_FROM_LEFT,
                 AnimationType.SLIDE_FROM_TOP,
@@ -58,7 +58,7 @@ class AnimationClassifierHelper {
             }
         }
 
-        private fun hasStaticIntroAnimation(animationType: AnimationType): Boolean {
+        fun hasStaticIntroAnimation(animationType: AnimationType): Boolean {
             return when (animationType) {
                 AnimationType.FADE_IN -> {
                     true
@@ -70,7 +70,7 @@ class AnimationClassifierHelper {
             }
         }
 
-        private fun hasDynamicOutroAnimation(animationType: AnimationType): Boolean {
+        fun hasDynamicOutroAnimation(animationType: AnimationType): Boolean {
             return when (animationType) {
                 AnimationType.SLIDE_TO_LEFT,
                 AnimationType.SLIDE_TO_TOP,
@@ -85,7 +85,7 @@ class AnimationClassifierHelper {
             }
         }
 
-        private fun hasStaticOutroAnimation(animationType: AnimationType): Boolean {
+        fun hasStaticOutroAnimation(animationType: AnimationType): Boolean {
             return when (animationType) {
                 AnimationType.FADE_OUT -> {
                     true
