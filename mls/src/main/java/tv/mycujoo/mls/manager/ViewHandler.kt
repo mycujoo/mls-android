@@ -4,12 +4,13 @@ import android.animation.ObjectAnimator
 import android.util.Log
 import androidx.test.espresso.idling.CountingIdlingResource
 import kotlinx.coroutines.CoroutineScope
+import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.widgets.ScaffoldView
 
-class ViewIdentifierManager(
+class ViewHandler(
     dispatcher: CoroutineScope,
     val idlingResource: CountingIdlingResource
-) {
+) : IViewHandler {
 
     /**region Fields*/
     private var viewIdToIdMap = mutableMapOf<String, Int>()
@@ -17,35 +18,35 @@ class ViewIdentifierManager(
 
     private val attachedViewList: ArrayList<ScaffoldView> = ArrayList()
 
-    val variableTranslator = VariableTranslator(dispatcher)
-    val timeKeeper = TimeKeeper(dispatcher)
+    private val variableTranslator = VariableTranslator(dispatcher)
+    private val timeKeeper = TimeKeeper(dispatcher)
 
     /**endregion */
 
     /**region Animation*/
-    fun addAnimation(
+    override fun addAnimation(
         id: String,
         objectAnimator: ObjectAnimator
     ) {
         animations.add(Pair(id, objectAnimator))
     }
 
-    fun removeAnimation(id: String) {
+    override fun removeAnimation(id: String) {
         val pair = animations.firstOrNull { it.first == id }
         animations.remove(pair)
     }
 
-    fun getAnimations(): List<ObjectAnimator> {
+    override fun getAnimations(): List<ObjectAnimator> {
         return animations.map { it.second }
     }
 
-    fun getAnimationWithTag(id: String): ObjectAnimator? {
+    override fun getAnimationWithTag(id: String): ObjectAnimator? {
         return animations.firstOrNull { it.first == id }?.second
     }
     /**endregion */
 
     /**region Overlay views*/
-    fun attachOverlayView(view: ScaffoldView) {
+    override fun attachOverlayView(view: ScaffoldView) {
         if (view.tag == null || (view.tag is String).not()) {
             Log.w("ViewIdentifierManager", "overlay tag should not be null")
             return
@@ -59,7 +60,7 @@ class ViewIdentifierManager(
 
     }
 
-    fun detachOverlayView(view: ScaffoldView?) {
+    override fun detachOverlayView(view: ScaffoldView?) {
         if (view == null) {
             return
         }
@@ -72,7 +73,7 @@ class ViewIdentifierManager(
         attachedViewList.remove(view)
     }
 
-    fun getOverlayView(id: String): ScaffoldView? {
+    override fun getOverlayView(id: String): ScaffoldView? {
         return attachedViewList.firstOrNull { it.tag == id }
     }
 
@@ -81,11 +82,11 @@ class ViewIdentifierManager(
     /**region Overlay objects*/
 
 
-    fun overlayBlueprintIsNotAttached(id: String): Boolean {
+    override fun overlayBlueprintIsNotAttached(id: String): Boolean {
         return attachedViewList.none { it.tag == id }
     }
 
-    fun overlayBlueprintIsAttached(id: String): Boolean {
+    override fun overlayBlueprintIsAttached(id: String): Boolean {
         return attachedViewList.any { it.tag == id }
     }
 
@@ -93,12 +94,30 @@ class ViewIdentifierManager(
 
     /**region msc*/
 
-    fun clearAll() {
+    override fun clearAll() {
         attachedViewList.clear()
         animations.clear()
         viewIdToIdMap.clear()
     }
 
+    override fun incrementIdlingResource() {
+        idlingResource.increment()
+    }
+
+
+    override fun decrementIdlingResource() {
+        if (idlingResource.isIdleNow.not()) {
+            idlingResource.decrement()
+        }
+    }
+
+    override fun getVariableTranslator(): VariableTranslator {
+        return variableTranslator
+    }
+
+    override fun getTimeKeeper(): TimeKeeper {
+        return timeKeeper
+    }
     /**endregion */
 
 

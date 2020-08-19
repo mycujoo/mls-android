@@ -22,7 +22,8 @@ import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
-import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.manager.ViewHandler
+import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.ReactorCallback
 import tv.mycujoo.mls.player.IPlayer
@@ -33,7 +34,7 @@ import tv.mycujoo.mls.widgets.PlayerViewWrapper
 
 class VideoPlayerCoordinator(
     private val videoPlayerConfig: VideoPlayerConfig,
-    private val viewIdentifierManager: ViewIdentifierManager,
+    private val viewHandler: IViewHandler,
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
@@ -116,7 +117,7 @@ class VideoPlayerCoordinator(
     ) {
         playerViewWrapper.prepare(
             OverlayViewHelper(AnimationFactory()),
-            viewIdentifierManager,
+            viewHandler,
             emptyList()
         )
 

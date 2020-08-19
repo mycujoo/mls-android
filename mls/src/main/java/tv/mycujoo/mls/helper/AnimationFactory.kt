@@ -6,7 +6,7 @@ import android.view.View
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.TransitionSpec
-import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ScaffoldView
 
@@ -39,7 +39,7 @@ open class AnimationFactory {
         overlayHost: OverlayHost,
         scaffoldView: ScaffoldView,
         introTransitionSpec: TransitionSpec,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ): ObjectAnimator? {
         val x = scaffoldView.x
         val y = scaffoldView.y
@@ -111,7 +111,7 @@ open class AnimationFactory {
                 }
 
             })
-            viewIdentifierManager.addAnimation(
+            viewHandler.addAnimation(
                 scaffoldView.tag as String,
                 animation
             )
@@ -125,7 +125,7 @@ open class AnimationFactory {
         overlayHost: OverlayHost,
         overlayEntity: OverlayEntity,
         overlayView: ScaffoldView,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ): ObjectAnimator {
         val animation = ObjectAnimator.ofFloat(overlayView, View.ALPHA, 1F, 0F)
         animation.duration = overlayEntity.outroTransitionSpec.animationDuration
@@ -136,8 +136,8 @@ open class AnimationFactory {
 
             override fun onAnimationEnd(animation: Animator?) {
                 overlayHost.removeView(overlayView)
-                viewIdentifierManager.detachOverlayView(overlayView)
-                viewIdentifierManager.removeAnimation(overlayEntity.id)
+                viewHandler.detachOverlayView(overlayView)
+                viewHandler.removeAnimation(overlayEntity.id)
             }
 
             override fun onAnimationRepeat(animation: Animator?) {
@@ -148,7 +148,7 @@ open class AnimationFactory {
 
         })
 
-        viewIdentifierManager.addAnimation(overlayEntity.id, animation)
+        viewHandler.addAnimation(overlayEntity.id, animation)
 
         return animation
 
@@ -158,7 +158,7 @@ open class AnimationFactory {
         overlayHost: OverlayHost,
         overlayEntity: OverlayEntity,
         view: ScaffoldView,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ): ObjectAnimator? {
         var animation: ObjectAnimator? = null
 
@@ -207,8 +207,8 @@ open class AnimationFactory {
 
                 override fun onAnimationEnd(animation: Animator?) {
                     overlayHost.removeView(view)
-                    viewIdentifierManager.detachOverlayView(view)
-                    viewIdentifierManager.removeAnimation(overlayEntity.id)
+                    viewHandler.detachOverlayView(view)
+                    viewHandler.removeAnimation(overlayEntity.id)
                 }
 
                 override fun onAnimationCancel(animation: Animator?) {
@@ -221,7 +221,7 @@ open class AnimationFactory {
             })
 
             animation.duration = overlayEntity.outroTransitionSpec.animationDuration
-            viewIdentifierManager.addAnimation(overlayEntity.id, animation)
+            viewHandler.addAnimation(overlayEntity.id, animation)
 
         }
         return animation
@@ -234,7 +234,7 @@ open class AnimationFactory {
         overlayEntity: OverlayEntity,
         animationPosition: Long,
         isPlaying: Boolean,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ): ObjectAnimator? {
         val x = scaffoldView.x
         val y = scaffoldView.y
@@ -305,7 +305,7 @@ open class AnimationFactory {
                 }
 
                 override fun onAnimationEnd(animation: Animator?) {
-                    viewIdentifierManager.removeAnimation(overlayEntity.id)
+                    viewHandler.removeAnimation(overlayEntity.id)
                 }
 
                 override fun onAnimationCancel(animation: Animator?) {
@@ -319,7 +319,7 @@ open class AnimationFactory {
 
             })
 
-            viewIdentifierManager.addAnimation(
+            viewHandler.addAnimation(
                 overlayEntity.id,
                 animation
             )
@@ -342,7 +342,7 @@ open class AnimationFactory {
         overlayEntity: OverlayEntity,
         animationPosition: Long,
         isPlaying: Boolean,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ): ObjectAnimator? {
         var animation: ObjectAnimator? = null
 
@@ -395,8 +395,8 @@ open class AnimationFactory {
                 }
 
                 override fun onAnimationEnd(animation: Animator?) {
-                    viewIdentifierManager.removeAnimation(overlayEntity.id)
-                    viewIdentifierManager.detachOverlayView(
+                    viewHandler.removeAnimation(overlayEntity.id)
+                    viewHandler.detachOverlayView(
                         scaffoldView
                     )
                     overlayHost.removeView(scaffoldView)
@@ -412,7 +412,7 @@ open class AnimationFactory {
 
             })
 
-            viewIdentifierManager.addAnimation(
+            viewHandler.addAnimation(
                 overlayEntity.id,
                 animation
             )

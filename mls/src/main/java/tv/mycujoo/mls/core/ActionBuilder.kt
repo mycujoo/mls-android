@@ -10,12 +10,12 @@ import tv.mycujoo.mls.helper.ActionVariableHelper
 import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasOutroAnimation
 import tv.mycujoo.mls.helper.IDownloaderClient
 import tv.mycujoo.mls.manager.TimerProcessor
-import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.manager.contracts.IViewHandler
 
 class ActionBuilder(
     private val listener: IAnnotationListener,
     private val downloaderClient: IDownloaderClient,
-    private val viewIdentifierManager: ViewIdentifierManager
+    private val viewHandler: IViewHandler
 ) : IActionBuilder() {
 
     /**region Fields*/
@@ -64,7 +64,7 @@ class ActionBuilder(
         this.actionCollections = actionCollections
         timerProcessor = TimerProcessor(
             actionCollections.timerCollection,
-            viewIdentifierManager.timeKeeper,
+            viewHandler.getTimeKeeper(),
             appliedCreateTimer
         )
     }
@@ -166,7 +166,7 @@ class ActionBuilder(
             setVariableActions,
             incrementVariableActions
         )
-        viewIdentifierManager.variableTranslator.setVariablesNameValueIfDifferent(variablesTillNow)
+        viewHandler.getVariableTranslator().setVariablesNameValueIfDifferent(variablesTillNow)
 
     }
 
@@ -177,7 +177,7 @@ class ActionBuilder(
         )
 
         toBeNotified.forEach { timerName ->
-            viewIdentifierManager.timeKeeper.notify(timerName)
+            viewHandler.getTimeKeeper().notify(timerName)
         }
 
     }
@@ -199,11 +199,11 @@ class ActionBuilder(
     }
 
     private fun isNotAttached(overlayBlueprint: OverlayBlueprint): Boolean {
-        return viewIdentifierManager.overlayBlueprintIsNotAttached(overlayBlueprint.id)
+        return viewHandler.overlayBlueprintIsNotAttached(overlayBlueprint.id)
     }
 
     private fun isAttached(overlayBlueprint: OverlayBlueprint): Boolean {
-        return viewIdentifierManager.overlayBlueprintIsAttached(overlayBlueprint.id)
+        return viewHandler.overlayBlueprintIsAttached(overlayBlueprint.id)
     }
 
     private fun shouldNotBeOnScreen(overlayBlueprint: OverlayBlueprint): Boolean {

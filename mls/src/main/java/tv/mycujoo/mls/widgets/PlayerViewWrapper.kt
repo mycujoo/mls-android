@@ -32,7 +32,8 @@ import tv.mycujoo.mls.extensions.getDisplaySize
 import tv.mycujoo.mls.helper.DateTimeHelper
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.TimelineMarkerManager
-import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.manager.ViewHandler
+import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.widgets.PlayerViewWrapper.LiveState.*
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterest
@@ -59,7 +60,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
     lateinit var uiEventListener: UIEventListener
     private var isFullScreen = false
 
-    private lateinit var viewIdentifierManager: ViewIdentifierManager
+    private lateinit var viewHandler: IViewHandler
 
     private lateinit var eventInfoTitle: String
     private lateinit var eventInfoDescription: String
@@ -123,11 +124,11 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     fun prepare(
         overlayViewHelper: OverlayViewHelper,
-        viewIdentifierManager: ViewIdentifierManager,
+        viewHandler: IViewHandler,
         timelineMarkers: List<TimelineMarkerEntity>
     ) {
         this.overlayViewHelper = overlayViewHelper
-        this.viewIdentifierManager = viewIdentifierManager
+        this.viewHandler = viewHandler
         initMlsTimeBar(timelineMarkers)
     }
 
@@ -389,11 +390,11 @@ class PlayerViewWrapper @JvmOverloads constructor(
     }
 
     fun continueOverlayAnimations() {
-        viewIdentifierManager.getAnimations().forEach { it.resume() }
+        viewHandler.getAnimations().forEach { it.resume() }
     }
 
     fun freezeOverlayAnimations() {
-        viewIdentifierManager.getAnimations().forEach { it.pause() }
+        viewHandler.getAnimations().forEach { it.pause() }
     }
     /**endregion */
 
@@ -473,7 +474,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             context,
             overlayHost,
             overlayEntity,
-            viewIdentifierManager
+            viewHandler
         )
     }
 
@@ -483,16 +484,16 @@ class PlayerViewWrapper @JvmOverloads constructor(
             context,
             overlayHost,
             overlayEntity,
-            viewIdentifierManager
+            viewHandler
         )
     }
 
     fun onOverlayRemovalWithNoAnimation(overlayEntity: OverlayEntity) {
         overlayHost.children.filter { it.tag == overlayEntity.id }
             .forEach {
-                if (this::viewIdentifierManager.isInitialized) {
-                    viewIdentifierManager.detachOverlayView(it as ScaffoldView)
-                    viewIdentifierManager.removeAnimation(overlayEntity.id)
+                if (this::viewHandler.isInitialized) {
+                    viewHandler.detachOverlayView(it as ScaffoldView)
+                    viewHandler.removeAnimation(overlayEntity.id)
                 }
                 overlayHost.removeView(it)
             }
@@ -503,7 +504,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
         overlayViewHelper.removeViewWithAnimation(
             overlayHost,
             overlayEntity,
-            viewIdentifierManager
+            viewHandler
         )
     }
 
@@ -518,7 +519,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             overlayEntity,
             animationPosition,
             isPlaying,
-            viewIdentifierManager
+            viewHandler
         )
     }
 
@@ -533,7 +534,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             overlayEntity,
             animationPosition,
             isPlaying,
-            viewIdentifierManager
+            viewHandler
         )
     }
 
@@ -548,7 +549,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             overlayEntity,
             animationPosition,
             isPlaying,
-            viewIdentifierManager
+            viewHandler
         )
     }
 
@@ -563,7 +564,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             overlayEntity,
             animationPosition,
             isPlaying,
-            viewIdentifierManager
+            viewHandler
         )
     }
 
@@ -572,7 +573,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
             context,
             overlayHost,
             overlayEntity,
-            viewIdentifierManager
+            viewHandler
         )
     }
 
@@ -580,16 +581,16 @@ class PlayerViewWrapper @JvmOverloads constructor(
         overlayViewHelper.updateLingeringMidwayOverlay(
             overlayHost,
             overlayEntity,
-            viewIdentifierManager
+            viewHandler
         )
     }
 
     fun removeLingeringOverlay(overlayEntity: OverlayEntity) {
         overlayHost.children.filter { it.tag == overlayEntity.id }
             .forEach {
-                if (this::viewIdentifierManager.isInitialized) {
-                    viewIdentifierManager.detachOverlayView(it as ScaffoldView)
-                    viewIdentifierManager.removeAnimation(overlayEntity.id)
+                if (this::viewHandler.isInitialized) {
+                    viewHandler.detachOverlayView(it as ScaffoldView)
+                    viewHandler.removeAnimation(overlayEntity.id)
                 }
                 overlayHost.removeView(it)
             }
@@ -599,15 +600,15 @@ class PlayerViewWrapper @JvmOverloads constructor(
         overlayHost.children
             .forEach {
                 if (idList.contains(it.tag)) {
-                    if (this::viewIdentifierManager.isInitialized) {
-                        viewIdentifierManager.detachOverlayView(it as ScaffoldView)
-                        viewIdentifierManager.removeAnimation(it.tag as String)
+                    if (this::viewHandler.isInitialized) {
+                        viewHandler.detachOverlayView(it as ScaffoldView)
+                        viewHandler.removeAnimation(it.tag as String)
                     }
                     overlayHost.removeView(it)
                 }
             }
 
-        viewIdentifierManager.clearAll()
+        viewHandler.clearAll()
     }
 
 

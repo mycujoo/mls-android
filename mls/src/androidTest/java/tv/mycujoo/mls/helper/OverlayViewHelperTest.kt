@@ -26,7 +26,7 @@ import tv.mycujoo.fake.FakeAnimationFactory
 import tv.mycujoo.matchers.TypeMatcher
 import tv.mycujoo.mls.BlankActivity
 import tv.mycujoo.mls.R
-import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.manager.ViewHandler
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 import tv.mycujoo.mls.widgets.ScaffoldView
 import tv.mycujoo.sampleSvgString
@@ -37,7 +37,7 @@ import tv.mycujoo.sampleSvgString
 class OverlayViewHelperTest {
 
     private lateinit var playerViewWrapper: PlayerViewWrapper
-    private var viewIdentifierManager = ViewIdentifierManager(
+    private var viewIdentifierManager = ViewHandler(
         GlobalScope,
         CountingIdlingResource("ViewIdentifierManager")
     )

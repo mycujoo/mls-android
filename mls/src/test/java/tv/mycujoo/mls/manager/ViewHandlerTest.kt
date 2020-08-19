@@ -8,15 +8,16 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
+import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.widgets.ScaffoldView
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class ViewIdentifierManagerTest {
+class ViewHandlerTest {
 
-    lateinit var viewIdentifierManager: ViewIdentifierManager
+    private lateinit var viewHandler: IViewHandler
 
     @Mock
     lateinit var view0: ScaffoldView
@@ -39,7 +40,7 @@ class ViewIdentifierManagerTest {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        viewIdentifierManager = ViewIdentifierManager(dispatcher, idlingResource)
+        viewHandler = ViewHandler(dispatcher, idlingResource)
     }
 
 
@@ -48,129 +49,129 @@ class ViewIdentifierManagerTest {
         Mockito.`when`(view0.tag).thenReturn(SAMPLE_TAG)
 
 
-        viewIdentifierManager.attachOverlayView(view0)
+        viewHandler.attachOverlayView(view0)
 
 
-        assertEquals(view0, viewIdentifierManager.getOverlayView(SAMPLE_TAG))
+        assertEquals(view0, viewHandler.getOverlayView(SAMPLE_TAG))
     }
 
     @Test
     fun `given duplicate attachOverlayView should not save it in list`() {
         Mockito.`when`(view0.tag).thenReturn(SAMPLE_TAG)
         Mockito.`when`(view1.tag).thenReturn(SAMPLE_TAG)
-        viewIdentifierManager.attachOverlayView(view0)
+        viewHandler.attachOverlayView(view0)
 
 
-        viewIdentifierManager.attachOverlayView(view1)
+        viewHandler.attachOverlayView(view1)
 
 
-        assertEquals(view0, viewIdentifierManager.getOverlayView(SAMPLE_TAG))
+        assertEquals(view0, viewHandler.getOverlayView(SAMPLE_TAG))
     }
 
 
     @Test
     fun `given attachOverlayView with invalid tag, should not, save view in list`() {
-        viewIdentifierManager.attachOverlayView(view0)
+        viewHandler.attachOverlayView(view0)
 
 
-        assertEquals(null, viewIdentifierManager.getOverlayView(SAMPLE_TAG))
+        assertEquals(null, viewHandler.getOverlayView(SAMPLE_TAG))
     }
 
 
     @Test
     fun `given request to remove existing view, should remove it`() {
         Mockito.`when`(view0.tag).thenReturn(SAMPLE_TAG)
-        viewIdentifierManager.attachOverlayView(view0)
+        viewHandler.attachOverlayView(view0)
 
 
-        viewIdentifierManager.detachOverlayView(view0)
+        viewHandler.detachOverlayView(view0)
 
 
-        assertNull(viewIdentifierManager.getOverlayView(SAMPLE_TAG))
+        assertNull(viewHandler.getOverlayView(SAMPLE_TAG))
     }
 
 
     @Test
     fun `given request to remove invalid view, should do nothing`() {
         Mockito.`when`(view0.tag).thenReturn(SAMPLE_TAG)
-        viewIdentifierManager.attachOverlayView(view0)
+        viewHandler.attachOverlayView(view0)
 
 
-        viewIdentifierManager.detachOverlayView(null)
-        viewIdentifierManager.detachOverlayView(view1)
+        viewHandler.detachOverlayView(null)
+        viewHandler.detachOverlayView(view1)
 
 
-        assertEquals(view0, viewIdentifierManager.getOverlayView(SAMPLE_TAG))
+        assertEquals(view0, viewHandler.getOverlayView(SAMPLE_TAG))
     }
 
 
     @Test
     fun `given attached overlay object, should return true for isAttached()`() {
         Mockito.`when`(view0.tag).thenReturn(SAMPLE_TAG)
-        viewIdentifierManager.attachOverlayView(view0)
+        viewHandler.attachOverlayView(view0)
 
-        assert(viewIdentifierManager.overlayBlueprintIsAttached(SAMPLE_TAG))
+        assert(viewHandler.overlayBlueprintIsAttached(SAMPLE_TAG))
     }
 
     @Test
     fun `given attached overlay object, should return false for isAttached()`() {
         Mockito.`when`(view0.tag).thenReturn(SAMPLE_TAG)
-        viewIdentifierManager.attachOverlayView(view0)
+        viewHandler.attachOverlayView(view0)
 
-        assertFalse(viewIdentifierManager.overlayBlueprintIsNotAttached(SAMPLE_TAG))
+        assertFalse(viewHandler.overlayBlueprintIsNotAttached(SAMPLE_TAG))
     }
 
     @Test
     fun `given detached overlay object, should return false for isAttached()`() {
-        assertFalse(viewIdentifierManager.overlayBlueprintIsAttached(SAMPLE_TAG))
+        assertFalse(viewHandler.overlayBlueprintIsAttached(SAMPLE_TAG))
     }
 
     @Test
     fun `given detached overlay object, should return true for isNotAttached()`() {
-        assertTrue(viewIdentifierManager.overlayBlueprintIsNotAttached(SAMPLE_TAG))
+        assertTrue(viewHandler.overlayBlueprintIsNotAttached(SAMPLE_TAG))
     }
 
     @Test
     fun `given clear(), should clear all lists`() {
         Mockito.`when`(view0.tag).thenReturn(SAMPLE_TAG)
         Mockito.`when`(view1.tag).thenReturn(SAMPLE_TAG)
-        viewIdentifierManager.attachOverlayView(view0)
-        viewIdentifierManager.attachOverlayView(view1)
+        viewHandler.attachOverlayView(view0)
+        viewHandler.attachOverlayView(view1)
 
 
-        viewIdentifierManager.clearAll()
+        viewHandler.clearAll()
 
 
-        assertNull(viewIdentifierManager.getOverlayView(SAMPLE_TAG))
+        assertNull(viewHandler.getOverlayView(SAMPLE_TAG))
     }
 
 
     @Test
     fun `given addAnimation() should save animation in list`() {
-        viewIdentifierManager.addAnimation(SAMPLE_TAG, animation0)
+        viewHandler.addAnimation(SAMPLE_TAG, animation0)
 
 
-        assertEquals(animation0, viewIdentifierManager.getAnimationWithTag(SAMPLE_TAG))
+        assertEquals(animation0, viewHandler.getAnimationWithTag(SAMPLE_TAG))
     }
 
     @Test
     fun `given removeAnimation() should remove animation from list`() {
-        viewIdentifierManager.addAnimation(SAMPLE_TAG, animation0)
+        viewHandler.addAnimation(SAMPLE_TAG, animation0)
 
 
-        viewIdentifierManager.removeAnimation(SAMPLE_TAG)
+        viewHandler.removeAnimation(SAMPLE_TAG)
 
 
-        assertNull(viewIdentifierManager.getAnimationWithTag(SAMPLE_TAG))
+        assertNull(viewHandler.getAnimationWithTag(SAMPLE_TAG))
     }
 
     @Test
     fun `given multiple addAnimation() should save all animatiosn in list`() {
-        viewIdentifierManager.addAnimation(SAMPLE_TAG, animation0)
-        viewIdentifierManager.addAnimation(SAMPLE_TAG, animation1)
+        viewHandler.addAnimation(SAMPLE_TAG, animation0)
+        viewHandler.addAnimation(SAMPLE_TAG, animation1)
 
 
-        assertEquals(2, viewIdentifierManager.getAnimations().size)
+        assertEquals(2, viewHandler.getAnimations().size)
     }
 
     companion object {

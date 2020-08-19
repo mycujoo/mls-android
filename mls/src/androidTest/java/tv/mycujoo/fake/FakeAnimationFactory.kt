@@ -5,7 +5,7 @@ import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.mls.helper.AnimationFactory
-import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ScaffoldView
 
@@ -29,7 +29,7 @@ class FakeAnimationFactory : AnimationFactory() {
         overlayHost: OverlayHost,
         scaffoldView: ScaffoldView,
         introTransitionSpec: TransitionSpec,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ): ObjectAnimator? {
 
         animationRecipe =
@@ -39,7 +39,7 @@ class FakeAnimationFactory : AnimationFactory() {
             overlayHost,
             scaffoldView,
             introTransitionSpec,
-            viewIdentifierManager
+            viewHandler
         )
     }
 
@@ -47,27 +47,27 @@ class FakeAnimationFactory : AnimationFactory() {
         overlayHost: OverlayHost,
         overlayEntity: OverlayEntity,
         overlayView: ScaffoldView,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ): ObjectAnimator {
 
         val outroTransitionSpec = overlayEntity.outroTransitionSpec
         animationRecipe =
             AnimationRecipe(overlayView, outroTransitionSpec.animationType, outroTransitionSpec.animationDuration)
 
-        return super.createRemoveViewStaticAnimation(overlayHost, overlayEntity, overlayView, viewIdentifierManager)
+        return super.createRemoveViewStaticAnimation(overlayHost, overlayEntity, overlayView, viewHandler)
     }
 
     override fun createRemoveViewDynamicAnimation(
         overlayHost: OverlayHost,
         overlayEntity: OverlayEntity,
         overlayView: ScaffoldView,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ): ObjectAnimator? {
         val outroTransitionSpec = overlayEntity.outroTransitionSpec
         animationRecipe =
             AnimationRecipe(overlayView, outroTransitionSpec.animationType, outroTransitionSpec.animationDuration)
 
-        return super.createRemoveViewDynamicAnimation(overlayHost, overlayEntity, overlayView, viewIdentifierManager)
+        return super.createRemoveViewDynamicAnimation(overlayHost, overlayEntity, overlayView, viewHandler)
     }
 
     override fun createLingeringIntroViewAnimation(
@@ -76,7 +76,7 @@ class FakeAnimationFactory : AnimationFactory() {
         overlayEntity: OverlayEntity,
         animationPosition: Long,
         isPlaying: Boolean,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ): ObjectAnimator? {
         val introTransitionSpec = overlayEntity.introTransitionSpec
 
@@ -95,7 +95,7 @@ class FakeAnimationFactory : AnimationFactory() {
             overlayEntity,
             animationPosition,
             isPlaying,
-            viewIdentifierManager
+            viewHandler
         )
     }
 
@@ -105,7 +105,7 @@ class FakeAnimationFactory : AnimationFactory() {
         overlayEntity: OverlayEntity,
         animationPosition: Long,
         isPlaying: Boolean,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ): ObjectAnimator? {
         val outroTransitionSpec = overlayEntity.outroTransitionSpec
 
@@ -124,7 +124,7 @@ class FakeAnimationFactory : AnimationFactory() {
             overlayEntity,
             animationPosition,
             isPlaying,
-            viewIdentifierManager
+            viewHandler
         )
     }
 

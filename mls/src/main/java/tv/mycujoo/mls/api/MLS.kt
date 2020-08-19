@@ -19,7 +19,7 @@ import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.SVGAssetResolver
 import tv.mycujoo.mls.manager.IPrefManager
-import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.mediator.AnnotationMediator
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.network.RemoteApi
@@ -54,7 +54,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
     private lateinit var annotationMediator: AnnotationMediator
     private lateinit var player: Player
 
-    private lateinit var viewIdentifierManager: ViewIdentifierManager
+    private lateinit var viewHandler: IViewHandler
     /**endregion */
 
     /**region Initializing*/
@@ -72,7 +72,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         this.okHttpClient = internalBuilder.okHttpClient
         this.dataManager = internalBuilder.dataManager
         this.prefManager = internalBuilder.prefManager
-        this.viewIdentifierManager = internalBuilder.viewIdentifierManager
+        this.viewHandler = internalBuilder.viewHandler
 
         persistPublicKey(this.builder.publicKey)
 
@@ -84,7 +84,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
         videoPlayerCoordinator = VideoPlayerCoordinator(
             builder.mlsConfiguration.VideoPlayerConfig,
-            viewIdentifierManager,
+            viewHandler,
             internalBuilder.reactorSocket,
             internalBuilder.dispatcher,
             dataManager,
@@ -118,11 +118,11 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         videoPlayerCoordinator.initialize(playerViewWrapper, player, builder)
 
 
-        val annotationListener = AnnotationListener(playerViewWrapper, viewIdentifierManager)
+        val annotationListener = AnnotationListener(playerViewWrapper, viewHandler)
         val actionBuilder = ActionBuilder(
             annotationListener,
             DownloaderClient(okHttpClient),
-            viewIdentifierManager
+            viewHandler
         )
         annotationMediator = AnnotationMediator(
             playerViewWrapper,

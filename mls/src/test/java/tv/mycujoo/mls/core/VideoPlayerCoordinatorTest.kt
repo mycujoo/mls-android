@@ -26,7 +26,7 @@ import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.MLSConfiguration
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
-import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.manager.ViewHandler
 import tv.mycujoo.mls.network.socket.MainWebSocketListener
 import tv.mycujoo.mls.network.socket.ReactorListener
 import tv.mycujoo.mls.network.socket.ReactorSocket
@@ -71,7 +71,7 @@ class VideoPlayerCoordinatorTest {
     lateinit var webSocket: WebSocket
 
     @Mock
-    lateinit var viewIdentifierManager: ViewIdentifierManager
+    lateinit var viewHandler: ViewHandler
 
     @Mock
     lateinit var dispatcher: CoroutineScope
@@ -147,7 +147,7 @@ class VideoPlayerCoordinatorTest {
         whenever(exoPlayer.addListener(any())).then { storeExoPlayerListener(it) }
         videoPlayerCoordinator = VideoPlayerCoordinator(
             videoPlayerConfig,
-            viewIdentifierManager,
+            viewHandler,
             reactorSocket,
             dispatcher,
             dataManager,

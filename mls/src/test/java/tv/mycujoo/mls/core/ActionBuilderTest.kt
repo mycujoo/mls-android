@@ -9,7 +9,7 @@ import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.mls.helper.DownloaderClient
-import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.manager.ViewHandler
 
 class ActionBuilderTest {
 
@@ -23,13 +23,13 @@ class ActionBuilderTest {
     lateinit var downloaderClient: DownloaderClient
 
     @Mock
-    lateinit var viewIdentifierManager: ViewIdentifierManager
+    lateinit var viewHandler: ViewHandler
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        actionBuilder = ActionBuilder(annotationListener, downloaderClient, viewIdentifierManager)
+        actionBuilder = ActionBuilder(annotationListener, downloaderClient, viewHandler)
     }
 
 

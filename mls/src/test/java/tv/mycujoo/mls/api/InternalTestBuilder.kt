@@ -4,11 +4,12 @@ import android.app.Activity
 import org.mockito.Mockito.mock
 import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.di.DaggerTestMlsComponent
-import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.manager.ViewHandler
+import tv.mycujoo.mls.manager.contracts.IViewHandler
 
 class InternalTestBuilder(private val activity: Activity) : InternalBuilder(activity) {
 
-    var mockViewIdentifierManager: ViewIdentifierManager = mock(ViewIdentifierManager::class.java)
+    var mockViewHandler: IViewHandler = mock(ViewHandler::class.java)
 
     override fun initialize() {
         val appModule = TestAppModule()
@@ -22,6 +23,6 @@ class InternalTestBuilder(private val activity: Activity) : InternalBuilder(acti
                 .build()
         dependencyGraph.inject(this)
 
-        viewIdentifierManager = mockViewIdentifierManager
+        viewHandler = mockViewHandler
     }
 }

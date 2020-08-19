@@ -11,7 +11,7 @@ import tv.mycujoo.mls.CoroutineTestRule
 import tv.mycujoo.mls.core.VideoPlayerCoordinator
 import tv.mycujoo.mls.data.IInternalDataProvider
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
-import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.manager.ViewHandler
 import tv.mycujoo.mls.player.IPlayer
 import tv.mycujoo.mls.player.Player
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
@@ -37,7 +37,7 @@ class MLSTest {
     lateinit var videoPlayerConfig: VideoPlayerConfig
 
     @Mock
-    lateinit var viewIdentifierManager: ViewIdentifierManager
+    lateinit var viewHandler: ViewHandler
 
     @Mock
     lateinit var dispatcher: CoroutineScope

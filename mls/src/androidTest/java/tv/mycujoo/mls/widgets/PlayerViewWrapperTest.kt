@@ -27,7 +27,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import tv.mycujoo.domain.entity.*
-import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.fake.FakeAnimationFactory
 import tv.mycujoo.matchers.TypeMatcher
@@ -38,7 +37,7 @@ import tv.mycujoo.mls.api.defaultVideoPlayerConfig
 import tv.mycujoo.mls.core.VideoPlayerCoordinator
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.helper.OverlayViewHelper
-import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.manager.ViewHandler
 import tv.mycujoo.mls.model.SingleLiveEvent
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.ReactorCallback
@@ -53,7 +52,7 @@ import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
 class PlayerViewWrapperTest {
 
     private lateinit var playerViewWrapper: PlayerViewWrapper
-    private var viewIdentifierManager = ViewIdentifierManager(
+    private var viewIdentifierManager = ViewHandler(
         GlobalScope,
         CountingIdlingResource("ViewIdentifierManager")
     )

@@ -12,7 +12,7 @@ import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.PositionGuide
 import tv.mycujoo.domain.entity.TransitionSpec
-import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ProportionalImageView
 import tv.mycujoo.mls.widgets.ScaffoldView
@@ -24,17 +24,17 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
         context: Context,
         overlayHost: OverlayHost,
         overlayEntity: OverlayEntity,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ) {
-        viewIdentifierManager.idlingResource.increment()
+        viewHandler.incrementIdlingResource()
 
         overlayHost.post {
             val scaffoldView =
                 OverlayFactory.createScaffoldView(
                     context,
                     overlayEntity,
-                    viewIdentifierManager.variableTranslator,
-                    viewIdentifierManager.timeKeeper
+                    viewHandler.getVariableTranslator(),
+                    viewHandler.getTimeKeeper()
                 )
 
             when (overlayEntity.introTransitionSpec.animationType) {
@@ -44,7 +44,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
                         scaffoldView,
                         overlayEntity.viewSpec.positionGuide!!,
                         overlayEntity.introTransitionSpec,
-                        viewIdentifierManager
+                        viewHandler
                     )
                 }
                 AnimationType.SLIDE_FROM_LEFT,
@@ -57,14 +57,12 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
                         scaffoldView,
                         overlayEntity.viewSpec.positionGuide!!,
                         overlayEntity.introTransitionSpec,
-                        viewIdentifierManager
+                        viewHandler
                     )
                 }
                 else -> {
                     // should not happen
-                    if (!viewIdentifierManager.idlingResource.isIdleNow) {
-                        viewIdentifierManager.idlingResource.decrement()
-                    }
+                    viewHandler.decrementIdlingResource()
                 }
             }
 
@@ -77,7 +75,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
         scaffoldView: ScaffoldView,
         positionGuide: PositionGuide,
         introTransitionSpec: TransitionSpec,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ) {
         val constraintSet = ConstraintSet()
         constraintSet.clone(overlayHost)
@@ -97,7 +95,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
         scaffoldView.visibility = View.INVISIBLE
         constraintSet.applyTo(overlayHost)
         overlayHost.addView(scaffoldView)
-        viewIdentifierManager.attachOverlayView(scaffoldView)
+        viewHandler.attachOverlayView(scaffoldView)
 
         scaffoldView.doOnLayout {
 
@@ -105,12 +103,10 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
                 overlayHost,
                 scaffoldView,
                 introTransitionSpec,
-                viewIdentifierManager
+                viewHandler
             )
             anim?.start()
-            if (!viewIdentifierManager.idlingResource.isIdleNow) {
-                viewIdentifierManager.idlingResource.decrement()
-            }
+            viewHandler.decrementIdlingResource()
         }
 
     }
@@ -120,7 +116,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
         scaffoldView: ScaffoldView,
         positionGuide: PositionGuide,
         introTransitionSpec: TransitionSpec,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ) {
         val constraintSet = ConstraintSet()
         constraintSet.clone(overlayHost)
@@ -141,19 +137,16 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
         scaffoldView.layoutParams = layoutParams
 
         overlayHost.addView(scaffoldView)
-        viewIdentifierManager.attachOverlayView(scaffoldView)
+        viewHandler.attachOverlayView(scaffoldView)
 
         val animation = animationFactory.createStaticAnimation(
             scaffoldView,
             introTransitionSpec.animationType,
             introTransitionSpec.animationDuration
         )
-        viewIdentifierManager.addAnimation(scaffoldView.tag as String, animation!!)
+        viewHandler.addAnimation(scaffoldView.tag as String, animation!!)
         animation.start()
-        if (!viewIdentifierManager.idlingResource.isIdleNow) {
-            viewIdentifierManager.idlingResource.decrement()
-        }
-
+        viewHandler.decrementIdlingResource()
     }
     /**endregion */
 
@@ -163,23 +156,23 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
         context: Context,
         overlayHost: OverlayHost,
         overlayEntity: OverlayEntity,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ) {
-        viewIdentifierManager.idlingResource.increment()
+        viewHandler.incrementIdlingResource()
 
         val scaffoldView =
             OverlayFactory.createScaffoldView(
                 context,
                 overlayEntity,
-                viewIdentifierManager.variableTranslator,
-                viewIdentifierManager.timeKeeper
+                viewHandler.getVariableTranslator(),
+                viewHandler.getTimeKeeper()
             )
 
         doAddViewWithNoAnimation(
             overlayHost,
             scaffoldView,
             overlayEntity.viewSpec.positionGuide!!,
-            viewIdentifierManager
+            viewHandler
         )
 
     }
@@ -189,7 +182,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
         overlayHost: OverlayHost,
         scaffoldView: ScaffoldView,
         positionGuide: PositionGuide,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ) {
         overlayHost.post {
             val constraintSet = ConstraintSet()
@@ -211,11 +204,9 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
             scaffoldView.layoutParams = layoutParams
 
             overlayHost.addView(scaffoldView)
-            viewIdentifierManager.attachOverlayView(scaffoldView)
+            viewHandler.attachOverlayView(scaffoldView)
             scaffoldView.doOnLayout {
-                if (!viewIdentifierManager.idlingResource.isIdleNow) {
-                    viewIdentifierManager.idlingResource.decrement()
-                }
+                viewHandler.decrementIdlingResource()
             }
         }
 
@@ -227,16 +218,16 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
     fun removeViewWithAnimation(
         overlayHost: OverlayHost,
         overlayEntity: OverlayEntity,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ) {
-        viewIdentifierManager.idlingResource.increment()
+        viewHandler.incrementIdlingResource()
 
         when (overlayEntity.outroTransitionSpec.animationType) {
             AnimationType.FADE_OUT -> {
                 removeViewWithStaticAnimation(
                     overlayHost,
                     overlayEntity,
-                    viewIdentifierManager
+                    viewHandler
                 )
             }
             AnimationType.SLIDE_TO_LEFT,
@@ -246,14 +237,12 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
                 removeViewWithDynamicAnimation(
                     overlayHost,
                     overlayEntity,
-                    viewIdentifierManager
+                    viewHandler
                 )
             }
             else -> {
                 // should not happen
-                if (!viewIdentifierManager.idlingResource.isIdleNow) {
-                    viewIdentifierManager.idlingResource.decrement()
-                }
+                viewHandler.decrementIdlingResource()
                 return
             }
 
@@ -264,7 +253,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
     private fun removeViewWithStaticAnimation(
         overlayHost: OverlayHost,
         overlayEntity: OverlayEntity,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ) {
         overlayHost.post {
             overlayHost.children.filter { it.tag == overlayEntity.id }.forEach { view ->
@@ -274,21 +263,19 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
                     overlayHost,
                     overlayEntity,
                     view,
-                    viewIdentifierManager
+                    viewHandler
                 )
 
                 animation.start()
             }
-            if (!viewIdentifierManager.idlingResource.isIdleNow) {
-                viewIdentifierManager.idlingResource.decrement()
-            }
+            viewHandler.decrementIdlingResource()
         }
     }
 
     private fun removeViewWithDynamicAnimation(
         overlayHost: OverlayHost,
         overlayEntity: OverlayEntity,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ) {
         overlayHost.post {
             overlayHost.children.filter { it.tag == overlayEntity.id }.forEach { view ->
@@ -299,7 +286,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
                     overlayHost,
                     overlayEntity,
                     view,
-                    viewIdentifierManager
+                    viewHandler
                 )
 
                 if (animation == null) {
@@ -311,9 +298,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
                 animation.start()
             }
 
-            if (!viewIdentifierManager.idlingResource.isIdleNow) {
-                viewIdentifierManager.idlingResource.decrement()
-            }
+            viewHandler.decrementIdlingResource()
         }
     }
 
@@ -326,9 +311,9 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
         overlayEntity: OverlayEntity,
         animationPosition: Long,
         isPlaying: Boolean,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ) {
-        viewIdentifierManager.idlingResource.increment()
+        viewHandler.incrementIdlingResource()
 
         overlayHost.post {
 
@@ -336,8 +321,8 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
                 OverlayFactory.createScaffoldView(
                     overlayHost.context,
                     overlayEntity,
-                    viewIdentifierManager.variableTranslator,
-                    viewIdentifierManager.timeKeeper
+                    viewHandler.getVariableTranslator(),
+                    viewHandler.getTimeKeeper()
                 )
 
             scaffoldView.doOnLayout {
@@ -348,17 +333,14 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
                     overlayEntity,
                     animationPosition,
                     isPlaying,
-                    viewIdentifierManager
+                    viewHandler
                 )
 
                 if (animation == null) {
                     Log.e("OverlayEntityView", "animation must not be null")
                     return@doOnLayout
                 }
-
-                if (!viewIdentifierManager.idlingResource.isIdleNow) {
-                    viewIdentifierManager.idlingResource.decrement()
-                }
+                viewHandler.decrementIdlingResource()
 
             }
 
@@ -385,7 +367,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
             scaffoldView.visibility = View.INVISIBLE
             constraintSet.applyTo(overlayHost)
             overlayHost.addView(scaffoldView)
-            viewIdentifierManager.attachOverlayView(scaffoldView)
+            viewHandler.attachOverlayView(scaffoldView)
 
         }
 
@@ -397,24 +379,24 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
         overlayEntity: OverlayEntity,
         animationPosition: Long,
         isPlaying: Boolean,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ) {
-        viewIdentifierManager.idlingResource.increment()
+        viewHandler.incrementIdlingResource()
 
         overlayHost.post {
             overlayHost.children.firstOrNull { it.tag == overlayEntity.id }?.let { view ->
 
                 overlayHost.removeView(view)
-                viewIdentifierManager.getAnimationWithTag(overlayEntity.id)?.let {
+                viewHandler.getAnimationWithTag(overlayEntity.id)?.let {
                     it.cancel()
                 }
-                viewIdentifierManager.removeAnimation(overlayEntity.id)
+                viewHandler.removeAnimation(overlayEntity.id)
 
-                val scaffoldView = viewIdentifierManager.getOverlayView(
+                val scaffoldView = viewHandler.getOverlayView(
                     overlayEntity.id
                 )
                 scaffoldView?.let {
-                    viewIdentifierManager.detachOverlayView(
+                    viewHandler.detachOverlayView(
                         it
                     )
                 }
@@ -425,12 +407,10 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
                     overlayEntity,
                     animationPosition,
                     isPlaying,
-                    viewIdentifierManager
+                    viewHandler
                 )
             }
-            if (!viewIdentifierManager.idlingResource.isIdleNow) {
-                viewIdentifierManager.idlingResource.decrement()
-            }
+            viewHandler.decrementIdlingResource()
         }
 
     }
@@ -441,7 +421,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
         overlayEntity: OverlayEntity,
         animationPosition: Long,
         isPlaying: Boolean,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ) {
         overlayHost.post {
 
@@ -449,8 +429,8 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
                 OverlayFactory.createScaffoldView(
                     overlayHost.context,
                     overlayEntity,
-                    viewIdentifierManager.variableTranslator,
-                    viewIdentifierManager.timeKeeper
+                    viewHandler.getVariableTranslator(),
+                    viewHandler.getTimeKeeper()
                 )
 
             scaffoldView.doOnLayout {
@@ -461,7 +441,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
                     overlayEntity,
                     animationPosition,
                     isPlaying,
-                    viewIdentifierManager
+                    viewHandler
                 )
 
             }
@@ -484,7 +464,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
             scaffoldView.visibility = View.INVISIBLE
             constraintSet.applyTo(overlayHost)
             overlayHost.addView(scaffoldView)
-            viewIdentifierManager.attachOverlayView(scaffoldView)
+            viewHandler.attachOverlayView(scaffoldView)
 
         }
 
@@ -496,18 +476,18 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
         overlayEntity: OverlayEntity,
         animationPosition: Long,
         isPlaying: Boolean,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ) {
-        val scaffoldView = viewIdentifierManager.getOverlayView(overlayEntity.id) ?: return
+        val scaffoldView = viewHandler.getOverlayView(overlayEntity.id) ?: return
 
         overlayHost.post {
-            viewIdentifierManager.getAnimationWithTag(overlayEntity.id)?.let {
+            viewHandler.getAnimationWithTag(overlayEntity.id)?.let {
                 it.cancel()
             }
-            viewIdentifierManager.removeAnimation(overlayEntity.id)
+            viewHandler.removeAnimation(overlayEntity.id)
 
             overlayHost.removeView(scaffoldView)
-            viewIdentifierManager.detachOverlayView(
+            viewHandler.detachOverlayView(
                 scaffoldView
             )
 
@@ -516,7 +496,7 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
                 overlayEntity,
                 animationPosition,
                 isPlaying,
-                viewIdentifierManager
+                viewHandler
             )
         }
 
@@ -525,9 +505,9 @@ class OverlayViewHelper(private val animationFactory: AnimationFactory) {
     fun updateLingeringMidwayOverlay(
         overlayHost: OverlayHost,
         overlayEntity: OverlayEntity,
-        viewIdentifierManager: ViewIdentifierManager
+        viewHandler: IViewHandler
     ) {
-        val scaffoldView = viewIdentifierManager.getOverlayView(overlayEntity.id) ?: return
+        val scaffoldView = viewHandler.getOverlayView(overlayEntity.id) ?: return
 
         overlayHost.post {
             val constraintSet = ConstraintSet()

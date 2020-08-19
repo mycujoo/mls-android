@@ -14,7 +14,8 @@ import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.di.DaggerMlsComponent
 import tv.mycujoo.mls.di.NetworkModule
 import tv.mycujoo.mls.manager.IPrefManager
-import tv.mycujoo.mls.manager.ViewIdentifierManager
+import tv.mycujoo.mls.manager.ViewHandler
+import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.MainWebSocketListener
 import tv.mycujoo.mls.network.socket.ReactorSocket
@@ -36,7 +37,7 @@ open class InternalBuilder(private val activity: Activity) {
     @Inject
     lateinit var prefManager: IPrefManager
 
-    lateinit var viewIdentifierManager: ViewIdentifierManager
+    lateinit var viewHandler: IViewHandler
 
     lateinit var reactorSocket: IReactorSocket
     private lateinit var mainWebSocketListener: MainWebSocketListener
@@ -49,7 +50,7 @@ open class InternalBuilder(private val activity: Activity) {
             DaggerMlsComponent.builder().networkModule(NetworkModule(activity)).build()
         dependencyGraph.inject(this)
 
-        viewIdentifierManager = ViewIdentifierManager(dispatcher, CountingIdlingResource("ViewIdentifierManager"))
+        viewHandler = ViewHandler(dispatcher, CountingIdlingResource("ViewIdentifierManager"))
 
         mainWebSocketListener = MainWebSocketListener()
         reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener)
