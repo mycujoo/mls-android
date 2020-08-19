@@ -3,12 +3,16 @@ package tv.mycujoo.mls.api
 import android.content.Context
 import android.content.res.AssetManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import com.caverock.androidsvg.SVG
 import com.google.android.exoplayer2.util.Util
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.repository.EventsRepository
+import tv.mycujoo.mls.core.ActionBuilder
+import tv.mycujoo.mls.core.AnnotationListener
 import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.core.VideoPlayerCoordinator
 import tv.mycujoo.mls.data.IDataManager
@@ -24,6 +28,7 @@ import tv.mycujoo.mls.player.Player.Companion.createExoPlayer
 import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
 import java.util.*
+import java.util.concurrent.Executors
 
 
 class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
@@ -111,13 +116,22 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         coordinatorInitialized = true
 
         videoPlayerCoordinator.initialize(playerViewWrapper, player, builder)
+
+
+        val annotationListener = AnnotationListener(playerViewWrapper, viewIdentifierManager)
+        val actionBuilder = ActionBuilder(
+            annotationListener,
+            DownloaderClient(okHttpClient),
+            viewIdentifierManager
+        )
         annotationMediator = AnnotationMediator(
             playerViewWrapper,
-            viewIdentifierManager,
+            actionBuilder,
             videoPlayerCoordinator.getPlayer(),
-            DownloaderClient(okHttpClient)
+            Executors.newScheduledThreadPool(1),
+            Handler(Looper.getMainLooper())
         )
-//        annotationMediator.initPlayerView(playerViewWrapper)
+        annotationMediator.initPlayerView(playerViewWrapper)
     }
     /**endregion */
 

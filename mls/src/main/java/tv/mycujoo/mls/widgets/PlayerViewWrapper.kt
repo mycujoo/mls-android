@@ -65,7 +65,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
     private lateinit var eventInfoDescription: String
     private lateinit var eventDateTime: String
 
-    var onSizeChangedCallback = {}
+    private var onSizeChangedCallback = {}
 
     private lateinit var overlayViewHelper: OverlayViewHelper
 
@@ -215,6 +215,11 @@ class PlayerViewWrapper @JvmOverloads constructor(
                 setLayoutParams(layoutParams)
             }
         }
+    }
+
+    // internal use only
+    fun setOnSizeChangedCallback(onSizeChangedCallback: () -> Unit) {
+        this.onSizeChangedCallback = onSizeChangedCallback
     }
 
     /**endregion */

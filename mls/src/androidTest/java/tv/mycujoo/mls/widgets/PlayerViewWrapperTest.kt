@@ -90,17 +90,6 @@ class PlayerViewWrapperTest {
     }
 
     private fun setupPlayer() {
-
-        val eventRepository = object : EventsRepository {
-            override suspend fun getEventsList(): Result<Exception, Events> {
-                return Result.Success(Events(emptyList()))
-            }
-
-            override suspend fun getEventDetails(eventId: String, updatedId: String?): Result<Exception, EventEntity> {
-                return Result.Success(getSampleEventEntity(emptyList()))
-            }
-        }
-
         val dataManager = object : IDataManager {
 
             override suspend fun getEventDetails(eventId: String): Result<Exception, EventEntity> {

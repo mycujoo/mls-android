@@ -1,7 +1,6 @@
 package tv.mycujoo.mls.mediator
 
 import android.os.Handler
-import android.os.Looper
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.DISCONTINUITY_REASON_SEEK
 import com.google.android.exoplayer2.Player.STATE_READY
@@ -9,30 +8,22 @@ import tv.mycujoo.domain.entity.ActionEntity
 import tv.mycujoo.domain.entity.models.ActionType.HIDE_OVERLAY
 import tv.mycujoo.domain.entity.models.ActionType.SHOW_OVERLAY
 import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
-import tv.mycujoo.mls.core.ActionBuilder
-import tv.mycujoo.mls.core.AnnotationListener
 import tv.mycujoo.mls.core.IActionBuilder
-import tv.mycujoo.mls.helper.IDownloaderClient
-import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.player.IPlayer
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
-import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
 
 class AnnotationMediator(
     private var playerViewWrapper: PlayerViewWrapper,
-    identifierManager: ViewIdentifierManager,
+    private val actionBuilder: IActionBuilder,
     player: IPlayer,
-    downloaderClient: IDownloaderClient
+    private val scheduler: ScheduledExecutorService,
+    handler: Handler
 ) : IAnnotationMediator {
 
-    private var scheduler: ScheduledExecutorService
-
     /**region Fields*/
-    internal var actionBuilder: IActionBuilder
-
     private lateinit var eventListener: Player.EventListener
     private var hasPendingSeek: Boolean = false
     /**endregion */
@@ -41,24 +32,14 @@ class AnnotationMediator(
     init {
         initEventListener(player)
 
-        val annotationListener = AnnotationListener(playerViewWrapper, identifierManager)
-
-        actionBuilder = ActionBuilder(
-            annotationListener,
-            downloaderClient,
-            identifierManager
-        )
-
         feed()
 
-        val handler = Handler(Looper.getMainLooper())
-        scheduler = Executors.newScheduledThreadPool(1)
 
         val exoRunnable = Runnable {
             if (player.isPlaying()) {
                 val currentPosition = player.currentPosition()
 
-                actionBuilder.setCurrentTime(currentPosition, player.isPlaying())
+                actionBuilder.setCurrentTime(currentPosition, true)
                 actionBuilder.buildCurrentTimeRange()
 
                 actionBuilder.processTimers()
@@ -147,7 +128,7 @@ class AnnotationMediator(
 
     override fun initPlayerView(playerViewWrapper: PlayerViewWrapper) {
         this.playerViewWrapper = playerViewWrapper
-        playerViewWrapper.onSizeChangedCallback = onSizeChangedCallback
+        playerViewWrapper.setOnSizeChangedCallback(onSizeChangedCallback)
     }
     /**endregion */
 

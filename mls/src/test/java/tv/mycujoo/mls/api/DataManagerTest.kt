@@ -124,7 +124,7 @@ class DataManagerTest {
         val result = dataManager.getEventDetails(event.id)
         assert(result is Result.Success)
         assertEquals(event.id, (result as Result.Success).value.id)
-        assertEquals(event.description, (result as Result.Success).value.description)
+        assertEquals(event.description, result.value.description)
 
     }
 
