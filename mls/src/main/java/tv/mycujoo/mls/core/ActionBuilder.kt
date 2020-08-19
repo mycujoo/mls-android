@@ -3,18 +3,18 @@ package tv.mycujoo.mls.core
 import tv.mycujoo.data.entity.ActionCollections
 import tv.mycujoo.domain.entity.IncrementVariableEntity
 import tv.mycujoo.domain.entity.OverlayAct.*
-import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.OverlayBlueprint
+import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.SetVariableEntity
 import tv.mycujoo.mls.helper.ActionVariableHelper
 import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasOutroAnimation
-import tv.mycujoo.mls.helper.DownloaderClient
+import tv.mycujoo.mls.helper.IDownloaderClient
 import tv.mycujoo.mls.manager.TimerProcessor
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 
 class ActionBuilder(
     private val listener: IAnnotationListener,
-    private val downloaderClient: DownloaderClient,
+    private val downloaderClient: IDownloaderClient,
     private val viewIdentifierManager: ViewIdentifierManager
 ) : IActionBuilder() {
 

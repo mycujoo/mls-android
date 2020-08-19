@@ -1,5 +1,10 @@
 package tv.mycujoo.mls.helper
 
-interface IDownloaderClient {
+import tv.mycujoo.domain.entity.OverlayEntity
 
+interface IDownloaderClient {
+    fun download(
+        overlayEntity: OverlayEntity,
+        callback: (OverlayEntity) -> Unit
+    )
 }

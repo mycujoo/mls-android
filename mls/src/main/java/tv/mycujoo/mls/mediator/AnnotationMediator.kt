@@ -12,7 +12,7 @@ import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.mls.core.ActionBuilder
 import tv.mycujoo.mls.core.AnnotationListener
 import tv.mycujoo.mls.core.IActionBuilder
-import tv.mycujoo.mls.helper.DownloaderClient
+import tv.mycujoo.mls.helper.IDownloaderClient
 import tv.mycujoo.mls.manager.ViewIdentifierManager
 import tv.mycujoo.mls.player.IPlayer
 import tv.mycujoo.mls.widgets.PlayerViewWrapper
@@ -25,7 +25,7 @@ class AnnotationMediator(
     private var playerViewWrapper: PlayerViewWrapper,
     identifierManager: ViewIdentifierManager,
     player: IPlayer,
-    downloaderClient: DownloaderClient
+    downloaderClient: IDownloaderClient
 ) : IAnnotationMediator {
 
     private var scheduler: ScheduledExecutorService

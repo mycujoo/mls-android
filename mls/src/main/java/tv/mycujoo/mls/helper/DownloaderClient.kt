@@ -9,7 +9,7 @@ import java.util.*
 
 class DownloaderClient(val okHttpClient: OkHttpClient) : IDownloaderClient {
 
-    fun download(
+    override fun download(
         overlayEntity: OverlayEntity,
         callback: (OverlayEntity) -> Unit
     ) {
