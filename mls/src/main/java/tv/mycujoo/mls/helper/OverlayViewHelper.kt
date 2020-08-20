@@ -91,7 +91,6 @@ class OverlayViewHelper(
         scaffoldView.layoutParams = layoutParams
         scaffoldView.visibility = View.INVISIBLE
         constraintSet.applyTo(overlayHost)
-        overlayHost.addView(scaffoldView)
         viewHandler.attachOverlayView(scaffoldView)
 
         scaffoldView.doOnLayout {
@@ -132,7 +131,6 @@ class OverlayViewHelper(
         constraintSet.applyTo(overlayHost)
         scaffoldView.layoutParams = layoutParams
 
-        overlayHost.addView(scaffoldView)
         viewHandler.attachOverlayView(scaffoldView)
 
         val animation = animationFactory.createAddViewStaticAnimation(
@@ -196,7 +194,6 @@ class OverlayViewHelper(
             constraintSet.applyTo(overlayHost)
             scaffoldView.layoutParams = layoutParams
 
-            overlayHost.addView(scaffoldView)
             viewHandler.attachOverlayView(scaffoldView)
             scaffoldView.doOnLayout {
                 viewHandler.decrementIdlingResource()
@@ -348,7 +345,6 @@ class OverlayViewHelper(
             scaffoldView.layoutParams = layoutParams
             scaffoldView.visibility = View.INVISIBLE
             constraintSet.applyTo(overlayHost)
-            overlayHost.addView(scaffoldView)
             viewHandler.attachOverlayView(scaffoldView)
 
         }
@@ -367,7 +363,6 @@ class OverlayViewHelper(
         overlayHost.post {
             overlayHost.children.firstOrNull { it.tag == overlayEntity.id }?.let { view ->
 
-                overlayHost.removeView(view)
                 viewHandler.getAnimationWithTag(overlayEntity.id)?.let {
                     it.cancel()
                 }
@@ -442,7 +437,6 @@ class OverlayViewHelper(
             scaffoldView.layoutParams = layoutParams
             scaffoldView.visibility = View.INVISIBLE
             constraintSet.applyTo(overlayHost)
-            overlayHost.addView(scaffoldView)
             viewHandler.attachOverlayView(scaffoldView)
 
         }
@@ -464,7 +458,6 @@ class OverlayViewHelper(
             }
             viewHandler.removeAnimation(overlayEntity.id)
 
-            overlayHost.removeView(scaffoldView)
             viewHandler.detachOverlayView(
                 scaffoldView
             )

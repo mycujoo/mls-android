@@ -139,6 +139,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
     override fun onStart(playerViewWrapper: PlayerViewWrapper) {
         if (Util.SDK_INT >= Build.VERSION_CODES.N) {
             this.playerViewWrapper = playerViewWrapper
+            this.viewHandler.setOverlayHost(playerViewWrapper.overlayHost)
             initializeCoordinators(playerViewWrapper)
             videoPlayerCoordinator.attachPlayer(playerViewWrapper)
         }

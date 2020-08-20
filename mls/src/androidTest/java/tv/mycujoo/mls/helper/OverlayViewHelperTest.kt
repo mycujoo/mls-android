@@ -61,6 +61,8 @@ class OverlayViewHelperTest {
                 viewHandler,
                 emptyList()
             )
+
+            viewHandler.setOverlayHost(playerViewWrapper.overlayHost)
         }
     }
 

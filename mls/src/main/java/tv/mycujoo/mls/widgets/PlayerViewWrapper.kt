@@ -48,7 +48,7 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
     /**region UI Fields*/
     var playerView: PlayerView
-    private var overlayHost: OverlayHost
+    var overlayHost: OverlayHost
 
     private var bufferView: ProgressBar
 
@@ -492,7 +492,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
                     viewHandler.detachOverlayView(it as ScaffoldView)
                     viewHandler.removeAnimation(overlayEntity.id)
                 }
-                overlayHost.removeView(it)
             }
 
     }
@@ -582,7 +581,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
                     viewHandler.detachOverlayView(it as ScaffoldView)
                     viewHandler.removeAnimation(overlayEntity.id)
                 }
-                overlayHost.removeView(it)
             }
     }
 
@@ -594,7 +592,6 @@ class PlayerViewWrapper @JvmOverloads constructor(
                         viewHandler.detachOverlayView(it as ScaffoldView)
                         viewHandler.removeAnimation(it.tag as String)
                     }
-                    overlayHost.removeView(it)
                 }
             }
 

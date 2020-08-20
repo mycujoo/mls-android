@@ -9,6 +9,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import tv.mycujoo.mls.manager.contracts.IViewHandler
+import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ScaffoldView
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -18,6 +19,9 @@ import kotlin.test.assertTrue
 class ViewHandlerTest {
 
     private lateinit var viewHandler: IViewHandler
+
+    @Mock
+    lateinit var overLayHost: OverlayHost
 
     @Mock
     lateinit var view0: ScaffoldView
@@ -41,6 +45,7 @@ class ViewHandlerTest {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         viewHandler = ViewHandler(dispatcher, idlingResource)
+        viewHandler.setOverlayHost(overLayHost)
     }
 
 

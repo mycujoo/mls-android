@@ -131,7 +131,6 @@ open class AnimationFactory {
             }
 
             override fun onAnimationEnd(animation: Animator?) {
-                overlayHost.removeView(overlayView)
                 viewHandler.detachOverlayView(overlayView)
                 viewHandler.removeAnimation(overlayEntity.id)
             }
@@ -202,7 +201,6 @@ open class AnimationFactory {
                 }
 
                 override fun onAnimationEnd(animation: Animator?) {
-                    overlayHost.removeView(view)
                     viewHandler.detachOverlayView(view)
                     viewHandler.removeAnimation(overlayEntity.id)
                 }
@@ -403,7 +401,6 @@ open class AnimationFactory {
                     viewHandler.detachOverlayView(
                         scaffoldView
                     )
-                    overlayHost.removeView(scaffoldView)
                 }
 
                 override fun onAnimationCancel(animation: Animator?) {

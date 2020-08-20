@@ -5,14 +5,18 @@ import android.util.Log
 import androidx.test.espresso.idling.CountingIdlingResource
 import kotlinx.coroutines.CoroutineScope
 import tv.mycujoo.mls.manager.contracts.IViewHandler
+import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ScaffoldView
 
-class ViewHandler(
+open class ViewHandler(
     dispatcher: CoroutineScope,
     val idlingResource: CountingIdlingResource
 ) : IViewHandler {
 
+
     /**region Fields*/
+    private lateinit var overlayHost: OverlayHost
+
     private var viewIdToIdMap = mutableMapOf<String, Int>()
     private var animations = ArrayList<Pair<String, ObjectAnimator>>()
 
@@ -21,6 +25,16 @@ class ViewHandler(
     private val variableTranslator = VariableTranslator(dispatcher)
     private val timeKeeper = TimeKeeper(dispatcher)
 
+    /**endregion */
+
+    /**region OverlayHost*/
+    override fun setOverlayHost(overlayHost: OverlayHost) {
+        this.overlayHost = overlayHost
+    }
+
+    override fun getOverlayHost(): OverlayHost {
+       return overlayHost
+    }
     /**endregion */
 
     /**region Animation*/
@@ -51,13 +65,14 @@ class ViewHandler(
             Log.w("ViewIdentifierManager", "overlay tag should not be null")
             return
         }
-
-        if (attachedViewList.any { it.tag == view.tag as String }) {
+        val viewTag = view.tag as String
+        if (attachedViewList.any {
+                it.tag == viewTag }) {
             Log.w("ViewIdentifierManager", "Should not add an already active view")
         } else {
             attachedViewList.add(view)
+            overlayHost.addView(view)
         }
-
     }
 
     override fun detachOverlayView(view: ScaffoldView?) {
@@ -71,6 +86,7 @@ class ViewHandler(
         }
 
         attachedViewList.remove(view)
+        overlayHost.removeView(view)
     }
 
     override fun getOverlayView(id: String): ScaffoldView? {
@@ -80,8 +96,6 @@ class ViewHandler(
     /**endregion */
 
     /**region Overlay objects*/
-
-
     override fun overlayBlueprintIsNotAttached(id: String): Boolean {
         return attachedViewList.none { it.tag == id }
     }
@@ -93,7 +107,6 @@ class ViewHandler(
     /**endregion */
 
     /**region msc*/
-
     override fun clearAll() {
         attachedViewList.clear()
         animations.clear()
