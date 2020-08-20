@@ -30,7 +30,7 @@ class OverlayFactory {
 
             overlayEntity.variablePlaceHolders.forEach { entry ->
                 // VALUE of place-holder, is the KEY in the set_variable map
-                variableTranslator.createVariableLiveEventIfNotExisted(entry)
+                variableTranslator.createVariableTripleIfNotExisted(entry)
                 variableTranslator.observe(
                     entry
                 ) { scaffoldView.onVariableUpdated(it) }

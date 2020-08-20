@@ -135,7 +135,7 @@ class OverlayViewHelper(
         overlayHost.addView(scaffoldView)
         viewHandler.attachOverlayView(scaffoldView)
 
-        val animation = animationFactory.createStaticAnimation(
+        val animation = animationFactory.createAddViewStaticAnimation(
             scaffoldView,
             introTransitionSpec.animationType,
             introTransitionSpec.animationDuration

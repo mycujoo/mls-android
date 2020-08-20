@@ -1,6 +1,5 @@
 package tv.mycujoo.mls.manager
 
-import android.util.Log
 import com.jakewharton.rxrelay3.BehaviorRelay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -8,12 +7,11 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class VariableTranslator(private val dispatcher: CoroutineScope) {
-    private val variableRelayList = ArrayList<VariableTriple>()
+    private val variableTripleList = ArrayList<VariableTriple>()
 
-    fun createVariableLiveEventIfNotExisted(variableName: String) {
-
-        if (variableRelayList.none { it.variableName == variableName }) {
-            variableRelayList.add(
+    fun createVariableTripleIfNotExisted(variableName: String) {
+        if (variableTripleList.none { it.variableName == variableName }) {
+            variableTripleList.add(
                 VariableTriple(
                     variableName,
                     arrayListOf(),
@@ -24,26 +22,26 @@ class VariableTranslator(private val dispatcher: CoroutineScope) {
     }
 
     fun emitNewValue(variableName: String, variableValue: Any) {
-        variableRelayList.firstOrNull { it.variableName == variableName }
+        variableTripleList.firstOrNull { it.variableName == variableName }
             ?.let { variableRelay ->
                 variableRelay.variableRelay.accept(Pair(variableName, variableValue))
             }
     }
 
     fun observe(variableName: String, callback: (Pair<String, Any>) -> Unit) {
-        variableRelayList.firstOrNull { it.variableName == variableName }
+        variableTripleList.firstOrNull { it.variableName == variableName }
             ?.let { variableTriple ->
                 variableTriple.callbackList.add(callback)
             }
     }
 
     fun getValue(key: String): Any? {
-        return variableRelayList.firstOrNull { it.variableName == key }?.variableRelay?.value?.second
+        return variableTripleList.firstOrNull { it.variableName == key }?.variableRelay?.value?.second
     }
 
     fun setVariablesNameValueIfDifferent(variablesTillNow: HashMap<String, Any>) {
         dispatcher.launch {
-            variableRelayList.forEach { variableRelay ->
+            variableTripleList.forEach { variableRelay ->
                 if (variablesTillNow.containsKey(variableRelay.variableName)) {
                     if (variableRelay.variableRelay.value?.second == null || variablesTillNow[variableRelay.variableName] != variableRelay.variableRelay.value.second) {
                         variableRelay.variableRelay.accept(

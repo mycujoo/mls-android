@@ -14,7 +14,7 @@ class FakeAnimationFactory : AnimationFactory() {
     var animationRecipe: AnimationRecipe? = null
 
 
-    override fun createStaticAnimation(
+    override fun createAddViewStaticAnimation(
         scaffoldView: ScaffoldView,
         animationType: AnimationType,
         animationDuration: Long
@@ -22,7 +22,7 @@ class FakeAnimationFactory : AnimationFactory() {
 
         animationRecipe = AnimationRecipe(scaffoldView, animationType, animationDuration)
 
-        return super.createStaticAnimation(scaffoldView, animationType, animationDuration)
+        return super.createAddViewStaticAnimation(scaffoldView, animationType, animationDuration)
     }
 
     override fun createAddViewDynamicAnimation(

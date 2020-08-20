@@ -11,7 +11,7 @@ import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ScaffoldView
 
 open class AnimationFactory {
-    open fun createStaticAnimation(
+    open fun createAddViewStaticAnimation(
         scaffoldView: ScaffoldView,
         animationType: AnimationType,
         animationDuration: Long
@@ -20,10 +20,6 @@ open class AnimationFactory {
         when (animationType) {
             AnimationType.FADE_IN -> {
                 animation = ObjectAnimator.ofFloat(scaffoldView, View.ALPHA, 0F, 1F)
-                animation.duration = animationDuration
-            }
-            AnimationType.FADE_OUT -> {
-                animation = ObjectAnimator.ofFloat(scaffoldView, View.ALPHA, 1F, 0F)
                 animation.duration = animationDuration
             }
             else -> {
@@ -364,6 +360,14 @@ open class AnimationFactory {
                     -scaffoldView.width.toFloat()
                 )
 
+            }
+            AnimationType.SLIDE_TO_TOP -> {
+                animation = ObjectAnimator.ofFloat(
+                    scaffoldView,
+                    View.Y,
+                    scaffoldView.y,
+                    -overlayHost.height.toFloat()
+                )
             }
             AnimationType.SLIDE_TO_RIGHT -> {
                 animation = ObjectAnimator.ofFloat(
