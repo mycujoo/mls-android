@@ -123,8 +123,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <tv.mycujoo.mls.widgets.mlstimebar.TimelineMarker
-            android:id="@+id/exo_highlight_marker_title_highlight_marker"
+        <tv.mycujoo.mls.widgets.mlstimebar.TimelineMarkerView
+            android:id="@+id/exo_timelineMarkerView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:animationCache="true"

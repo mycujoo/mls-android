@@ -37,7 +37,7 @@ import tv.mycujoo.mls.widgets.PlayerViewWrapper.LiveState.*
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterest
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterestType
-import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarker
+import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarkerView
 import java.util.*
 
 
@@ -156,16 +156,17 @@ class PlayerViewWrapper @JvmOverloads constructor(
     private fun initMlsTimeBar(list: List<TimelineMarkerEntity>) {
         val mlsTimeBar = findViewById<MLSTimeBar>(R.id.exo_progress)
         mlsTimeBar.setPlayedColor(Color.BLUE)
-        val highlightMarkerTextView =
-            findViewById<TimelineMarker>(R.id.exo_highlight_marker_title_highlight_marker)
+        val timelineMarkerView =
+            findViewById<TimelineMarkerView>(R.id.exo_timelineMarkerView)
 
-        val timelineMarkerManager = TimelineMarkerManager(mlsTimeBar, highlightMarkerTextView)
+        val timelineMarkerManager = TimelineMarkerManager(mlsTimeBar, timelineMarkerView)
 
 
         list.forEach { showTimelineMarkerEntity ->
             timelineMarkerManager.addTimeLineHighlight(
                 PointOfInterest(
                     showTimelineMarkerEntity.offset,
+                    showTimelineMarkerEntity.seekOffset,
                     listOf(showTimelineMarkerEntity.label),
                     PointOfInterestType(showTimelineMarkerEntity.color)
                 )
@@ -252,9 +253,9 @@ class PlayerViewWrapper @JvmOverloads constructor(
 
             val mlsTimeBar = findViewById<MLSTimeBar>(R.id.exo_progress)
             mlsTimeBar.setPlayedColor(primaryColor)
-            val highlightMarkerTextView =
-                findViewById<TimelineMarker>(R.id.exo_highlight_marker_title_highlight_marker)
-            highlightMarkerTextView.initialize(config.secondaryColor)
+            val timelineMarkerView =
+                findViewById<TimelineMarkerView>(R.id.exo_timelineMarkerView)
+            timelineMarkerView.initialize(config.secondaryColor)
 
             bufferView.indeterminateTintList = ColorStateList.valueOf(primaryColor)
             findViewById<ImageButton>(R.id.exo_play).setColorFilter(

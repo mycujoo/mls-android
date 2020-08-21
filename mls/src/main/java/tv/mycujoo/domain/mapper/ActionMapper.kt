@@ -363,12 +363,16 @@ class ActionMapper {
 
             var label = INVALID_STRING_VALUE
             var color = INVALID_STRING_VALUE
+            var seekOffset = 0L // initialValue
 
             actionSourceData.data?.let { data ->
                 data.keys.forEach { key ->
                     val any = data[key]
                     when (key) {
 
+                        "seek_offset" -> {
+                            any?.let { seekOffset = (it as Double).toLong() }
+                        }
                         "label" -> {
                             any?.let { label = it as String }
                         }
@@ -383,8 +387,7 @@ class ActionMapper {
             }
 
 
-
-            return TimelineMarkerEntity(actionSourceData.id, actionSourceData.offset, label, color)
+            return TimelineMarkerEntity(actionSourceData.id, seekOffset, actionSourceData.offset, label, color)
         }
 
         private fun mapToCreateScreenTimerEntity(actionSourceData: ActionSourceData?): CreateTimerEntity? {

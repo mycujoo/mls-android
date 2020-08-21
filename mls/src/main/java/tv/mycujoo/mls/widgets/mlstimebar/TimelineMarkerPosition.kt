@@ -6,7 +6,7 @@ interface TimelineMarkerPosition {
     fun onScrubMove(
         position: Long,
         videoDuration: Long,
-        poiPositionOnTimeBarArrayList: ArrayList<Int>
+        poiPositionsOnScreen: ArrayList<Int>
     )
 
     fun update(position: Long, videoDuration: Long)

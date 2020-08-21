@@ -17,7 +17,7 @@ import tv.mycujoo.mls.R
 import tv.mycujoo.mls.utils.ColorUtils
 
 
-class TimelineMarker @JvmOverloads constructor(
+class TimelineMarkerView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr) {
 
@@ -95,12 +95,12 @@ class TimelineMarker @JvmOverloads constructor(
 
     }
 
-    fun removeTexts() {
+    fun removeMarkerTexts() {
         children.forEach { removeView(it) }
     }
 
-    fun addHighlightTexts(titles: List<String>) {
-        removeTexts()
+    fun setMarkerTexts(titles: List<String>) {
+        removeMarkerTexts()
         titles.forEach {
             addView(TextView(context).apply {
                 text = it

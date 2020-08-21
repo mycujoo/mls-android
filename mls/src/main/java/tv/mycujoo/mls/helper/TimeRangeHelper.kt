@@ -2,7 +2,7 @@ package tv.mycujoo.mls.helper
 
 class TimeRangeHelper {
     companion object {
-        fun isInRange(currentTime: Long, videoDuration: Long, subjectTime: Long): Boolean {
+        fun isInRange(currentTime: Long, videoDuration: Long, subjectTime: Long, seekOffset: Long): Boolean {
 
             var range = 5000L
 
@@ -11,18 +11,14 @@ class TimeRangeHelper {
                 range += extra20MinSegments.toInt() * 1000L
             }
 
-            val right = subjectTime + range
-            val left: Long = if (subjectTime < range) {
+            val right = subjectTime + range + seekOffset
+            val left: Long = if (subjectTime + seekOffset < range) {
                 0L
             } else {
-                subjectTime - range
+                subjectTime - range + seekOffset
             }
 
             return (currentTime >= left) && (currentTime <= right)
-        }
-
-        fun isOffsetInRange(currentTime: Long, offset: Long): Boolean {
-            return (currentTime + 1000L >= offset) && (currentTime <= offset)
         }
 
         fun isOffsetUntilNow(currentTime: Long, offset: Long): Boolean {

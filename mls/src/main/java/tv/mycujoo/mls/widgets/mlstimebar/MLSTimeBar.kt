@@ -69,7 +69,7 @@ class MLSTimeBar @JvmOverloads constructor(
     private var adGroupTimesMs: LongArray? = null
     private var playedAdGroups: BooleanArray? = null
     private val poiArrayList = ArrayList<PointOfInterest>()
-    private val poiPositionOnTimeBarArrayList = ArrayList<Int>()
+    private val poiPositionsOnScreen = ArrayList<Int>()
     private lateinit var timelineMarkerPositionListener: TimelineMarkerPosition
 
 
@@ -137,7 +137,7 @@ class MLSTimeBar @JvmOverloads constructor(
         invalidate(seekBounds)
     }
 
-    fun setHighlightMarkerPositionListener(listener: TimelineMarkerPosition) {
+    fun setTimelineMarkerPositionListener(listener: TimelineMarkerPosition) {
         timelineMarkerPositionListener = listener
     }
 
@@ -166,7 +166,7 @@ class MLSTimeBar @JvmOverloads constructor(
         this.position = position
         contentDescription = progressText
 
-        if (this::timelineMarkerPositionListener.isInitialized){
+        if (this::timelineMarkerPositionListener.isInitialized) {
             timelineMarkerPositionListener.update(position, duration)
         }
 
@@ -211,7 +211,7 @@ class MLSTimeBar @JvmOverloads constructor(
 
     fun addTimeLineHighlight(poi: PointOfInterest) {
         poiArrayList.add(poi)
-        poiPositionOnTimeBarArrayList.add(-1)
+        poiPositionsOnScreen.add(-1)
     }
 
     // View methods.
@@ -438,7 +438,7 @@ class MLSTimeBar @JvmOverloads constructor(
             timelineMarkerPositionListener.onScrubMove(
                 scrubPosition,
                 duration,
-                poiPositionOnTimeBarArrayList
+                poiPositionsOnScreen
             )
         }
 
@@ -582,11 +582,20 @@ class MLSTimeBar @JvmOverloads constructor(
         val poiMarkerOffset = adMarkerWidth / 2
 
         poiArrayList.forEachIndexed { index, poi ->
+
+            var poiOffsetAdjusted = -1L
+            if (poi.offset + poi.seekOffset in 0L..duration) {
+                poiOffsetAdjusted = poi.offset + poi.seekOffset
+            } else {
+                poiPositionsOnScreen[index] = -1
+                return
+            }
+
             paint.color =
                 Color.parseColor(poi.poiType.color)
 
             val poiTimeMs = Util.constrainValue(
-                poi.offset,
+                poiOffsetAdjusted,
                 0,
                 duration
             )
@@ -608,7 +617,7 @@ class MLSTimeBar @JvmOverloads constructor(
                 paint
             )
 
-            poiPositionOnTimeBarArrayList[index] =
+            poiPositionsOnScreen[index] =
                 ((markerLeft + markerRight) / 2).toInt()
 
         }
