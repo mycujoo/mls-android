@@ -9,9 +9,9 @@ import tv.mycujoo.mls.widgets.CreateTimerEntity
 import tv.mycujoo.mls.widgets.SkipTimerEntity
 import tv.mycujoo.mls.widgets.StartTimerEntity
 
-class TimeKeeper(private val dispatcher: CoroutineScope) {
+class TimerKeeper(private val dispatcher: CoroutineScope) : ITimerKeeper {
 
-    val timerRelayList = ArrayList<TimerTwin>()
+    private val timerRelayList = ArrayList<TimerTwin>()
 
     fun createTimer(createTimerEntity: CreateTimerEntity) {
         val timerRelay = TimerTwin(
@@ -29,7 +29,7 @@ class TimeKeeper(private val dispatcher: CoroutineScope) {
         timerRelayList.add(timerRelay)
     }
 
-    fun observe(timerName: String, callback: (Pair<String, String>) -> Unit) {
+    override fun observe(timerName: String, callback: (Pair<String, String>) -> Unit) {
         dispatcher.launch {
             timerRelayList.firstOrNull { it.timerCore.name == timerName }
                 ?.let { timerTwin ->
@@ -41,7 +41,7 @@ class TimeKeeper(private val dispatcher: CoroutineScope) {
     }
 
 
-    fun getValue(name: String): String {
+    override fun getValue(name: String): String {
         return timerRelayList.firstOrNull { it.timerCore.name == name }?.timerCore?.getFormattedTime()
             ?: ""
     }

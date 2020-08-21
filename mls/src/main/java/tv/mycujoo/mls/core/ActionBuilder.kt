@@ -64,7 +64,7 @@ class ActionBuilder(
         this.actionCollections = actionCollections
         timerProcessor = TimerProcessor(
             actionCollections.timerCollection,
-            viewHandler.getTimeKeeper(),
+            viewHandler.getTimerKeeper(),
             appliedCreateTimer
         )
     }
@@ -177,7 +177,7 @@ class ActionBuilder(
         )
 
         toBeNotified.forEach { timerName ->
-            viewHandler.getTimeKeeper().notify(timerName)
+            viewHandler.getTimerKeeper().notify(timerName)
         }
 
     }

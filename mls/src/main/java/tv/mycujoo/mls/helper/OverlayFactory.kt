@@ -5,7 +5,7 @@ import android.util.Log
 import android.view.View
 import com.caverock.androidsvg.SVG
 import tv.mycujoo.domain.entity.OverlayEntity
-import tv.mycujoo.mls.manager.TimeKeeper
+import tv.mycujoo.mls.manager.ITimerKeeper
 import tv.mycujoo.mls.manager.VariableTranslator
 import tv.mycujoo.mls.widgets.ScaffoldView
 
@@ -16,7 +16,7 @@ class OverlayFactory {
             context: Context,
             overlayEntity: OverlayEntity,
             variableTranslator: VariableTranslator,
-            timeKeeper: TimeKeeper
+            timerKeeper: ITimerKeeper
         ): ScaffoldView {
 
             val size = overlayEntity.viewSpec.size!!
@@ -41,9 +41,9 @@ class OverlayFactory {
             }
 
             overlayEntity.variablePlaceHolders.forEach { entry ->
-                timeKeeper.observe(entry) { scaffoldView.onVariableUpdated(it) }
+                timerKeeper.observe(entry) { scaffoldView.onVariableUpdated(it) }
 
-                scaffoldView.initialVariables(Pair(entry, timeKeeper.getValue(entry)))
+                scaffoldView.initialVariables(Pair(entry, timerKeeper.getValue(entry)))
             }
 
 
@@ -54,7 +54,7 @@ class OverlayFactory {
                 overlayEntity.variablePlaceHolders.forEach { placeHolder ->
                     var value = variableTranslator.getValue(placeHolder)
                     if (value == null) {
-                        value = timeKeeper.getValue(placeHolder)
+                        value = timerKeeper.getValue(placeHolder)
                     }
                     rawString =
                         rawString.replace(placeHolder, value.toString())

@@ -20,7 +20,7 @@ class TimerProcessorTest {
 
 
     @Mock
-    lateinit var timeKeeper: TimeKeeper
+    lateinit var timerKeeper: TimerKeeper
 
     @Before
     fun setUp() {
@@ -33,7 +33,7 @@ class TimerProcessorTest {
         val createTimerEntity = getSampleCreateTimerEntity(ZERO_SECONDS)
         val timerProcessor = TimerProcessor(
             getSampleTimerCollection(createTimerEntity),
-            timeKeeper,
+            timerKeeper,
             arrayListOf()
         )
 
@@ -41,7 +41,7 @@ class TimerProcessorTest {
         timerProcessor.process(ONE_SECONDS)
 
 
-        Mockito.verify(timeKeeper).createTimer(createTimerEntity)
+        Mockito.verify(timerKeeper).createTimer(createTimerEntity)
     }
 
     @Test
@@ -49,7 +49,7 @@ class TimerProcessorTest {
         val createTimerEntity = getSampleCreateTimerEntity(ONE_SECONDS)
         val timerProcessor = TimerProcessor(
             getSampleTimerCollection(createTimerEntity),
-            timeKeeper,
+            timerKeeper,
             arrayListOf()
         )
 
@@ -57,7 +57,7 @@ class TimerProcessorTest {
         timerProcessor.process(ONE_SECONDS)
 
 
-        Mockito.verify(timeKeeper).createTimer(createTimerEntity)
+        Mockito.verify(timerKeeper).createTimer(createTimerEntity)
     }
 
     @Test
@@ -65,7 +65,7 @@ class TimerProcessorTest {
         val createTimerEntity = getSampleCreateTimerEntity(ONE_SECONDS)
         val timerProcessor = TimerProcessor(
             getSampleTimerCollection(createTimerEntity),
-            timeKeeper,
+            timerKeeper,
             arrayListOf()
         )
 
@@ -73,7 +73,7 @@ class TimerProcessorTest {
         timerProcessor.process(999)
 
 
-        Mockito.verify(timeKeeper, never()).createTimer(any())
+        Mockito.verify(timerKeeper, never()).createTimer(any())
     }
 
     @Test
@@ -82,7 +82,7 @@ class TimerProcessorTest {
 
         val timerProcessor = TimerProcessor(
             getSampleTimerCollection(startTimerEntity),
-            timeKeeper,
+            timerKeeper,
             arrayListOf()
         )
 
@@ -90,7 +90,7 @@ class TimerProcessorTest {
         timerProcessor.process(TWO_SECONDS)
 
 
-        Mockito.verify(timeKeeper).startTimer(startTimerEntity, TWO_SECONDS)
+        Mockito.verify(timerKeeper).startTimer(startTimerEntity, TWO_SECONDS)
     }
 
     @Test
@@ -99,7 +99,7 @@ class TimerProcessorTest {
 
         val timerProcessor = TimerProcessor(
             getSampleTimerCollection(startTimerEntity),
-            timeKeeper,
+            timerKeeper,
             arrayListOf()
         )
 
@@ -107,7 +107,7 @@ class TimerProcessorTest {
         timerProcessor.process(ONE_SECONDS)
 
 
-        Mockito.verify(timeKeeper).startTimer(startTimerEntity, ONE_SECONDS)
+        Mockito.verify(timerKeeper).startTimer(startTimerEntity, ONE_SECONDS)
     }
 
     @Test
@@ -116,7 +116,7 @@ class TimerProcessorTest {
 
         val timerProcessor = TimerProcessor(
             getSampleTimerCollection(startTimerEntity),
-            timeKeeper,
+            timerKeeper,
             arrayListOf()
         )
 
@@ -124,7 +124,7 @@ class TimerProcessorTest {
         timerProcessor.process(999L)
 
 
-        Mockito.verify(timeKeeper, never()).startTimer(any(), any())
+        Mockito.verify(timerKeeper, never()).startTimer(any(), any())
     }
 
 
@@ -134,7 +134,7 @@ class TimerProcessorTest {
 
         val timerProcessor = TimerProcessor(
             getSampleTimerCollection(adjustTimerEntity),
-            timeKeeper,
+            timerKeeper,
             arrayListOf()
         )
 
@@ -142,7 +142,7 @@ class TimerProcessorTest {
         timerProcessor.process(TWO_SECONDS)
 
 
-        Mockito.verify(timeKeeper).adjustTimer(adjustTimerEntity, TWO_SECONDS)
+        Mockito.verify(timerKeeper).adjustTimer(adjustTimerEntity, TWO_SECONDS)
     }
 
     @Test
@@ -151,7 +151,7 @@ class TimerProcessorTest {
 
         val timerProcessor = TimerProcessor(
             getSampleTimerCollection(adjustTimerEntity),
-            timeKeeper,
+            timerKeeper,
             arrayListOf()
         )
 
@@ -159,7 +159,7 @@ class TimerProcessorTest {
         timerProcessor.process(ONE_SECONDS)
 
 
-        Mockito.verify(timeKeeper).adjustTimer(adjustTimerEntity, ONE_SECONDS)
+        Mockito.verify(timerKeeper).adjustTimer(adjustTimerEntity, ONE_SECONDS)
     }
 
     @Test
@@ -168,7 +168,7 @@ class TimerProcessorTest {
 
         val timerProcessor = TimerProcessor(
             getSampleTimerCollection(adjustTimerEntity),
-            timeKeeper,
+            timerKeeper,
             arrayListOf()
         )
 
@@ -176,7 +176,7 @@ class TimerProcessorTest {
         timerProcessor.process(999L)
 
 
-        Mockito.verify(timeKeeper, never()).adjustTimer(any(), any())
+        Mockito.verify(timerKeeper, never()).adjustTimer(any(), any())
     }
 
 
@@ -184,7 +184,7 @@ class TimerProcessorTest {
     fun `given out of range timer, should kill it`() {
 
 
-        Mockito.verify(timeKeeper, never()).killTimer(SAMPLE_NAME_0)
+        Mockito.verify(timerKeeper, never()).killTimer(SAMPLE_NAME_0)
     }
 
     /**region */

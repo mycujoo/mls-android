@@ -5,7 +5,7 @@ import tv.mycujoo.mls.widgets.*
 
 class TimerProcessor(
     private val timerCollection: List<TimerCollection>,
-    private val timerKeeper: TimeKeeper,
+    private val timerKeeper: TimerKeeper,
     private val appliedCreateTimer: ArrayList<String>
 ) : ITimerProcessor {
     override fun process(
@@ -65,13 +65,6 @@ class TimerProcessor(
         currentTime: Long
     ) {
         timerKeeper.startTimer(startTimerEntity, currentTime)
-    }
-
-    private fun pauseTimer(pauseTimerEntity: PauseTimerEntity) {
-        timerKeeper.timerRelayList.firstOrNull { it.timerCore.name == pauseTimerEntity.name }
-            ?.let { timerTwin ->
-//                timerTwin.timerCore.pause(currentTime, pauseTimerEntity)
-            }
     }
 
     private fun adjustTimer(adjustTimerEntity: AdjustTimerEntity, currentTime: Long) {

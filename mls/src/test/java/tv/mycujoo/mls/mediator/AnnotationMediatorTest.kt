@@ -9,7 +9,7 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import tv.mycujoo.mls.core.IActionBuilder
 import tv.mycujoo.mls.helper.IDownloaderClient
-import tv.mycujoo.mls.manager.TimeKeeper
+import tv.mycujoo.mls.manager.TimerKeeper
 import tv.mycujoo.mls.manager.VariableTranslator
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.player.IPlayer
@@ -38,7 +38,7 @@ class AnnotationMediatorTest {
     lateinit var viewHandler: IViewHandler
 
     @Mock
-    lateinit var timerKeeper: TimeKeeper
+    lateinit var timerKeeper: TimerKeeper
 
     @Mock
     lateinit var variableTranslator: VariableTranslator
@@ -67,7 +67,7 @@ class AnnotationMediatorTest {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        whenever(viewHandler.getTimeKeeper()).thenReturn(timerKeeper)
+        whenever(viewHandler.getTimerKeeper()).thenReturn(timerKeeper)
         whenever(viewHandler.getVariableTranslator()).thenReturn(variableTranslator)
 
         whenever(

@@ -39,7 +39,7 @@ class OverlayViewHelper(
                     context,
                     overlayEntity,
                     viewHandler.getVariableTranslator(),
-                    viewHandler.getTimeKeeper()
+                    viewHandler.getTimerKeeper()
                 )
 
             when {
@@ -158,7 +158,7 @@ class OverlayViewHelper(
                 context,
                 overlayEntity,
                 viewHandler.getVariableTranslator(),
-                viewHandler.getTimeKeeper()
+                viewHandler.getTimerKeeper()
             )
 
         doAddViewWithNoAnimation(
@@ -301,7 +301,7 @@ class OverlayViewHelper(
                     overlayHost.context,
                     overlayEntity,
                     viewHandler.getVariableTranslator(),
-                    viewHandler.getTimeKeeper()
+                    viewHandler.getTimerKeeper()
                 )
 
             scaffoldView.doOnLayout {
@@ -404,7 +404,7 @@ class OverlayViewHelper(
                     overlayHost.context,
                     overlayEntity,
                     viewHandler.getVariableTranslator(),
-                    viewHandler.getTimeKeeper()
+                    viewHandler.getTimerKeeper()
                 )
 
             scaffoldView.doOnLayout {

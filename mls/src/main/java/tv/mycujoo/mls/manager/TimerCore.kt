@@ -1,7 +1,9 @@
 package tv.mycujoo.mls.manager
 
+import android.util.Log
 import tv.mycujoo.mls.model.ScreenTimerDirection
-import tv.mycujoo.mls.model.ScreenTimerDirection.*
+import tv.mycujoo.mls.model.ScreenTimerDirection.DOWN
+import tv.mycujoo.mls.model.ScreenTimerDirection.UP
 import tv.mycujoo.mls.model.ScreenTimerFormat
 import tv.mycujoo.mls.model.ScreenTimerFormat.*
 import tv.mycujoo.mls.widgets.AdjustTimerEntity
@@ -12,6 +14,9 @@ import tv.mycujoo.mls.widgets.StartTimerEntity
  * TimerCore is where a Timer times, direction, format and other attributes are stored.
  *
  * Mind that applying any entity on this class will make it act as Alive.
+ *
+ * Note:
+ * This class is tested through TimerKeeper tests.
  */
 class TimerCore(
     val name: String,
@@ -31,7 +36,6 @@ class TimerCore(
             step = 1000L
         } else {
             step = -1000L
-
         }
     }
 
@@ -39,6 +43,7 @@ class TimerCore(
     fun getFormattedTime(): String {
 
         if (isAlive.not()) {
+            Log.w("TimerCore", "A timer which is not alive is trying to be accessed!")
             return ""
         }
 
