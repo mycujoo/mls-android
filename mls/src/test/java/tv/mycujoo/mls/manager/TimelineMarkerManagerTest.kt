@@ -1,9 +1,6 @@
 package tv.mycujoo.mls.manager
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -211,4 +208,159 @@ class TimelineMarkerManagerTest {
 
         verify(timelineMarkerView).setMarkerTexts(titlesList)
     }
+
+
+    @Test
+    fun `given timeline marker list, should set all to view`() {
+        timelineMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                10000L,
+                0L,
+                listOf("Goal"),
+                PointOfInterestType()
+            )
+        )
+        timelineMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                10000L,
+                0L,
+                listOf("Assist"),
+                PointOfInterestType()
+            )
+        )
+        val markerTitleList = listOf("Goal", "Assist")
+
+
+        val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
+        timeLineMarkerPositionListener.onScrubMove(12000L, 60000L, poiPositionsOnScreen)
+
+
+        verify(timelineMarkerView).setMarkerTexts(markerTitleList)
+    }
+
+    @Test
+    fun `given a timeline marker list multiple time, should not set it to view more than once`() {
+        timelineMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                10000L,
+                0L,
+                listOf("Goal"),
+                PointOfInterestType()
+            )
+        )
+        timelineMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                10000L,
+                0L,
+                listOf("Assist"),
+                PointOfInterestType()
+            )
+        )
+        val markerTitleList = listOf("Goal", "Assist")
+
+
+        val poiPositionsOnScreen = ArrayList<Int>().apply { addAll(listOf(333, 333, 666, 666)) }
+        timeLineMarkerPositionListener.onScrubMove(12000L, 60000L, poiPositionsOnScreen)
+        timeLineMarkerPositionListener.onScrubMove(12001L, 60000L, poiPositionsOnScreen)
+
+
+        verify(timelineMarkerView, times(1)).setMarkerTexts(markerTitleList)
+    }
+
+    @Test
+    fun `given multiple different timeline marker list, should set it to view`() {
+        timelineMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                10000L,
+                0L,
+                listOf("Goal"),
+                PointOfInterestType()
+            )
+        )
+        timelineMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                10000L,
+                0L,
+                listOf("Assist"),
+                PointOfInterestType()
+            )
+        )
+        val firstMarkerTitleList = listOf("Goal", "Assist")
+        timelineMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                50000L,
+                0L,
+                listOf("Foul"),
+                PointOfInterestType()
+            )
+        )
+        timelineMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                50000L,
+                0L,
+                listOf("Red card"),
+                PointOfInterestType()
+            )
+        )
+        val secondMarkerTitleList = listOf("Foul", "Red card")
+
+
+        val poiPositionsOnScreen = ArrayList<Int>().apply { addAll(listOf(333, 333, 666, 666)) }
+        timeLineMarkerPositionListener.onScrubMove(12000L, 60000L, poiPositionsOnScreen)
+        timeLineMarkerPositionListener.onScrubMove(48000L, 60000L, poiPositionsOnScreen)
+
+
+        verify(timelineMarkerView).setMarkerTexts(firstMarkerTitleList)
+        verify(timelineMarkerView).setMarkerTexts(secondMarkerTitleList)
+    }
+
+    @Test
+    fun `given multiple different timeline marker list with common element, should set it to view`() {
+        timelineMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                10000L,
+                0L,
+                listOf("Goal"),
+                PointOfInterestType()
+            )
+        )
+        timelineMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                10000L,
+                0L,
+                listOf("Assist"),
+                PointOfInterestType()
+            )
+        )
+        timelineMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                15000L,
+                0L,
+                listOf("Foul"),
+                PointOfInterestType()
+            )
+        )
+        val firstMarkerTitleListPlusCommonElement = listOf("Goal", "Assist", "Foul")
+
+        timelineMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                20000L,
+                0L,
+                listOf("Red card"),
+                PointOfInterestType()
+            )
+        )
+        val secondMarkerTitleListPlusCommonElement = listOf("Foul", "Red card")
+
+
+        val poiPositionsOnScreen = ArrayList<Int>().apply { addAll(listOf(333, 333, 666, 666)) }
+        timeLineMarkerPositionListener.onScrubMove(12000L, 60000L, poiPositionsOnScreen)
+        timeLineMarkerPositionListener.onScrubMove(18000L, 60000L, poiPositionsOnScreen)
+
+
+        verify(timelineMarkerView).setMarkerTexts(firstMarkerTitleListPlusCommonElement)
+        verify(timelineMarkerView).setMarkerTexts(secondMarkerTitleListPlusCommonElement)
+    }
+
+
 }

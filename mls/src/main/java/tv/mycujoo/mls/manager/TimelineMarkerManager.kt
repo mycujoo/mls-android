@@ -1,6 +1,5 @@
 package tv.mycujoo.mls.manager
 
-import android.util.Log
 import android.view.View
 import tv.mycujoo.mls.helper.TimeRangeHelper.Companion.isInRange
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
@@ -14,48 +13,88 @@ class TimelineMarkerManager(
 ) {
 
     private val pointOfInterestList = ArrayList<PointOfInterest>()
+    private val currentPoiList = ArrayList<PointOfInterest>()
 
 
     init {
 
         mlsTimeBar.setTimelineMarkerPositionListener(object : TimelineMarkerPosition {
+            private var scrubbing = false
+
             override fun onScrubMove(
                 position: Long,
                 videoDuration: Long,
                 poiPositionsOnScreen: ArrayList<Int>
             ) {
-                Log.d("TimelineMarkerManager", " onScrubMove pos: $position")
-                val highlightIndex = pointOfInterestList.indexOfFirst { pointOfInterest ->
+                scrubbing = true
+
+                pointOfInterestList.filterIndexed { index, pointOfInterest ->
                     isInRange(
                         position,
                         videoDuration,
                         pointOfInterest.offset,
                         pointOfInterest.seekOffset
                     )
-                }
+                }.let { inRangePointOfInterestList ->
 
-                if (highlightIndex != -1) {
-                    if (pointOfInterestList[highlightIndex].title.isNotEmpty() && poiPositionsOnScreen[highlightIndex] != -1) {
+                    if (inRangePointOfInterestList.isEmpty()) {
+                        timelineMarkerView.visibility = View.INVISIBLE
+                        timelineMarkerView.removeMarkerTexts()
 
-                        timelineMarkerView.setMarkerTexts(pointOfInterestList[highlightIndex].title)
-                        timelineMarkerView.setPosition(poiPositionsOnScreen[highlightIndex])
+                        currentPoiList.clear()
+
+                        return@let
                     }
 
-                } else {
-                    timelineMarkerView.visibility = View.INVISIBLE
-                    timelineMarkerView.removeMarkerTexts()
+                    if (isCurrentListChanged(inRangePointOfInterestList)) {
+                        currentPoiList.clear()
+                        currentPoiList.addAll(inRangePointOfInterestList)
+
+                        timelineMarkerView.setMarkerTexts(inRangePointOfInterestList.flatMap { it.title })
+                    }
+
+
+                    val markerIndex = pointOfInterestList.indexOfFirst { pointOfInterest ->
+                        isInRange(
+                            position,
+                            videoDuration,
+                            pointOfInterest.offset,
+                            pointOfInterest.seekOffset
+                        )
+                    }
+                    if (markerIndex != -1) {
+                        timelineMarkerView.setPosition(poiPositionsOnScreen[markerIndex])
+
+                    }
                 }
             }
 
-            override fun update(position: Long, videoDuration: Long) {
+            override fun onScrubStop() {
+                scrubbing = false
+            }
 
+            override fun update(position: Long, videoDuration: Long) {
+                if (scrubbing) {
+                    return
+                }
                 if (pointOfInterestList.none { isInRange(position, videoDuration, it.offset, it.seekOffset) }) {
+
+                    currentPoiList.clear()
+
                     timelineMarkerView.visibility = View.INVISIBLE
                     timelineMarkerView.removeMarkerTexts()
                 }
 
             }
         })
+    }
+
+    private fun isCurrentListChanged(inRangePoiList: List<PointOfInterest>): Boolean {
+        if (currentPoiList.size != inRangePoiList.size) {
+            return true
+        }
+
+        return currentPoiList.containsAll(inRangePoiList).not() || inRangePoiList.containsAll(currentPoiList).not()
     }
 
     fun addTimeLineHighlight(pointOfInterest: PointOfInterest) {

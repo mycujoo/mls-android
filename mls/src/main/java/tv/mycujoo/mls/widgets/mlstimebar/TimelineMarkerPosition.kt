@@ -8,6 +8,7 @@ interface TimelineMarkerPosition {
         videoDuration: Long,
         poiPositionsOnScreen: ArrayList<Int>
     )
+    fun onScrubStop()
 
     fun update(position: Long, videoDuration: Long)
 }

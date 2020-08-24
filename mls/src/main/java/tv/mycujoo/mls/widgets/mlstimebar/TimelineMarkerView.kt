@@ -9,10 +9,12 @@ import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.UiThread
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
-import androidx.core.view.children
+import androidx.core.view.doOnLayout
+import androidx.test.espresso.idling.CountingIdlingResource
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.utils.ColorUtils
 
@@ -23,6 +25,7 @@ class TimelineMarkerView @JvmOverloads constructor(
 
     /**region Fields*/
     var bgColor = ""
+    private lateinit var idlingResource: CountingIdlingResource
     /**endregion */
 
     /**region Initializing*/
@@ -55,12 +58,17 @@ class TimelineMarkerView @JvmOverloads constructor(
     /**
      * expects input from 0 to screen-width to position the time-line marker
      */
+    @UiThread
     fun setPosition(relationalPosition: Int) {
-        val parentLayout = parent as ConstraintLayout
-        val constraintSet = ConstraintSet()
-        constraintSet.clone(parentLayout)
+        if (this::idlingResource.isInitialized) {
+            idlingResource.increment()
+        }
+        visibility = View.INVISIBLE
 
-        this.post {
+        doOnLayout {
+            val parentLayout = parent as ConstraintLayout
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(parentLayout)
 
             if (parentLayout.width - (measuredWidth / 2) < relationalPosition) {
                 // marker should stick to the end
@@ -81,22 +89,27 @@ class TimelineMarkerView @JvmOverloads constructor(
                 constraintSet.setMargin(
                     this.id,
                     ConstraintSet.START,
-                    relationalPosition - (measuredWidth / 2)
+                    relationalPosition - (width / 2)
                 )
                 constraintSet.clear(this.id, ConstraintSet.END)
             }
 
-
-
-
             constraintSet.applyTo(parentLayout)
-            visibility = View.VISIBLE
-        }
 
+            doOnLayout {
+                visibility = View.VISIBLE
+
+                if (this::idlingResource.isInitialized) {
+                    if (idlingResource.isIdleNow.not()) {
+                        idlingResource.decrement()
+                    }
+                }
+            }
+        }
     }
 
     fun removeMarkerTexts() {
-        children.forEach { removeView(it) }
+        removeAllViews()
     }
 
     fun setMarkerTexts(titles: List<String>) {
@@ -117,5 +130,11 @@ class TimelineMarkerView @JvmOverloads constructor(
         }
     }
 
+    /**endregion */
+
+    /**region Test helper*/
+    fun setIdlingResource(idlingResource: CountingIdlingResource) {
+        this.idlingResource = idlingResource
+    }
     /**endregion */
 }

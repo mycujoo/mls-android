@@ -27,6 +27,7 @@ import tv.mycujoo.mls.api.MLSConfiguration
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.manager.ViewHandler
+import tv.mycujoo.mls.matcher.UriArgumentMatcher
 import tv.mycujoo.mls.network.socket.MainWebSocketListener
 import tv.mycujoo.mls.network.socket.ReactorListener
 import tv.mycujoo.mls.network.socket.ReactorSocket
@@ -230,6 +231,18 @@ class VideoPlayerCoordinatorTest {
 
 
         verify(webSocket).send("joinEvent;${event.id}")
+    }
+
+    @Test
+    fun `given external video uri to play, should play`() = runBlockingTest {
+        val externalVideoUri ="https://dc9jagk60w3y3mt6171f-b03c88.p5cdn.com/shervin/cke8cohm8001u0176j5ahnlo7/master.m3u8"
+
+
+        videoPlayerCoordinator.playExternalSourceVideo(externalVideoUri)
+
+
+        verify(mediaFactory).createMediaSource(argThat(UriArgumentMatcher(externalVideoUri)))
+        verify(exoPlayer).prepare(any(), any(), any())
     }
 
     @Ignore("Event Status is not done on server yet")
