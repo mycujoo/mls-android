@@ -454,6 +454,9 @@ class MLSTimeBar @JvmOverloads constructor(
         for (listener in listeners) {
             listener.onScrubStop(this, scrubPosition, canceled)
         }
+        if (this::timelineMarkerPositionListener.isInitialized) {
+            timelineMarkerPositionListener.onScrubStop()
+        }
     }
 
     /**

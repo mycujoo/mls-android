@@ -202,7 +202,16 @@ class GetActionsFromJSONUseCase {
                         "color": "#ffff01", 
                         "label": "Goal"
                     }, 
-                    "offset": 166000,
+                    "offset": 19600,
+                    "id": "fda43t943f9a", 
+                    "type": "show_timeline_marker"
+                }
+                ,{
+                    "data": {
+                        "color": "#ffff01", 
+                        "label": "Goal 2"
+                    }, 
+                    "offset": 19600,
                     "id": "fda43t943f9a", 
                     "type": "show_timeline_marker"
                 }
