@@ -6,9 +6,9 @@ import tv.mycujoo.mls.model.ScreenTimerDirection.DOWN
 import tv.mycujoo.mls.model.ScreenTimerDirection.UP
 import tv.mycujoo.mls.model.ScreenTimerFormat
 import tv.mycujoo.mls.model.ScreenTimerFormat.*
-import tv.mycujoo.mls.widgets.AdjustTimerEntity
-import tv.mycujoo.mls.widgets.SkipTimerEntity
-import tv.mycujoo.mls.widgets.StartTimerEntity
+import tv.mycujoo.mls.entity.AdjustTimerEntity
+import tv.mycujoo.mls.entity.SkipTimerEntity
+import tv.mycujoo.mls.entity.StartTimerEntity
 
 /**
  * TimerCore is where a Timer times, direction, format and other attributes are stored.

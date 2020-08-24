@@ -4,10 +4,10 @@ import android.util.Log
 import com.jakewharton.rxrelay3.BehaviorRelay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import tv.mycujoo.mls.widgets.AdjustTimerEntity
-import tv.mycujoo.mls.widgets.CreateTimerEntity
-import tv.mycujoo.mls.widgets.SkipTimerEntity
-import tv.mycujoo.mls.widgets.StartTimerEntity
+import tv.mycujoo.mls.entity.AdjustTimerEntity
+import tv.mycujoo.mls.entity.CreateTimerEntity
+import tv.mycujoo.mls.entity.SkipTimerEntity
+import tv.mycujoo.mls.entity.StartTimerEntity
 
 class TimerKeeper(private val dispatcher: CoroutineScope) : ITimerKeeper {
 

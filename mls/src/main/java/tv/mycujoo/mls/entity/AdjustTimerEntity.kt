@@ -1,4 +1,4 @@
-package tv.mycujoo.mls.widgets
+package tv.mycujoo.mls.entity
 
 class AdjustTimerEntity(
     var name: String,

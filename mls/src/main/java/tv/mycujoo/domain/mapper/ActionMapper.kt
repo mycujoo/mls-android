@@ -5,6 +5,7 @@ import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.VariableType.*
 import tv.mycujoo.domain.entity.models.ActionType
+import tv.mycujoo.mls.entity.*
 import tv.mycujoo.mls.model.MutablePair
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerFormat

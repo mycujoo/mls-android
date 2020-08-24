@@ -10,9 +10,9 @@ import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerFormat
-import tv.mycujoo.mls.widgets.AdjustTimerEntity
-import tv.mycujoo.mls.widgets.CreateTimerEntity
-import tv.mycujoo.mls.widgets.StartTimerEntity
+import tv.mycujoo.mls.entity.AdjustTimerEntity
+import tv.mycujoo.mls.entity.CreateTimerEntity
+import tv.mycujoo.mls.entity.StartTimerEntity
 import tv.mycujoo.mls.widgets.TimerCollection
 
 @ExperimentalCoroutinesApi

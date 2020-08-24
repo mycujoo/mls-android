@@ -1,6 +1,6 @@
 package tv.mycujoo.mls.manager
 
-import tv.mycujoo.mls.widgets.*
+import tv.mycujoo.mls.entity.*
 
 sealed class TimerEntity {
     data class CreateTimer(val createTimerEntity: CreateTimerEntity) : TimerEntity()

@@ -1,4 +1,4 @@
-package tv.mycujoo.mls.widgets
+package tv.mycujoo.mls.entity
 
 class StartTimerEntity(
     val name: String,

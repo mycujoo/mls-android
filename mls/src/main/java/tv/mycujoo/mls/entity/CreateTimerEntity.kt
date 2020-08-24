@@ -1,4 +1,4 @@
-package tv.mycujoo.mls.widgets
+package tv.mycujoo.mls.entity
 
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerFormat

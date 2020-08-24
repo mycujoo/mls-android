@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.widgets
 
+import tv.mycujoo.mls.entity.*
 import tv.mycujoo.mls.helper.TimeRangeHelper.Companion.isOffsetUntilNow
 import tv.mycujoo.mls.manager.TimerEntity
 
