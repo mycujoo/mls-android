@@ -27,6 +27,7 @@ import tv.mycujoo.mls.api.MLSConfiguration
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.manager.ViewHandler
+import tv.mycujoo.mls.matcher.SeekParameterArgumentMatcher
 import tv.mycujoo.mls.matcher.UriArgumentMatcher
 import tv.mycujoo.mls.network.socket.MainWebSocketListener
 import tv.mycujoo.mls.network.socket.ReactorListener
@@ -167,6 +168,11 @@ class VideoPlayerCoordinatorTest {
     }
 
     @Test
+    fun `ensure seek_tolerance is applied`() {
+        verify(exoPlayer).setSeekParameters(argThat(SeekParameterArgumentMatcher(MLSBuilder.mlsConfiguration.seekTolerance)))
+    }
+
+    @Test
     fun `given call to play event with id, should fetch event details`() = runBlockingTest {
         videoPlayerCoordinator.playVideo("1eUBgUbXhriLFCT6A8E5a6Lv0R7")
 
@@ -235,7 +241,8 @@ class VideoPlayerCoordinatorTest {
 
     @Test
     fun `given external video uri to play, should play`() = runBlockingTest {
-        val externalVideoUri ="https://dc9jagk60w3y3mt6171f-b03c88.p5cdn.com/shervin/cke8cohm8001u0176j5ahnlo7/master.m3u8"
+        val externalVideoUri =
+            "https://dc9jagk60w3y3mt6171f-b03c88.p5cdn.com/shervin/cke8cohm8001u0176j5ahnlo7/master.m3u8"
 
 
         videoPlayerCoordinator.playExternalSourceVideo(externalVideoUri)
