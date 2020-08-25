@@ -104,7 +104,7 @@ class PlayerViewWrapperTest {
                 pageToken: String?,
                 eventStatus: List<EventStatus>?,
                 orderBy: OrderByEventsParam?,
-                fetchEventCallback: ((List<EventEntity>) -> Unit)?
+                fetchEventCallback: ((eventList: List<EventEntity>, previousPageToken: String, nextPageToken: String) -> Unit)?
             ) {
                 TODO("Not yet implemented")
             }

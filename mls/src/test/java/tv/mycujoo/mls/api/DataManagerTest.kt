@@ -50,7 +50,7 @@ class DataManagerTest {
 
                 repeat(pageSize!!, action = { eventEntityList.add(getSampleEventEntity()) })
 
-                return Events(eventEntityList)
+                return Events(eventEntityList, SAMPLE_PREVIOUS_PAGE_TOKEN, SAMPLE_NEXT_PAGE_TOKEN)
             }
 
             override suspend fun getEventDetails(id: String, updateId: String?): EventEntity {
@@ -78,10 +78,38 @@ class DataManagerTest {
             null,
             listOf(EventStatus.EVENT_STATUS_SCHEDULED, EventStatus.EVENT_STATUS_CANCELLED),
             OrderByEventsParam.ORDER_TITLE_ASC
-        ) { list -> eventEntityArrayList.addAll(list) }
+        ) { eventList, previousPageToken, nextPageToken -> eventEntityArrayList.addAll(eventList) }
 
 
         assertEquals(2, eventEntityArrayList.size)
+    }
+
+    @Test
+    fun `given previousPageToken on response of get event, should return in callback`() = runBlocking {
+        var result = ""
+        dataManager.fetchEvents(
+            2,
+            null,
+            listOf(EventStatus.EVENT_STATUS_SCHEDULED, EventStatus.EVENT_STATUS_CANCELLED),
+            OrderByEventsParam.ORDER_TITLE_ASC
+        ) { eventList, previousPageToken, nextPageToken -> result = previousPageToken }
+
+
+        assertEquals(SAMPLE_PREVIOUS_PAGE_TOKEN, result)
+    }
+
+    @Test
+    fun `given nextPageToken on response of get event, should return in callback`() = runBlocking {
+        var result = ""
+        dataManager.fetchEvents(
+            2,
+            null,
+            listOf(EventStatus.EVENT_STATUS_SCHEDULED, EventStatus.EVENT_STATUS_CANCELLED),
+            OrderByEventsParam.ORDER_TITLE_ASC
+        ) { eventList, previousPageToken, nextPageToken -> result = nextPageToken }
+
+
+        assertEquals(SAMPLE_NEXT_PAGE_TOKEN, result)
     }
 
     @Test
@@ -93,7 +121,7 @@ class DataManagerTest {
             null,
             listOf(EventStatus.EVENT_STATUS_SCHEDULED, EventStatus.EVENT_STATUS_CANCELLED),
             OrderByEventsParam.ORDER_TITLE_ASC
-        ) { list -> eventEntityArrayList.addAll(list) }
+        ) { eventList, previousPageToken, nextPageToken -> eventEntityArrayList.addAll(eventList) }
 
 
         assertEquals(0, eventEntityArrayList.size)
@@ -145,6 +173,11 @@ class DataManagerTest {
             Metadata(),
             false
         )
+    }
+
+    companion object {
+        const val SAMPLE_PREVIOUS_PAGE_TOKEN = "sample_previous_page_token"
+        const val SAMPLE_NEXT_PAGE_TOKEN = "sample_next_page_token"
     }
 
 }

@@ -27,7 +27,8 @@ class DataManager(
     /**region Fields*/
     private val events = SingleLiveEvent<List<EventEntity>>()
     override var currentEvent: EventEntity? = null
-    private var fetchEventCallback: ((List<EventEntity>) -> Unit)? = null
+    private var fetchEventCallback: ((eventList: List<EventEntity>, previousPageToken: String, nextPageToken: String) -> Unit)? =
+        null
 
     /**endregion */
 
@@ -48,7 +49,7 @@ class DataManager(
         pageToken: String?,
         eventStatus: List<EventStatus>?,
         orderBy: OrderByEventsParam?,
-        fetchEventCallback: ((List<EventEntity>) -> Unit)?
+        fetchEventCallback: ((eventList: List<EventEntity>, previousPageToken: String, nextPageToken: String) -> Unit)?
     ) {
         this.fetchEventCallback = fetchEventCallback
         scope.launch {
@@ -59,7 +60,7 @@ class DataManager(
                     response.events
                 )
                 fetchEventCallback?.let {
-                    it.invoke(response.events)
+                    it.invoke(response.events, response.previousPageToken ?: "", response.nextPageToken ?: "")
                 }
             }
 

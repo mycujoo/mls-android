@@ -19,6 +19,6 @@ interface DataProvider {
         pageToken: String? = null,
         eventStatus: List<EventStatus>? = null,
         orderBy: OrderByEventsParam? = null,
-        fetchEventCallback: ((List<EventEntity>) -> Unit)? = null
+        fetchEventCallback: ((eventList: List<EventEntity>, previousPageToken: String, nextPageToken: String) -> Unit)? = null
     )
 }
