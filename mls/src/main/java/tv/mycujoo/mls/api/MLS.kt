@@ -83,7 +83,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         initSvgRenderingLibrary(internalBuilder.getAssetManager())
 
         videoPlayerCoordinator = VideoPlayerCoordinator(
-            builder.mlsConfiguration.VideoPlayerConfig,
+            builder.mlsConfiguration.videoPlayerConfig,
             viewHandler,
             internalBuilder.reactorSocket,
             internalBuilder.dispatcher,
