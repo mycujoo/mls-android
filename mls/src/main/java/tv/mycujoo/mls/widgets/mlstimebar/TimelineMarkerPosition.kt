@@ -4,11 +4,9 @@ import java.util.*
 
 interface TimelineMarkerPosition {
     fun onScrubMove(
-        position: Long,
-        videoDuration: Long,
-        poiPositionsOnScreen: ArrayList<Int>
+        position: Float,
+        positionedPointOfInterestList: ArrayList<PositionedPointOfInterest>
     )
-    fun onScrubStop()
 
-    fun update(position: Long, videoDuration: Long)
+    fun onScrubStop()
 }

@@ -2,6 +2,7 @@ package tv.mycujoo.mls.manager
 
 import com.nhaarman.mockitokotlin2.*
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
@@ -39,76 +40,90 @@ class TimelineMarkerManagerTest {
     /**region */
     @Test
     fun `given currentTime equal to left range of timeline marker, should set it to view`() {
-        timelineMarkerManager.addTimeLineHighlight(PointOfInterest(10000L, 0L, listOf("Goal"), PointOfInterestType()))
+        val pointOfInterest = PointOfInterest(10000L, 0L, listOf("Goal"), PointOfInterestType())
+        timelineMarkerManager.addTimeLineHighlight(pointOfInterest)
         val titlesList = listOf("Goal")
 
 
-        val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
-        timeLineMarkerPositionListener.onScrubMove(5000L, 60000L, poiPositionsOnScreen)
+        val poiPositionsOnScreen =
+            ArrayList<PositionedPointOfInterest>().apply { add(PositionedPointOfInterest(490, pointOfInterest)) }
+        val position = 500F
+        timeLineMarkerPositionListener.onScrubMove(position, poiPositionsOnScreen)
 
 
-        verify(timelineMarkerView).setMarkerTexts(titlesList)
+        verify(timelineMarkerView).setMarkerTexts(titlesList, position.toInt())
     }
 
     @Test
     fun `given currentTime equal to right range of timeline marker, should set it to view`() {
-        timelineMarkerManager.addTimeLineHighlight(PointOfInterest(10000L, 0L, listOf("Goal"), PointOfInterestType()))
+        val pointOfInterest = PointOfInterest(10000L, 0L, listOf("Goal"), PointOfInterestType())
+        timelineMarkerManager.addTimeLineHighlight(pointOfInterest)
         val titlesList = listOf("Goal")
 
+        val poiPositionsOnScreen =
+            ArrayList<PositionedPointOfInterest>().apply { add(PositionedPointOfInterest(510, pointOfInterest)) }
+        val position = 500F
+        timeLineMarkerPositionListener.onScrubMove(position, poiPositionsOnScreen)
 
-        val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
-        timeLineMarkerPositionListener.onScrubMove(15000L, 60000L, poiPositionsOnScreen)
 
-
-        verify(timelineMarkerView).setMarkerTexts(titlesList)
+        verify(timelineMarkerView).setMarkerTexts(titlesList, position.toInt())
     }
 
     @Test
     fun `given currentTime less than left range of timeline marker, should not set it to view`() {
-        timelineMarkerManager.addTimeLineHighlight(PointOfInterest(10000L, 0L, listOf("Goal"), PointOfInterestType()))
+        val pointOfInterest = PointOfInterest(10000L, 0L, listOf("Goal"), PointOfInterestType())
+        timelineMarkerManager.addTimeLineHighlight(pointOfInterest)
         val titlesList = listOf("Goal")
 
+        val poiPositionsOnScreen =
+            ArrayList<PositionedPointOfInterest>().apply { add(PositionedPointOfInterest(489, pointOfInterest)) }
+        val position = 500F
+        timeLineMarkerPositionListener.onScrubMove(position, poiPositionsOnScreen)
 
-        val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
-        timeLineMarkerPositionListener.onScrubMove(4999, 60000L, poiPositionsOnScreen)
 
-
-        verify(timelineMarkerView, never()).setMarkerTexts(titlesList)
+        verify(timelineMarkerView, never()).setMarkerTexts(titlesList, position.toInt())
     }
 
     @Test
     fun `given currentTime greater than right range of timeline marker, should not set it to view`() {
-        timelineMarkerManager.addTimeLineHighlight(PointOfInterest(10000L, 0L, listOf("Goal"), PointOfInterestType()))
+        val pointOfInterest = PointOfInterest(10000L, 0L, listOf("Goal"), PointOfInterestType())
+        timelineMarkerManager.addTimeLineHighlight(pointOfInterest)
         val titlesList = listOf("Goal")
 
 
-        val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
-        timeLineMarkerPositionListener.onScrubMove(15001L, 60000L, poiPositionsOnScreen)
+        val poiPositionsOnScreen =
+            ArrayList<PositionedPointOfInterest>().apply { add(PositionedPointOfInterest(511, pointOfInterest)) }
+        val position = 500F
+        timeLineMarkerPositionListener.onScrubMove(position, poiPositionsOnScreen)
 
 
-        verify(timelineMarkerView, never()).setMarkerTexts(titlesList)
+        verify(timelineMarkerView, never()).setMarkerTexts(titlesList, position.toInt())
     }
 
+    @Ignore("This should be tested through MLSTimeBar")
     @Test
     fun `given currentTime less than left range + positive seekOffset of timeline marker, should not set it to view`() {
+        val pointOfInterest = PointOfInterest(
+            10000L,
+            3000L,
+            listOf("Goal"),
+            PointOfInterestType()
+        )
         timelineMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                10000L,
-                3000L,
-                listOf("Goal"),
-                PointOfInterestType()
-            )
+            pointOfInterest
         )
         val titlesList = listOf("Goal")
 
 
-        val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
-        timeLineMarkerPositionListener.onScrubMove(7999L, 60000L, poiPositionsOnScreen)
+        val poiPositionsOnScreen =
+            ArrayList<PositionedPointOfInterest>().apply { add(PositionedPointOfInterest(511, pointOfInterest)) }
+//        timeLineMarkerPositionListener.onScrubMove(7999L, 60000L, poiPositionsOnScreen)
 
 
-        verify(timelineMarkerView, never()).setMarkerTexts(titlesList)
+//        verify(timelineMarkerView, never()).setMarkerTexts(titlesList, position.toInt())
     }
 
+    @Ignore("This should be tested through MLSTimeBar")
     @Test
     fun `given currentTime greater than right range + positive seekOffset of timeline marker, should not set it to view`() {
         timelineMarkerManager.addTimeLineHighlight(
@@ -123,12 +138,13 @@ class TimelineMarkerManagerTest {
 
 
         val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
-        timeLineMarkerPositionListener.onScrubMove(18001L, 60000L, poiPositionsOnScreen)
+//        timeLineMarkerPositionListener.onScrubMove(18001L, 60000L, poiPositionsOnScreen)
 
 
-        verify(timelineMarkerView, never()).setMarkerTexts(titlesList)
+//        verify(timelineMarkerView, never()).setMarkerTexts(titlesList, position.toInt())
     }
 
+    @Ignore("This should be tested through MLSTimeBar")
     @Test
     fun `given currentTime less than left range + negative seekOffset of timeline marker, should not set it to view`() {
         timelineMarkerManager.addTimeLineHighlight(
@@ -143,12 +159,13 @@ class TimelineMarkerManagerTest {
 
 
         val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
-        timeLineMarkerPositionListener.onScrubMove(1999L, 60000L, poiPositionsOnScreen)
+//        timeLineMarkerPositionListener.onScrubMove(1999L, 60000L, poiPositionsOnScreen)
 
 
-        verify(timelineMarkerView, never()).setMarkerTexts(titlesList)
+//        verify(timelineMarkerView, never()).setMarkerTexts(titlesList, position.toInt())
     }
 
+    @Ignore("This should be tested through MLSTimeBar")
     @Test
     fun `given currentTime equal to left range + negative seekOffset of timeline marker, should set it to view`() {
         timelineMarkerManager.addTimeLineHighlight(
@@ -163,12 +180,13 @@ class TimelineMarkerManagerTest {
 
 
         val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
-        timeLineMarkerPositionListener.onScrubMove(2000L, 60000L, poiPositionsOnScreen)
+//        timeLineMarkerPositionListener.onScrubMove(2000L, 60000L, poiPositionsOnScreen)
 
 
-        verify(timelineMarkerView).setMarkerTexts(titlesList)
+//        verify(timelineMarkerView).setMarkerTexts(titlesList, position.toInt())
     }
 
+    @Ignore("This should be tested through MLSTimeBar")
     @Test
     fun `given currentTime greater than right range + negative seekOffset of timeline marker, should not set it to view`() {
         timelineMarkerManager.addTimeLineHighlight(
@@ -183,12 +201,13 @@ class TimelineMarkerManagerTest {
 
 
         val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
-        timeLineMarkerPositionListener.onScrubMove(12001L, 60000L, poiPositionsOnScreen)
+//        timeLineMarkerPositionListener.onScrubMove(12001L, 60000L, poiPositionsOnScreen)
 
 
-        verify(timelineMarkerView, never()).setMarkerTexts(titlesList)
+//        verify(timelineMarkerView, never()).setMarkerTexts(titlesList, position.toInt())
     }
 
+    @Ignore("This should be tested through MLSTimeBar")
     @Test
     fun `given currentTime equal to right range + negative seekOffset of timeline marker, should set it to view`() {
         timelineMarkerManager.addTimeLineHighlight(
@@ -203,163 +222,206 @@ class TimelineMarkerManagerTest {
 
 
         val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
-        timeLineMarkerPositionListener.onScrubMove(12000L, 60000L, poiPositionsOnScreen)
+//        timeLineMarkerPositionListener.onScrubMove(12000L, 60000L, poiPositionsOnScreen)
 
 
-        verify(timelineMarkerView).setMarkerTexts(titlesList)
+//        verify(timelineMarkerView).setMarkerTexts(titlesList, position.toInt())
     }
 
 
     @Test
     fun `given timeline marker list, should set all to view`() {
-        timelineMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                10000L,
-                0L,
-                listOf("Goal"),
-                PointOfInterestType()
-            )
+        val pointOfInterest0 = PointOfInterest(
+            10000L,
+            0L,
+            listOf("Goal"),
+            PointOfInterestType()
         )
         timelineMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                10000L,
-                0L,
-                listOf("Assist"),
-                PointOfInterestType()
-            )
+            pointOfInterest0
+        )
+        val pointOfInterest1 = PointOfInterest(
+            10000L,
+            0L,
+            listOf("Assist"),
+            PointOfInterestType()
+        )
+        timelineMarkerManager.addTimeLineHighlight(
+            pointOfInterest1
         )
         val markerTitleList = listOf("Goal", "Assist")
 
 
-        val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
-        timeLineMarkerPositionListener.onScrubMove(12000L, 60000L, poiPositionsOnScreen)
+
+        val poiPositionsOnScreen =
+            ArrayList<PositionedPointOfInterest>().apply {
+                add(PositionedPointOfInterest(500, pointOfInterest0))
+                add(PositionedPointOfInterest(500, pointOfInterest1))
+            }
+
+        val position = 500F
+        timeLineMarkerPositionListener.onScrubMove(position, poiPositionsOnScreen)
 
 
-        verify(timelineMarkerView).setMarkerTexts(markerTitleList)
+        verify(timelineMarkerView).setMarkerTexts(markerTitleList, position.toInt())
     }
 
     @Test
     fun `given a timeline marker list multiple time, should not set it to view more than once`() {
-        timelineMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                10000L,
-                0L,
-                listOf("Goal"),
-                PointOfInterestType()
-            )
+        val pointOfInterest0 = PointOfInterest(
+            10000L,
+            0L,
+            listOf("Goal"),
+            PointOfInterestType()
         )
         timelineMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                10000L,
-                0L,
-                listOf("Assist"),
-                PointOfInterestType()
-            )
+            pointOfInterest0
+        )
+        val pointOfInterest1 = PointOfInterest(
+            10000L,
+            0L,
+            listOf("Assist"),
+            PointOfInterestType()
+        )
+        timelineMarkerManager.addTimeLineHighlight(
+            pointOfInterest1
         )
         val markerTitleList = listOf("Goal", "Assist")
 
 
-        val poiPositionsOnScreen = ArrayList<Int>().apply { addAll(listOf(333, 333, 666, 666)) }
-        timeLineMarkerPositionListener.onScrubMove(12000L, 60000L, poiPositionsOnScreen)
-        timeLineMarkerPositionListener.onScrubMove(12001L, 60000L, poiPositionsOnScreen)
+        val poiPositionsOnScreen =
+            ArrayList<PositionedPointOfInterest>().apply {
+                add(PositionedPointOfInterest(500, pointOfInterest0))
+                add(PositionedPointOfInterest(500, pointOfInterest1))
+            }
+
+        timeLineMarkerPositionListener.onScrubMove(500F, poiPositionsOnScreen)
+        timeLineMarkerPositionListener.onScrubMove(501F, poiPositionsOnScreen)
 
 
-        verify(timelineMarkerView, times(1)).setMarkerTexts(markerTitleList)
+        verify(timelineMarkerView, times(1)).setMarkerTexts(any(), any())
     }
 
     @Test
-    fun `given multiple different timeline marker list, should set it to view`() {
-        timelineMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                10000L,
-                0L,
-                listOf("Goal"),
-                PointOfInterestType()
-            )
+    fun `given multiple different timeline marker list for different time, should set them to view`() {
+        val pointOfInterest0 = PointOfInterest(
+            10000L,
+            0L,
+            listOf("Goal"),
+            PointOfInterestType()
         )
         timelineMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                10000L,
-                0L,
-                listOf("Assist"),
-                PointOfInterestType()
-            )
+            pointOfInterest0
+        )
+        val pointOfInterest1 = PointOfInterest(
+            10000L,
+            0L,
+            listOf("Assist"),
+            PointOfInterestType()
+        )
+        timelineMarkerManager.addTimeLineHighlight(
+            pointOfInterest1
         )
         val firstMarkerTitleList = listOf("Goal", "Assist")
-        timelineMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                50000L,
-                0L,
-                listOf("Foul"),
-                PointOfInterestType()
-            )
+
+        val pointOfInterest2 = PointOfInterest(
+            50000L,
+            0L,
+            listOf("Foul"),
+            PointOfInterestType()
         )
         timelineMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                50000L,
-                0L,
-                listOf("Red card"),
-                PointOfInterestType()
-            )
+            pointOfInterest2
+        )
+        val pointOfInterest3 = PointOfInterest(
+            50000L,
+            0L,
+            listOf("Red card"),
+            PointOfInterestType()
+        )
+        timelineMarkerManager.addTimeLineHighlight(
+            pointOfInterest3
         )
         val secondMarkerTitleList = listOf("Foul", "Red card")
 
 
-        val poiPositionsOnScreen = ArrayList<Int>().apply { addAll(listOf(333, 333, 666, 666)) }
-        timeLineMarkerPositionListener.onScrubMove(12000L, 60000L, poiPositionsOnScreen)
-        timeLineMarkerPositionListener.onScrubMove(48000L, 60000L, poiPositionsOnScreen)
+        val poiPositionsOnScreen =
+            ArrayList<PositionedPointOfInterest>().apply {
+                add(PositionedPointOfInterest(500, pointOfInterest0))
+                add(PositionedPointOfInterest(500, pointOfInterest1))
+                add(PositionedPointOfInterest(600, pointOfInterest2))
+                add(PositionedPointOfInterest(600, pointOfInterest3))
+            }
+
+        val position = 500F
+        timeLineMarkerPositionListener.onScrubMove(position, poiPositionsOnScreen)
+        val position1 = 600F
+        timeLineMarkerPositionListener.onScrubMove(position1, poiPositionsOnScreen)
 
 
-        verify(timelineMarkerView).setMarkerTexts(firstMarkerTitleList)
-        verify(timelineMarkerView).setMarkerTexts(secondMarkerTitleList)
+        verify(timelineMarkerView).setMarkerTexts(firstMarkerTitleList, position.toInt())
+        verify(timelineMarkerView).setMarkerTexts(secondMarkerTitleList, position1.toInt())
     }
 
     @Test
-    fun `given multiple different timeline marker list with common element, should set it to view`() {
-        timelineMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                10000L,
-                0L,
-                listOf("Goal"),
-                PointOfInterestType()
-            )
+    fun `given multiple different timeline marker list with common element, should set them to view`() {
+        val pointOfInterest0 = PointOfInterest(
+            10000L,
+            0L,
+            listOf("Goal"),
+            PointOfInterestType()
         )
         timelineMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                10000L,
-                0L,
-                listOf("Assist"),
-                PointOfInterestType()
-            )
+            pointOfInterest0
+        )
+        val pointOfInterest1 = PointOfInterest(
+            10000L,
+            0L,
+            listOf("Assist"),
+            PointOfInterestType()
         )
         timelineMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                15000L,
-                0L,
-                listOf("Foul"),
-                PointOfInterestType()
-            )
+            pointOfInterest1
+        )
+        val pointOfInterest2 = PointOfInterest(
+            15000L,
+            0L,
+            listOf("Foul"),
+            PointOfInterestType()
+        )
+        timelineMarkerManager.addTimeLineHighlight(
+            pointOfInterest2
         )
         val firstMarkerTitleListPlusCommonElement = listOf("Goal", "Assist", "Foul")
 
+        val pointOfInterest3 = PointOfInterest(
+            20000L,
+            0L,
+            listOf("Red card"),
+            PointOfInterestType()
+        )
         timelineMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                20000L,
-                0L,
-                listOf("Red card"),
-                PointOfInterestType()
-            )
+            pointOfInterest3
         )
         val secondMarkerTitleListPlusCommonElement = listOf("Foul", "Red card")
 
 
-        val poiPositionsOnScreen = ArrayList<Int>().apply { addAll(listOf(333, 333, 666, 666)) }
-        timeLineMarkerPositionListener.onScrubMove(12000L, 60000L, poiPositionsOnScreen)
-        timeLineMarkerPositionListener.onScrubMove(18000L, 60000L, poiPositionsOnScreen)
+        val poiPositionsOnScreen =
+            ArrayList<PositionedPointOfInterest>().apply {
+                add(PositionedPointOfInterest(500, pointOfInterest0))
+                add(PositionedPointOfInterest(500, pointOfInterest1))
+                add(PositionedPointOfInterest(510, pointOfInterest2))
+                add(PositionedPointOfInterest(520, pointOfInterest3))
+            }
+
+        val position = 500F
+        timeLineMarkerPositionListener.onScrubMove(position, poiPositionsOnScreen)
+        val position1 = 520F
+        timeLineMarkerPositionListener.onScrubMove(position1, poiPositionsOnScreen)
 
 
-        verify(timelineMarkerView).setMarkerTexts(firstMarkerTitleListPlusCommonElement)
-        verify(timelineMarkerView).setMarkerTexts(secondMarkerTitleListPlusCommonElement)
+        verify(timelineMarkerView).setMarkerTexts(firstMarkerTitleListPlusCommonElement, position.toInt())
+        verify(timelineMarkerView).setMarkerTexts(secondMarkerTitleListPlusCommonElement, position1.toInt())
     }
 
 

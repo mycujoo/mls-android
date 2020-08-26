@@ -209,7 +209,8 @@ class GetActionsFromJSONUseCase {
                 ,{
                     "data": {
                         "color": "#ffff01", 
-                        "label": "Goal 2"
+                        "label": "Goal 2",
+                        "seek_offset": 20000
                     }, 
                     "offset": 19600,
                     "id": "fda43t943f9a", 

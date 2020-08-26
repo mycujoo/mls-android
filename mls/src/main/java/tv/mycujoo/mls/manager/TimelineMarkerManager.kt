@@ -1,11 +1,7 @@
 package tv.mycujoo.mls.manager
 
-import android.view.View
 import tv.mycujoo.mls.helper.TimeRangeHelper.Companion.isInRange
-import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
-import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterest
-import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarkerPosition
-import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarkerView
+import tv.mycujoo.mls.widgets.mlstimebar.*
 
 class TimelineMarkerManager(
     private val mlsTimeBar: MLSTimeBar,
@@ -13,83 +9,54 @@ class TimelineMarkerManager(
 ) {
 
     private val pointOfInterestList = ArrayList<PointOfInterest>()
-    private val currentPoiList = ArrayList<PointOfInterest>()
+    private val currentPoiList = ArrayList<PositionedPointOfInterest>()
 
 
     init {
 
         mlsTimeBar.setTimelineMarkerPositionListener(object : TimelineMarkerPosition {
-            private var scrubbing = false
-
             override fun onScrubMove(
-                position: Long,
-                videoDuration: Long,
-                poiPositionsOnScreen: ArrayList<Int>
+                position: Float,
+                positionedPointOfInterestList: ArrayList<PositionedPointOfInterest>
             ) {
-                scrubbing = true
-
-                pointOfInterestList.filterIndexed { index, pointOfInterest ->
+                positionedPointOfInterestList.filter { positionedPointOfInterest ->
                     isInRange(
                         position,
-                        videoDuration,
-                        pointOfInterest.offset,
-                        pointOfInterest.seekOffset
+                        positionedPointOfInterest.positionOnScreen
                     )
                 }.let { inRangePointOfInterestList ->
 
                     if (inRangePointOfInterestList.isEmpty()) {
-                        timelineMarkerView.visibility = View.INVISIBLE
                         timelineMarkerView.removeMarkerTexts()
 
                         currentPoiList.clear()
 
                         return@let
+                    } else {
+                        if (isCurrentListChanged(inRangePointOfInterestList)) {
+                            currentPoiList.clear()
+                            currentPoiList.addAll(inRangePointOfInterestList)
+
+                            timelineMarkerView.setMarkerTexts(
+                                inRangePointOfInterestList.flatMap { it.pointOfInterest.title },
+                                position.toInt()
+                            )
+                        }
                     }
 
-                    if (isCurrentListChanged(inRangePointOfInterestList)) {
-                        currentPoiList.clear()
-                        currentPoiList.addAll(inRangePointOfInterestList)
-
-                        timelineMarkerView.setMarkerTexts(inRangePointOfInterestList.flatMap { it.title })
-                    }
-
-
-                    val markerIndex = pointOfInterestList.indexOfFirst { pointOfInterest ->
-                        isInRange(
-                            position,
-                            videoDuration,
-                            pointOfInterest.offset,
-                            pointOfInterest.seekOffset
-                        )
-                    }
-                    if (markerIndex != -1) {
-                        timelineMarkerView.setPosition(poiPositionsOnScreen[markerIndex])
-
-                    }
                 }
             }
 
             override fun onScrubStop() {
-                scrubbing = false
+                currentPoiList.clear()
+
+                timelineMarkerView.removeMarkerTexts()
             }
 
-            override fun update(position: Long, videoDuration: Long) {
-                if (scrubbing) {
-                    return
-                }
-                if (pointOfInterestList.none { isInRange(position, videoDuration, it.offset, it.seekOffset) }) {
-
-                    currentPoiList.clear()
-
-                    timelineMarkerView.visibility = View.INVISIBLE
-                    timelineMarkerView.removeMarkerTexts()
-                }
-
-            }
         })
     }
 
-    private fun isCurrentListChanged(inRangePoiList: List<PointOfInterest>): Boolean {
+    private fun isCurrentListChanged(inRangePoiList: List<PositionedPointOfInterest>): Boolean {
         if (currentPoiList.size != inRangePoiList.size) {
             return true
         }

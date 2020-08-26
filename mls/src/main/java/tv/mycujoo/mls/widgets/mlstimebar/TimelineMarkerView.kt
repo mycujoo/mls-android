@@ -7,6 +7,7 @@ import android.graphics.PorterDuffColorFilter
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.UiThread
@@ -26,6 +27,7 @@ class TimelineMarkerView @JvmOverloads constructor(
     /**region Fields*/
     var bgColor = ""
     private lateinit var idlingResource: CountingIdlingResource
+    private var counter = 0
     /**endregion */
 
     /**region Initializing*/
@@ -59,61 +61,100 @@ class TimelineMarkerView @JvmOverloads constructor(
      * expects input from 0 to screen-width to position the time-line marker
      */
     @UiThread
-    fun setPosition(relationalPosition: Int) {
+    private fun setPosition(relationalPosition: Int) {
         if (this::idlingResource.isInitialized) {
             idlingResource.increment()
         }
-        visibility = View.INVISIBLE
+
+        val parentLayout = parent as ConstraintLayout
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(parentLayout)
+
+        if (parentLayout.width - (width / 2) < relationalPosition) {
+            // marker should stick to the end
+            constraintSet.connect(
+                this.id,
+                ConstraintSet.END,
+                parentLayout.id,
+                ConstraintSet.END
+            )
+            constraintSet.clear(this.id, ConstraintSet.START)
+        } else {
+            constraintSet.connect(
+                this.id,
+                ConstraintSet.START,
+                parentLayout.id,
+                ConstraintSet.START
+            )
+            constraintSet.setMargin(
+                this.id,
+                ConstraintSet.START,
+                relationalPosition - (width / 2)
+            )
+            constraintSet.clear(this.id, ConstraintSet.END)
+        }
+
+        constraintSet.applyTo(parentLayout)
 
         doOnLayout {
-            val parentLayout = parent as ConstraintLayout
-            val constraintSet = ConstraintSet()
-            constraintSet.clone(parentLayout)
+            visibility = View.VISIBLE
 
-            if (parentLayout.width - (measuredWidth / 2) < relationalPosition) {
-                // marker should stick to the end
-                constraintSet.connect(
-                    this.id,
-                    ConstraintSet.END,
-                    parentLayout.id,
-                    ConstraintSet.END
-                )
-                constraintSet.clear(this.id, ConstraintSet.START)
-            } else {
-                constraintSet.connect(
-                    this.id,
-                    ConstraintSet.START,
-                    parentLayout.id,
-                    ConstraintSet.START
-                )
-                constraintSet.setMargin(
-                    this.id,
-                    ConstraintSet.START,
-                    relationalPosition - (width / 2)
-                )
-                constraintSet.clear(this.id, ConstraintSet.END)
-            }
-
-            constraintSet.applyTo(parentLayout)
-
-            doOnLayout {
-                visibility = View.VISIBLE
-
-                if (this::idlingResource.isInitialized) {
-                    if (idlingResource.isIdleNow.not()) {
-                        idlingResource.decrement()
-                    }
+            if (this::idlingResource.isInitialized) {
+                if (idlingResource.isIdleNow.not()) {
+                    idlingResource.decrement()
                 }
             }
         }
     }
 
     fun removeMarkerTexts() {
-        removeAllViews()
+        if (counter > 0) {
+            counter = 0
+            removeAllViewsInLayout()
+            visibility = View.INVISIBLE
+
+        }
     }
 
-    fun setMarkerTexts(titles: List<String>) {
-        removeMarkerTexts()
+    fun setMarkerTexts(titles: List<String>, toInt: Int) {
+        if (counter > 0) {
+            val t = object : OnHierarchyChangeListener {
+                override fun onChildViewAdded(parent: View?, child: View?) {
+                }
+
+                override fun onChildViewRemoved(parent: View?, child: View?) {
+                    if ((parent as ViewGroup).childCount == 0) {
+                        addTitles(titles, toInt)
+                    }
+                }
+            }
+            setOnHierarchyChangeListener(t)
+
+            removeMarkerTexts()
+        } else {
+            addTitles(titles, toInt)
+        }
+
+    }
+
+    private fun addTitles(titles: List<String>, toInt: Int) {
+        counter = titles.size
+
+        val t = object : OnHierarchyChangeListener {
+            override fun onChildViewAdded(parent: View?, child: View?) {
+                if ((parent as ViewGroup).childCount == titles.size) {
+                    setPosition(toInt)
+                }
+            }
+
+            override fun onChildViewRemoved(parent: View?, child: View?) {
+
+            }
+        }
+
+        setOnHierarchyChangeListener(t)
+
+
         titles.forEach {
             addView(TextView(context).apply {
                 text = it

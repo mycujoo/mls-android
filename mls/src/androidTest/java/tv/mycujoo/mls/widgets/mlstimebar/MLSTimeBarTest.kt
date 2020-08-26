@@ -45,15 +45,6 @@ class MLSTimeBarTest {
     }
 
 
-    @Test
-    fun seekingShouldCallPOIListener() {
-        mlsTimeBar.setPosition(123L)
-
-
-        assertEquals(123L, timeLineMarkerPosition.position)
-    }
-
-
     @Ignore
     @Test
     fun scrubbingShouldCallPOIListener() {

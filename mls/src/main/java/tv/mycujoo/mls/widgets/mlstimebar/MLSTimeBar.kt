@@ -69,7 +69,7 @@ class MLSTimeBar @JvmOverloads constructor(
     private var adGroupTimesMs: LongArray? = null
     private var playedAdGroups: BooleanArray? = null
     private val poiArrayList = ArrayList<PointOfInterest>()
-    private val poiPositionsOnScreen = ArrayList<Int>()
+    private val poiPositionsOnScreen = ArrayList<PositionedPointOfInterest>()
     private lateinit var timelineMarkerPositionListener: TimelineMarkerPosition
 
 
@@ -166,10 +166,6 @@ class MLSTimeBar @JvmOverloads constructor(
         this.position = position
         contentDescription = progressText
 
-        if (this::timelineMarkerPositionListener.isInitialized) {
-            timelineMarkerPositionListener.update(position, duration)
-        }
-
         update()
     }
 
@@ -211,7 +207,7 @@ class MLSTimeBar @JvmOverloads constructor(
 
     fun addTimeLineHighlight(poi: PointOfInterest) {
         poiArrayList.add(poi)
-        poiPositionsOnScreen.add(-1)
+        poiPositionsOnScreen.add(PositionedPointOfInterest(-1, poi))
     }
 
     // View methods.
@@ -248,9 +244,11 @@ class MLSTimeBar @JvmOverloads constructor(
                 if (y < fineScrubYThreshold) {
                     val relativeX = x - lastCoarseScrubXPosition
                     positionScrubber(lastCoarseScrubXPosition + relativeX / FINE_SCRUB_RATIO.toFloat())
+                    notifyScrubbingUpdated(x.toFloat())
                 } else {
                     lastCoarseScrubXPosition = x
                     positionScrubber(x.toFloat())
+                    notifyScrubbingUpdated(x.toFloat())
                 }
                 updateScrubbing(scrubberPosition)
                 update()
@@ -433,15 +431,6 @@ class MLSTimeBar @JvmOverloads constructor(
         for (listener in listeners) {
             listener.onScrubMove(this, scrubPosition)
         }
-
-        if (this::timelineMarkerPositionListener.isInitialized) {
-            timelineMarkerPositionListener.onScrubMove(
-                scrubPosition,
-                duration,
-                poiPositionsOnScreen
-            )
-        }
-
     }
 
     private fun stopScrubbing(canceled: Boolean) {
@@ -485,6 +474,15 @@ class MLSTimeBar @JvmOverloads constructor(
         }
         update()
         return true
+    }
+
+    private fun notifyScrubbingUpdated(xPosition: Float) {
+        if (this::timelineMarkerPositionListener.isInitialized) {
+            timelineMarkerPositionListener.onScrubMove(
+                xPosition,
+                poiPositionsOnScreen
+            )
+        }
     }
 
     private fun update() {
@@ -582,15 +580,15 @@ class MLSTimeBar @JvmOverloads constructor(
 
 
         val paint = Paint()
-        val poiMarkerOffset = adMarkerWidth / 2
+        val timelineMarkerWidth = adMarkerWidth / 2
 
         poiArrayList.forEachIndexed { index, poi ->
 
-            var poiOffsetAdjusted = -1L
+            val poiOffsetAdjusted: Long
             if (poi.offset + poi.seekOffset in 0L..duration) {
                 poiOffsetAdjusted = poi.offset + poi.seekOffset
             } else {
-                poiPositionsOnScreen[index] = -1
+                poiPositionsOnScreen[index].positionOnScreen = -1
                 return
             }
 
@@ -604,7 +602,7 @@ class MLSTimeBar @JvmOverloads constructor(
             )
 
             val markerPositionOffset: Int =
-                (progressBar.width() * poiTimeMs / duration).toInt() - poiMarkerOffset
+                (progressBar.width() * poiTimeMs / duration).toInt() - timelineMarkerWidth
 
             val markerLeft = progressBar.left + Math.min(
                 progressBar.width() - adMarkerWidth,
@@ -620,11 +618,9 @@ class MLSTimeBar @JvmOverloads constructor(
                 paint
             )
 
-            poiPositionsOnScreen[index] =
+            poiPositionsOnScreen[index].positionOnScreen =
                 ((markerLeft + markerRight) / 2).toInt()
-
         }
-
 
         if (adGroupCount == 0) {
             return
