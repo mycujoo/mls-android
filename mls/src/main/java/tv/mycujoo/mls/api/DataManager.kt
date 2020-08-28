@@ -8,6 +8,7 @@ import tv.mycujoo.domain.entity.EventStatus
 import tv.mycujoo.domain.entity.OrderByEventsParam
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.params.EventIdPairParam
+import tv.mycujoo.domain.params.EventListParams
 import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.domain.usecase.GetEventDetailUseCase
 import tv.mycujoo.domain.usecase.GetEventsUseCase
@@ -56,7 +57,14 @@ class DataManager(
         this.fetchEventCallback = fetchEventCallback
         scope.launch {
 
-            val result = GetEventsUseCase(eventsRepository).execute()
+            val result = GetEventsUseCase(eventsRepository).execute(
+                EventListParams(
+                    pageSize,
+                    pageToken,
+                    eventStatus?.map { it.toString() },
+                    orderBy?.toString()
+                )
+            )
             when (result) {
                 is Result.Success -> {
                     events.postValue(

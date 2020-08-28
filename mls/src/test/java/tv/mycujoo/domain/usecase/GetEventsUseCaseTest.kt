@@ -16,6 +16,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import tv.mycujoo.data.repository.EventsRepository
 import tv.mycujoo.domain.entity.Result
+import tv.mycujoo.domain.params.EventListParams
 import tv.mycujoo.mls.CoroutineTestRule
 import tv.mycujoo.mls.model.Event
 import tv.mycujoo.mls.network.MlsApi
@@ -58,63 +59,6 @@ class GetEventsUseCaseTest {
         server.shutdown()
     }
 
-//    @Test
-//    fun `given valid list of events, should return them`() = runBlocking<Unit> {
-//
-//
-//        val event_0 = Event("1000", Stream(emptyList()), "name str", "location str", "started")
-//        val event_1 = Event("1001", Stream(emptyList()), "name str", "location str", "started")
-//        val toJson = Gson().toJson(listOf(event_0, event_1))
-//
-//        val response = MockResponse()
-//            .setBody(toJson)
-//
-//        setResponseCodeAndStatus(response, HttpURLConnection.HTTP_OK)
-//
-//        server.enqueue(response)
-//
-//
-//        when (val result = GetEventsUseCase(EventsRepository(api)).execute()) {
-//
-//            is Result.Success -> {
-////                assertTrue { result.value.events[0] == event_0 }
-////                assertTrue { result.value[1] == event_1 }
-//            }
-//            is Result.NetworkError -> {
-//                fail()
-//            }
-//            is Result.GenericError -> {
-//                fail()
-//            }
-//        }
-//    }
-
-//    @Test
-//    fun `given empty list of events, should return empty list`() = runBlocking<Unit> {
-//        val arrayList = ArrayList<Event>(0)
-//        val toJson = Gson().toJson(arrayList)
-//        var response = MockResponse()
-//            .setBody(toJson)
-//
-//        response = setResponseCodeAndStatus(response, HttpURLConnection.HTTP_OK)
-//
-//        server.enqueue(response)
-//
-//
-//        when (val result = GetEventsUseCase(EventsRepository(api)).execute()) {
-//
-//            is Result.Success -> {
-//                assertTrue { result.value.events.isEmpty() }
-//            }
-//            is Result.NetworkError -> {
-//                fail()
-//            }
-//            is Result.GenericError -> {
-//                fail()
-//            }
-//        }
-//    }
-
     @Test
     fun `given generic error, should return error`() = runBlocking<Unit> {
         val arrayList = ArrayList<Event>(0)
@@ -128,7 +72,7 @@ class GetEventsUseCaseTest {
         server.enqueue(response)
 
 
-        when (val result = GetEventsUseCase(EventsRepository(api)).execute()) {
+        when (val result = GetEventsUseCase(EventsRepository(api)).execute(EventListParams())) {
 
             is Result.Success -> {
                 fail()

@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.api
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -71,8 +72,17 @@ class DataManagerTest {
 
     @Test
     fun `given event list on response of get event, should return in callback`() = runBlocking {
-        val eventEntityArrayList = ArrayList<EventEntity>()
+        whenever(eventsRepository.getEventsList(any())).thenReturn(
+            Result.Success(
+                getSampleEvents(
+                    null,
+                    null
+                )
+            )
+        )
 
+
+        val eventEntityArrayList = ArrayList<EventEntity>()
         dataManager.fetchEvents(
             2,
             null,
@@ -86,6 +96,13 @@ class DataManagerTest {
 
     @Test
     fun `given previousPageToken on response of get event, should return in callback`() = runBlocking {
+        whenever(eventsRepository.getEventsList(any())).thenReturn(
+            Result.Success(
+                getSampleEvents(SAMPLE_PREVIOUS_PAGE_TOKEN, null)
+            )
+        )
+
+
         var result = ""
         dataManager.fetchEvents(
             2,
@@ -100,6 +117,13 @@ class DataManagerTest {
 
     @Test
     fun `given nextPageToken on response of get event, should return in callback`() = runBlocking {
+        whenever(eventsRepository.getEventsList(any())).thenReturn(
+            Result.Success(
+                getSampleEvents(null, SAMPLE_NEXT_PAGE_TOKEN)
+            )
+        )
+
+
         var result = ""
         dataManager.fetchEvents(
             2,
@@ -128,7 +152,13 @@ class DataManagerTest {
     }
 
     @Test
-    fun `given new data, should call live data`() {
+    fun `given new data, should call live data`() = runBlocking {
+        whenever(eventsRepository.getEventsList(any())).then {
+            dataManager.getEventsLiveData().value = listOf(getSampleEventEntity(), getSampleEventEntity())
+            true
+        }
+
+
         dataManager.fetchEvents(
             2,
             null,
@@ -174,6 +204,11 @@ class DataManagerTest {
             false
         )
     }
+
+    private fun getSampleEvents(previousPageToken: String?, nextPageToken: String?): Events {
+        return Events(listOf(getSampleEventEntity(), getSampleEventEntity()), previousPageToken, nextPageToken)
+    }
+
 
     companion object {
         const val SAMPLE_PREVIOUS_PAGE_TOKEN = "sample_previous_page_token"
