@@ -34,7 +34,7 @@ import tv.mycujoo.mls.network.socket.ReactorListener
 import tv.mycujoo.mls.network.socket.ReactorSocket
 import tv.mycujoo.mls.player.IPlayer
 import tv.mycujoo.mls.player.Player
-import tv.mycujoo.mls.widgets.PlayerViewWrapper
+import tv.mycujoo.mls.widgets.MLSPlayerView
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
 
 
@@ -48,7 +48,7 @@ class VideoPlayerCoordinatorTest {
     private lateinit var videoPlayerCoordinator: VideoPlayerCoordinator
 
     @Mock
-    private lateinit var playerViewWrapper: PlayerViewWrapper
+    private lateinit var playerView: MLSPlayerView
 
 
     @Mock
@@ -137,8 +137,8 @@ class VideoPlayerCoordinatorTest {
         whenever(internalBuilder.createExoPlayerAdapter(any())).thenReturn(exoplayer2Adapter)
         whenever(internalBuilder.createYouboraClient(any())).thenReturn(youboraClient)
 
-        whenever(playerViewWrapper.context).thenReturn(activity)
-        whenever(playerViewWrapper.getTimeBar()).thenReturn(timeBar)
+        whenever(playerView.context).thenReturn(activity)
+        whenever(playerView.getTimeBar()).thenReturn(timeBar)
 
         whenever(dispatcher.coroutineContext).thenReturn(coroutineTestRule.testDispatcher)
 
@@ -155,7 +155,7 @@ class VideoPlayerCoordinatorTest {
             dataManager,
             GetActionsFromJSONUseCase.mappedActionCollections().timelineMarkerActionList
         )
-        videoPlayerCoordinator.initialize(playerViewWrapper, player, MLSBuilder)
+        videoPlayerCoordinator.initialize(playerView, player, MLSBuilder)
     }
 
     private fun storeExoPlayerListener(it: InvocationOnMock) {
@@ -224,7 +224,7 @@ class VideoPlayerCoordinatorTest {
 
         videoPlayerCoordinator.playVideo(event)
 
-        verify(playerViewWrapper).displayEventInformationPreEventDialog()
+        verify(playerView).displayEventInformationPreEventDialog()
     }
 
     @Test
@@ -289,7 +289,7 @@ class VideoPlayerCoordinatorTest {
         mainWebSocketListener.onMessage(webSocket, "eventTotal;ck2343whlc43k0g90i92grc0u;17")
 
 
-        verify(playerViewWrapper).hideViewersCounter()
+        verify(playerView).hideViewersCounter()
     }
 
     @Test
@@ -306,7 +306,7 @@ class VideoPlayerCoordinatorTest {
         mainWebSocketListener.onMessage(webSocket, "eventTotal;ck2343whlc43k0g90i92grc0u;17")
 
 
-        verify(playerViewWrapper).updateViewersCounter("17")
+        verify(playerView).updateViewersCounter("17")
     }
 
     @Test

@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
-import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
@@ -30,7 +29,7 @@ import tv.mycujoo.mls.player.IPlayer
 import tv.mycujoo.mls.player.Player.Companion.createExoPlayer
 import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
 import tv.mycujoo.mls.utils.StringUtils
-import tv.mycujoo.mls.widgets.PlayerViewWrapper
+import tv.mycujoo.mls.widgets.MLSPlayerView
 
 class VideoPlayerCoordinator(
     private val videoPlayerConfig: VideoPlayerConfig,
@@ -45,7 +44,7 @@ class VideoPlayerCoordinator(
     /**region Fields*/
     private lateinit var player: IPlayer
     internal lateinit var videoPlayer: VideoPlayer
-    private lateinit var playerViewWrapper: PlayerViewWrapper
+    private lateinit var playerView: MLSPlayerView
 
     private var hasAnalytic = false
     private lateinit var youboraClient: YouboraClient
@@ -58,8 +57,8 @@ class VideoPlayerCoordinator(
     /**endregion */
 
     /**region Initialization*/
-    fun initialize(playerViewWrapper: PlayerViewWrapper, player: IPlayer, builder: MLSBuilder) {
-        this.playerViewWrapper = playerViewWrapper
+    fun initialize(MLSPlayerView: MLSPlayerView, player: IPlayer, builder: MLSBuilder) {
+        this.playerView = MLSPlayerView
         this.player = player
 
 
@@ -70,9 +69,9 @@ class VideoPlayerCoordinator(
 
             override fun onCounterUpdate(counts: String) {
                 if (isLive && isViewersCountValid(counts)) {
-                    playerViewWrapper.updateViewersCounter(StringUtils.getNumberOfViewers(counts))
+                    MLSPlayerView.updateViewersCounter(StringUtils.getNumberOfViewers(counts))
                 } else {
-                    playerViewWrapper.hideViewersCounter()
+                    MLSPlayerView.hideViewersCounter()
                 }
             }
         })
@@ -98,7 +97,7 @@ class VideoPlayerCoordinator(
             }
             builder.uiEventListener?.let { uiEventCallback ->
                 videoPlayer.uiEventListener = uiEventCallback
-                playerViewWrapper.uiEventListener = uiEventCallback
+                MLSPlayerView.uiEventListener = uiEventCallback
 
             }
 
@@ -107,15 +106,15 @@ class VideoPlayerCoordinator(
                 initAnalytic(builder.internalBuilder, builder.activity!!, it)
             }
 
-            initPlayerViewWrapper(playerViewWrapper, player)
+            initPlayerViewWrapper(MLSPlayerView, player)
         }
     }
 
     private fun initPlayerViewWrapper(
-        playerViewWrapper: PlayerViewWrapper,
+        MLSPlayerView: MLSPlayerView,
         player: IPlayer
     ) {
-        playerViewWrapper.prepare(
+        MLSPlayerView.prepare(
             OverlayViewHelper(viewHandler, AnimationFactory()),
             viewHandler,
             emptyList()
@@ -147,20 +146,20 @@ class VideoPlayerCoordinator(
         player.addListener(mainEventListener)
         player.loadLastVideo()
 
-        playerViewWrapper.getTimeBar().addListener(object : TimeBar.OnScrubListener {
+        MLSPlayerView.getTimeBar().addListener(object : TimeBar.OnScrubListener {
             override fun onScrubMove(timeBar: TimeBar, position: Long) {
                 //do nothing
-                playerViewWrapper.scrubbedTo(position)
+                MLSPlayerView.scrubbedTo(position)
             }
 
             override fun onScrubStart(timeBar: TimeBar, position: Long) {
                 //do nothing
-                playerViewWrapper.scrubStartedAt(position)
+                MLSPlayerView.scrubStartedAt(position)
 
             }
 
             override fun onScrubStop(timeBar: TimeBar, position: Long, canceled: Boolean) {
-                playerViewWrapper.scrubStopAt(position)
+                MLSPlayerView.scrubStopAt(position)
                 timelineMarkerActionEntities.firstOrNull { position in it.offset - 10000L..it.offset + 10000L }
                     ?.let {
                         player.seekTo(it.offset)
@@ -169,24 +168,24 @@ class VideoPlayerCoordinator(
             }
         })
 
-        playerViewWrapper.config(videoPlayerConfig)
+        MLSPlayerView.config(videoPlayerConfig)
     }
 
-    fun reInitialize(playerViewWrapper: PlayerViewWrapper) {
-        player.create(createMediaFactory(playerViewWrapper.context), createExoPlayer(playerViewWrapper.context))
+    fun reInitialize(MLSPlayerView: MLSPlayerView) {
+        player.create(createMediaFactory(MLSPlayerView.context), createExoPlayer(MLSPlayerView.context))
 
-        initPlayerViewWrapper(playerViewWrapper, player)
+        initPlayerViewWrapper(MLSPlayerView, player)
         dataManager.currentEvent?.let {
             joinToReactor(it)
         }
     }
 
-    fun attachPlayer(playerViewWrapper: PlayerViewWrapper) {
-        playerViewWrapper.playerView.player = player.getDirectInstance()
+    fun attachPlayer(playerView: MLSPlayerView) {
+        playerView.playerView.player = player.getDirectInstance()
 
-        playerViewWrapper.screenMode(PlayerViewWrapper.ScreenMode.Portrait(PlayerViewWrapper.RESIZE_MODE_FILL))
+        playerView.screenMode(MLSPlayerView.ScreenMode.Portrait(MLSPlayerView.RESIZE_MODE_FILL))
 
-        playerViewWrapper.playerView.hideController()
+        playerView.playerView.hideController()
 
         if (hasAnalytic) {
             youboraClient.start()
@@ -265,7 +264,7 @@ class VideoPlayerCoordinator(
     }
 
     private fun playVideoOrDisplayEventInfo(event: EventEntity) {
-        playerViewWrapper.setEventInfo(event.title, event.description, event.start_time)
+        playerView.setEventInfo(event.title, event.description, event.start_time)
 
         if (mayPlayVideo(event)) {
             logged = false
@@ -273,7 +272,7 @@ class VideoPlayerCoordinator(
             player.play(event.streams.first().fullUrl)
         } else {
             // display event info
-            playerViewWrapper.displayEventInformationPreEventDialog()
+            playerView.displayEventInformationPreEventDialog()
         }
     }
 
@@ -298,23 +297,23 @@ class VideoPlayerCoordinator(
         if (player.isLive()) {
             isLive = true
             if (player.currentPosition() + 15000L >= player.duration()) {
-                playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.LIVE_ON_THE_EDGE)
+                playerView.setLiveMode(MLSPlayerView.LiveState.LIVE_ON_THE_EDGE)
             } else {
-                playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.LIVE_TRAILING)
+                playerView.setLiveMode(MLSPlayerView.LiveState.LIVE_TRAILING)
             }
         } else {
             // VOD
             isLive = false
-            playerViewWrapper.setLiveMode(PlayerViewWrapper.LiveState.VOD)
+            playerView.setLiveMode(MLSPlayerView.LiveState.VOD)
         }
 
     }
 
     private fun handlePlayStatusOfOverlayAnimationsOnPlayPause(isPlaying: Boolean) {
         if (isPlaying) {
-            playerViewWrapper.continueOverlayAnimations()
+            playerView.continueOverlayAnimations()
         } else {
-            playerViewWrapper.freezeOverlayAnimations()
+            playerView.freezeOverlayAnimations()
         }
     }
 
@@ -323,10 +322,10 @@ class VideoPlayerCoordinator(
         playWhenReady: Boolean
     ) {
         if (playbackState == STATE_BUFFERING && playWhenReady) {
-            playerViewWrapper.freezeOverlayAnimations()
+            playerView.freezeOverlayAnimations()
 
         } else if (playbackState == STATE_READY && playWhenReady) {
-            playerViewWrapper.continueOverlayAnimations()
+            playerView.continueOverlayAnimations()
 
         }
     }
@@ -336,9 +335,9 @@ class VideoPlayerCoordinator(
         playWhenReady: Boolean
     ) {
         if (playbackState == STATE_BUFFERING && playWhenReady) {
-            playerViewWrapper.showBuffering()
+            playerView.showBuffering()
         } else {
-            playerViewWrapper.hideBuffering()
+            playerView.hideBuffering()
         }
     }
 

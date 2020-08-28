@@ -33,7 +33,7 @@ import tv.mycujoo.mls.helper.DateTimeHelper
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.TimelineMarkerManager
 import tv.mycujoo.mls.manager.contracts.IViewHandler
-import tv.mycujoo.mls.widgets.PlayerViewWrapper.LiveState.*
+import tv.mycujoo.mls.widgets.MLSPlayerView.LiveState.*
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterest
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterestType
@@ -41,7 +41,7 @@ import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarkerView
 import java.util.*
 
 
-class PlayerViewWrapper @JvmOverloads constructor(
+class MLSPlayerView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
@@ -134,10 +134,10 @@ class PlayerViewWrapper @JvmOverloads constructor(
     private fun initAttributes(attrs: AttributeSet?, context: Context) {
         attrs?.let {
             val obtainAttrs =
-                context.obtainStyledAttributes(it, R.styleable.PlayerViewWrapper)
-            if (obtainAttrs.hasValue(R.styleable.PlayerViewWrapper_has_fullscreen_button)) {
+                context.obtainStyledAttributes(it, R.styleable.MLSPlayerView)
+            if (obtainAttrs.hasValue(R.styleable.MLSPlayerView_has_fullscreen_button)) {
                 if (!obtainAttrs.getBoolean(
-                        R.styleable.PlayerViewWrapper_has_fullscreen_button,
+                        R.styleable.MLSPlayerView_has_fullscreen_button,
                         true
                     )
                 ) {

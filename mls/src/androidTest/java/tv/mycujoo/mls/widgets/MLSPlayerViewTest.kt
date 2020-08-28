@@ -49,9 +49,9 @@ import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
 
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
-class PlayerViewWrapperTest {
+class MLSPlayerViewTest {
 
-    private lateinit var playerViewWrapper: PlayerViewWrapper
+    private lateinit var MLSPlayerView: MLSPlayerView
     private var viewHandler = ViewHandler(
         GlobalScope,
         CountingIdlingResource("ViewIdentifierManager")
@@ -71,12 +71,12 @@ class PlayerViewWrapperTest {
         val scenario = launchActivity<BlankActivity>(intent)
         scenario.onActivity { activity ->
             val frameLayout = activity.findViewById<FrameLayout>(R.id.blankActivity_rootView)
-            playerViewWrapper = PlayerViewWrapper(frameLayout.context)
-            playerViewWrapper.id = View.generateViewId()
-            frameLayout.addView(playerViewWrapper)
+            MLSPlayerView = MLSPlayerView(frameLayout.context)
+            MLSPlayerView.id = View.generateViewId()
+            frameLayout.addView(MLSPlayerView)
 
-            playerViewWrapper.idlingResource = viewHandler.idlingResource
-            playerViewWrapper.prepare(
+            MLSPlayerView.idlingResource = viewHandler.idlingResource
+            MLSPlayerView.prepare(
                 OverlayViewHelper(viewHandler, animationHelper),
                 viewHandler,
                 emptyList()
@@ -133,7 +133,7 @@ class PlayerViewWrapperTest {
 
         UiThreadStatement.runOnUiThread {
             player = Player()
-            player.create(createMediaFactory(playerViewWrapper.context), createExoPlayer(playerViewWrapper.context))
+            player.create(createMediaFactory(MLSPlayerView.context), createExoPlayer(MLSPlayerView.context))
 
             videoPlayerCoordinator = VideoPlayerCoordinator(
                 defaultVideoPlayerConfig(),
@@ -144,12 +144,12 @@ class PlayerViewWrapperTest {
                 GetActionsFromJSONUseCase.mappedActionCollections().timelineMarkerActionList
             )
             videoPlayerCoordinator.initialize(
-                playerViewWrapper,
+                MLSPlayerView,
                 player,
                 MLSBuilder
             )
 
-            videoPlayerCoordinator.attachPlayer(playerViewWrapper)
+            videoPlayerCoordinator.attachPlayer(MLSPlayerView)
         }
 
     }
@@ -183,10 +183,10 @@ class PlayerViewWrapperTest {
 
     @Test
     fun displayEventInfoForPreEvent_shouldDisplayEventInfo() {
-        playerViewWrapper.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
+        MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        playerViewWrapper.displayEventInformationPreEventDialog()
+        MLSPlayerView.displayEventInformationPreEventDialog()
 
 
         onView(withText("title_0")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
@@ -195,10 +195,10 @@ class PlayerViewWrapperTest {
 
     @Test
     fun whileDisplayingPreEventDialog_shouldNotTogglePlayerVisibilityOnClick() {
-        playerViewWrapper.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
+        MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        playerViewWrapper.displayEventInformationPreEventDialog()
+        MLSPlayerView.displayEventInformationPreEventDialog()
         onView(withText("title_0")).perform(click())
 
 
@@ -211,10 +211,10 @@ class PlayerViewWrapperTest {
 
     @Test
     fun displayEventInfoForStartedEvent_shouldDisplayEventInfo() {
-        playerViewWrapper.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
+        MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        playerViewWrapper.displayEventInfoForStartedEvents()
+        MLSPlayerView.displayEventInfoForStartedEvents()
 
 
         onView(withText("title_0")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
@@ -224,10 +224,10 @@ class PlayerViewWrapperTest {
 
     @Test
     fun whileDisplayingStartedEventDialog_shouldDismissDialogOnClick() {
-        playerViewWrapper.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
+        MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        playerViewWrapper.displayEventInfoForStartedEvents()
+        MLSPlayerView.displayEventInfoForStartedEvents()
         onView(withText("title_0")).perform(click())
 
 
@@ -248,9 +248,9 @@ class PlayerViewWrapperTest {
 
     @Test
     fun whileDisplayingStartedEventDialog_shouldTogglePlayerVisibilityOnClick() {
-        playerViewWrapper.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
+        MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
         setupPlayer()
-        playerViewWrapper.displayEventInfoForStartedEvents()
+        MLSPlayerView.displayEventInfoForStartedEvents()
 
 
         onView(withText("title_0")).perform(click())
@@ -264,13 +264,13 @@ class PlayerViewWrapperTest {
 
     @Test
     fun clickOnEventInfoButton_shouldDisplayEventInfo() {
-        playerViewWrapper.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
+        MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
         setupPlayer()
 
 
 
         UiThreadStatement.runOnUiThread {
-            playerViewWrapper.findViewById<ImageButton>(R.id.controller_informationButton).performClick()
+            MLSPlayerView.findViewById<ImageButton>(R.id.controller_informationButton).performClick()
         }
 
 

@@ -1,11 +1,11 @@
 package tv.mycujoo.mls.api
 
-import tv.mycujoo.mls.widgets.PlayerViewWrapper
+import tv.mycujoo.mls.widgets.MLSPlayerView
 
 abstract class MLSAbstract {
 
-    abstract fun onStart(playerViewWrapper: PlayerViewWrapper)
-    abstract fun onResume(playerViewWrapper: PlayerViewWrapper)
+    abstract fun onStart(MLSPlayerView: MLSPlayerView)
+    abstract fun onResume(MLSPlayerView: MLSPlayerView)
 
 
     abstract fun onPause()

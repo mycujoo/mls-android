@@ -26,7 +26,7 @@ import tv.mycujoo.mls.network.RemoteApi
 import tv.mycujoo.mls.player.Player
 import tv.mycujoo.mls.player.Player.Companion.createExoPlayer
 import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
-import tv.mycujoo.mls.widgets.PlayerViewWrapper
+import tv.mycujoo.mls.widgets.MLSPlayerView
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -47,7 +47,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
     private var api: Api
 
-    private lateinit var playerViewWrapper: PlayerViewWrapper
+    private lateinit var playerView: MLSPlayerView
 
     private var coordinatorInitialized = false
     private lateinit var videoPlayerCoordinator: VideoPlayerCoordinator
@@ -107,49 +107,49 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
 
     private fun initializeCoordinators(
-        playerViewWrapper: PlayerViewWrapper
+        MLSPlayerView: MLSPlayerView
     ) {
         if (coordinatorInitialized) {
-            videoPlayerCoordinator.reInitialize(playerViewWrapper)
+            videoPlayerCoordinator.reInitialize(MLSPlayerView)
             return
         }
         coordinatorInitialized = true
 
-        videoPlayerCoordinator.initialize(playerViewWrapper, player, builder)
+        videoPlayerCoordinator.initialize(MLSPlayerView, player, builder)
 
 
-        val annotationListener = AnnotationListener(playerViewWrapper, viewHandler)
+        val annotationListener = AnnotationListener(MLSPlayerView, viewHandler)
         val actionBuilder = ActionBuilder(
             annotationListener,
             DownloaderClient(okHttpClient),
             viewHandler
         )
         annotationMediator = AnnotationMediator(
-            playerViewWrapper,
+            MLSPlayerView,
             actionBuilder,
             videoPlayerCoordinator.getPlayer(),
             Executors.newScheduledThreadPool(1),
             Handler(Looper.getMainLooper())
         )
-        annotationMediator.initPlayerView(playerViewWrapper)
+        annotationMediator.initPlayerView(MLSPlayerView)
     }
     /**endregion */
 
     /**region Over-ridden Functions*/
-    override fun onStart(playerViewWrapper: PlayerViewWrapper) {
+    override fun onStart(MLSPlayerView: MLSPlayerView) {
         if (Util.SDK_INT >= Build.VERSION_CODES.N) {
-            this.playerViewWrapper = playerViewWrapper
-            this.viewHandler.setOverlayHost(playerViewWrapper.overlayHost)
-            initializeCoordinators(playerViewWrapper)
-            videoPlayerCoordinator.attachPlayer(playerViewWrapper)
+            this.playerView = MLSPlayerView
+            this.viewHandler.setOverlayHost(MLSPlayerView.overlayHost)
+            initializeCoordinators(MLSPlayerView)
+            videoPlayerCoordinator.attachPlayer(MLSPlayerView)
         }
     }
 
-    override fun onResume(playerViewWrapper: PlayerViewWrapper) {
+    override fun onResume(MLSPlayerView: MLSPlayerView) {
         if (Util.SDK_INT < Build.VERSION_CODES.N) {
-            this.playerViewWrapper = playerViewWrapper
-            initializeCoordinators(playerViewWrapper)
-            videoPlayerCoordinator.attachPlayer(playerViewWrapper)
+            this.playerView = MLSPlayerView
+            initializeCoordinators(MLSPlayerView)
+            videoPlayerCoordinator.attachPlayer(MLSPlayerView)
         }
     }
 
@@ -193,27 +193,27 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
     }
 
     private fun displayPreviewModeWithEventInfo(event: EventEntity) {
-        if (!this::playerViewWrapper.isInitialized) {
+        if (!this::playerView.isInitialized) {
             return
         }
 
-        playerViewWrapper.hideEventInfoButton()
-        playerViewWrapper.displayEventInformationPreEventDialog()
+        playerView.hideEventInfoButton()
+        playerView.displayEventInformationPreEventDialog()
     }
 
     private fun setEventInfoToPlayerViewWrapper(event: EventEntity) {
-        if (!this::playerViewWrapper.isInitialized) {
+        if (!this::playerView.isInitialized) {
             return
         }
 
-        playerViewWrapper.setEventInfo(event.title, event.description, event.start_time)
+        playerView.setEventInfo(event.title, event.description, event.start_time)
     }
 
     private fun hidePreviewMode() {
-        if (!this::playerViewWrapper.isInitialized) {
+        if (!this::playerView.isInitialized) {
             return
         }
-        playerViewWrapper.hideEventInfoDialog()
+        playerView.hideEventInfoDialog()
     }
     /**endregion */
 }

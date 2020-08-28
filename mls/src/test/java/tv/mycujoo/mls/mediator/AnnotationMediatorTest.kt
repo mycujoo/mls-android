@@ -13,7 +13,7 @@ import tv.mycujoo.mls.manager.TimerKeeper
 import tv.mycujoo.mls.manager.VariableTranslator
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.player.IPlayer
-import tv.mycujoo.mls.widgets.PlayerViewWrapper
+import tv.mycujoo.mls.widgets.MLSPlayerView
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
@@ -32,7 +32,7 @@ class AnnotationMediatorTest {
     private lateinit var eventListener: Player.EventListener
 
     @Mock
-    lateinit var playerViewWrapper: PlayerViewWrapper
+    lateinit var playerView: MLSPlayerView
 
     @Mock
     lateinit var viewHandler: IViewHandler
@@ -94,7 +94,7 @@ class AnnotationMediatorTest {
 
         annotationMediator =
             AnnotationMediator(
-                playerViewWrapper,
+                playerView,
                 actionBuilder,
                 player,
                 scheduledExecutorService,
@@ -138,7 +138,7 @@ class AnnotationMediatorTest {
         heartBeatInnerRunnable.run()
 
 
-        verify(playerViewWrapper, never()).updateTime(any(), any())
+        verify(playerView, never()).updateTime(any(), any())
     }
 
     @Test
@@ -162,7 +162,7 @@ class AnnotationMediatorTest {
         heartBeatInnerRunnable.run()
 
 
-        verify(playerViewWrapper, never()).updateTime(123L, 400L)
+        verify(playerView, never()).updateTime(123L, 400L)
     }
     /**endregion */
 
@@ -178,7 +178,7 @@ class AnnotationMediatorTest {
 
 
         verify(actionBuilder).setCurrentTime(123L, true)
-        verify(playerViewWrapper).updateTime(123L, 400L)
+        verify(playerView).updateTime(123L, 400L)
     }
 
     @Test
@@ -190,7 +190,7 @@ class AnnotationMediatorTest {
         eventListener.onPlayerStateChanged(true, Player.STATE_READY)
 
 
-        verify(playerViewWrapper).updateTime(123L, 400L)
+        verify(playerView).updateTime(123L, 400L)
     }
 
     @Test
@@ -245,11 +245,11 @@ class AnnotationMediatorTest {
         whenever(player.duration()).thenReturn(400L)
 
         var onSizeChangedCallback = {}
-        whenever(playerViewWrapper.setOnSizeChangedCallback(any())).then {
+        whenever(playerView.setOnSizeChangedCallback(any())).then {
             onSizeChangedCallback = it.getArgument(0) as () -> Unit
             true
         }
-        annotationMediator.initPlayerView(playerViewWrapper)
+        annotationMediator.initPlayerView(playerView)
 
 
         onSizeChangedCallback.invoke()

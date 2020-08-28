@@ -10,13 +10,13 @@ import tv.mycujoo.domain.entity.models.ActionType.SHOW_OVERLAY
 import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.mls.core.IActionBuilder
 import tv.mycujoo.mls.player.IPlayer
-import tv.mycujoo.mls.widgets.PlayerViewWrapper
+import tv.mycujoo.mls.widgets.MLSPlayerView
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
 
 class AnnotationMediator(
-    private var playerViewWrapper: PlayerViewWrapper,
+    private var playerView: MLSPlayerView,
     private val actionBuilder: IActionBuilder,
     player: IPlayer,
     private val scheduler: ScheduledExecutorService,
@@ -46,7 +46,7 @@ class AnnotationMediator(
 
                 actionBuilder.computeVariableNameValueTillNow()
 
-                playerViewWrapper.updateTime(currentPosition, player.duration())
+                playerView.updateTime(currentPosition, player.duration())
             }
         }
 
@@ -94,14 +94,14 @@ class AnnotationMediator(
                     hasPendingSeek = true
                 }
 
-                playerViewWrapper.updateTime(time, player.duration())
+                playerView.updateTime(time, player.duration())
             }
 
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 super.onPlayerStateChanged(playWhenReady, playbackState)
 
                 if (playbackState == STATE_READY) {
-                    playerViewWrapper.updateTime(player.currentPosition(), player.duration())
+                    playerView.updateTime(player.currentPosition(), player.duration())
                 }
 
                 if (playbackState == STATE_READY && hasPendingSeek) {
@@ -126,9 +126,9 @@ class AnnotationMediator(
         player.addListener(eventListener)
     }
 
-    override fun initPlayerView(playerViewWrapper: PlayerViewWrapper) {
-        this.playerViewWrapper = playerViewWrapper
-        playerViewWrapper.setOnSizeChangedCallback(onSizeChangedCallback)
+    override fun initPlayerView(playerView: MLSPlayerView) {
+        this.playerView = playerView
+        playerView.setOnSizeChangedCallback(onSizeChangedCallback)
     }
     /**endregion */
 

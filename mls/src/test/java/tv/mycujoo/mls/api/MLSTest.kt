@@ -14,7 +14,8 @@ import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.manager.ViewHandler
 import tv.mycujoo.mls.player.IPlayer
 import tv.mycujoo.mls.player.Player
-import tv.mycujoo.mls.widgets.PlayerViewWrapper
+import tv.mycujoo.mls.widgets.MLSPlayerView
+import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
 
 class MLSTest {
 
@@ -26,7 +27,7 @@ class MLSTest {
     lateinit var videoPlayerCoordinator: VideoPlayerCoordinator
 
     @Mock
-    lateinit var playerViewWrapper: PlayerViewWrapper
+    lateinit var playerView: MLSPlayerView
 
 
     @Mock
@@ -63,7 +64,7 @@ class MLSTest {
     lateinit var assetManager: AssetManager
 
     @Mock
-    lateinit var playerWrapper: PlayerViewWrapper
+    lateinit var MLSPlayer: MLSPlayerView
 
 
     @Before
@@ -72,14 +73,32 @@ class MLSTest {
         whenever(activity.assets).thenReturn(assetManager)
 
 
+        whenever(MLSBuilder.activity).thenReturn(activity)
+        whenever(MLSBuilder.createExoPlayer(any())).thenReturn(exoPlayer)
+        whenever(MLSBuilder.createMediaFactory(any())).thenReturn(mediaFactory)
+        whenever(MLSBuilder.mlsConfiguration).thenReturn(MLSConfiguration())
+        whenever(MLSBuilder.hasAnalytic).thenReturn(false)
+
+        whenever(playerView.context).thenReturn(activity)
+        whenever(playerView.getTimeBar()).thenReturn(timeBar)
+
+        whenever(dispatcher.coroutineContext).thenReturn(coroutineTestRule.testDispatcher)
+
+        player = Player()
+        player.create(mediaFactory, exoPlayer)
+
+        videoPlayerCoordinator.initialize(playerView, player, MLSBuilder)
+
+
+        mLSTestBuilder = MLSTestBuilder()
+            .publicKey("3HFCBP4EQJME2EH8H0SBH9RCST0IR269")
+            .withActivity(activity)
+            .setConfiguration(MLSConfiguration(seekTolerance = 1000L))
         MLS =
-            MLSTestBuilder()
-                .publicKey("3HFCBP4EQJME2EH8H0SBH9RCST0IR269")
-                .withActivity(activity)
-                .setConfiguration(MLSConfiguration(accuracy = 1000L))
+            mLSTestBuilder
                 .build()
 
-        MLS.onStart(playerViewWrapper)
+        MLS.onStart(playerView)
 
     }
 }

@@ -10,7 +10,7 @@ import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.OverlayEntityTest
 import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.mls.manager.ViewHandler
-import tv.mycujoo.mls.widgets.PlayerViewWrapper
+import tv.mycujoo.mls.widgets.MLSPlayerView
 
 class AnnotationListenerTest {
 
@@ -20,7 +20,7 @@ class AnnotationListenerTest {
 
     /**region Fields*/
     @Mock
-    lateinit var playerViewWrapper: PlayerViewWrapper
+    lateinit var playerView: MLSPlayerView
 
     @Mock
     lateinit var viewHandler: ViewHandler
@@ -30,7 +30,7 @@ class AnnotationListenerTest {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        annotationListener = AnnotationListener(playerViewWrapper, viewHandler)
+        annotationListener = AnnotationListener(playerView, viewHandler)
     }
 
     /**region addOverlay() tests*/
@@ -42,7 +42,7 @@ class AnnotationListenerTest {
         annotationListener.addOverlay(overlayEntity)
 
 
-        verify(playerViewWrapper).onNewOverlayWithAnimation(overlayEntity)
+        verify(playerView).onNewOverlayWithAnimation(overlayEntity)
     }
 
     @Test
@@ -53,7 +53,7 @@ class AnnotationListenerTest {
         annotationListener.addOverlay(overlayEntity)
 
 
-        verify(playerViewWrapper).onNewOverlayWithNoAnimation(overlayEntity)
+        verify(playerView).onNewOverlayWithNoAnimation(overlayEntity)
     }
 
     @Test
@@ -79,7 +79,7 @@ class AnnotationListenerTest {
         annotationListener.removeOverlay(overlayEntity)
 
 
-        verify(playerViewWrapper).onOverlayRemovalWithAnimation(overlayEntity)
+        verify(playerView).onOverlayRemovalWithAnimation(overlayEntity)
     }
 
     @Test
@@ -91,7 +91,7 @@ class AnnotationListenerTest {
         annotationListener.removeOverlay(overlayEntity)
 
 
-        verify(playerViewWrapper).onOverlayRemovalWithNoAnimation(overlayEntity)
+        verify(playerView).onOverlayRemovalWithNoAnimation(overlayEntity)
     }
 
     @Test
@@ -120,7 +120,7 @@ class AnnotationListenerTest {
         annotationListener.addOrUpdateLingeringIntroOverlay(overlayEntity, 123L, true)
 
 
-        verify(playerViewWrapper).updateLingeringIntroOverlay(overlayEntity, 123L, true)
+        verify(playerView).updateLingeringIntroOverlay(overlayEntity, 123L, true)
     }
 
     @Test
@@ -133,7 +133,7 @@ class AnnotationListenerTest {
         annotationListener.addOrUpdateLingeringIntroOverlay(overlayEntity, 123L, true)
 
 
-        verify(playerViewWrapper).addLingeringIntroOverlay(overlayEntity, 123L, true)
+        verify(playerView).addLingeringIntroOverlay(overlayEntity, 123L, true)
     }
 
     @Test
@@ -163,7 +163,7 @@ class AnnotationListenerTest {
         annotationListener.addOrUpdateLingeringOutroOverlay(overlayEntity, 123L, true)
 
 
-        verify(playerViewWrapper).updateLingeringOutroOverlay(overlayEntity, 123L, true)
+        verify(playerView).updateLingeringOutroOverlay(overlayEntity, 123L, true)
     }
 
     @Test
@@ -177,7 +177,7 @@ class AnnotationListenerTest {
         annotationListener.addOrUpdateLingeringOutroOverlay(overlayEntity, 123L, true)
 
 
-        verify(playerViewWrapper).addLingeringOutroOverlay(overlayEntity, 123L, true)
+        verify(playerView).addLingeringOutroOverlay(overlayEntity, 123L, true)
     }
 
     @Test
@@ -207,7 +207,7 @@ class AnnotationListenerTest {
         annotationListener.addOrUpdateLingeringMidwayOverlay(overlayEntity)
 
 
-        verify(playerViewWrapper).updateLingeringMidwayOverlay(overlayEntity)
+        verify(playerView).updateLingeringMidwayOverlay(overlayEntity)
     }
 
     @Test
@@ -221,7 +221,7 @@ class AnnotationListenerTest {
         annotationListener.addOrUpdateLingeringMidwayOverlay(overlayEntity)
 
 
-        verify(playerViewWrapper).addLingeringMidwayOverlay(overlayEntity)
+        verify(playerView).addLingeringMidwayOverlay(overlayEntity)
     }
 
 
@@ -263,7 +263,7 @@ class AnnotationListenerTest {
         annotationListener.removeLingeringOverlay(overlayEntity)
 
 
-        verify(playerViewWrapper).removeLingeringOverlay(overlayEntity)
+        verify(playerView).removeLingeringOverlay(overlayEntity)
     }
     /**endregion */
 
@@ -276,7 +276,7 @@ class AnnotationListenerTest {
         annotationListener.clearScreen(list)
 
 
-        verify(playerViewWrapper).clearScreen(list)
+        verify(playerView).clearScreen(list)
     }
 
     /**endregion */

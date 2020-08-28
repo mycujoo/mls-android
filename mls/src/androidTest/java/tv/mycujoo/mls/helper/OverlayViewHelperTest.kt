@@ -27,7 +27,7 @@ import tv.mycujoo.matchers.TypeMatcher
 import tv.mycujoo.mls.BlankActivity
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.manager.ViewHandler
-import tv.mycujoo.mls.widgets.PlayerViewWrapper
+import tv.mycujoo.mls.widgets.MLSPlayerView
 import tv.mycujoo.mls.widgets.ScaffoldView
 import tv.mycujoo.sampleSvgString
 
@@ -36,7 +36,7 @@ import tv.mycujoo.sampleSvgString
 @RunWith(AndroidJUnit4::class)
 class OverlayViewHelperTest {
 
-    private lateinit var playerViewWrapper: PlayerViewWrapper
+    private lateinit var playerView: MLSPlayerView
     private var viewHandler = ViewHandler(
         GlobalScope,
         CountingIdlingResource("ViewIdentifierManager")
@@ -51,18 +51,18 @@ class OverlayViewHelperTest {
         val scenario = launchActivity<BlankActivity>(intent)
         scenario.onActivity { activity ->
             val frameLayout = activity.findViewById<FrameLayout>(R.id.blankActivity_rootView)
-            playerViewWrapper = PlayerViewWrapper(frameLayout.context)
-            playerViewWrapper.id = View.generateViewId()
-            frameLayout.addView(playerViewWrapper)
+            playerView = MLSPlayerView(frameLayout.context)
+            playerView.id = View.generateViewId()
+            frameLayout.addView(playerView)
 
-            playerViewWrapper.idlingResource = viewHandler.idlingResource
-            playerViewWrapper.prepare(
+            playerView.idlingResource = viewHandler.idlingResource
+            playerView.prepare(
                 OverlayViewHelper(viewHandler, animationHelper),
                 viewHandler,
                 emptyList()
             )
 
-            viewHandler.setOverlayHost(playerViewWrapper.overlayHost)
+            viewHandler.setOverlayHost(playerView.overlayHost)
         }
     }
 
@@ -86,7 +86,7 @@ class OverlayViewHelperTest {
 
     @Test
     fun addOverlayWithNoAnimation_shouldAddOverlayView() {
-        playerViewWrapper.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
+        playerView.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
 
 
         Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
@@ -99,7 +99,7 @@ class OverlayViewHelperTest {
 
     @Test
     fun addOverlayWithNoAnimation_shouldNotMakeAnimation() {
-        playerViewWrapper.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
+        playerView.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
 
 
         val animationRecipe = animationHelper.animationRecipe
@@ -108,7 +108,7 @@ class OverlayViewHelperTest {
 
     @Test
     fun addOverlayWithAnimation_shouldAddOverlayView() {
-        playerViewWrapper.onNewOverlayWithAnimation(getSampleOverlayEntity(AnimationType.FADE_IN))
+        playerView.onNewOverlayWithAnimation(getSampleOverlayEntity(AnimationType.FADE_IN))
 
 
         Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
@@ -122,7 +122,7 @@ class OverlayViewHelperTest {
     @Test
     fun addOverlayWithAnimation_shouldMakeStaticIntroAnimation() {
         val overlayEntity = getSampleOverlayEntity(AnimationType.FADE_IN)
-        playerViewWrapper.onNewOverlayWithAnimation(overlayEntity)
+        playerView.onNewOverlayWithAnimation(overlayEntity)
 
         Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
             .check(
@@ -139,7 +139,7 @@ class OverlayViewHelperTest {
     @Test
     fun addOverlayWithAnimation_shouldMakeDynamicIntroAnimation() {
         val overlayEntity = getSampleOverlayEntity(AnimationType.SLIDE_FROM_LEFT)
-        playerViewWrapper.onNewOverlayWithAnimation(overlayEntity)
+        playerView.onNewOverlayWithAnimation(overlayEntity)
 
         Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
             .check(
@@ -156,7 +156,7 @@ class OverlayViewHelperTest {
     @Test
     fun addOverlayWithWrongAnimation_shouldNotAddOverlayOrMakeAnimation() {
         val overlayEntity = getSampleOverlayEntity(AnimationType.FADE_OUT)
-        playerViewWrapper.onNewOverlayWithAnimation(overlayEntity)
+        playerView.onNewOverlayWithAnimation(overlayEntity)
 
         Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
             .check(
@@ -169,11 +169,11 @@ class OverlayViewHelperTest {
 
     @Test
     fun removeOverlayWithStaticAnimation_shouldMakeAnimation() {
-        playerViewWrapper.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
+        playerView.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
         val overlayEntity = getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.FADE_OUT)
 
 
-        playerViewWrapper.onOverlayRemovalWithAnimation(overlayEntity)
+        playerView.onOverlayRemovalWithAnimation(overlayEntity)
 
 
         Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
@@ -190,11 +190,11 @@ class OverlayViewHelperTest {
 
     @Test
     fun removeOverlayWithDynamicAnimation_shouldMakeAnimation() {
-        playerViewWrapper.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
+        playerView.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
         val overlayEntity = getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.SLIDE_TO_LEFT)
 
 
-        playerViewWrapper.onOverlayRemovalWithAnimation(overlayEntity)
+        playerView.onOverlayRemovalWithAnimation(overlayEntity)
 
 
         Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
@@ -211,11 +211,11 @@ class OverlayViewHelperTest {
 
     @Test
     fun removeOverlayWithWrongAnimation_shouldNotMakeAnimation() {
-        playerViewWrapper.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
+        playerView.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
         val overlayEntity = getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.FADE_IN)
 
 
-        playerViewWrapper.onOverlayRemovalWithAnimation(overlayEntity)
+        playerView.onOverlayRemovalWithAnimation(overlayEntity)
 
 
         Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
@@ -232,7 +232,7 @@ class OverlayViewHelperTest {
     @Test
     fun addLingeringIntroOverlayWithAnimation_shouldMakeLingeringIntroAnimation_staticAnimation() {
         val overlayEntity = getSampleOverlayEntity(AnimationType.FADE_IN)
-        playerViewWrapper.addLingeringIntroOverlay(overlayEntity, 100L, true)
+        playerView.addLingeringIntroOverlay(overlayEntity, 100L, true)
 
 
         Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
@@ -252,10 +252,10 @@ class OverlayViewHelperTest {
     @Test
     fun updateLingeringIntroOverlayWithAnimation_shouldMakeLingeringIntroAnimation_staticAnimation() {
         viewHandler.idlingResource.dumpStateToLogs()
-        playerViewWrapper.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
+        playerView.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
         val overlayEntity = getSampleOverlayEntity(AnimationType.FADE_IN)
         UiThreadStatement.runOnUiThread {
-            playerViewWrapper.updateLingeringIntroOverlay(overlayEntity, 100L, true)
+            playerView.updateLingeringIntroOverlay(overlayEntity, 100L, true)
 
         }
 
@@ -277,7 +277,7 @@ class OverlayViewHelperTest {
     @Test
     fun addLingeringIntroOverlayWithAnimation_shouldMakeLingeringIntroAnimation_dynamicAnimation() {
         val overlayEntity = getSampleOverlayEntity(AnimationType.SLIDE_FROM_LEFT)
-        playerViewWrapper.addLingeringIntroOverlay(overlayEntity, 100L, true)
+        playerView.addLingeringIntroOverlay(overlayEntity, 100L, true)
 
 
         Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
@@ -297,7 +297,7 @@ class OverlayViewHelperTest {
     @Test
     fun addLingeringOutroOverlayWithAnimation_shouldMakeLingeringOutroAnimation_staticAnimation() {
         val overlayEntity = getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.FADE_OUT)
-        playerViewWrapper.addLingeringOutroOverlay(overlayEntity, 100L, true)
+        playerView.addLingeringOutroOverlay(overlayEntity, 100L, true)
 
 
         Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
@@ -317,7 +317,7 @@ class OverlayViewHelperTest {
     @Test
     fun addLingeringOutroOverlayWithAnimation_shouldMakeLingeringOutroAnimation_dynamicAnimation() {
         val overlayEntity = getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.SLIDE_TO_LEFT)
-        playerViewWrapper.addLingeringOutroOverlay(overlayEntity, 100L, true)
+        playerView.addLingeringOutroOverlay(overlayEntity, 100L, true)
 
 
         Espresso.onView(ViewMatchers.withClassName(TypeMatcher(ScaffoldView::class.java.canonicalName)))
@@ -337,12 +337,12 @@ class OverlayViewHelperTest {
     @Test
     fun updateLingeringOutroOverlayWithAnimation_shouldMakeLingeringIntroAnimation_staticAnimation() {
         viewHandler.idlingResource.dumpStateToLogs()
-        playerViewWrapper.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
+        playerView.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
 
 
         val overlayEntity = getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.SLIDE_TO_LEFT)
         UiThreadStatement.runOnUiThread {
-            playerViewWrapper.updateLingeringOutroOverlay(overlayEntity, 100L, true)
+            playerView.updateLingeringOutroOverlay(overlayEntity, 100L, true)
         }
 
 
