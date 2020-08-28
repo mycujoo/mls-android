@@ -82,11 +82,11 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     kapt 'com.github.bumptech.glide:compiler:4.11.0'
 
-    implementation 'com.google.android.exoplayer:exoplayer:2.11.2'
+    api 'com.google.android.exoplayer:exoplayer:2.11.2'
 
     implementation 'com.google.code.gson:gson:2.8.6'
 
-    implementation 'com.npaw.youbora.adapters:exoplayer2-adapter:6.6.4'
+    api 'com.npaw.youbora.adapters:exoplayer2-adapter:6.6.4'
 
     implementation 'com.google.dagger:dagger-android:2.20'
     implementation 'com.google.dagger:dagger-android-support:2.20'

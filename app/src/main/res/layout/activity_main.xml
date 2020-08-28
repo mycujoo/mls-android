@@ -1,21 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:playerViewWrapper="http://schemas.android.com/apk/res-auto"
+    xmlns:mlsPlayerView="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activity.MainActivity">
 
 
-    <tv.mycujoo.mls.widgets.PlayerViewWrapper
-        android:id="@+id/playerViewWrapper"
+    <tv.mycujoo.mls.widgets.MLSPlayerView
+        android:id="@+id/mlsPlayerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        playerViewWrapper:has_fullscreen_button="true"
+        mlsPlayerView:has_fullscreen_button="true"
         tools:layout_height="240dp" />
+
+    <Button
+        android:id="@+id/mainActivityPlayButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Play"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/mlsPlayerView" />
+
+    <Button
+        android:id="@+id/mainActivityPlayButton2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Play2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/mainActivityPlayButton" />
+
+    <TextView
+        android:id="@+id/result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/mainActivityPlayButton2" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/mlsPlayerView">
+
+        <com.caverock.androidsvg.SVGImageView
+            android:id="@+id/svgImageView_0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <com.caverock.androidsvg.SVGImageView
+            android:id="@+id/svgImageView_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
