@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -91,6 +92,9 @@ class MLSPlayerView @JvmOverloads constructor(
         bufferView = findViewById(R.id.controller_buffering)
         playerView.resizeMode = RESIZE_MODE_FIXED_WIDTH
 
+        findViewById<FrameLayout>(R.id.controller_informationButtonLayout).setOnClickListener {
+            displayEventInfoForStartedEvents()
+        }
         findViewById<ImageButton>(R.id.controller_informationButton).setOnClickListener {
             displayEventInfoForStartedEvents()
         }
@@ -457,12 +461,12 @@ class MLSPlayerView @JvmOverloads constructor(
     }
 
     fun showEventInfoButton() {
-        findViewById<ImageButton>(R.id.controller_informationButton).visibility =
+        findViewById<ImageButton>(R.id.controller_informationButtonLayout).visibility =
             View.VISIBLE
     }
 
     fun hideEventInfoButton() {
-        findViewById<ImageButton>(R.id.controller_informationButton).visibility =
+        findViewById<ImageButton>(R.id.controller_informationButtonLayout).visibility =
             View.GONE
     }
 
