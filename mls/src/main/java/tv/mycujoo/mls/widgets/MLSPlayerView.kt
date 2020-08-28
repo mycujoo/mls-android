@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.C
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.PlayerView
 import kotlinx.android.synthetic.main.dialog_event_info_pre_event_layout.view.*
 import kotlinx.android.synthetic.main.dialog_event_info_started_layout.view.*
@@ -90,7 +91,7 @@ class MLSPlayerView @JvmOverloads constructor(
 
 
         bufferView = findViewById(R.id.controller_buffering)
-        playerView.resizeMode = RESIZE_MODE_FIXED_WIDTH
+        playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
 
         findViewById<FrameLayout>(R.id.controller_informationButtonLayout).setOnClickListener {
             displayEventInfoForStartedEvents()

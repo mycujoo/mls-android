@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">MLS</string>
-    <string name="time_separator">/</string>
+    <string name="app_name" translatable="false">MLS</string>
+    <string name="time_separator" translatable="false">/</string>
     <string name="information">Information</string>
     <string name="live">LIVE</string>
-    <string name="back_to_live">BACK TO LIVE</string>
+    <string name="back_to_live" translatable="false">BACK TO LIVE</string>
 </resources>
