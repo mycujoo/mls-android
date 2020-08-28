@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.api
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
@@ -9,6 +10,7 @@ import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.params.EventIdPairParam
 import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.domain.usecase.GetEventDetailUseCase
+import tv.mycujoo.domain.usecase.GetEventsUseCase
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.model.SingleLiveEvent
 import tv.mycujoo.mls.network.MlsApi
@@ -53,17 +55,29 @@ class DataManager(
     ) {
         this.fetchEventCallback = fetchEventCallback
         scope.launch {
-            val eventsResponse =
-                mlsApi.getEvents(pageSize, pageToken, eventStatus?.map { it.name }, orderBy?.name)
-            eventsResponse?.let { response ->
-                events.postValue(
-                    response.events
-                )
-                fetchEventCallback?.let {
-                    it.invoke(response.events, response.previousPageToken ?: "", response.nextPageToken ?: "")
-                }
-            }
 
+            val result = GetEventsUseCase(eventsRepository).execute()
+            when (result) {
+                is Result.Success -> {
+                    events.postValue(
+                        result.value.events
+                    )
+                    fetchEventCallback?.let {
+                        it.invoke(
+                            result.value.events,
+                            result.value.previousPageToken ?: "",
+                            result.value.nextPageToken ?: ""
+                        )
+                    }
+                }
+                is Result.NetworkError -> {
+                    Log.w("DataManager", result.error.toString())
+                }
+                is Result.GenericError -> {
+                    Log.w("DataManager", "Error: ${result.errorCode}:${result.errorMessage}")
+                }
+
+            }
         }
     }
     /**endregion */

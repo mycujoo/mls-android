@@ -33,7 +33,11 @@ open class MLSBuilder {
     internal var hasAnalytic: Boolean = true
         private set
 
-    fun publicKey(publicKey: String) = apply { this.publicKey = publicKey }
+    fun publicKey(publicKey: String) = apply {
+       if(publicKey == "YOUR_PUBLIC_KEY_HERE"){
+           throw IllegalArgumentException("Public key must be set!")
+       }
+        this.publicKey = publicKey }
 
     fun withActivity(activity: Activity) = apply { this.activity = activity }
 

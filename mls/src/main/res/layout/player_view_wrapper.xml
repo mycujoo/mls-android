@@ -7,7 +7,7 @@
 
 
     <com.google.android.exoplayer2.ui.PlayerView
-        android:id="@+id/playerView"
+        android:id="@+id/exoPlayerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:controller_layout_id="@layout/main_controls_layout"
@@ -21,10 +21,10 @@
         android:id="@+id/eventInfoDialogContainerLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="@id/playerView"
-        app:layout_constraintEnd_toEndOf="@id/playerView"
-        app:layout_constraintStart_toStartOf="@id/playerView"
-        app:layout_constraintTop_toTopOf="@id/playerView" />
+        app:layout_constraintBottom_toBottomOf="@id/exoPlayerView"
+        app:layout_constraintEnd_toEndOf="@id/exoPlayerView"
+        app:layout_constraintStart_toStartOf="@id/exoPlayerView"
+        app:layout_constraintTop_toTopOf="@id/exoPlayerView" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -85,7 +85,7 @@ class MLSPlayerView @JvmOverloads constructor(
 
         initAttributes(attrs, context)
 
-        playerView = findViewById(R.id.playerView)
+        playerView = findViewById(R.id.exoPlayerView)
         overlayHost = OverlayHost(context)
         playerView.addView(overlayHost, 1)
 
