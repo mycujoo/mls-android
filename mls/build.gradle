@@ -6,7 +6,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.github.dcendents.android-maven'
 
 group='com.github.mycujoo'
-version = '1.0.1-alpha17'
+version = '1.0.1-alpha18'
 
 android {
     compileSdkVersion 29
@@ -135,42 +135,42 @@ def getArtificatId = { ->
     return "mls" // library name ID
 }
 
-publishing {
-    publications {
-        bar(MavenPublication) {
-            groupId 'tv.mycujoo.libraries' // group ID
-            artifactId getArtificatId()
-            version getVersionName()
-            artifact("$buildDir/outputs/aar/${getArtificatId()}-release.aar")
-
-            //generate pom nodes for dependencies
-            pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-                configurations.implementation.allDependencies.each { dependency ->
-                    if (dependency.group != null) {
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', dependency.group)
-                        dependencyNode.appendNode('artifactId', dependency.name)
-                        dependencyNode.appendNode('version', dependency.version)
-                    }
-                }
-            }
-        }
-    }
-
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            /** Configure path of your package repository on Github
-             *  Replace GITHUB_USERID with your/organisation Github userID and REPOSITORY with the repository name on GitHub
-             */
-            url = uri("https://maven.pkg.github.com/mycujoo/mls-android")
-
-            credentials {
-                /**Create github.properties in root project folder file with gpr.usr=GITHUB_USER_ID  & gpr.key=PERSONAL_ACCESS_TOKEN**/
-                username = githubProperties['gpr.usr'] ?: System.getenv("GPR_USER")
-                password = githubProperties['gpr.key'] ?: System.getenv("GPR_API_KEY")
-            }
-        }
-    }
-}
+//publishing {
+//    publications {
+//        bar(MavenPublication) {
+//            groupId 'tv.mycujoo.libraries' // group ID
+//            artifactId getArtificatId()
+//            version getVersionName()
+//            artifact("$buildDir/outputs/aar/${getArtificatId()}-release.aar")
+//
+//            //generate pom nodes for dependencies
+//            pom.withXml {
+//                def dependenciesNode = asNode().appendNode('dependencies')
+//                configurations.implementation.allDependencies.each { dependency ->
+//                    if (dependency.group != null) {
+//                        def dependencyNode = dependenciesNode.appendNode('dependency')
+//                        dependencyNode.appendNode('groupId', dependency.group)
+//                        dependencyNode.appendNode('artifactId', dependency.name)
+//                        dependencyNode.appendNode('version', dependency.version)
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    repositories {
+//        maven {
+//            name = "GitHubPackages"
+//            /** Configure path of your package repository on Github
+//             *  Replace GITHUB_USERID with your/organisation Github userID and REPOSITORY with the repository name on GitHub
+//             */
+//            url = uri("https://maven.pkg.github.com/mycujoo/mls-android")
+//
+//            credentials {
+//                /**Create github.properties in root project folder file with gpr.usr=GITHUB_USER_ID  & gpr.key=PERSONAL_ACCESS_TOKEN**/
+//                username = githubProperties['gpr.usr'] ?: System.getenv("GPR_USER")
+//                password = githubProperties['gpr.key'] ?: System.getenv("GPR_API_KEY")
+//            }
+//        }
+//    }
+//}
