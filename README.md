@@ -12,14 +12,15 @@ MLS Android SDK enables apps to play videos that are hosted on MyCujoo Live Serv
 
 Add required repositories to root-level build.gradle file:
 
-    repositories {
-        google()
-        jcenter()
+    allprojects {
+        repositories {
+            maven { url 'https://jitpack.io' }
+        }
     }
 
 Add dependency to SDK in app-level build.gradle file:
 
-    implementation 'tv.mycujoo.mls:LATEST_VERSION'
+    implementation 'com.github.mycujoo:mls-android:LATEST_VERSION_HERE'
 
 in order to communicate with SDK, MLS class must be instantiated. Init MLS whenever you have a reference to an Activity:
 
