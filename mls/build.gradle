@@ -3,6 +3,10 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'maven-publish'
+apply plugin: 'com.github.dcendents.android-maven'
+
+group='com.github.mycujoo'
+version = '1.0.1-alpha17'
 
 android {
     compileSdkVersion 29
@@ -26,6 +30,9 @@ android {
             exclude 'META-INF/ASL2.0'
             exclude("META-INF/*.kotlin_module")
         }
+
+        versionCode 1
+        versionName version
     }
 
     compileOptions {
@@ -121,7 +128,7 @@ def githubProperties = new Properties()
 githubProperties.load(new FileInputStream(rootProject.file("github.properties")))
 
 def getVersionName = { ->
-    return "1.0.1-alpha16"  // version Name
+    return version  // version Name
 }
 
 def getArtificatId = { ->
