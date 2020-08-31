@@ -1,5 +1,5 @@
 
-
+[![](https://jitpack.io/v/mycujoo/mls-android.svg)](https://jitpack.io/#mycujoo/mls-android)
 # MLS (MyCujoo Live Services) in Android platform MLS-android
 
 ### For usage showcase please refer to Sample-app [https://github.com/mycujoo/mls-android-sample-app]
