@@ -1,49 +1,47 @@
-//import sun.lwawt.macosx.CFileDialog
-//
-//// In here we can filter out what modules that we want to cover
-//def coveredProject = subprojects
-//
-//// configure() method takes a list as an argument and applies the configuration to the projects in this list.
-//configure(coveredProject) { prj ->
-//
-//    // Here we apply jacoco plugin to every project
-//    apply plugin: 'jacoco'
-//
-//    // Set Jacoco version
-//    jacoco {
-//        toolVersion = "0.8.5"
-//    }
-//
-//    tasks.withType(Test) {
-//        jacoco.includeNoLocationClasses = true
-//        jacoco.excludes = ['jdk.internal.*']
-//    }
-//
-//    // Here we create the task to generate Jacoco report
-//    // It depends to unit test task we don't have to manually running unit test before the task
-//    task jacocoReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'connectedDebugAndroidTest']) {
-//
-//        reports {
-//            csv.enabled = false
-//            xml.enabled = false
-//            html.enabled = true
-//        }
-//
-//        // Setup the .class, source, and execution directories
-//        final fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', 'android/**/*.*']
-//
-//        final kotlinTree = fileTree(dir: "${prj.buildDir}/tmp/kotlin-classes/debug", excludes: fileFilter)
-//        final javacTree = fileTree(dir: "${prj.buildDir}/intermediates/javac/debug", excludes: fileFilter)
-//
-//        final mainSrc = "${prj.projectDir}/src/main/java"
-//
-//        sourceDirectories.setFrom files([mainSrc])
-//        classDirectories.setFrom files([kotlinTree, javacTree])
-//        executionData.setFrom fileTree(dir: prj.buildDir, includes: [
-//                'jacoco/testDebugUnitTest.exec', 'outputs/code_coverage/debugAndroidTest/connected/*coverage.ec'
-//        ])
-//        doLast() {
-//            print "Check coverage report at => file://${reports.html.destination}"
-//        }
-//    }
-//}
+// In here we can filter out what modules that we want to cover
+def coveredProject = subprojects
+
+// configure() method takes a list as an argument and applies the configuration to the projects in this list.
+configure(coveredProject) { prj ->
+
+    // Here we apply jacoco plugin to every project
+    apply plugin: 'jacoco'
+
+    // Set Jacoco version
+    jacoco {
+        toolVersion = "0.8.5"
+    }
+
+    tasks.withType(Test) {
+        jacoco.includeNoLocationClasses = true
+        jacoco.excludes = ['jdk.internal.*']
+    }
+
+    // Here we create the task to generate Jacoco report
+    // It depends to unit test task we don't have to manually running unit test before the task
+    task jacocoReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'connectedDebugAndroidTest']) {
+
+        reports {
+            csv.enabled = false
+            xml.enabled = false
+            html.enabled = true
+        }
+
+        // Setup the .class, source, and execution directories
+        final fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', 'android/**/*.*']
+
+        final kotlinTree = fileTree(dir: "${prj.buildDir}/tmp/kotlin-classes/debug", excludes: fileFilter)
+        final javacTree = fileTree(dir: "${prj.buildDir}/intermediates/javac/debug", excludes: fileFilter)
+
+        final mainSrc = "${prj.projectDir}/src/main/java"
+
+        sourceDirectories.setFrom files([mainSrc])
+        classDirectories.setFrom files([kotlinTree, javacTree])
+        executionData.setFrom fileTree(dir: prj.buildDir, includes: [
+                'jacoco/testDebugUnitTest.exec', 'outputs/code_coverage/debugAndroidTest/connected/*coverage.ec'
+        ])
+        doLast() {
+            print "Check coverage report at => file://${reports.html.destination}"
+        }
+    }
+}
