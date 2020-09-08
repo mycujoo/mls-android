@@ -11,10 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.repository.EventsRepository
-import tv.mycujoo.mls.core.ActionBuilder
-import tv.mycujoo.mls.core.AnnotationListener
-import tv.mycujoo.mls.core.InternalBuilder
-import tv.mycujoo.mls.core.VideoPlayerCoordinator
+import tv.mycujoo.mls.core.*
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.SVGAssetResolver
@@ -119,14 +116,14 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
 
         val annotationListener = AnnotationListener(MLSPlayerView, viewHandler)
-        val actionBuilder = ActionBuilder(
+        val annotationFactory = AnnotationFactory(
             annotationListener,
             DownloaderClient(okHttpClient),
             viewHandler
         )
         annotationMediator = AnnotationMediator(
             MLSPlayerView,
-            actionBuilder,
+            annotationFactory,
             videoPlayerCoordinator.getPlayer(),
             Executors.newScheduledThreadPool(1),
             Handler(Looper.getMainLooper())

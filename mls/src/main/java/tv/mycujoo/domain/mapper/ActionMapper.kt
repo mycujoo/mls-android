@@ -9,16 +9,16 @@ import tv.mycujoo.mls.entity.*
 import tv.mycujoo.mls.model.MutablePair
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerFormat
-import tv.mycujoo.mls.widgets.*
+import tv.mycujoo.mls.widgets.TimerCollection
 import kotlin.random.Random
 
 class ActionMapper {
     companion object {
 
-        private const val INVALID_STRING_VALUE = "-1"
-        private const val INVALID_LONG_VALUE = -1L
-        private const val INVALID_INT_VALUE = -1
-        private const val INVALID_FLOAT_VALUE = -1F
+        const val INVALID_STRING_VALUE = "-1"
+        const val INVALID_LONG_VALUE = -1L
+        const val INVALID_INT_VALUE = -1
+        const val INVALID_FLOAT_VALUE = -1F
 
         fun mapToActionCollections(actionResponse: ActionResponse): ActionCollections {
 
@@ -203,7 +203,7 @@ class ActionMapper {
         }
 
 
-        private fun mapToActionEntity(actionSourceData: ActionSourceData?): ActionEntity? {
+        fun mapToActionEntity(actionSourceData: ActionSourceData?): ActionEntity? {
             if (actionSourceData == null || actionSourceData.data.isNullOrEmpty()) {
                 return null
             }

@@ -33,8 +33,6 @@ class AnnotationFactory(
 
     override fun build(currentPosition: Long, isPlaying: Boolean, interrupted: Boolean) {
 
-        val toBeNotifiedTimers = arrayListOf<String>()
-
         val variables = mutableSetOf<Variable>()
 
         sortedActionList.forEach {
@@ -115,7 +113,6 @@ class AnnotationFactory(
                 CREATE_TIMER -> {
                     it.toCreateTimerEntity()?.let { createTimerEntity ->
                         timerKeeper.createTimer(createTimerEntity)
-                        toBeNotifiedTimers.add(createTimerEntity.name)
                     }
                 }
                 START_TIMER -> {
@@ -125,7 +122,9 @@ class AnnotationFactory(
                     }
                 }
                 PAUSE_TIMER -> {
-
+                    it.toPauseTimerEntity()?.let { pauseTimerEntity ->
+                        timerKeeper.pauseTimer(pauseTimerEntity, currentPosition)
+                    }
                 }
                 ADJUST_TIMER -> {
                     it.toAdjustTimerEntity()?.let { adjustTimerEntity ->
@@ -203,5 +202,6 @@ class AnnotationFactory(
         }
 
         variables.forEach { viewHandler.getVariableTranslator().emitNewValue(it.name, it.value) }
+        variables.clear()
     }
 }

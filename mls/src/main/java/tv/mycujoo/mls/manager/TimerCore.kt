@@ -1,14 +1,15 @@
 package tv.mycujoo.mls.manager
 
 import android.util.Log
+import tv.mycujoo.mls.entity.AdjustTimerEntity
+import tv.mycujoo.mls.entity.PauseTimerEntity
+import tv.mycujoo.mls.entity.SkipTimerEntity
+import tv.mycujoo.mls.entity.StartTimerEntity
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerDirection.DOWN
 import tv.mycujoo.mls.model.ScreenTimerDirection.UP
 import tv.mycujoo.mls.model.ScreenTimerFormat
 import tv.mycujoo.mls.model.ScreenTimerFormat.*
-import tv.mycujoo.mls.entity.AdjustTimerEntity
-import tv.mycujoo.mls.entity.SkipTimerEntity
-import tv.mycujoo.mls.entity.StartTimerEntity
 
 /**
  * TimerCore is where a Timer times, direction, format and other attributes are stored.
@@ -122,6 +123,10 @@ class TimerCore(
             }
         }
 
+    }
+
+    fun setTime(pauseTimerEntity: PauseTimerEntity) {
+        // todo
     }
 
     fun setTime(adjustTimerEntity: AdjustTimerEntity, now: Long) {

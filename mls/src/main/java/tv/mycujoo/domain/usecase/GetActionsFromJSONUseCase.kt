@@ -1,9 +1,12 @@
 package tv.mycujoo.domain.usecase
 
+import android.content.res.Resources
 import com.google.gson.Gson
 import tv.mycujoo.data.entity.ActionCollections
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.mapper.ActionMapper.Companion.mapToActionCollections
+import tv.mycujoo.mls.R
+import tv.mycujoo.mls.utils.StringUtils.Companion.inputStreamToString
 
 class GetActionsFromJSONUseCase {
 
@@ -23,34 +26,14 @@ class GetActionsFromJSONUseCase {
             return mapToActionCollections(result())
         }
 
-        private val sourceRawResponse2 = """
-            {
-            "actions": [
-                        {
-                         "data": {
-                             "animatein_duration": 3000, 
-                             "animatein_type": "slide_from_right",
-                             "animateout_duration": 5000, 
-                            "animateout_type": "fade_out",
-                             "custom_id": "scoreboard3",
-                              "duration": 10000,
-                             "position": {
-                                 "right": 5.0, 
-                                 "top": 5.0
-                             }, 
-                             "size": {
-                                 "width": 25.0
-                             }, 
-                             "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg"
-                         }, 
-                         "id": "54afag35yag3", 
-                         "type": "show_overlay",
-                          "offset": 5000, 
-                          "timeline_id": "tml_1"
-                            },
-                        ]
-            }
-            """
+        fun fromRawResource(resources: Resources): ActionResponse {
+            val inputStream = resources.openRawResource(R.raw.actions)
+            val string = inputStreamToString(inputStream)
+            return Gson().fromJson(
+                string,
+                ActionResponse::class.java
+            )
+        }
 
         private val sourceRawResponse = """
        {
@@ -78,7 +61,7 @@ class GetActionsFromJSONUseCase {
 					}
 				},
                 {
-                    "offset": 60000, 
+                    "offset": 6000, 
 					"id": "43faf4j59595961",
 					"type": "increment_variable",
 					"data": {
@@ -87,7 +70,7 @@ class GetActionsFromJSONUseCase {
 					}
 				},                
                 {
-                    "offset": 120000, 
+                    "offset": 12000, 
 					"id": "43faf4j59595961",
 					"type": "increment_variable",
 					"data": {
@@ -96,7 +79,7 @@ class GetActionsFromJSONUseCase {
 					}
 				},                
                     {
-                    "offset": 180000, 
+                    "offset": 18000, 
 					"id": "43faf4j59595961",
 					"type": "increment_variable",
 					"data": {

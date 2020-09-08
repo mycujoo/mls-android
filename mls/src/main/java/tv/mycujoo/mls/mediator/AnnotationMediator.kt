@@ -4,11 +4,8 @@ import android.os.Handler
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.DISCONTINUITY_REASON_SEEK
 import com.google.android.exoplayer2.Player.STATE_READY
-import tv.mycujoo.domain.entity.ActionEntity
-import tv.mycujoo.domain.entity.models.ActionType.HIDE_OVERLAY
-import tv.mycujoo.domain.entity.models.ActionType.SHOW_OVERLAY
 import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
-import tv.mycujoo.mls.core.IActionBuilder
+import tv.mycujoo.mls.core.IAnnotationFactory
 import tv.mycujoo.mls.player.IPlayer
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import java.util.concurrent.ScheduledExecutorService
@@ -17,7 +14,7 @@ import java.util.concurrent.TimeUnit
 
 class AnnotationMediator(
     private var playerView: MLSPlayerView,
-    private val actionBuilder: IActionBuilder,
+    private val annotationFactory: IAnnotationFactory,
     player: IPlayer,
     private val scheduler: ScheduledExecutorService,
     handler: Handler
@@ -39,12 +36,7 @@ class AnnotationMediator(
             if (player.isPlaying()) {
                 val currentPosition = player.currentPosition()
 
-                actionBuilder.setCurrentTime(currentPosition, true)
-                actionBuilder.buildCurrentTimeRange()
-
-                actionBuilder.processTimers()
-
-                actionBuilder.computeVariableNameValueTillNow()
+                annotationFactory.build(currentPosition, isPlaying = player.isPlaying(), interrupted = false)
 
                 playerView.updateTime(currentPosition, player.duration())
             }
@@ -58,27 +50,7 @@ class AnnotationMediator(
     }
 
     private fun feed() {
-        val actionsList = ArrayList<ActionEntity>()
-
-        actionsList.addAll(GetActionsFromJSONUseCase.mappedActionCollections().actionEntityList)
-
-        actionsList.filter { it.type == HIDE_OVERLAY }
-            .forEach { hideAction ->
-                actionsList.firstOrNull { showAction -> hideAction.customId == showAction.customId && showAction.type == SHOW_OVERLAY }
-                    ?.let {
-                        it.outroAnimationType = hideAction.outroAnimationType
-                        it.outroAnimationDuration = hideAction.outroAnimationDuration
-                        it.duration = hideAction.offset
-                    }
-            }
-
-        actionBuilder.addOverlayBlueprints(actionsList.filter { it.type == SHOW_OVERLAY }
-            .map { it.toOverlayBlueprint() })
-
-        actionBuilder.addSetVariableEntities(GetActionsFromJSONUseCase.mappedActionCollections().setVariableEntityList)
-        actionBuilder.addIncrementVariableEntities(GetActionsFromJSONUseCase.mappedActionCollections().incrementVariableEntityList)
-
-        actionBuilder.addActionCollections(GetActionsFromJSONUseCase.mappedActionCollections())
+        annotationFactory.setAnnotations(GetActionsFromJSONUseCase.result())
     }
 
     private fun initEventListener(player: IPlayer) {
@@ -87,8 +59,6 @@ class AnnotationMediator(
             override fun onPositionDiscontinuity(reason: Int) {
                 super.onPositionDiscontinuity(reason)
                 val time = player.currentPosition()
-
-                actionBuilder.setCurrentTime(time, player.isPlaying())
 
                 if (reason == DISCONTINUITY_REASON_SEEK) {
                     hasPendingSeek = true
@@ -107,21 +77,14 @@ class AnnotationMediator(
                 if (playbackState == STATE_READY && hasPendingSeek) {
                     hasPendingSeek = false
 
-                    actionBuilder.buildLingerings()
-
-                    actionBuilder.buildCurrentTimeRange()
-
-                    actionBuilder.computeVariableNameValueTillNow()
-
-                    actionBuilder.processTimers()
+                    annotationFactory.build(
+                        player.currentPosition(),
+                        isPlaying = player.isPlaying(),
+                        interrupted = true
+                    )
                 }
             }
 
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                super.onIsPlayingChanged(isPlaying)
-
-                actionBuilder.processTimers()
-            }
         }
         player.addListener(eventListener)
     }
@@ -138,10 +101,7 @@ class AnnotationMediator(
     }
 
     override var onSizeChangedCallback = {
-        actionBuilder.setCurrentTime(player.currentPosition(), player.isPlaying())
-        actionBuilder.removeAll()
-        actionBuilder.buildCurrentTimeRange()
-        actionBuilder.buildLingerings()
+        annotationFactory.build(player.currentPosition(), isPlaying = player.isPlaying(), interrupted = false)
     }
     /**endregion */
 }

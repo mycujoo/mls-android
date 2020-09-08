@@ -122,19 +122,23 @@ dependencies {
     implementation 'joda-time:joda-time:2.10.6'
     testImplementation 'joda-time:joda-time:2.10.6'
 
+    //TV
+    implementation "androidx.leanback:leanback-preference:1.0.0"
+    implementation 'com.google.android.exoplayer:extension-leanback:2.11.1'
+
 }
 
 
 //def githubProperties = new Properties()
 //githubProperties.load(new FileInputStream(rootProject.file("github.properties")))
 
-//def getVersionName = { ->
-//    return version  // version Name
-//}
-//
-//def getArtificatId = { ->
-//    return "mls" // library name ID
-//}
+def getVersionName = { ->
+    return version  // version Name
+}
+
+def getArtificatId = { ->
+    return "mls" // library name ID
+}
 
 //publishing {
 //    publications {
