@@ -38,6 +38,7 @@ import tv.mycujoo.mls.core.VideoPlayerCoordinator
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.ViewHandler
+import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.model.SingleLiveEvent
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.ReactorCallback
@@ -124,7 +125,10 @@ class MLSPlayerViewTest {
             override fun setUUID(uuid: String) {
             }
 
-            override fun join(eventId: String) {
+            override fun joinEvent(eventId: String) {
+            }
+
+            override fun joinTimelineIfNeeded(param: JoinTimelineParam) {
             }
 
             override fun leave(destroyAfter: Boolean) {

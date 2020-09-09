@@ -7,6 +7,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import tv.mycujoo.mls.model.JoinTimelineParam
 import kotlin.test.assertFailsWith
 
 class ReactorSocketTest {
@@ -36,7 +37,7 @@ class ReactorSocketTest {
 
     @Test
     fun `given join command before setting UUID, should throw UninitializedPropertyAccessException`() {
-        assertFailsWith<UninitializedPropertyAccessException> { reactorSocket.join(EVENT_ID) }
+        assertFailsWith<UninitializedPropertyAccessException> { reactorSocket.joinEvent(EVENT_ID) }
     }
 
     @Test
@@ -44,16 +45,53 @@ class ReactorSocketTest {
         reactorSocket.setUUID("SAMPLE_UUID")
 
 
-        reactorSocket.join(EVENT_ID)
+        reactorSocket.joinEvent(EVENT_ID)
 
 
         verify(webSocket).send("$JOIN_EVENT$EVENT_ID")
     }
 
     @Test
+    fun `given joinTimelineIfNeeded command when socket is connected, should join timeline-id with no actionId`() {
+        reactorSocket.setUUID("SAMPLE_UUID")
+        reactorSocket.joinEvent(EVENT_ID)
+
+
+        reactorSocket.joinTimelineIfNeeded(JoinTimelineParam("timeline_id_0"))
+
+
+        verify(webSocket, atLeastOnce()).send("${JOIN_TIMELINE}timeline_id_0;")
+    }
+    @Test
+    fun `given joinTimelineIfNeeded command when socket is connected, should join timeline-id with actionId`() {
+        reactorSocket.setUUID("SAMPLE_UUID")
+        reactorSocket.joinEvent(EVENT_ID)
+
+
+        reactorSocket.joinTimelineIfNeeded(JoinTimelineParam("timeline_id_0", "last_action_id_0"))
+
+
+        verify(webSocket, atLeastOnce()).send("${JOIN_TIMELINE}timeline_id_0;last_action_id_0")
+    }
+
+    @Test
+    fun `given joinTimelineIfNeeded command when socket is not connected, should join timeline-id`() {
+        // not connecting to socket
+
+
+        reactorSocket.joinTimelineIfNeeded(JoinTimelineParam("timeline_id_0"))
+        reactorSocket.joinTimelineIfNeeded(JoinTimelineParam("timeline_id_0", "last_action_id_0"))
+
+
+        verify(webSocket, never()).send("${JOIN_TIMELINE};timeline_id_0")
+        verify(webSocket, never()).send("${JOIN_TIMELINE};timeline_id_0;last_action_id_0")
+    }
+
+
+    @Test
     fun `given leave command without destroy after, should disconnect from webSocket but not destroy client`() {
         reactorSocket.setUUID("SAMPLE_UUID")
-        reactorSocket.join(EVENT_ID)
+        reactorSocket.joinEvent(EVENT_ID)
 
 
         reactorSocket.leave(false)
@@ -66,7 +104,7 @@ class ReactorSocketTest {
     @Test
     fun `given leave command with destroy after, should disconnect from webSocket & destroy socket client`() {
         reactorSocket.setUUID("SAMPLE_UUID")
-        reactorSocket.join(EVENT_ID)
+        reactorSocket.joinEvent(EVENT_ID)
 
 
         reactorSocket.leave(true)
@@ -89,10 +127,10 @@ class ReactorSocketTest {
     @Test
     fun `given join command when active connection exist, should leave from active connection`() {
         reactorSocket.setUUID("SAMPLE_UUID")
-        reactorSocket.join(EVENT_ID)
+        reactorSocket.joinEvent(EVENT_ID)
 
 
-        reactorSocket.join(EVENT_ID_NEW)
+        reactorSocket.joinEvent(EVENT_ID_NEW)
 
 
         verify(webSocket).send("$LEAVE_EVENT$EVENT_ID")
@@ -101,11 +139,11 @@ class ReactorSocketTest {
     @Test
     fun `given join command after leave, should not leave again`() {
         reactorSocket.setUUID("SAMPLE_UUID")
-        reactorSocket.join(EVENT_ID)
+        reactorSocket.joinEvent(EVENT_ID)
         reactorSocket.leave(false)
 
 
-        reactorSocket.join(EVENT_ID_NEW)
+        reactorSocket.joinEvent(EVENT_ID_NEW)
 
 
         verify(webSocket, times(1)).send("$LEAVE_EVENT$EVENT_ID")
@@ -127,6 +165,13 @@ class ReactorSocketTest {
 
 
         verify(reactorCallback).onCounterUpdate("17")
+    }
+
+    @Test
+    fun `received timelineUpdate, should call onTimelineUpdate of callback`() {
+        mainWebSocketListener.onMessage(webSocket, "$TIMELINE_UPDATE;timeline_id_0;timeline_id_1")
+
+        verify(reactorCallback).onTimelineUpdate("timeline_id_0", "timeline_id_1")
     }
 
     @Test

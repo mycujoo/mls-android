@@ -65,5 +65,11 @@ class ReactorListenerTest {
         verify(reactorCallback, never()).onCounterUpdate(any())
     }
 
+    @Test
+    fun `given valid timeline update, should call onTimelineUpdate`() {
+        val message = "$TIMELINE_UPDATE;id0;id1"
+        reactorListener.onMessage(webSocket, message)
 
+        verify(reactorCallback).onTimelineUpdate("id0", "id1")
+    }
 }

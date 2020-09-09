@@ -19,7 +19,6 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.invocation.InvocationOnMock
 import tv.mycujoo.domain.entity.*
-import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.mls.CoroutineTestRule
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
@@ -294,7 +293,7 @@ class VideoPlayerCoordinatorTest {
         videoPlayerCoordinator.playVideo(getSampleEventEntity(emptyList(), EventStatus.EVENT_STATUS_UNSPECIFIED))
 
 
-        verify(reactorSocket, never()).join(any())
+        verify(reactorSocket, never()).joinEvent(any())
     }
 
     @Test

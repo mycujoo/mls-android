@@ -24,6 +24,7 @@ import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mls.manager.contracts.IViewHandler
+import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.ReactorCallback
 import tv.mycujoo.mls.player.IPlayer
@@ -74,6 +75,10 @@ class VideoPlayerCoordinator(
                 } else {
                     MLSPlayerView.hideViewersCounter()
                 }
+            }
+
+            override fun onTimelineUpdate(timelineId: String, timelineUpdateId: String) {
+                onTimelineUpdateAvailable(timelineUpdateId)
             }
         })
 
@@ -203,8 +208,11 @@ class VideoPlayerCoordinator(
 //            YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE)
         }
         val youboraOptions = Options()
-        //todo : use mls specific Youbora account
-        youboraOptions.accountCode = "mycujoodev"
+        youboraOptions.accountCode = if (BuildConfig.DEBUG) {
+            "mycujoodev"
+        } else {
+            "mycujoo"
+        }
         youboraOptions.isAutoDetectBackground = true
 
         val plugin = internalBuilder.createYouboraPlugin(youboraOptions, activity)
@@ -225,8 +233,6 @@ class VideoPlayerCoordinator(
                     dataManager.currentEvent = result.value
                     if (eventMayBeStreamed.not()) {
                         playVideoOrDisplayEventInfo(result.value)
-                    } else {
-                        fetchActions(result.value)
                     }
                 }
                 is NetworkError -> {
@@ -235,6 +241,10 @@ class VideoPlayerCoordinator(
                 }
             }
         }
+    }
+
+    fun onTimelineUpdateAvailable(timelineUpdateId: String) {
+        fetchActions(timelineUpdateId)
     }
 
 
@@ -265,15 +275,19 @@ class VideoPlayerCoordinator(
 
     fun playExternalSourceVideo(videoUri: String) {
         player.play(videoUri)
+        playerView.hideEventInfoDialog()
+        playerView.hideEventInfoButton()
     }
 
     private fun playVideoOrDisplayEventInfo(event: EventEntity) {
         playerView.setEventInfo(event.title, event.description, event.start_time)
+        playerView.showEventInfoButton()
 
         if (mayPlayVideo(event)) {
             logged = false
 
             player.play(event.streams.first().fullUrl)
+            playerView.hideEventInfoDialog()
         } else {
             // display event info
             playerView.displayEventInformationPreEventDialog()
@@ -291,26 +305,34 @@ class VideoPlayerCoordinator(
     /**region Reactor function*/
 
     private fun joinToReactor(event: EventEntity) {
-        reactorSocket.join(event.id)
+        reactorSocket.joinEvent(event.id)
     }
 
     private fun fetchActions(event: EventEntity) {
         if (event.timeline_ids.isEmpty()) {
             return
         }
+        fetchActions(event.timeline_ids.first())
+    }
+
+    private fun fetchActions(timelineId: String) {
         dispatcher.launch(context = Dispatchers.Main) {
-            val result = dataManager.getActions(event.timeline_ids.first())
+            val result = dataManager.getActions(timelineId)
             when (result) {
                 is Success -> {
                     val timelineMarkerEntityList =
                         result.value.data.mapNotNull { TimelineMarkerMapper.mapToTimelineMarker(it) }
                     playerView.setTimelineMarker(timelineMarkerEntityList)
+
+                    val joinTimelineParam = JoinTimelineParam(timelineId, result.value.data.lastOrNull()?.id)
+                    reactorSocket.joinTimelineIfNeeded(joinTimelineParam)
                 }
                 is NetworkError,
                 is GenericError -> {
                 }
             }
         }
+
     }
 
     /**endregion */

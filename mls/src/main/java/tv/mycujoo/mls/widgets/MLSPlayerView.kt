@@ -13,6 +13,7 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.annotation.MainThread
 import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -469,21 +470,43 @@ class MLSPlayerView @JvmOverloads constructor(
     }
 
     fun hideEventInfoDialog() {
-        children.forEach { child ->
-            if (child.tag == "event_info_dialog") {
-                removeView(child)
+        if (eventInfoDialogContainerLayout == null) {
+            return
+        }
+        post {
+            eventInfoDialogContainerLayout.children.forEach { child ->
+                if (child.tag == "event_info_dialog") {
+                    child.visibility = GONE
+                    removeView(child)
+                }
             }
         }
     }
 
     fun showEventInfoButton() {
-        findViewById<ImageButton>(R.id.controller_informationButtonLayout).visibility =
+        post {
+            showEventInfoButtonInstantly()
+        }
+    }
+
+    @MainThread
+    fun showEventInfoButtonInstantly() {
+        findViewById<FrameLayout>(R.id.controller_informationButtonLayout).visibility =
             View.VISIBLE
+
     }
 
     fun hideEventInfoButton() {
-        findViewById<ImageButton>(R.id.controller_informationButtonLayout).visibility =
-            View.GONE
+        post {
+            hideEventInfoButtonInstantly()
+        }
+    }
+    @MainThread
+    fun hideEventInfoButtonInstantly() {
+        post {
+            findViewById<FrameLayout>(R.id.controller_informationButtonLayout).visibility =
+                View.GONE
+        }
     }
 
     /**endregion */

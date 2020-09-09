@@ -74,9 +74,9 @@ class TimelineMarkerViewTest {
     fun initializingShouldSetColor() {
         val color = "#55FFFF"
 
-
-        timelineMarkerView.initialize(color)
-
+        UiThreadStatement.runOnUiThread {
+            timelineMarkerView.initialize(color)
+        }
 
         assertEquals(color, timelineMarkerView.bgColor)
     }
