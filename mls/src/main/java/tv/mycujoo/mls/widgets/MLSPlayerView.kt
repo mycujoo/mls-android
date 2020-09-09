@@ -75,6 +75,8 @@ class MLSPlayerView @JvmOverloads constructor(
     private var timeFormatter = Formatter(timeFormatBuilder, Locale.getDefault())
     private var isScrubbing = false
 
+    private lateinit var timelineMarkerManager: TimelineMarkerManager
+
     @Nullable
     lateinit var idlingResource: CountingIdlingResource
     /**endregion */
@@ -164,7 +166,7 @@ class MLSPlayerView @JvmOverloads constructor(
         val timelineMarkerView =
             findViewById<TimelineMarkerView>(R.id.exo_timelineMarkerView)
 
-        val timelineMarkerManager = TimelineMarkerManager(mlsTimeBar, timelineMarkerView)
+        timelineMarkerManager = TimelineMarkerManager(mlsTimeBar, timelineMarkerView)
 
 
         list.forEach { showTimelineMarkerEntity ->
@@ -176,6 +178,19 @@ class MLSPlayerView @JvmOverloads constructor(
                     PointOfInterestType(showTimelineMarkerEntity.color)
                 )
             )
+        }
+    }
+
+    fun setTimelineMarker(list: List<TimelineMarkerEntity>) {
+        list.map {
+            PointOfInterest(
+                it.offset,
+                it.seekOffset,
+                listOf(it.label),
+                PointOfInterestType(it.color)
+            )
+        }.let {
+            timelineMarkerManager.setTimeLineHighlight(it)
         }
     }
     /**endregion */

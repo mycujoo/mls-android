@@ -14,6 +14,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.mls.CoroutineTestRule
@@ -56,6 +57,10 @@ class DataManagerTest {
 
             override suspend fun getEventDetails(id: String, updateId: String?): EventEntity {
                 return getSampleEventEntity()
+            }
+
+            override suspend fun getActions(timelineId: String): ActionResponse {
+                TODO("Not yet implemented")
             }
         }
 

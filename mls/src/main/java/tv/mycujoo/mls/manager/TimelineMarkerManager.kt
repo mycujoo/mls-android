@@ -72,4 +72,16 @@ class TimelineMarkerManager(
 
     }
 
+    fun setTimeLineHighlight(list: List<PointOfInterest>) {
+        pointOfInterestList.clear()
+        pointOfInterestList.addAll(list)
+
+        mlsTimeBar.clearTimeLineMarker()
+        list.forEach {
+            mlsTimeBar.addTimeLineHighlight(it)
+        }
+
+
+    }
+
 }

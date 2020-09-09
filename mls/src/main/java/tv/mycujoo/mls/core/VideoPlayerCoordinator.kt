@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
+import tv.mycujoo.domain.mapper.TimelineMarkerMapper
 import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
@@ -117,7 +118,7 @@ class VideoPlayerCoordinator(
         MLSPlayerView.prepare(
             OverlayViewHelper(viewHandler, AnimationFactory()),
             viewHandler,
-            emptyList()
+            timelineMarkerActionEntities
         )
 
         val mainEventListener = object : MainEventListener {
@@ -224,6 +225,8 @@ class VideoPlayerCoordinator(
                     dataManager.currentEvent = result.value
                     if (eventMayBeStreamed.not()) {
                         playVideoOrDisplayEventInfo(result.value)
+                    } else {
+                        fetchActions(result.value)
                     }
                 }
                 is NetworkError -> {
@@ -249,6 +252,7 @@ class VideoPlayerCoordinator(
                 is Success -> {
                     dataManager.currentEvent = result.value
                     playVideoOrDisplayEventInfo(result.value)
+                    fetchActions(result.value)
                     joinToReactor(result.value)
                 }
                 is NetworkError -> {
@@ -259,7 +263,7 @@ class VideoPlayerCoordinator(
         }
     }
 
-    fun playExternalSourceVideo(videoUri : String){
+    fun playExternalSourceVideo(videoUri: String) {
         player.play(videoUri)
     }
 
@@ -288,6 +292,25 @@ class VideoPlayerCoordinator(
 
     private fun joinToReactor(event: EventEntity) {
         reactorSocket.join(event.id)
+    }
+
+    private fun fetchActions(event: EventEntity) {
+        if (event.timeline_ids.isEmpty()) {
+            return
+        }
+        dispatcher.launch(context = Dispatchers.Main) {
+            val result = dataManager.getActions(event.timeline_ids.first())
+            when (result) {
+                is Success -> {
+                    val timelineMarkerEntityList =
+                        result.value.data.mapNotNull { TimelineMarkerMapper.mapToTimelineMarker(it) }
+                    playerView.setTimelineMarker(timelineMarkerEntityList)
+                }
+                is NetworkError,
+                is GenericError -> {
+                }
+            }
+        }
     }
 
     /**endregion */

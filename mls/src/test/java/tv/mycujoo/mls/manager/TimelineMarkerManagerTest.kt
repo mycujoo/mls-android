@@ -230,6 +230,31 @@ class TimelineMarkerManagerTest {
 
 
     @Test
+    fun `set timeline marker, should clear previous timeline markers`() {
+        timelineMarkerManager.setTimeLineHighlight(emptyList())
+
+
+        verify(timeBar).clearTimeLineMarker()
+    }
+
+    @Test
+    fun `set timeline marker, should add to timeBar too`() {
+        timelineMarkerManager.setTimeLineHighlight(
+            listOf(
+                getSamplePointOfInterest(5000L, "Kick-off"),
+                getSamplePointOfInterest(25000L, "Foul"),
+                getSamplePointOfInterest(50000L, "Goal"),
+                getSamplePointOfInterest(75000L, "Foul"),
+                getSamplePointOfInterest(100000L, "Half-time")
+            )
+        )
+
+        verify(
+            timeBar, times(5)
+        ).addTimeLineHighlight(any())
+    }
+
+    @Test
     fun `given timeline marker list, should set all to view`() {
         val pointOfInterest0 = PointOfInterest(
             10000L,
@@ -250,7 +275,6 @@ class TimelineMarkerManagerTest {
             pointOfInterest1
         )
         val markerTitleList = listOf("Goal", "Assist")
-
 
 
         val poiPositionsOnScreen =
@@ -422,6 +446,12 @@ class TimelineMarkerManagerTest {
 
         verify(timelineMarkerView).setMarkerTexts(firstMarkerTitleListPlusCommonElement, position.toInt())
         verify(timelineMarkerView).setMarkerTexts(secondMarkerTitleListPlusCommonElement, position1.toInt())
+    }
+
+    companion object {
+        fun getSamplePointOfInterest(offset: Long, title: String): PointOfInterest {
+            return PointOfInterest(offset, 10000L, listOf(title), PointOfInterestType())
+        }
     }
 
 

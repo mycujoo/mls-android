@@ -3,6 +3,7 @@ package tv.mycujoo.mls.api
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.EventStatus
 import tv.mycujoo.domain.entity.OrderByEventsParam
@@ -10,6 +11,7 @@ import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.params.EventIdPairParam
 import tv.mycujoo.domain.params.EventListParams
 import tv.mycujoo.domain.repository.EventsRepository
+import tv.mycujoo.domain.usecase.GetActionsUseCase
 import tv.mycujoo.domain.usecase.GetEventDetailUseCase
 import tv.mycujoo.domain.usecase.GetEventsUseCase
 import tv.mycujoo.mls.data.IDataManager
@@ -40,6 +42,11 @@ class DataManager(
     override suspend fun getEventDetails(eventId: String): Result<Exception, EventEntity> {
         return GetEventDetailUseCase(eventsRepository).execute(EventIdPairParam(eventId))
     }
+
+    override suspend fun getActions(timelineId: String): Result<Exception, ActionResponse> {
+        return GetActionsUseCase(eventsRepository).execute(timelineId)
+    }
+
     /**endregion */
 
     /**region Data Provider*/

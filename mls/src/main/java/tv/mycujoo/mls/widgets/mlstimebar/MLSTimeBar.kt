@@ -210,6 +210,11 @@ class MLSTimeBar @JvmOverloads constructor(
         poiPositionsOnScreen.add(PositionedPointOfInterest(-1, poi))
     }
 
+    fun clearTimeLineMarker() {
+        poiArrayList.clear()
+        poiPositionsOnScreen.clear()
+    }
+
     // View methods.
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)

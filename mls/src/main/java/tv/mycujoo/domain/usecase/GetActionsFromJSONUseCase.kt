@@ -2,9 +2,7 @@ package tv.mycujoo.domain.usecase
 
 import android.content.res.Resources
 import com.google.gson.Gson
-import tv.mycujoo.data.entity.ActionCollections
 import tv.mycujoo.data.entity.ActionResponse
-import tv.mycujoo.domain.mapper.ActionMapper.Companion.mapToActionCollections
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.utils.StringUtils.Companion.inputStreamToString
 
@@ -22,9 +20,6 @@ class GetActionsFromJSONUseCase {
             )
         }
 
-        fun mappedActionCollections(): ActionCollections {
-            return mapToActionCollections(result())
-        }
 
         fun fromRawResource(resources: Resources): ActionResponse {
             val inputStream = resources.openRawResource(R.raw.actions)

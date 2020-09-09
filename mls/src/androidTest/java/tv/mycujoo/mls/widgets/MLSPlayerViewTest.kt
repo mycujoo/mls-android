@@ -26,8 +26,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.*
-import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.fake.FakeAnimationFactory
 import tv.mycujoo.matchers.TypeMatcher
 import tv.mycujoo.mls.BlankActivity
@@ -109,6 +109,10 @@ class MLSPlayerViewTest {
                 TODO("Not yet implemented")
             }
 
+            override suspend fun getActions(timelineId: String): Result<Exception, ActionResponse> {
+                TODO("Not yet implemented")
+            }
+
             override var currentEvent: EventEntity?
                 get() = getSampleEventEntity(emptyList())
                 set(value) {}
@@ -141,7 +145,7 @@ class MLSPlayerViewTest {
                 reactorSocket,
                 GlobalScope,
                 dataManager,
-                GetActionsFromJSONUseCase.mappedActionCollections().timelineMarkerActionList
+                emptyList()
             )
             videoPlayerCoordinator.initialize(
                 MLSPlayerView,

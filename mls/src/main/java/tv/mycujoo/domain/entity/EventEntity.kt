@@ -13,7 +13,7 @@ data class EventEntity(
     @SerializedName("status") val status: EventStatus,
     @SerializedName("streams") val streams: List<Stream>,
     @SerializedName("timezone") val timezone: String,
-    @SerializedName("timeline_ids") val timeline_ids: List<Any>,
+    @SerializedName("timeline_ids") val timeline_ids: List<String>,
     @SerializedName("metadata") val metadata: Metadata,
     @SerializedName("is_test") val is_test: Boolean
 )
