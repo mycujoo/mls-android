@@ -20,6 +20,6 @@ class MLSTvBuilder {
     open fun build(): MLSTV {
         val internalBuilder = MLSTvInternalBuilder(activity!!)
         internalBuilder.prefManager.persist("PUBLIC_KEY", publicKey)
-        return MLSTV(activity!!, internalBuilder.dispatcher, internalBuilder.dataManager)
+        return MLSTV(activity!!, internalBuilder.reactorSocket, internalBuilder.dispatcher, internalBuilder.dataManager)
     }
 }

@@ -22,13 +22,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
+import tv.mycujoo.domain.mapper.TimelineMarkerMapper
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.helper.DateTimeHelper
+import tv.mycujoo.mls.model.JoinTimelineParam
+import tv.mycujoo.mls.network.socket.IReactorSocket
 
 class TvVideoPlayer(
     private val activity: Activity,
     videoSupportFragment: VideoSupportFragment,
+    private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager
 ) {
@@ -133,6 +137,41 @@ class TvVideoPlayer(
         informationDialog.informationDialog_bodyTextView.text = description
         informationDialog.informationDialog_dateTimeTextView.text = DateTimeHelper.getDateTime(startTime)
     }
+    /**endregion */
+
+    /**region Reactor function*/
+
+    private fun joinToReactor(event: EventEntity) {
+        reactorSocket.joinEvent(event.id)
+    }
+
+    private fun fetchActions(event: EventEntity) {
+        if (event.timeline_ids.isEmpty()) {
+            return
+        }
+        fetchActions(event.timeline_ids.first())
+    }
+
+    private fun fetchActions(timelineId: String) {
+        dispatcher.launch(context = Dispatchers.Main) {
+            val result = dataManager.getActions(timelineId)
+            when (result) {
+                is Result.Success -> {
+                    val timelineMarkerEntityList =
+                        result.value.data.mapNotNull { TimelineMarkerMapper.mapToTimelineMarker(it) }
+//                    playerView.setTimelineMarker(timelineMarkerEntityList) todo
+
+                    val joinTimelineParam = JoinTimelineParam(timelineId, result.value.data.lastOrNull()?.id)
+                    reactorSocket.joinTimelineIfNeeded(joinTimelineParam)
+                }
+                is Result.NetworkError,
+                is Result.GenericError -> {
+                }
+            }
+        }
+
+    }
+
     /**endregion */
 
 }
