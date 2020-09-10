@@ -46,7 +46,7 @@ class TvVideoPlayer(
     }
 
 
-    fun play(url: String, isHls: Boolean) {
+    fun playExternalSourceVideo(url: String, isHls: Boolean = true) {
         if (isHls) {
             val userAgent = Util.getUserAgent(activity, "MLS-AndroidTv-SDK")
             val hlsFactory = HlsMediaSource.Factory(DefaultDataSourceFactory(activity, userAgent))
@@ -61,7 +61,43 @@ class TvVideoPlayer(
                 .createMediaSource(Uri.parse(url))
             player!!.prepare(videoSource)
         }
+    }
 
+    fun playVideo(event: EventEntity) {
+        playVideo(event.id)
+    }
+
+    fun playVideo(eventId: String) {
+        dispatcher.launch(context = Dispatchers.Main) {
+            val result = dataManager.getEventDetails(eventId)
+            when (result) {
+                is Result.Success -> {
+                    dataManager.currentEvent = result.value
+                    playVideoOrDisplayEventInfo(result.value)
+                }
+                is Result.NetworkError -> {
+                }
+                is Result.GenericError -> {
+                }
+            }
+        }
+    }
+
+    private fun playVideoOrDisplayEventInfo(event: EventEntity) {
+
+        if (mayPlayVideo(event)) {
+            val userAgent = Util.getUserAgent(activity, "MLS-AndroidTv-SDK")
+            val hlsFactory = HlsMediaSource.Factory(DefaultDataSourceFactory(activity, userAgent))
+
+            player!!.prepare(hlsFactory.createMediaSource(Uri.parse(event.streams.first().fullUrl)))
+        } else {
+            // todo displaying event info
+        }
+    }
+
+    private fun mayPlayVideo(event: EventEntity): Boolean {
+        eventMayBeStreamed = event.streams.firstOrNull()?.fullUrl != null
+        return eventMayBeStreamed
     }
 
 }
