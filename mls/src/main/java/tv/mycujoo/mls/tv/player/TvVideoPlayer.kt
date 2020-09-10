@@ -13,13 +13,27 @@ import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import tv.mycujoo.domain.entity.EventEntity
+import tv.mycujoo.domain.entity.Result
+import tv.mycujoo.mls.data.IDataManager
 
-class TvVideoPlayer(private val activity: Activity, videoSupportFragment: VideoSupportFragment) {
+class TvVideoPlayer(
+    private val activity: Activity,
+    videoSupportFragment: VideoSupportFragment,
+    private val dispatcher: CoroutineScope,
+    private val dataManager: IDataManager
+) {
 
     var player: SimpleExoPlayer? = null
-    private lateinit var leanbackAdapter: LeanbackPlayerAdapter
-    private lateinit var glueHost: VideoSupportFragmentGlueHost
-    private lateinit var mTransportControlGlue: PlaybackTransportControlGlue<LeanbackPlayerAdapter>
+    private var leanbackAdapter: LeanbackPlayerAdapter
+    private var glueHost: VideoSupportFragmentGlueHost
+    private var mTransportControlGlue: PlaybackTransportControlGlue<LeanbackPlayerAdapter>
+
+    private var eventMayBeStreamed = false
+
 
     init {
         player = SimpleExoPlayer.Builder(activity).build()
