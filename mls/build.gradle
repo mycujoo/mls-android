@@ -6,7 +6,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.github.dcendents.android-maven'
 
 group='com.github.mycujoo'
-version = '1.0.2-alpha06'
+version = '1.0.2-alpha07'
 
 android {
     compileSdkVersion 29
@@ -46,7 +46,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
@@ -132,13 +132,13 @@ dependencies {
 //def githubProperties = new Properties()
 //githubProperties.load(new FileInputStream(rootProject.file("github.properties")))
 
-def getVersionName = { ->
-    return version  // version Name
-}
-
-def getArtificatId = { ->
-    return "mls" // library name ID
-}
+//def getVersionName = { ->
+//    return version  // version Name
+//}
+//
+//def getArtificatId = { ->
+//    return "mls" // library name ID
+//}
 
 //publishing {
 //    publications {
