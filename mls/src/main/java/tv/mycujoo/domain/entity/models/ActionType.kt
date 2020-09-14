@@ -2,6 +2,7 @@ package tv.mycujoo.domain.entity.models
 
 enum class ActionType(val type: String) {
     UNKNOWN("unknown"),
+    DELETE_ACTION("delete_action"),
     SHOW_OVERLAY("show_overlay"),
     HIDE_OVERLAY("hide_overlay"),
     SHOW_TIMELINE_MARKER("show_timeline_marker"),

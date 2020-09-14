@@ -195,6 +195,10 @@ class AnnotationFactory(
                 SHOW_TIMELINE_MARKER -> {
                 }
 
+                DELETE_ACTION -> {
+                    // do nothing
+                }
+
                 UNKNOWN -> {
                     // should not happen
                 }

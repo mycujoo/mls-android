@@ -23,6 +23,9 @@ data class ActionObject(
 
     init {
         priority = when (type) {
+            DELETE_ACTION -> {
+                2000
+            }
             CREATE_TIMER,
             SET_VARIABLE -> {
                 1000

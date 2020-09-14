@@ -324,7 +324,7 @@ class VideoPlayerCoordinator(
                         result.value.data.mapNotNull { TimelineMarkerMapper.mapToTimelineMarker(it) }
                     playerView.setTimelineMarker(timelineMarkerEntityList)
 
-                    val joinTimelineParam = JoinTimelineParam(timelineId, result.value.data.lastOrNull()?.id)
+                    val joinTimelineParam = JoinTimelineParam(timelineId, result.value.updateId)
                     reactorSocket.joinTimelineIfNeeded(joinTimelineParam)
                 }
                 is NetworkError,
