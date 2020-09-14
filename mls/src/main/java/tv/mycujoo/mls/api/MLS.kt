@@ -98,6 +98,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
                 createExoPlayer(context)
             )
         }
+
     }
 
     private fun initSvgRenderingLibrary(assetManager: AssetManager) {
