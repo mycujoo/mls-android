@@ -30,14 +30,24 @@ class AnnotationFactory(
 
     override fun setAnnotations(annotationList: ActionResponse) {
         lock.lock()
-        if (atomicInt.get() > 0){
+        if (atomicInt.get() > 0) {
             busyCondition.await()
         }
         atomicInt.incrementAndGet()
 
-        sortedActionList =
+        val sortedTemp =
             annotationList.data.map { it.toActionObject() }
                 .sortedWith(compareBy<ActionObject> { it.offset }.thenByDescending { it.priority })
+
+        val deleteActions = ArrayList<ActionObject>()
+        loop@ for (actionObject in sortedTemp) {
+            if (actionObject.type != DELETE_ACTION) {
+                break@loop
+            }
+            deleteActions.add(actionObject)
+        }
+
+        sortedActionList = sortedTemp.filter { actionObject -> deleteActions.none { actionObject.id == it.id } }
 
         atomicInt.decrementAndGet()
         busyCondition.signal()
@@ -53,7 +63,7 @@ class AnnotationFactory(
             return
         }
         lock.lock()
-        if (atomicInt.get() > 0){
+        if (atomicInt.get() > 0) {
             busyCondition.await()
         }
         atomicInt.incrementAndGet()

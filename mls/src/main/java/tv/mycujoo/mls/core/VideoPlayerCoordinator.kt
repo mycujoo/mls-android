@@ -78,8 +78,8 @@ class VideoPlayerCoordinator(
                 }
             }
 
-            override fun onTimelineUpdate(timelineId: String, timelineUpdateId: String) {
-                onTimelineUpdateAvailable(timelineUpdateId)
+            override fun onTimelineUpdate(timelineId: String, updatedEventId: String) {
+                onTimelineUpdateAvailable(timelineId)
             }
         })
 

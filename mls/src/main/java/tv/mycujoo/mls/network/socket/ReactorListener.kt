@@ -15,7 +15,7 @@ class ReactorListener(private val reactorCallback: ReactorCallback) : WebSocketL
                 reactorCallback.onCounterUpdate(reactorMessage.counts)
             }
             is ReactorMessage.TimelineUpdate -> {
-                reactorCallback.onTimelineUpdate(reactorMessage.timelineId, reactorMessage.timelineUpdateId)
+                reactorCallback.onTimelineUpdate(reactorMessage.timelineId, reactorMessage.updatedEventId)
             }
             is ReactorMessage.Unsupported -> {
                 // do nothing
@@ -43,7 +43,7 @@ class ReactorListener(private val reactorCallback: ReactorCallback) : WebSocketL
     sealed class ReactorMessage {
         data class EventUpdate(val eventId: String, val updatedEventId: String) : ReactorMessage()
         data class CounterUpdate(val counts: String) : ReactorMessage()
-        data class TimelineUpdate(val timelineId: String, val timelineUpdateId: String) : ReactorMessage()
+        data class TimelineUpdate(val timelineId: String, val updatedEventId: String) : ReactorMessage()
         data class Unsupported(val message: String = "") : ReactorMessage()
     }
 }
