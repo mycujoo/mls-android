@@ -298,15 +298,19 @@ class MLSPlayerView @JvmOverloads constructor(
 
             playerView.player?.playWhenReady = config.autoPlay
 
-            if (config.backForwardButtons) {
+            if (config.showBackForwardsButtons) {
                 findViewById<ImageButton>(R.id.exo_rew).visibility = View.VISIBLE
+                findViewById<FrameLayout>(R.id.controller_rewButtonContainerLayout).visibility = View.VISIBLE
+                findViewById<FrameLayout>(R.id.controller_ffwdButtonContainerLayout).visibility = View.VISIBLE
                 findViewById<ImageButton>(R.id.exo_ffwd).visibility = View.VISIBLE
             } else {
                 findViewById<ImageButton>(R.id.exo_rew).visibility = View.GONE
+                findViewById<FrameLayout>(R.id.controller_rewButtonContainerLayout).visibility = View.GONE
+                findViewById<FrameLayout>(R.id.controller_ffwdButtonContainerLayout).visibility = View.GONE
                 findViewById<ImageButton>(R.id.exo_ffwd).visibility = View.GONE
             }
 
-            if (config.eventInfoButton) {
+            if (config.showEventInfoButton) {
                 showEventInfoButton()
             } else {
                 hideEventInfoButton()
@@ -501,6 +505,7 @@ class MLSPlayerView @JvmOverloads constructor(
             hideEventInfoButtonInstantly()
         }
     }
+
     @MainThread
     fun hideEventInfoButtonInstantly() {
         post {

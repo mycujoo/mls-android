@@ -34,7 +34,7 @@ import tv.mycujoo.mls.utils.StringUtils
 import tv.mycujoo.mls.widgets.MLSPlayerView
 
 class VideoPlayerCoordinator(
-    private val videoPlayerConfig: VideoPlayerConfig,
+    private var videoPlayerConfig: VideoPlayerConfig,
     private val viewHandler: IViewHandler,
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
@@ -71,7 +71,7 @@ class VideoPlayerCoordinator(
             }
 
             override fun onCounterUpdate(counts: String) {
-                if (isLive && isViewersCountValid(counts)) {
+                if (videoPlayerConfig.showLiveViewers && isLive && isViewersCountValid(counts)) {
                     MLSPlayerView.updateViewersCounter(StringUtils.getNumberOfViewers(counts))
                 } else {
                     MLSPlayerView.hideViewersCounter()
@@ -228,6 +228,14 @@ class VideoPlayerCoordinator(
         youboraClient = internalBuilder.createYouboraClient(plugin)
     }
 
+    fun config(videoPlayerConfig: VideoPlayerConfig){
+        if (this::playerView.isInitialized.not()){
+            return
+        }
+
+        this.videoPlayerConfig = videoPlayerConfig
+        playerView.config(videoPlayerConfig)
+    }
     /**endregion */
 
     fun onEventUpdateAvailable(updateId: String) {

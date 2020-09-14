@@ -52,18 +52,26 @@
         app:layout_constraintGuide_percent=".75" />
 
 
-    <ImageButton
-        android:id="@+id/exo_rew"
+    <FrameLayout
+        android:id="@+id/controller_rewButtonContainerLayout"
         android:layout_width="28dp"
         android:layout_height="28dp"
         android:layout_marginRight="44dp"
-        android:background="@null"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_10_sec_rewind"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="@id/guidelineOf1stQuarter"
         app:layout_constraintRight_toRightOf="@id/guidelineOfCenter"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/exo_rew"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_10_sec_rewind" />
+
+    </FrameLayout>
+
 
     <ImageButton
         android:id="@+id/exo_play"
@@ -92,19 +100,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-
-    <ImageButton
-        android:id="@+id/exo_ffwd"
+    <FrameLayout
+        android:id="@+id/controller_ffwdButtonContainerLayout"
         android:layout_width="28dp"
         android:layout_height="28dp"
         android:layout_marginLeft="44dp"
-        android:background="@null"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_10_sec_forward"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="@id/guidelineOfCenter"
         app:layout_constraintRight_toRightOf="@id/guidelineOf3rdQuarter"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/exo_ffwd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_10_sec_forward" />
+    </FrameLayout>
 
 
     <ProgressBar

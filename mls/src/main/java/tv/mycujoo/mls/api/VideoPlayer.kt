@@ -5,6 +5,7 @@ import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.core.VideoPlayerCoordinator
+import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 
 class VideoPlayer(
     private val exoPlayer: ExoPlayer,
@@ -54,6 +55,11 @@ class VideoPlayer(
     override fun previous() {
         exoPlayer.previous()
     }
+
+    override fun config(videoPlayerConfig: VideoPlayerConfig) {
+        videoPlayerCoordinator.config(videoPlayerConfig)
+    }
+
     /**endregion */
 
     /**region PlayerStatus*/

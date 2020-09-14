@@ -23,6 +23,7 @@ import tv.mycujoo.mls.CoroutineTestRule
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.MLSConfiguration
+import tv.mycujoo.mls.api.defaultVideoPlayerConfig
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.manager.ViewHandler
@@ -322,6 +323,7 @@ class VideoPlayerCoordinatorTest {
     fun `update viewers counter in LIVE stream, should update player wrapper`() = runBlockingTest {
         val event = getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_SCHEDULED)
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
+        videoPlayerCoordinator.config(defaultVideoPlayerConfig())
 
 
         whenever(exoPlayer.isCurrentWindowDynamic).thenReturn(true)

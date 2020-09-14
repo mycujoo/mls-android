@@ -110,8 +110,8 @@ class TimelineMarkerView @JvmOverloads constructor(
     fun removeMarkerTexts() {
         if (counter > 0) {
             counter = 0
-            removeAllViewsInLayout()
             visibility = View.INVISIBLE
+            removeAllViewsInLayout()
 
         }
     }
@@ -123,9 +123,7 @@ class TimelineMarkerView @JvmOverloads constructor(
                 }
 
                 override fun onChildViewRemoved(parent: View?, child: View?) {
-                    if ((parent as ViewGroup).childCount == 0) {
-                        addTitles(titles, toInt)
-                    }
+                    visibility = View.INVISIBLE
                 }
             }
             setOnHierarchyChangeListener(t)
