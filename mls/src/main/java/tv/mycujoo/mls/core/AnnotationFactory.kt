@@ -11,21 +11,37 @@ import tv.mycujoo.mls.helper.HideOverlayActionHelper
 import tv.mycujoo.mls.helper.IDownloaderClient
 import tv.mycujoo.mls.helper.ShowOverlayActionHelper
 import tv.mycujoo.mls.manager.contracts.IViewHandler
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.locks.Condition
+import java.util.concurrent.locks.ReentrantLock
 
 class AnnotationFactory(
     private val annotationListener: IAnnotationListener,
     private val downloaderClient: IDownloaderClient,
-    private val viewHandler: IViewHandler
+    private val viewHandler: IViewHandler,
+    private val lock: ReentrantLock,
+    private val busyCondition: Condition
 ) : IAnnotationFactory {
 
     private val timerKeeper = viewHandler.getTimerKeeper()
+    private val atomicInt = AtomicInteger()
 
     private lateinit var sortedActionList: List<ActionObject>
 
     override fun setAnnotations(annotationList: ActionResponse) {
+        lock.lock()
+        if (atomicInt.get() > 0){
+            busyCondition.await()
+        }
+        atomicInt.incrementAndGet()
+
         sortedActionList =
             annotationList.data.map { it.toActionObject() }
                 .sortedWith(compareBy<ActionObject> { it.offset }.thenByDescending { it.priority })
+
+        atomicInt.decrementAndGet()
+        busyCondition.signal()
+        lock.unlock()
     }
 
     override fun actionList(): List<ActionObject> {
@@ -36,6 +52,11 @@ class AnnotationFactory(
         if (this::sortedActionList.isInitialized.not()) {
             return
         }
+        lock.lock()
+        if (atomicInt.get() > 0){
+            busyCondition.await()
+        }
+        atomicInt.incrementAndGet()
 
         val variables = mutableSetOf<Variable>()
 
@@ -218,6 +239,10 @@ class AnnotationFactory(
         variables.clear()
 
         annotationListener.setTimelineMarkers(timelineMarkers)
+
+        atomicInt.decrementAndGet()
+        busyCondition.signal()
+        lock.unlock()
 
     }
 }

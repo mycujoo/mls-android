@@ -15,6 +15,7 @@ import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.mls.helper.IDownloaderClient
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.matcher.OverlayEntityMatcher
+import java.util.concurrent.locks.ReentrantLock
 import kotlin.test.assertTrue
 
 @ExperimentalStdlibApi
@@ -37,7 +38,8 @@ class AnnotationFactoryTest {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        annotationFactory = AnnotationFactory(annotationListener, downloaderClient, viewHandler)
+        val reentrantLock = ReentrantLock()
+        annotationFactory = AnnotationFactory(annotationListener, downloaderClient, viewHandler, reentrantLock, reentrantLock.newCondition())
     }
 
     @Test

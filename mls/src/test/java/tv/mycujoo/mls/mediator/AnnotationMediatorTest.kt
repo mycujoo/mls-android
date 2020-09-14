@@ -3,6 +3,8 @@ package tv.mycujoo.mls.mediator
 import android.os.Handler
 import com.google.android.exoplayer2.Player
 import com.nhaarman.mockitokotlin2.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -18,6 +20,7 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 
+@ExperimentalCoroutinesApi
 class AnnotationMediatorTest {
 
 
@@ -27,6 +30,7 @@ class AnnotationMediatorTest {
     /**endregion */
 
     /**region Fields*/
+    private lateinit var testCoroutineScope: TestCoroutineScope
     private lateinit var heartBeatOuterRunnable: Runnable
     private lateinit var heartBeatInnerRunnable: Runnable
     private lateinit var eventListener: Player.EventListener
@@ -42,6 +46,9 @@ class AnnotationMediatorTest {
 
     @Mock
     lateinit var variableTranslator: VariableTranslator
+
+    @Mock
+    lateinit var dataManager: IDataManager
 
     @Mock
     lateinit var player: IPlayer
@@ -66,6 +73,7 @@ class AnnotationMediatorTest {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        testCoroutineScope = TestCoroutineScope()
 
         whenever(viewHandler.getTimerKeeper()).thenReturn(timerKeeper)
         whenever(viewHandler.getVariableTranslator()).thenReturn(variableTranslator)

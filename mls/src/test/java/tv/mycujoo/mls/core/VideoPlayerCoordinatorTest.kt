@@ -28,6 +28,7 @@ import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.manager.ViewHandler
 import tv.mycujoo.mls.matcher.SeekParameterArgumentMatcher
 import tv.mycujoo.mls.matcher.UriArgumentMatcher
+import tv.mycujoo.mls.mediator.AnnotationMediator
 import tv.mycujoo.mls.network.socket.MainWebSocketListener
 import tv.mycujoo.mls.network.socket.ReactorListener
 import tv.mycujoo.mls.network.socket.ReactorSocket
@@ -112,6 +113,9 @@ class VideoPlayerCoordinatorTest {
     @Mock
     lateinit var exoplayer2Adapter: Exoplayer2Adapter
 
+    @Mock
+    lateinit var annotationMediator : AnnotationMediator
+
 
     @Before
     fun setUp() {
@@ -155,6 +159,7 @@ class VideoPlayerCoordinatorTest {
             emptyList()
         )
         videoPlayerCoordinator.initialize(playerView, player, MLSBuilder)
+        videoPlayerCoordinator.setAnnotationMediator(annotationMediator)
     }
 
     private fun storeExoPlayerListener(it: InvocationOnMock) {
@@ -223,7 +228,7 @@ class VideoPlayerCoordinatorTest {
         videoPlayerCoordinator.playVideo(event.id)
 
 
-        verify(dataManager).getActions("timeline_id_01")
+        verify(annotationMediator).fetchActions(any(), any())
     }
     @Test
     fun `given eventId to play stream which does not have timelineId, should not call fetchActions`() = runBlockingTest {
