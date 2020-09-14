@@ -2,6 +2,7 @@ package tv.mycujoo.mls.core
 
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.OverlayEntity
+import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.widgets.MLSPlayerView
 
@@ -93,6 +94,10 @@ class AnnotationListener(
     override fun removeLingeringOverlay(overlayEntity: OverlayEntity) {
         overlayEntity.isOnScreen = false
         MLSPlayerView.removeLingeringOverlay(overlayEntity)
+    }
+
+    override fun setTimelineMarkers(timelineMarkerEntityList: List<TimelineMarkerEntity>) {
+        MLSPlayerView.setTimelineMarker(timelineMarkerEntityList)
     }
 
     override fun clearScreen(idList: List<String>) {

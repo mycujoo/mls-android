@@ -4,8 +4,14 @@ import android.os.Handler
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.DISCONTINUITY_REASON_SEEK
 import com.google.android.exoplayer2.Player.STATE_READY
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import tv.mycujoo.data.entity.ActionResponse
+import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.mls.core.IAnnotationFactory
+import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.player.IPlayer
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import java.util.concurrent.ScheduledExecutorService
@@ -15,6 +21,8 @@ import java.util.concurrent.TimeUnit
 class AnnotationMediator(
     private var playerView: MLSPlayerView,
     private val annotationFactory: IAnnotationFactory,
+    val dataManager: IDataManager,
+    val dispatcher: CoroutineScope,
     player: IPlayer,
     private val scheduler: ScheduledExecutorService,
     handler: Handler
@@ -28,9 +36,6 @@ class AnnotationMediator(
     /**region Initialization*/
     init {
         initEventListener(player)
-
-        feed()
-
 
         val exoRunnable = Runnable {
             if (player.isPlaying()) {
@@ -51,6 +56,32 @@ class AnnotationMediator(
 
     private fun feed() {
         annotationFactory.setAnnotations(GetActionsFromJSONUseCase.result())
+    }
+
+    override fun fetchActions(
+        timelineId: String,
+        resultCallback: ((result: Result<Exception, ActionResponse>) -> Unit)?
+    ) {
+        dispatcher.launch(context = Dispatchers.Main) {
+            val result = dataManager.getActions(timelineId)
+            resultCallback?.invoke(result)
+            when (result) {
+                is Result.Success -> {
+                    feed(result.value)
+                }
+                is Result.NetworkError -> {
+                }
+                is Result.GenericError -> {
+                }
+                else -> {
+                }
+            }
+
+        }
+    }
+
+    override fun feed(actionResponse: ActionResponse) {
+        annotationFactory.setAnnotations(actionResponse)
     }
 
     private fun initEventListener(player: IPlayer) {

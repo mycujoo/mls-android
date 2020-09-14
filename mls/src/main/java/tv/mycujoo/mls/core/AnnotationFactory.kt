@@ -3,6 +3,7 @@ package tv.mycujoo.mls.core
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.ActionObject
 import tv.mycujoo.domain.entity.OverlayAct.*
+import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.domain.entity.Variable
 import tv.mycujoo.domain.entity.VariableType
 import tv.mycujoo.domain.entity.models.ActionType.*
@@ -32,8 +33,13 @@ class AnnotationFactory(
     }
 
     override fun build(currentPosition: Long, isPlaying: Boolean, interrupted: Boolean) {
+        if (this::sortedActionList.isInitialized.not()) {
+            return
+        }
 
         val variables = mutableSetOf<Variable>()
+
+        val timelineMarkers = ArrayList<TimelineMarkerEntity>()
 
         sortedActionList.forEach {
             when (it.type) {
@@ -193,6 +199,9 @@ class AnnotationFactory(
 
 
                 SHOW_TIMELINE_MARKER -> {
+                    it.toTimelineMarkerEntity()?.let { timelineMarkerEntity ->
+                        timelineMarkers.add(timelineMarkerEntity)
+                    }
                 }
 
                 DELETE_ACTION -> {
@@ -207,5 +216,8 @@ class AnnotationFactory(
 
         variables.forEach { viewHandler.getVariableTranslator().emitNewValue(it.name, it.value) }
         variables.clear()
+
+        annotationListener.setTimelineMarkers(timelineMarkers)
+
     }
 }

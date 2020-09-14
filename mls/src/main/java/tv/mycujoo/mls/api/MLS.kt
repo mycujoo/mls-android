@@ -124,11 +124,15 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         annotationMediator = AnnotationMediator(
             MLSPlayerView,
             annotationFactory,
+            dataManager,
+            dispatcher,
             videoPlayerCoordinator.getPlayer(),
             Executors.newScheduledThreadPool(1),
             Handler(Looper.getMainLooper())
         )
         annotationMediator.initPlayerView(MLSPlayerView)
+
+        videoPlayerCoordinator.setAnnotationMediator(annotationMediator)
     }
     /**endregion */
 

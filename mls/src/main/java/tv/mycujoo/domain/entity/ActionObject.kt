@@ -249,4 +249,43 @@ data class ActionObject(
         )
     }
     /**endregion */
+
+    /**region Timeline marker related*/
+    fun toTimelineMarkerEntity(): TimelineMarkerEntity? {
+        if (rawData == null) {
+            return null
+        }
+
+        if (type != SHOW_TIMELINE_MARKER) {
+            return null
+        }
+
+        var label = INVALID_STRING_VALUE
+        var color = INVALID_STRING_VALUE
+        var seekOffset = 0L // initialValue
+
+        rawData.let { data ->
+            data.keys.forEach { key ->
+                val any = data[key]
+                when (key) {
+
+                    "seek_offset" -> {
+                        any?.let { seekOffset = (it as Double).toLong() }
+                    }
+                    "label" -> {
+                        any?.let { label = it as String }
+                    }
+
+                    "color" -> {
+                        any?.let { color = it as String }
+                    }
+                    else -> {
+                    }
+                }
+            }
+        }
+
+        return TimelineMarkerEntity(id, offset, seekOffset, label, color)
+    }
+    /**endregion */
 }

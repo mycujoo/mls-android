@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
-import tv.mycujoo.domain.mapper.TimelineMarkerMapper
 import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
@@ -24,6 +23,7 @@ import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mls.manager.contracts.IViewHandler
+import tv.mycujoo.mls.mediator.AnnotationMediator
 import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.ReactorCallback
@@ -47,6 +47,7 @@ class VideoPlayerCoordinator(
     private lateinit var player: IPlayer
     internal lateinit var videoPlayer: VideoPlayer
     private lateinit var playerView: MLSPlayerView
+    private lateinit var annotationMediator: AnnotationMediator
 
     private var hasAnalytic = false
     private lateinit var youboraClient: YouboraClient
@@ -114,6 +115,10 @@ class VideoPlayerCoordinator(
 
             initPlayerViewWrapper(MLSPlayerView, player)
         }
+    }
+
+    fun setAnnotationMediator(annotationMediator: AnnotationMediator) {
+        this.annotationMediator = annotationMediator
     }
 
     private fun initPlayerViewWrapper(
@@ -316,14 +321,13 @@ class VideoPlayerCoordinator(
     }
 
     private fun fetchActions(timelineId: String) {
-        dispatcher.launch(context = Dispatchers.Main) {
-            val result = dataManager.getActions(timelineId)
+        if (this::annotationMediator.isInitialized.not()) {
+            return
+        }
+
+        annotationMediator.fetchActions(timelineId) { result ->
             when (result) {
                 is Success -> {
-                    val timelineMarkerEntityList =
-                        result.value.data.mapNotNull { TimelineMarkerMapper.mapToTimelineMarker(it) }
-                    playerView.setTimelineMarker(timelineMarkerEntityList)
-
                     val joinTimelineParam = JoinTimelineParam(timelineId, result.value.updateId)
                     reactorSocket.joinTimelineIfNeeded(joinTimelineParam)
                 }

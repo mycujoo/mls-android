@@ -23,5 +23,6 @@ interface MlsApi {
         @Query("update_id") updateId: String? = null
     ): EventEntity
 
+    @GET("bff/timeline/v1beta1/{timeline_id}")
     suspend fun getActions(@Path("timeline_id") timelineId: String): ActionResponse
 }

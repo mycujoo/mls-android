@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.core
 
 import tv.mycujoo.domain.entity.OverlayEntity
+import tv.mycujoo.domain.entity.TimelineMarkerEntity
 
 interface IAnnotationListener {
 
@@ -22,6 +23,9 @@ interface IAnnotationListener {
     fun addOrUpdateLingeringMidwayOverlay(overlayEntity: OverlayEntity)
 
     fun removeLingeringOverlay(overlayEntity: OverlayEntity)
+
+    fun setTimelineMarkers(timelineMarkerEntityList: List<TimelineMarkerEntity>)
+
 
     /**
      * clears entire screen
