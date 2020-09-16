@@ -2,11 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'maven-publish'
-apply plugin: 'com.github.dcendents.android-maven'
 
-group='com.github.mycujoo'
-version = '1.0.2-alpha07'
 
 android {
     compileSdkVersion 29
@@ -47,10 +43,14 @@ android {
     buildTypes {
         release {
             minifyEnabled false
+            useProguard false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
             minifyEnabled false
+            useProguard false
+            shrinkResources false
             testCoverageEnabled true
         }
 
@@ -61,6 +61,11 @@ android {
             includeAndroidResources = true
         }
     }
+}
+
+tasks.withType(Javadoc).all {
+    enabled = false
+    excludes = ['**/*.kt'] // < ---- Exclude all kotlin files from javadoc file.
 }
 
 dependencies {
@@ -123,59 +128,10 @@ dependencies {
     testImplementation 'joda-time:joda-time:2.10.6'
 
     //TV
-    implementation "androidx.leanback:leanback-preference:1.0.0"
-    implementation 'com.google.android.exoplayer:extension-leanback:2.11.1'
+    api "androidx.leanback:leanback-preference:1.0.0"
+    api 'com.google.android.exoplayer:extension-leanback:2.11.1'
 
 }
 
-
-//def githubProperties = new Properties()
-//githubProperties.load(new FileInputStream(rootProject.file("github.properties")))
-
-//def getVersionName = { ->
-//    return version  // version Name
-//}
-//
-//def getArtificatId = { ->
-//    return "mls" // library name ID
-//}
-
-//publishing {
-//    publications {
-//        bar(MavenPublication) {
-//            groupId 'tv.mycujoo.libraries' // group ID
-//            artifactId getArtificatId()
-//            version getVersionName()
-//            artifact("$buildDir/outputs/aar/${getArtificatId()}-release.aar")
-//
-//            //generate pom nodes for dependencies
-//            pom.withXml {
-//                def dependenciesNode = asNode().appendNode('dependencies')
-//                configurations.implementation.allDependencies.each { dependency ->
-//                    if (dependency.group != null) {
-//                        def dependencyNode = dependenciesNode.appendNode('dependency')
-//                        dependencyNode.appendNode('groupId', dependency.group)
-//                        dependencyNode.appendNode('artifactId', dependency.name)
-//                        dependencyNode.appendNode('version', dependency.version)
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
-//    repositories {
-//        maven {
-//            name = "GitHubPackages"
-//            /** Configure path of your package repository on Github
-//             *  Replace GITHUB_USERID with your/organisation Github userID and REPOSITORY with the repository name on GitHub
-//             */
-//            url = uri("https://maven.pkg.github.com/mycujoo/mls-android")
-//
-//            credentials {
-//                /**Create github.properties in root project folder file with gpr.usr=GITHUB_USER_ID  & gpr.key=PERSONAL_ACCESS_TOKEN**/
-//                username = githubProperties['gpr.usr'] ?: System.getenv("GPR_USER")
-//                password = githubProperties['gpr.key'] ?: System.getenv("GPR_API_KEY")
-//            }
-//        }
-//    }
-//}
+apply from: 'install.gradle'
+apply from: 'bintray.gradle'
