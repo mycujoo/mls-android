@@ -31,7 +31,6 @@ import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
-import tv.mycujoo.mls.extensions.getDisplaySize
 import tv.mycujoo.mls.helper.DateTimeHelper
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.TimelineMarkerManager
@@ -94,7 +93,7 @@ class MLSPlayerView @JvmOverloads constructor(
 
 
         bufferView = findViewById(R.id.controller_buffering)
-        playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
+        playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
 
         findViewById<FrameLayout>(R.id.controller_informationButtonLayout).setOnClickListener {
             displayEventInfoForStartedEvents()
@@ -116,16 +115,13 @@ class MLSPlayerView @JvmOverloads constructor(
             if (this::uiEventListener.isInitialized) {
                 isFullScreen = !isFullScreen
 
-                if (isFullScreen) {
-                    fullScreenButton.setImageResource(R.drawable.ic_fullscreen_exit_24dp)
-                } else {
-                    fullScreenButton.setImageResource(R.drawable.ic_fullscreen_24dp)
-                }
+                updateFullscreenButtonImage()
 
                 uiEventListener.onFullScreenButtonClicked(isFullScreen)
             }
         }
 
+        updateFullscreenButtonImage()
 
     }
 
@@ -155,10 +151,6 @@ class MLSPlayerView @JvmOverloads constructor(
 
             obtainAttrs.recycle()
         }
-    }
-
-    private fun removeFullscreenButton() {
-        findViewById<ImageButton>(R.id.controller_fullscreenImageButton).visibility = View.GONE
     }
 
     private fun initMlsTimeBar(list: List<TimelineMarkerEntity>) {
@@ -196,47 +188,24 @@ class MLSPlayerView @JvmOverloads constructor(
     }
     /**endregion */
 
+
     /**region UI*/
-    fun screenMode(screenMode: ScreenMode) {
-        when (screenMode) {
-            is ScreenMode.Portrait -> {
-                playerView.resizeMode = screenMode.resizeMode
+    /**
+     * set different resize mode that video should respect
+     * @param resizeMode
+     */
+    fun setScreenResizeMode(resizeMode: ResizeMode) {
+        playerView.resizeMode = resizeMode.value
+    }
 
-                val displaySize = context.getDisplaySize()
-                val layoutParams = layoutParams as ViewGroup.LayoutParams
-                layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
-                layoutParams.height = displaySize.width * 9 / 16
-
-                setLayoutParams(layoutParams)
-            }
-            is ScreenMode.Landscape -> {
-                playerView.resizeMode = screenMode.resizeMode
-
-                val layoutParams = layoutParams as ViewGroup.LayoutParams
-
-                when (screenMode.resizeMode) {
-                    RESIZE_MODE_FIT -> {
-                        layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
-                        layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
-                    }
-                    RESIZE_MODE_FIXED_WIDTH -> {
-                        layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
-                        layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
-                    }
-                    RESIZE_MODE_FIXED_HEIGHT -> {
-                        layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
-                        layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
-                    }
-
-                    RESIZE_MODE_FILL -> {
-                        layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
-                        layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
-                    }
-                }
-
-                setLayoutParams(layoutParams)
-            }
-        }
+    /**
+     * set current fullscreen state.
+     * updates fullscreen button accordingly
+     * @param isFullscreen
+     */
+    fun setFullscreen(isFullscreen: Boolean) {
+        this.isFullScreen = isFullscreen
+        updateFullscreenButtonImage()
     }
 
     // internal use only
@@ -244,6 +213,17 @@ class MLSPlayerView @JvmOverloads constructor(
         this.onSizeChangedCallback = onSizeChangedCallback
     }
 
+    private fun updateFullscreenButtonImage() {
+        if (isFullScreen) {
+            fullScreenButton.setImageResource(R.drawable.ic_fullscreen_exit_24dp)
+        } else {
+            fullScreenButton.setImageResource(R.drawable.ic_fullscreen_24dp)
+        }
+    }
+
+    private fun removeFullscreenButton() {
+        findViewById<ImageButton>(R.id.controller_fullscreenImageButton).visibility = View.GONE
+    }
     /**endregion */
 
     /**region Functionality*/
@@ -300,13 +280,17 @@ class MLSPlayerView @JvmOverloads constructor(
 
             if (config.showBackForwardsButtons) {
                 findViewById<ImageButton>(R.id.exo_rew).visibility = View.VISIBLE
-                findViewById<FrameLayout>(R.id.controller_rewButtonContainerLayout).visibility = View.VISIBLE
-                findViewById<FrameLayout>(R.id.controller_ffwdButtonContainerLayout).visibility = View.VISIBLE
+                findViewById<FrameLayout>(R.id.controller_rewButtonContainerLayout).visibility =
+                    View.VISIBLE
+                findViewById<FrameLayout>(R.id.controller_ffwdButtonContainerLayout).visibility =
+                    View.VISIBLE
                 findViewById<ImageButton>(R.id.exo_ffwd).visibility = View.VISIBLE
             } else {
                 findViewById<ImageButton>(R.id.exo_rew).visibility = View.GONE
-                findViewById<FrameLayout>(R.id.controller_rewButtonContainerLayout).visibility = View.GONE
-                findViewById<FrameLayout>(R.id.controller_ffwdButtonContainerLayout).visibility = View.GONE
+                findViewById<FrameLayout>(R.id.controller_rewButtonContainerLayout).visibility =
+                    View.GONE
+                findViewById<FrameLayout>(R.id.controller_ffwdButtonContainerLayout).visibility =
+                    View.GONE
                 findViewById<ImageButton>(R.id.exo_ffwd).visibility = View.GONE
             }
 
@@ -409,11 +393,6 @@ class MLSPlayerView @JvmOverloads constructor(
     /**endregion */
 
     /**region New Annotation structure*/
-
-    fun getTimeSvgString(): String {
-        return "<svg height=\"30\" width=\"200\"><rect width=\"200\" height=\"30\" style=\"fill:rgb(211,211,211);stroke-width:3;stroke:rgb(128, 128, 128)\" /><text x=\"0\" y=\"15\" fill=\"red\">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</text></svg>"
-    }
-
     fun continueOverlayAnimations() {
         viewHandler.getAnimations().forEach { it.resume() }
     }
@@ -435,12 +414,14 @@ class MLSPlayerView @JvmOverloads constructor(
             playerView.hideController()
 
             val informationDialog =
-                LayoutInflater.from(context).inflate(R.layout.dialog_event_info_pre_event_layout, this, false)
+                LayoutInflater.from(context)
+                    .inflate(R.layout.dialog_event_info_pre_event_layout, this, false)
             eventInfoDialogContainerLayout.addView(informationDialog)
 
             informationDialog.eventInfoPreEventDialog_titleTextView.text = eventInfoTitle
             informationDialog.informationDialog_bodyTextView.text = eventInfoDescription
-            informationDialog.informationDialog_dateTimeTextView.text = DateTimeHelper.getDateTime(eventDateTime)
+            informationDialog.informationDialog_dateTimeTextView.text =
+                DateTimeHelper.getDateTime(eventDateTime)
 
         }
 
@@ -453,7 +434,8 @@ class MLSPlayerView @JvmOverloads constructor(
         }
         post {
             val eventInfoDialog =
-                LayoutInflater.from(context).inflate(R.layout.dialog_event_info_started_layout, this, false)
+                LayoutInflater.from(context)
+                    .inflate(R.layout.dialog_event_info_started_layout, this, false)
             eventInfoDialogContainerLayout.addView(eventInfoDialog)
 
             eventInfoDialog.eventInfoStartedEventDialog_titleTextView.text = eventInfoTitle
@@ -659,14 +641,6 @@ class MLSPlayerView @JvmOverloads constructor(
     /**endregion */
 
     /**region Classes*/
-
-    sealed class ScreenMode {
-        data class Portrait(val resizeMode: Int = 0) :
-            ScreenMode()
-
-        data class Landscape(val resizeMode: Int = 0) : ScreenMode()
-    }
-
     enum class LiveState {
         LIVE_ON_THE_EDGE,
         LIVE_TRAILING,
@@ -674,28 +648,15 @@ class MLSPlayerView @JvmOverloads constructor(
     }
 
     /**endregion */
+    /**region Inner classes*/
 
-    companion object {
-        /**
-         * Either the width or height is decreased to obtain the desired aspect ratio.
-         */
-        const val RESIZE_MODE_FIT = 0
-
-        /**
-         * The width is fixed and the height is increased or decreased to obtain the desired aspect ratio.
-         */
-        const val RESIZE_MODE_FIXED_WIDTH = 1
-
-        /**
-         * The height is fixed and the width is increased or decreased to obtain the desired aspect ratio.
-         */
-        const val RESIZE_MODE_FIXED_HEIGHT = 2
-
-        /**
-         * The specified aspect ratio is ignored.
-         */
-        const val RESIZE_MODE_FILL = 3
+    enum class ResizeMode(val value: Int) {
+        RESIZE_MODE_FIT(0),
+        RESIZE_MODE_FIXED_WIDTH(1),
+        RESIZE_MODE_FIXED_HEIGHT(2),
+        RESIZE_MODE_FILL(3);
     }
+    /**endregion */
 
 
 }

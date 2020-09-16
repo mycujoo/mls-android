@@ -123,7 +123,6 @@ class TimelineMarkerView @JvmOverloads constructor(
                 }
 
                 override fun onChildViewRemoved(parent: View?, child: View?) {
-                    visibility = View.INVISIBLE
                 }
             }
             setOnHierarchyChangeListener(t)

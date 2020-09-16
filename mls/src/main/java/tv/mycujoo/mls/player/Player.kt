@@ -94,10 +94,10 @@ class Player : IPlayer {
     }
 
 
-    override fun play(uriString: String) {
+    override fun play(uriString: String, autoPlay: Boolean) {
         this.uri = Uri.parse(uriString)
         this.uri?.let {
-            play(it, true)
+            play(it, autoPlay)
         }
     }
 

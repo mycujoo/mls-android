@@ -183,7 +183,10 @@ class VideoPlayerCoordinator(
     }
 
     fun reInitialize(MLSPlayerView: MLSPlayerView) {
-        player.create(createMediaFactory(MLSPlayerView.context), createExoPlayer(MLSPlayerView.context))
+        player.create(
+            createMediaFactory(MLSPlayerView.context),
+            createExoPlayer(MLSPlayerView.context)
+        )
 
         initPlayerViewWrapper(MLSPlayerView, player)
         dataManager.currentEvent?.let {
@@ -193,9 +196,6 @@ class VideoPlayerCoordinator(
 
     fun attachPlayer(playerView: MLSPlayerView) {
         playerView.playerView.player = player.getDirectInstance()
-
-        playerView.screenMode(MLSPlayerView.ScreenMode.Portrait(MLSPlayerView.RESIZE_MODE_FILL))
-
         playerView.playerView.hideController()
 
         if (hasAnalytic) {
@@ -228,14 +228,15 @@ class VideoPlayerCoordinator(
         youboraClient = internalBuilder.createYouboraClient(plugin)
     }
 
-    fun config(videoPlayerConfig: VideoPlayerConfig){
-        if (this::playerView.isInitialized.not()){
+    fun config(videoPlayerConfig: VideoPlayerConfig) {
+        if (this::playerView.isInitialized.not()) {
             return
         }
 
         this.videoPlayerConfig = videoPlayerConfig
         playerView.config(videoPlayerConfig)
     }
+
     /**endregion */
 
     fun onEventUpdateAvailable(updateId: String) {
@@ -287,19 +288,23 @@ class VideoPlayerCoordinator(
     }
 
     fun playExternalSourceVideo(videoUri: String) {
-        player.play(videoUri)
+        player.play(videoUri, videoPlayerConfig.autoPlay)
         playerView.hideEventInfoDialog()
         playerView.hideEventInfoButton()
     }
 
     private fun playVideoOrDisplayEventInfo(event: EventEntity) {
         playerView.setEventInfo(event.title, event.description, event.start_time)
-        playerView.showEventInfoButton()
+        if (videoPlayerConfig.showEventInfoButton) {
+            playerView.showEventInfoButton()
+        } else {
+            playerView.hideEventInfoButton()
+        }
 
         if (mayPlayVideo(event)) {
             logged = false
 
-            player.play(event.streams.first().fullUrl)
+            player.play(event.streams.first().fullUrl, videoPlayerConfig.autoPlay)
             playerView.hideEventInfoDialog()
         } else {
             // display event info
