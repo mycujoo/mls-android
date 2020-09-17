@@ -1,5 +1,5 @@
 
-[![Download](https://api.bintray.com/packages/sherviiin/mls/tv.mycujoo.mls/images/download.svg) ](https://bintray.com/sherviiin/mls/tv.mycujoo.mls/_latestVersion)
+[ ![Download](https://api.bintray.com/packages/mycujoo/mls/tv.mycujoo.mls-android/images/download.svg?version=1.0.2-alpha17) ](https://bintray.com/mycujoo/mls/tv.mycujoo.mls-android/1.0.2-alpha17/link)
 # MLS (MyCujoo Live Services) in Android platform MLS-android
 
 ### For usage showcase please refer to Sample-app [https://github.com/mycujoo/mls-android-sample-app]
@@ -12,7 +12,16 @@ MLS Android SDK enables apps to play videos that are hosted on MyCujoo Live Serv
 
 Add dependency to SDK in app-level build.gradle file:
 
-    implementation 'tv.mycujoo.mls:mls:LATEST_VERSION_HERE'
+    implementation 'tv.mycujoo.mls-android:mls:LATEST_VERSION_HERE'
+    
+#### Add MLSPlayerView
+
+In xml layout file of your activity (or fragment) add MLSPayerView. 
+
+        <tv.mycujoo.mls.widgets.MLSPlayerView
+            android:id="@+id/mlsPlayerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
 in order to communicate with SDK, MLS class must be instantiated. Init MLS whenever you have a reference to an Activity:
 
@@ -21,6 +30,8 @@ in order to communicate with SDK, MLS class must be instantiated. Init MLS whene
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // code ommited for brevity
+        
+        // constraint MLSPlayerView here
 
         val playerEventsListener = object : PlayerEventsListener {
             override fun onIsPlayingChanged(playing: Boolean) {
@@ -70,9 +81,11 @@ in order to communicate with SDK, MLS class must be instantiated. Init MLS whene
             super.onConfigurationChanged(newConfig)
             // change view display mode
             if (isFullScreen) {
-                playerView.screenMode(MLSPlayerView.ScreenMode.Landscape(MLSPlayerView.RESIZE_MODE_FILL))
+                mlsPlayerView.setScreenResizeMode(resizeMode = MLSPlayerView.ResizeMode.RESIZE_MODE_FIXED_HEIGHT)
+                mlsPlayerView.setFullscreen(isFullscreen = true)
             } else {
-                playerView.screenMode(MLSPlayerView.ScreenMode.Portrait(MLSPlayerView.RESIZE_MODE_FIT))
+                mlsPlayerView.setScreenResizeMode(resizeMode = MLSPlayerView.ResizeMode.RESIZE_MODE_FIT)
+                mlsPlayerView.setFullscreen(isFullscreen = false)
             }
         }
 #### Get Events
