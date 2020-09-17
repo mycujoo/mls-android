@@ -1,6 +1,6 @@
 apply plugin: 'com.jfrog.bintray'
 
-version = '1.0.2-alpha15' // LIBRARY VERSION
+version = '1.0.2-alpha17' // LIBRARY VERSION
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
@@ -31,7 +31,8 @@ bintray {
     configurations = ['archives']
     pkg {
         repo = 'mls'
-        name = 'tv.mycujoo.mls' // PACKAGE NAME
+        userOrg = 'mycujoo'
+        name = 'tv.mycujoo.mls-android' // PACKAGE NAME
         desc = 'MLS Android SDK' // LIBRARY DESCRIPTION
         websiteUrl = 'https://github.com/mycujoo/mls-android' // SITE
         vcsUrl = 'https://github.com/mycujoo/mls-android.git' // GIT REPO

@@ -1,6 +1,6 @@
 apply plugin: 'com.github.dcendents.android-maven'
 
-group = 'tv.mycujoo.mls' // CREATE A GROUP ID FOR YOUR LIBRARY
+group = 'tv.mycujoo.mls-android' // CREATE A GROUP ID FOR YOUR LIBRARY
 
 install {
     repositories.mavenInstaller {
@@ -19,7 +19,7 @@ install {
             }
             project {
                 packaging 'aar'
-                groupId 'tv.mycujoo.mls' // CREATE A GROUP ID FOR LIBRARY
+                groupId 'tv.mycujoo.mls-android' // CREATE A GROUP ID FOR LIBRARY
                 artifactId 'mls' // THE NAME OF MODULE
 
                 name 'mls' // LIBRARY NAME
