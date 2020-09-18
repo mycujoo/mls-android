@@ -29,6 +29,7 @@ import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.helper.DateTimeHelper
 import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.network.socket.IReactorSocket
+import tv.mycujoo.mls.tv.internal.controller.LiveBadgeToggleHandler
 import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackTransportControlGlueImpl
 
@@ -55,7 +56,8 @@ class TvVideoPlayer(
         leanbackAdapter = LeanbackPlayerAdapter(activity, player!!, 1000)
         glueHost = VideoSupportFragmentGlueHost(videoSupportFragment)
 
-        mTransportControlGlue = MLSPlaybackTransportControlGlueImpl(activity, leanbackAdapter)
+        val liveToggleHandler = LiveBadgeToggleHandler()
+        mTransportControlGlue = MLSPlaybackTransportControlGlueImpl(activity, leanbackAdapter, liveToggleHandler)
         mTransportControlGlue.host = glueHost
         mTransportControlGlue.playWhenPrepared()
         if (mTransportControlGlue.isPrepared) {
@@ -81,6 +83,10 @@ class TvVideoPlayer(
                     mTransportControlGlue.seekProvider?.let {
                         (it as MLSPlaybackSeekDataProvider).setSeekPositions(player!!.duration)
                     }
+                }
+
+                player?.let {
+                    liveToggleHandler.toggle(it.isCurrentWindowDynamic)
                 }
             }
         })

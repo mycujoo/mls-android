@@ -22,6 +22,7 @@ import androidx.leanback.widget.RowPresenter;
 
 import java.lang.ref.WeakReference;
 
+import tv.mycujoo.mls.tv.internal.controller.LiveBadgeToggleHandler;
 import tv.mycujoo.mls.tv.internal.presenter.MLSPlaybackTransportRowPresenter;
 import tv.mycujoo.mls.tv.widgets.MLSFastForwardAction;
 import tv.mycujoo.mls.tv.widgets.MLSPlayPauseAction;
@@ -60,8 +61,8 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
      * @param context
      * @param impl    Implementation to underlying media player.
      */
-    public MLSPlaybackTransportControlGlueImpl(Context context, T impl) {
-        super(context, impl);
+    public MLSPlaybackTransportControlGlueImpl(Context context, T impl, LiveBadgeToggleHandler liveBadgeToggleHandler) {
+        super(context, impl, liveBadgeToggleHandler);
     }
 
     @Override
@@ -80,7 +81,7 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
     }
 
     @Override
-    protected PlaybackRowPresenter onCreateRowPresenter() {
+    protected PlaybackRowPresenter onCreateRowPresenter(LiveBadgeToggleHandler liveBadgeToggleHandler) {
         final AbstractDetailsDescriptionPresenter detailsPresenter =
                 new AbstractDetailsDescriptionPresenter() {
                     @Override
@@ -92,7 +93,7 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
                     }
                 };
 
-        MLSPlaybackTransportRowPresenter rowPresenter = new MLSPlaybackTransportRowPresenter() {
+        MLSPlaybackTransportRowPresenter rowPresenter = new MLSPlaybackTransportRowPresenter(liveBadgeToggleHandler) {
             @Override
             protected void onBindRowViewHolder(RowPresenter.ViewHolder vh, Object item) {
                 super.onBindRowViewHolder(vh, item);
@@ -208,10 +209,10 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
         } else if (action instanceof PlaybackControlsRow.SkipPreviousAction) {
             previous();
             handled = true;
-        } else if (action instanceof MLSRewindAction){
+        } else if (action instanceof MLSRewindAction) {
             rewind();
             handled = true;
-        } else if (action instanceof MLSFastForwardAction){
+        } else if (action instanceof MLSFastForwardAction) {
             fastForward();
             handled = true;
         }

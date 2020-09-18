@@ -27,11 +27,14 @@ import androidx.leanback.widget.RowPresenter;
 import java.util.Arrays;
 
 import tv.mycujoo.mls.R;
+import tv.mycujoo.mls.tv.internal.controller.LiveBadgeToggleHandler;
 import tv.mycujoo.mls.tv.widgets.MLSPlaybackTransportRowView;
 import tv.mycujoo.mls.tv.widgets.MLSSeekBar;
 import tv.mycujoo.mls.tv.widgets.MLSThumbsBar;
 
 public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
+
+    private final LiveBadgeToggleHandler LiveBadgeToggleHandler;
 
     static class BoundData extends MLSPlaybackControlPresenter.BoundData {
         MLSPlaybackTransportRowPresenter.ViewHolder mRowViewHolder;
@@ -68,6 +71,8 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
         PlaybackSeekDataProvider mSeekDataProvider;
         long[] mPositions;
         int mPositionsLength;
+
+        TextView mLiveBadgeTextView;
 
         final PlaybackControlsRow.OnPlaybackProgressCallback mListener =
                 new PlaybackControlsRow.OnPlaybackProgressCallback() {
@@ -333,6 +338,8 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
                 mDescriptionDock.addView(mDescriptionViewHolder.view);
             }
             mThumbsBar = (MLSThumbsBar) rootView.findViewById(R.id.thumbs_row);
+
+            mLiveBadgeTextView = (TextView) rootView.findViewById(R.id.tvController_liveBadgeTextView);
         }
 
         /**
@@ -573,9 +580,11 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
                 }
             };
 
-    public MLSPlaybackTransportRowPresenter() {
+    public MLSPlaybackTransportRowPresenter(LiveBadgeToggleHandler liveBadgeToggleHandler) {
         setHeaderPresenter(null);
         setSelectEffectEnabled(false);
+
+        this.LiveBadgeToggleHandler = liveBadgeToggleHandler;
 
         mPlaybackControlsPresenter = new MLSControlBarPresenter(R.layout.layout_mls_control_bar);
         mPlaybackControlsPresenter.setDefaultFocusToMiddle(false);
@@ -748,6 +757,8 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
         vh.setCurrentPosition(row.getCurrentPosition());
         vh.setBufferedPosition(row.getBufferedPosition());
         row.setOnPlaybackProgressChangedListener(vh.mListener);
+
+        LiveBadgeToggleHandler.addListener(state -> setIsLive(state, vh.mLiveBadgeTextView));
     }
 
     @Override
@@ -827,6 +838,14 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
         if (mDescriptionPresenter != null) {
             mDescriptionPresenter.onViewDetachedFromWindow(
                     ((MLSPlaybackTransportRowPresenter.ViewHolder) vh).mDescriptionViewHolder);
+        }
+    }
+
+    private void setIsLive(boolean isLive, TextView mLiveBadgeTextView) {
+        if (isLive) {
+            mLiveBadgeTextView.setVisibility(View.VISIBLE);
+        } else {
+            mLiveBadgeTextView.setVisibility(View.GONE);
         }
     }
 

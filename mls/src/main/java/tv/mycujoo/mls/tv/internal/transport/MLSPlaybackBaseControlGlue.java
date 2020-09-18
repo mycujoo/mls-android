@@ -21,6 +21,7 @@ import androidx.leanback.widget.Presenter;
 
 import java.util.List;
 
+import tv.mycujoo.mls.tv.internal.controller.LiveBadgeToggleHandler;
 import tv.mycujoo.mls.tv.widgets.MLSFastForwardAction;
 import tv.mycujoo.mls.tv.widgets.MLSPlayPauseAction;
 import tv.mycujoo.mls.tv.widgets.MLSRewindAction;
@@ -98,6 +99,8 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
     boolean mErrorSet = false;
     int mErrorCode;
     String mErrorMessage;
+
+    LiveBadgeToggleHandler liveBadgeToggleHandler;
 
     final PlayerAdapter.Callback mAdapterCallback = new PlayerAdapter
             .Callback() {
@@ -177,10 +180,11 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
      * @param context
      * @param impl    Implementation to underlying media player.
      */
-    public MLSPlaybackBaseControlGlue(Context context, T impl) {
+    public MLSPlaybackBaseControlGlue(Context context, T impl, LiveBadgeToggleHandler liveBadgeToggleHandler) {
         super(context);
         mPlayerAdapter = impl;
         mPlayerAdapter.setCallback(mAdapterCallback);
+        this.liveBadgeToggleHandler = liveBadgeToggleHandler;
     }
 
     public final T getPlayerAdapter() {
@@ -251,11 +255,11 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
 
     void onCreateDefaultRowPresenter() {
         if (mControlsRowPresenter == null) {
-            setPlaybackRowPresenter(onCreateRowPresenter());
+            setPlaybackRowPresenter(onCreateRowPresenter(liveBadgeToggleHandler));
         }
     }
 
-    protected abstract PlaybackRowPresenter onCreateRowPresenter();
+    protected abstract PlaybackRowPresenter onCreateRowPresenter(LiveBadgeToggleHandler liveToggleL);
 
     /**
      * Sets the controls to auto hide after a timeout when media is playing.
