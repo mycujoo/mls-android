@@ -30,59 +30,69 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/controlsCardContainerLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:orientation="vertical"
-        android:paddingBottom="@dimen/lb_playback_transport_control_row_padding_bottom"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="wrap_content">
 
-        <FrameLayout
+        <LinearLayout
+            android:id="@+id/controls_card"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="@dimen/lb_playback_transport_control_info_margin_bottom"
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:paddingStart="?attr/browsePaddingStart"
+            android:paddingEnd="?attr/browsePaddingEnd">
 
-            <LinearLayout
-                android:id="@+id/controls_card"
+            <ImageView
+                android:id="@+id/image"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/lb_playback_transport_image_height"
+                android:layout_gravity="top"
+                android:layout_marginEnd="@dimen/lb_playback_transport_image_margin_end"
+                android:adjustViewBounds="true"
+                android:scaleType="fitStart" />
+
+            <FrameLayout
+                android:id="@+id/description_dock"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:layout_marginBottom="@dimen/lb_playback_transport_control_info_margin_bottom"
+                android:layout_gravity="top"
                 android:clipToPadding="false"
-                android:orientation="horizontal"
-                android:paddingStart="?attr/browsePaddingStart"
-                android:paddingEnd="?attr/browsePaddingEnd">
+                android:gravity="bottom" />
+        </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/image"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/lb_playback_transport_image_height"
-                    android:layout_gravity="top"
-                    android:layout_marginEnd="@dimen/lb_playback_transport_image_margin_end"
-                    android:adjustViewBounds="true"
-                    android:scaleType="fitStart" />
+        <tv.mycujoo.mls.tv.widgets.MLSThumbsBar
+            android:id="@+id/thumbs_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginBottom="@dimen/lb_playback_transport_thumbs_bottom_margin"
+            android:orientation="horizontal"
+            android:visibility="invisible" />
 
-                <FrameLayout
-                    android:id="@+id/description_dock"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="top"
-                    android:clipToPadding="false"
-                    android:gravity="bottom" />
-            </LinearLayout>
 
-            <tv.mycujoo.mls.tv.widgets.MLSThumbsBar
-                android:id="@+id/thumbs_row"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:layout_marginBottom="@dimen/lb_playback_transport_thumbs_bottom_margin"
-                android:orientation="horizontal"
-                android:visibility="invisible" />
-        </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/transportRowContainerLayout"
+        android:layout_width="match_parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/controlsCardContainerLayout"
+        android:layout_height="wrap_content">
 
         <tv.mycujoo.mls.tv.widgets.MLSPlaybackTransportRowView
             android:id="@+id/transport_row"
@@ -90,13 +100,17 @@
             android:layout_height="match_parent"
             android:clipChildren="false"
             android:clipToPadding="false"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
             android:orientation="vertical"
             android:paddingStart="?attr/browsePaddingStart"
             android:paddingEnd="?attr/browsePaddingEnd">
 
-            <FrameLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/controls_dock"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_gravity="center"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/lb_playback_transport_controlbar_margin_start"
                 android:layoutDirection="ltr" />
@@ -159,5 +173,29 @@
 
 
         </tv.mycujoo.mls.tv.widgets.MLSPlaybackTransportRowView>
-    </LinearLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:clipChildren="false"-->
+<!--        android:clipToPadding="false"-->
+<!--        android:orientation="vertical"-->
+<!--        android:paddingBottom="@dimen/lb_playback_transport_control_row_padding_bottom"-->
+<!--        app:layout_constraintLeft_toLeftOf="parent"-->
+<!--        app:layout_constraintRight_toRightOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent">-->
+
+<!--        <FrameLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent">-->
+
+
+
+
+<!--        </FrameLayout>-->
+
+<!--    </LinearLayout>-->
 </androidx.constraintlayout.widget.ConstraintLayout>

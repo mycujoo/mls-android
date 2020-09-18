@@ -21,6 +21,10 @@ import androidx.leanback.widget.Presenter;
 
 import java.util.List;
 
+import tv.mycujoo.mls.tv.widgets.MLSFastForwardAction;
+import tv.mycujoo.mls.tv.widgets.MLSPlayPauseAction;
+import tv.mycujoo.mls.tv.widgets.MLSRewindAction;
+
 public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extends PlaybackGlue
         implements OnActionClickedListener, View.OnKeyListener {
 
@@ -77,7 +81,9 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
     public final T mPlayerAdapter;
     public PlaybackControlsRow mControlsRow;
     PlaybackRowPresenter mControlsRowPresenter;
-    public PlaybackControlsRow.PlayPauseAction mPlayPauseAction;
+    public MLSPlayPauseAction mPlayPauseAction;
+    public MLSRewindAction mRewindAction;
+    public MLSFastForwardAction mFastForwardAction;
     public boolean mIsPlaying = false;
     public boolean mFadeWhenPlaying = true;
 
@@ -366,6 +372,33 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
     @Override
     public void previous() {
         mPlayerAdapter.previous();
+    }
+
+    public void rewind() {
+        long currentPosition = getCurrentPosition();
+        if (currentPosition < 0) {
+            return;
+        }
+
+        if (currentPosition > 10000L) {
+            seekTo(currentPosition - 10000L);
+        } else {
+            seekTo(0L);
+        }
+    }
+
+    public void fastForward() {
+        long currentPosition = getCurrentPosition();
+        long duration = getDuration();
+        if (currentPosition < 0 || duration < 0) {
+            return;
+        }
+
+        if (currentPosition + 1000L < duration) {
+            seekTo(currentPosition + 10000L);
+        } else {
+            seekTo(duration);
+        }
     }
 
     protected static void notifyItemChanged(ArrayObjectAdapter adapter, Object object) {

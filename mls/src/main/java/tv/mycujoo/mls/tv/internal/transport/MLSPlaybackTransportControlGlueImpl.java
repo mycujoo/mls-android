@@ -23,6 +23,9 @@ import androidx.leanback.widget.RowPresenter;
 import java.lang.ref.WeakReference;
 
 import tv.mycujoo.mls.tv.internal.presenter.MLSPlaybackTransportRowPresenter;
+import tv.mycujoo.mls.tv.widgets.MLSFastForwardAction;
+import tv.mycujoo.mls.tv.widgets.MLSPlayPauseAction;
+import tv.mycujoo.mls.tv.widgets.MLSRewindAction;
 
 public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extends MLSPlaybackBaseControlGlue<T> {
     static final String TAG = "PlaybackTransportGlue";
@@ -70,8 +73,10 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
 
     @Override
     protected void onCreatePrimaryActions(ArrayObjectAdapter primaryActionsAdapter) {
+        primaryActionsAdapter.add(mRewindAction = new MLSRewindAction(getContext(), 1));
         primaryActionsAdapter.add(mPlayPauseAction =
-                new PlaybackControlsRow.PlayPauseAction(getContext()));
+                new MLSPlayPauseAction(getContext()));
+        primaryActionsAdapter.add(mFastForwardAction = new MLSFastForwardAction(getContext(), 1));
     }
 
     @Override
@@ -177,7 +182,7 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
      */
     boolean dispatchAction(Action action, KeyEvent keyEvent) {
         boolean handled = false;
-        if (action instanceof PlaybackControlsRow.PlayPauseAction) {
+        if (action instanceof MLSPlayPauseAction) {
             boolean canPlay = keyEvent == null
                     || keyEvent.getKeyCode() == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
                     || keyEvent.getKeyCode() == KeyEvent.KEYCODE_MEDIA_PLAY;
@@ -202,6 +207,12 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
             handled = true;
         } else if (action instanceof PlaybackControlsRow.SkipPreviousAction) {
             previous();
+            handled = true;
+        } else if (action instanceof MLSRewindAction){
+            rewind();
+            handled = true;
+        } else if (action instanceof MLSFastForwardAction){
+            fastForward();
             handled = true;
         }
         return handled;
