@@ -20,17 +20,17 @@ import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
-import tv.mycujoo.domain.mapper.TimelineMarkerMapper
 import tv.mycujoo.mls.R
+import tv.mycujoo.mls.core.AbstractPlayerMediator
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.helper.DateTimeHelper
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
-import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.network.socket.IReactorSocket
-import tv.mycujoo.mls.network.socket.ReactorCallback
 import tv.mycujoo.mls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackTransportControlGlueImpl
@@ -43,7 +43,7 @@ class TvVideoPlayer(
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager
-) {
+) : AbstractPlayerMediator(reactorSocket, dispatcher) {
 
 
     /**region Fields*/
@@ -52,11 +52,7 @@ class TvVideoPlayer(
     private var glueHost: VideoSupportFragmentGlueHost
     private var mTransportControlGlue: MLSPlaybackTransportControlGlueImpl<LeanbackPlayerAdapter>
     private var eventInfoContainerLayout: FrameLayout
-
-    private var eventMayBeStreamed = false
-    private var isLive: Boolean = false
-
-    private lateinit var streamUrlPullJob: Job
+    private var controllerAgent: ControllerAgent
     /**endregion */
 
     /**region Initializing*/
@@ -65,7 +61,7 @@ class TvVideoPlayer(
         leanbackAdapter = LeanbackPlayerAdapter(activity, player!!, 1000)
         glueHost = VideoSupportFragmentGlueHost(videoSupportFragment)
 
-        val controllerAgent = ControllerAgent(player!!)
+        controllerAgent = ControllerAgent(player!!)
         mTransportControlGlue =
             MLSPlaybackTransportControlGlueImpl(activity, leanbackAdapter, controllerAgent)
         mTransportControlGlue.host = glueHost
@@ -123,33 +119,13 @@ class TvVideoPlayer(
                 FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
             )
         }
-
-
-        reactorSocket.addListener(reactorCallback = object : ReactorCallback {
-            override fun onEventUpdate(eventId: String, updateEventId: String) {
-                onEventUpdateAvailable(eventId, updateEventId)
-            }
-
-            override fun onCounterUpdate(counts: String) {
-                if (isLive && isViewersCountValid(counts)) {
-                    controllerAgent.setViewerCount(StringUtils.getNumberOfViewers(counts))
-                } else {
-                    controllerAgent.hideViewersCount()
-                }
-            }
-
-            override fun onTimelineUpdate(timelineId: String, updatedEventId: String) {
-            }
-        })
-
     }
 
     /**endregion */
-
-    fun onEventUpdateAvailable(eventId: String, updateId: String) {
+    override fun onReactorEventUpdate(eventId: String, updateEventId: String) {
         cancelStreamUrlPulling()
         dispatcher.launch(context = Dispatchers.Main) {
-            val result = dataManager.getEventDetails(eventId, updateId)
+            val result = dataManager.getEventDetails(eventId, updateEventId)
             when (result) {
                 is Result.Success -> {
                     dataManager.currentEvent = result.value
@@ -166,6 +142,17 @@ class TvVideoPlayer(
         }
     }
 
+    override fun onReactorCounterUpdate(counts: String) {
+        if (isLive && isViewersCountValid(counts)) {
+            controllerAgent.setViewerCount(StringUtils.getNumberOfViewers(counts))
+        } else {
+            controllerAgent.hideViewersCount()
+        }
+    }
+
+    override fun onReactorTimelineUpdate(timelineId: String, updateId: String) {
+        // todo
+    }
 
     /**region Playback*/
     fun playExternalSourceVideo(url: String, isHls: Boolean = true) {
@@ -185,11 +172,11 @@ class TvVideoPlayer(
         }
     }
 
-    fun playVideo(event: EventEntity) {
+    override fun playVideo(event: EventEntity) {
         playVideo(event.id)
     }
 
-    fun playVideo(eventId: String) {
+    override fun playVideo(eventId: String) {
         dispatcher.launch(context = Dispatchers.Main) {
             val result = dataManager.getEventDetails(eventId)
             when (result) {
@@ -220,29 +207,6 @@ class TvVideoPlayer(
         }
     }
 
-    private fun mayPlayVideo(event: EventEntity): Boolean {
-        eventMayBeStreamed = event.streams.firstOrNull()?.fullUrl != null
-        return eventMayBeStreamed
-    }
-
-    private fun startStreamUrlPullingIfNeeded(event: EventEntity) {
-        cancelStreamUrlPulling()
-        if (eventMayBeStreamed) {
-            return
-        }
-        streamUrlPullJob = dispatcher.launch {
-            delay(30000L)
-            playVideo(event.id)
-        }
-    }
-
-    private fun cancelStreamUrlPulling() {
-        if (this::streamUrlPullJob.isInitialized) {
-            streamUrlPullJob.cancel()
-        }
-    }
-
-
     /**endregion */
 
     /**region Event-information layout*/
@@ -271,41 +235,4 @@ class TvVideoPlayer(
             DateTimeHelper.getDateTime(startTime)
     }
     /**endregion */
-
-    /**region Reactor function*/
-
-    private fun joinToReactor(event: EventEntity) {
-        reactorSocket.joinEvent(event.id)
-    }
-
-    private fun fetchActions(event: EventEntity) {
-        if (event.timeline_ids.isEmpty()) {
-            return
-        }
-        fetchActions(event.timeline_ids.first())
-    }
-
-    private fun fetchActions(timelineId: String) {
-        dispatcher.launch(context = Dispatchers.Main) {
-            val result = dataManager.getActions(timelineId)
-            when (result) {
-                is Result.Success -> {
-                    val timelineMarkerEntityList =
-                        result.value.data.mapNotNull { TimelineMarkerMapper.mapToTimelineMarker(it) }
-//                    playerView.setTimelineMarker(timelineMarkerEntityList) todo
-
-                    val joinTimelineParam =
-                        JoinTimelineParam(timelineId, result.value.data.lastOrNull()?.id)
-                    reactorSocket.joinTimelineIfNeeded(joinTimelineParam)
-                }
-                is Result.NetworkError,
-                is Result.GenericError -> {
-                }
-            }
-        }
-
-    }
-
-    /**endregion */
-
 }

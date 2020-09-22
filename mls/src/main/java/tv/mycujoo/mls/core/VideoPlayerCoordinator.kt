@@ -26,7 +26,6 @@ import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.mediator.AnnotationMediator
 import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.network.socket.IReactorSocket
-import tv.mycujoo.mls.network.socket.ReactorCallback
 import tv.mycujoo.mls.player.IPlayer
 import tv.mycujoo.mls.player.Player.Companion.createExoPlayer
 import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
@@ -40,7 +39,7 @@ class VideoPlayerCoordinator(
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     private val timelineMarkerActionEntities: List<TimelineMarkerEntity>
-) {
+) : AbstractPlayerMediator(reactorSocket, dispatcher) {
 
 
     /**region Fields*/
@@ -52,36 +51,12 @@ class VideoPlayerCoordinator(
     private var hasAnalytic = false
     private lateinit var youboraClient: YouboraClient
     private var logged = false
-
-    private var isLive = false
-
-    private var eventMayBeStreamed = false
-
     /**endregion */
 
     /**region Initialization*/
     fun initialize(MLSPlayerView: MLSPlayerView, player: IPlayer, builder: MLSBuilder) {
         this.playerView = MLSPlayerView
         this.player = player
-
-
-        reactorSocket.addListener(object : ReactorCallback {
-            override fun onEventUpdate(eventId: String, updatedEventId: String) {
-                onEventUpdateAvailable(eventId, updatedEventId)
-            }
-
-            override fun onCounterUpdate(counts: String) {
-                if (videoPlayerConfig.showLiveViewers && isLive && isViewersCountValid(counts)) {
-                    MLSPlayerView.updateViewersCounter(StringUtils.getNumberOfViewers(counts))
-                } else {
-                    MLSPlayerView.hideViewersCounter()
-                }
-            }
-
-            override fun onTimelineUpdate(timelineId: String, updatedEventId: String) {
-                onTimelineUpdateAvailable(timelineId)
-            }
-        })
 
         player.getDirectInstance()?.let {
             videoPlayer = VideoPlayer(it, this)
@@ -239,7 +214,9 @@ class VideoPlayerCoordinator(
 
     /**endregion */
 
-    fun onEventUpdateAvailable(eventId: String, updateId: String) {
+    /**region Over-ridden functions*/
+    override fun onReactorEventUpdate(eventId: String, updateId: String) {
+        cancelStreamUrlPulling()
         dispatcher.launch(context = Dispatchers.Main) {
             val result = dataManager.getEventDetails(eventId, updateId)
             when (result) {
@@ -247,6 +224,7 @@ class VideoPlayerCoordinator(
                     dataManager.currentEvent = result.value
                     if (eventMayBeStreamed.not()) {
                         playVideoOrDisplayEventInfo(result.value)
+                        startStreamUrlPullingIfNeeded(result.value)
                     }
                 }
                 is NetworkError -> {
@@ -257,17 +235,26 @@ class VideoPlayerCoordinator(
         }
     }
 
-    fun onTimelineUpdateAvailable(timelineUpdateId: String) {
-        fetchActions(timelineUpdateId)
+    override fun onReactorCounterUpdate(counts: String) {
+        if (videoPlayerConfig.showLiveViewers && isLive && isViewersCountValid(counts)) {
+            playerView.updateViewersCounter(StringUtils.getNumberOfViewers(counts))
+        } else {
+            playerView.hideViewersCounter()
+        }
     }
 
+    override fun onReactorTimelineUpdate(timelineId: String, updateId: String) {
+        fetchActions(timelineId)
+    }
+
+    /**endregion */
 
     /**region Playback functions*/
-    fun playVideo(event: EventEntity) {
+    override fun playVideo(event: EventEntity) {
         playVideo(event.id)
     }
 
-    fun playVideo(eventId: String) {
+    override fun playVideo(eventId: String) {
         isLive = false
 
         dispatcher.launch(context = Dispatchers.Main) {
@@ -278,6 +265,7 @@ class VideoPlayerCoordinator(
                     playVideoOrDisplayEventInfo(result.value)
                     fetchActions(result.value)
                     joinToReactor(result.value)
+                    startStreamUrlPullingIfNeeded(result.value)
                 }
                 is NetworkError -> {
                 }
@@ -311,21 +299,10 @@ class VideoPlayerCoordinator(
             playerView.displayEventInformationPreEventDialog()
         }
     }
-
-    private fun mayPlayVideo(event: EventEntity): Boolean {
-        eventMayBeStreamed = event.streams.firstOrNull()?.fullUrl != null
-        return eventMayBeStreamed
-    }
-
     /**endregion */
 
 
     /**region Reactor function*/
-
-    private fun joinToReactor(event: EventEntity) {
-        reactorSocket.joinEvent(event.id)
-    }
-
     private fun fetchActions(event: EventEntity) {
         if (event.timeline_ids.isEmpty()) {
             return
