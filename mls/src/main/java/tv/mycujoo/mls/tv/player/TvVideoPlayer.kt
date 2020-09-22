@@ -3,6 +3,7 @@ package tv.mycujoo.mls.tv.player
 import android.app.Activity
 import android.net.Uri
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
 import android.widget.TextView
@@ -28,11 +29,14 @@ import tv.mycujoo.domain.mapper.TimelineMarkerMapper
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.helper.DateTimeHelper
+import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.network.socket.IReactorSocket
-import tv.mycujoo.mls.tv.internal.controller.LiveBadgeStateHandler
+import tv.mycujoo.mls.network.socket.ReactorCallback
+import tv.mycujoo.mls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackTransportControlGlueImpl
+import tv.mycujoo.mls.utils.StringUtils
 import tv.mycujoo.mls.widgets.MLSPlayerView
 
 class TvVideoPlayer(
@@ -42,7 +46,6 @@ class TvVideoPlayer(
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager
 ) {
-    private var isLive: Boolean = false
 
     /**region Fields*/
     var player: SimpleExoPlayer? = null
@@ -52,6 +55,7 @@ class TvVideoPlayer(
     private var eventInfoContainerLayout: FrameLayout
 
     private var eventMayBeStreamed = false
+    private var isLive: Boolean = false
     /**endregion */
 
     /**region Initializing*/
@@ -60,9 +64,9 @@ class TvVideoPlayer(
         leanbackAdapter = LeanbackPlayerAdapter(activity, player!!, 1000)
         glueHost = VideoSupportFragmentGlueHost(videoSupportFragment)
 
-        val liveToggleHandler = LiveBadgeStateHandler(player!!)
+        val controllerAgent = ControllerAgent(player!!)
         mTransportControlGlue =
-            MLSPlaybackTransportControlGlueImpl(activity, leanbackAdapter, liveToggleHandler)
+            MLSPlaybackTransportControlGlueImpl(activity, leanbackAdapter, controllerAgent)
         mTransportControlGlue.host = glueHost
         mTransportControlGlue.playWhenPrepared()
         if (mTransportControlGlue.isPrepared) {
@@ -91,18 +95,16 @@ class TvVideoPlayer(
                 }
 
                 player?.let {
-                    isLive = it.isCurrentWindowDynamic
+                    isLive = player!!.isCurrentWindowDynamic
                     if (isLive) {
                         if (it.currentPosition + 15000L >= it.duration) {
-                            liveToggleHandler.setLiveMode(MLSPlayerView.LiveState.LIVE_ON_THE_EDGE)
-
+                            controllerAgent.setControllerLiveMode(MLSPlayerView.LiveState.LIVE_ON_THE_EDGE)
                         } else {
-                            liveToggleHandler.setLiveMode(MLSPlayerView.LiveState.LIVE_TRAILING)
-
+                            controllerAgent.setControllerLiveMode(MLSPlayerView.LiveState.LIVE_TRAILING)
                         }
                     } else {
                         // VOD
-                        liveToggleHandler.setLiveMode(MLSPlayerView.LiveState.VOD)
+                        controllerAgent.setControllerLiveMode(MLSPlayerView.LiveState.VOD)
                     }
 
                 }
@@ -120,9 +122,47 @@ class TvVideoPlayer(
                 FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
             )
         }
+
+
+        reactorSocket.addListener(reactorCallback = object : ReactorCallback {
+            override fun onEventUpdate(eventId: String, updateEventId: String) {
+                onEventUpdateAvailable(eventId, updateEventId)
+            }
+
+            override fun onCounterUpdate(counts: String) {
+                if (isLive && isViewersCountValid(counts)) {
+                    controllerAgent.setViewerCount(StringUtils.getNumberOfViewers(counts))
+                } else {
+                    controllerAgent.hideViewersCount()
+                }
+            }
+
+            override fun onTimelineUpdate(timelineId: String, updatedEventId: String) {
+            }
+        })
+
     }
 
     /**endregion */
+
+    fun onEventUpdateAvailable(eventId: String, updateId: String) {
+        dispatcher.launch(context = Dispatchers.Main) {
+            val result = dataManager.getEventDetails(eventId, updateId)
+            when (result) {
+                is Result.Success -> {
+                    dataManager.currentEvent = result.value
+                    if (eventMayBeStreamed.not()) {
+                        playVideoOrDisplayEventInfo(result.value)
+                    }
+                }
+                is Result.NetworkError -> {
+                }
+                is Result.GenericError -> {
+                }
+            }
+        }
+    }
+
 
     /**region Playback*/
 
@@ -154,6 +194,8 @@ class TvVideoPlayer(
                 is Result.Success -> {
                     dataManager.currentEvent = result.value
                     playVideoOrDisplayEventInfo(result.value)
+                    joinToReactor(result.value)
+
                 }
                 is Result.NetworkError -> {
                 }
@@ -164,14 +206,14 @@ class TvVideoPlayer(
     }
 
     private fun playVideoOrDisplayEventInfo(event: EventEntity) {
-
         if (mayPlayVideo(event)) {
             val userAgent = Util.getUserAgent(activity, "MLS-AndroidTv-SDK")
             val hlsFactory = HlsMediaSource.Factory(DefaultDataSourceFactory(activity, userAgent))
 
             player!!.prepare(hlsFactory.createMediaSource(Uri.parse(event.streams.first().fullUrl)))
+            eventInfoContainerLayout.visibility = View.GONE
         } else {
-            displayPreEventInformationDialog(event.title, event.description, event.start_time)
+            displayPreEventInformationLayout(event.title, event.description, event.start_time)
         }
     }
 
@@ -182,28 +224,29 @@ class TvVideoPlayer(
 
     /**endregion */
 
-    /**region Event-information dialog*/
-    private fun displayPreEventInformationDialog(
+    /**region Event-information layout*/
+    private fun displayPreEventInformationLayout(
         title: String,
         description: String,
         startTime: String
     ) {
         glueHost.hideControlsOverlay(true)
+        eventInfoContainerLayout.visibility = View.VISIBLE
 
-        val informationDialog =
+        val informationLayout =
             LayoutInflater.from(eventInfoContainerLayout.context)
                 .inflate(
                     R.layout.dialog_event_info_pre_event_layout,
                     eventInfoContainerLayout,
                     false
                 )
-        eventInfoContainerLayout.addView(informationDialog)
+        eventInfoContainerLayout.addView(informationLayout)
 
-        informationDialog.findViewById<TextView>(R.id.eventInfoPreEventDialog_titleTextView).text =
+        informationLayout.findViewById<TextView>(R.id.eventInfoPreEventDialog_titleTextView).text =
             title
-        informationDialog.findViewById<TextView>(R.id.informationDialog_bodyTextView).text =
+        informationLayout.findViewById<TextView>(R.id.informationDialog_bodyTextView).text =
             description
-        informationDialog.findViewById<TextView>(R.id.informationDialog_dateTimeTextView).text =
+        informationLayout.findViewById<TextView>(R.id.informationDialog_dateTimeTextView).text =
             DateTimeHelper.getDateTime(startTime)
     }
     /**endregion */

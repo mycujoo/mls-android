@@ -39,8 +39,11 @@ class DataManager(
 
 
     /**region InternalDataProvider*/
-    override suspend fun getEventDetails(eventId: String): Result<Exception, EventEntity> {
-        return GetEventDetailUseCase(eventsRepository).execute(EventIdPairParam(eventId))
+    override suspend fun getEventDetails(
+        eventId: String,
+        updateId: String?
+    ): Result<Exception, EventEntity> {
+        return GetEventDetailUseCase(eventsRepository).execute(EventIdPairParam(eventId, updateId))
     }
 
     override suspend fun getActions(timelineId: String): Result<Exception, ActionResponse> {

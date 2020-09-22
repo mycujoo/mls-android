@@ -21,7 +21,7 @@ import androidx.leanback.widget.Presenter;
 
 import java.util.List;
 
-import tv.mycujoo.mls.tv.internal.controller.LiveBadgeStateHandler;
+import tv.mycujoo.mls.tv.internal.controller.ControllerAgent;
 import tv.mycujoo.mls.tv.widgets.MLSFastForwardAction;
 import tv.mycujoo.mls.tv.widgets.MLSPlayPauseAction;
 import tv.mycujoo.mls.tv.widgets.MLSRewindAction;
@@ -100,7 +100,7 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
     int mErrorCode;
     String mErrorMessage;
 
-    LiveBadgeStateHandler liveBadgeStateHandler;
+    ControllerAgent controllerAgent;
 
     final PlayerAdapter.Callback mAdapterCallback = new PlayerAdapter
             .Callback() {
@@ -180,11 +180,11 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
      * @param context
      * @param impl    Implementation to underlying media player.
      */
-    public MLSPlaybackBaseControlGlue(Context context, T impl, LiveBadgeStateHandler liveBadgeStateHandler) {
+    public MLSPlaybackBaseControlGlue(Context context, T impl, ControllerAgent controllerAgent) {
         super(context);
         mPlayerAdapter = impl;
         mPlayerAdapter.setCallback(mAdapterCallback);
-        this.liveBadgeStateHandler = liveBadgeStateHandler;
+        this.controllerAgent = controllerAgent;
     }
 
     public final T getPlayerAdapter() {
@@ -255,11 +255,11 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
 
     void onCreateDefaultRowPresenter() {
         if (mControlsRowPresenter == null) {
-            setPlaybackRowPresenter(onCreateRowPresenter(liveBadgeStateHandler));
+            setPlaybackRowPresenter(onCreateRowPresenter(controllerAgent));
         }
     }
 
-    protected abstract PlaybackRowPresenter onCreateRowPresenter(LiveBadgeStateHandler liveToggleL);
+    protected abstract PlaybackRowPresenter onCreateRowPresenter(ControllerAgent liveToggleL);
 
     /**
      * Sets the controls to auto hide after a timeout when media is playing.

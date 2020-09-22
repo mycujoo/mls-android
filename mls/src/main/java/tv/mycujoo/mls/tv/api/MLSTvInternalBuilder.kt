@@ -10,6 +10,7 @@ import tv.mycujoo.mls.manager.IPrefManager
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.MainWebSocketListener
 import tv.mycujoo.mls.network.socket.ReactorSocket
+import java.util.*
 import javax.inject.Inject
 
 class MLSTvInternalBuilder(activity: Activity) {
@@ -28,16 +29,31 @@ class MLSTvInternalBuilder(activity: Activity) {
     @Inject
     lateinit var prefManager: IPrefManager
 
-    lateinit var reactorSocket: IReactorSocket
-    private lateinit var mainWebSocketListener: MainWebSocketListener
+    var reactorSocket: IReactorSocket
+    private var mainWebSocketListener: MainWebSocketListener
+
+    var uuid: String? = null
+
 
     init {
         val dependencyGraph =
             DaggerMlsComponent.builder().networkModule(NetworkModule(activity)).build()
         dependencyGraph.inject(this)
 
+        uuid = prefManager.get("UUID") ?: UUID.randomUUID().toString()
+        persistUUIDIfNotStoredAlready(uuid!!)
+
+
         mainWebSocketListener = MainWebSocketListener()
         reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener)
+        reactorSocket.setUUID(uuid!!)
+    }
+
+    private fun persistUUIDIfNotStoredAlready(uuid: String) {
+        val storedUUID = prefManager.get("UUID")
+        if (storedUUID == null) {
+            prefManager.persist("UUID", uuid)
+        }
     }
 
 }

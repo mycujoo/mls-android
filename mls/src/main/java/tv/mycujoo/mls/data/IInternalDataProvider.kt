@@ -7,7 +7,10 @@ import tv.mycujoo.domain.entity.Result
 interface IInternalDataProvider {
     var currentEvent: EventEntity?
 
-    suspend fun getEventDetails(eventId: String): Result<Exception, EventEntity>
+    suspend fun getEventDetails(
+        eventId: String,
+        updateId: String? = null
+    ): Result<Exception, EventEntity>
 
     suspend fun getActions(timelineId: String): Result<Exception, ActionResponse>
 }

@@ -67,7 +67,7 @@ class VideoPlayerCoordinator(
 
         reactorSocket.addListener(object : ReactorCallback {
             override fun onEventUpdate(eventId: String, updatedEventId: String) {
-                onEventUpdateAvailable(updatedEventId)
+                onEventUpdateAvailable(eventId, updatedEventId)
             }
 
             override fun onCounterUpdate(counts: String) {
@@ -239,9 +239,9 @@ class VideoPlayerCoordinator(
 
     /**endregion */
 
-    fun onEventUpdateAvailable(updateId: String) {
+    fun onEventUpdateAvailable(eventId: String, updateId: String) {
         dispatcher.launch(context = Dispatchers.Main) {
-            val result = dataManager.getEventDetails(updateId)
+            val result = dataManager.getEventDetails(eventId, updateId)
             when (result) {
                 is Success -> {
                     dataManager.currentEvent = result.value
