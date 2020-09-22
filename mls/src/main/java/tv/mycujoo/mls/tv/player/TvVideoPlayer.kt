@@ -20,9 +20,7 @@ import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.mapper.TimelineMarkerMapper
@@ -47,6 +45,7 @@ class TvVideoPlayer(
     private val dataManager: IDataManager
 ) {
 
+
     /**region Fields*/
     var player: SimpleExoPlayer? = null
     private var leanbackAdapter: LeanbackPlayerAdapter
@@ -56,6 +55,8 @@ class TvVideoPlayer(
 
     private var eventMayBeStreamed = false
     private var isLive: Boolean = false
+
+    private lateinit var streamUrlPullJob: Job
     /**endregion */
 
     /**region Initializing*/
@@ -146,6 +147,7 @@ class TvVideoPlayer(
     /**endregion */
 
     fun onEventUpdateAvailable(eventId: String, updateId: String) {
+        cancelStreamUrlPulling()
         dispatcher.launch(context = Dispatchers.Main) {
             val result = dataManager.getEventDetails(eventId, updateId)
             when (result) {
@@ -153,6 +155,7 @@ class TvVideoPlayer(
                     dataManager.currentEvent = result.value
                     if (eventMayBeStreamed.not()) {
                         playVideoOrDisplayEventInfo(result.value)
+                        startStreamUrlPullingIfNeeded(result.value)
                     }
                 }
                 is Result.NetworkError -> {
@@ -165,7 +168,6 @@ class TvVideoPlayer(
 
 
     /**region Playback*/
-
     fun playExternalSourceVideo(url: String, isHls: Boolean = true) {
         if (isHls) {
             val userAgent = Util.getUserAgent(activity, "MLS-AndroidTv-SDK")
@@ -195,6 +197,7 @@ class TvVideoPlayer(
                     dataManager.currentEvent = result.value
                     playVideoOrDisplayEventInfo(result.value)
                     joinToReactor(result.value)
+                    startStreamUrlPullingIfNeeded(result.value)
 
                 }
                 is Result.NetworkError -> {
@@ -221,6 +224,24 @@ class TvVideoPlayer(
         eventMayBeStreamed = event.streams.firstOrNull()?.fullUrl != null
         return eventMayBeStreamed
     }
+
+    private fun startStreamUrlPullingIfNeeded(event: EventEntity) {
+        cancelStreamUrlPulling()
+        if (eventMayBeStreamed) {
+            return
+        }
+        streamUrlPullJob = dispatcher.launch {
+            delay(30000L)
+            playVideo(event.id)
+        }
+    }
+
+    private fun cancelStreamUrlPulling() {
+        if (this::streamUrlPullJob.isInitialized) {
+            streamUrlPullJob.cancel()
+        }
+    }
+
 
     /**endregion */
 
