@@ -20,8 +20,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:layout_height="match_parent">
 
     <FrameLayout
         android:id="@+id/overlay_container"
@@ -34,10 +33,10 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/controlsCardContainerLayout"
         android:layout_width="match_parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_height="wrap_content"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_height="wrap_content">
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:id="@+id/controls_card"
@@ -47,11 +46,11 @@
             android:layout_marginBottom="@dimen/lb_playback_transport_control_info_margin_bottom"
             android:clipToPadding="false"
             android:orientation="horizontal"
+            android:paddingStart="?attr/browsePaddingStart"
+            android:paddingEnd="?attr/browsePaddingEnd"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:paddingStart="?attr/browsePaddingStart"
-            android:paddingEnd="?attr/browsePaddingEnd">
+            app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
                 android:id="@+id/image"
@@ -76,12 +75,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             android:layout_marginBottom="@dimen/lb_playback_transport_thumbs_bottom_margin"
             android:orientation="horizontal"
-            android:visibility="invisible" />
+            android:visibility="invisible"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -90,10 +89,10 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/transportRowContainerLayout"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/controlsCardContainerLayout"
-        android:layout_height="wrap_content">
+        app:layout_constraintTop_toBottomOf="@id/controlsCardContainerLayout">
 
         <tv.mycujoo.mls.tv.widgets.MLSPlaybackTransportRowView
             android:id="@+id/transport_row"
@@ -101,18 +100,18 @@
             android:layout_height="match_parent"
             android:clipChildren="false"
             android:clipToPadding="false"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
             android:orientation="vertical"
             android:paddingStart="?attr/browsePaddingStart"
-            android:paddingEnd="?attr/browsePaddingEnd">
+            android:paddingEnd="?attr/browsePaddingEnd"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/controls_dock"
                 android:layout_width="wrap_content"
-                android:layout_gravity="center"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_marginLeft="@dimen/lb_playback_transport_controlbar_margin_start"
                 android:layoutDirection="ltr" />
 
@@ -120,19 +119,41 @@
                 android:id="@+id/playback_progress"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/lb_playback_transport_progressbar_height"
-                android:focusable="true" />
+                android:focusable="true"
+                android:nextFocusDown="@id/tvController_liveBadgeLayout" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layoutDirection="ltr">
 
-                <FrameLayout
+                <LinearLayout
                     android:id="@+id/secondary_controls_dock"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    android:orientation="horizontal"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <FrameLayout
+                        android:id="@+id/tvController_liveBadgeLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp"
+                        android:layout_marginRight="8dp"
+                        android:background="@drawable/selector_live_badge_button"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="LIVE"
+                            android:textColor="@color/lb_tv_white" />
+                    </FrameLayout>
+
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -169,30 +190,6 @@
                         android:textColor="@color/gray" />
 
                 </LinearLayout>
-
-                <TextView
-                    android:id="@+id/tvController_liveBadgeTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginRight="8dp"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    android:background="@drawable/bg_live"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:paddingLeft="4dp"
-                    android:paddingTop="2dp"
-                    android:paddingRight="4dp"
-                    android:paddingBottom="2dp"
-                    android:text="@string/live"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

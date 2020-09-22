@@ -22,7 +22,7 @@ import androidx.leanback.widget.RowPresenter;
 
 import java.lang.ref.WeakReference;
 
-import tv.mycujoo.mls.tv.internal.controller.LiveBadgeToggleHandler;
+import tv.mycujoo.mls.tv.internal.controller.LiveBadgeStateHandler;
 import tv.mycujoo.mls.tv.internal.presenter.MLSPlaybackTransportRowPresenter;
 import tv.mycujoo.mls.tv.widgets.MLSFastForwardAction;
 import tv.mycujoo.mls.tv.widgets.MLSPlayPauseAction;
@@ -61,8 +61,8 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
      * @param context
      * @param impl    Implementation to underlying media player.
      */
-    public MLSPlaybackTransportControlGlueImpl(Context context, T impl, LiveBadgeToggleHandler liveBadgeToggleHandler) {
-        super(context, impl, liveBadgeToggleHandler);
+    public MLSPlaybackTransportControlGlueImpl(Context context, T impl, LiveBadgeStateHandler liveBadgeStateHandler) {
+        super(context, impl, liveBadgeStateHandler);
     }
 
     @Override
@@ -81,7 +81,7 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
     }
 
     @Override
-    protected PlaybackRowPresenter onCreateRowPresenter(LiveBadgeToggleHandler liveBadgeToggleHandler) {
+    protected PlaybackRowPresenter onCreateRowPresenter(LiveBadgeStateHandler liveBadgeStateHandler) {
         final AbstractDetailsDescriptionPresenter detailsPresenter =
                 new AbstractDetailsDescriptionPresenter() {
                     @Override
@@ -93,7 +93,7 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
                     }
                 };
 
-        MLSPlaybackTransportRowPresenter rowPresenter = new MLSPlaybackTransportRowPresenter(liveBadgeToggleHandler) {
+        MLSPlaybackTransportRowPresenter rowPresenter = new MLSPlaybackTransportRowPresenter(liveBadgeStateHandler) {
             @Override
             protected void onBindRowViewHolder(RowPresenter.ViewHolder vh, Object item) {
                 super.onBindRowViewHolder(vh, item);

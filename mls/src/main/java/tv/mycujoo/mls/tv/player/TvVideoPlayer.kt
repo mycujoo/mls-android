@@ -3,6 +3,7 @@ package tv.mycujoo.mls.tv.player
 import android.app.Activity
 import android.net.Uri
 import android.view.LayoutInflater
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.leanback.app.VideoSupportFragment
@@ -29,9 +30,10 @@ import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.helper.DateTimeHelper
 import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.network.socket.IReactorSocket
-import tv.mycujoo.mls.tv.internal.controller.LiveBadgeToggleHandler
+import tv.mycujoo.mls.tv.internal.controller.LiveBadgeStateHandler
 import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackTransportControlGlueImpl
+import tv.mycujoo.mls.widgets.MLSPlayerView
 
 class TvVideoPlayer(
     private val activity: Activity,
@@ -40,6 +42,8 @@ class TvVideoPlayer(
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager
 ) {
+    private var isLive: Boolean = false
+
     /**region Fields*/
     var player: SimpleExoPlayer? = null
     private var leanbackAdapter: LeanbackPlayerAdapter
@@ -56,8 +60,9 @@ class TvVideoPlayer(
         leanbackAdapter = LeanbackPlayerAdapter(activity, player!!, 1000)
         glueHost = VideoSupportFragmentGlueHost(videoSupportFragment)
 
-        val liveToggleHandler = LiveBadgeToggleHandler()
-        mTransportControlGlue = MLSPlaybackTransportControlGlueImpl(activity, leanbackAdapter, liveToggleHandler)
+        val liveToggleHandler = LiveBadgeStateHandler(player!!)
+        mTransportControlGlue =
+            MLSPlaybackTransportControlGlueImpl(activity, leanbackAdapter, liveToggleHandler)
         mTransportControlGlue.host = glueHost
         mTransportControlGlue.playWhenPrepared()
         if (mTransportControlGlue.isPrepared) {
@@ -86,7 +91,20 @@ class TvVideoPlayer(
                 }
 
                 player?.let {
-                    liveToggleHandler.toggle(it.isCurrentWindowDynamic)
+                    isLive = it.isCurrentWindowDynamic
+                    if (isLive) {
+                        if (it.currentPosition + 15000L >= it.duration) {
+                            liveToggleHandler.setLiveMode(MLSPlayerView.LiveState.LIVE_ON_THE_EDGE)
+
+                        } else {
+                            liveToggleHandler.setLiveMode(MLSPlayerView.LiveState.LIVE_TRAILING)
+
+                        }
+                    } else {
+                        // VOD
+                        liveToggleHandler.setLiveMode(MLSPlayerView.LiveState.VOD)
+                    }
+
                 }
             }
         })
@@ -96,9 +114,14 @@ class TvVideoPlayer(
         } else {
             val rootView = videoSupportFragment.view!! as FrameLayout
             eventInfoContainerLayout = FrameLayout(rootView.context)
-//            rootView.addView(eventInfoContainerLayout, 1, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+            rootView.addView(
+                eventInfoContainerLayout,
+                1,
+                FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+            )
         }
     }
+
     /**endregion */
 
     /**region Playback*/
@@ -130,7 +153,7 @@ class TvVideoPlayer(
             when (result) {
                 is Result.Success -> {
                     dataManager.currentEvent = result.value
-//                    playVideoOrDisplayEventInfo(result.value)
+                    playVideoOrDisplayEventInfo(result.value)
                 }
                 is Result.NetworkError -> {
                 }

@@ -9,10 +9,12 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
+import androidx.core.content.ContextCompat;
 import androidx.leanback.widget.Action;
 import androidx.leanback.widget.ControlButtonPresenterSelector;
 import androidx.leanback.widget.ObjectAdapter;
@@ -27,14 +29,15 @@ import androidx.leanback.widget.RowPresenter;
 import java.util.Arrays;
 
 import tv.mycujoo.mls.R;
-import tv.mycujoo.mls.tv.internal.controller.LiveBadgeToggleHandler;
+import tv.mycujoo.mls.tv.internal.controller.LiveBadgeStateHandler;
 import tv.mycujoo.mls.tv.widgets.MLSPlaybackTransportRowView;
 import tv.mycujoo.mls.tv.widgets.MLSSeekBar;
 import tv.mycujoo.mls.tv.widgets.MLSThumbsBar;
+import tv.mycujoo.mls.widgets.MLSPlayerView;
 
 public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
 
-    private final LiveBadgeToggleHandler LiveBadgeToggleHandler;
+    private final LiveBadgeStateHandler liveBadgeStateHandler;
 
     static class BoundData extends MLSPlaybackControlPresenter.BoundData {
         MLSPlaybackTransportRowPresenter.ViewHolder mRowViewHolder;
@@ -72,7 +75,7 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
         long[] mPositions;
         int mPositionsLength;
 
-        TextView mLiveBadgeTextView;
+        FrameLayout mLiveBadgeLayout;
 
         final PlaybackControlsRow.OnPlaybackProgressCallback mListener =
                 new PlaybackControlsRow.OnPlaybackProgressCallback() {
@@ -339,7 +342,13 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
             }
             mThumbsBar = (MLSThumbsBar) rootView.findViewById(R.id.thumbs_row);
 
-            mLiveBadgeTextView = (TextView) rootView.findViewById(R.id.tvController_liveBadgeTextView);
+            mLiveBadgeLayout = ((FrameLayout) rootView.findViewById(R.id.tvController_liveBadgeLayout));
+            mLiveBadgeLayout.setOnClickListener(v -> {
+                liveBadgeStateHandler.setLiveMode(MLSPlayerView.LiveState.LIVE_ON_THE_EDGE);
+                liveBadgeStateHandler.backToLive();
+            });
+
+
         }
 
         /**
@@ -580,11 +589,11 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
                 }
             };
 
-    public MLSPlaybackTransportRowPresenter(LiveBadgeToggleHandler liveBadgeToggleHandler) {
+    public MLSPlaybackTransportRowPresenter(LiveBadgeStateHandler liveBadgeStateHandler) {
         setHeaderPresenter(null);
         setSelectEffectEnabled(false);
 
-        this.LiveBadgeToggleHandler = liveBadgeToggleHandler;
+        this.liveBadgeStateHandler = liveBadgeStateHandler;
 
         mPlaybackControlsPresenter = new MLSControlBarPresenter(R.layout.layout_mls_control_bar);
         mPlaybackControlsPresenter.setDefaultFocusToMiddle(false);
@@ -758,7 +767,7 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
         vh.setBufferedPosition(row.getBufferedPosition());
         row.setOnPlaybackProgressChangedListener(vh.mListener);
 
-        LiveBadgeToggleHandler.addListener(state -> setIsLive(state, vh.mLiveBadgeTextView));
+        liveBadgeStateHandler.addListener(state -> setIsLive(state, vh.mLiveBadgeLayout));
     }
 
     @Override
@@ -841,11 +850,23 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
         }
     }
 
-    private void setIsLive(boolean isLive, TextView mLiveBadgeTextView) {
-        if (isLive) {
-            mLiveBadgeTextView.setVisibility(View.VISIBLE);
-        } else {
-            mLiveBadgeTextView.setVisibility(View.GONE);
+    private void setIsLive(MLSPlayerView.LiveState state, FrameLayout liveBadgeLayout) {
+        switch (state) {
+
+            case LIVE_ON_THE_EDGE:
+                liveBadgeLayout.setFocusable(false);
+                liveBadgeLayout.setVisibility(View.VISIBLE);
+                liveBadgeLayout.setBackground(ContextCompat.getDrawable(liveBadgeLayout.getContext(), R.drawable.bg_live));
+                break;
+            case LIVE_TRAILING:
+                liveBadgeLayout.setFocusable(true);
+                liveBadgeLayout.setVisibility(View.VISIBLE);
+                liveBadgeLayout.setBackground(ContextCompat.getDrawable(liveBadgeLayout.getContext(), R.drawable.selector_live_badge_button));
+                break;
+            case VOD:
+                liveBadgeLayout.setVisibility(View.GONE);
+
+                break;
         }
     }
 

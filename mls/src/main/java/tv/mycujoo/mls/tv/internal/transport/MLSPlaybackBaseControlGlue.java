@@ -21,7 +21,7 @@ import androidx.leanback.widget.Presenter;
 
 import java.util.List;
 
-import tv.mycujoo.mls.tv.internal.controller.LiveBadgeToggleHandler;
+import tv.mycujoo.mls.tv.internal.controller.LiveBadgeStateHandler;
 import tv.mycujoo.mls.tv.widgets.MLSFastForwardAction;
 import tv.mycujoo.mls.tv.widgets.MLSPlayPauseAction;
 import tv.mycujoo.mls.tv.widgets.MLSRewindAction;
@@ -100,7 +100,7 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
     int mErrorCode;
     String mErrorMessage;
 
-    LiveBadgeToggleHandler liveBadgeToggleHandler;
+    LiveBadgeStateHandler liveBadgeStateHandler;
 
     final PlayerAdapter.Callback mAdapterCallback = new PlayerAdapter
             .Callback() {
@@ -180,11 +180,11 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
      * @param context
      * @param impl    Implementation to underlying media player.
      */
-    public MLSPlaybackBaseControlGlue(Context context, T impl, LiveBadgeToggleHandler liveBadgeToggleHandler) {
+    public MLSPlaybackBaseControlGlue(Context context, T impl, LiveBadgeStateHandler liveBadgeStateHandler) {
         super(context);
         mPlayerAdapter = impl;
         mPlayerAdapter.setCallback(mAdapterCallback);
-        this.liveBadgeToggleHandler = liveBadgeToggleHandler;
+        this.liveBadgeStateHandler = liveBadgeStateHandler;
     }
 
     public final T getPlayerAdapter() {
@@ -255,11 +255,11 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
 
     void onCreateDefaultRowPresenter() {
         if (mControlsRowPresenter == null) {
-            setPlaybackRowPresenter(onCreateRowPresenter(liveBadgeToggleHandler));
+            setPlaybackRowPresenter(onCreateRowPresenter(liveBadgeStateHandler));
         }
     }
 
-    protected abstract PlaybackRowPresenter onCreateRowPresenter(LiveBadgeToggleHandler liveToggleL);
+    protected abstract PlaybackRowPresenter onCreateRowPresenter(LiveBadgeStateHandler liveToggleL);
 
     /**
      * Sets the controls to auto hide after a timeout when media is playing.
