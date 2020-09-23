@@ -28,8 +28,11 @@ import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.AbstractPlayerMediator
 import tv.mycujoo.mls.data.IDataManager
+import tv.mycujoo.mls.enum.C
+import tv.mycujoo.mls.enum.MessageLevel
 import tv.mycujoo.mls.helper.DateTimeHelper
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
+import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackSeekDataProvider
@@ -42,8 +45,9 @@ class TvVideoPlayer(
     videoSupportFragment: VideoSupportFragment,
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
-    private val dataManager: IDataManager
-) : AbstractPlayerMediator(reactorSocket, dispatcher) {
+    private val dataManager: IDataManager,
+    logger: Logger
+) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
 
     /**region Fields*/
@@ -122,10 +126,10 @@ class TvVideoPlayer(
     }
 
     /**endregion */
-    override fun onReactorEventUpdate(eventId: String, updateEventId: String) {
+    override fun onReactorEventUpdate(eventId: String, updateId: String) {
         cancelStreamUrlPulling()
         dispatcher.launch(context = Dispatchers.Main) {
-            val result = dataManager.getEventDetails(eventId, updateEventId)
+            val result = dataManager.getEventDetails(eventId, updateId)
             when (result) {
                 is Result.Success -> {
                     dataManager.currentEvent = result.value
@@ -135,8 +139,13 @@ class TvVideoPlayer(
                     }
                 }
                 is Result.NetworkError -> {
+                    logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
                 }
                 is Result.GenericError -> {
+                    logger.log(
+                        MessageLevel.DEBUG,
+                        C.INTERNAL_ERROR_MESSAGE.plus(" ${result.errorMessage} ${result.errorCode}")
+                    )
                 }
             }
         }
@@ -188,8 +197,13 @@ class TvVideoPlayer(
 
                 }
                 is Result.NetworkError -> {
+                    logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
                 }
                 is Result.GenericError -> {
+                    logger.log(
+                        MessageLevel.DEBUG,
+                        C.INTERNAL_ERROR_MESSAGE.plus(" ${result.errorMessage} ${result.errorCode}")
+                    )
                 }
             }
         }

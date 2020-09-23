@@ -89,7 +89,8 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
             internalBuilder.reactorSocket,
             internalBuilder.dispatcher,
             dataManager,
-            emptyList()
+            emptyList(),
+            internalBuilder.logger
         )
 
         player = Player().apply {
@@ -136,7 +137,8 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
             dispatcher,
             videoPlayerCoordinator.getPlayer(),
             Executors.newScheduledThreadPool(1),
-            Handler(Looper.getMainLooper())
+            Handler(Looper.getMainLooper()),
+            builder.internalBuilder.logger
         )
         annotationMediator.initPlayerView(MLSPlayerView)
 

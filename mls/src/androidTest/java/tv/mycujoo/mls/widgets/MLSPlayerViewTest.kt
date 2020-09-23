@@ -36,7 +36,9 @@ import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.defaultVideoPlayerConfig
 import tv.mycujoo.mls.core.VideoPlayerCoordinator
 import tv.mycujoo.mls.data.IDataManager
+import tv.mycujoo.mls.enum.LogLevel
 import tv.mycujoo.mls.helper.OverlayViewHelper
+import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.manager.ViewHandler
 import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.model.SingleLiveEvent
@@ -92,7 +94,11 @@ class MLSPlayerViewTest {
     private fun setupPlayer() {
         val dataManager = object : IDataManager {
 
-            override suspend fun getEventDetails(eventId: String): Result<Exception, EventEntity> {
+            override fun setLogLevel(logLevel: LogLevel) {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun getEventDetails(eventId: String, updateId: String?): Result<Exception, EventEntity> {
                 TODO("Not yet implemented")
             }
 
@@ -149,7 +155,8 @@ class MLSPlayerViewTest {
                 reactorSocket,
                 GlobalScope,
                 dataManager,
-                emptyList()
+                emptyList(),
+                Logger(LogLevel.MINIMAL)
             )
             videoPlayerCoordinator.initialize(
                 MLSPlayerView,

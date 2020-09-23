@@ -174,7 +174,7 @@ class PlayerTest {
         initPlayer()
         whenever(mediaFactory.createMediaSource(any())).thenReturn(hlsMediaSource)
 
-        player.play(SAMPLE_URI)
+        player.play(SAMPLE_URI, true)
 
 
         verify(exoPlayer).prepare(hlsMediaSource, true, false)
@@ -191,7 +191,7 @@ class PlayerTest {
         initPlayer()
 
 
-        player.play(SAMPLE_URI)
+        player.play(SAMPLE_URI, true)
 
 
         verify(exoPlayer).prepare(hlsMediaSource, false, false)

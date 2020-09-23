@@ -18,6 +18,8 @@ import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.mls.CoroutineTestRule
+import tv.mycujoo.mls.enum.LogLevel
+import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.network.MlsApi
 import kotlin.test.assertEquals
 
@@ -66,7 +68,7 @@ class DataManagerTest {
 
 
         val scope = TestCoroutineScope()
-        dataManager = DataManager(scope, eventsRepository, mlsApi)
+        dataManager = DataManager(scope, eventsRepository, mlsApi, Logger(LogLevel.MINIMAL))
     }
 
     @After

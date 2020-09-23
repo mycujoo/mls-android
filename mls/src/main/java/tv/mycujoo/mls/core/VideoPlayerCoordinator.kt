@@ -19,9 +19,12 @@ import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.VideoPlayer
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
+import tv.mycujoo.mls.enum.C
+import tv.mycujoo.mls.enum.MessageLevel
 import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
+import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.mediator.AnnotationMediator
 import tv.mycujoo.mls.model.JoinTimelineParam
@@ -38,8 +41,9 @@ class VideoPlayerCoordinator(
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
-    private val timelineMarkerActionEntities: List<TimelineMarkerEntity>
-) : AbstractPlayerMediator(reactorSocket, dispatcher) {
+    private val timelineMarkerActionEntities: List<TimelineMarkerEntity>,
+    logger: Logger
+) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
 
     /**region Fields*/
@@ -184,9 +188,6 @@ class VideoPlayerCoordinator(
         activity: Activity,
         exoPlayer: ExoPlayer
     ) {
-        if (BuildConfig.DEBUG) {
-//            YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE)
-        }
         val youboraOptions = Options()
         youboraOptions.accountCode = if (BuildConfig.DEBUG) {
             "mycujoodev"
@@ -228,8 +229,13 @@ class VideoPlayerCoordinator(
                     }
                 }
                 is NetworkError -> {
+                    logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
                 }
                 is GenericError -> {
+                    logger.log(
+                        MessageLevel.DEBUG,
+                        C.INTERNAL_ERROR_MESSAGE.plus(" ${result.errorMessage} ${result.errorCode}")
+                    )
                 }
             }
         }
@@ -268,8 +274,10 @@ class VideoPlayerCoordinator(
                     startStreamUrlPullingIfNeeded(result.value)
                 }
                 is NetworkError -> {
+                    logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
                 }
                 is GenericError -> {
+                    logger.log(MessageLevel.DEBUG, C.INTERNAL_ERROR_MESSAGE)
                 }
             }
         }
@@ -321,8 +329,14 @@ class VideoPlayerCoordinator(
                     val joinTimelineParam = JoinTimelineParam(timelineId, result.value.updateId)
                     reactorSocket.joinTimelineIfNeeded(joinTimelineParam)
                 }
-                is NetworkError,
+                is NetworkError -> {
+                    logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
+                }
                 is GenericError -> {
+                    logger.log(
+                        MessageLevel.DEBUG,
+                        C.INTERNAL_ERROR_MESSAGE.plus(" ${result.errorMessage} ${result.errorCode}")
+                    )
                 }
             }
         }

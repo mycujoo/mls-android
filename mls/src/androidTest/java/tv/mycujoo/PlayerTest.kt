@@ -21,14 +21,14 @@ import tv.mycujoo.matchers.TypeMatcher
 import tv.mycujoo.matchers.ViewSizeMatcher
 import tv.mycujoo.mls.BlankActivity
 import tv.mycujoo.mls.R
-import tv.mycujoo.mls.widgets.PlayerViewWrapper
+import tv.mycujoo.mls.widgets.MLSPlayerView
 import tv.mycujoo.mls.widgets.ProportionalImageView
 
 
 @RunWith(AndroidJUnit4::class)
 class PlayerTest {
 
-    private lateinit var playerViewWrapper: PlayerViewWrapper
+    private lateinit var playerViewWrapper: MLSPlayerView
 
     @Before
     fun setUp() {
@@ -36,7 +36,7 @@ class PlayerTest {
         val scenario = launchActivity<BlankActivity>(intent)
         scenario.onActivity { activity ->
             val linearLayout = activity.findViewById<LinearLayout>(R.id.blankActivity_rootView)
-            playerViewWrapper = PlayerViewWrapper(linearLayout.context)
+            playerViewWrapper = MLSPlayerView(linearLayout.context)
             playerViewWrapper.id = View.generateViewId()
             linearLayout.addView(playerViewWrapper)
         }

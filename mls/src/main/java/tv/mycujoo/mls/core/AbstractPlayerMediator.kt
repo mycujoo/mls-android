@@ -1,17 +1,20 @@
 package tv.mycujoo.mls.core
 
-import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
+import tv.mycujoo.mls.enum.C
+import tv.mycujoo.mls.enum.MessageLevel
+import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.ReactorCallback
 
 abstract class AbstractPlayerMediator(
     private val reactorSocket: IReactorSocket,
-    private val coroutineScope: CoroutineScope
+    private val coroutineScope: CoroutineScope,
+    protected val logger: Logger
 ) {
 
     abstract fun playVideo(event: EventEntity)
@@ -25,14 +28,18 @@ abstract class AbstractPlayerMediator(
         reactorSocket.addListener(reactorCallback = object : ReactorCallback {
             override fun onEventUpdate(eventId: String, updateId: String) {
                 onReactorEventUpdate(eventId, updateId)
+                logger.log(MessageLevel.INFO, C.EVENT_UPDATE_MESSAGE)
             }
 
             override fun onCounterUpdate(counts: String) {
                 onReactorCounterUpdate(counts)
+                logger.log(MessageLevel.INFO, C.VIEWERS_COUNT_UPDATE_MESSAGE)
+
             }
 
             override fun onTimelineUpdate(timelineId: String, updateId: String) {
                 onReactorTimelineUpdate(timelineId, updateId)
+                logger.log(MessageLevel.INFO, C.TIMELINE_UPDATE_MESSAGE)
             }
         })
     }
@@ -57,11 +64,8 @@ abstract class AbstractPlayerMediator(
             return
         }
         streamUrlPullJob = coroutineScope.launch {
-            Log.d("Medi", "inited")
             delay(30000L)
             playVideo(event.id)
-            Log.d("Medi", "fired")
-
         }
     }
 

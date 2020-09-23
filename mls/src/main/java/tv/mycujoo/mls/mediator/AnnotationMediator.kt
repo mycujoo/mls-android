@@ -12,6 +12,9 @@ import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.mls.core.IAnnotationFactory
 import tv.mycujoo.mls.data.IDataManager
+import tv.mycujoo.mls.enum.C
+import tv.mycujoo.mls.enum.MessageLevel
+import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.player.IPlayer
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import java.util.concurrent.ScheduledExecutorService
@@ -25,7 +28,8 @@ class AnnotationMediator(
     val dispatcher: CoroutineScope,
     player: IPlayer,
     private val scheduler: ScheduledExecutorService,
-    handler: Handler
+    handler: Handler,
+    private val logger: Logger
 ) : IAnnotationMediator {
 
     /**region Fields*/
@@ -70,10 +74,13 @@ class AnnotationMediator(
                     feed(result.value)
                 }
                 is Result.NetworkError -> {
+                    logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
                 }
                 is Result.GenericError -> {
-                }
-                else -> {
+                    logger.log(
+                        MessageLevel.DEBUG,
+                        C.INTERNAL_ERROR_MESSAGE.plus(" ${result.errorMessage} ${result.errorCode}")
+                    )
                 }
             }
 
