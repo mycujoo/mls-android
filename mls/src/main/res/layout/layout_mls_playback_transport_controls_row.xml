@@ -19,6 +19,7 @@
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -30,59 +31,69 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/controlsCardContainerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:orientation="vertical"
-        android:paddingBottom="@dimen/lb_playback_transport_control_row_padding_bottom"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <FrameLayout
+        <LinearLayout
+            android:id="@+id/controls_card"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="@dimen/lb_playback_transport_control_info_margin_bottom"
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            android:paddingStart="?attr/browsePaddingStart"
+            android:paddingEnd="?attr/browsePaddingEnd"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <LinearLayout
-                android:id="@+id/controls_card"
+            <ImageView
+                android:id="@+id/image"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/lb_playback_transport_image_height"
+                android:layout_gravity="top"
+                android:layout_marginEnd="@dimen/lb_playback_transport_image_margin_end"
+                android:adjustViewBounds="true"
+                android:scaleType="fitStart" />
+
+            <FrameLayout
+                android:id="@+id/description_dock"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:layout_marginBottom="@dimen/lb_playback_transport_control_info_margin_bottom"
+                android:layout_gravity="top"
                 android:clipToPadding="false"
-                android:orientation="horizontal"
-                android:paddingStart="?attr/browsePaddingStart"
-                android:paddingEnd="?attr/browsePaddingEnd">
+                android:gravity="bottom" />
+        </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/image"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/lb_playback_transport_image_height"
-                    android:layout_gravity="top"
-                    android:layout_marginEnd="@dimen/lb_playback_transport_image_margin_end"
-                    android:adjustViewBounds="true"
-                    android:scaleType="fitStart" />
+        <tv.mycujoo.mls.tv.widgets.MLSThumbsBar
+            android:id="@+id/thumbs_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="@dimen/lb_playback_transport_thumbs_bottom_margin"
+            android:orientation="horizontal"
+            android:visibility="invisible"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-                <FrameLayout
-                    android:id="@+id/description_dock"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="top"
-                    android:clipToPadding="false"
-                    android:gravity="bottom" />
-            </LinearLayout>
 
-            <tv.mycujoo.mls.tv.widgets.MLSThumbsBar
-                android:id="@+id/thumbs_row"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:layout_marginBottom="@dimen/lb_playback_transport_thumbs_bottom_margin"
-                android:orientation="horizontal"
-                android:visibility="invisible" />
-        </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/transportRowContainerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/controlsCardContainerLayout">
 
         <tv.mycujoo.mls.tv.widgets.MLSPlaybackTransportRowView
             android:id="@+id/transport_row"
@@ -92,12 +103,16 @@
             android:clipToPadding="false"
             android:orientation="vertical"
             android:paddingStart="?attr/browsePaddingStart"
-            android:paddingEnd="?attr/browsePaddingEnd">
+            android:paddingEnd="?attr/browsePaddingEnd"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <FrameLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/controls_dock"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_marginLeft="@dimen/lb_playback_transport_controlbar_margin_start"
                 android:layoutDirection="ltr" />
 
@@ -105,54 +120,129 @@
                 android:id="@+id/playback_progress"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/lb_playback_transport_progressbar_height"
-                android:focusable="true" />
+                android:focusable="true"
+                android:nextFocusDown="@id/tvController_liveBadgeLayout" />
 
-
-            <RelativeLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/lb_playback_transport_controlbar_margin_start"
                 android:layoutDirection="ltr">
 
-                <FrameLayout
+                <LinearLayout
                     android:id="@+id/secondary_controls_dock"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true" />
+                    android:orientation="horizontal"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
 
-                <TextView
-                    android:id="@+id/current_time"
-                    style="?attr/playbackControlsTimeStyle"
-                    android:layout_width="wrap_content"
+                    <FrameLayout
+                        android:id="@+id/tvController_liveBadgeLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="8dp"
+                        android:background="@drawable/selector_live_badge_button"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="LIVE"
+                            android:textColor="@color/lb_tv_white" />
+
+                    </FrameLayout>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/tvController_viewersCountLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginRight="8dp"
+                        android:background="#80000000"
+                        android:focusable="false"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginLeft="2dp"
+                            android:layout_marginTop="2dp"
+                            android:layout_marginRight="4dp"
+                            android:background="@drawable/ic_eye_icon"
+                            android:focusable="false"
+                            app:layout_constraintBottom_toBottomOf="@id/tvController_viewersCountTextView"
+                            app:layout_constraintLeft_toLeftOf="parent"
+                            app:layout_constraintRight_toLeftOf="@id/tvController_viewersCountTextView"
+                            app:layout_constraintTop_toTopOf="@id/tvController_viewersCountTextView" />
+
+                        <TextView
+                            android:id="@+id/tvController_viewersCountTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="2dp"
+                            android:layout_marginRight="4dp"
+                            android:layout_marginBottom="2dp"
+                            android:focusable="false"
+                            android:gravity="center"
+                            android:textColor="@color/white"
+                            android:textSize="12sp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintRight_toRightOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:text="823" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="top"
-                    android:layout_marginStart="@dimen/lb_playback_transport_time_margin"
                     android:layout_marginTop="@dimen/lb_playback_transport_time_margin_top"
-                    android:layout_toStartOf="@+id/separate_time" />
+                    android:orientation="horizontal"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
 
-                <TextView
-                    android:id="@+id/separate_time"
-                    style="?attr/playbackControlsTimeStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="top"
-                    android:layout_marginStart="@dimen/lb_playback_transport_time_margin"
-                    android:layout_marginTop="@dimen/lb_playback_transport_time_margin_top"
-                    android:layout_toStartOf="@+id/total_time"
-                    android:text="@string/lb_playback_time_separator" />
+                    <TextView
+                        android:id="@+id/current_time"
+                        style="?attr/playbackControlsTimeStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/lb_playback_transport_time_margin"
+                        android:textColor="@color/white" />
 
-                <TextView
-                    android:id="@+id/total_time"
-                    style="?attr/playbackControlsTimeStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_gravity="top"
-                    android:layout_marginStart="@dimen/lb_playback_transport_time_margin"
-                    android:layout_marginTop="@dimen/lb_playback_transport_time_margin_top" />
-            </RelativeLayout>
+                    <TextView
+                        android:id="@+id/separate_time"
+                        style="?attr/playbackControlsTimeStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/lb_playback_transport_time_margin"
+                        android:text="@string/lb_playback_time_separator"
+                        android:textColor="@color/gray" />
+
+                    <TextView
+                        android:id="@+id/total_time"
+                        style="?attr/playbackControlsTimeStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/lb_playback_transport_time_margin"
+                        android:textColor="@color/gray" />
+
+                </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
 
         </tv.mycujoo.mls.tv.widgets.MLSPlaybackTransportRowView>
-    </LinearLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

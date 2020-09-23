@@ -157,7 +157,8 @@ class VideoPlayerCoordinatorTest {
             reactorSocket,
             dispatcher,
             dataManager,
-            emptyList()
+            emptyList(),
+            internalBuilder.logger
         )
         videoPlayerCoordinator.initialize(playerView, player, MLSBuilder)
         videoPlayerCoordinator.setAnnotationMediator(annotationMediator)

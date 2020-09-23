@@ -11,7 +11,9 @@ import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.api.DataManager
 import tv.mycujoo.mls.data.IDataManager
+import tv.mycujoo.mls.enum.LogLevel
 import tv.mycujoo.mls.manager.IPrefManager
+import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.manager.PrefManager
 import tv.mycujoo.mls.network.MlsApi
 import javax.inject.Singleton
@@ -39,7 +41,7 @@ open class AppModule() {
     @Provides
     @Singleton
     open fun provideDataManager(scope: CoroutineScope, repository: EventsRepository, mlsApi: MlsApi): IDataManager {
-        return DataManager(scope, repository, mlsApi)
+        return DataManager(scope, repository, mlsApi, Logger(LogLevel.MINIMAL))
     }
 
 

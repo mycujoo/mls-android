@@ -9,8 +9,11 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
-import tv.mycujoo.mls.core.IActionBuilder
+import tv.mycujoo.mls.core.IAnnotationFactory
+import tv.mycujoo.mls.data.IDataManager
+import tv.mycujoo.mls.enum.LogLevel
 import tv.mycujoo.mls.helper.IDownloaderClient
+import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.manager.TimerKeeper
 import tv.mycujoo.mls.manager.VariableTranslator
 import tv.mycujoo.mls.manager.contracts.IViewHandler
@@ -66,7 +69,7 @@ class AnnotationMediatorTest {
     lateinit var downloaderClient: IDownloaderClient
 
     @Mock
-    lateinit var actionBuilder: IActionBuilder
+    lateinit var annotationFactory: IAnnotationFactory
 
     /**endregion */
 
@@ -103,10 +106,13 @@ class AnnotationMediatorTest {
         annotationMediator =
             AnnotationMediator(
                 playerView,
-                actionBuilder,
+                annotationFactory,
+                dataManager,
+                testCoroutineScope,
                 player,
                 scheduledExecutorService,
-                handler
+                handler,
+                Logger(LogLevel.MINIMAL)
             )
 
         heartBeatOuterRunnable.run()
@@ -118,7 +124,12 @@ class AnnotationMediatorTest {
         assert(this::heartBeatOuterRunnable.isInitialized)
         assert(this::heartBeatInnerRunnable.isInitialized)
         assert(this::eventListener.isInitialized)
-        verify(scheduledExecutorService).scheduleAtFixedRate(any(), eq(1000L), eq(1000L), eq(TimeUnit.MILLISECONDS))
+        verify(scheduledExecutorService).scheduleAtFixedRate(
+            any(),
+            eq(1000L),
+            eq(1000L),
+            eq(TimeUnit.MILLISECONDS)
+        )
     }
 
     @Test
@@ -134,10 +145,10 @@ class AnnotationMediatorTest {
         heartBeatInnerRunnable.run()
 
 
-        verify(actionBuilder, never()).setCurrentTime(any(), any())
-        verify(actionBuilder, never()).buildCurrentTimeRange()
-        verify(actionBuilder, never()).processTimers()
-        verify(actionBuilder, never()).computeVariableNameValueTillNow()
+//        verify(annotationFactory, never()).setCurrentTime(any(), any())
+//        verify(annotationFactory, never()).buildCurrentTimeRange()
+//        verify(annotationFactory, never()).processTimers()
+//        verify(annotationFactory, never()).computeVariableNameValueTillNow()
     }
 
     @Test
@@ -156,10 +167,10 @@ class AnnotationMediatorTest {
         heartBeatInnerRunnable.run()
 
 
-        verify(actionBuilder).setCurrentTime(123L, true)
-        verify(actionBuilder).buildCurrentTimeRange()
-        verify(actionBuilder).processTimers()
-        verify(actionBuilder).computeVariableNameValueTillNow()
+//        verify(annotationFactory).setCurrentTime(123L, true)
+//        verify(annotationFactory).buildCurrentTimeRange()
+//        verify(annotationFactory).processTimers()
+//        verify(annotationFactory).computeVariableNameValueTillNow()
     }
 
     @Test
@@ -185,7 +196,7 @@ class AnnotationMediatorTest {
         eventListener.onPositionDiscontinuity(Player.DISCONTINUITY_REASON_SEEK)
 
 
-        verify(actionBuilder).setCurrentTime(123L, true)
+//        verify(annotationFactory).setCurrentTime(123L, true)
         verify(playerView).updateTime(123L, 400L)
     }
 
@@ -211,11 +222,11 @@ class AnnotationMediatorTest {
         eventListener.onPlayerStateChanged(true, Player.STATE_READY)
 
 
-        actionBuilder.processTimers()
-        verify(actionBuilder).buildLingerings()
-        verify(actionBuilder).buildCurrentTimeRange()
-        verify(actionBuilder).computeVariableNameValueTillNow()
-        verify(actionBuilder).computeVariableNameValueTillNow()
+//        annotationFactory.processTimers()
+//        verify(annotationFactory).buildLingerings()
+//        verify(annotationFactory).buildCurrentTimeRange()
+//        verify(annotationFactory).computeVariableNameValueTillNow()
+//        verify(annotationFactory).computeVariableNameValueTillNow()
     }
 
     @Test
@@ -228,11 +239,11 @@ class AnnotationMediatorTest {
         eventListener.onPlayerStateChanged(true, Player.STATE_READY)
 
 
-        actionBuilder.processTimers()
-        verify(actionBuilder, never()).buildLingerings()
-        verify(actionBuilder, never()).buildCurrentTimeRange()
-        verify(actionBuilder, never()).computeVariableNameValueTillNow()
-        verify(actionBuilder, never()).computeVariableNameValueTillNow()
+//        annotationFactory.processTimers()
+//        verify(annotationFactory, never()).buildLingerings()
+//        verify(annotationFactory, never()).buildCurrentTimeRange()
+//        verify(annotationFactory, never()).computeVariableNameValueTillNow()
+//        verify(annotationFactory, never()).computeVariableNameValueTillNow()
     }
 
     @Test
@@ -241,7 +252,7 @@ class AnnotationMediatorTest {
         eventListener.onIsPlayingChanged(false)
 
 
-        verify(actionBuilder, times(2)).processTimers()
+//        verify(annotationFactory, times(2)).processTimers()
     }
     /**endregion */
 
@@ -263,10 +274,10 @@ class AnnotationMediatorTest {
         onSizeChangedCallback.invoke()
 
 
-        verify(actionBuilder).setCurrentTime(123L, true)
-        verify(actionBuilder).removeAll()
-        verify(actionBuilder).buildCurrentTimeRange()
-        verify(actionBuilder).buildLingerings()
+//        verify(annotationFactory).setCurrentTime(123L, true)
+//        verify(annotationFactory).removeAll()
+//        verify(annotationFactory).buildCurrentTimeRange()
+//        verify(annotationFactory).buildLingerings()
     }
 
     @Test

@@ -1,10 +1,12 @@
 package tv.mycujoo.mls.api
 
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
+import tv.mycujoo.mls.enum.LogLevel
 
 data class MLSConfiguration(
     val seekTolerance: Long = 1000L,
-    val videoPlayerConfig: VideoPlayerConfig = defaultVideoPlayerConfig()
+    val videoPlayerConfig: VideoPlayerConfig = defaultVideoPlayerConfig(),
+    val logLevel: LogLevel = LogLevel.MINIMAL
 )
 
 fun defaultVideoPlayerConfig(): VideoPlayerConfig {

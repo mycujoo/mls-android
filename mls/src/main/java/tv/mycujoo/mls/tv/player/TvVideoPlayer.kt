@@ -3,6 +3,8 @@ package tv.mycujoo.mls.tv.player
 import android.app.Activity
 import android.net.Uri
 import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.leanback.app.VideoSupportFragment
@@ -23,30 +25,38 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
-import tv.mycujoo.domain.mapper.TimelineMarkerMapper
 import tv.mycujoo.mls.R
+import tv.mycujoo.mls.core.AbstractPlayerMediator
 import tv.mycujoo.mls.data.IDataManager
+import tv.mycujoo.mls.enum.C
+import tv.mycujoo.mls.enum.MessageLevel
 import tv.mycujoo.mls.helper.DateTimeHelper
-import tv.mycujoo.mls.model.JoinTimelineParam
+import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
+import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.network.socket.IReactorSocket
+import tv.mycujoo.mls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackTransportControlGlueImpl
+import tv.mycujoo.mls.utils.StringUtils
+import tv.mycujoo.mls.widgets.MLSPlayerView
 
 class TvVideoPlayer(
     private val activity: Activity,
     videoSupportFragment: VideoSupportFragment,
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
-    private val dataManager: IDataManager
-) {
+    private val dataManager: IDataManager,
+    logger: Logger
+) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
+
+
     /**region Fields*/
     var player: SimpleExoPlayer? = null
     private var leanbackAdapter: LeanbackPlayerAdapter
     private var glueHost: VideoSupportFragmentGlueHost
     private var mTransportControlGlue: MLSPlaybackTransportControlGlueImpl<LeanbackPlayerAdapter>
     private var eventInfoContainerLayout: FrameLayout
-
-    private var eventMayBeStreamed = false
+    private var controllerAgent: ControllerAgent
     /**endregion */
 
     /**region Initializing*/
@@ -55,7 +65,9 @@ class TvVideoPlayer(
         leanbackAdapter = LeanbackPlayerAdapter(activity, player!!, 1000)
         glueHost = VideoSupportFragmentGlueHost(videoSupportFragment)
 
-        mTransportControlGlue = MLSPlaybackTransportControlGlueImpl(activity, leanbackAdapter)
+        controllerAgent = ControllerAgent(player!!)
+        mTransportControlGlue =
+            MLSPlaybackTransportControlGlueImpl(activity, leanbackAdapter, controllerAgent)
         mTransportControlGlue.host = glueHost
         mTransportControlGlue.playWhenPrepared()
         if (mTransportControlGlue.isPrepared) {
@@ -82,6 +94,21 @@ class TvVideoPlayer(
                         (it as MLSPlaybackSeekDataProvider).setSeekPositions(player!!.duration)
                     }
                 }
+
+                player?.let {
+                    isLive = player!!.isCurrentWindowDynamic
+                    if (isLive) {
+                        if (it.currentPosition + 15000L >= it.duration) {
+                            controllerAgent.setControllerLiveMode(MLSPlayerView.LiveState.LIVE_ON_THE_EDGE)
+                        } else {
+                            controllerAgent.setControllerLiveMode(MLSPlayerView.LiveState.LIVE_TRAILING)
+                        }
+                    } else {
+                        // VOD
+                        controllerAgent.setControllerLiveMode(MLSPlayerView.LiveState.VOD)
+                    }
+
+                }
             }
         })
 
@@ -90,13 +117,53 @@ class TvVideoPlayer(
         } else {
             val rootView = videoSupportFragment.view!! as FrameLayout
             eventInfoContainerLayout = FrameLayout(rootView.context)
-//            rootView.addView(eventInfoContainerLayout, 1, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+            rootView.addView(
+                eventInfoContainerLayout,
+                1,
+                FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+            )
         }
     }
+
     /**endregion */
+    override fun onReactorEventUpdate(eventId: String, updateId: String) {
+        cancelStreamUrlPulling()
+        dispatcher.launch(context = Dispatchers.Main) {
+            val result = dataManager.getEventDetails(eventId, updateId)
+            when (result) {
+                is Result.Success -> {
+                    dataManager.currentEvent = result.value
+                    if (eventMayBeStreamed.not()) {
+                        playVideoOrDisplayEventInfo(result.value)
+                        startStreamUrlPullingIfNeeded(result.value)
+                    }
+                }
+                is Result.NetworkError -> {
+                    logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
+                }
+                is Result.GenericError -> {
+                    logger.log(
+                        MessageLevel.DEBUG,
+                        C.INTERNAL_ERROR_MESSAGE.plus(" ${result.errorMessage} ${result.errorCode}")
+                    )
+                }
+            }
+        }
+    }
+
+    override fun onReactorCounterUpdate(counts: String) {
+        if (isLive && isViewersCountValid(counts)) {
+            controllerAgent.setViewerCount(StringUtils.getNumberOfViewers(counts))
+        } else {
+            controllerAgent.hideViewersCount()
+        }
+    }
+
+    override fun onReactorTimelineUpdate(timelineId: String, updateId: String) {
+        // todo
+    }
 
     /**region Playback*/
-
     fun playExternalSourceVideo(url: String, isHls: Boolean = true) {
         if (isHls) {
             val userAgent = Util.getUserAgent(activity, "MLS-AndroidTv-SDK")
@@ -114,105 +181,72 @@ class TvVideoPlayer(
         }
     }
 
-    fun playVideo(event: EventEntity) {
+    override fun playVideo(event: EventEntity) {
         playVideo(event.id)
     }
 
-    fun playVideo(eventId: String) {
+    override fun playVideo(eventId: String) {
         dispatcher.launch(context = Dispatchers.Main) {
             val result = dataManager.getEventDetails(eventId)
             when (result) {
                 is Result.Success -> {
                     dataManager.currentEvent = result.value
-//                    playVideoOrDisplayEventInfo(result.value)
+                    playVideoOrDisplayEventInfo(result.value)
+                    joinToReactor(result.value)
+                    startStreamUrlPullingIfNeeded(result.value)
+
                 }
                 is Result.NetworkError -> {
+                    logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
                 }
                 is Result.GenericError -> {
+                    logger.log(
+                        MessageLevel.DEBUG,
+                        C.INTERNAL_ERROR_MESSAGE.plus(" ${result.errorMessage} ${result.errorCode}")
+                    )
                 }
             }
         }
     }
 
     private fun playVideoOrDisplayEventInfo(event: EventEntity) {
-
         if (mayPlayVideo(event)) {
             val userAgent = Util.getUserAgent(activity, "MLS-AndroidTv-SDK")
             val hlsFactory = HlsMediaSource.Factory(DefaultDataSourceFactory(activity, userAgent))
 
             player!!.prepare(hlsFactory.createMediaSource(Uri.parse(event.streams.first().fullUrl)))
+            eventInfoContainerLayout.visibility = View.GONE
         } else {
-            displayPreEventInformationDialog(event.title, event.description, event.start_time)
+            displayPreEventInformationLayout(event.title, event.description, event.start_time)
         }
-    }
-
-    private fun mayPlayVideo(event: EventEntity): Boolean {
-        eventMayBeStreamed = event.streams.firstOrNull()?.fullUrl != null
-        return eventMayBeStreamed
     }
 
     /**endregion */
 
-    /**region Event-information dialog*/
-    private fun displayPreEventInformationDialog(
+    /**region Event-information layout*/
+    private fun displayPreEventInformationLayout(
         title: String,
         description: String,
         startTime: String
     ) {
         glueHost.hideControlsOverlay(true)
+        eventInfoContainerLayout.visibility = View.VISIBLE
 
-        val informationDialog =
+        val informationLayout =
             LayoutInflater.from(eventInfoContainerLayout.context)
                 .inflate(
                     R.layout.dialog_event_info_pre_event_layout,
                     eventInfoContainerLayout,
                     false
                 )
-        eventInfoContainerLayout.addView(informationDialog)
+        eventInfoContainerLayout.addView(informationLayout)
 
-        informationDialog.findViewById<TextView>(R.id.eventInfoPreEventDialog_titleTextView).text =
+        informationLayout.findViewById<TextView>(R.id.eventInfoPreEventDialog_titleTextView).text =
             title
-        informationDialog.findViewById<TextView>(R.id.informationDialog_bodyTextView).text =
+        informationLayout.findViewById<TextView>(R.id.informationDialog_bodyTextView).text =
             description
-        informationDialog.findViewById<TextView>(R.id.informationDialog_dateTimeTextView).text =
+        informationLayout.findViewById<TextView>(R.id.informationDialog_dateTimeTextView).text =
             DateTimeHelper.getDateTime(startTime)
     }
     /**endregion */
-
-    /**region Reactor function*/
-
-    private fun joinToReactor(event: EventEntity) {
-        reactorSocket.joinEvent(event.id)
-    }
-
-    private fun fetchActions(event: EventEntity) {
-        if (event.timeline_ids.isEmpty()) {
-            return
-        }
-        fetchActions(event.timeline_ids.first())
-    }
-
-    private fun fetchActions(timelineId: String) {
-        dispatcher.launch(context = Dispatchers.Main) {
-            val result = dataManager.getActions(timelineId)
-            when (result) {
-                is Result.Success -> {
-                    val timelineMarkerEntityList =
-                        result.value.data.mapNotNull { TimelineMarkerMapper.mapToTimelineMarker(it) }
-//                    playerView.setTimelineMarker(timelineMarkerEntityList) todo
-
-                    val joinTimelineParam =
-                        JoinTimelineParam(timelineId, result.value.data.lastOrNull()?.id)
-                    reactorSocket.joinTimelineIfNeeded(joinTimelineParam)
-                }
-                is Result.NetworkError,
-                is Result.GenericError -> {
-                }
-            }
-        }
-
-    }
-
-    /**endregion */
-
 }

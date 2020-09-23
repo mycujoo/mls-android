@@ -4,10 +4,12 @@ import android.app.Activity
 import org.mockito.Mockito.mock
 import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.di.DaggerTestMlsComponent
+import tv.mycujoo.mls.enum.LogLevel
 import tv.mycujoo.mls.manager.ViewHandler
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 
-class InternalTestBuilder(private val activity: Activity) : InternalBuilder(activity) {
+class InternalTestBuilder(private val activity: Activity) :
+    InternalBuilder(activity, LogLevel.MINIMAL) {
 
     var mockViewHandler: IViewHandler = mock(ViewHandler::class.java)
 

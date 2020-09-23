@@ -21,6 +21,11 @@ import androidx.leanback.widget.Presenter;
 
 import java.util.List;
 
+import tv.mycujoo.mls.tv.internal.controller.ControllerAgent;
+import tv.mycujoo.mls.tv.widgets.MLSFastForwardAction;
+import tv.mycujoo.mls.tv.widgets.MLSPlayPauseAction;
+import tv.mycujoo.mls.tv.widgets.MLSRewindAction;
+
 public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extends PlaybackGlue
         implements OnActionClickedListener, View.OnKeyListener {
 
@@ -77,7 +82,9 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
     public final T mPlayerAdapter;
     public PlaybackControlsRow mControlsRow;
     PlaybackRowPresenter mControlsRowPresenter;
-    public PlaybackControlsRow.PlayPauseAction mPlayPauseAction;
+    public MLSPlayPauseAction mPlayPauseAction;
+    public MLSRewindAction mRewindAction;
+    public MLSFastForwardAction mFastForwardAction;
     public boolean mIsPlaying = false;
     public boolean mFadeWhenPlaying = true;
 
@@ -92,6 +99,8 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
     boolean mErrorSet = false;
     int mErrorCode;
     String mErrorMessage;
+
+    ControllerAgent controllerAgent;
 
     final PlayerAdapter.Callback mAdapterCallback = new PlayerAdapter
             .Callback() {
@@ -171,10 +180,11 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
      * @param context
      * @param impl    Implementation to underlying media player.
      */
-    public MLSPlaybackBaseControlGlue(Context context, T impl) {
+    public MLSPlaybackBaseControlGlue(Context context, T impl, ControllerAgent controllerAgent) {
         super(context);
         mPlayerAdapter = impl;
         mPlayerAdapter.setCallback(mAdapterCallback);
+        this.controllerAgent = controllerAgent;
     }
 
     public final T getPlayerAdapter() {
@@ -245,11 +255,11 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
 
     void onCreateDefaultRowPresenter() {
         if (mControlsRowPresenter == null) {
-            setPlaybackRowPresenter(onCreateRowPresenter());
+            setPlaybackRowPresenter(onCreateRowPresenter(controllerAgent));
         }
     }
 
-    protected abstract PlaybackRowPresenter onCreateRowPresenter();
+    protected abstract PlaybackRowPresenter onCreateRowPresenter(ControllerAgent liveToggleL);
 
     /**
      * Sets the controls to auto hide after a timeout when media is playing.
@@ -366,6 +376,33 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
     @Override
     public void previous() {
         mPlayerAdapter.previous();
+    }
+
+    public void rewind() {
+        long currentPosition = getCurrentPosition();
+        if (currentPosition < 0) {
+            return;
+        }
+
+        if (currentPosition > 10000L) {
+            seekTo(currentPosition - 10000L);
+        } else {
+            seekTo(0L);
+        }
+    }
+
+    public void fastForward() {
+        long currentPosition = getCurrentPosition();
+        long duration = getDuration();
+        if (currentPosition < 0 || duration < 0) {
+            return;
+        }
+
+        if (currentPosition + 1000L < duration) {
+            seekTo(currentPosition + 10000L);
+        } else {
+            seekTo(duration);
+        }
     }
 
     protected static void notifyItemChanged(ArrayObjectAdapter adapter, Object object) {

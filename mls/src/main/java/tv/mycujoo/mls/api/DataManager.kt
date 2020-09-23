@@ -1,6 +1,5 @@
 package tv.mycujoo.mls.api
 
-import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import tv.mycujoo.data.entity.ActionResponse
@@ -15,6 +14,10 @@ import tv.mycujoo.domain.usecase.GetActionsUseCase
 import tv.mycujoo.domain.usecase.GetEventDetailUseCase
 import tv.mycujoo.domain.usecase.GetEventsUseCase
 import tv.mycujoo.mls.data.IDataManager
+import tv.mycujoo.mls.enum.C
+import tv.mycujoo.mls.enum.LogLevel
+import tv.mycujoo.mls.enum.MessageLevel
+import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.model.SingleLiveEvent
 import tv.mycujoo.mls.network.MlsApi
 
@@ -25,7 +28,8 @@ import tv.mycujoo.mls.network.MlsApi
 class DataManager(
     private val scope: CoroutineScope,
     private val eventsRepository: EventsRepository,
-    private var mlsApi: MlsApi
+    private var mlsApi: MlsApi,
+    private val logger: Logger
 ) : IDataManager {
 
 
@@ -39,8 +43,16 @@ class DataManager(
 
 
     /**region InternalDataProvider*/
-    override suspend fun getEventDetails(eventId: String): Result<Exception, EventEntity> {
-        return GetEventDetailUseCase(eventsRepository).execute(EventIdPairParam(eventId))
+
+    override suspend fun getEventDetails(
+        eventId: String,
+        updateId: String?
+    ): Result<Exception, EventEntity> {
+        return GetEventDetailUseCase(eventsRepository).execute(EventIdPairParam(eventId, updateId))
+    }
+
+    override fun setLogLevel(logLevel: LogLevel) {
+        logger.setLogLevel(logLevel)
     }
 
     override suspend fun getActions(timelineId: String): Result<Exception, ActionResponse> {
@@ -86,10 +98,13 @@ class DataManager(
                     }
                 }
                 is Result.NetworkError -> {
-                    Log.w("DataManager", result.error.toString())
+                    logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus(" ${result.error}"))
                 }
                 is Result.GenericError -> {
-                    Log.w("DataManager", "Error: ${result.errorCode}:${result.errorMessage}")
+                    logger.log(
+                        MessageLevel.DEBUG,
+                        C.INTERNAL_ERROR_MESSAGE.plus(" ${result.errorMessage} ${result.errorCode}")
+                    )
                 }
 
             }
