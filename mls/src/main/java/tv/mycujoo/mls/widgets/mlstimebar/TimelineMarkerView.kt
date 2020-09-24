@@ -8,7 +8,7 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
+import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -22,32 +22,65 @@ import tv.mycujoo.mls.utils.ColorUtils
 
 class TimelineMarkerView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : LinearLayout(context, attrs, defStyleAttr) {
+) : ConstraintLayout(context, attrs, defStyleAttr) {
 
     /**region Fields*/
+    private val anchorView: View = View(context)
+    private val frameLayout: FrameLayout
+    private val textView: TextView
     var bgColor = ""
     private lateinit var idlingResource: CountingIdlingResource
-    private var counter = 0
     /**endregion */
 
     /**region Initializing*/
     init {
-        orientation = VERTICAL
-        gravity = Gravity.CENTER
-        background = ContextCompat.getDrawable(context, R.drawable.shape_highlight_marker_bg)
+        anchorView.id = View.generateViewId()
+        val anchorLayoutParams = LayoutParams(
+            1,
+            1
+        )
+        anchorLayoutParams.leftToLeft = id
+        addView(anchorView, anchorLayoutParams)
+
+        frameLayout = FrameLayout(context)
+        frameLayout.id = View.generateViewId()
+        val frameLayoutLayoutParams = LayoutParams(
+            LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        frameLayoutLayoutParams.leftToLeft = anchorView.id
+        frameLayoutLayoutParams.topToTop = this.id
+        frameLayoutLayoutParams.rightToRight = anchorView.id
+        addView(frameLayout, frameLayoutLayoutParams)
+
+        frameLayout.background =
+            ContextCompat.getDrawable(context, R.drawable.shape_highlight_marker_bg)
         val density = resources.displayMetrics.density
         val verticalPadding: Int = (4 * density).toInt()
         val sidePadding: Int = (8 * density).toInt()
 
-        setPadding(sidePadding, verticalPadding, sidePadding, verticalPadding)
+        frameLayout.setPadding(sidePadding, verticalPadding, sidePadding, verticalPadding)
+
+
+        textView = TextView(context)
+        textView.id = View.generateViewId()
+        val layoutParams = FrameLayout.LayoutParams(
+            LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        layoutParams.gravity = Gravity.CENTER
+        frameLayout.addView(textView, layoutParams)
     }
 
     fun initialize(color: String) {
         bgColor = color
-        background.colorFilter = PorterDuffColorFilter(
-            Color.parseColor(color),
-            PorterDuff.Mode.SRC_ATOP
-        )
+        frameLayout.doOnLayout {
+            frameLayout.background.colorFilter = PorterDuffColorFilter(
+                Color.parseColor(color),
+                PorterDuff.Mode.SRC_ATOP
+            )
+        }
+
 
         visibility = View.GONE
     }
@@ -66,35 +99,26 @@ class TimelineMarkerView @JvmOverloads constructor(
             idlingResource.increment()
         }
 
-        val parentLayout = parent as ConstraintLayout
-        val constraintSet = ConstraintSet()
-        constraintSet.clone(parentLayout)
+        var relationalPosition = relationalPosition
 
-        if (parentLayout.width - (width / 2) < relationalPosition) {
-            // marker should stick to the end
-            constraintSet.connect(
-                this.id,
-                ConstraintSet.END,
-                parentLayout.id,
-                ConstraintSet.END
-            )
-            constraintSet.clear(this.id, ConstraintSet.START)
-        } else {
-            constraintSet.connect(
-                this.id,
-                ConstraintSet.START,
-                parentLayout.id,
-                ConstraintSet.START
-            )
-            constraintSet.setMargin(
-                this.id,
-                ConstraintSet.START,
-                relationalPosition - (width / 2)
-            )
-            constraintSet.clear(this.id, ConstraintSet.END)
+        if ((textView.width / 2) > relationalPosition) {
+            relationalPosition += (textView.width / 2)
         }
 
-        constraintSet.applyTo(parentLayout)
+        if ((parent as View).width - (textView.width / 2) < relationalPosition) {
+            relationalPosition -= (textView.width / 2)
+        }
+
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(this)
+
+        constraintSet.setMargin(
+            anchorView.id,
+            ConstraintSet.START,
+            relationalPosition
+        )
+
+        constraintSet.applyTo(this)
 
         doOnLayout {
             visibility = View.VISIBLE
@@ -108,66 +132,26 @@ class TimelineMarkerView @JvmOverloads constructor(
     }
 
     fun removeMarkerTexts() {
-        if (counter > 0) {
-            counter = 0
-            visibility = View.INVISIBLE
-            removeAllViewsInLayout()
-
-        }
+        visibility = View.GONE
     }
 
-    fun setMarkerTexts(titles: List<String>, toInt: Int) {
-        if (counter > 0) {
-            val t = object : OnHierarchyChangeListener {
-                override fun onChildViewAdded(parent: View?, child: View?) {
-                }
-
-                override fun onChildViewRemoved(parent: View?, child: View?) {
-                }
-            }
-            setOnHierarchyChangeListener(t)
-
+    fun setMarkerTexts(titles: List<String>, position: Int) {
+        if (titles.isEmpty()) {
             removeMarkerTexts()
+        }
+        visibility = View.VISIBLE
+        textView.visibility = View.VISIBLE
+        textView.text = titles.first()
+        textView.doOnLayout {
+            setPosition(position)
+        }
+
+        if (ColorUtils.isColorBright(bgColor)) {
+            textView.setTextColor(Color.parseColor("#000000"))
         } else {
-            addTitles(titles, toInt)
-        }
-
-    }
-
-    private fun addTitles(titles: List<String>, toInt: Int) {
-        counter = titles.size
-
-        val t = object : OnHierarchyChangeListener {
-            override fun onChildViewAdded(parent: View?, child: View?) {
-                if ((parent as ViewGroup).childCount == titles.size) {
-                    setPosition(toInt)
-                }
-            }
-
-            override fun onChildViewRemoved(parent: View?, child: View?) {
-
-            }
-        }
-
-        setOnHierarchyChangeListener(t)
-
-
-        titles.forEach {
-            addView(TextView(context).apply {
-                text = it
-                gravity = Gravity.CENTER
-
-
-                if (ColorUtils.isColorBright(bgColor)) {
-                    setTextColor(Color.parseColor("#000000"))
-                } else {
-                    setTextColor(Color.parseColor("#FFFFFF"))
-                }
-
-            })
+            textView.setTextColor(Color.parseColor("#FFFFFF"))
         }
     }
-
     /**endregion */
 
     /**region Test helper*/
