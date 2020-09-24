@@ -167,7 +167,7 @@ class MLSPlayerView @JvmOverloads constructor(
                 PointOfInterest(
                     showTimelineMarkerEntity.offset,
                     showTimelineMarkerEntity.seekOffset,
-                    listOf(showTimelineMarkerEntity.label),
+                    showTimelineMarkerEntity.label,
                     PointOfInterestType(showTimelineMarkerEntity.color)
                 )
             )
@@ -179,7 +179,7 @@ class MLSPlayerView @JvmOverloads constructor(
             PointOfInterest(
                 it.offset,
                 it.seekOffset,
-                listOf(it.label),
+                it.label,
                 PointOfInterestType(it.color)
             )
         }.let {

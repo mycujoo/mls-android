@@ -30,11 +30,13 @@ import androidx.leanback.widget.RowPresenter;
 import java.util.Arrays;
 
 import tv.mycujoo.mls.R;
+import tv.mycujoo.mls.manager.TvTimelineMarkerManager;
 import tv.mycujoo.mls.tv.internal.controller.ControllerAgent;
 import tv.mycujoo.mls.tv.widgets.MLSPlaybackTransportRowView;
 import tv.mycujoo.mls.tv.widgets.MLSSeekBar;
 import tv.mycujoo.mls.tv.widgets.MLSThumbsBar;
 import tv.mycujoo.mls.widgets.MLSPlayerView;
+import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarkerWidget;
 
 public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
 
@@ -79,6 +81,11 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
         FrameLayout mLiveBadgeLayout;
         ConstraintLayout mViewersCountLayout;
         TextView mViewersCountTextView;
+
+        final View mTimelineMarkerAnchor;
+        final FrameLayout mTimelineMarkerBackgroundLayout;
+        final TextView mTimelineMarkerTextView;
+
 
         final PlaybackControlsRow.OnPlaybackProgressCallback mListener =
                 new PlaybackControlsRow.OnPlaybackProgressCallback() {
@@ -159,6 +166,7 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
             }
             double ratio = (double) newPos / mTotalTimeInMs;     // Range: [0, 1]
             mProgressBar.setProgress((int) (ratio * Integer.MAX_VALUE)); // Could safely cast to int
+            mProgressBar.setCurrentTimeBySeek(newPos);
             mSeekClient.onSeekPositionChanged(newPos);
         }
 
@@ -356,6 +364,11 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
 
             controllerAgent.setViewerCountView(mViewersCountLayout, mViewersCountTextView);
 
+            mTimelineMarkerAnchor = rootView.findViewById(R.id.tvController_timelineMarkerAnchor);
+            mTimelineMarkerBackgroundLayout = rootView.findViewById(R.id.tvController_timelineMarkerBackgroundLayout);
+            mTimelineMarkerTextView = rootView.findViewById(R.id.tvController_timelineMarkerTextView);
+
+            TvTimelineMarkerManager tvTimelineMarkerManager = new TvTimelineMarkerManager(mProgressBar, new TimelineMarkerWidget(mTimelineMarkerAnchor, mTimelineMarkerBackgroundLayout, mTimelineMarkerTextView));
 
         }
 
@@ -481,6 +494,7 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
             if (mTotalTimeInMs != totalTimeMs) {
                 mTotalTimeInMs = totalTimeMs;
                 onSetDurationLabel(totalTimeMs);
+                mProgressBar.setTotalTime(totalTimeMs);
             }
         }
 

@@ -8,8 +8,13 @@ import android.view.View
 import android.widget.SeekBar
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import tv.mycujoo.mls.R
+import tv.mycujoo.mls.manager.SeekBarListener
+import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterest
+import tv.mycujoo.mls.widgets.mlstimebar.PositionedPointOfInterest
+import java.util.*
 
 class MLSSeekBar(context: Context, attrs: AttributeSet?) : View(context, attrs) {
+
     abstract class AccessibilitySeekListener {
         /**
          * Called to perform AccessibilityNodeInfoCompat.ACTION_SCROLL_FORWARD
@@ -43,6 +48,25 @@ class MLSSeekBar(context: Context, attrs: AttributeSet?) : View(context, attrs) 
     private var mBarHeight: Int
     private var mActiveBarHeight: Int
     private var mAccessibilitySeekListener: AccessibilitySeekListener? = null
+
+    private lateinit var seekBarListener: SeekBarListener
+    private val poiArrayList = ArrayList<PointOfInterest>()
+    private val poiPositionsOnScreen = ArrayList<PositionedPointOfInterest>()
+
+
+    fun addTimeLineHighlight(poi: PointOfInterest) {
+        poiArrayList.add(poi)
+        poiPositionsOnScreen.add(PositionedPointOfInterest(-1, poi))
+    }
+
+    fun clearTimeLineMarker() {
+        poiArrayList.clear()
+        poiPositionsOnScreen.clear()
+    }
+
+    fun setSeekbarListener(seekBarListener: SeekBarListener) {
+        this.seekBarListener = seekBarListener
+    }
 
     /**
      * Set radius in pixels for thumb when SeekBar is focused.
@@ -86,11 +110,49 @@ class MLSSeekBar(context: Context, attrs: AttributeSet?) : View(context, attrs) 
         val radius = if (isFocused) mActiveRadius else mBarHeight / 2
         canvas.drawRoundRect(mBackgroundRect, radius.toFloat(), radius.toFloat(), mBackgroundPaint)
         if (mSecondProgressRect.right > mSecondProgressRect.left) {
-            canvas.drawRoundRect(mSecondProgressRect, radius.toFloat(), radius.toFloat(), mSecondProgressPaint)
+            canvas.drawRoundRect(
+                mSecondProgressRect,
+                radius.toFloat(),
+                radius.toFloat(),
+                mSecondProgressPaint
+            )
         }
         canvas.drawRoundRect(mProgressRect, radius.toFloat(), radius.toFloat(), mProgressPaint)
+
+        poiArrayList.forEachIndexed { index, poi ->
+            val poiOffsetAdjusted: Long
+            if (poi.offset + poi.seekOffset in 0L..totalTime) {
+                poiOffsetAdjusted = poi.offset + poi.seekOffset
+            } else {
+                poiPositionsOnScreen[index].positionOnScreen = -1
+                return
+            }
+
+            mMarkerPaint.color =
+                Color.parseColor(poi.poiType.color)
+
+            val markerPositionOffset: Int =
+                (width * poiOffsetAdjusted / totalTime).toInt()
+
+            val markerLeft = mProgressRect.left + Math.min(
+                mBackgroundRect.width().toInt() - 4,
+                Math.max(0, markerPositionOffset)
+            ).toFloat()
+            val markerRight = markerLeft + 4
+
+            canvas.drawRect(
+                markerLeft,
+                mSecondProgressRect.top,
+                markerRight,
+                mSecondProgressRect.bottom,
+                mMarkerPaint
+            )
+
+            poiPositionsOnScreen[index].positionOnScreen =
+                ((markerLeft + markerRight) / 2).toInt()
+        }
+
         canvas.drawCircle(mKnobx.toFloat(), height / 2.toFloat(), radius.toFloat(), mKnobPaint)
-        //        canvas.drawRect(300F, mSecondProgressRect.top, 310F, mSecondProgressRect.bottom, mMarkerPaint);
     }
 
     /**
@@ -106,24 +168,30 @@ class MLSSeekBar(context: Context, attrs: AttributeSet?) : View(context, attrs) 
         secondProgress = progress
         calculate()
     }
+
     /**
      * Get progress within 0 and [.getMax]
-     */
-    /**
      * Set progress within 0 and [.getMax]
      */
-    var progress: Int
-        get() = mProgress
-        set(progress) {
-            var progress = progress
-            if (progress > mMax) {
-                progress = mMax
-            } else if (progress < 0) {
-                progress = 0
-            }
-            mProgress = progress
-            calculate()
+    fun getProgress(): Int {
+        return mProgress
+    }
+
+    fun setProgress(progress: Int) {
+        var progress = progress
+        if (progress > mMax) {
+            progress = mMax
+        } else if (progress < 0) {
+            progress = 0
         }
+        mProgress = progress
+        calculate()
+    }
+
+    fun setCurrentTimeBySeek(pos: Long) {
+        val ratio = pos.toDouble() / totalTime
+        seekBarListener.onSeekTo((ratio * mBackgroundRect.width()).toInt(), poiPositionsOnScreen)
+    }
     /**
      * Get max value.
      */
@@ -136,6 +204,11 @@ class MLSSeekBar(context: Context, attrs: AttributeSet?) : View(context, attrs) 
             mMax = max
             calculate()
         }
+
+    private var totalTime: Long = 0L
+    fun setTotalTime(totalTime: Long) {
+        this.totalTime = totalTime
+    }
 
     /**
      * Set color for progress.
