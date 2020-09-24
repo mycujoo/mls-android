@@ -7,11 +7,11 @@ import android.view.FocusFinder
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import androidx.annotation.RestrictTo
+import androidx.constraintlayout.widget.ConstraintLayout
 import tv.mycujoo.mls.R
 
-class MLSPlaybackTransportRowView : LinearLayout {
+class MLSPlaybackTransportRowView : ConstraintLayout {
     /**
      * @hide
      */
@@ -25,8 +25,8 @@ class MLSPlaybackTransportRowView : LinearLayout {
 
     var onUnhandledKeyListener: OnUnhandledKeyListener? = null
 
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {}
-    constructor(context: Context?, attrs: AttributeSet?, defStyle: Int) : super(
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {}
+    constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(
         context,
         attrs,
         defStyle

@@ -32,7 +32,7 @@ bintray {
     pkg {
         repo = 'mls'
         userOrg = 'mycujoo'
-        name = 'tv.mycujoo.mls-android' // PACKAGE NAME
+        name = 'tv.mycujoo.mls' // PACKAGE NAME
         desc = 'MLS Android SDK' // LIBRARY DESCRIPTION
         websiteUrl = 'https://github.com/mycujoo/mls-android' // SITE
         vcsUrl = 'https://github.com/mycujoo/mls-android.git' // GIT REPO

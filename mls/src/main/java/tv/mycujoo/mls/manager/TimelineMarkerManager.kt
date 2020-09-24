@@ -38,7 +38,7 @@ class TimelineMarkerManager(
                             currentPoiList.addAll(inRangePointOfInterestList)
 
                             timelineMarkerView.setMarkerTexts(
-                                inRangePointOfInterestList.flatMap { it.pointOfInterest.title },
+                                currentPoiList.map { it.pointOfInterest.title },
                                 position.toInt()
                             )
                         }

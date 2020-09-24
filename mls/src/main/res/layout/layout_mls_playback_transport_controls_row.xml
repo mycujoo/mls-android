@@ -87,162 +87,196 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/transportRowContainerLayout"
+    <tv.mycujoo.mls.tv.widgets.MLSPlaybackTransportRowView
+        android:id="@+id/transport_row"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:paddingStart="?attr/browsePaddingStart"
+        android:paddingEnd="?attr/browsePaddingEnd"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/controlsCardContainerLayout">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <tv.mycujoo.mls.tv.widgets.MLSPlaybackTransportRowView
-            android:id="@+id/transport_row"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:orientation="vertical"
-            android:paddingStart="?attr/browsePaddingStart"
-            android:paddingEnd="?attr/browsePaddingEnd"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/controls_dock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="@dimen/lb_playback_transport_controlbar_margin_start"
+            android:animateLayoutChanges="true"
+            android:layoutDirection="ltr"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/controls_dock"
+
+        <View
+            android:id="@+id/tvController_timelineMarkerAnchor"
+            android:layout_width="1dp"
+            android:layout_height="1dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <FrameLayout
+            android:id="@+id/tvController_timelineMarkerBackgroundLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shape_highlight_marker_bg"
+            android:paddingLeft="4dp"
+            android:paddingTop="2dp"
+            android:paddingRight="4dp"
+            android:paddingBottom="2dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/playback_progress"
+            app:layout_constraintLeft_toLeftOf="@id/tvController_timelineMarkerAnchor"
+            app:layout_constraintRight_toRightOf="@id/tvController_timelineMarkerAnchor"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/tvController_timelineMarkerTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginLeft="@dimen/lb_playback_transport_controlbar_margin_start"
-                android:layoutDirection="ltr" />
+                android:gravity="center"
+                android:textColor="@color/white"
+                tools:text="Test" />
+        </FrameLayout>
 
-            <tv.mycujoo.mls.tv.widgets.MLSSeekBar
-                android:id="@+id/playback_progress"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/lb_playback_transport_progressbar_height"
-                android:focusable="true"
-                android:nextFocusDown="@id/tvController_liveBadgeLayout" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/tvController_guidelineOf3rdQuarter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent=".90" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
+
+        <tv.mycujoo.mls.tv.widgets.MLSSeekBar
+            android:id="@+id/playback_progress"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/lb_playback_transport_progressbar_height"
+            android:focusable="true"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintLeft_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvController_guidelineOf3rdQuarter" />
+
+
+        <LinearLayout
+            android:id="@+id/secondary_controls_dock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/playback_progress">
+
+            <FrameLayout
+                android:id="@+id/tvController_liveBadgeLayout"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layoutDirection="ltr">
+                android:layout_marginRight="8dp"
+                android:background="@drawable/selector_live_badge_button"
+                android:clickable="true"
+                android:focusable="true"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp">
 
-                <LinearLayout
-                    android:id="@+id/secondary_controls_dock"
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    android:text="LIVE"
+                    android:textColor="@color/lb_tv_white" />
 
-                    <FrameLayout
-                        android:id="@+id/tvController_liveBadgeLayout"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="8dp"
-                        android:background="@drawable/selector_live_badge_button"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:paddingStart="4dp"
-                        android:paddingEnd="4dp">
+            </FrameLayout>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="LIVE"
-                            android:textColor="@color/lb_tv_white" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/tvController_viewersCountLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginRight="8dp"
+                android:background="#80000000"
+                android:focusable="false"
+                android:visibility="gone"
+                tools:visibility="visible">
 
-                    </FrameLayout>
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/tvController_viewersCountLayout"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginRight="8dp"
-                        android:background="#80000000"
-                        android:focusable="false"
-                        android:visibility="gone"
-                        tools:visibility="visible">
-
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginLeft="2dp"
-                            android:layout_marginTop="2dp"
-                            android:layout_marginRight="4dp"
-                            android:background="@drawable/ic_eye_icon"
-                            android:focusable="false"
-                            app:layout_constraintBottom_toBottomOf="@id/tvController_viewersCountTextView"
-                            app:layout_constraintLeft_toLeftOf="parent"
-                            app:layout_constraintRight_toLeftOf="@id/tvController_viewersCountTextView"
-                            app:layout_constraintTop_toTopOf="@id/tvController_viewersCountTextView" />
-
-                        <TextView
-                            android:id="@+id/tvController_viewersCountTextView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginTop="2dp"
-                            android:layout_marginRight="4dp"
-                            android:layout_marginBottom="2dp"
-                            android:focusable="false"
-                            android:gravity="center"
-                            android:textColor="@color/white"
-                            android:textSize="12sp"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintRight_toRightOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:text="823" />
-
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
+                <ImageView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/lb_playback_transport_time_margin_top"
-                    android:orientation="horizontal"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="2dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginRight="4dp"
+                    android:background="@drawable/ic_eye_icon"
+                    android:focusable="false"
+                    app:layout_constraintBottom_toBottomOf="@id/tvController_viewersCountTextView"
                     app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toLeftOf="@id/tvController_viewersCountTextView"
+                    app:layout_constraintTop_toTopOf="@id/tvController_viewersCountTextView" />
+
+                <TextView
+                    android:id="@+id/tvController_viewersCountTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginBottom="2dp"
+                    android:focusable="false"
+                    android:gravity="center"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <TextView
-                        android:id="@+id/current_time"
-                        style="?attr/playbackControlsTimeStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/lb_playback_transport_time_margin"
-                        android:textColor="@color/white" />
-
-                    <TextView
-                        android:id="@+id/separate_time"
-                        style="?attr/playbackControlsTimeStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/lb_playback_transport_time_margin"
-                        android:text="@string/lb_playback_time_separator"
-                        android:textColor="@color/gray" />
-
-                    <TextView
-                        android:id="@+id/total_time"
-                        style="?attr/playbackControlsTimeStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/lb_playback_transport_time_margin"
-                        android:textColor="@color/gray" />
-
-                </LinearLayout>
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="823" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-        </tv.mycujoo.mls.tv.widgets.MLSPlaybackTransportRowView>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tvController_timesLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/lb_playback_transport_time_margin_top"
+            android:orientation="horizontal"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/playback_progress">
+
+            <TextView
+                android:id="@+id/current_time"
+                style="?attr/playbackControlsTimeStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/lb_playback_transport_time_margin"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/separate_time"
+                style="?attr/playbackControlsTimeStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/lb_playback_transport_time_margin"
+                android:text="@string/lb_playback_time_separator"
+                android:textColor="@color/gray" />
+
+            <TextView
+                android:id="@+id/total_time"
+                style="?attr/playbackControlsTimeStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/lb_playback_transport_time_margin"
+                android:textColor="@color/gray" />
+
+        </LinearLayout>
 
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </tv.mycujoo.mls.tv.widgets.MLSPlaybackTransportRowView>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
