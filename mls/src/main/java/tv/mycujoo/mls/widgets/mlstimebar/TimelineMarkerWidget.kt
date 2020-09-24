@@ -12,13 +12,14 @@ import androidx.constraintlayout.widget.ConstraintSet
 class TimelineMarkerWidget(
     private val anchor: View,
     private val backgroundLayout: FrameLayout,
-    private val timelineMarkerTextView: TextView
+    private val timelineMarkerTextView: TextView,
+    primaryColor: String
 ) {
 
 
     init {
         backgroundLayout.background.colorFilter = PorterDuffColorFilter(
-            Color.parseColor("#ff0000"),
+            Color.parseColor(primaryColor),
             PorterDuff.Mode.SRC_ATOP
         )
     }

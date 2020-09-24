@@ -22,6 +22,7 @@ import androidx.leanback.widget.RowPresenter;
 
 import java.lang.ref.WeakReference;
 
+import tv.mycujoo.mls.api.MLSConfiguration;
 import tv.mycujoo.mls.tv.internal.controller.ControllerAgent;
 import tv.mycujoo.mls.tv.internal.presenter.MLSPlaybackTransportRowPresenter;
 import tv.mycujoo.mls.tv.widgets.MLSFastForwardAction;
@@ -61,8 +62,8 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
      * @param context
      * @param impl    Implementation to underlying media player.
      */
-    public MLSPlaybackTransportControlGlueImpl(Context context, T impl, ControllerAgent controllerAgent) {
-        super(context, impl, controllerAgent);
+    public MLSPlaybackTransportControlGlueImpl(Context context, T impl, MLSConfiguration config, ControllerAgent controllerAgent) {
+        super(context, impl, config, controllerAgent);
     }
 
     @Override
@@ -93,7 +94,7 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
                     }
                 };
 
-        MLSPlaybackTransportRowPresenter rowPresenter = new MLSPlaybackTransportRowPresenter(controllerAgent) {
+        MLSPlaybackTransportRowPresenter rowPresenter = new MLSPlaybackTransportRowPresenter(controllerAgent, config) {
             @Override
             protected void onBindRowViewHolder(RowPresenter.ViewHolder vh, Object item) {
                 super.onBindRowViewHolder(vh, item);

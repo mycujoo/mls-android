@@ -30,6 +30,7 @@ import androidx.leanback.widget.RowPresenter;
 import java.util.Arrays;
 
 import tv.mycujoo.mls.R;
+import tv.mycujoo.mls.api.MLSConfiguration;
 import tv.mycujoo.mls.manager.TvTimelineMarkerManager;
 import tv.mycujoo.mls.tv.internal.controller.ControllerAgent;
 import tv.mycujoo.mls.tv.widgets.MLSPlaybackTransportRowView;
@@ -40,6 +41,7 @@ import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarkerWidget;
 
 public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
 
+    private final MLSConfiguration config;
     private final ControllerAgent controllerAgent;
 
     static class BoundData extends MLSPlaybackControlPresenter.BoundData {
@@ -368,7 +370,8 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
             mTimelineMarkerBackgroundLayout = rootView.findViewById(R.id.tvController_timelineMarkerBackgroundLayout);
             mTimelineMarkerTextView = rootView.findViewById(R.id.tvController_timelineMarkerTextView);
 
-            TvTimelineMarkerManager tvTimelineMarkerManager = new TvTimelineMarkerManager(mProgressBar, new TimelineMarkerWidget(mTimelineMarkerAnchor, mTimelineMarkerBackgroundLayout, mTimelineMarkerTextView));
+            TimelineMarkerWidget timelineMarkerView = new TimelineMarkerWidget(mTimelineMarkerAnchor, mTimelineMarkerBackgroundLayout, mTimelineMarkerTextView, config.getVideoPlayerConfig().getPrimaryColor());
+            TvTimelineMarkerManager tvTimelineMarkerManager = new TvTimelineMarkerManager(mProgressBar, timelineMarkerView);
 
         }
 
@@ -611,10 +614,11 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
                 }
             };
 
-    public MLSPlaybackTransportRowPresenter(ControllerAgent controllerAgent) {
+    public MLSPlaybackTransportRowPresenter(ControllerAgent controllerAgent, MLSConfiguration config) {
         setHeaderPresenter(null);
         setSelectEffectEnabled(false);
 
+        this.config = config;
         this.controllerAgent = controllerAgent;
 
         mPlaybackControlsPresenter = new MLSControlBarPresenter(R.layout.layout_mls_control_bar);
