@@ -5,6 +5,7 @@ import androidx.leanback.app.VideoSupportFragment
 import kotlinx.coroutines.CoroutineScope
 import tv.mycujoo.mls.api.DataProvider
 import tv.mycujoo.mls.api.MLSConfiguration
+import tv.mycujoo.mls.api.MLSTVConfiguration
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.network.socket.IReactorSocket
@@ -12,7 +13,7 @@ import tv.mycujoo.mls.tv.player.TvVideoPlayer
 
 class MLSTV(
     val activity: Activity,
-    private val mlsConfiguration: MLSConfiguration,
+    private val mlsTVConfiguration: MLSTVConfiguration,
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
@@ -23,7 +24,7 @@ class MLSTV(
 
 
     fun preparePlayer(videoSupportFragment: VideoSupportFragment) {
-        tvVideoPlayer = TvVideoPlayer(activity, videoSupportFragment, mlsConfiguration, reactorSocket, dispatcher, dataManager, logger)
+        tvVideoPlayer = TvVideoPlayer(activity, videoSupportFragment, mlsTVConfiguration, reactorSocket, dispatcher, dataManager, logger)
     }
 
 

@@ -23,6 +23,8 @@ import androidx.leanback.widget.RowPresenter;
 import java.lang.ref.WeakReference;
 
 import tv.mycujoo.mls.api.MLSConfiguration;
+import tv.mycujoo.mls.api.MLSTVConfiguration;
+import tv.mycujoo.mls.entity.msc.TVVideoPlayerConfig;
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig;
 import tv.mycujoo.mls.tv.internal.controller.ControllerAgent;
 import tv.mycujoo.mls.tv.internal.presenter.MLSPlaybackTransportRowPresenter;
@@ -63,7 +65,7 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
      * @param context
      * @param impl    Implementation to underlying media player.
      */
-    public MLSPlaybackTransportControlGlueImpl(Context context, T impl, MLSConfiguration config, ControllerAgent controllerAgent) {
+    public MLSPlaybackTransportControlGlueImpl(Context context, T impl, MLSTVConfiguration config, ControllerAgent controllerAgent) {
         super(context, impl, config, controllerAgent);
     }
 
@@ -76,7 +78,7 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
 
     @Override
     protected void onCreatePrimaryActions(ArrayObjectAdapter primaryActionsAdapter) {
-        VideoPlayerConfig videoPlayerConfig = config.getVideoPlayerConfig();
+        TVVideoPlayerConfig videoPlayerConfig = config.getVideoPlayerConfig();
         if (videoPlayerConfig.getShowBackForwardsButtons()) {
             primaryActionsAdapter.add(mRewindAction = new MLSRewindAction(getContext(), 1, videoPlayerConfig.getPrimaryColor()));
         }

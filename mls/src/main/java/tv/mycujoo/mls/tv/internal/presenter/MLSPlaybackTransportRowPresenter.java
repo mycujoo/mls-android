@@ -32,6 +32,8 @@ import java.util.Arrays;
 
 import tv.mycujoo.mls.R;
 import tv.mycujoo.mls.api.MLSConfiguration;
+import tv.mycujoo.mls.api.MLSTVConfiguration;
+import tv.mycujoo.mls.entity.msc.TVVideoPlayerConfig;
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig;
 import tv.mycujoo.mls.manager.TvTimelineMarkerManager;
 import tv.mycujoo.mls.tv.internal.controller.ControllerAgent;
@@ -43,7 +45,7 @@ import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarkerWidget;
 
 public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
 
-    private final MLSConfiguration config;
+    private final MLSTVConfiguration config;
     private final ControllerAgent controllerAgent;
 
     static class BoundData extends MLSPlaybackControlPresenter.BoundData {
@@ -380,7 +382,7 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
             TvTimelineMarkerManager tvTimelineMarkerManager = new TvTimelineMarkerManager(mProgressBar, timelineMarkerView);
 
 
-            VideoPlayerConfig videoPlayerConfig = config.getVideoPlayerConfig();
+            TVVideoPlayerConfig videoPlayerConfig = config.getVideoPlayerConfig();
             setProgressColor(Color.parseColor(videoPlayerConfig.getPrimaryColor()));
             if (videoPlayerConfig.getShowSeekBar()) {
                 mSeeKBarContainer.setVisibility(View.VISIBLE);
@@ -635,7 +637,7 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
                 }
             };
 
-    public MLSPlaybackTransportRowPresenter(ControllerAgent controllerAgent, MLSConfiguration config) {
+    public MLSPlaybackTransportRowPresenter(ControllerAgent controllerAgent, MLSTVConfiguration config) {
         setHeaderPresenter(null);
         setSelectEffectEnabled(false);
 

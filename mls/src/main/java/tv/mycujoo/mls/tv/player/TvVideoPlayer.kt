@@ -27,6 +27,7 @@ import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.api.MLSConfiguration
+import tv.mycujoo.mls.api.MLSTVConfiguration
 import tv.mycujoo.mls.core.AbstractPlayerMediator
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.enum.C
@@ -44,7 +45,7 @@ import tv.mycujoo.mls.widgets.MLSPlayerView
 class TvVideoPlayer(
     private val activity: Activity,
     videoSupportFragment: VideoSupportFragment,
-    private val mlsConfiguration: MLSConfiguration,
+    private val mlsTVConfiguration: MLSTVConfiguration,
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
@@ -64,13 +65,13 @@ class TvVideoPlayer(
     /**region Initializing*/
     init {
         player = SimpleExoPlayer.Builder(activity).build()
-        player!!.playWhenReady = mlsConfiguration.videoPlayerConfig.autoPlay
+        player!!.playWhenReady = mlsTVConfiguration.videoPlayerConfig.autoPlay
         leanbackAdapter = LeanbackPlayerAdapter(activity, player!!, 1000)
         glueHost = VideoSupportFragmentGlueHost(videoSupportFragment)
 
         controllerAgent = ControllerAgent(player!!)
         mTransportControlGlue =
-            MLSPlaybackTransportControlGlueImpl(activity, leanbackAdapter, mlsConfiguration, controllerAgent)
+            MLSPlaybackTransportControlGlueImpl(activity, leanbackAdapter, mlsTVConfiguration, controllerAgent)
         mTransportControlGlue.host = glueHost
         mTransportControlGlue.playWhenPrepared()
         if (mTransportControlGlue.isPrepared) {

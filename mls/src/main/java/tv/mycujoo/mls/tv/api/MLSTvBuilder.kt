@@ -2,6 +2,7 @@ package tv.mycujoo.mls.tv.api
 
 import android.app.Activity
 import tv.mycujoo.mls.api.MLSConfiguration
+import tv.mycujoo.mls.api.MLSTVConfiguration
 import tv.mycujoo.mls.enum.LogLevel
 
 class MLSTvBuilder {
@@ -9,7 +10,7 @@ class MLSTvBuilder {
         private set
     internal var activity: Activity? = null
         private set
-    internal var mlsConfiguration: MLSConfiguration = MLSConfiguration()
+    internal var mlsTVConfiguration: MLSTVConfiguration = MLSTVConfiguration()
         private set
     internal var logLevel: LogLevel = LogLevel.MINIMAL
         private set
@@ -23,8 +24,8 @@ class MLSTvBuilder {
 
     fun withActivity(activity: Activity) = apply { this.activity = activity }
 
-    fun setConfiguration(mlsConfiguration: MLSConfiguration) = apply {
-        this.mlsConfiguration = mlsConfiguration
+    fun setConfiguration(mlsTVConfiguration: MLSTVConfiguration) = apply {
+        this.mlsTVConfiguration = mlsTVConfiguration
     }
 
     fun setLogLevel(logLevel: LogLevel) = apply { this.logLevel = logLevel }
@@ -34,7 +35,7 @@ class MLSTvBuilder {
         internalBuilder.prefManager.persist("PUBLIC_KEY", publicKey)
         return MLSTV(
             activity!!,
-            mlsConfiguration,
+            mlsTVConfiguration,
             internalBuilder.reactorSocket,
             internalBuilder.dispatcher,
             internalBuilder.dataManager,
