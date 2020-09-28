@@ -294,6 +294,31 @@ class MLSPlayerView @JvmOverloads constructor(
                 findViewById<ImageButton>(R.id.exo_ffwd).visibility = View.GONE
             }
 
+            if (config.showSeekBar) {
+                findViewById<FrameLayout>(R.id.controller_timeBarLayoutContainer).visibility =
+                    View.VISIBLE
+            } else {
+                findViewById<FrameLayout>(R.id.controller_timeBarLayoutContainer).visibility =
+                    View.GONE
+            }
+
+
+            if (config.showFullScreenButton) {
+                findViewById<FrameLayout>(R.id.controller_fullscreenImageButtonContainer).visibility =
+                    View.VISIBLE
+            } else {
+                findViewById<FrameLayout>(R.id.controller_fullscreenImageButtonContainer).visibility =
+                    View.GONE
+            }
+
+            if (config.showTimers) {
+                findViewById<ConstraintLayout>(R.id.controller_timersContainer).visibility =
+                    View.VISIBLE
+            } else {
+                findViewById<ConstraintLayout>(R.id.controller_timersContainer).visibility =
+                    View.GONE
+            }
+
             if (config.showEventInfoButton) {
                 showEventInfoButton()
             } else {
