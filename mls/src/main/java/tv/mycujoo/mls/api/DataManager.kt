@@ -9,6 +9,7 @@ import tv.mycujoo.domain.entity.OrderByEventsParam
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.params.EventIdPairParam
 import tv.mycujoo.domain.params.EventListParams
+import tv.mycujoo.domain.params.TimelineIdPairParam
 import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.domain.usecase.GetActionsUseCase
 import tv.mycujoo.domain.usecase.GetEventDetailUseCase
@@ -55,8 +56,11 @@ class DataManager(
         logger.setLogLevel(logLevel)
     }
 
-    override suspend fun getActions(timelineId: String): Result<Exception, ActionResponse> {
-        return GetActionsUseCase(eventsRepository).execute(timelineId)
+    override suspend fun getActions(
+        timelineId: String,
+        updateId: String?
+    ): Result<Exception, ActionResponse> {
+        return GetActionsUseCase(eventsRepository).execute(TimelineIdPairParam(timelineId, updateId))
     }
 
     /**endregion */

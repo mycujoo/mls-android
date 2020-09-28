@@ -13,7 +13,10 @@ interface IInternalDataProvider {
         updateId: String? = null
     ): Result<Exception, EventEntity>
 
-    suspend fun getActions(timelineId: String): Result<Exception, ActionResponse>
+    suspend fun getActions(
+        timelineId: String,
+        updateId: String? = null
+    ): Result<Exception, ActionResponse>
 
     fun setLogLevel(logLevel: LogLevel)
 }
