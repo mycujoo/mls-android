@@ -11,10 +11,13 @@ data class MLSConfiguration(
 
 fun defaultVideoPlayerConfig(): VideoPlayerConfig {
     return VideoPlayerConfig(
-        "#FFFFFF",
-        "#000000",
-        true,
-        true,
+        primaryColor = "#FFFFFF",
+        secondaryColor = "#000000",
+        autoPlay = true,
+        showBackForwardsButtons = true,
+        showSeekBar = true,
+        showTimers = true,
+        showFullScreenButton = false,
         showLiveViewers = true,
         showEventInfoButton = true
     )
