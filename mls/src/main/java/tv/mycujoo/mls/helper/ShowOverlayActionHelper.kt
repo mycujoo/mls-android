@@ -22,6 +22,11 @@ class ShowOverlayActionHelper {
             if (interrupted.not()) {
                 return OverlayAct.DO_NOTHING
             } else {
+
+                if (actionObject.offset < currentTime && actionObject.offset + actionObject.overlayRelatedData!!.duration > currentTime){
+                    return OverlayAct.LINGERING_MIDWAY
+                }
+
                 if (isLingeringInIntroAnimation(currentTime, actionObject)) {
                     return OverlayAct.LINGERING_INTRO
                 }
