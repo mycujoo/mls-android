@@ -96,31 +96,24 @@ class ReactorSocket(
      * @param param provides timelineId & lastActionId (optional)
      */
     override fun joinTimeline(param: JoinTimelineParam) {
-        Log.d("Live test", "joinTimelineIfNeeded() $param, $created, $connected")
         if (created.not() || connected.not()) {
             return
         }
 
-//        if (joinedTimeline) {
-//            return
-//        }
-
         if (this::timelineId.isInitialized && timelineId != param.timelineId) {
-//            leaveTimeline()
+            leaveTimeline()
         }
 
-//        if (param.lastActionId != null) {
-//            timelineId = param.timelineId
-//            updateId = param.lastActionId
-//            webSocket.send("$JOIN_TIMELINE${param.timelineId};${param.lastActionId}")
-//            Log.d("Live ", "socket sent -> $JOIN_TIMELINE${param.timelineId};${param.lastActionId}")
-//
-//        } else {
+        if (param.lastActionId != null) {
             timelineId = param.timelineId
-            webSocket.send("$JOIN_TIMELINE${param.timelineId};")
-            Log.d("Live test", "socket sent -> $JOIN_TIMELINE${param.timelineId};")
+            updateId = param.lastActionId
+            webSocket.send("$JOIN_TIMELINE${param.timelineId}$SEMICOLON${param.lastActionId}")
 
-//        }
+        } else {
+            timelineId = param.timelineId
+            webSocket.send("$JOIN_TIMELINE${param.timelineId}$SEMICOLON")
+
+        }
         joinedTimeline = true
 
     }
@@ -134,7 +127,7 @@ class ReactorSocket(
     }
 
     private fun createSocket() {
-        val request = Request.Builder().url("wss://mls-rt.mycujoo.tv").build()
+        val request = Request.Builder().url(WEB_SOCKET_URL).build()
         webSocket = okHttpClient.newWebSocket(request, mainSocketListener)
         created = true
 
