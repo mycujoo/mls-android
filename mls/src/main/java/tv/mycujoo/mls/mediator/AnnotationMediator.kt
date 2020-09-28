@@ -45,7 +45,11 @@ class AnnotationMediator(
             if (player.isPlaying()) {
                 val currentPosition = player.currentPosition()
 
-                annotationFactory.build(currentPosition, isPlaying = player.isPlaying(), interrupted = false)
+                annotationFactory.build(
+                    currentPosition,
+                    isPlaying = player.isPlaying(),
+                    interrupted = false
+                )
 
                 playerView.updateTime(currentPosition, player.duration())
             }
@@ -64,10 +68,11 @@ class AnnotationMediator(
 
     override fun fetchActions(
         timelineId: String,
+        updateId: String?,
         resultCallback: ((result: Result<Exception, ActionResponse>) -> Unit)?
     ) {
         dispatcher.launch(context = Dispatchers.Main) {
-            val result = dataManager.getActions(timelineId)
+            val result = dataManager.getActions(timelineId, updateId)
             resultCallback?.invoke(result)
             when (result) {
                 is Result.Success -> {
@@ -139,7 +144,11 @@ class AnnotationMediator(
     }
 
     override var onSizeChangedCallback = {
-        annotationFactory.build(player.currentPosition(), isPlaying = player.isPlaying(), interrupted = false)
+        annotationFactory.build(
+            player.currentPosition(),
+            isPlaying = player.isPlaying(),
+            interrupted = false
+        )
     }
     /**endregion */
 }

@@ -7,9 +7,7 @@ import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.ui.TimeBar
 import com.npaw.youbora.lib6.plugin.Options
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
@@ -46,6 +44,9 @@ class VideoPlayerCoordinator(
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
 
+    private var joined: Boolean = false
+    private var updateId: String? = null
+
     /**region Fields*/
     private lateinit var player: IPlayer
     internal lateinit var videoPlayer: VideoPlayer
@@ -55,6 +56,8 @@ class VideoPlayerCoordinator(
     private var hasAnalytic = false
     private lateinit var youboraClient: YouboraClient
     private var logged = false
+
+    private lateinit var streamUrlPullJob: Job
     /**endregion */
 
     /**region Initialization*/
@@ -217,15 +220,19 @@ class VideoPlayerCoordinator(
 
     /**region Over-ridden functions*/
     override fun onReactorEventUpdate(eventId: String, updateId: String) {
+        this.updateId = updateId
         cancelStreamUrlPulling()
         dispatcher.launch(context = Dispatchers.Main) {
             val result = dataManager.getEventDetails(eventId, updateId)
             when (result) {
                 is Success -> {
                     dataManager.currentEvent = result.value
-                    if (eventMayBeStreamed.not()) {
+                    if (eventMayBeStreamed.not()){
                         playVideoOrDisplayEventInfo(result.value)
                         startStreamUrlPullingIfNeeded(result.value)
+                    }
+                    if (!joined) {
+                        fetchActions(result.value, updateId)
                     }
                 }
                 is NetworkError -> {
@@ -250,7 +257,8 @@ class VideoPlayerCoordinator(
     }
 
     override fun onReactorTimelineUpdate(timelineId: String, updateId: String) {
-        fetchActions(timelineId)
+        this.updateId = updateId
+        fetchActions(timelineId, updateId, false)
     }
 
     /**endregion */
@@ -264,13 +272,13 @@ class VideoPlayerCoordinator(
         isLive = false
 
         dispatcher.launch(context = Dispatchers.Main) {
-            val result = dataManager.getEventDetails(eventId)
+            val result = dataManager.getEventDetails(eventId, updateId)
             when (result) {
                 is Success -> {
                     dataManager.currentEvent = result.value
                     playVideoOrDisplayEventInfo(result.value)
-                    fetchActions(result.value)
                     joinToReactor(result.value)
+                    fetchActions(result.value, true)
                     startStreamUrlPullingIfNeeded(result.value)
                 }
                 is NetworkError -> {
@@ -311,23 +319,33 @@ class VideoPlayerCoordinator(
 
 
     /**region Reactor function*/
-    private fun fetchActions(event: EventEntity) {
+    private fun fetchActions(event: EventEntity, updateId: String) {
         if (event.timeline_ids.isEmpty()) {
             return
         }
-        fetchActions(event.timeline_ids.first())
+        fetchActions(event.timeline_ids.first(), updateId, true)
+    }
+    private fun fetchActions(event: EventEntity, joinTimeLine: Boolean) {
+        if (event.timeline_ids.isEmpty()) {
+            return
+        }
+        fetchActions(event.timeline_ids.first(), null, joinTimeLine)
     }
 
-    private fun fetchActions(timelineId: String) {
+    private fun fetchActions(timelineId: String, updateId: String?, joinTimeLine: Boolean) {
         if (this::annotationMediator.isInitialized.not()) {
             return
         }
 
-        annotationMediator.fetchActions(timelineId) { result ->
+        annotationMediator.fetchActions(timelineId, updateId) { result ->
             when (result) {
                 is Success -> {
-                    val joinTimelineParam = JoinTimelineParam(timelineId, result.value.updateId)
-                    reactorSocket.joinTimelineIfNeeded(joinTimelineParam)
+                    this.updateId = result.value.updateId
+//                    joined = true
+                    if (joinTimeLine) {
+                        val joinTimelineParam = JoinTimelineParam(timelineId, result.value.updateId)
+                        reactorSocket.joinTimeline(joinTimelineParam)
+                    }
                 }
                 is NetworkError -> {
                     logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
@@ -346,7 +364,6 @@ class VideoPlayerCoordinator(
     /**endregion */
 
     private fun handleLiveModeState() {
-
         if (player.isLive()) {
             isLive = true
             if (player.currentPosition() + 15000L >= player.duration()) {

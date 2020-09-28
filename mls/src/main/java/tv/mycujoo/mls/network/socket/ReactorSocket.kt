@@ -6,7 +6,10 @@ import okhttp3.Request
 import okhttp3.WebSocket
 import tv.mycujoo.mls.model.JoinTimelineParam
 
-class ReactorSocket(private val okHttpClient: OkHttpClient, private val mainSocketListener: MainWebSocketListener) :
+class ReactorSocket(
+    private val okHttpClient: OkHttpClient,
+    private val mainSocketListener: MainWebSocketListener
+) :
     IReactorSocket {
 
 
@@ -19,6 +22,7 @@ class ReactorSocket(private val okHttpClient: OkHttpClient, private val mainSock
     private var joinedTimeline = false
     private lateinit var eventId: String
     private lateinit var timelineId: String
+    private lateinit var updateId: String
 
 
     override fun addListener(reactorCallback: ReactorCallback) {
@@ -46,9 +50,9 @@ class ReactorSocket(private val okHttpClient: OkHttpClient, private val mainSock
         if (this::uuid.isInitialized.not()) {
             throw UninitializedPropertyAccessException("uuid must be initialized")
         }
-        if (connected) {
-            leave(false)
-        }
+//        if (connected) {
+//            leave(false)
+//        }
 
         if (created.not()) {
             createSocket()
@@ -61,6 +65,7 @@ class ReactorSocket(private val okHttpClient: OkHttpClient, private val mainSock
         }
         webSocket.send("$JOIN_EVENT$eventId")
         connected = true
+
     }
 
     /**
@@ -90,27 +95,39 @@ class ReactorSocket(private val okHttpClient: OkHttpClient, private val mainSock
      * before doing so, a connection must be active
      * @param param provides timelineId & lastActionId (optional)
      */
-    override fun joinTimelineIfNeeded(param: JoinTimelineParam) {
+    override fun joinTimeline(param: JoinTimelineParam) {
         if (created.not() || connected.not()) {
             return
         }
 
-        if (joinedTimeline) {
-            return
+        if (this::timelineId.isInitialized && timelineId != param.timelineId) {
+            leaveTimeline()
         }
 
         if (param.lastActionId != null) {
-            webSocket.send("$JOIN_TIMELINE${param.timelineId};${param.lastActionId}")
+            timelineId = param.timelineId
+            updateId = param.lastActionId
+            webSocket.send("$JOIN_TIMELINE${param.timelineId}$SEMICOLON${param.lastActionId}")
 
         } else {
-            webSocket.send("$JOIN_TIMELINE${param.timelineId};")
+            timelineId = param.timelineId
+            webSocket.send("$JOIN_TIMELINE${param.timelineId}$SEMICOLON")
+
         }
         joinedTimeline = true
 
     }
 
+
+    fun leaveTimeline() {
+        if (this::timelineId.isInitialized && joinedTimeline) {
+            webSocket.send("$LEAVE_TIMELINE$timelineId")
+            joinedTimeline = false
+        }
+    }
+
     private fun createSocket() {
-        val request = Request.Builder().url("wss://mls-rt.mycujoo.tv").build()
+        val request = Request.Builder().url(WEB_SOCKET_URL).build()
         webSocket = okHttpClient.newWebSocket(request, mainSocketListener)
         created = true
 

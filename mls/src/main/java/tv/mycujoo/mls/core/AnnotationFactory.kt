@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.core
 
+import android.util.Log
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.ActionObject
 import tv.mycujoo.domain.entity.OverlayAct.*
@@ -77,7 +78,7 @@ class AnnotationFactory(
                 SHOW_OVERLAY -> {
 
                     val act =
-                        ShowOverlayActionHelper.getOverlayActionCurrentAct(currentPosition, it, interrupted)
+                        ShowOverlayActionHelper.getOverlayActionCurrentAct(currentPosition, it, true)
 
                     when (act) {
                         INTRO -> {
@@ -103,9 +104,9 @@ class AnnotationFactory(
                             }
                         }
                         LINGERING_MIDWAY -> {
-                            if (interrupted.not()) {
-                                return@forEach
-                            }
+//                            if (interrupted.not()) {
+//                                return@forEach
+//                            }
                             downloaderClient.download(it.toOverlayEntity()!!) {
                                 annotationListener.addOrUpdateLingeringMidwayOverlay(
                                     it

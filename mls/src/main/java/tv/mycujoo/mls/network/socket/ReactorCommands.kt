@@ -1,5 +1,9 @@
 package tv.mycujoo.mls.network.socket
 
+const val WEB_SOCKET_URL= "wss://mls-rt.mycujoo.tv"
+
+const val SEMICOLON = ";"
+
 const val SESSION_ID = "sessionId;"
 const val JOIN_EVENT = "joinEvent;"
 const val LEAVE_EVENT = "leaveEvent;"

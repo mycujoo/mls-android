@@ -146,7 +146,15 @@ class DataMapper {
                     }
                 }
 
-                return ParsedTimerRelatedData(name, format, direction, startValue, step, capValue, value)
+                return ParsedTimerRelatedData(
+                    name,
+                    format,
+                    direction,
+                    startValue,
+                    step,
+                    capValue,
+                    value
+                )
             }
         }
 
@@ -154,48 +162,62 @@ class DataMapper {
             sizePair: MutablePair<Float, Float>,
             data: Any
         ) {
-            val map = data as Map<String, Double>
-            map.keys.forEach { key ->
+            val map = data as Map<*, *>
+
+            for (key in map.keys) {
+                val value = map[key]
+                if (value !is Double) {
+                    continue
+                }
+
                 when (key) {
                     "width" -> {
-                        sizePair.first = (map[key]!!.toFloat())
+                        sizePair.first = (value.toFloat())
                     }
                     "height" -> {
-                        sizePair.second = (map[key]!!.toFloat())
+                        sizePair.second = (value.toFloat())
                     }
 
                     else -> {
                     }
                 }
+
             }
         }
 
         private fun retrievePositionGuide(positionGuide: PositionGuide, data: Any) {
-            val map = data as Map<String, Double>
-            map.keys.forEach { key ->
+            val map = data as Map<*, *>
+
+            for (key in map.keys) {
+                val value = map[key]
+                if (value !is Double) {
+                    continue
+                }
+
                 when (key) {
                     "top" -> {
-                        positionGuide.top = (map[key]!!.toFloat())
+                        positionGuide.top = (value.toFloat())
                     }
                     "right" -> {
-                        positionGuide.right = (map[key]!!.toFloat())
+                        positionGuide.right = (value.toFloat())
                     }
                     "bottom" -> {
-                        positionGuide.bottom = (map[key]!!.toFloat())
+                        positionGuide.bottom = (value.toFloat())
                     }
                     "left" -> {
-                        positionGuide.left = (map[key]!!.toFloat())
+                        positionGuide.left = (value.toFloat())
                     }
                     "HCenter" -> {
-                        positionGuide.hCenter = (map[key]!!.toFloat())
+                        positionGuide.hCenter = (value.toFloat())
                     }
                     "VCenter" -> {
-                        positionGuide.vCenter = (map[key]!!.toFloat())
+                        positionGuide.vCenter = (value.toFloat())
                     }
 
                     else -> {
                     }
                 }
+
             }
         }
     }

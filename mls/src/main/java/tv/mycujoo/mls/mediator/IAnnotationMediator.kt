@@ -10,6 +10,11 @@ interface IAnnotationMediator {
 
     var onSizeChangedCallback: () -> Unit
 
-    fun fetchActions(timelineId: String, resultCallback: ((result: Result<Exception, ActionResponse>) -> Unit)? = null)
+    fun fetchActions(
+        timelineId: String,
+        updateId: String? = null,
+        resultCallback: ((result: Result<Exception, ActionResponse>) -> Unit)? = null
+    )
+
     fun feed(actionResponse: ActionResponse)
 }

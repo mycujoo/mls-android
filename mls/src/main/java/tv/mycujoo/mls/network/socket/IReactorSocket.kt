@@ -9,5 +9,5 @@ interface IReactorSocket {
     fun setUUID(uuid: String)
     fun joinEvent(eventId: String)
     fun leave(destroyAfter: Boolean)
-    fun joinTimelineIfNeeded(param: JoinTimelineParam)
+    fun joinTimeline(param: JoinTimelineParam)
 }
