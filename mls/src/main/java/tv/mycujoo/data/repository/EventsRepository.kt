@@ -5,6 +5,7 @@ import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Events
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.params.EventListParams
+import tv.mycujoo.domain.params.TimelineIdPairParam
 import tv.mycujoo.domain.repository.AbstractRepository
 import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.mls.network.MlsApi
@@ -26,7 +27,7 @@ class EventsRepository(val api: MlsApi) : AbstractRepository(),
         return safeApiCall { api.getEventDetails(eventId, updatedId) }
     }
 
-    override suspend fun getActions(timelineId: String): Result<Exception, ActionResponse> {
-        return safeApiCall { api.getActions(timelineId) }
+    override suspend fun getActions(timelineIdPairParam: TimelineIdPairParam): Result<Exception, ActionResponse> {
+        return safeApiCall { api.getActions(timelineIdPairParam.timelineId, timelineIdPairParam.updateEventId) }
     }
 }
