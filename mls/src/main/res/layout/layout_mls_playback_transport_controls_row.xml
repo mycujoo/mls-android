@@ -153,15 +153,20 @@
             android:orientation="horizontal"
             app:layout_constraintGuide_percent=".90" />
 
-
-        <tv.mycujoo.mls.tv.widgets.MLSSeekBar
-            android:id="@+id/playback_progress"
+        <FrameLayout
+            android:id="@+id/tvController_seekBarContainer"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/lb_playback_transport_progressbar_height"
-            android:focusable="true"
+            android:layout_height="wrap_content"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintLeft_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvController_guidelineOf3rdQuarter" />
+            app:layout_constraintTop_toBottomOf="@id/tvController_guidelineOf3rdQuarter">
+
+            <tv.mycujoo.mls.tv.widgets.MLSSeekBar
+                android:id="@+id/playback_progress"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/lb_playback_transport_progressbar_height"
+                android:focusable="true" />
+        </FrameLayout>
 
 
         <LinearLayout
@@ -170,7 +175,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/playback_progress">
+            app:layout_constraintTop_toBottomOf="@id/tvController_seekBarContainer">
 
             <FrameLayout
                 android:id="@+id/tvController_liveBadgeLayout"
@@ -239,14 +244,14 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/tvController_timesLayout"
+            android:id="@+id/tvController_timersContainer"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/lb_playback_transport_time_margin_top"
             android:orientation="horizontal"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/playback_progress">
+            app:layout_constraintTop_toBottomOf="@id/tvController_seekBarContainer">
 
             <TextView
                 android:id="@+id/current_time"

@@ -64,6 +64,7 @@ class TvVideoPlayer(
     /**region Initializing*/
     init {
         player = SimpleExoPlayer.Builder(activity).build()
+        player!!.playWhenReady = mlsConfiguration.videoPlayerConfig.autoPlay
         leanbackAdapter = LeanbackPlayerAdapter(activity, player!!, 1000)
         glueHost = VideoSupportFragmentGlueHost(videoSupportFragment)
 
