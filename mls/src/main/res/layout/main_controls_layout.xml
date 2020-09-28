@@ -133,41 +133,47 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/controller_timeBarLayout"
+    <FrameLayout
+        android:id="@+id/controller_timeBarLayoutContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:orientation="vertical"
         app:layout_constraintBottom_toTopOf="@id/controller_bottomLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <tv.mycujoo.mls.widgets.mlstimebar.TimelineMarkerView
-            android:id="@+id/exo_timelineMarkerView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:animationCache="true"
-            android:gravity="center"
-            android:minWidth="32dp"
-            app:layout_constraintBottom_toTopOf="@id/exo_progress"
-            app:layout_constraintStart_toStartOf="parent" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/controller_timeBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <tv.mycujoo.mls.widgets.mlstimebar.TimelineMarkerView
+                android:id="@+id/exo_timelineMarkerView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:animationCache="true"
+                android:gravity="center"
+                android:minWidth="32dp"
+                app:layout_constraintBottom_toTopOf="@id/exo_progress"
+                app:layout_constraintStart_toStartOf="parent" />
 
 
-        <tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
-            android:id="@id/exo_progress"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:ad_marker_width="2dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintHorizontal_chainStyle="packed"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
+            <tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
+                android:id="@id/exo_progress"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:ad_marker_width="2dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
 
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </FrameLayout>
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/controller_bottomLayout"
@@ -180,37 +186,47 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent">
 
-        <TextView
-            android:id="@+id/positionTextView"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/controller_timersContainer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            tools:text="0:04" />
+            app:layout_constraintLeft_toLeftOf="parent">
 
-        <TextView
-            android:id="@+id/controller_timeSeparator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="2dp"
-            android:text="@string/time_separator"
-            android:textColor="@color/gray"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toRightOf="@id/positionTextView" />
+            <TextView
+                android:id="@+id/positionTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                tools:text="0:04" />
 
-        <TextView
-            android:id="@+id/durationTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="2dp"
-            android:textColor="@color/gray"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toRightOf="@id/controller_timeSeparator"
-            tools:text="0:04" />
+            <TextView
+                android:id="@+id/controller_timeSeparator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:text="@string/time_separator"
+                android:textColor="@color/gray"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toRightOf="@id/positionTextView" />
+
+            <TextView
+                android:id="@+id/durationTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:textColor="@color/gray"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toRightOf="@id/controller_timeSeparator"
+                tools:text="0:04" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
 
         <LinearLayout
             android:id="@+id/controller_bottomRightLayout"
@@ -291,14 +307,20 @@
 
             </LinearLayout>
 
+            <FrameLayout
+                android:id="@+id/controller_fullscreenImageButtonContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
 
-            <ImageButton
-                android:id="@+id/controller_fullscreenImageButton"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginEnd="8dp"
-                android:background="@android:color/transparent"
-                android:src="@drawable/ic_fullscreen_24dp" />
+                <ImageButton
+                    android:id="@+id/controller_fullscreenImageButton"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_fullscreen_24dp" />
+            </FrameLayout>
+
         </LinearLayout>
 
 
