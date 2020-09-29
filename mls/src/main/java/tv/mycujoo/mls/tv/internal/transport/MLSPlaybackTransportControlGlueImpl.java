@@ -22,10 +22,8 @@ import androidx.leanback.widget.RowPresenter;
 
 import java.lang.ref.WeakReference;
 
-import tv.mycujoo.mls.api.MLSConfiguration;
 import tv.mycujoo.mls.api.MLSTVConfiguration;
 import tv.mycujoo.mls.entity.msc.TVVideoPlayerConfig;
-import tv.mycujoo.mls.entity.msc.VideoPlayerConfig;
 import tv.mycujoo.mls.tv.internal.controller.ControllerAgent;
 import tv.mycujoo.mls.tv.internal.presenter.MLSPlaybackTransportRowPresenter;
 import tv.mycujoo.mls.tv.widgets.MLSFastForwardAction;
@@ -226,6 +224,7 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
             fastForward();
             handled = true;
         }
+
         return handled;
     }
 
@@ -342,7 +341,7 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
                 play();
             } else {
                 mPlayerAdapter.setProgressUpdatingEnabled(false);
-                // we neeed update UI since PlaybackControlRow still saves previous position.
+                // we need update UI since PlaybackControlRow still saves previous position.
                 onUpdateProgress();
             }
         }

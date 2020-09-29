@@ -131,7 +131,7 @@
             android:paddingRight="4dp"
             android:paddingBottom="2dp"
             android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@id/playback_progress"
+            app:layout_constraintBottom_toTopOf="@id/tvController_seekBarContainer"
             app:layout_constraintLeft_toLeftOf="@id/tvController_timelineMarkerAnchor"
             app:layout_constraintRight_toRightOf="@id/tvController_timelineMarkerAnchor"
             tools:visibility="visible">

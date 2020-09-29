@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.tv.internal.controller
 
 import android.view.View
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.exoplayer2.Player
@@ -18,6 +19,7 @@ class ControllerAgent(val player: Player) {
     private lateinit var viewersCountTextView: TextView
     private lateinit var viewersCountLayout: ConstraintLayout
     private lateinit var badgeStateListener: ILiveBadgeStateListener
+    private lateinit var progressBar: ProgressBar
 
     fun addLiveBadgeStateListener(listenerBadge: ILiveBadgeStateListener) {
         this.badgeStateListener = listenerBadge
@@ -62,6 +64,23 @@ class ControllerAgent(val player: Player) {
             viewersCountLayout.visibility = View.GONE
         }
     }
+
+    /**region Buffer progress-bar*/
+    fun setBufferProgressBar(progressBar: ProgressBar) {
+        this.progressBar = progressBar
+    }
+
+    fun onBufferingStateChanged(state: Boolean) {
+        if (this::progressBar.isInitialized.not()) {
+            return
+        }
+        if (state) {
+            progressBar.visibility = View.VISIBLE
+        } else {
+            progressBar.visibility = View.INVISIBLE
+        }
+    }
+    /**endregion */
 
 
 }
