@@ -1,19 +1,27 @@
 package tv.mycujoo.mls.tv.widgets
 
 import android.content.Context
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.view.KeyEvent
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.leanback.widget.PlaybackControlsRow
 import tv.mycujoo.mls.R
 
-class MLSFastForwardAction(context: Context, numOfSpeed: Int = 1) :
+class MLSFastForwardAction(
+    context: Context,
+    numOfSpeed: Int = 1,
+    primaryColor: String
+) :
     PlaybackControlsRow.MultiAction(R.id.lb_control_fast_forward) {
 
     init {
         require(numOfSpeed >= 1) { "numSpeeds must be > 0" }
         val drawables = arrayOfNulls<Drawable>(numOfSpeed + 1)
-        drawables[0] = ContextCompat.getDrawable(context, R.drawable.ic_10_sec_forward)
+        val drawable = ContextCompat.getDrawable(context, R.drawable.ic_10_sec_forward)
+        DrawableCompat.setTint(drawable!!, Color.parseColor(primaryColor))
+        drawables[0] = drawable
         setDrawables(drawables)
 
         val labels = arrayOfNulls<String>(actionCount)

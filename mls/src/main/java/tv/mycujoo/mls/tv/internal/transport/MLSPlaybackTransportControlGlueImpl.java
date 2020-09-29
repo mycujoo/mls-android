@@ -22,6 +22,8 @@ import androidx.leanback.widget.RowPresenter;
 
 import java.lang.ref.WeakReference;
 
+import tv.mycujoo.mls.api.MLSTVConfiguration;
+import tv.mycujoo.mls.entity.msc.TVVideoPlayerConfig;
 import tv.mycujoo.mls.tv.internal.controller.ControllerAgent;
 import tv.mycujoo.mls.tv.internal.presenter.MLSPlaybackTransportRowPresenter;
 import tv.mycujoo.mls.tv.widgets.MLSFastForwardAction;
@@ -61,8 +63,8 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
      * @param context
      * @param impl    Implementation to underlying media player.
      */
-    public MLSPlaybackTransportControlGlueImpl(Context context, T impl, ControllerAgent controllerAgent) {
-        super(context, impl, controllerAgent);
+    public MLSPlaybackTransportControlGlueImpl(Context context, T impl, MLSTVConfiguration config, ControllerAgent controllerAgent) {
+        super(context, impl, config, controllerAgent);
     }
 
     @Override
@@ -74,10 +76,16 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
 
     @Override
     protected void onCreatePrimaryActions(ArrayObjectAdapter primaryActionsAdapter) {
-        primaryActionsAdapter.add(mRewindAction = new MLSRewindAction(getContext(), 1));
+        TVVideoPlayerConfig videoPlayerConfig = config.getVideoPlayerConfig();
+        if (videoPlayerConfig.getShowBackForwardsButtons()) {
+            primaryActionsAdapter.add(mRewindAction = new MLSRewindAction(getContext(), 1, videoPlayerConfig.getPrimaryColor()));
+        }
+
         primaryActionsAdapter.add(mPlayPauseAction =
-                new MLSPlayPauseAction(getContext()));
-        primaryActionsAdapter.add(mFastForwardAction = new MLSFastForwardAction(getContext(), 1));
+                new MLSPlayPauseAction(getContext(), videoPlayerConfig.getPrimaryColor()));
+        if (videoPlayerConfig.getShowBackForwardsButtons()) {
+            primaryActionsAdapter.add(mFastForwardAction = new MLSFastForwardAction(getContext(), 1, videoPlayerConfig.getPrimaryColor()));
+        }
     }
 
     @Override
@@ -93,7 +101,7 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
                     }
                 };
 
-        MLSPlaybackTransportRowPresenter rowPresenter = new MLSPlaybackTransportRowPresenter(controllerAgent) {
+        MLSPlaybackTransportRowPresenter rowPresenter = new MLSPlaybackTransportRowPresenter(controllerAgent, config) {
             @Override
             protected void onBindRowViewHolder(RowPresenter.ViewHolder vh, Object item) {
                 super.onBindRowViewHolder(vh, item);
@@ -216,6 +224,7 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
             fastForward();
             handled = true;
         }
+
         return handled;
     }
 
@@ -332,7 +341,7 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
                 play();
             } else {
                 mPlayerAdapter.setProgressUpdatingEnabled(false);
-                // we neeed update UI since PlaybackControlRow still saves previous position.
+                // we need update UI since PlaybackControlRow still saves previous position.
                 onUpdateProgress();
             }
         }

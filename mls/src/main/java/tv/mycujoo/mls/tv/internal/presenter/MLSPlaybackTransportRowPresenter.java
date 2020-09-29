@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
@@ -30,6 +31,10 @@ import androidx.leanback.widget.RowPresenter;
 import java.util.Arrays;
 
 import tv.mycujoo.mls.R;
+import tv.mycujoo.mls.api.MLSConfiguration;
+import tv.mycujoo.mls.api.MLSTVConfiguration;
+import tv.mycujoo.mls.entity.msc.TVVideoPlayerConfig;
+import tv.mycujoo.mls.entity.msc.VideoPlayerConfig;
 import tv.mycujoo.mls.manager.TvTimelineMarkerManager;
 import tv.mycujoo.mls.tv.internal.controller.ControllerAgent;
 import tv.mycujoo.mls.tv.widgets.MLSPlaybackTransportRowView;
@@ -40,6 +45,7 @@ import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarkerWidget;
 
 public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
 
+    private final MLSTVConfiguration config;
     private final ControllerAgent controllerAgent;
 
     static class BoundData extends MLSPlaybackControlPresenter.BoundData {
@@ -55,8 +61,10 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
         final ViewGroup mDescriptionDock;
         final ViewGroup mControlsDock;
         final ViewGroup mSecondaryControlsDock;
+        final LinearLayout mTimersContainer;
         final TextView mTotalTime;
         final TextView mCurrentTime;
+        final FrameLayout mSeeKBarContainer;
         final MLSSeekBar mProgressBar;
         final MLSThumbsBar mThumbsBar;
         long mTotalTimeInMs = Long.MIN_VALUE;
@@ -274,7 +282,9 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
             mImageView = (ImageView) rootView.findViewById(R.id.image);
             mDescriptionDock = (ViewGroup) rootView.findViewById(R.id.description_dock);
             mCurrentTime = (TextView) rootView.findViewById(R.id.current_time);
+            mTimersContainer = (LinearLayout) rootView.findViewById(R.id.tvController_timersContainer);
             mTotalTime = (TextView) rootView.findViewById(R.id.total_time);
+            mSeeKBarContainer = (FrameLayout) rootView.findViewById(R.id.tvController_seekBarContainer);
             mProgressBar = (MLSSeekBar) rootView.findViewById(R.id.playback_progress);
             mProgressBar.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -368,7 +378,23 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
             mTimelineMarkerBackgroundLayout = rootView.findViewById(R.id.tvController_timelineMarkerBackgroundLayout);
             mTimelineMarkerTextView = rootView.findViewById(R.id.tvController_timelineMarkerTextView);
 
-            TvTimelineMarkerManager tvTimelineMarkerManager = new TvTimelineMarkerManager(mProgressBar, new TimelineMarkerWidget(mTimelineMarkerAnchor, mTimelineMarkerBackgroundLayout, mTimelineMarkerTextView));
+            TimelineMarkerWidget timelineMarkerView = new TimelineMarkerWidget(mTimelineMarkerAnchor, mTimelineMarkerBackgroundLayout, mTimelineMarkerTextView, config.getVideoPlayerConfig().getPrimaryColor());
+            TvTimelineMarkerManager tvTimelineMarkerManager = new TvTimelineMarkerManager(mProgressBar, timelineMarkerView);
+
+
+            TVVideoPlayerConfig videoPlayerConfig = config.getVideoPlayerConfig();
+            setProgressColor(Color.parseColor(videoPlayerConfig.getPrimaryColor()));
+            if (videoPlayerConfig.getShowSeekBar()) {
+                mSeeKBarContainer.setVisibility(View.VISIBLE);
+            } else {
+                mSeeKBarContainer.setVisibility(View.GONE);
+            }
+            if (videoPlayerConfig.getShowTimers()) {
+                mTimersContainer.setVisibility(View.VISIBLE);
+            } else {
+                mTimersContainer.setVisibility(View.GONE);
+            }
+
 
         }
 
@@ -611,10 +637,11 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
                 }
             };
 
-    public MLSPlaybackTransportRowPresenter(ControllerAgent controllerAgent) {
+    public MLSPlaybackTransportRowPresenter(ControllerAgent controllerAgent, MLSTVConfiguration config) {
         setHeaderPresenter(null);
         setSelectEffectEnabled(false);
 
+        this.config = config;
         this.controllerAgent = controllerAgent;
 
         mPlaybackControlsPresenter = new MLSControlBarPresenter(R.layout.layout_mls_control_bar);

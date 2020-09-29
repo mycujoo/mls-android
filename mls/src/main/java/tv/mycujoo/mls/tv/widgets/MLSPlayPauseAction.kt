@@ -1,21 +1,27 @@
 package tv.mycujoo.mls.tv.widgets
 
 import android.content.Context
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.view.KeyEvent
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.leanback.widget.PlaybackControlsRow
 import androidx.leanback.widget.PlaybackControlsRow.PlayPauseAction
 import tv.mycujoo.mls.R
 
-class MLSPlayPauseAction(context: Context) :
+class MLSPlayPauseAction(context: Context, primaryColor: String) :
     PlaybackControlsRow.MultiAction(R.id.lb_control_play_pause) {
     init {
         val drawables = arrayOfNulls<Drawable>(2)
+        val playDrawable = ContextCompat.getDrawable(context, R.drawable.ic_play)
+        DrawableCompat.setTint(playDrawable!!, Color.parseColor(primaryColor))
         drawables[PlayPauseAction.INDEX_PLAY] =
-            ContextCompat.getDrawable(context, R.drawable.ic_play)
+            playDrawable
+        val pauseDrawable = ContextCompat.getDrawable(context, R.drawable.ic_pause)
+        DrawableCompat.setTint(pauseDrawable!!, Color.parseColor(primaryColor))
         drawables[PlayPauseAction.INDEX_PAUSE] =
-            ContextCompat.getDrawable(context, R.drawable.ic_pause)
+            pauseDrawable
 
         setDrawables(drawables)
 

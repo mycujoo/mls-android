@@ -150,7 +150,7 @@ public class MLSPlaybackControlPresenter extends MLSControlBarPresenter {
                 formatTime(seconds, mCurrentTimeStringBuilder);
                 mCurrentTime.setText(mCurrentTimeStringBuilder.toString());
             }
-            // Use ratio to represent current progres
+            // Use ratio to represent current progress
             double ratio = (double) mCurrentTimeInMs / mTotalTimeInMs;     // Range: [0, 1]
             double progressRatio = ratio * Integer.MAX_VALUE;   // Could safely cast to int
             mProgressBar.setProgress((int) progressRatio);

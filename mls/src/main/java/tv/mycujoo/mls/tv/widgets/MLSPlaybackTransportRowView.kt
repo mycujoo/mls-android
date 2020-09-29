@@ -11,7 +11,10 @@ import androidx.annotation.RestrictTo
 import androidx.constraintlayout.widget.ConstraintLayout
 import tv.mycujoo.mls.R
 
-class MLSPlaybackTransportRowView : ConstraintLayout {
+class MLSPlaybackTransportRowView @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : ConstraintLayout(context, attrs, defStyleAttr) {
+
     /**
      * @hide
      */
@@ -24,14 +27,6 @@ class MLSPlaybackTransportRowView : ConstraintLayout {
     }
 
     var onUnhandledKeyListener: OnUnhandledKeyListener? = null
-
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {}
-    constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(
-        context,
-        attrs,
-        defStyle
-    ) {
-    }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         return if (super.dispatchKeyEvent(event)) {

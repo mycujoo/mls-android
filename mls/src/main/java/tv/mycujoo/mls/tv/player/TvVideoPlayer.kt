@@ -1,11 +1,14 @@
 package tv.mycujoo.mls.tv.player
 
 import android.app.Activity
+import android.graphics.Color
 import android.net.Uri
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.leanback.app.VideoSupportFragment
 import androidx.leanback.app.VideoSupportFragmentGlueHost
@@ -26,6 +29,7 @@ import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.mls.R
+import tv.mycujoo.mls.api.MLSTVConfiguration
 import tv.mycujoo.mls.core.AbstractPlayerMediator
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.enum.C
@@ -43,6 +47,7 @@ import tv.mycujoo.mls.widgets.MLSPlayerView
 class TvVideoPlayer(
     private val activity: Activity,
     videoSupportFragment: VideoSupportFragment,
+    private val mlsTVConfiguration: MLSTVConfiguration,
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
@@ -62,12 +67,20 @@ class TvVideoPlayer(
     /**region Initializing*/
     init {
         player = SimpleExoPlayer.Builder(activity).build()
+        player!!.playWhenReady = mlsTVConfiguration.videoPlayerConfig.autoPlay
         leanbackAdapter = LeanbackPlayerAdapter(activity, player!!, 1000)
         glueHost = VideoSupportFragmentGlueHost(videoSupportFragment)
 
+        val progressBar = ProgressBar(activity)
+        progressBar.indeterminateDrawable.setTint(Color.parseColor(mlsTVConfiguration.videoPlayerConfig.primaryColor))
+        val layoutParams = FrameLayout.LayoutParams(120, 120)
+        layoutParams.gravity = Gravity.CENTER
+        progressBar.visibility = View.GONE
+        (videoSupportFragment.view!! as FrameLayout).addView(progressBar, layoutParams)
         controllerAgent = ControllerAgent(player!!)
+        controllerAgent.setBufferProgressBar(progressBar)
         mTransportControlGlue =
-            MLSPlaybackTransportControlGlueImpl(activity, leanbackAdapter, controllerAgent)
+            MLSPlaybackTransportControlGlueImpl(activity, leanbackAdapter, mlsTVConfiguration, controllerAgent)
         mTransportControlGlue.host = glueHost
         mTransportControlGlue.playWhenPrepared()
         if (mTransportControlGlue.isPrepared) {

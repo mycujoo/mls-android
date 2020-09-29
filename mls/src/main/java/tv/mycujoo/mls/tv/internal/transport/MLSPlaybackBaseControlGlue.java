@@ -21,6 +21,7 @@ import androidx.leanback.widget.Presenter;
 
 import java.util.List;
 
+import tv.mycujoo.mls.api.MLSTVConfiguration;
 import tv.mycujoo.mls.tv.internal.controller.ControllerAgent;
 import tv.mycujoo.mls.tv.widgets.MLSFastForwardAction;
 import tv.mycujoo.mls.tv.widgets.MLSPlayPauseAction;
@@ -100,6 +101,7 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
     int mErrorCode;
     String mErrorMessage;
 
+    MLSTVConfiguration config;
     ControllerAgent controllerAgent;
 
     final PlayerAdapter.Callback mAdapterCallback = new PlayerAdapter
@@ -163,9 +165,8 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
         @Override
         public void onBufferingStateChanged(PlayerAdapter wrapper, boolean start) {
             mBuffering = start;
-            if (mPlayerCallback != null) {
-                mPlayerCallback.onBufferingStateChanged(start);
-            }
+            // mPlayerCallback removed and replaced
+            controllerAgent.onBufferingStateChanged(start);
         }
 
         @Override
@@ -180,10 +181,11 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
      * @param context
      * @param impl    Implementation to underlying media player.
      */
-    public MLSPlaybackBaseControlGlue(Context context, T impl, ControllerAgent controllerAgent) {
+    public MLSPlaybackBaseControlGlue(Context context, T impl, MLSTVConfiguration config, ControllerAgent controllerAgent) {
         super(context);
         mPlayerAdapter = impl;
         mPlayerAdapter.setCallback(mAdapterCallback);
+        this.config = config;
         this.controllerAgent = controllerAgent;
     }
 
@@ -214,7 +216,9 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
             if (mErrorSet) {
                 mPlayerCallback.onError(mErrorCode, mErrorMessage);
             }
-            mPlayerCallback.onBufferingStateChanged(mBuffering);
+            // mPlayerCallback removed and replaced
+            controllerAgent.onBufferingStateChanged(mBuffering);
+
         }
     }
 
@@ -222,9 +226,9 @@ public abstract class MLSPlaybackBaseControlGlue<T extends PlayerAdapter> extend
         mErrorSet = false;
         mErrorCode = 0;
         mErrorMessage = null;
-        if (mPlayerCallback != null) {
-            mPlayerCallback.onBufferingStateChanged(false);
-        }
+        // mPlayerCallback removed and replaced
+        controllerAgent.onBufferingStateChanged(false);
+
     }
 
     @Override
