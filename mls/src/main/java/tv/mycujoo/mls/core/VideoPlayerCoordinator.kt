@@ -7,7 +7,10 @@ import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.ui.TimeBar
 import com.npaw.youbora.lib6.plugin.Options
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
@@ -227,7 +230,7 @@ class VideoPlayerCoordinator(
             when (result) {
                 is Success -> {
                     dataManager.currentEvent = result.value
-                    if (eventMayBeStreamed.not()){
+                    if (eventMayBeStreamed.not()) {
                         playVideoOrDisplayEventInfo(result.value)
                         startStreamUrlPullingIfNeeded(result.value)
                     }
@@ -325,6 +328,7 @@ class VideoPlayerCoordinator(
         }
         fetchActions(event.timeline_ids.first(), updateId, true)
     }
+
     private fun fetchActions(event: EventEntity, joinTimeLine: Boolean) {
         if (event.timeline_ids.isEmpty()) {
             return
@@ -426,11 +430,16 @@ class VideoPlayerCoordinator(
 
 
     fun release() {
+        cancelPulling()
         player.release()
         if (hasAnalytic) {
             youboraClient.stop()
         }
         reactorSocket.leave(true)
+    }
+
+    fun cancelPulling() {
+        cancelStreamUrlPulling()
     }
 
     fun getPlayer(): IPlayer {
