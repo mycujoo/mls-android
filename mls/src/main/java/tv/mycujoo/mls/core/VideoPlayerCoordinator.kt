@@ -172,7 +172,7 @@ class VideoPlayerCoordinator(
 
         initPlayerViewWrapper(MLSPlayerView, player)
         dataManager.currentEvent?.let {
-            joinToReactor(it)
+            joinEvent(it)
         }
     }
 
@@ -277,7 +277,7 @@ class VideoPlayerCoordinator(
                 is Success -> {
                     dataManager.currentEvent = result.value
                     playVideoOrDisplayEventInfo(result.value)
-                    joinToReactor(result.value)
+                    joinEvent(result.value)
                     fetchActions(result.value, true)
                     startStreamUrlPullingIfNeeded(result.value)
                 }

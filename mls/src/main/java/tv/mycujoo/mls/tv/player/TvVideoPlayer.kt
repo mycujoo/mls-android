@@ -205,7 +205,7 @@ class TvVideoPlayer(
                 is Result.Success -> {
                     dataManager.currentEvent = result.value
                     playVideoOrDisplayEventInfo(result.value)
-                    joinToReactor(result.value)
+                    joinEvent(result.value)
                     startStreamUrlPullingIfNeeded(result.value)
 
                 }

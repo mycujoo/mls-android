@@ -53,7 +53,7 @@ abstract class AbstractPlayerMediator(
     /**endregion */
 
 
-    protected fun joinToReactor(event: EventEntity) {
+    protected fun joinEvent(event: EventEntity) {
         reactorSocket.joinEvent(event.id)
     }
 
