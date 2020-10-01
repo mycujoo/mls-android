@@ -1,5 +1,5 @@
 
-[ ![Download](https://api.bintray.com/packages/mycujoo/mls/tv.mycujoo.mls-android/images/download.svg?version=1.0.2-alpha17) ](https://bintray.com/mycujoo/mls/tv.mycujoo.mls-android/1.0.2-alpha17/link)
+ [ ![Download](https://api.bintray.com/packages/mycujoo/mls/tv.mycujoo.mls/images/download.svg) ](https://bintray.com/mycujoo/mls/tv.mycujoo.mls/_latestVersion)
 # MLS (MyCujoo Live Services) in Android platform MLS-android
 
 ### For usage showcase please refer to Sample-app [https://github.com/mycujoo/mls-android-sample-app]
@@ -74,19 +74,6 @@ in order to communicate with SDK, MLS class must be instantiated. Init MLS whene
         override fun onStop() {
             super.onStop()
             MLS.onStop()
-        }
-#### Adopt to device configuration change [**Optional**]
-
-        override fun onConfigurationChanged(newConfig: Configuration) {
-            super.onConfigurationChanged(newConfig)
-            // change view display mode
-            if (isFullScreen) {
-                mlsPlayerView.setScreenResizeMode(resizeMode = MLSPlayerView.ResizeMode.RESIZE_MODE_FIXED_HEIGHT)
-                mlsPlayerView.setFullscreen(isFullscreen = true)
-            } else {
-                mlsPlayerView.setScreenResizeMode(resizeMode = MLSPlayerView.ResizeMode.RESIZE_MODE_FIT)
-                mlsPlayerView.setFullscreen(isFullscreen = false)
-            }
         }
 #### Get Events
         // use Data-Provider to fetch events
