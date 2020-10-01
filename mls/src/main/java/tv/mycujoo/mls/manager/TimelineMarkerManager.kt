@@ -27,7 +27,7 @@ class TimelineMarkerManager(
                 }.let { inRangePointOfInterestList ->
 
                     if (inRangePointOfInterestList.isEmpty()) {
-                        timelineMarkerView.removeMarkerTexts()
+                        timelineMarkerView.removeMarkerView()
 
                         currentPoiList.clear()
 
@@ -50,7 +50,7 @@ class TimelineMarkerManager(
             override fun onScrubStop() {
                 currentPoiList.clear()
 
-                timelineMarkerView.removeMarkerTexts()
+                timelineMarkerView.removeMarkerView()
             }
 
         })
