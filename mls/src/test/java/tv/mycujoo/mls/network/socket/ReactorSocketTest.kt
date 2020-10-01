@@ -57,7 +57,7 @@ class ReactorSocketTest {
         reactorSocket.joinEvent(EVENT_ID)
 
 
-        reactorSocket.joinTimelineIfNeeded(JoinTimelineParam("timeline_id_0"))
+        reactorSocket.joinTimeline(JoinTimelineParam("timeline_id_0"))
 
 
         verify(webSocket, atLeastOnce()).send("${JOIN_TIMELINE}timeline_id_0;")
@@ -68,7 +68,7 @@ class ReactorSocketTest {
         reactorSocket.joinEvent(EVENT_ID)
 
 
-        reactorSocket.joinTimelineIfNeeded(JoinTimelineParam("timeline_id_0", "last_action_id_0"))
+        reactorSocket.joinTimeline(JoinTimelineParam("timeline_id_0", "last_action_id_0"))
 
 
         verify(webSocket, atLeastOnce()).send("${JOIN_TIMELINE}timeline_id_0;last_action_id_0")
@@ -79,8 +79,8 @@ class ReactorSocketTest {
         // not connecting to socket
 
 
-        reactorSocket.joinTimelineIfNeeded(JoinTimelineParam("timeline_id_0"))
-        reactorSocket.joinTimelineIfNeeded(JoinTimelineParam("timeline_id_0", "last_action_id_0"))
+        reactorSocket.joinTimeline(JoinTimelineParam("timeline_id_0"))
+        reactorSocket.joinTimeline(JoinTimelineParam("timeline_id_0", "last_action_id_0"))
 
 
         verify(webSocket, never()).send("${JOIN_TIMELINE};timeline_id_0")

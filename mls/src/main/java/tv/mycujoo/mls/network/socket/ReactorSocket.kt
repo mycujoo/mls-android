@@ -50,9 +50,9 @@ class ReactorSocket(
         if (this::uuid.isInitialized.not()) {
             throw UninitializedPropertyAccessException("uuid must be initialized")
         }
-//        if (connected) {
-//            leave(false)
-//        }
+        if (connected) {
+            leave(false)
+        }
 
         if (created.not()) {
             createSocket()

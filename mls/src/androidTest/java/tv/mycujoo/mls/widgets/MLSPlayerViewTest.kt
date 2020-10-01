@@ -116,7 +116,10 @@ class MLSPlayerViewTest {
                 TODO("Not yet implemented")
             }
 
-            override suspend fun getActions(timelineId: String): Result<Exception, ActionResponse> {
+            override suspend fun getActions(
+                timelineId: String,
+                updateId: String?
+            ): Result<Exception, ActionResponse> {
                 TODO("Not yet implemented")
             }
 
@@ -134,7 +137,8 @@ class MLSPlayerViewTest {
             override fun joinEvent(eventId: String) {
             }
 
-            override fun joinTimelineIfNeeded(param: JoinTimelineParam) {
+            override fun joinTimeline(param: JoinTimelineParam) {
+                TODO("Not yet implemented")
             }
 
             override fun leave(destroyAfter: Boolean) {
