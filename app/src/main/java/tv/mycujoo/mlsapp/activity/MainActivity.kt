@@ -71,6 +71,9 @@ class MainActivity : AppCompatActivity() {
                             primaryColor = "#ff0000", secondaryColor = "#fff000",
                             autoPlay = true,
                             showBackForwardsButtons = true,
+                            showSeekBar = true,
+                            showTimers = true,
+                            showFullScreenButton = true,
                             showLiveViewers = true,
                             showEventInfoButton = false
                         )
@@ -78,8 +81,6 @@ class MainActivity : AppCompatActivity() {
                 )
                 .build()
 
-        MLS.getDataProvider().getEventsLiveData()
-            .observe(this, Observer { eventList -> onEventListUpdated(eventList) })
 
 
         mainActivityPlayButton.setOnClickListener {
@@ -97,13 +98,6 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-    }
-
-    private fun onEventListUpdated(eventList: List<EventEntity>) {
-        Log.i("MainActivity", "onEventListUpdated")
-        eventList.firstOrNull()?.let {
-            MLS.getVideoPlayer().playVideo(it)
-        }
     }
 
 

@@ -18,6 +18,7 @@ import org.junit.*
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.invocation.InvocationOnMock
+import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.mls.CoroutineTestRule
 import tv.mycujoo.mls.analytic.YouboraClient
@@ -26,6 +27,7 @@ import tv.mycujoo.mls.api.MLSConfiguration
 import tv.mycujoo.mls.api.defaultVideoPlayerConfig
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
+import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.manager.ViewHandler
 import tv.mycujoo.mls.matcher.SeekParameterArgumentMatcher
 import tv.mycujoo.mls.matcher.UriArgumentMatcher
@@ -115,12 +117,17 @@ class VideoPlayerCoordinatorTest {
     lateinit var exoplayer2Adapter: Exoplayer2Adapter
 
     @Mock
-    lateinit var annotationMediator : AnnotationMediator
+    lateinit var annotationMediator: AnnotationMediator
+
+    @Mock
+    lateinit var logger: Logger
 
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+
+        internalBuilder.initialize()
 
         whenever(okHttpClient.newWebSocket(any(), any())).thenReturn(webSocket)
         mainWebSocketListener = MainWebSocketListener()
@@ -140,6 +147,7 @@ class VideoPlayerCoordinatorTest {
         whenever(internalBuilder.createYouboraPlugin(any(), any())).thenReturn(youboraPlugin)
         whenever(internalBuilder.createExoPlayerAdapter(any())).thenReturn(exoplayer2Adapter)
         whenever(internalBuilder.createYouboraClient(any())).thenReturn(youboraClient)
+        whenever(internalBuilder.logger).thenReturn(logger)
 
         whenever(playerView.context).thenReturn(activity)
         whenever(playerView.getTimeBar()).thenReturn(timeBar)
@@ -179,7 +187,7 @@ class VideoPlayerCoordinatorTest {
     }
 
     @Test
-    fun `given call to play event with id, should fetch event details`() = runBlockingTest {
+    fun `given event with id to play, should fetch event details`() = runBlockingTest {
         videoPlayerCoordinator.playVideo("1eUBgUbXhriLFCT6A8E5a6Lv0R7")
 
 
@@ -187,18 +195,23 @@ class VideoPlayerCoordinatorTest {
     }
 
     @Test
-    fun `given call to play event with eventEntity, should fetch event details`() = runBlockingTest {
-        val event: EventEntity = getSampleEventEntity(emptyList())
-        videoPlayerCoordinator.playVideo(event)
+    fun `given eventEntity to play, should fetch event details`() =
+        runBlockingTest {
+            val event: EventEntity = getSampleEventEntity(emptyList())
+            videoPlayerCoordinator.playVideo(event)
 
 
-        verify(dataManager).getEventDetails(event.id)
-    }
+            verify(dataManager).getEventDetails(event.id)
+        }
 
     @Test
     fun `given event with streamUrl, should play video`() = runBlockingTest {
         val eventEntityDetails = getSampleEventEntity(getSampleStreamList())
-        whenever(dataManager.getEventDetails(eventEntityDetails.id)).thenReturn(Result.Success(eventEntityDetails))
+        whenever(dataManager.getEventDetails(eventEntityDetails.id)).thenReturn(
+            Result.Success(
+                eventEntityDetails
+            )
+        )
         whenever(mediaFactory.createMediaSource(any())).thenReturn(hlsMediaSource)
 
 
@@ -209,6 +222,22 @@ class VideoPlayerCoordinatorTest {
     }
 
     @Test
+    fun `given event with streamUrl, should never pull streamUrl`() = runBlockingTest {
+        val eventEntityDetails = getSampleEventEntity(getSampleStreamList())
+        whenever(dataManager.getEventDetails(eventEntityDetails.id)).thenReturn(
+            Result.Success(
+                eventEntityDetails
+            )
+        )
+
+        videoPlayerCoordinator.playVideo(eventEntityDetails)
+        coroutineTestRule.testDispatcher.advanceTimeBy(61000L)
+        videoPlayerCoordinator.cancelPulling()
+
+        verify(dataManager, times(1)).getEventDetails(eventEntityDetails.id, null)
+    }
+
+    @Test
     fun `given event without streamUrl, should not play video`() = runBlockingTest {
         val event: EventEntity = getSampleEventEntity(emptyList())
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
@@ -216,55 +245,110 @@ class VideoPlayerCoordinatorTest {
 
 
         videoPlayerCoordinator.playVideo(event)
+        videoPlayerCoordinator.cancelPulling()
 
 
         verify(exoPlayer, never()).prepare(any())
     }
 
     @Test
-    fun `given eventId to play stream which has timelineId, should fetchActions`() = runBlockingTest {
-        val event: EventEntity = getSampleEventEntity(emptyList(), "timeline_id_01")
-        whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
+    fun `given event to play which has timelineId, should fetchActions`() =
+        runBlockingTest {
+            val event: EventEntity = getSampleEventEntity(
+                id = "42",
+                streams = emptyList(),
+                timelineIds = "timeline_id_01"
+            )
+            whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
 
 
-        videoPlayerCoordinator.playVideo(event.id)
+            videoPlayerCoordinator.playVideo(event.id)
+            videoPlayerCoordinator.cancelPulling()
 
+            val timelineIdCaptor = argumentCaptor<String>()
+            val updateIdCaptor = argumentCaptor<String>()
+            val callbackArgumentCaptor =
+                argumentCaptor<(result: Result<Exception, ActionResponse>) -> Unit>()
+            verify(annotationMediator).fetchActions(
+                timelineIdCaptor.capture(),
+                updateIdCaptor.capture(),
+                callbackArgumentCaptor.capture()
+            )
+        }
 
-        verify(annotationMediator).fetchActions(any(), any())
-    }
     @Test
-    fun `given eventId to play stream which does not have timelineId, should not call fetchActions`() = runBlockingTest {
-        val event: EventEntity = getSampleEventEntity(emptyList(), null)
-        whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
+    fun `given event to play which does not have timelineId, should not call fetchActions`() =
+        runBlockingTest {
+            val event: EventEntity =
+                getSampleEventEntity(id = "42", streams = emptyList(), timelineIds = null)
+            whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
 
 
-        videoPlayerCoordinator.playVideo(event.id)
+            videoPlayerCoordinator.playVideo(event.id)
+            videoPlayerCoordinator.cancelPulling()
 
 
-        verify(dataManager, never()).getActions(any())
-    }
+            verify(dataManager, never()).getActions(any(), any())
+        }
 
     @Test
     fun `given event without streamUrl, should display event info`() = runBlockingTest {
         val event: EventEntity = getSampleEventEntity(emptyList())
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
-        whenever(mediaFactory.createMediaSource(any())).thenReturn(hlsMediaSource)
 
         videoPlayerCoordinator.playVideo(event)
+        videoPlayerCoordinator.cancelPulling()
 
         verify(playerView).displayEventInformationPreEventDialog()
     }
 
+
     @Test
-    fun `given event to play, should connect to reactor`() = runBlockingTest {
+    fun `given event without streamUrl, should pull streamUrl periodically`() = runBlockingTest {
+        val event: EventEntity = getSampleEventEntity(emptyList())
+        whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
+
+        videoPlayerCoordinator.playVideo(event)
+        coroutineTestRule.testDispatcher.advanceTimeBy(61000L)
+        videoPlayerCoordinator.cancelPulling()
+
+        verify(dataManager, times(3)).getEventDetails(event.id, null)
+    }
+
+    @Test
+    fun `given event to play, should connect to reactor service`() = runBlockingTest {
         val event: EventEntity = getSampleEventEntity(emptyList())
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
 
 
         videoPlayerCoordinator.playVideo(event)
+        videoPlayerCoordinator.cancelPulling()
 
 
         verify(webSocket).send("joinEvent;${event.id}")
+    }
+
+    @Test
+    fun `given 2nd event to play, should re-connect to reactor service`() = runBlockingTest {
+        val firstEvent: EventEntity = getSampleEventEntity("42")
+        whenever(dataManager.getEventDetails(firstEvent.id)).thenReturn(Result.Success(firstEvent))
+        val secondEvent: EventEntity = getSampleEventEntity("57")
+        whenever(dataManager.getEventDetails(secondEvent.id)).thenReturn(Result.Success(secondEvent))
+
+
+
+        videoPlayerCoordinator.playVideo(firstEvent)
+        videoPlayerCoordinator.cancelPulling()
+
+
+        videoPlayerCoordinator.playVideo(secondEvent)
+        videoPlayerCoordinator.cancelPulling()
+
+
+
+        verify(webSocket).send("joinEvent;${firstEvent.id}")
+        verify(webSocket).send("leaveEvent;${firstEvent.id}")
+        verify(webSocket).send("joinEvent;${secondEvent.id}")
     }
 
     @Test
@@ -282,46 +366,94 @@ class VideoPlayerCoordinatorTest {
 
     @Ignore("Event Status is not done on server yet")
     @Test
-    fun `given event with anything but Started status to play, should not connect to reactor`() = runBlockingTest {
-        val event = getSampleEventEntity(emptyList(), EventStatus.EVENT_STATUS_SCHEDULED)
-        whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
+    fun `given event with anything but Started status to play, should not connect to reactor`() =
+        runBlockingTest {
+            val event = getSampleEventEntity(emptyList(), EventStatus.EVENT_STATUS_SCHEDULED)
+            whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
 
 
 
-        videoPlayerCoordinator.playVideo(event)
-        videoPlayerCoordinator.playVideo(getSampleEventEntity(emptyList(), EventStatus.EVENT_STATUS_RESCHEDULED))
-        videoPlayerCoordinator.playVideo(getSampleEventEntity(emptyList(), EventStatus.EVENT_STATUS_CANCELLED))
-        videoPlayerCoordinator.playVideo(getSampleEventEntity(emptyList(), EventStatus.EVENT_STATUS_POSTPONED))
-        videoPlayerCoordinator.playVideo(getSampleEventEntity(emptyList(), EventStatus.EVENT_STATUS_DELAYED))
-        videoPlayerCoordinator.playVideo(getSampleEventEntity(emptyList(), EventStatus.EVENT_STATUS_PAUSED))
-        videoPlayerCoordinator.playVideo(getSampleEventEntity(emptyList(), EventStatus.EVENT_STATUS_DELAYED))
-        videoPlayerCoordinator.playVideo(getSampleEventEntity(emptyList(), EventStatus.EVENT_STATUS_SUSPENDED))
-        videoPlayerCoordinator.playVideo(getSampleEventEntity(emptyList(), EventStatus.EVENT_STATUS_FINISHED))
-        videoPlayerCoordinator.playVideo(getSampleEventEntity(emptyList(), EventStatus.EVENT_STATUS_UNSPECIFIED))
+            videoPlayerCoordinator.playVideo(event)
+            videoPlayerCoordinator.playVideo(
+                getSampleEventEntity(
+                    emptyList(),
+                    EventStatus.EVENT_STATUS_RESCHEDULED
+                )
+            )
+            videoPlayerCoordinator.playVideo(
+                getSampleEventEntity(
+                    emptyList(),
+                    EventStatus.EVENT_STATUS_CANCELLED
+                )
+            )
+            videoPlayerCoordinator.playVideo(
+                getSampleEventEntity(
+                    emptyList(),
+                    EventStatus.EVENT_STATUS_POSTPONED
+                )
+            )
+            videoPlayerCoordinator.playVideo(
+                getSampleEventEntity(
+                    emptyList(),
+                    EventStatus.EVENT_STATUS_DELAYED
+                )
+            )
+            videoPlayerCoordinator.playVideo(
+                getSampleEventEntity(
+                    emptyList(),
+                    EventStatus.EVENT_STATUS_PAUSED
+                )
+            )
+            videoPlayerCoordinator.playVideo(
+                getSampleEventEntity(
+                    emptyList(),
+                    EventStatus.EVENT_STATUS_DELAYED
+                )
+            )
+            videoPlayerCoordinator.playVideo(
+                getSampleEventEntity(
+                    emptyList(),
+                    EventStatus.EVENT_STATUS_SUSPENDED
+                )
+            )
+            videoPlayerCoordinator.playVideo(
+                getSampleEventEntity(
+                    emptyList(),
+                    EventStatus.EVENT_STATUS_FINISHED
+                )
+            )
+            videoPlayerCoordinator.playVideo(
+                getSampleEventEntity(
+                    emptyList(),
+                    EventStatus.EVENT_STATUS_UNSPECIFIED
+                )
+            )
 
 
-        verify(reactorSocket, never()).joinEvent(any())
-    }
+            verify(reactorSocket, never()).joinEvent(any())
+        }
 
     @Test
-    fun `update viewers counter in VOD stream, should hide viewers counter in player wrapper`() = runBlockingTest {
-        val event = getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_SCHEDULED)
-        whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
+    fun `update viewers counter in VOD stream, should hide viewers counter in player wrapper`() =
+        runBlockingTest {
+            val event =
+                getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_SCHEDULED)
+            whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
 
 
-        whenever(exoPlayer.isCurrentWindowDynamic).thenReturn(false)
+            whenever(exoPlayer.isCurrentWindowDynamic).thenReturn(false)
 
 
-        videoPlayerCoordinator.playVideo(event)
-        exoPlayerMainEventListener.onPlayerStateChanged(true, 0)
-        mainWebSocketListener.onMessage(webSocket, "eventTotal;ck2343whlc43k0g90i92grc0u;17")
+            videoPlayerCoordinator.playVideo(event)
+            exoPlayerMainEventListener.onPlayerStateChanged(true, 0)
+            mainWebSocketListener.onMessage(webSocket, "eventTotal;ck2343whlc43k0g90i92grc0u;17")
 
 
-        verify(playerView).hideViewersCounter()
-    }
+            verify(playerView).hideViewersCounter()
+        }
 
     @Test
-    fun `update viewers counter in LIVE stream, should update player wrapper`() = runBlockingTest {
+    fun `update viewers counter in LIVE stream, should update player view`() = runBlockingTest {
         val event = getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_SCHEDULED)
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
         videoPlayerCoordinator.config(defaultVideoPlayerConfig())
@@ -385,13 +517,20 @@ class VideoPlayerCoordinatorTest {
         }
 
         fun getSampleEventEntity(
-            streams: List<Stream>,
-            status: EventStatus = EventStatus.EVENT_STATUS_UNSPECIFIED
+            id: String
         ): EventEntity {
-            return getSampleEventEntity(streams, null, status)
+            return getSampleEventEntity(id, emptyList(), null, EventStatus.EVENT_STATUS_UNSPECIFIED)
         }
 
         fun getSampleEventEntity(
+            streams: List<Stream>,
+            status: EventStatus = EventStatus.EVENT_STATUS_UNSPECIFIED
+        ): EventEntity {
+            return getSampleEventEntity("42", streams, null, status)
+        }
+
+        fun getSampleEventEntity(
+            id: String,
             streams: List<Stream>,
             timelineIds: String? = null,
             status: EventStatus = EventStatus.EVENT_STATUS_UNSPECIFIED
@@ -400,9 +539,10 @@ class VideoPlayerCoordinatorTest {
 //        location=Location(physical=Physical(city=Amsterdam, continent_code=EU, coordinates=Coordinates(latitude=52.3666969, longitude=4.8945398), country_code=NL, venue=)),
 //        organiser=Org text, start_time=2020-07-11T07:32:46Z, status=EVENT_STATUS_SCHEDULED, streams=[Stream(fullUrl=https://rendered-europe-west.mls.mycujoo.tv/shervin/ckcfwmo4g000j0131mvc1zchu/master.m3u8)],
 //        timezone=America/Los_Angeles, timeline_ids=[], metadata=tv.mycujoo.domain.entity.Metadata@ea3de11, is_test=false)
-            val location = Location(Physical("", "", Coordinates(0.toDouble(), 0.toDouble()), "", ""))
+            val location =
+                Location(Physical("", "", Coordinates(0.toDouble(), 0.toDouble()), "", ""))
             return EventEntity(
-                "42",
+                id,
                 "",
                 "",
                 "",

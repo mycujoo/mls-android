@@ -1,6 +1,5 @@
 package tv.mycujoo.mls.core
 
-import android.util.Log
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.ActionObject
 import tv.mycujoo.domain.entity.OverlayAct.*

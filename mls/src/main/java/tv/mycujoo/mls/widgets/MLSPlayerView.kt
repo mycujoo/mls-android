@@ -89,7 +89,7 @@ class MLSPlayerView @JvmOverloads constructor(
 
         playerView = findViewById(R.id.exoPlayerView)
         overlayHost = OverlayHost(context)
-        playerView.addView(overlayHost, 1)
+        playerView.findViewById<AspectRatioFrameLayout>(R.id.exo_content_frame).addView(overlayHost)
 
 
         bufferView = findViewById(R.id.controller_buffering)

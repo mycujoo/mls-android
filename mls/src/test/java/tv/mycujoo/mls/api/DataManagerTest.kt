@@ -61,7 +61,7 @@ class DataManagerTest {
                 return getSampleEventEntity()
             }
 
-            override suspend fun getActions(timelineId: String): ActionResponse {
+            override suspend fun getActions(timelineId: String, updateId: String?): ActionResponse {
                 TODO("Not yet implemented")
             }
         }

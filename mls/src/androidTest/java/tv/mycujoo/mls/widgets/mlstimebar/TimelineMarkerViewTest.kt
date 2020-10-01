@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.marginLeft
+import androidx.core.view.marginStart
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.onView
@@ -82,21 +83,10 @@ class TimelineMarkerViewTest {
     }
 
     @Test
-    fun positionLessThanScreenWidthShouldConstraintMarkerToLeftOfParent() {
-        UiThreadStatement.runOnUiThread {
-            val position = (timelineMarkerView.parent as View).width - (timelineMarkerView.measuredWidth / 2)
-            timelineMarkerView.setMarkerTexts(sampleTitleList(), position)
-        }
-
-        waitForIdlingResourceCounter(true)
-        assertTrue(-1 != (timelineMarkerView.layoutParams as ConstraintLayout.LayoutParams).startToStart)
-        assertTrue(-1 == (timelineMarkerView.layoutParams as ConstraintLayout.LayoutParams).endToEnd)
-    }
-
-    @Test
     fun positionLessThanScreenWidthShouldAddMarginLeftToMarker() {
         UiThreadStatement.runOnUiThread {
-            val position = (timelineMarkerView.parent as View).width - (timelineMarkerView.width / 2)
+            val position =
+                (timelineMarkerView.parent as View).width - (timelineMarkerView.width / 2)
             timelineMarkerView.setMarkerTexts(sampleTitleList(), position - 1)
         }
 
@@ -111,7 +101,8 @@ class TimelineMarkerViewTest {
     @Test
     fun positionLessThanScreenWidthShouldNotPlaceMarkerAtRightOfParent() {
         UiThreadStatement.runOnUiThread {
-            val position = (timelineMarkerView.parent as View).width - (timelineMarkerView.measuredWidth / 2)
+            val position =
+                (timelineMarkerView.parent as View).width - (timelineMarkerView.measuredWidth / 2)
             timelineMarkerView.setMarkerTexts(sampleTitleList(), position)
         }
 
@@ -120,22 +111,13 @@ class TimelineMarkerViewTest {
         assertTrue(-1 == (timelineMarkerView.layoutParams as ConstraintLayout.LayoutParams).endToEnd)
     }
 
-    @Test
-    fun positionGreaterThanScreenWidthShouldPlaceMarkerAtRightOfParent() {
-        UiThreadStatement.runOnUiThread {
-            val position = (timelineMarkerView.parent as View).width - (timelineMarkerView.measuredWidth / 2)
-            timelineMarkerView.setMarkerTexts(sampleTitleList(), position+1)
-        }
-
-        waitForIdlingResourceCounter(true)
-        assertTrue(-1 != (timelineMarkerView.layoutParams as ConstraintLayout.LayoutParams).endToEnd)
-    }
 
     @Test
     fun positionGreaterThanScreenWidthShouldNotConstraintMarkerToLeftOfParent() {
         UiThreadStatement.runOnUiThread {
-            val position = (timelineMarkerView.parent as View).width - (timelineMarkerView.measuredWidth / 2)
-            timelineMarkerView.setMarkerTexts(sampleTitleList(), position+1)
+            val position =
+                (timelineMarkerView.parent as View).width - (timelineMarkerView.measuredWidth / 2)
+            timelineMarkerView.setMarkerTexts(sampleTitleList(), position + 1)
         }
 
         waitForIdlingResourceCounter(true)
@@ -145,18 +127,18 @@ class TimelineMarkerViewTest {
     @Test
     fun positionGreaterThanScreenWidthShouldNotAddMarginLeftToMarker() {
         UiThreadStatement.runOnUiThread {
-            val position = (timelineMarkerView.parent as View).width - (timelineMarkerView.measuredWidth / 2)
-            timelineMarkerView.setMarkerTexts(sampleTitleList(), position+1)
+            val position =
+                (timelineMarkerView.parent as View).width - (timelineMarkerView.measuredWidth / 2)
+            timelineMarkerView.setMarkerTexts(sampleTitleList(), position + 1)
         }
 
         waitForIdlingResourceCounter(true)
-        assertTrue(-1 == timelineMarkerView.marginLeft)
+        assertTrue(0 == timelineMarkerView.marginStart)
     }
 
 
     @Test
-    fun removeMarkerTextsShouldRemoveAllChildViews() {
-        assertEquals(0, timelineMarkerView.childCount)
+    fun removeMarkerTextsShouldRemoveView() {
         val titleList = listOf("Goal", "Foul")
         UiThreadStatement.runOnUiThread {
             timelineMarkerView.setMarkerTexts(titleList, 0)
@@ -164,11 +146,13 @@ class TimelineMarkerViewTest {
         waitForIdlingResourceCounter(true)
         assertEquals(2, timelineMarkerView.childCount)
 
+        UiThreadStatement.runOnUiThread {
+            timelineMarkerView.removeMarkerView()
+        }
 
-        timelineMarkerView.removeMarkerTexts()
-
-        waitForIdlingResourceCounter(false)
-        assertEquals(0, timelineMarkerView.childCount)
+        onView(withId(timelineMarkerView.id)).check(
+            ViewAssertions.matches(withEffectiveVisibility(Visibility.GONE))
+        )
     }
 
     @Test
@@ -179,20 +163,22 @@ class TimelineMarkerViewTest {
         UiThreadStatement.runOnUiThread {
             timelineMarkerView.setMarkerTexts(titleList, 0)
         }
-//        UiThreadStatement.runOnUiThread {
-//            timelineMarkerView.setPosition(30)
-//        }
 
+        waitForIdlingResourceCounter(true)
+        val stringBuilder = StringBuilder()
+        stringBuilder.append(titleList.first())
 
-        onView(withText(titleList[0])).check(
-            ViewAssertions.matches(isDisplayed())
-        )
-        onView(withText(titleList[1])).check(
+        for (i in 1 until titleList.size) {
+            stringBuilder.append("\n")
+            stringBuilder.append(titleList[i])
+        }
+
+        onView(withText(stringBuilder.toString())).check(
             ViewAssertions.matches(isDisplayed())
         )
     }
 
-    private fun sampleTitleList() : List<String>{
+    private fun sampleTitleList(): List<String> {
         return listOf("Goal")
     }
 

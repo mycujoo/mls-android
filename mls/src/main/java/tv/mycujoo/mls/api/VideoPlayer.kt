@@ -48,14 +48,6 @@ class VideoPlayer(
         exoPlayer.playWhenReady = false
     }
 
-    override fun next() {
-        exoPlayer.next()
-    }
-
-    override fun previous() {
-        exoPlayer.previous()
-    }
-
     override fun config(videoPlayerConfig: VideoPlayerConfig) {
         videoPlayerCoordinator.config(videoPlayerConfig)
     }

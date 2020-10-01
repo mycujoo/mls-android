@@ -130,18 +130,27 @@ class TimelineMarkerView @JvmOverloads constructor(
             }
         }
     }
-
-    fun removeMarkerTexts() {
+    @UiThread
+    fun removeMarkerView() {
         visibility = View.GONE
     }
 
     fun setMarkerTexts(titles: List<String>, position: Int) {
         if (titles.isEmpty()) {
-            removeMarkerTexts()
+            removeMarkerView()
         }
         visibility = View.VISIBLE
         textView.visibility = View.VISIBLE
-        textView.text = titles.first()
+
+        val stringBuilder = StringBuilder()
+        stringBuilder.append(titles.first())
+
+        for (i in 1 until titles.size) {
+            stringBuilder.append("\n")
+            stringBuilder.append(titles[i])
+        }
+        textView.text = stringBuilder.toString()
+
         textView.doOnLayout {
             setPosition(position)
         }
