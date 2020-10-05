@@ -173,7 +173,10 @@ class VideoPlayerCoordinatorTest {
     }
 
     private fun storeExoPlayerListener(it: InvocationOnMock) {
-        exoPlayerMainEventListener = it.arguments[0] as MainEventListener
+        if (it.arguments[0] is MainEventListener){
+            exoPlayerMainEventListener = it.arguments[0] as MainEventListener
+        }
+
     }
 
     @After

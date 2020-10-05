@@ -14,6 +14,8 @@ fun defaultVideoPlayerConfig(): VideoPlayerConfig {
         primaryColor = "#FFFFFF",
         secondaryColor = "#000000",
         autoPlay = true,
+        enableControls = true,
+        showPlayPauseButtons = true,
         showBackForwardsButtons = true,
         showSeekBar = true,
         showTimers = true,

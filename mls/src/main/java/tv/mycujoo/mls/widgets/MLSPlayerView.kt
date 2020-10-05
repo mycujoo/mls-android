@@ -247,6 +247,7 @@ class MLSPlayerView @JvmOverloads constructor(
         bufferView.visibility = View.GONE
     }
 
+    /**region Configuration*/
     fun config(config: VideoPlayerConfig) {
         try {
             val primaryColor = Color.parseColor(config.primaryColor)
@@ -278,46 +279,12 @@ class MLSPlayerView @JvmOverloads constructor(
 
             playerView.player?.playWhenReady = config.autoPlay
 
-            if (config.showBackForwardsButtons) {
-                findViewById<ImageButton>(R.id.exo_rew).visibility = View.VISIBLE
-                findViewById<FrameLayout>(R.id.controller_rewButtonContainerLayout).visibility =
-                    View.VISIBLE
-                findViewById<FrameLayout>(R.id.controller_ffwdButtonContainerLayout).visibility =
-                    View.VISIBLE
-                findViewById<ImageButton>(R.id.exo_ffwd).visibility = View.VISIBLE
-            } else {
-                findViewById<ImageButton>(R.id.exo_rew).visibility = View.GONE
-                findViewById<FrameLayout>(R.id.controller_rewButtonContainerLayout).visibility =
-                    View.GONE
-                findViewById<FrameLayout>(R.id.controller_ffwdButtonContainerLayout).visibility =
-                    View.GONE
-                findViewById<ImageButton>(R.id.exo_ffwd).visibility = View.GONE
-            }
+            showPlayPauseButtons(config.showPlayPauseButtons)
+            showBackForwardsButtons(config.showBackForwardsButtons)
+            showSeekBar(config.showSeekBar)
+            showFullScreenButton(config.showFullScreenButton)
+            showTimers(config.showTimers)
 
-            if (config.showSeekBar) {
-                findViewById<FrameLayout>(R.id.controller_timeBarLayoutContainer).visibility =
-                    View.VISIBLE
-            } else {
-                findViewById<FrameLayout>(R.id.controller_timeBarLayoutContainer).visibility =
-                    View.GONE
-            }
-
-
-            if (config.showFullScreenButton) {
-                findViewById<FrameLayout>(R.id.controller_fullscreenImageButtonContainer).visibility =
-                    View.VISIBLE
-            } else {
-                findViewById<FrameLayout>(R.id.controller_fullscreenImageButtonContainer).visibility =
-                    View.GONE
-            }
-
-            if (config.showTimers) {
-                findViewById<ConstraintLayout>(R.id.controller_timersContainer).visibility =
-                    View.VISIBLE
-            } else {
-                findViewById<ConstraintLayout>(R.id.controller_timersContainer).visibility =
-                    View.GONE
-            }
 
             if (config.showEventInfoButton) {
                 showEventInfoButton()
@@ -325,14 +292,100 @@ class MLSPlayerView @JvmOverloads constructor(
                 hideEventInfoButton()
             }
 
+            // enableControls has the highest priority
+            if (config.enableControls) {
+                playerView.controllerAutoShow = true
+                showControlsContainer(true)
+            } else {
+                playerView.controllerAutoShow = false
+                playerView.hideController()
+                showPlayPauseButtons(false)
+                showBackForwardsButtons(false)
+                showSeekBar(false)
+                showFullScreenButton(false)
+                showTimers(false)
+                hideEventInfoButton()
+                showControlsContainer(false)
+            }
+
 
         } catch (e: Exception) {
             Log.e("PlayerViewWrapper", e.message)
-        } finally {
-
-
         }
     }
+
+    private fun showControlsContainer(show: Boolean) {
+        if (show) {
+            findViewById<ConstraintLayout>(R.id.controlsLayoutContainer).visibility =
+                VISIBLE
+        } else {
+            findViewById<ConstraintLayout>(R.id.controlsLayoutContainer).visibility =
+                GONE
+        }
+
+    }
+
+    private fun showTimers(showTimers: Boolean) {
+        if (showTimers) {
+            findViewById<ConstraintLayout>(R.id.controller_timersContainer).visibility =
+                VISIBLE
+        } else {
+            findViewById<ConstraintLayout>(R.id.controller_timersContainer).visibility =
+                View.GONE
+        }
+    }
+
+    private fun showFullScreenButton(showFullScreenButton: Boolean) {
+        if (showFullScreenButton) {
+            findViewById<FrameLayout>(R.id.controller_fullscreenImageButtonContainer).visibility =
+                VISIBLE
+        } else {
+            findViewById<FrameLayout>(R.id.controller_fullscreenImageButtonContainer).visibility =
+                View.GONE
+        }
+    }
+
+    private fun showSeekBar(showSeekBar: Boolean) {
+        if (showSeekBar) {
+            findViewById<FrameLayout>(R.id.controller_timeBarLayoutContainer).visibility =
+                VISIBLE
+        } else {
+            findViewById<FrameLayout>(R.id.controller_timeBarLayoutContainer).visibility =
+                View.GONE
+        }
+
+    }
+
+    private fun showBackForwardsButtons(showBackForwardsButtons: Boolean) {
+        if (showBackForwardsButtons) {
+            findViewById<ImageButton>(R.id.exo_rew).visibility = VISIBLE
+            findViewById<FrameLayout>(R.id.controller_rewButtonContainerLayout).visibility =
+                VISIBLE
+            findViewById<FrameLayout>(R.id.controller_ffwdButtonContainerLayout).visibility =
+                VISIBLE
+            findViewById<ImageButton>(R.id.exo_ffwd).visibility = VISIBLE
+        } else {
+            findViewById<ImageButton>(R.id.exo_rew).visibility = View.GONE
+            findViewById<FrameLayout>(R.id.controller_rewButtonContainerLayout).visibility =
+                View.GONE
+            findViewById<FrameLayout>(R.id.controller_ffwdButtonContainerLayout).visibility =
+                View.GONE
+            findViewById<ImageButton>(R.id.exo_ffwd).visibility = View.GONE
+        }
+
+    }
+
+    private fun showPlayPauseButtons(showPlayPauseButtons: Boolean) {
+        if (showPlayPauseButtons) {
+            findViewById<FrameLayout>(R.id.controller_playPauseButtonContainerLayout).visibility =
+                VISIBLE
+        } else {
+            findViewById<FrameLayout>(R.id.controller_playPauseButtonContainerLayout).visibility =
+                View.GONE
+        }
+    }
+
+    /**endregion */
 
     fun setLiveMode(liveState: LiveState) {
         when (liveState) {

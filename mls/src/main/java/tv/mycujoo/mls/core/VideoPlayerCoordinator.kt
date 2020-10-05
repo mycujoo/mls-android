@@ -69,7 +69,7 @@ class VideoPlayerCoordinator(
         this.player = player
 
         player.getDirectInstance()?.let {
-            videoPlayer = VideoPlayer(it, this)
+            videoPlayer = VideoPlayer(it, this, MLSPlayerView)
 
             builder.mlsConfiguration.seekTolerance?.let { accuracy ->
                 if (accuracy > 0) {
