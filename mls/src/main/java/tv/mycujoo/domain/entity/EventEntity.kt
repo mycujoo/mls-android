@@ -20,7 +20,13 @@ data class EventEntity(
 
 data class Stream(
     @SerializedName("id") val id: String,
-    @SerializedName("full_url") val fullUrl: String
+    @SerializedName("full_url") val fullUrl: String,
+    @SerializedName("widevine") val widevine: Widevine
+)
+
+data class Widevine(
+    @SerializedName("full_url") val fullUrl: String,
+    @SerializedName("license_url") val licenseUrl: String
 )
 
 data class Location(
