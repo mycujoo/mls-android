@@ -4,6 +4,7 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Before
@@ -12,6 +13,7 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class PlayerTest {
 
@@ -178,7 +180,11 @@ class PlayerTest {
         player.play(SAMPLE_URI, true)
 
 
-        verify(exoPlayer).prepare(hlsMediaSource, true, false)
+        val mediaItemCaptor = argumentCaptor<MediaItem>()
+        val resetPositionCaptor = argumentCaptor<Boolean>()
+        verify(exoPlayer).setMediaItem(mediaItemCaptor.capture(), resetPositionCaptor.capture())
+        assertTrue { resetPositionCaptor.firstValue }
+
     }
 
     @Test
@@ -195,7 +201,11 @@ class PlayerTest {
         player.play(SAMPLE_URI, true)
 
 
-        verify(exoPlayer).prepare(hlsMediaSource, false, false)
+        val mediaItemCaptor = argumentCaptor<MediaItem>()
+        val resetPositionCaptor = argumentCaptor<Boolean>()
+        verify(exoPlayer).setMediaItem(mediaItemCaptor.capture(), resetPositionCaptor.capture())
+        assertFalse { resetPositionCaptor.firstValue }
+
     }
 
     companion object {

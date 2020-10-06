@@ -77,7 +77,7 @@ class YouboraClientTest {
         const val UUID = "uuid_0"
 
         private fun getSampleStreamList(): List<Stream> {
-            return listOf(Stream("stream_id_0", "stream_url"))
+            return listOf(Stream("stream_id_0", "stream_url", null))
         }
 
         fun getSampleEventEntity(
@@ -89,7 +89,8 @@ class YouboraClientTest {
 //        organiser=Org text, start_time=2020-07-11T07:32:46Z, status=EVENT_STATUS_SCHEDULED, streams=[Stream(fullUrl=https://rendered-europe-west.mls.mycujoo.tv/shervin/ckcfwmo4g000j0131mvc1zchu/master.m3u8)],
 //        timezone=America/Los_Angeles, timeline_ids=[], metadata=tv.mycujoo.domain.entity.Metadata@ea3de11, is_test=false)
 
-            val location = Location(Physical("", "", Coordinates(0.toDouble(), 0.toDouble()), "", ""))
+            val location =
+                Location(Physical("", "", Coordinates(0.toDouble(), 0.toDouble()), "", ""))
             return EventEntity(
                 "42",
                 "",
