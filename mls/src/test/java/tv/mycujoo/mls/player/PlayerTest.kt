@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.player
 
+import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.nhaarman.mockitokotlin2.any
@@ -172,7 +173,7 @@ class PlayerTest {
     @Test
     fun `given uri to play when no resume data is available, should start from the beginning`() {
         initPlayer()
-        whenever(mediaFactory.createMediaSource(any())).thenReturn(hlsMediaSource)
+        whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
 
         player.play(SAMPLE_URI, true)
 
@@ -183,7 +184,7 @@ class PlayerTest {
     @Test
     fun `given uri to play when resume data is available, should start from resume position`() {
         initPlayer()
-        whenever(mediaFactory.createMediaSource(any())).thenReturn(hlsMediaSource)
+        whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
         whenever(exoPlayer.currentWindowIndex).thenReturn(0)
         whenever(exoPlayer.isCurrentWindowSeekable).thenReturn(true)
         whenever(exoPlayer.currentPosition).thenReturn(42L)
