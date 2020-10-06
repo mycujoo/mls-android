@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.core
 
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player.*
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
@@ -30,7 +31,6 @@ import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.manager.ViewHandler
 import tv.mycujoo.mls.matcher.SeekParameterArgumentMatcher
-import tv.mycujoo.mls.matcher.UriArgumentMatcher
 import tv.mycujoo.mls.mediator.AnnotationMediator
 import tv.mycujoo.mls.network.socket.MainWebSocketListener
 import tv.mycujoo.mls.network.socket.ReactorListener
@@ -137,7 +137,7 @@ class VideoPlayerCoordinatorTest {
         whenever(MLSBuilder.activity).thenReturn(activity)
         whenever(MLSBuilder.createExoPlayer(any())).thenReturn(exoPlayer)
         whenever(MLSBuilder.createMediaFactory(any())).thenReturn(mediaFactory)
-        whenever(mediaFactory.createMediaSource(any())).thenReturn(hlsMediaSource)
+        whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
 
         whenever(MLSBuilder.createReactorListener(any())).thenReturn(reactorListener)
         whenever(MLSBuilder.mlsConfiguration).thenReturn(MLSConfiguration())
@@ -173,7 +173,7 @@ class VideoPlayerCoordinatorTest {
     }
 
     private fun storeExoPlayerListener(it: InvocationOnMock) {
-        if (it.arguments[0] is MainEventListener){
+        if (it.arguments[0] is MainEventListener) {
             exoPlayerMainEventListener = it.arguments[0] as MainEventListener
         }
 
@@ -215,13 +215,14 @@ class VideoPlayerCoordinatorTest {
                 eventEntityDetails
             )
         )
-        whenever(mediaFactory.createMediaSource(any())).thenReturn(hlsMediaSource)
+        whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
 
 
         videoPlayerCoordinator.playVideo(eventEntityDetails)
 
 
-        verify(exoPlayer).prepare(any(), any(), any())
+        verify(exoPlayer).setMediaItem(any(), any<Boolean>())
+
     }
 
     @Test
@@ -244,14 +245,14 @@ class VideoPlayerCoordinatorTest {
     fun `given event without streamUrl, should not play video`() = runBlockingTest {
         val event: EventEntity = getSampleEventEntity(emptyList())
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
-        whenever(mediaFactory.createMediaSource(any())).thenReturn(hlsMediaSource)
+        whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
 
 
         videoPlayerCoordinator.playVideo(event)
         videoPlayerCoordinator.cancelPulling()
 
 
-        verify(exoPlayer, never()).prepare(any())
+        verify(exoPlayer, never()).setMediaItem(any(), any<Boolean>())
     }
 
     @Test
@@ -363,8 +364,7 @@ class VideoPlayerCoordinatorTest {
         videoPlayerCoordinator.playExternalSourceVideo(externalVideoUri)
 
 
-        verify(mediaFactory).createMediaSource(argThat(UriArgumentMatcher(externalVideoUri)))
-        verify(exoPlayer).prepare(any(), any(), any())
+        verify(exoPlayer).setMediaItem(any(), any<Boolean>())
     }
 
     @Ignore("Event Status is not done on server yet")
@@ -516,7 +516,7 @@ class VideoPlayerCoordinatorTest {
     /**region Fake data*/
     companion object {
         private fun getSampleStreamList(): List<Stream> {
-            return listOf(Stream("stream_id_0", "stream_url"))
+            return listOf(Stream("stream_id_0", "stream_url", null))
         }
 
         fun getSampleEventEntity(

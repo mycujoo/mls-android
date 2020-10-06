@@ -1,8 +1,10 @@
 package tv.mycujoo.mls.player
 
+import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Before
@@ -11,6 +13,7 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class PlayerTest {
 
@@ -172,18 +175,22 @@ class PlayerTest {
     @Test
     fun `given uri to play when no resume data is available, should start from the beginning`() {
         initPlayer()
-        whenever(mediaFactory.createMediaSource(any())).thenReturn(hlsMediaSource)
+        whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
 
         player.play(SAMPLE_URI, true)
 
 
-        verify(exoPlayer).prepare(hlsMediaSource, true, false)
+        val mediaItemCaptor = argumentCaptor<MediaItem>()
+        val resetPositionCaptor = argumentCaptor<Boolean>()
+        verify(exoPlayer).setMediaItem(mediaItemCaptor.capture(), resetPositionCaptor.capture())
+        assertTrue { resetPositionCaptor.firstValue }
+
     }
 
     @Test
     fun `given uri to play when resume data is available, should start from resume position`() {
         initPlayer()
-        whenever(mediaFactory.createMediaSource(any())).thenReturn(hlsMediaSource)
+        whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
         whenever(exoPlayer.currentWindowIndex).thenReturn(0)
         whenever(exoPlayer.isCurrentWindowSeekable).thenReturn(true)
         whenever(exoPlayer.currentPosition).thenReturn(42L)
@@ -194,7 +201,11 @@ class PlayerTest {
         player.play(SAMPLE_URI, true)
 
 
-        verify(exoPlayer).prepare(hlsMediaSource, false, false)
+        val mediaItemCaptor = argumentCaptor<MediaItem>()
+        val resetPositionCaptor = argumentCaptor<Boolean>()
+        verify(exoPlayer).setMediaItem(mediaItemCaptor.capture(), resetPositionCaptor.capture())
+        assertFalse { resetPositionCaptor.firstValue }
+
     }
 
     companion object {

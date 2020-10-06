@@ -13,6 +13,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
+import tv.mycujoo.domain.entity.Stream
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
@@ -311,12 +312,26 @@ class VideoPlayerCoordinator(
         if (mayPlayVideo(event)) {
             logged = false
 
-            player.play(event.streams.first().fullUrl, videoPlayerConfig.autoPlay)
+            play(event.streams.first())
             playerView.hideEventInfoDialog()
         } else {
             // display event info
             playerView.displayEventInformationPreEventDialog()
         }
+    }
+
+    private fun play(stream: Stream) {
+
+        if (stream.widevine?.fullUrl != null && stream.widevine?.licenseUrl != null) {
+            player.play(
+                stream.widevine.fullUrl,
+                stream.widevine.licenseUrl,
+                videoPlayerConfig.autoPlay
+            )
+        } else if (stream.fullUrl != null) {
+            player.play(stream.fullUrl, videoPlayerConfig.autoPlay)
+        }
+
     }
     /**endregion */
 

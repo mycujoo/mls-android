@@ -2,7 +2,7 @@ package tv.mycujoo
 
 import android.content.Intent
 import android.view.View
-import android.widget.LinearLayout
+import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -28,10 +28,10 @@ class SvgGenerationTest {
         val intent = Intent(ApplicationProvider.getApplicationContext(), BlankActivity::class.java)
         val scenario = launchActivity<BlankActivity>(intent)
         scenario.onActivity { activity ->
-            val linearLayout = activity.findViewById<LinearLayout>(R.id.blankActivity_rootView)
-            svgImageView = SVGImageView(linearLayout.context)
+            val frameLayout = activity.findViewById<FrameLayout>(R.id.blankActivity_rootView)
+            svgImageView = SVGImageView(frameLayout.context)
             svgImageView.id = View.generateViewId()
-            linearLayout.addView(svgImageView)
+            frameLayout.addView(svgImageView)
         }
 
     }

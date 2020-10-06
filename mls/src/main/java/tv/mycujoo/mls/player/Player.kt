@@ -2,10 +2,8 @@ package tv.mycujoo.mls.player
 
 import android.content.Context
 import android.net.Uri
-import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
@@ -23,6 +21,7 @@ class Player : IPlayer {
     private var playbackPosition: Long = -1L
 
     private var uri: Uri? = null
+    private var licenseUrl: Uri? = null
 
     override fun create(mediaFactory: HlsMediaSource.Factory, exoPlayer: SimpleExoPlayer) {
         this.mediaFactory = mediaFactory
@@ -96,35 +95,57 @@ class Player : IPlayer {
 
     override fun play(uriString: String, autoPlay: Boolean) {
         this.uri = Uri.parse(uriString)
-        this.uri?.let {
-            play(it, autoPlay)
-        }
+        val mediaItem = MediaItem.Builder().setUri(uri).build()
+        play(mediaItem, autoPlay)
+
     }
 
-    private fun play(uri: Uri, playWhenReady: Boolean) {
-        val mediaSource = mediaFactory.createMediaSource(uri)
+    override fun play(uriString: String, licenseUrl: String, autoPlay: Boolean) {
+        this.uri = Uri.parse(uriString)
+        this.licenseUrl = Uri.parse(licenseUrl)
 
+        val mediaItem = MediaItem.Builder()
+            .setDrmUuid(Util.getDrmUuid("widevine"))
+            .setDrmLicenseUri(licenseUrl)
+            .setUri(uriString)
+            .build()
+
+        play(mediaItem, autoPlay)
+    }
+
+    private fun play(mediaItem: MediaItem, autoPlay: Boolean) {
         if (playbackPosition != -1L) {
             exoPlayer!!.seekTo(playbackPosition)
         }
 
         val haveResumePosition = resumeWindow != C.INDEX_UNSET
         if (haveResumePosition) {
-            exoPlayer!!.seekTo(resumeWindow, resumePosition)
-            exoPlayer?.prepare(mediaSource, false, false)
-            resumePosition = C.INDEX_UNSET.toLong()
-            resumeWindow = C.INDEX_UNSET
+            exoPlayer?.let {
+                it.seekTo(resumeWindow, resumePosition)
+                it.setMediaItem(mediaItem, false)
+                it.prepare()
+                it.playWhenReady = autoPlay
+                resumePosition = C.INDEX_UNSET.toLong()
+                resumeWindow = C.INDEX_UNSET
+                it.playWhenReady = autoPlay
+            }
         } else {
-            exoPlayer?.prepare(mediaSource, true, false)
+            exoPlayer?.let {
+                it.setMediaItem(mediaItem, true)
+                it.prepare()
+                it.playWhenReady = autoPlay
+            }
         }
-
-        exoPlayer?.playWhenReady = playWhenReady
 
     }
 
     override fun loadLastVideo() {
-        uri?.let {
-            play(it, false)
+        if (licenseUrl != null) {
+            play(uri.toString(), licenseUrl.toString(), false)
+        } else {
+            uri?.let {
+                play(it.toString(), false)
+            }
         }
     }
 

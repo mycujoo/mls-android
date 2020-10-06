@@ -317,7 +317,7 @@ class MLSPlayerViewTest {
     /**region Fake data*/
     companion object {
         private fun getSampleStreamList(): List<Stream> {
-            return listOf(Stream("stream_id_0", "stream_url"))
+            return listOf(Stream("stream_id_0", "stream_url", null))
         }
 
         fun getSampleEventEntity(streams: List<Stream>): EventEntity {

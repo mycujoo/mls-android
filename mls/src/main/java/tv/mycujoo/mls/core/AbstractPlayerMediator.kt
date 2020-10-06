@@ -10,6 +10,7 @@ import tv.mycujoo.mls.enum.MessageLevel
 import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.ReactorCallback
+import tv.mycujoo.mls.utils.PlayerUtils.Companion.isStreamPlayable
 
 abstract class AbstractPlayerMediator(
     private val reactorSocket: IReactorSocket,
@@ -77,7 +78,7 @@ abstract class AbstractPlayerMediator(
 
     /**region Helper functions*/
     protected fun mayPlayVideo(event: EventEntity): Boolean {
-        eventMayBeStreamed = event.streams.firstOrNull()?.fullUrl != null
+        eventMayBeStreamed = isStreamPlayable(event)
         return eventMayBeStreamed
     }
     /**endregion */
