@@ -303,7 +303,7 @@ class VideoPlayerMediatorTest {
         videoPlayerMediator.playVideo(event)
         videoPlayerMediator.cancelPulling()
 
-        verify(playerView).displayEventInformationPreEventDialog()
+        verify(playerView).showEventInformationPreEventDialog()
     }
 
 

@@ -69,7 +69,7 @@ class PlayerTest {
 
 
         UiThreadStatement.runOnUiThread {
-            mlsPlayerView.displayEventInfoForStartedEvents()
+            mlsPlayerView.showEventInfoForStartedEvents()
         }
 
 
@@ -81,7 +81,7 @@ class PlayerTest {
     fun hideEventInfo() {
         mlsPlayerView.setEventInfo(EVENT_TITLE, EVENT_DESCRIPTION, EVENT_DATE)
         UiThreadStatement.runOnUiThread {
-            mlsPlayerView.displayEventInfoForStartedEvents()
+            mlsPlayerView.showEventInfoForStartedEvents()
         }
         onView(withText(EVENT_TITLE)).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
 

@@ -45,7 +45,7 @@ import java.util.*
 
 class MLSPlayerView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : ConstraintLayout(context, attrs, defStyleAttr) {
+) : ConstraintLayout(context, attrs, defStyleAttr), IPlayerView {
 
 
     /**region UI Fields*/
@@ -96,10 +96,10 @@ class MLSPlayerView @JvmOverloads constructor(
         playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
 
         findViewById<FrameLayout>(R.id.controller_informationButtonLayout).setOnClickListener {
-            displayEventInfoForStartedEvents()
+            showEventInfoForStartedEvents()
         }
         findViewById<ImageButton>(R.id.controller_informationButton).setOnClickListener {
-            displayEventInfoForStartedEvents()
+            showEventInfoForStartedEvents()
         }
 
 
@@ -239,16 +239,16 @@ class MLSPlayerView @JvmOverloads constructor(
     }
 
 
-    fun showBuffering() {
+    override fun showBuffering() {
         bufferView.visibility = View.VISIBLE
     }
 
-    fun hideBuffering() {
+    override fun hideBuffering() {
         bufferView.visibility = View.GONE
     }
 
     /**region Configuration*/
-    fun config(config: VideoPlayerConfig) {
+    override fun config(config: VideoPlayerConfig) {
         try {
             val primaryColor = Color.parseColor(config.primaryColor)
             val secondaryColor = Color.parseColor(config.secondaryColor)
@@ -387,7 +387,7 @@ class MLSPlayerView @JvmOverloads constructor(
 
     /**endregion */
 
-    fun setLiveMode(liveState: LiveState) {
+    override fun setLiveMode(liveState: LiveState) {
         when (liveState) {
             LIVE_ON_THE_EDGE -> {
                 controller_liveBadgeTextView.visibility = View.VISIBLE
@@ -409,12 +409,12 @@ class MLSPlayerView @JvmOverloads constructor(
         }
     }
 
-    fun updateViewersCounter(count: String) {
+    override fun updateViewersCounter(count: String) {
         controller_viewersCountLayout.visibility = View.VISIBLE
         controller_viewersCountTextView.text = count
     }
 
-    fun hideViewersCounter() {
+    override fun hideViewersCounter() {
         controller_viewersCountLayout.visibility = View.GONE
     }
 
@@ -471,11 +471,11 @@ class MLSPlayerView @JvmOverloads constructor(
     /**endregion */
 
     /**region New Annotation structure*/
-    fun continueOverlayAnimations() {
+    override fun continueOverlayAnimations() {
         viewHandler.getAnimations().forEach { it.resume() }
     }
 
-    fun freezeOverlayAnimations() {
+    override fun freezeOverlayAnimations() {
         viewHandler.getAnimations().forEach { it.pause() }
     }
     /**endregion */
@@ -487,7 +487,7 @@ class MLSPlayerView @JvmOverloads constructor(
         eventDateTime = startTime
     }
 
-    fun displayEventInformationPreEventDialog() {
+    override fun showEventInformationPreEventDialog() {
         post {
             playerView.hideController()
 
@@ -506,7 +506,7 @@ class MLSPlayerView @JvmOverloads constructor(
 
     }
 
-    fun displayEventInfoForStartedEvents() {
+    override fun showEventInfoForStartedEvents() {
         if (this::eventInfoTitle.isInitialized.not() && this::eventInfoDescription.isInitialized.not()) {
             return
         }
@@ -533,7 +533,7 @@ class MLSPlayerView @JvmOverloads constructor(
 
     }
 
-    fun hideEventInfoDialog() {
+    override fun hideEventInfoDialog() {
         if (eventInfoDialogContainerLayout == null) {
             return
         }
@@ -547,7 +547,7 @@ class MLSPlayerView @JvmOverloads constructor(
         }
     }
 
-    fun showEventInfoButton() {
+    override fun showEventInfoButton() {
         post {
             showEventInfoButtonInstantly()
         }
@@ -560,7 +560,7 @@ class MLSPlayerView @JvmOverloads constructor(
 
     }
 
-    fun hideEventInfoButton() {
+    override fun hideEventInfoButton() {
         post {
             hideEventInfoButtonInstantly()
         }

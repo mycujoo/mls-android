@@ -316,7 +316,7 @@ class VideoPlayerMediator(
             playerView.hideEventInfoDialog()
         } else {
             // display event info
-            playerView.displayEventInformationPreEventDialog()
+            playerView.showEventInformationPreEventDialog()
         }
     }
 

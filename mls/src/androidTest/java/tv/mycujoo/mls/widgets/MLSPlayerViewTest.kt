@@ -205,7 +205,7 @@ class MLSPlayerViewTest {
         MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        MLSPlayerView.displayEventInformationPreEventDialog()
+        MLSPlayerView.showEventInformationPreEventDialog()
 
 
         onView(withText("title_0")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
@@ -217,7 +217,7 @@ class MLSPlayerViewTest {
         MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        MLSPlayerView.displayEventInformationPreEventDialog()
+        MLSPlayerView.showEventInformationPreEventDialog()
         onView(withText("title_0")).perform(click())
 
 
@@ -233,7 +233,7 @@ class MLSPlayerViewTest {
         MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        MLSPlayerView.displayEventInfoForStartedEvents()
+        MLSPlayerView.showEventInfoForStartedEvents()
 
 
         onView(withText("title_0")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
@@ -246,7 +246,7 @@ class MLSPlayerViewTest {
         MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        MLSPlayerView.displayEventInfoForStartedEvents()
+        MLSPlayerView.showEventInfoForStartedEvents()
         onView(withText("title_0")).perform(click())
 
 
@@ -269,7 +269,7 @@ class MLSPlayerViewTest {
     fun whileDisplayingStartedEventDialog_shouldTogglePlayerVisibilityOnClick() {
         MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
         setupPlayer()
-        MLSPlayerView.displayEventInfoForStartedEvents()
+        MLSPlayerView.showEventInfoForStartedEvents()
 
 
         onView(withText("title_0")).perform(click())

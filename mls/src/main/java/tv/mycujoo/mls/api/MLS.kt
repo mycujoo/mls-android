@@ -211,7 +211,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         }
 
         playerView.hideEventInfoButton()
-        playerView.displayEventInformationPreEventDialog()
+        playerView.showEventInformationPreEventDialog()
     }
 
     private fun setEventInfoToPlayerViewWrapper(event: EventEntity) {

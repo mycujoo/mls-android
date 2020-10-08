@@ -102,7 +102,7 @@ class VideoPlayer(
     }
 
     override fun showEventInfoOverlay() {
-        MLSPlayerView.displayEventInfoForStartedEvents()
+        MLSPlayerView.showEventInfoForStartedEvents()
     }
 
     override fun hideEventInfoOverlay() {
