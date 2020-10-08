@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.lifecycle.Observer
 import kotlinx.android.synthetic.main.activity_main.*
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.EventStatus
@@ -70,6 +69,8 @@ class MainActivity : AppCompatActivity() {
                         VideoPlayerConfig(
                             primaryColor = "#ff0000", secondaryColor = "#fff000",
                             autoPlay = true,
+                            enableControls = true,
+                            showPlayPauseButtons = true,
                             showBackForwardsButtons = true,
                             showSeekBar = true,
                             showTimers = true,
@@ -90,7 +91,10 @@ class MainActivity : AppCompatActivity() {
             MLS.getDataProvider().fetchEvents(
                 pageSize = 10,
                 pageToken = null,
-                eventStatus = listOf(EventStatus.EVENT_STATUS_SCHEDULED, EventStatus.EVENT_STATUS_CANCELLED),
+                eventStatus = listOf(
+                    EventStatus.EVENT_STATUS_SCHEDULED,
+                    EventStatus.EVENT_STATUS_CANCELLED
+                ),
                 orderBy = OrderByEventsParam.ORDER_TITLE_ASC,
                 fetchEventCallback = { eventList: List<EventEntity>, previousPageToken: String, nextPageToken: String ->
                     MLS.getVideoPlayer().playVideo(eventList.first())
