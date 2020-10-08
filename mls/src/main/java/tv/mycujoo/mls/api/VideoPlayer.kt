@@ -6,13 +6,13 @@ import com.google.android.exoplayer2.Player.STATE_READY
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
-import tv.mycujoo.mls.core.VideoPlayerCoordinator
+import tv.mycujoo.mls.core.VideoPlayerMediator
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.widgets.MLSPlayerView
 
 class VideoPlayer(
     private val exoPlayer: ExoPlayer,
-    private val videoPlayerCoordinator: VideoPlayerCoordinator,
+    private val videoPlayerMediator: VideoPlayerMediator,
     private val MLSPlayerView: MLSPlayerView
 ) : PlayerController, PlayerStatus {
 
@@ -39,15 +39,15 @@ class VideoPlayer(
 
     /**region Player Higher level control*/
     fun playVideo(event: EventEntity) {
-        videoPlayerCoordinator.playVideo(event)
+        videoPlayerMediator.playVideo(event)
     }
 
     fun playVideo(eventId: String) {
-        videoPlayerCoordinator.playVideo(eventId)
+        videoPlayerMediator.playVideo(eventId)
     }
 
     fun playExternalSourceVideo(videoUrl: String) {
-        videoPlayerCoordinator.playExternalSourceVideo(videoUrl)
+        videoPlayerMediator.playExternalSourceVideo(videoUrl)
     }
     /**endregion */
 
@@ -110,7 +110,7 @@ class VideoPlayer(
     }
 
     override fun config(videoPlayerConfig: VideoPlayerConfig) {
-        videoPlayerCoordinator.config(videoPlayerConfig)
+        videoPlayerMediator.config(videoPlayerConfig)
     }
 
     /**endregion */

@@ -14,7 +14,7 @@ import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.mls.core.AnnotationFactory
 import tv.mycujoo.mls.core.AnnotationListener
 import tv.mycujoo.mls.core.InternalBuilder
-import tv.mycujoo.mls.core.VideoPlayerCoordinator
+import tv.mycujoo.mls.core.VideoPlayerMediator
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.SVGAssetResolver
@@ -50,8 +50,8 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
     private lateinit var playerView: MLSPlayerView
 
-    private var coordinatorInitialized = false
-    private lateinit var videoPlayerCoordinator: VideoPlayerCoordinator
+    private var mediatorInitialized = false
+    private lateinit var videoPlayerMediator: VideoPlayerMediator
     private lateinit var annotationMediator: AnnotationMediator
     private lateinit var player: Player
 
@@ -83,7 +83,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
         initSvgRenderingLibrary(internalBuilder.getAssetManager())
 
-        videoPlayerCoordinator = VideoPlayerCoordinator(
+        videoPlayerMediator = VideoPlayerMediator(
             builder.mlsConfiguration.videoPlayerConfig,
             viewHandler,
             internalBuilder.reactorSocket,
@@ -109,16 +109,16 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
     }
 
 
-    private fun initializeCoordinators(
+    private fun initializeMediators(
         MLSPlayerView: MLSPlayerView
     ) {
-        if (coordinatorInitialized) {
-            videoPlayerCoordinator.reInitialize(MLSPlayerView)
+        if (mediatorInitialized) {
+            videoPlayerMediator.reInitialize(MLSPlayerView)
             return
         }
-        coordinatorInitialized = true
+        mediatorInitialized = true
 
-        videoPlayerCoordinator.initialize(MLSPlayerView, player, builder)
+        videoPlayerMediator.initialize(MLSPlayerView, player, builder)
 
 
         val annotationListener = AnnotationListener(MLSPlayerView, viewHandler)
@@ -135,32 +135,34 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
             annotationFactory,
             dataManager,
             dispatcher,
-            videoPlayerCoordinator.getPlayer(),
+            videoPlayerMediator.getPlayer(),
             Executors.newScheduledThreadPool(1),
             Handler(Looper.getMainLooper()),
             builder.internalBuilder.logger
         )
         annotationMediator.initPlayerView(MLSPlayerView)
 
-        videoPlayerCoordinator.setAnnotationMediator(annotationMediator)
+        videoPlayerMediator.setAnnotationMediator(annotationMediator)
+    }
+
+    private fun initializePlayerView(MLSPlayerView: MLSPlayerView) {
+        this.playerView = MLSPlayerView
+        this.viewHandler.setOverlayHost(MLSPlayerView.overlayHost)
+        initializeMediators(MLSPlayerView)
+        videoPlayerMediator.attachPlayer(MLSPlayerView)
     }
     /**endregion */
 
     /**region Over-ridden Functions*/
     override fun onStart(MLSPlayerView: MLSPlayerView) {
         if (Util.SDK_INT >= Build.VERSION_CODES.N) {
-            this.playerView = MLSPlayerView
-            this.viewHandler.setOverlayHost(MLSPlayerView.overlayHost)
-            initializeCoordinators(MLSPlayerView)
-            videoPlayerCoordinator.attachPlayer(MLSPlayerView)
+            initializePlayerView(MLSPlayerView)
         }
     }
 
     override fun onResume(MLSPlayerView: MLSPlayerView) {
         if (Util.SDK_INT < Build.VERSION_CODES.N) {
-            this.playerView = MLSPlayerView
-            initializeCoordinators(MLSPlayerView)
-            videoPlayerCoordinator.attachPlayer(MLSPlayerView)
+            initializePlayerView(MLSPlayerView)
         }
     }
 
@@ -177,7 +179,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
     }
 
     override fun getVideoPlayer(): VideoPlayer {
-        return videoPlayerCoordinator.videoPlayer
+        return videoPlayerMediator.videoPlayer
     }
 
     override fun getDataProvider(): DataProvider {
@@ -187,7 +189,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
     /**endregion */
 
     private fun release() {
-        videoPlayerCoordinator.release()
+        videoPlayerMediator.release()
         annotationMediator.release()
     }
 

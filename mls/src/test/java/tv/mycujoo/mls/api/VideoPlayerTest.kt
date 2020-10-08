@@ -12,7 +12,7 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import tv.mycujoo.domain.entity.*
-import tv.mycujoo.mls.core.VideoPlayerCoordinator
+import tv.mycujoo.mls.core.VideoPlayerMediator
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import kotlin.test.assertEquals
 
@@ -29,7 +29,7 @@ class VideoPlayerTest {
     lateinit var audioComponent: Player.AudioComponent
 
     @Mock
-    lateinit var videoPlayerCoordinator: VideoPlayerCoordinator
+    lateinit var videoPlayerMediator: VideoPlayerMediator
 
     @Mock
     lateinit var MLSPlayerView: MLSPlayerView
@@ -41,7 +41,7 @@ class VideoPlayerTest {
             eventListener = i.getArgument<Player.EventListener>(0)
             eventListener
         }
-        videoPlayer = VideoPlayer(exoPlayer, videoPlayerCoordinator, MLSPlayerView)
+        videoPlayer = VideoPlayer(exoPlayer, videoPlayerMediator, MLSPlayerView)
         whenever(exoPlayer.audioComponent).thenReturn(audioComponent)
     }
 
@@ -185,18 +185,18 @@ class VideoPlayerTest {
     }
 
     @Test
-    fun `given request to play event with id, should call videoPlayerCoordinator`() {
+    fun `given request to play event with id, should call videoPlayerMediator`() {
         videoPlayer.playVideo("42")
 
-        verify(videoPlayerCoordinator).playVideo("42")
+        verify(videoPlayerMediator).playVideo("42")
     }
 
     @Test
-    fun `given request to play event with eventEntity, should call videoPlayerCoordinator`() {
+    fun `given request to play event with eventEntity, should call videoPlayerMediator`() {
         val event = getSampleEventEntity()
         videoPlayer.playVideo(event)
 
-        verify(videoPlayerCoordinator).playVideo(event)
+        verify(videoPlayerMediator).playVideo(event)
     }
 
     private fun getSampleEventEntity(): EventEntity {

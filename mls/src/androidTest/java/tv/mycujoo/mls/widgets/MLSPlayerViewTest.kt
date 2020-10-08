@@ -34,7 +34,7 @@ import tv.mycujoo.mls.BlankActivity
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.defaultVideoPlayerConfig
-import tv.mycujoo.mls.core.VideoPlayerCoordinator
+import tv.mycujoo.mls.core.VideoPlayerMediator
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.enum.LogLevel
 import tv.mycujoo.mls.helper.OverlayViewHelper
@@ -62,7 +62,7 @@ class MLSPlayerViewTest {
 
     private var animationHelper = FakeAnimationFactory()
 
-    private lateinit var videoPlayerCoordinator: VideoPlayerCoordinator
+    private lateinit var videoPlayerMediator: VideoPlayerMediator
     private lateinit var player: IPlayer
 
     private lateinit var MLSBuilder: MLSBuilder
@@ -153,7 +153,7 @@ class MLSPlayerViewTest {
             player = Player()
             player.create(createMediaFactory(MLSPlayerView.context), createExoPlayer(MLSPlayerView.context))
 
-            videoPlayerCoordinator = VideoPlayerCoordinator(
+            videoPlayerMediator = VideoPlayerMediator(
                 defaultVideoPlayerConfig(),
                 viewHandler,
                 reactorSocket,
@@ -162,13 +162,13 @@ class MLSPlayerViewTest {
                 emptyList(),
                 Logger(LogLevel.MINIMAL)
             )
-            videoPlayerCoordinator.initialize(
+            videoPlayerMediator.initialize(
                 MLSPlayerView,
                 player,
                 MLSBuilder
             )
 
-            videoPlayerCoordinator.attachPlayer(MLSPlayerView)
+            videoPlayerMediator.attachPlayer(MLSPlayerView)
         }
 
     }

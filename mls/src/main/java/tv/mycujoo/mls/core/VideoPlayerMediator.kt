@@ -37,7 +37,7 @@ import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
 import tv.mycujoo.mls.utils.StringUtils
 import tv.mycujoo.mls.widgets.MLSPlayerView
 
-class VideoPlayerCoordinator(
+class VideoPlayerMediator(
     private var videoPlayerConfig: VideoPlayerConfig,
     private val viewHandler: IViewHandler,
     private val reactorSocket: IReactorSocket,

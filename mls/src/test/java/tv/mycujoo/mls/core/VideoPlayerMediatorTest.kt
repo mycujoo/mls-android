@@ -42,13 +42,13 @@ import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
 
 
 @ExperimentalCoroutinesApi
-class VideoPlayerCoordinatorTest {
+class VideoPlayerMediatorTest {
 
 
     @get:Rule
     var coroutineTestRule = CoroutineTestRule()
 
-    private lateinit var videoPlayerCoordinator: VideoPlayerCoordinator
+    private lateinit var videoPlayerMediator: VideoPlayerMediator
 
     @Mock
     private lateinit var playerView: MLSPlayerView
@@ -159,7 +159,7 @@ class VideoPlayerCoordinatorTest {
 
 
         whenever(exoPlayer.addListener(any())).then { storeExoPlayerListener(it) }
-        videoPlayerCoordinator = VideoPlayerCoordinator(
+        videoPlayerMediator = VideoPlayerMediator(
             videoPlayerConfig,
             viewHandler,
             reactorSocket,
@@ -168,8 +168,8 @@ class VideoPlayerCoordinatorTest {
             emptyList(),
             internalBuilder.logger
         )
-        videoPlayerCoordinator.initialize(playerView, player, MLSBuilder)
-        videoPlayerCoordinator.setAnnotationMediator(annotationMediator)
+        videoPlayerMediator.initialize(playerView, player, MLSBuilder)
+        videoPlayerMediator.setAnnotationMediator(annotationMediator)
     }
 
     private fun storeExoPlayerListener(it: InvocationOnMock) {
@@ -191,7 +191,7 @@ class VideoPlayerCoordinatorTest {
 
     @Test
     fun `given event with id to play, should fetch event details`() = runBlockingTest {
-        videoPlayerCoordinator.playVideo("1eUBgUbXhriLFCT6A8E5a6Lv0R7")
+        videoPlayerMediator.playVideo("1eUBgUbXhriLFCT6A8E5a6Lv0R7")
 
 
         verify(dataManager).getEventDetails("1eUBgUbXhriLFCT6A8E5a6Lv0R7")
@@ -201,7 +201,7 @@ class VideoPlayerCoordinatorTest {
     fun `given eventEntity to play, should fetch event details`() =
         runBlockingTest {
             val event: EventEntity = getSampleEventEntity(emptyList())
-            videoPlayerCoordinator.playVideo(event)
+            videoPlayerMediator.playVideo(event)
 
 
             verify(dataManager).getEventDetails(event.id)
@@ -218,7 +218,7 @@ class VideoPlayerCoordinatorTest {
         whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
 
 
-        videoPlayerCoordinator.playVideo(eventEntityDetails)
+        videoPlayerMediator.playVideo(eventEntityDetails)
 
 
         verify(exoPlayer).setMediaItem(any(), any<Boolean>())
@@ -234,9 +234,9 @@ class VideoPlayerCoordinatorTest {
             )
         )
 
-        videoPlayerCoordinator.playVideo(eventEntityDetails)
+        videoPlayerMediator.playVideo(eventEntityDetails)
         coroutineTestRule.testDispatcher.advanceTimeBy(61000L)
-        videoPlayerCoordinator.cancelPulling()
+        videoPlayerMediator.cancelPulling()
 
         verify(dataManager, times(1)).getEventDetails(eventEntityDetails.id, null)
     }
@@ -248,8 +248,8 @@ class VideoPlayerCoordinatorTest {
         whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
 
 
-        videoPlayerCoordinator.playVideo(event)
-        videoPlayerCoordinator.cancelPulling()
+        videoPlayerMediator.playVideo(event)
+        videoPlayerMediator.cancelPulling()
 
 
         verify(exoPlayer, never()).setMediaItem(any(), any<Boolean>())
@@ -266,8 +266,8 @@ class VideoPlayerCoordinatorTest {
             whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
 
 
-            videoPlayerCoordinator.playVideo(event.id)
-            videoPlayerCoordinator.cancelPulling()
+            videoPlayerMediator.playVideo(event.id)
+            videoPlayerMediator.cancelPulling()
 
             val timelineIdCaptor = argumentCaptor<String>()
             val updateIdCaptor = argumentCaptor<String>()
@@ -288,8 +288,8 @@ class VideoPlayerCoordinatorTest {
             whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
 
 
-            videoPlayerCoordinator.playVideo(event.id)
-            videoPlayerCoordinator.cancelPulling()
+            videoPlayerMediator.playVideo(event.id)
+            videoPlayerMediator.cancelPulling()
 
 
             verify(dataManager, never()).getActions(any(), any())
@@ -300,8 +300,8 @@ class VideoPlayerCoordinatorTest {
         val event: EventEntity = getSampleEventEntity(emptyList())
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
 
-        videoPlayerCoordinator.playVideo(event)
-        videoPlayerCoordinator.cancelPulling()
+        videoPlayerMediator.playVideo(event)
+        videoPlayerMediator.cancelPulling()
 
         verify(playerView).displayEventInformationPreEventDialog()
     }
@@ -312,9 +312,9 @@ class VideoPlayerCoordinatorTest {
         val event: EventEntity = getSampleEventEntity(emptyList())
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
 
-        videoPlayerCoordinator.playVideo(event)
+        videoPlayerMediator.playVideo(event)
         coroutineTestRule.testDispatcher.advanceTimeBy(61000L)
-        videoPlayerCoordinator.cancelPulling()
+        videoPlayerMediator.cancelPulling()
 
         verify(dataManager, times(3)).getEventDetails(event.id, null)
     }
@@ -325,8 +325,8 @@ class VideoPlayerCoordinatorTest {
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
 
 
-        videoPlayerCoordinator.playVideo(event)
-        videoPlayerCoordinator.cancelPulling()
+        videoPlayerMediator.playVideo(event)
+        videoPlayerMediator.cancelPulling()
 
 
         verify(webSocket).send("joinEvent;${event.id}")
@@ -341,12 +341,12 @@ class VideoPlayerCoordinatorTest {
 
 
 
-        videoPlayerCoordinator.playVideo(firstEvent)
-        videoPlayerCoordinator.cancelPulling()
+        videoPlayerMediator.playVideo(firstEvent)
+        videoPlayerMediator.cancelPulling()
 
 
-        videoPlayerCoordinator.playVideo(secondEvent)
-        videoPlayerCoordinator.cancelPulling()
+        videoPlayerMediator.playVideo(secondEvent)
+        videoPlayerMediator.cancelPulling()
 
 
 
@@ -361,7 +361,7 @@ class VideoPlayerCoordinatorTest {
             "https://dc9jagk60w3y3mt6171f-b03c88.p5cdn.com/shervin/cke8cohm8001u0176j5ahnlo7/master.m3u8"
 
 
-        videoPlayerCoordinator.playExternalSourceVideo(externalVideoUri)
+        videoPlayerMediator.playExternalSourceVideo(externalVideoUri)
 
 
         verify(exoPlayer).setMediaItem(any(), any<Boolean>())
@@ -376,56 +376,56 @@ class VideoPlayerCoordinatorTest {
 
 
 
-            videoPlayerCoordinator.playVideo(event)
-            videoPlayerCoordinator.playVideo(
+            videoPlayerMediator.playVideo(event)
+            videoPlayerMediator.playVideo(
                 getSampleEventEntity(
                     emptyList(),
                     EventStatus.EVENT_STATUS_RESCHEDULED
                 )
             )
-            videoPlayerCoordinator.playVideo(
+            videoPlayerMediator.playVideo(
                 getSampleEventEntity(
                     emptyList(),
                     EventStatus.EVENT_STATUS_CANCELLED
                 )
             )
-            videoPlayerCoordinator.playVideo(
+            videoPlayerMediator.playVideo(
                 getSampleEventEntity(
                     emptyList(),
                     EventStatus.EVENT_STATUS_POSTPONED
                 )
             )
-            videoPlayerCoordinator.playVideo(
+            videoPlayerMediator.playVideo(
                 getSampleEventEntity(
                     emptyList(),
                     EventStatus.EVENT_STATUS_DELAYED
                 )
             )
-            videoPlayerCoordinator.playVideo(
+            videoPlayerMediator.playVideo(
                 getSampleEventEntity(
                     emptyList(),
                     EventStatus.EVENT_STATUS_PAUSED
                 )
             )
-            videoPlayerCoordinator.playVideo(
+            videoPlayerMediator.playVideo(
                 getSampleEventEntity(
                     emptyList(),
                     EventStatus.EVENT_STATUS_DELAYED
                 )
             )
-            videoPlayerCoordinator.playVideo(
+            videoPlayerMediator.playVideo(
                 getSampleEventEntity(
                     emptyList(),
                     EventStatus.EVENT_STATUS_SUSPENDED
                 )
             )
-            videoPlayerCoordinator.playVideo(
+            videoPlayerMediator.playVideo(
                 getSampleEventEntity(
                     emptyList(),
                     EventStatus.EVENT_STATUS_FINISHED
                 )
             )
-            videoPlayerCoordinator.playVideo(
+            videoPlayerMediator.playVideo(
                 getSampleEventEntity(
                     emptyList(),
                     EventStatus.EVENT_STATUS_UNSPECIFIED
@@ -447,7 +447,7 @@ class VideoPlayerCoordinatorTest {
             whenever(exoPlayer.isCurrentWindowDynamic).thenReturn(false)
 
 
-            videoPlayerCoordinator.playVideo(event)
+            videoPlayerMediator.playVideo(event)
             exoPlayerMainEventListener.onPlayerStateChanged(true, 0)
             mainWebSocketListener.onMessage(webSocket, "eventTotal;ck2343whlc43k0g90i92grc0u;17")
 
@@ -459,13 +459,13 @@ class VideoPlayerCoordinatorTest {
     fun `update viewers counter in LIVE stream, should update player view`() = runBlockingTest {
         val event = getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_SCHEDULED)
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
-        videoPlayerCoordinator.config(defaultVideoPlayerConfig())
+        videoPlayerMediator.config(defaultVideoPlayerConfig())
 
 
         whenever(exoPlayer.isCurrentWindowDynamic).thenReturn(true)
 
 
-        videoPlayerCoordinator.playVideo(event)
+        videoPlayerMediator.playVideo(event)
         exoPlayerMainEventListener.onPlayerStateChanged(true, 0)
         mainWebSocketListener.onMessage(webSocket, "eventTotal;ck2343whlc43k0g90i92grc0u;17")
 
