@@ -1,6 +1,5 @@
 package tv.mycujoo.mls.tv.player
 
-import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.ActionObject
 import tv.mycujoo.domain.entity.OverlayAct.*
 import tv.mycujoo.domain.entity.models.ActionType.*
@@ -10,9 +9,9 @@ class TvAnnotationFactory(private val tvAnnotationListener: TvAnnotationListener
 
     private lateinit var sortedActionList: List<ActionObject>
 
-    fun setAnnotations(annotationList: ActionResponse) {
+    fun setAnnotations(actionObjectList: List<ActionObject>) {
         val sortedTemp =
-            annotationList.data.map { it.toActionObject() }
+            actionObjectList
                 .sortedWith(compareBy<ActionObject> { it.offset }.thenByDescending { it.priority })
 
         val deleteActions = ArrayList<ActionObject>()
@@ -25,7 +24,6 @@ class TvAnnotationFactory(private val tvAnnotationListener: TvAnnotationListener
 
         sortedActionList =
             sortedTemp.filter { actionObject -> deleteActions.none { actionObject.id == it.id } }
-
     }
 
     fun build(currentPosition: Long, isPlaying: Boolean, interrupted: Boolean) {
@@ -46,7 +44,7 @@ class TvAnnotationFactory(private val tvAnnotationListener: TvAnnotationListener
                         ShowOverlayActionHelper.getOverlayActionCurrentAct(
                             currentPosition,
                             it,
-                            true
+                            false
                         )
                     when (act) {
                         DO_NOTHING -> {
