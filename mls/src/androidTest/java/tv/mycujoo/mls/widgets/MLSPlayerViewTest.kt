@@ -37,6 +37,7 @@ import tv.mycujoo.mls.api.defaultVideoPlayerConfig
 import tv.mycujoo.mls.core.VideoPlayerMediator
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.enum.LogLevel
+import tv.mycujoo.mls.helper.OverlayFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.manager.ViewHandler
@@ -80,7 +81,7 @@ class MLSPlayerViewTest {
 
             MLSPlayerView.idlingResource = viewHandler.idlingResource
             MLSPlayerView.prepare(
-                OverlayViewHelper(viewHandler, animationHelper),
+                OverlayViewHelper(viewHandler, OverlayFactory(), animationHelper),
                 viewHandler,
                 emptyList()
             )
@@ -98,7 +99,10 @@ class MLSPlayerViewTest {
                 TODO("Not yet implemented")
             }
 
-            override suspend fun getEventDetails(eventId: String, updateId: String?): Result<Exception, EventEntity> {
+            override suspend fun getEventDetails(
+                eventId: String,
+                updateId: String?
+            ): Result<Exception, EventEntity> {
                 TODO("Not yet implemented")
             }
 
@@ -151,7 +155,10 @@ class MLSPlayerViewTest {
 
         UiThreadStatement.runOnUiThread {
             player = Player()
-            player.create(createMediaFactory(MLSPlayerView.context), createExoPlayer(MLSPlayerView.context))
+            player.create(
+                createMediaFactory(MLSPlayerView.context),
+                createExoPlayer(MLSPlayerView.context)
+            )
 
             videoPlayerMediator = VideoPlayerMediator(
                 defaultVideoPlayerConfig(),
@@ -289,7 +296,8 @@ class MLSPlayerViewTest {
 
 
         UiThreadStatement.runOnUiThread {
-            MLSPlayerView.findViewById<ImageButton>(R.id.controller_informationButton).performClick()
+            MLSPlayerView.findViewById<ImageButton>(R.id.controller_informationButton)
+                .performClick()
         }
 
 
@@ -326,7 +334,8 @@ class MLSPlayerViewTest {
 //        organiser=Org text, start_time=2020-07-11T07:32:46Z, status=EVENT_STATUS_SCHEDULED, streams=[Stream(fullUrl=https://rendered-europe-west.mls.mycujoo.tv/shervin/ckcfwmo4g000j0131mvc1zchu/master.m3u8)],
 //        timezone=America/Los_Angeles, timeline_ids=[], metadata=tv.mycujoo.domain.entity.Metadata@ea3de11, is_test=false)
 
-            val location = Location(Physical("", "", Coordinates(0.toDouble(), 0.toDouble()), "", ""))
+            val location =
+                Location(Physical("", "", Coordinates(0.toDouble(), 0.toDouble()), "", ""))
             return EventEntity(
                 "42",
                 "",
