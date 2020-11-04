@@ -5,7 +5,11 @@ import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.ExoPlayer
 import kotlinx.coroutines.CoroutineScope
 import tv.mycujoo.domain.entity.ActionObject
+import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.helper.DownloaderClient
+import tv.mycujoo.mls.helper.OverlayFactory
+import tv.mycujoo.mls.helper.OverlayViewHelper
+import tv.mycujoo.mls.manager.ViewHandler
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
@@ -19,15 +23,23 @@ class TvAnnotationMediator(
 ) {
 
     private var tvAnnotationFactory: TvAnnotationFactory
-    private var tvAnnotationListener: TvAnnotationListener =
-        TvAnnotationListener(
-            tvOverlayContainer,
-            coroutineScope,
-            CountingIdlingResource("ViewIdentifierManager"),
-            downloaderClient
-        )
+    private var tvAnnotationListener: TvAnnotationListener
 
     init {
+        val viewHandler =
+            ViewHandler(coroutineScope, CountingIdlingResource("ViewIdentifierManager"))
+        viewHandler.setOverlayHost(tvOverlayContainer)
+
+        val overlayViewHelper =
+            OverlayViewHelper(viewHandler, OverlayFactory(), AnimationFactory())
+
+        tvAnnotationListener =
+            TvAnnotationListener(
+                tvOverlayContainer,
+                overlayViewHelper,
+                downloaderClient
+            )
+
 
         tvAnnotationFactory = TvAnnotationFactory(tvAnnotationListener)
 
