@@ -3,9 +3,48 @@ package tv.mycujoo.mls.helper
 import tv.mycujoo.domain.entity.ActionObject
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.OverlayAct
+import tv.mycujoo.domain.entity.TvOverlayAct
 
 class ShowOverlayActionHelper {
     companion object {
+
+        fun getTVOverlayActionCurrentAct(
+            currentTime: Long,
+            actionObject: ActionObject,
+            interrupted: Boolean
+        ): TvOverlayAct {
+            if (introIsInCurrentTimeRange(currentTime, actionObject)) {
+                return TvOverlayAct.INTRO
+            }
+            if (outroIsInCurrentTimeRange(currentTime, actionObject)) {
+                return TvOverlayAct.OUTRO
+            }
+            if (hasPassedDuration(currentTime, actionObject) || hasNotReached(
+                    currentTime,
+                    actionObject
+                )
+            ) {
+                return TvOverlayAct.REMOVE
+            }
+            return TvOverlayAct.DO_NOTHING
+        }
+
+        private fun hasNotReached(currentTime: Long, actionObject: ActionObject): Boolean {
+            return (actionObject.offset > currentTime) && (actionObject.offset + 1000L > currentTime)
+        }
+
+        private fun hasPassedDuration(currentTime: Long, actionObject: ActionObject): Boolean {
+            return if (actionObject.overlayRelatedData?.duration != -1L) {
+                if (actionObject.overlayRelatedData?.outroAnimationDuration != -1L) {
+                    (actionObject.offset + actionObject.overlayRelatedData?.duration!! + actionObject.overlayRelatedData.outroAnimationDuration < currentTime)
+                } else {
+                    (actionObject.offset + actionObject.overlayRelatedData.duration < currentTime)
+                }
+            } else {
+                false
+            }
+
+        }
 
         fun getOverlayActionCurrentAct(
             currentTime: Long,
@@ -23,7 +62,7 @@ class ShowOverlayActionHelper {
                 return OverlayAct.DO_NOTHING
             } else {
 
-                if (actionObject.offset < currentTime && actionObject.offset + actionObject.overlayRelatedData!!.duration > currentTime){
+                if (actionObject.offset < currentTime && actionObject.offset + actionObject.overlayRelatedData!!.duration > currentTime) {
                     return OverlayAct.LINGERING_MIDWAY
                 }
 
