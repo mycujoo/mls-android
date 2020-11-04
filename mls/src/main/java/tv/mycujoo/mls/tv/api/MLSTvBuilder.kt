@@ -1,7 +1,6 @@
 package tv.mycujoo.mls.tv.api
 
 import android.app.Activity
-import tv.mycujoo.mls.api.MLSConfiguration
 import tv.mycujoo.mls.api.MLSTVConfiguration
 import tv.mycujoo.mls.enum.LogLevel
 
@@ -39,6 +38,7 @@ class MLSTvBuilder {
             internalBuilder.reactorSocket,
             internalBuilder.dispatcher,
             internalBuilder.dataManager,
+            internalBuilder.okHttpClient,
             internalBuilder.logger
         )
     }
