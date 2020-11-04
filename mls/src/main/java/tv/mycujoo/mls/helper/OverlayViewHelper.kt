@@ -8,6 +8,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 import androidx.core.view.doOnLayout
+import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.PositionGuide
 import tv.mycujoo.domain.entity.TransitionSpec
@@ -22,8 +23,33 @@ import tv.mycujoo.mls.widgets.ScaffoldView
 
 class OverlayViewHelper(
     private val viewHandler: IViewHandler,
+    private val overlayFactory : IOverlayFactory,
     private val animationFactory: AnimationFactory
 ) {
+
+    /**region Add view*/
+    fun addView(
+        context: Context,
+        overlayHost: OverlayHost,
+        overlayEntity: OverlayEntity
+    ) {
+        if (overlayEntity.introTransitionSpec.animationType == AnimationType.NONE ||
+            overlayEntity.introTransitionSpec.animationType == AnimationType.UNSPECIFIED
+        ) {
+            addViewWithNoAnimation(
+                context,
+                overlayHost,
+                overlayEntity
+            )
+        } else {
+            addViewWithAnimation(
+                context,
+                overlayHost,
+                overlayEntity
+            )
+        }
+    }
+    /**endregion */
 
     /**region Add view with animation*/
     fun addViewWithAnimation(
@@ -35,7 +61,7 @@ class OverlayViewHelper(
 
         overlayHost.post {
             val scaffoldView =
-                OverlayFactory.createScaffoldView(
+                overlayFactory.createScaffoldView(
                     context,
                     overlayEntity,
                     viewHandler.getVariableTranslator(),
@@ -154,7 +180,7 @@ class OverlayViewHelper(
         viewHandler.incrementIdlingResource()
 
         val scaffoldView =
-            OverlayFactory.createScaffoldView(
+            overlayFactory.createScaffoldView(
                 context,
                 overlayEntity,
                 viewHandler.getVariableTranslator(),
@@ -200,6 +226,29 @@ class OverlayViewHelper(
             }
         }
 
+    }
+    /**endregion */
+
+    /**region Remove view*/
+    fun removeView(
+        overlayHost: OverlayHost,
+        overlayEntity: OverlayEntity
+    ) {
+        if (overlayEntity.outroTransitionSpec.animationType == AnimationType.NONE ||
+            overlayEntity.outroTransitionSpec.animationType == AnimationType.UNSPECIFIED
+        ) {
+            removeViewWithNoAnimation(overlayHost, overlayEntity)
+        } else {
+            removeViewWithAnimation(overlayHost, overlayEntity)
+        }
+    }
+
+    private fun removeViewWithNoAnimation(overlayHost: OverlayHost, overlayEntity: OverlayEntity) {
+        overlayHost.children.filter { it.tag == overlayEntity.id }
+            .forEach {
+                viewHandler.detachOverlayView(it as ScaffoldView)
+            }
+        viewHandler.removeAnimation(overlayEntity.id)
     }
     /**endregion */
 
@@ -297,7 +346,7 @@ class OverlayViewHelper(
         overlayHost.post {
 
             val scaffoldView =
-                OverlayFactory.createScaffoldView(
+                overlayFactory.createScaffoldView(
                     overlayHost.context,
                     overlayEntity,
                     viewHandler.getVariableTranslator(),
@@ -400,7 +449,7 @@ class OverlayViewHelper(
         overlayHost.post {
 
             val scaffoldView =
-                OverlayFactory.createScaffoldView(
+                overlayFactory.createScaffoldView(
                     overlayHost.context,
                     overlayEntity,
                     viewHandler.getVariableTranslator(),

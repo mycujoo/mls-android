@@ -42,6 +42,7 @@ class OverlayViewHelperTest {
         CountingIdlingResource("ViewIdentifierManager")
     )
 
+    private var overlayFactory = OverlayFactory()
     private var animationHelper = FakeAnimationFactory()
 
 
@@ -57,7 +58,7 @@ class OverlayViewHelperTest {
 
             playerView.idlingResource = viewHandler.idlingResource
             playerView.prepare(
-                OverlayViewHelper(viewHandler, animationHelper),
+                OverlayViewHelper(viewHandler, overlayFactory, animationHelper),
                 viewHandler,
                 emptyList()
             )
@@ -132,8 +133,14 @@ class OverlayViewHelperTest {
             )
 
         val animationRecipe = animationHelper.animationRecipe
-        assertEquals(overlayEntity.introTransitionSpec.animationType, animationRecipe?.animationType)
-        assertEquals(overlayEntity.introTransitionSpec.animationDuration, animationRecipe?.animationDuration)
+        assertEquals(
+            overlayEntity.introTransitionSpec.animationType,
+            animationRecipe?.animationType
+        )
+        assertEquals(
+            overlayEntity.introTransitionSpec.animationDuration,
+            animationRecipe?.animationDuration
+        )
     }
 
     @Test
@@ -149,8 +156,14 @@ class OverlayViewHelperTest {
             )
 
         val animationRecipe = animationHelper.animationRecipe
-        assertEquals(overlayEntity.introTransitionSpec.animationType, animationRecipe?.animationType)
-        assertEquals(overlayEntity.introTransitionSpec.animationDuration, animationRecipe?.animationDuration)
+        assertEquals(
+            overlayEntity.introTransitionSpec.animationType,
+            animationRecipe?.animationType
+        )
+        assertEquals(
+            overlayEntity.introTransitionSpec.animationDuration,
+            animationRecipe?.animationDuration
+        )
     }
 
     @Test
@@ -170,7 +183,8 @@ class OverlayViewHelperTest {
     @Test
     fun removeOverlayWithStaticAnimation_shouldMakeAnimation() {
         playerView.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
-        val overlayEntity = getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.FADE_OUT)
+        val overlayEntity =
+            getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.FADE_OUT)
 
 
         playerView.onOverlayRemovalWithAnimation(overlayEntity)
@@ -184,14 +198,21 @@ class OverlayViewHelperTest {
             )
 
         val animationRecipe = animationHelper.animationRecipe
-        assertEquals(overlayEntity.outroTransitionSpec.animationType, animationRecipe?.animationType)
-        assertEquals(overlayEntity.outroTransitionSpec.animationDuration, animationRecipe?.animationDuration)
+        assertEquals(
+            overlayEntity.outroTransitionSpec.animationType,
+            animationRecipe?.animationType
+        )
+        assertEquals(
+            overlayEntity.outroTransitionSpec.animationDuration,
+            animationRecipe?.animationDuration
+        )
     }
 
     @Test
     fun removeOverlayWithDynamicAnimation_shouldMakeAnimation() {
         playerView.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
-        val overlayEntity = getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.SLIDE_TO_LEFT)
+        val overlayEntity =
+            getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.SLIDE_TO_LEFT)
 
 
         playerView.onOverlayRemovalWithAnimation(overlayEntity)
@@ -205,8 +226,14 @@ class OverlayViewHelperTest {
             )
 
         val animationRecipe = animationHelper.animationRecipe
-        assertEquals(overlayEntity.outroTransitionSpec.animationType, animationRecipe?.animationType)
-        assertEquals(overlayEntity.outroTransitionSpec.animationDuration, animationRecipe?.animationDuration)
+        assertEquals(
+            overlayEntity.outroTransitionSpec.animationType,
+            animationRecipe?.animationType
+        )
+        assertEquals(
+            overlayEntity.outroTransitionSpec.animationDuration,
+            animationRecipe?.animationDuration
+        )
     }
 
     @Test
@@ -243,8 +270,14 @@ class OverlayViewHelperTest {
             )
 
         val animationRecipe = animationHelper.animationRecipe
-        assertEquals(overlayEntity.introTransitionSpec.animationType, animationRecipe?.animationType)
-        assertEquals(overlayEntity.introTransitionSpec.animationDuration, animationRecipe?.animationDuration)
+        assertEquals(
+            overlayEntity.introTransitionSpec.animationType,
+            animationRecipe?.animationType
+        )
+        assertEquals(
+            overlayEntity.introTransitionSpec.animationDuration,
+            animationRecipe?.animationDuration
+        )
         assertEquals(100L, animationRecipe?.animationPosition)
         assertEquals(true, animationRecipe?.isPlaying)
     }
@@ -268,8 +301,14 @@ class OverlayViewHelperTest {
             )
 
         val animationRecipe = animationHelper.animationRecipe
-        assertEquals(overlayEntity.introTransitionSpec.animationType, animationRecipe?.animationType)
-        assertEquals(overlayEntity.introTransitionSpec.animationDuration, animationRecipe?.animationDuration)
+        assertEquals(
+            overlayEntity.introTransitionSpec.animationType,
+            animationRecipe?.animationType
+        )
+        assertEquals(
+            overlayEntity.introTransitionSpec.animationDuration,
+            animationRecipe?.animationDuration
+        )
         assertEquals(100L, animationRecipe?.animationPosition)
         assertEquals(true, animationRecipe?.isPlaying)
     }
@@ -288,15 +327,22 @@ class OverlayViewHelperTest {
             )
 
         val animationRecipe = animationHelper.animationRecipe
-        assertEquals(overlayEntity.introTransitionSpec.animationType, animationRecipe?.animationType)
-        assertEquals(overlayEntity.introTransitionSpec.animationDuration, animationRecipe?.animationDuration)
+        assertEquals(
+            overlayEntity.introTransitionSpec.animationType,
+            animationRecipe?.animationType
+        )
+        assertEquals(
+            overlayEntity.introTransitionSpec.animationDuration,
+            animationRecipe?.animationDuration
+        )
         assertEquals(100L, animationRecipe?.animationPosition)
         assertEquals(true, animationRecipe?.isPlaying)
     }
 
     @Test
     fun addLingeringOutroOverlayWithAnimation_shouldMakeLingeringOutroAnimation_staticAnimation() {
-        val overlayEntity = getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.FADE_OUT)
+        val overlayEntity =
+            getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.FADE_OUT)
         playerView.addLingeringOutroOverlay(overlayEntity, 100L, true)
 
 
@@ -308,15 +354,22 @@ class OverlayViewHelperTest {
             )
 
         val animationRecipe = animationHelper.animationRecipe
-        assertEquals(overlayEntity.outroTransitionSpec.animationType, animationRecipe?.animationType)
-        assertEquals(overlayEntity.outroTransitionSpec.animationDuration, animationRecipe?.animationDuration)
+        assertEquals(
+            overlayEntity.outroTransitionSpec.animationType,
+            animationRecipe?.animationType
+        )
+        assertEquals(
+            overlayEntity.outroTransitionSpec.animationDuration,
+            animationRecipe?.animationDuration
+        )
         assertEquals(100L, animationRecipe?.animationPosition)
         assertEquals(true, animationRecipe?.isPlaying)
     }
 
     @Test
     fun addLingeringOutroOverlayWithAnimation_shouldMakeLingeringOutroAnimation_dynamicAnimation() {
-        val overlayEntity = getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.SLIDE_TO_LEFT)
+        val overlayEntity =
+            getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.SLIDE_TO_LEFT)
         playerView.addLingeringOutroOverlay(overlayEntity, 100L, true)
 
 
@@ -328,8 +381,14 @@ class OverlayViewHelperTest {
             )
 
         val animationRecipe = animationHelper.animationRecipe
-        assertEquals(overlayEntity.outroTransitionSpec.animationType, animationRecipe?.animationType)
-        assertEquals(overlayEntity.outroTransitionSpec.animationDuration, animationRecipe?.animationDuration)
+        assertEquals(
+            overlayEntity.outroTransitionSpec.animationType,
+            animationRecipe?.animationType
+        )
+        assertEquals(
+            overlayEntity.outroTransitionSpec.animationDuration,
+            animationRecipe?.animationDuration
+        )
         assertEquals(100L, animationRecipe?.animationPosition)
         assertEquals(true, animationRecipe?.isPlaying)
     }
@@ -340,7 +399,8 @@ class OverlayViewHelperTest {
         playerView.onNewOverlayWithNoAnimation(getSampleOverlayEntity())
 
 
-        val overlayEntity = getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.SLIDE_TO_LEFT)
+        val overlayEntity =
+            getSampleOverlayEntity(AnimationType.UNSPECIFIED, AnimationType.SLIDE_TO_LEFT)
         UiThreadStatement.runOnUiThread {
             playerView.updateLingeringOutroOverlay(overlayEntity, 100L, true)
         }
@@ -354,8 +414,14 @@ class OverlayViewHelperTest {
             )
 
         val animationRecipe = animationHelper.animationRecipe
-        assertEquals(overlayEntity.outroTransitionSpec.animationType, animationRecipe?.animationType)
-        assertEquals(overlayEntity.outroTransitionSpec.animationDuration, animationRecipe?.animationDuration)
+        assertEquals(
+            overlayEntity.outroTransitionSpec.animationType,
+            animationRecipe?.animationType
+        )
+        assertEquals(
+            overlayEntity.outroTransitionSpec.animationDuration,
+            animationRecipe?.animationDuration
+        )
         assertEquals(100L, animationRecipe?.animationPosition)
         assertEquals(true, animationRecipe?.isPlaying)
     }
