@@ -24,6 +24,7 @@ import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.enum.MessageLevel
 import tv.mycujoo.mls.helper.AnimationFactory
+import tv.mycujoo.mls.helper.OverlayFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mls.manager.Logger
@@ -112,7 +113,7 @@ class VideoPlayerMediator(
         player: IPlayer
     ) {
         MLSPlayerView.prepare(
-            OverlayViewHelper(viewHandler, AnimationFactory()),
+            OverlayViewHelper(viewHandler, OverlayFactory() ,AnimationFactory()),
             viewHandler,
             timelineMarkerActionEntities
         )

@@ -3,6 +3,8 @@ package tv.mycujoo.mls.tv.player
 import android.app.Activity
 import android.graphics.Color
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -26,8 +28,10 @@ import com.google.android.exoplayer2.util.Util
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import tv.mycujoo.domain.entity.EventEntity
-import tv.mycujoo.domain.entity.Result
+import okhttp3.OkHttpClient
+import tv.mycujoo.domain.entity.*
+import tv.mycujoo.domain.entity.models.ActionType
+import tv.mycujoo.domain.entity.models.ParsedOverlayRelatedData
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.api.MLSTVConfiguration
 import tv.mycujoo.mls.core.AbstractPlayerMediator
@@ -35,22 +39,26 @@ import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.enum.MessageLevel
 import tv.mycujoo.mls.helper.DateTimeHelper
+import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mls.manager.Logger
+import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackTransportControlGlueImpl
 import tv.mycujoo.mls.utils.StringUtils
 import tv.mycujoo.mls.widgets.MLSPlayerView
+import java.util.concurrent.Executors
 
 class TvVideoPlayer(
     private val activity: Activity,
     videoSupportFragment: VideoSupportFragment,
-    private val mlsTVConfiguration: MLSTVConfiguration,
+    mlsTVConfiguration: MLSTVConfiguration,
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
+    okHttpClient: OkHttpClient,
     logger: Logger
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
@@ -62,6 +70,9 @@ class TvVideoPlayer(
     private var mTransportControlGlue: MLSPlaybackTransportControlGlueImpl<LeanbackPlayerAdapter>
     private var eventInfoContainerLayout: FrameLayout
     private var controllerAgent: ControllerAgent
+
+    private var tvAnnotationMediator: TvAnnotationMediator
+    private var tvOverlayContainer: TvOverlayContainer
     /**endregion */
 
     /**region Initializing*/
@@ -80,7 +91,12 @@ class TvVideoPlayer(
         controllerAgent = ControllerAgent(player!!)
         controllerAgent.setBufferProgressBar(progressBar)
         mTransportControlGlue =
-            MLSPlaybackTransportControlGlueImpl(activity, leanbackAdapter, mlsTVConfiguration, controllerAgent)
+            MLSPlaybackTransportControlGlueImpl(
+                activity,
+                leanbackAdapter,
+                mlsTVConfiguration,
+                controllerAgent
+            )
         mTransportControlGlue.host = glueHost
         mTransportControlGlue.playWhenPrepared()
         if (mTransportControlGlue.isPrepared) {
@@ -129,6 +145,23 @@ class TvVideoPlayer(
             throw IllegalArgumentException("Fragment must be supported in a state which has active view!")
         } else {
             val rootView = videoSupportFragment.view!! as FrameLayout
+
+            tvOverlayContainer = TvOverlayContainer(rootView.context)
+            rootView.addView(
+                tvOverlayContainer,
+                2,
+                FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+            )
+
+            tvAnnotationMediator = TvAnnotationMediator(
+                player!!,
+                tvOverlayContainer,
+                Executors.newScheduledThreadPool(1),
+                Handler(Looper.getMainLooper()),
+                dispatcher,
+                DownloaderClient(okHttpClient)
+            )
+
             eventInfoContainerLayout = FrameLayout(rootView.context)
             rootView.addView(
                 eventInfoContainerLayout,
@@ -173,14 +206,43 @@ class TvVideoPlayer(
     }
 
     override fun onReactorTimelineUpdate(timelineId: String, updateId: String) {
-        // todo
+        fetchActions(timelineId, updateId, false)
+    }
+
+    private fun fetchActions(timelineId: String, updateId: String, joinTimeline: Boolean) {
+        dispatcher.launch(context = Dispatchers.Main) {
+            val result = dataManager.getActions(timelineId, updateId)
+            when (result) {
+                is Result.Success -> {
+
+                    tvAnnotationMediator.feed(result.value.data.map { it.toActionObject() })
+
+                    if (joinTimeline) {
+                        val joinTimelineParam = JoinTimelineParam(timelineId, result.value.updateId)
+                        reactorSocket.joinTimeline(joinTimelineParam)
+                    }
+
+                }
+                is Result.NetworkError -> {
+                    logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
+                }
+
+                is Result.GenericError -> {
+                    logger.log(
+                        MessageLevel.DEBUG,
+                        C.INTERNAL_ERROR_MESSAGE.plus(" ${result.errorMessage} ${result.errorCode}")
+                    )
+                }
+            }
+        }
     }
 
     /**region Playback*/
     fun playExternalSourceVideo(url: String, isHls: Boolean = true) {
         if (isHls) {
             val userAgent = Util.getUserAgent(activity, "MLS-AndroidTv-SDK")
-            val hlsFactory = HlsMediaSource.Factory(DefaultDataSourceFactory(activity, userAgent))
+            val hlsFactory =
+                HlsMediaSource.Factory(DefaultDataSourceFactory(activity, userAgent))
 
             player!!.prepare(hlsFactory.createMediaSource(Uri.parse(url)))
         } else {
@@ -210,7 +272,10 @@ class TvVideoPlayer(
 
                 }
                 is Result.NetworkError -> {
-                    logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
+                    logger.log(
+                        MessageLevel.DEBUG,
+                        C.NETWORK_ERROR_MESSAGE.plus("${result.error}")
+                    )
                 }
                 is Result.GenericError -> {
                     logger.log(
@@ -225,7 +290,8 @@ class TvVideoPlayer(
     private fun playVideoOrDisplayEventInfo(event: EventEntity) {
         if (mayPlayVideo(event)) {
             val userAgent = Util.getUserAgent(activity, "MLS-AndroidTv-SDK")
-            val hlsFactory = HlsMediaSource.Factory(DefaultDataSourceFactory(activity, userAgent))
+            val hlsFactory =
+                HlsMediaSource.Factory(DefaultDataSourceFactory(activity, userAgent))
 
             player!!.prepare(hlsFactory.createMediaSource(Uri.parse(event.streams.first().fullUrl)))
             eventInfoContainerLayout.visibility = View.GONE
