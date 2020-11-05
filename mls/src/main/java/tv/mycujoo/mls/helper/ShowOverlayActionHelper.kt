@@ -26,6 +26,14 @@ class ShowOverlayActionHelper {
             ) {
                 return TvOverlayAct.REMOVE
             }
+            if (interrupted.not()){
+                return TvOverlayAct.DO_NOTHING
+            }
+
+            if (isLingeringInIntroAnimation(currentTime, actionObject)) {
+                return TvOverlayAct.LINGERING_INTRO
+            }
+
             return TvOverlayAct.DO_NOTHING
         }
 

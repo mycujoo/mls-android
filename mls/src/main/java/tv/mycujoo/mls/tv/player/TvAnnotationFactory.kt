@@ -1,7 +1,7 @@
 package tv.mycujoo.mls.tv.player
 
 import tv.mycujoo.domain.entity.ActionObject
-import tv.mycujoo.domain.entity.TvOverlayAct
+import tv.mycujoo.domain.entity.TvOverlayAct.*
 import tv.mycujoo.domain.entity.models.ActionType.*
 import tv.mycujoo.mls.helper.ShowOverlayActionHelper
 
@@ -44,20 +44,26 @@ class TvAnnotationFactory(private val tvAnnotationListener: TvAnnotationListener
                         ShowOverlayActionHelper.getTVOverlayActionCurrentAct(
                             currentPosition,
                             it,
-                            false
+                            interrupted
                         )
                     when (act) {
-                        TvOverlayAct.DO_NOTHING -> {
+                        DO_NOTHING -> {
                             // do nothing
                         }
-                        TvOverlayAct.INTRO -> {
+                        INTRO -> {
                             tvAnnotationListener.addOverlay(it.toOverlayEntity()!!)
                         }
-                        TvOverlayAct.OUTRO,
-                        TvOverlayAct.REMOVE -> {
+                        OUTRO,
+                        REMOVE -> {
                             tvAnnotationListener.removeOverlay(it.toOverlayEntity()!!)
                         }
-
+                        LINGERING_INTRO -> {
+                            tvAnnotationListener.addOrUpdateLingeringIntroOverlay(
+                                it.toOverlayEntity()!!,
+                                currentPosition - it.toOverlayEntity()!!.introTransitionSpec.offset,
+                                isPlaying
+                            )
+                        }
                     }
                 }
                 HIDE_OVERLAY -> {

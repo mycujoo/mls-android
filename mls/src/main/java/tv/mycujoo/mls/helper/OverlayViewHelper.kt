@@ -250,7 +250,6 @@ class OverlayViewHelper(
 
     private fun removeViewWithNoAnimation(overlayHost: OverlayHost, overlayEntity: OverlayEntity) {
         removeViewWithNoAnimation(overlayHost, overlayEntity.id)
-
     }
 
     private fun removeViewWithNoAnimation(overlayHost: OverlayHost, overlayId: String) {
@@ -562,6 +561,30 @@ class OverlayViewHelper(
 
     /**endregion */
 
+    /**region Add or Update lingering view*/
+    fun addOrUpdateLingeringIntroOverlay(
+        tvOverlayContainer: TvOverlayContainer,
+        overlayEntity: OverlayEntity,
+        animationPosition: Long,
+        isPlaying: Boolean
+    ) {
+        if (viewHandler.overlayBlueprintIsAttached(overlayEntity.id)) {
+            updateLingeringIntroOverlay(
+                tvOverlayContainer,
+                overlayEntity,
+                animationPosition,
+                isPlaying
+            )
+        } else {
+            addLingeringIntroViewWithAnimation(
+                tvOverlayContainer,
+                overlayEntity,
+                animationPosition,
+                isPlaying
+            )
+        }
+    }
+    /**endregion */
 
     /**region Positioning Functions*/
     private fun applyPositionGuide(

@@ -3,6 +3,7 @@ package tv.mycujoo.mls.tv.player
 import android.os.Handler
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.Player
 import kotlinx.coroutines.CoroutineScope
 import tv.mycujoo.domain.entity.ActionObject
 import tv.mycujoo.mls.helper.AnimationFactory
@@ -24,10 +25,12 @@ class TvAnnotationMediator(
 
     private var tvAnnotationFactory: TvAnnotationFactory
     private var tvAnnotationListener: TvAnnotationListener
+    private val viewHandler :
+        ViewHandler = ViewHandler(coroutineScope, CountingIdlingResource("ViewIdentifierManager"))
+
+    private var hasPendingSeek: Boolean = false
 
     init {
-        val viewHandler =
-            ViewHandler(coroutineScope, CountingIdlingResource("ViewIdentifierManager"))
         viewHandler.setOverlayHost(tvOverlayContainer)
 
         val overlayViewHelper =
@@ -43,13 +46,46 @@ class TvAnnotationMediator(
 
         tvAnnotationFactory = TvAnnotationFactory(tvAnnotationListener)
 
+        player.addListener(object : Player.EventListener {
+            override fun onPositionDiscontinuity(reason: Int) {
+                if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+                    hasPendingSeek = true
+                }
+            }
+
+            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+                if (playbackState == Player.STATE_READY && hasPendingSeek) {
+                    hasPendingSeek = false
+
+                    tvAnnotationFactory.build(
+                        player.currentPosition,
+                        isPlaying = player.isPlaying,
+                        interrupted = true
+                    )
+                }
+
+            }
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if (isPlaying){
+                    viewHandler.getAnimations().forEach { it.resume() }
+                } else {
+                    viewHandler.getAnimations().forEach { it.pause() }
+                }
+            }
+
+            override fun onPlaybackStateChanged(state: Int) {
+
+            }
+        })
+
         val exoRunnable = Runnable {
             if (player.isPlaying) {
                 val currentPosition = player.currentPosition
 
                 tvAnnotationFactory.build(
                     currentPosition,
-                    isPlaying = player.isPlaying,
+                    isPlaying = true,
                     interrupted = false
                 )
             }
