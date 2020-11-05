@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.core
 
 import tv.mycujoo.domain.entity.AnimationType
+import tv.mycujoo.domain.entity.HideOverlayActionEntity
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mls.manager.contracts.IViewHandler
@@ -38,6 +39,9 @@ class AnnotationListener(
         }
     }
 
+    override fun removeOverlay(hideOverlayActionEntity: HideOverlayActionEntity) {
+        TODO("Not yet implemented")
+    }
 
     override fun addOrUpdateLingeringIntroOverlay(
         overlayEntity: OverlayEntity,

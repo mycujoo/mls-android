@@ -95,6 +95,18 @@ data class ActionObject(
             overlayRelatedData.variablePlaceHolders
         )
     }
+
+    fun toHideOverlayActionEntity(): HideOverlayActionEntity? {
+        if (overlayRelatedData == null) {
+            return null
+        }
+        return HideOverlayActionEntity(
+            id,
+            overlayRelatedData.id,
+            overlayRelatedData.outroAnimationType,
+            overlayRelatedData.outroAnimationDuration
+        )
+    }
     /**endregion */
 
     /**region Timer related*/

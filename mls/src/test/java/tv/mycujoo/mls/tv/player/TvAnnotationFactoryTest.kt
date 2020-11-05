@@ -7,9 +7,7 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
-import tv.mycujoo.domain.entity.ActionObject
-import tv.mycujoo.domain.entity.AnimationType
-import tv.mycujoo.domain.entity.PositionGuide
+import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.domain.entity.models.ParsedOverlayRelatedData
 
@@ -36,7 +34,7 @@ class TvAnnotationFactoryTest {
 
 
         Mockito.verify(tvAnnotationListener, never()).addOverlay(any())
-        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any())
+        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<OverlayEntity>())
     }
 
     @Test
@@ -68,7 +66,7 @@ class TvAnnotationFactoryTest {
 
 
         Mockito.verify(tvAnnotationListener).addOverlay(any())
-        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any())
+        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<OverlayEntity>())
     }
 
     @Test
@@ -100,8 +98,9 @@ class TvAnnotationFactoryTest {
 
 
         Mockito.verify(tvAnnotationListener, never()).addOverlay(any())
-        Mockito.verify(tvAnnotationListener).removeOverlay(any())
+        Mockito.verify(tvAnnotationListener).removeOverlay(any<OverlayEntity>())
     }
+
     @Test
     fun `do nothing`() {
         val parsedOverlayRelatedData = ParsedOverlayRelatedData(
@@ -131,6 +130,68 @@ class TvAnnotationFactoryTest {
 
 
         Mockito.verify(tvAnnotationListener, never()).addOverlay(any())
-        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any())
+        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<OverlayEntity>())
+    }
+
+    @Test
+    fun `hide overlay in range`() {
+        val parsedOverlayRelatedData = ParsedOverlayRelatedData(
+            "id_0",
+            "",
+            3000L,
+            PositionGuide(),
+            Pair(-1F, -1F),
+            AnimationType.NONE,
+            -1L,
+            AnimationType.NONE,
+            -1L,
+            emptyList()
+        )
+        val hideActionObject = ActionObject(
+            "id_0",
+            ActionType.HIDE_OVERLAY,
+            5000L,
+            parsedOverlayRelatedData,
+            null,
+            null
+        )
+        tvAnnotationFactory.setAnnotations(listOf(hideActionObject))
+
+        tvAnnotationFactory.build(4500L, isPlaying = true, interrupted = false)
+
+        Mockito.verify(tvAnnotationListener, never()).addOverlay(any())
+        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<OverlayEntity>())
+        Mockito.verify(tvAnnotationListener).removeOverlay(any<HideOverlayActionEntity>())
+    }
+
+    @Test
+    fun `hide overlay out of range`() {
+        val parsedOverlayRelatedData = ParsedOverlayRelatedData(
+            "id_0",
+            "",
+            3000L,
+            PositionGuide(),
+            Pair(-1F, -1F),
+            AnimationType.NONE,
+            -1L,
+            AnimationType.NONE,
+            -1L,
+            emptyList()
+        )
+        val hideActionObject = ActionObject(
+            "id_0",
+            ActionType.HIDE_OVERLAY,
+            5000L,
+            parsedOverlayRelatedData,
+            null,
+            null
+        )
+        tvAnnotationFactory.setAnnotations(listOf(hideActionObject))
+
+        tvAnnotationFactory.build(3500L, isPlaying = true, interrupted = false)
+
+        Mockito.verify(tvAnnotationListener, never()).addOverlay(any())
+        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<OverlayEntity>())
+        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<HideOverlayActionEntity>())
     }
 }

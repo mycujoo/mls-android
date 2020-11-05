@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.core
 
+import tv.mycujoo.domain.entity.HideOverlayActionEntity
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
 
@@ -7,6 +8,7 @@ interface IAnnotationListener {
 
     fun addOverlay(overlayEntity: OverlayEntity)
     fun removeOverlay(overlayEntity: OverlayEntity)
+    fun removeOverlay(hideOverlayActionEntity: HideOverlayActionEntity)
 
 
     fun addOrUpdateLingeringIntroOverlay(

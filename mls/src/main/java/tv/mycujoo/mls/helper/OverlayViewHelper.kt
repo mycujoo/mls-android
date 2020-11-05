@@ -8,22 +8,20 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 import androidx.core.view.doOnLayout
-import tv.mycujoo.domain.entity.AnimationType
-import tv.mycujoo.domain.entity.OverlayEntity
-import tv.mycujoo.domain.entity.PositionGuide
-import tv.mycujoo.domain.entity.TransitionSpec
+import tv.mycujoo.domain.entity.*
 import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasDynamicIntroAnimation
 import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasDynamicOutroAnimation
 import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasStaticIntroAnimation
 import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasStaticOutroAnimation
 import tv.mycujoo.mls.manager.contracts.IViewHandler
+import tv.mycujoo.mls.tv.player.TvOverlayContainer
 import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ProportionalImageView
 import tv.mycujoo.mls.widgets.ScaffoldView
 
 class OverlayViewHelper(
     private val viewHandler: IViewHandler,
-    private val overlayFactory : IOverlayFactory,
+    private val overlayFactory: IOverlayFactory,
     private val animationFactory: AnimationFactory
 ) {
 
@@ -243,12 +241,24 @@ class OverlayViewHelper(
         }
     }
 
+    fun removeView(
+        overlayHost: TvOverlayContainer,
+        hideOverlayActionEntity: HideOverlayActionEntity
+    ) {
+        removeViewWithNoAnimation(overlayHost, hideOverlayActionEntity.id)
+    }
+
     private fun removeViewWithNoAnimation(overlayHost: OverlayHost, overlayEntity: OverlayEntity) {
-        overlayHost.children.filter { it.tag == overlayEntity.id }
+        removeViewWithNoAnimation(overlayHost, overlayEntity.id)
+
+    }
+
+    private fun removeViewWithNoAnimation(overlayHost: OverlayHost, overlayId: String) {
+        overlayHost.children.filter { it.tag == overlayId }
             .forEach {
                 viewHandler.detachOverlayView(it as ScaffoldView)
             }
-        viewHandler.removeAnimation(overlayEntity.id)
+        viewHandler.removeAnimation(overlayId)
     }
     /**endregion */
 

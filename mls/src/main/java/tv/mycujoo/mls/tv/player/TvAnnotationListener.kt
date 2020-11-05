@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.tv.player
 
+import tv.mycujoo.domain.entity.HideOverlayActionEntity
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mls.core.IAnnotationListener
@@ -26,6 +27,10 @@ class TvAnnotationListener(
 
     override fun removeOverlay(overlayEntity: OverlayEntity) {
         overlayViewHelper.removeView(tvOverlayContainer, overlayEntity)
+    }
+
+    override fun removeOverlay(hideOverlayActionEntity: HideOverlayActionEntity) {
+        overlayViewHelper.removeView(tvOverlayContainer, hideOverlayActionEntity)
     }
 
     override fun addOrUpdateLingeringIntroOverlay(

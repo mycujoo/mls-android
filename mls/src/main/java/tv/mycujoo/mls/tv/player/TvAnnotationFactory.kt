@@ -53,15 +53,19 @@ class TvAnnotationFactory(private val tvAnnotationListener: TvAnnotationListener
                         TvOverlayAct.INTRO -> {
                             tvAnnotationListener.addOverlay(it.toOverlayEntity()!!)
                         }
-                        TvOverlayAct.OUTRO -> {
-                        }
+                        TvOverlayAct.OUTRO,
                         TvOverlayAct.REMOVE -> {
                             tvAnnotationListener.removeOverlay(it.toOverlayEntity()!!)
                         }
 
                     }
                 }
-                HIDE_OVERLAY -> TODO()
+                HIDE_OVERLAY -> {
+                    if (currentPosition + 1000L > it.offset) {
+                        tvAnnotationListener.removeOverlay(it.toHideOverlayActionEntity()!!)
+                    }
+
+                }
                 SHOW_TIMELINE_MARKER -> TODO()
                 SET_VARIABLE -> TODO()
                 INCREMENT_VARIABLE -> TODO()
