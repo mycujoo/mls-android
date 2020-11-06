@@ -10,6 +10,8 @@ import org.mockito.MockitoAnnotations
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.domain.entity.models.ParsedOverlayRelatedData
+import tv.mycujoo.mls.TestData
+import tv.mycujoo.mls.toActionObject
 
 class TvAnnotationFactoryTest {
 
@@ -131,6 +133,42 @@ class TvAnnotationFactoryTest {
 
         Mockito.verify(tvAnnotationListener, never()).addOverlay(any())
         Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<OverlayEntity>())
+    }
+
+    @Test
+    fun `add or update lingering intro overlay`() {
+
+        val actionObject =
+            TestData.sampleEntityWithIntroAnimation(AnimationType.SLIDE_FROM_LEFT).toActionObject(500L, -1L)
+        tvAnnotationFactory.setAnnotations(listOf(actionObject))
+
+
+
+
+        tvAnnotationFactory.build(600L, isPlaying = true, interrupted = true)
+
+
+        Mockito.verify(tvAnnotationListener, never()).addOverlay(any())
+        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<OverlayEntity>())
+        Mockito.verify(tvAnnotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
+        Mockito.verify(tvAnnotationListener).addOrUpdateLingeringIntroOverlay(any<OverlayEntity>(), any(), any())
+    }
+
+    @Test
+    fun `add or update lingering outro overlay`() {
+
+        val actionObject =
+            TestData.sampleEntityWithOutroAnimation(AnimationType.SLIDE_TO_LEFT).toActionObject(500L, 3000L)
+        tvAnnotationFactory.setAnnotations(listOf(actionObject))
+
+
+        tvAnnotationFactory.build(3600L, isPlaying = true, interrupted = true)
+
+
+        Mockito.verify(tvAnnotationListener, never()).addOverlay(any())
+        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<OverlayEntity>())
+        Mockito.verify(tvAnnotationListener, never()).addOrUpdateLingeringIntroOverlay(any(), any(), any())
+        Mockito.verify(tvAnnotationListener).addOrUpdateLingeringOutroOverlay(any(), any(), any())
     }
 
     @Test

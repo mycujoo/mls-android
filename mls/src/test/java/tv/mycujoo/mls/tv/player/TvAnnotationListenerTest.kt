@@ -85,4 +85,39 @@ class TvAnnotationListenerTest {
     }
 
 
+    @Test
+    fun `add or update lingering intro Overlay`() {
+        val overlayEntity = sampleEntityWithIntroAnimation(AnimationType.SLIDE_FROM_LEFT)
+
+        Mockito.`when`(downloaderClient.download(any(), any()))
+            .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
+
+
+        tvAnnotationListener.addOrUpdateLingeringIntroOverlay(overlayEntity, 500L, true)
+
+
+        Mockito.verify(overlayViewHelper)
+            .addOrUpdateLingeringIntroOverlay(tvOverlayContainer, overlayEntity, 500L, true)
+    }
+
+
+
+    @Test
+    fun `add or update lingering outro Overlay`() {
+        val overlayEntity = sampleEntityWithIntroAnimation(AnimationType.SLIDE_FROM_LEFT)
+
+        Mockito.`when`(downloaderClient.download(any(), any()))
+            .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
+
+
+        tvAnnotationListener.addOrUpdateLingeringOutroOverlay(overlayEntity, 500L, true)
+
+
+        Mockito.verify(overlayViewHelper)
+            .addOrUpdateLingeringOutroOverlay(tvOverlayContainer, overlayEntity, 500L, true)
+    }
+
+
+
+
 }

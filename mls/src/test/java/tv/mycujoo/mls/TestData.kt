@@ -9,7 +9,7 @@ class TestData {
                 "id_0",
                 null,
                 ViewSpec(null, null),
-                TransitionSpec(0L, animationType, 0L),
+                TransitionSpec(0L, animationType, 1000L),
                 TransitionSpec(-1L, AnimationType.NONE, -1L),
                 emptyList()
             )
@@ -21,7 +21,7 @@ class TestData {
                 null,
                 ViewSpec(null, null),
                 TransitionSpec(0L, AnimationType.NONE, 0L),
-                TransitionSpec(-1L, animationType, -1L),
+                TransitionSpec(0L, animationType, 1000L),
                 emptyList()
             )
         }

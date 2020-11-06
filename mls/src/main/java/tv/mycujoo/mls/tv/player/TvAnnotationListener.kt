@@ -53,7 +53,14 @@ class TvAnnotationListener(
         animationPosition: Long,
         isPlaying: Boolean
     ) {
-        TODO("Not yet implemented")
+        downloaderClient.download(overlayEntity) {
+            overlayViewHelper.addOrUpdateLingeringOutroOverlay(
+                tvOverlayContainer,
+                it,
+                animationPosition,
+                isPlaying
+            )
+        }
     }
 
     override fun addOrUpdateLingeringMidwayOverlay(overlayEntity: OverlayEntity) {

@@ -6,6 +6,10 @@ enum class TvOverlayAct {
     // regular play mode
     INTRO,
     OUTRO,
-    REMOVE
+    REMOVE,
+
+    // seek or jump play mode
+    LINGERING_INTRO,
+    LINGERING_OUTRO
 
 }

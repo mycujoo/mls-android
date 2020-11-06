@@ -64,6 +64,13 @@ class TvAnnotationFactory(private val tvAnnotationListener: TvAnnotationListener
                                 isPlaying
                             )
                         }
+                        LINGERING_OUTRO -> {
+                            tvAnnotationListener.addOrUpdateLingeringOutroOverlay(
+                                it.toOverlayEntity()!!,
+                                currentPosition - (it.toOverlayEntity()!!.outroTransitionSpec.offset + it.toOverlayEntity()!!.outroTransitionSpec.animationDuration),
+                                isPlaying
+                            )
+                        }
                     }
                 }
                 HIDE_OVERLAY -> {

@@ -561,7 +561,7 @@ class OverlayViewHelper(
 
     /**endregion */
 
-    /**region Add or Update lingering view*/
+    /**region Add or Update lingering intro view*/
     fun addOrUpdateLingeringIntroOverlay(
         tvOverlayContainer: TvOverlayContainer,
         overlayEntity: OverlayEntity,
@@ -577,6 +577,31 @@ class OverlayViewHelper(
             )
         } else {
             addLingeringIntroViewWithAnimation(
+                tvOverlayContainer,
+                overlayEntity,
+                animationPosition,
+                isPlaying
+            )
+        }
+    }
+    /**endregion */
+
+    /**region Add or Update lingering outro view*/
+    fun addOrUpdateLingeringOutroOverlay(
+        tvOverlayContainer: TvOverlayContainer,
+        overlayEntity: OverlayEntity,
+        animationPosition: Long,
+        isPlaying: Boolean
+    ) {
+        if (viewHandler.overlayBlueprintIsAttached(overlayEntity.id)) {
+            updateLingeringOutroOverlay(
+                tvOverlayContainer,
+                overlayEntity,
+                animationPosition,
+                isPlaying
+            )
+        } else {
+            addLingeringOutroViewWithAnimation(
                 tvOverlayContainer,
                 overlayEntity,
                 animationPosition,

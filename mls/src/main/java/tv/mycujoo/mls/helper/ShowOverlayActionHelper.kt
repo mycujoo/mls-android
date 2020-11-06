@@ -33,6 +33,9 @@ class ShowOverlayActionHelper {
             if (isLingeringInIntroAnimation(currentTime, actionObject)) {
                 return TvOverlayAct.LINGERING_INTRO
             }
+            if (isLingeringInOutroAnimation(currentTime, actionObject)) {
+                return TvOverlayAct.LINGERING_OUTRO
+            }
 
             return TvOverlayAct.DO_NOTHING
         }
