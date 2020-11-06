@@ -13,20 +13,20 @@ class ShowOverlayActionHelper {
             actionObject: ActionObject,
             interrupted: Boolean
         ): TvOverlayAct {
-            if (introIsInCurrentTimeRange(currentTime, actionObject)) {
-                return TvOverlayAct.INTRO
-            }
-            if (outroIsInCurrentTimeRange(currentTime, actionObject)) {
-                return TvOverlayAct.OUTRO
-            }
-            if (hasPassedDuration(currentTime, actionObject) || hasNotReached(
-                    currentTime,
-                    actionObject
-                )
-            ) {
-                return TvOverlayAct.REMOVE
-            }
-            if (interrupted.not()){
+            if (interrupted.not()) {
+                if (introIsInCurrentTimeRange(currentTime, actionObject)) {
+                    return TvOverlayAct.INTRO
+                }
+                if (outroIsInCurrentTimeRange(currentTime, actionObject)) {
+                    return TvOverlayAct.OUTRO
+                }
+                if (hasPassedDuration(currentTime, actionObject) || hasNotReached(
+                        currentTime,
+                        actionObject
+                    )
+                ) {
+                    return TvOverlayAct.REMOVE
+                }
                 return TvOverlayAct.DO_NOTHING
             }
 
@@ -35,6 +35,16 @@ class ShowOverlayActionHelper {
             }
             if (isLingeringInOutroAnimation(currentTime, actionObject)) {
                 return TvOverlayAct.LINGERING_OUTRO
+            }
+            if (isLingeringInMidway(currentTime, actionObject)) {
+                return TvOverlayAct.LINGERING_MIDWAY
+            }
+            if (hasPassedDuration(currentTime, actionObject) || hasNotReached(
+                    currentTime,
+                    actionObject
+                )
+            ) {
+                return TvOverlayAct.LINGERING_REMOVE
             }
 
             return TvOverlayAct.DO_NOTHING
@@ -72,11 +82,6 @@ class ShowOverlayActionHelper {
             if (interrupted.not()) {
                 return OverlayAct.DO_NOTHING
             } else {
-
-                if (actionObject.offset < currentTime && actionObject.offset + actionObject.overlayRelatedData!!.duration > currentTime) {
-                    return OverlayAct.LINGERING_MIDWAY
-                }
-
                 if (isLingeringInIntroAnimation(currentTime, actionObject)) {
                     return OverlayAct.LINGERING_INTRO
                 }
@@ -154,8 +159,11 @@ class ShowOverlayActionHelper {
                 if (actionObject.overlayRelatedData == null) {
                     return false
                 }
+                if (actionObject.overlayRelatedData.duration == -1L) {
+                    return false
+                }
 
-                if (actionObject.offset == -1L || actionObject.overlayRelatedData.outroAnimationDuration == 0L) {
+                if (actionObject.offset == -1L) {
                     return false
                 }
 
@@ -167,9 +175,8 @@ class ShowOverlayActionHelper {
                         actionObject.offset + actionObject.overlayRelatedData.introAnimationDuration
                 }
 
-                if (AnimationClassifierHelper.hasOutroAnimation(actionObject.overlayRelatedData.outroAnimationType)) {
-                    rightBound = actionObject.offset
-                }
+                rightBound =
+                    actionObject.offset + actionObject.overlayRelatedData.duration
 
                 return (currentTime > leftBound) && (currentTime < rightBound)
             }
@@ -198,7 +205,7 @@ class ShowOverlayActionHelper {
                 return false
             }
 
-            val leftBound = actionObject.offset
+            val leftBound = actionObject.offset + actionObject.overlayRelatedData.duration
             var rightBound =
                 actionObject.offset + actionObject.overlayRelatedData.duration + actionObject.overlayRelatedData.outroAnimationDuration
 

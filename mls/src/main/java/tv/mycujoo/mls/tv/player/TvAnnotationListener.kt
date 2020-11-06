@@ -64,11 +64,13 @@ class TvAnnotationListener(
     }
 
     override fun addOrUpdateLingeringMidwayOverlay(overlayEntity: OverlayEntity) {
-        TODO("Not yet implemented")
+        downloaderClient.download(overlayEntity) {
+            overlayViewHelper.updateLingeringMidwayOverlay(tvOverlayContainer, it)
+        }
     }
 
     override fun removeLingeringOverlay(overlayEntity: OverlayEntity) {
-        TODO("Not yet implemented")
+        overlayViewHelper.removeView(tvOverlayContainer, overlayEntity)
     }
 
     override fun setTimelineMarkers(timelineMarkerEntityList: List<TimelineMarkerEntity>) {
