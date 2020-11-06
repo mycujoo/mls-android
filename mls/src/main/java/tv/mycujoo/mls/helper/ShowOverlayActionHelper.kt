@@ -3,53 +3,9 @@ package tv.mycujoo.mls.helper
 import tv.mycujoo.domain.entity.ActionObject
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.OverlayAct
-import tv.mycujoo.domain.entity.TvOverlayAct
 
 class ShowOverlayActionHelper {
     companion object {
-
-        fun getTVOverlayActionCurrentAct(
-            currentTime: Long,
-            actionObject: ActionObject,
-            interrupted: Boolean
-        ): TvOverlayAct {
-            if (interrupted.not()) {
-                if (introIsInCurrentTimeRange(currentTime, actionObject)) {
-                    return TvOverlayAct.INTRO
-                }
-                if (outroIsInCurrentTimeRange(currentTime, actionObject)) {
-                    return TvOverlayAct.OUTRO
-                }
-                if (hasPassedDuration(currentTime, actionObject) || hasNotReached(
-                        currentTime,
-                        actionObject
-                    )
-                ) {
-                    return TvOverlayAct.REMOVE
-                }
-                return TvOverlayAct.DO_NOTHING
-            }
-
-            if (isLingeringInIntroAnimation(currentTime, actionObject)) {
-                return TvOverlayAct.LINGERING_INTRO
-            }
-            if (isLingeringInOutroAnimation(currentTime, actionObject)) {
-                return TvOverlayAct.LINGERING_OUTRO
-            }
-            if (isLingeringInMidway(currentTime, actionObject)) {
-                return TvOverlayAct.LINGERING_MIDWAY
-            }
-            if (hasPassedDuration(currentTime, actionObject) || hasNotReached(
-                    currentTime,
-                    actionObject
-                )
-            ) {
-                return TvOverlayAct.LINGERING_REMOVE
-            }
-
-            return TvOverlayAct.DO_NOTHING
-        }
-
         private fun hasNotReached(currentTime: Long, actionObject: ActionObject): Boolean {
             return (actionObject.offset > currentTime) && (actionObject.offset + 1000L > currentTime)
         }
@@ -72,31 +28,46 @@ class ShowOverlayActionHelper {
             actionObject: ActionObject,
             interrupted: Boolean
         ): OverlayAct {
-            if (introIsInCurrentTimeRange(currentTime, actionObject)) {
-                return OverlayAct.INTRO
-            }
-            if (outroIsInCurrentTimeRange(currentTime, actionObject)) {
-                return OverlayAct.OUTRO
+            if (interrupted.not()) {
+                if (introIsInCurrentTimeRange(currentTime, actionObject)) {
+                    return OverlayAct.INTRO
+                }
+                if (outroIsInCurrentTimeRange(currentTime, actionObject)) {
+                    return OverlayAct.OUTRO
+                }
+                if (hasPassedDuration(currentTime, actionObject) || hasNotReached(
+                        currentTime,
+                        actionObject
+                    )
+                ) {
+                    return OverlayAct.REMOVE
+                }
+                return OverlayAct.DO_NOTHING
             }
 
-            if (interrupted.not()) {
-                return OverlayAct.DO_NOTHING
-            } else {
-                if (isLingeringInIntroAnimation(currentTime, actionObject)) {
-                    return OverlayAct.LINGERING_INTRO
-                }
-                if (isLingeringInMidway(currentTime, actionObject)) {
-                    return OverlayAct.LINGERING_MIDWAY
-                }
-                if (isLingeringInOutroAnimation(currentTime, actionObject)) {
-                    return OverlayAct.LINGERING_OUTRO
-                } else return OverlayAct.LINGERING_REMOVE
+            if (isLingeringInIntroAnimation(currentTime, actionObject)) {
+                return OverlayAct.LINGERING_INTRO
             }
+            if (isLingeringInOutroAnimation(currentTime, actionObject)) {
+                return OverlayAct.LINGERING_OUTRO
+            }
+            if (isLingeringInMidway(currentTime, actionObject)) {
+                return OverlayAct.LINGERING_MIDWAY
+            }
+            if (hasPassedDuration(currentTime, actionObject) || hasNotReached(
+                    currentTime,
+                    actionObject
+                )
+            ) {
+                return OverlayAct.LINGERING_REMOVE
+            }
+
+            return OverlayAct.DO_NOTHING
 
 
         }
 
-        fun introIsInCurrentTimeRange(
+        private fun introIsInCurrentTimeRange(
             currentTime: Long,
             actionObject: ActionObject
         ): Boolean {
@@ -140,10 +111,13 @@ class ShowOverlayActionHelper {
                 if (actionObject.overlayRelatedData == null) {
                     return false
                 }
+                if (actionObject.overlayRelatedData.duration != -1L) {
+                    return false
+                }
 
                 // there is no outro specified at all
                 if (actionObject.overlayRelatedData.outroAnimationType == AnimationType.UNSPECIFIED || actionObject.overlayRelatedData.outroAnimationDuration == -1L) {
-                    return if (AnimationClassifierHelper.hasIntroAnimation(actionObject.overlayRelatedData.outroAnimationType)) {
+                    return if (AnimationClassifierHelper.hasOutroAnimation(actionObject.overlayRelatedData.outroAnimationType)) {
                         currentTime > actionObject.offset + actionObject.overlayRelatedData.outroAnimationDuration
                     } else {
                         currentTime > actionObject.offset

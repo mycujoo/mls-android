@@ -192,8 +192,9 @@ class AnnotationFactoryTest {
     @Test
     fun `given overlay before current time in interrupted mode, should remove it`() {
         val dataMap = buildMap<String, Any> {
+            put("duration", 1000.toDouble())
             put("animateout_type", "fade_out")
-            put("animateout_duration", 3000.toDouble())
+            put("animateout_duration", 1000.toDouble())
         }
         val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))

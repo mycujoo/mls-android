@@ -1,7 +1,7 @@
 package tv.mycujoo.mls.tv.player
 
 import tv.mycujoo.domain.entity.ActionObject
-import tv.mycujoo.domain.entity.TvOverlayAct.*
+import tv.mycujoo.domain.entity.OverlayAct.*
 import tv.mycujoo.domain.entity.models.ActionType.*
 import tv.mycujoo.mls.helper.ShowOverlayActionHelper
 
@@ -41,7 +41,7 @@ class TvAnnotationFactory(private val tvAnnotationListener: TvAnnotationListener
                 }
                 SHOW_OVERLAY -> {
                     val act =
-                        ShowOverlayActionHelper.getTVOverlayActionCurrentAct(
+                        ShowOverlayActionHelper.getOverlayActionCurrentAct(
                             currentPosition,
                             it,
                             interrupted

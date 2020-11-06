@@ -47,7 +47,8 @@ class AnnotationFactory(
             deleteActions.add(actionObject)
         }
 
-        sortedActionList = sortedTemp.filter { actionObject -> deleteActions.none { actionObject.id == it.id } }
+        sortedActionList =
+            sortedTemp.filter { actionObject -> deleteActions.none { actionObject.id == it.id } }
 
         atomicInt.decrementAndGet()
         busyCondition.signal()
@@ -77,7 +78,11 @@ class AnnotationFactory(
                 SHOW_OVERLAY -> {
 
                     val act =
-                        ShowOverlayActionHelper.getOverlayActionCurrentAct(currentPosition, it, true)
+                        ShowOverlayActionHelper.getOverlayActionCurrentAct(
+                            currentPosition,
+                            it,
+                            interrupted
+                        )
 
                     when (act) {
                         INTRO -> {
@@ -87,7 +92,8 @@ class AnnotationFactory(
                                 )
                             }
                         }
-                        OUTRO -> {
+                        OUTRO,
+                        REMOVE -> {
                             annotationListener.removeOverlay(it.toOverlayEntity()!!)
                         }
                         DO_NOTHING -> {
@@ -103,9 +109,6 @@ class AnnotationFactory(
                             }
                         }
                         LINGERING_MIDWAY -> {
-//                            if (interrupted.not()) {
-//                                return@forEach
-//                            }
                             downloaderClient.download(it.toOverlayEntity()!!) {
                                 annotationListener.addOrUpdateLingeringMidwayOverlay(
                                     it
@@ -200,7 +203,8 @@ class AnnotationFactory(
                             when (it.type) {
                                 VariableType.DOUBLE -> {
                                     if (incrementVariableEntity.amount is Double) {
-                                        initialValue = (initialValue as Double) + incrementVariableEntity.amount
+                                        initialValue =
+                                            (initialValue as Double) + incrementVariableEntity.amount
                                     }
                                     if (incrementVariableEntity.amount is Long) {
                                         initialValue =
@@ -209,10 +213,12 @@ class AnnotationFactory(
                                 }
                                 VariableType.LONG -> {
                                     if (incrementVariableEntity.amount is Double) {
-                                        initialValue = (initialValue as Long) + incrementVariableEntity.amount.toLong()
+                                        initialValue =
+                                            (initialValue as Long) + incrementVariableEntity.amount.toLong()
                                     }
                                     if (incrementVariableEntity.amount is Long) {
-                                        initialValue = (initialValue as Long) + incrementVariableEntity.amount
+                                        initialValue =
+                                            (initialValue as Long) + incrementVariableEntity.amount
                                     }
                                 }
                                 VariableType.STRING,
