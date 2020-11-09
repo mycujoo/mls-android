@@ -1,9 +1,6 @@
 package tv.mycujoo.mls.core
 
-import tv.mycujoo.domain.entity.HideOverlayActionEntity
-import tv.mycujoo.domain.entity.OverlayEntity
-import tv.mycujoo.domain.entity.SetVariableEntity
-import tv.mycujoo.domain.entity.TimelineMarkerEntity
+import tv.mycujoo.domain.entity.*
 
 interface IAnnotationListener {
 
@@ -37,6 +34,7 @@ interface IAnnotationListener {
     
     
     fun createVariable(variableEntity: SetVariableEntity)
+    fun incrementVariable(incrementVariableEntity: IncrementVariableEntity)
 
 
 }

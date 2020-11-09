@@ -106,7 +106,12 @@ class TvAnnotationFactory(private val tvAnnotationListener: TvAnnotationListener
                         }
                     }
                 }
-                INCREMENT_VARIABLE -> TODO()
+                INCREMENT_VARIABLE -> {
+                    it.toIncrementVariableEntity()?.let { incrementVariableEntity ->
+                        tvAnnotationListener.incrementVariable(incrementVariableEntity)
+                    }
+
+                }
                 CREATE_TIMER -> TODO()
                 START_TIMER -> TODO()
                 PAUSE_TIMER -> TODO()

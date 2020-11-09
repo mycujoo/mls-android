@@ -1,9 +1,6 @@
 package tv.mycujoo.mls.tv.player
 
-import tv.mycujoo.domain.entity.HideOverlayActionEntity
-import tv.mycujoo.domain.entity.OverlayEntity
-import tv.mycujoo.domain.entity.SetVariableEntity
-import tv.mycujoo.domain.entity.TimelineMarkerEntity
+import tv.mycujoo.domain.entity.*
 import tv.mycujoo.mls.core.IAnnotationListener
 import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.OverlayViewHelper
@@ -84,5 +81,9 @@ class TvAnnotationListener(
 
     override fun createVariable(variableEntity: SetVariableEntity) {
         overlayViewHelper.setVariable(variableEntity)
+    }
+
+    override fun incrementVariable(incrementVariableEntity: IncrementVariableEntity) {
+        overlayViewHelper.incrementVariable(incrementVariableEntity)
     }
 }

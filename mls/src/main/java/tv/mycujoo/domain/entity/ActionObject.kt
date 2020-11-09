@@ -278,7 +278,17 @@ data class ActionObject(
                     }
                     "amount" -> {
                         any?.let {
-                            variableAmount = it as Double
+                            when(it){
+                                is Double -> {
+                                    variableAmount = it as Double
+                                }
+                                is Long -> {
+                                    variableAmount = it as Long
+                                }
+                                else -> {
+                                    // should not happen
+                                }
+                            }
                         }
                     }
                 }

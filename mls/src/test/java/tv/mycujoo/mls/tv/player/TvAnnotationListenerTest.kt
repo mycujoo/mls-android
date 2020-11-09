@@ -146,7 +146,18 @@ class TvAnnotationListenerTest {
         val setVariableEntity = SetVariableEntity("id_0", 5000L, variable)
         tvAnnotationListener.createVariable(setVariableEntity)
 
+
         Mockito.verify(overlayViewHelper)
             .setVariable(setVariableEntity)
+    }
+
+    @Test
+    fun incrementVariable() {
+        val incrementVariableEntity = IncrementVariableEntity("id_0", 5000L, "\$awayscore", 2L)
+        tvAnnotationListener.incrementVariable(incrementVariableEntity)
+
+
+        Mockito.verify(overlayViewHelper)
+            .incrementVariable(incrementVariableEntity)
     }
 }

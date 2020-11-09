@@ -301,7 +301,30 @@ class TvAnnotationFactoryTest {
         Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<OverlayEntity>())
         Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<HideOverlayActionEntity>())
         Mockito.verify(tvAnnotationListener).createVariable(any())
+    }
 
+    @Test
+    fun `incrementVariable test`() {
+        val dataMap = buildMap<String, Any> {
+            put("name", "\$awayScore")
+            put("amount", 2L)
+        }
+        val setVariableActionObject = ActionObject(
+            "id_5",
+            ActionType.INCREMENT_VARIABLE,
+            5000L,
+            null,
+            null,
+            dataMap
+        )
+        tvAnnotationFactory.setAnnotations(listOf(setVariableActionObject))
 
+        tvAnnotationFactory.build(5000L, isPlaying = true, interrupted = false)
+
+        Mockito.verify(tvAnnotationListener, never()).addOverlay(any())
+        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<OverlayEntity>())
+        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<HideOverlayActionEntity>())
+        Mockito.verify(tvAnnotationListener, never()).createVariable(any())
+        Mockito.verify(tvAnnotationListener).incrementVariable(any())
     }
 }

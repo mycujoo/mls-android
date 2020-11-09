@@ -108,4 +108,8 @@ class AnnotationListener(
     override fun createVariable(setVariable: SetVariableEntity) {
         TODO("Not yet implemented")
     }
+
+    override fun incrementVariable(incrementVariableEntity: IncrementVariableEntity) {
+        TODO("Not yet implemented")
+    }
 }
