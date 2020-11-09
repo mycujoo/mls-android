@@ -300,7 +300,7 @@ class TvAnnotationFactoryTest {
         Mockito.verify(tvAnnotationListener, never()).addOverlay(any())
         Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<OverlayEntity>())
         Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<HideOverlayActionEntity>())
-        Mockito.verify(tvAnnotationListener).setVariable(any())
+        Mockito.verify(tvAnnotationListener).createVariable(any())
 
 
     }

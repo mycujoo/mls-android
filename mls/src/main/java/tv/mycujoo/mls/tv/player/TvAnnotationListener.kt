@@ -82,9 +82,7 @@ class TvAnnotationListener(
         TODO("Not yet implemented")
     }
 
-    override fun setVariable(setVariable: SetVariableEntity?) {
-        setVariable?.let {
-            overlayViewHelper.setVariable(setVariable)
-        }
+    override fun createVariable(variableEntity: SetVariableEntity) {
+        overlayViewHelper.setVariable(variableEntity)
     }
 }

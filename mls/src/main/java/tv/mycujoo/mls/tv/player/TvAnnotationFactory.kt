@@ -2,8 +2,11 @@ package tv.mycujoo.mls.tv.player
 
 import tv.mycujoo.domain.entity.ActionObject
 import tv.mycujoo.domain.entity.OverlayAct.*
+import tv.mycujoo.domain.entity.VariableAct.CLEAR
+import tv.mycujoo.domain.entity.VariableAct.CREATE_VARIABLE
 import tv.mycujoo.domain.entity.models.ActionType.*
 import tv.mycujoo.mls.helper.ShowOverlayActionHelper
+import tv.mycujoo.mls.helper.VariableActionHelper
 
 class TvAnnotationFactory(private val tvAnnotationListener: TvAnnotationListener) {
 
@@ -89,7 +92,19 @@ class TvAnnotationFactory(private val tvAnnotationListener: TvAnnotationListener
                 }
                 SHOW_TIMELINE_MARKER -> TODO()
                 SET_VARIABLE -> {
-                    tvAnnotationListener.setVariable(it.toSetVariable())
+                    it.toSetVariable()?.let { setVariableEntity ->
+                        val act = VariableActionHelper.getVariableCurrentAct(
+                            currentPosition,
+                            setVariableEntity
+                        )
+                        when (act) {
+                            CREATE_VARIABLE -> {
+                                tvAnnotationListener.createVariable(setVariableEntity)
+                            }
+                            CLEAR -> {
+                            }
+                        }
+                    }
                 }
                 INCREMENT_VARIABLE -> TODO()
                 CREATE_TIMER -> TODO()

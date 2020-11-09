@@ -36,7 +36,7 @@ interface IAnnotationListener {
     fun clearScreen(idList: List<String>)
     
     
-    fun setVariable(setVariable: SetVariableEntity?)
+    fun createVariable(variableEntity: SetVariableEntity)
 
 
 }

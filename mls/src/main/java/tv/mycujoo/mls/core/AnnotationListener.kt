@@ -105,7 +105,7 @@ class AnnotationListener(
         MLSPlayerView.clearScreen(idList)
     }
 
-    override fun setVariable(setVariable: SetVariableEntity?) {
+    override fun createVariable(setVariable: SetVariableEntity) {
         TODO("Not yet implemented")
     }
 }
