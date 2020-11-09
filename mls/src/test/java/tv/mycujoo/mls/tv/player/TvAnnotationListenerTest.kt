@@ -2,14 +2,14 @@ package tv.mycujoo.mls.tv.player
 
 import android.content.Context
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
-import tv.mycujoo.domain.entity.AnimationType
-import tv.mycujoo.domain.entity.OverlayEntity
+import tv.mycujoo.domain.entity.*
 import tv.mycujoo.mls.TestData.Companion.sampleEntityWithIntroAnimation
 import tv.mycujoo.mls.TestData.Companion.sampleEntityWithOutroAnimation
 import tv.mycujoo.mls.TestData.Companion.sampleHideOverlayEntity
@@ -141,6 +141,21 @@ class TvAnnotationListenerTest {
             .removeView(tvOverlayContainer, overlayEntity)
     }
 
+    @Test
+    fun setVariable() {
+        val variable = Variable("\$awayscore", VariableType.LONG, 0)
+        val setVariableEntity = SetVariableEntity("id_0", 5000L, variable)
+        tvAnnotationListener.setVariable(setVariableEntity)
 
+        Mockito.verify(overlayViewHelper)
+            .setVariable(setVariableEntity)
+    }
 
+    @Test
+    fun `setVariable with null value`() {
+        tvAnnotationListener.setVariable(null)
+
+        Mockito.verify(overlayViewHelper, never())
+            .setVariable(any())
+    }
 }

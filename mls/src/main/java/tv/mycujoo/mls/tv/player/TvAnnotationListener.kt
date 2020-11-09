@@ -2,6 +2,7 @@ package tv.mycujoo.mls.tv.player
 
 import tv.mycujoo.domain.entity.HideOverlayActionEntity
 import tv.mycujoo.domain.entity.OverlayEntity
+import tv.mycujoo.domain.entity.SetVariableEntity
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mls.core.IAnnotationListener
 import tv.mycujoo.mls.helper.DownloaderClient
@@ -79,5 +80,11 @@ class TvAnnotationListener(
 
     override fun clearScreen(idList: List<String>) {
         TODO("Not yet implemented")
+    }
+
+    override fun setVariable(setVariable: SetVariableEntity?) {
+        setVariable?.let {
+            overlayViewHelper.setVariable(setVariable)
+        }
     }
 }

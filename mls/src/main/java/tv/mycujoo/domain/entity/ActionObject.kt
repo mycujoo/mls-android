@@ -195,30 +195,62 @@ data class ActionObject(
                         any?.let { variableType = VariableType.fromValueOrNone(it as String) }
                     }
                     "double_precision" -> {
-                        any?.let { variableDoublePrecision = (it as Double).toInt() }
+                        any?.let {
+                            when (it) {
+                                is Double -> {
+                                    variableDoublePrecision = it.toInt()
+                                }
+                                is Int -> {
+                                    variableDoublePrecision = it
+                                }
+                                else -> {
+                                    // should not happen
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
 
-        when (variableType) {
-            VariableType.DOUBLE -> {
-                variableValue =
-                    rawData["value"] as? Double ?: ActionMapper.INVALID_LONG_VALUE
+        when (rawData["value"]) {
+            is Double -> {
+                when (variableType) {
+                    VariableType.DOUBLE -> {
+                        variableValue =
+                            rawData["value"] as Double
+                    }
+                    VariableType.LONG -> {
+                        variableValue =
+                            (rawData["value"] as Double).toLong()
+                    }
+                    VariableType.STRING,
+                    VariableType.UNSPECIFIED -> {
+                        // should not happen
+                    }
+                }
             }
-            VariableType.LONG -> {
-                variableValue =
-                    (rawData["value"] as? Double)?.toLong()
-                        ?: ActionMapper.INVALID_LONG_VALUE
+            is Long -> {
+                when (variableType) {
+                    VariableType.DOUBLE -> {
+                        variableValue =
+                            (rawData["value"] as Long).toDouble()
+                    }
+                    VariableType.LONG -> {
+                        variableValue =
+                            rawData["value"] as Long
+                    }
+                    VariableType.STRING,
+                    VariableType.UNSPECIFIED -> {
+                        // should not happen
+                    }
+                }
             }
-            VariableType.STRING -> {
-                variableValue =
-                    rawData["value"] as? String ?: ActionMapper.INVALID_LONG_VALUE
-            }
-            VariableType.UNSPECIFIED -> {
+            else -> {
                 // should not happen
             }
         }
+
 
         val variable = Variable(variableName, variableType, variableValue)
         return SetVariableEntity(id, offset, variable)

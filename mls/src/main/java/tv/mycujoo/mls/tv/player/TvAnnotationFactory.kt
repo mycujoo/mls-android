@@ -88,7 +88,9 @@ class TvAnnotationFactory(private val tvAnnotationListener: TvAnnotationListener
 
                 }
                 SHOW_TIMELINE_MARKER -> TODO()
-                SET_VARIABLE -> TODO()
+                SET_VARIABLE -> {
+                    tvAnnotationListener.setVariable(it.toSetVariable())
+                }
                 INCREMENT_VARIABLE -> TODO()
                 CREATE_TIMER -> TODO()
                 START_TIMER -> TODO()

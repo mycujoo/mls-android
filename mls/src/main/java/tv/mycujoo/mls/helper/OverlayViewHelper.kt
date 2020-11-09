@@ -748,4 +748,11 @@ class OverlayViewHelper(
 
 
     /**endregion */
+
+    /**region Variables*/
+    fun setVariable(variable: SetVariableEntity) {
+        viewHandler.getVariableTranslator().createVariableTripleIfNotExisted(variable.variable.name)
+        viewHandler.getVariableTranslator().emitNewValue(variable.variable.name, variable.variable.value)
+    }
+    /**endregion */
 }

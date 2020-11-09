@@ -1,9 +1,6 @@
 package tv.mycujoo.mls.core
 
-import tv.mycujoo.domain.entity.AnimationType
-import tv.mycujoo.domain.entity.HideOverlayActionEntity
-import tv.mycujoo.domain.entity.OverlayEntity
-import tv.mycujoo.domain.entity.TimelineMarkerEntity
+import tv.mycujoo.domain.entity.*
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.widgets.MLSPlayerView
 
@@ -108,4 +105,7 @@ class AnnotationListener(
         MLSPlayerView.clearScreen(idList)
     }
 
+    override fun setVariable(setVariable: SetVariableEntity?) {
+        TODO("Not yet implemented")
+    }
 }

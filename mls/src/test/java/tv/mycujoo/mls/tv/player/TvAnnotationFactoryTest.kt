@@ -13,6 +13,7 @@ import tv.mycujoo.domain.entity.models.ParsedOverlayRelatedData
 import tv.mycujoo.mls.TestData
 import tv.mycujoo.mls.toActionObject
 
+@ExperimentalStdlibApi
 class TvAnnotationFactoryTest {
 
 
@@ -274,5 +275,33 @@ class TvAnnotationFactoryTest {
         Mockito.verify(tvAnnotationListener, never()).addOverlay(any())
         Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<OverlayEntity>())
         Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<HideOverlayActionEntity>())
+    }
+
+    @Test
+    fun `setVariable test`() {
+        val dataMap = buildMap<String, Any> {
+            put("name", "\$awayScore")
+            put("value", 0)
+            put("type", "long")
+            put("double_precision", 2)
+        }
+        val setVariableActionObject = ActionObject(
+            "id_5",
+            ActionType.SET_VARIABLE,
+            5000L,
+            null,
+            null,
+            dataMap
+        )
+        tvAnnotationFactory.setAnnotations(listOf(setVariableActionObject))
+
+        tvAnnotationFactory.build(5000L, isPlaying = true, interrupted = false)
+
+        Mockito.verify(tvAnnotationListener, never()).addOverlay(any())
+        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<OverlayEntity>())
+        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<HideOverlayActionEntity>())
+        Mockito.verify(tvAnnotationListener).setVariable(any())
+
+
     }
 }
