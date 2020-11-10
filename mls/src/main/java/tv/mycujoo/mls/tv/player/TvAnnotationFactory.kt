@@ -10,8 +10,12 @@ import tv.mycujoo.domain.entity.models.ActionType.*
 import tv.mycujoo.mls.helper.ShowOverlayActionHelper
 import tv.mycujoo.mls.helper.VariableActionHelper
 import tv.mycujoo.mls.helper.VariableActionHelper.Companion.getIncrementVariableCurrentAct
+import tv.mycujoo.mls.manager.TimerKeeper
 
-class TvAnnotationFactory(private val tvAnnotationListener: TvAnnotationListener) {
+class TvAnnotationFactory(
+    private val tvAnnotationListener: TvAnnotationListener,
+    private val timerKeeper: TimerKeeper
+) {
 
     private lateinit var sortedActionList: List<ActionObject>
 
@@ -37,7 +41,10 @@ class TvAnnotationFactory(private val tvAnnotationListener: TvAnnotationListener
             return
         }
 
-        sortedActionList.forEach {
+         sortedActionList.forEach() {
+            if (currentPosition + 1000L < it.offset) {
+                return@forEach
+            }
             when (it.type) {
                 UNKNOWN -> {
                     // should not happen
@@ -124,8 +131,17 @@ class TvAnnotationFactory(private val tvAnnotationListener: TvAnnotationListener
                     }
 
                 }
-                CREATE_TIMER -> TODO()
-                START_TIMER -> TODO()
+                CREATE_TIMER -> {
+                    it.toCreateTimerEntity()?.let { createTimerEntity ->
+                        timerKeeper.createTimer(createTimerEntity)
+                    }
+                }
+                START_TIMER -> {
+                    it.toStartTimerEntity()?.let { startTimerEntity ->
+                        timerKeeper.startTimer(startTimerEntity, currentPosition)
+                        timerKeeper.notify(startTimerEntity.name)
+                    }
+                }
                 PAUSE_TIMER -> TODO()
                 ADJUST_TIMER -> TODO()
                 SKIP_TIMER -> TODO()

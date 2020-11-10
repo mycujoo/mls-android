@@ -10,7 +10,11 @@ import org.mockito.MockitoAnnotations
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.domain.entity.models.ParsedOverlayRelatedData
+import tv.mycujoo.domain.entity.models.ParsedTimerRelatedData
 import tv.mycujoo.mls.TestData
+import tv.mycujoo.mls.manager.TimerKeeper
+import tv.mycujoo.mls.model.ScreenTimerDirection
+import tv.mycujoo.mls.model.ScreenTimerFormat
 import tv.mycujoo.mls.toActionObject
 
 @ExperimentalStdlibApi
@@ -22,10 +26,16 @@ class TvAnnotationFactoryTest {
     @Mock
     lateinit var tvAnnotationListener: TvAnnotationListener
 
+    @Mock
+    lateinit var timerKeeper: TimerKeeper
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        tvAnnotationFactory = TvAnnotationFactory(tvAnnotationListener)
+        tvAnnotationFactory = TvAnnotationFactory(
+            tvAnnotationListener,
+            timerKeeper
+        )
     }
 
     @Test
@@ -327,4 +337,71 @@ class TvAnnotationFactoryTest {
         Mockito.verify(tvAnnotationListener, never()).createVariable(any())
         Mockito.verify(tvAnnotationListener).incrementVariable(any())
     }
+
+
+    @Test
+    fun `createTimer test`() {
+        val parsedTimerRelatedData = ParsedTimerRelatedData(
+            "${"$"}scoreboardTimer",
+            ScreenTimerFormat.MINUTES_SECONDS,
+            ScreenTimerDirection.UP,
+            0L,
+            1000L,
+            -1L,
+            0L
+        )
+        val createTimerActionObject = ActionObject(
+            "id_6",
+            ActionType.CREATE_TIMER,
+            5000L,
+            null,
+            parsedTimerRelatedData,
+            null
+        )
+        tvAnnotationFactory.setAnnotations(listOf(createTimerActionObject))
+
+        tvAnnotationFactory.build(5000L, isPlaying = true, interrupted = false)
+
+        Mockito.verify(tvAnnotationListener, never()).addOverlay(any())
+        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<OverlayEntity>())
+        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<HideOverlayActionEntity>())
+        Mockito.verify(tvAnnotationListener, never()).createVariable(any())
+        Mockito.verify(tvAnnotationListener, never()).incrementVariable(any())
+        Mockito.verify(timerKeeper).createTimer(any())
+    }
+
+    @Test
+    fun `startTimer test`() {
+        val parsedTimerRelatedData = ParsedTimerRelatedData(
+            "${"$"}scoreboardTimer",
+            ScreenTimerFormat.MINUTES_SECONDS,
+            ScreenTimerDirection.UP,
+            0L,
+            1000L,
+            -1L,
+            0L
+        )
+        val startTimerActionObject = ActionObject(
+            "id_6",
+            ActionType.START_TIMER,
+            5000L,
+            null,
+            parsedTimerRelatedData,
+            null
+        )
+        tvAnnotationFactory.setAnnotations(listOf(startTimerActionObject))
+
+        tvAnnotationFactory.build(5000L, isPlaying = true, interrupted = false)
+
+        Mockito.verify(tvAnnotationListener, never()).addOverlay(any())
+        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<OverlayEntity>())
+        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<HideOverlayActionEntity>())
+        Mockito.verify(tvAnnotationListener, never()).createVariable(any())
+        Mockito.verify(tvAnnotationListener, never()).incrementVariable(any())
+        Mockito.verify(timerKeeper, never()).createTimer(any())
+        Mockito.verify(timerKeeper).startTimer(any(), any())
+        Mockito.verify(timerKeeper).notify(any())
+    }
+
+
 }
