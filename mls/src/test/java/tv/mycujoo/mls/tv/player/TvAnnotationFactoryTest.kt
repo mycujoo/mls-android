@@ -403,5 +403,27 @@ class TvAnnotationFactoryTest {
         Mockito.verify(timerKeeper).notify(any())
     }
 
+    @Test
+    fun `pauseTimer test`() {
+        val pauseTimerDataMap = buildMap<String, Any> {
+            put("name", "${"$"}scoreboardTimer")
+        }
+        val pauseTimerActionObject =
+            ActionSourceData("id_1", "pause_timer", 5000L, pauseTimerDataMap).toActionObject()
+        tvAnnotationFactory.setAnnotations(listOf(pauseTimerActionObject))
+
+        tvAnnotationFactory.build(5000L, isPlaying = true, interrupted = false)
+
+        Mockito.verify(tvAnnotationListener, never()).addOverlay(any())
+        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<OverlayEntity>())
+        Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<HideOverlayActionEntity>())
+        Mockito.verify(tvAnnotationListener, never()).createVariable(any())
+        Mockito.verify(tvAnnotationListener, never()).incrementVariable(any())
+        Mockito.verify(timerKeeper, never()).createTimer(any())
+        Mockito.verify(timerKeeper, never()).startTimer(any(), any())
+        Mockito.verify(timerKeeper, never()).notify(any())
+        Mockito.verify(timerKeeper).pauseTimer(any(), any())
+    }
+
 
 }

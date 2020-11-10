@@ -142,7 +142,11 @@ class TvAnnotationFactory(
                         timerKeeper.notify(startTimerEntity.name)
                     }
                 }
-                PAUSE_TIMER -> TODO()
+                PAUSE_TIMER -> {
+                    it.toPauseTimerEntity()?.let { pauseTimerEntity ->
+                        timerKeeper.pauseTimer(pauseTimerEntity, currentPosition)
+                    }
+                }
                 ADJUST_TIMER -> TODO()
                 SKIP_TIMER -> TODO()
             }
