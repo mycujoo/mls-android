@@ -1,12 +1,15 @@
 package tv.mycujoo.mls.tv.player
 
 import tv.mycujoo.domain.entity.ActionObject
+import tv.mycujoo.domain.entity.IncrementVariableCurrentAct
+import tv.mycujoo.domain.entity.IncrementVariableCurrentAct.INCREMENT
 import tv.mycujoo.domain.entity.OverlayAct.*
 import tv.mycujoo.domain.entity.VariableAct.CLEAR
 import tv.mycujoo.domain.entity.VariableAct.CREATE_VARIABLE
 import tv.mycujoo.domain.entity.models.ActionType.*
 import tv.mycujoo.mls.helper.ShowOverlayActionHelper
 import tv.mycujoo.mls.helper.VariableActionHelper
+import tv.mycujoo.mls.helper.VariableActionHelper.Companion.getIncrementVariableCurrentAct
 
 class TvAnnotationFactory(private val tvAnnotationListener: TvAnnotationListener) {
 
@@ -108,7 +111,16 @@ class TvAnnotationFactory(private val tvAnnotationListener: TvAnnotationListener
                 }
                 INCREMENT_VARIABLE -> {
                     it.toIncrementVariableEntity()?.let { incrementVariableEntity ->
-                        tvAnnotationListener.incrementVariable(incrementVariableEntity)
+                        val act =
+                            getIncrementVariableCurrentAct(currentPosition, incrementVariableEntity)
+                        when (act) {
+                            INCREMENT -> {
+                                tvAnnotationListener.incrementVariable(incrementVariableEntity)
+                            }
+                            IncrementVariableCurrentAct.DO_NOTHING -> {
+                                // do nothing
+                            }
+                        }
                     }
 
                 }

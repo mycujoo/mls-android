@@ -2,10 +2,7 @@ package tv.mycujoo.mls.helper
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import tv.mycujoo.domain.entity.SetVariableEntity
-import tv.mycujoo.domain.entity.Variable
-import tv.mycujoo.domain.entity.VariableAct
-import tv.mycujoo.domain.entity.VariableType
+import tv.mycujoo.domain.entity.*
 
 class VariableActionHelperTest {
     @Test
@@ -28,5 +25,25 @@ class VariableActionHelperTest {
             VariableActionHelper.getVariableCurrentAct(4001L, setVariableEntity)
 
         assertEquals(VariableAct.CREATE_VARIABLE, act)
+    }
+
+    @Test
+    fun `IncrementVariableAction not reached`() {
+        val incrementVariableEntity = IncrementVariableEntity("id_0", 5000L, "\$awayscore", 2L)
+
+        val act =
+            VariableActionHelper.getIncrementVariableCurrentAct(3000L, incrementVariableEntity)
+
+        assertEquals(IncrementVariableCurrentAct.DO_NOTHING, act)
+    }
+
+    @Test
+    fun `IncrementVariableAction reached`() {
+        val incrementVariableEntity = IncrementVariableEntity("id_0", 5000L, "\$awayscore", 2L)
+
+        val act =
+            VariableActionHelper.getIncrementVariableCurrentAct(4001L, incrementVariableEntity)
+
+        assertEquals(IncrementVariableCurrentAct.INCREMENT, act)
     }
 }
