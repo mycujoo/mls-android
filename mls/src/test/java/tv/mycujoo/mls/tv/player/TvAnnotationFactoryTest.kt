@@ -1,7 +1,6 @@
 package tv.mycujoo.mls.tv.player
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.*
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -12,7 +11,11 @@ import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.domain.entity.models.ParsedOverlayRelatedData
 import tv.mycujoo.domain.entity.models.ParsedTimerRelatedData
 import tv.mycujoo.mls.TestData
+import tv.mycujoo.mls.entity.CreateTimerEntity
+import tv.mycujoo.mls.manager.ITimerHolder
 import tv.mycujoo.mls.manager.TimerKeeper
+import tv.mycujoo.mls.matcher.TimerArrayMatcher
+import tv.mycujoo.mls.model.MutablePair
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerFormat
 import tv.mycujoo.mls.toActionObject
@@ -29,12 +32,16 @@ class TvAnnotationFactoryTest {
     @Mock
     lateinit var timerKeeper: TimerKeeper
 
+    @Mock
+    lateinit var timerHolder: ITimerHolder
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         tvAnnotationFactory = TvAnnotationFactory(
             tvAnnotationListener,
-            timerKeeper
+            timerKeeper,
+            timerHolder
         )
     }
 
@@ -424,6 +431,294 @@ class TvAnnotationFactoryTest {
         Mockito.verify(timerKeeper, never()).notify(any())
         Mockito.verify(timerKeeper).pauseTimer(any(), any())
     }
+
+
+    /**region Create-Timer*/
+    @Test
+    fun `createTimer started`() {
+        val createTimerDataMap = buildMap<String, Any> {
+            put("name", "${"$"}scoreboardTimer")
+            put("format", "ms")
+            put("direction", "up")
+            put("start_value", 0L)
+            put("step", 1000L)
+            put("cap_value", -1L)
+        }
+        val createTimerActionObject =
+            ActionSourceData("id_1", "create_timer", 5000L, createTimerDataMap).toActionObject()
+        tvAnnotationFactory.setAnnotations(listOf(createTimerActionObject))
+
+
+        tvAnnotationFactory.build(5000L, isPlaying = true, interrupted = false)
+
+        val expectedResult = ArrayList<Set<MutablePair<CreateTimerEntity, String>>>()
+        expectedResult.add(
+            setOf(
+                MutablePair(
+                    CreateTimerEntity(
+                        "${"$"}scoreboardTimer",
+                        5000L,
+                        ScreenTimerFormat.MINUTES_SECONDS,
+                        ScreenTimerDirection.UP,
+                        0L,
+                        1000L,
+                        -1L
+                    ), "0"
+                )
+            )
+        )
+
+
+        Mockito.verify(timerHolder).notifyTimers(argThat(TimerArrayMatcher(expectedResult)))
+
+    }
+
+    @Test
+    fun `createTimer started multiple`() {
+        val createTimerDataMap = buildMap<String, Any> {
+            put("name", "${"$"}scoreboardTimer")
+            put("format", "ms")
+            put("direction", "up")
+            put("start_value", 0L)
+            put("step", 1000L)
+            put("cap_value", -1L)
+        }
+        val createTimerActionObject =
+            ActionSourceData("id_1", "create_timer", 5000L, createTimerDataMap).toActionObject()
+        tvAnnotationFactory.setAnnotations(listOf(createTimerActionObject))
+
+
+        tvAnnotationFactory.build(5000L, isPlaying = true, interrupted = false)
+        tvAnnotationFactory.build(5500L, isPlaying = true, interrupted = false)
+
+        val expectedResult = ArrayList<Set<MutablePair<CreateTimerEntity, String>>>()
+        expectedResult.add(
+            setOf(
+                MutablePair(
+                    CreateTimerEntity(
+                        "${"$"}scoreboardTimer",
+                        5000L,
+                        ScreenTimerFormat.MINUTES_SECONDS,
+                        ScreenTimerDirection.UP,
+                        0L,
+                        1000L,
+                        -1L
+                    ), "0"
+                )
+            )
+        )
+        Mockito.verify(timerHolder, times(2)).notifyTimers(argThat(TimerArrayMatcher(expectedResult)))
+
+    }
+
+
+    /**endregion */
+
+    /**region Start-Timer*/
+    @Test
+    fun `startTimer on time`() {
+        val createTimerDataMap = buildMap<String, Any> {
+            put("name", "${"$"}scoreboardTimer")
+            put("format", "ms")
+            put("direction", "up")
+            put("start_value", 0L)
+            put("step", 1000L)
+            put("cap_value", -1L)
+        }
+        val createTimerActionObject =
+            ActionSourceData("id_1", "create_timer", 5000L, createTimerDataMap).toActionObject()
+        val startTimerDataMap = buildMap<String, Any> {
+            put("name", "${"$"}scoreboardTimer")
+        }
+        val startTimerActionObject =
+            ActionSourceData("id_1", "start_timer", 5000L, startTimerDataMap).toActionObject()
+
+        tvAnnotationFactory.setAnnotations(listOf(createTimerActionObject, startTimerActionObject))
+
+
+        tvAnnotationFactory.build(5000L, isPlaying = true, interrupted = false)
+
+        val expectedResult = ArrayList<Set<MutablePair<CreateTimerEntity, String>>>()
+        expectedResult.add(
+            setOf(
+                MutablePair(
+                    CreateTimerEntity(
+                        "${"$"}scoreboardTimer",
+                        5000L,
+                        ScreenTimerFormat.MINUTES_SECONDS,
+                        ScreenTimerDirection.UP,
+                        0L,
+                        1000L,
+                        -1L
+                    ), "0"
+                )
+            )
+        )
+        Mockito.verify(timerHolder).notifyTimers(argThat(TimerArrayMatcher(expectedResult)))
+    }
+    @Test
+    fun `startTimer afterward`() {
+        val createTimerDataMap = buildMap<String, Any> {
+            put("name", "${"$"}scoreboardTimer")
+            put("format", "ms")
+            put("direction", "up")
+            put("start_value", 0L)
+            put("step", 1000L)
+            put("cap_value", -1L)
+        }
+        val createTimerActionObject =
+            ActionSourceData("id_1", "create_timer", 5000L, createTimerDataMap).toActionObject()
+        val startTimerDataMap = buildMap<String, Any> {
+            put("name", "${"$"}scoreboardTimer")
+        }
+        val startTimerActionObject =
+            ActionSourceData("id_1", "start_timer", 5000L, startTimerDataMap).toActionObject()
+
+        tvAnnotationFactory.setAnnotations(listOf(createTimerActionObject, startTimerActionObject))
+
+
+        tvAnnotationFactory.build(6000L, isPlaying = true, interrupted = false)
+
+        val expectedResult = ArrayList<Set<MutablePair<CreateTimerEntity, String>>>()
+        expectedResult.add(
+            setOf(
+                MutablePair(
+                    CreateTimerEntity(
+                        "${"$"}scoreboardTimer",
+                        5000L,
+                        ScreenTimerFormat.MINUTES_SECONDS,
+                        ScreenTimerDirection.UP,
+                        0L,
+                        1000L,
+                        -1L
+                    ), "1000"
+                )
+            )
+        )
+        Mockito.verify(timerHolder).notifyTimers(argThat(TimerArrayMatcher(expectedResult)))
+    }
+
+    /**endregion */
+
+
+    /**region Adjust-Timer*/
+    @Test
+    fun `adjustTimer on time`() {
+        val createTimerDataMap = buildMap<String, Any> {
+            put("name", "${"$"}scoreboardTimer")
+            put("format", "ms")
+            put("direction", "up")
+            put("start_value", 0L)
+            put("step", 1000L)
+            put("cap_value", -1L)
+        }
+        val createTimerActionObject =
+            ActionSourceData("id_1", "create_timer", 5000L, createTimerDataMap).toActionObject()
+
+        val startTimerDataMap = buildMap<String, Any> {
+            put("name", "${"$"}scoreboardTimer")
+        }
+        val startTimerActionObject =
+            ActionSourceData("id_1", "start_timer", 5000L, startTimerDataMap).toActionObject()
+
+        val adjustTimerDataMap = buildMap<String, Any> {
+            put("name", "${"$"}scoreboardTimer")
+            put("value", 42000L)
+        }
+        val adjustTimerActionObject =
+            ActionSourceData("id_1", "adjust_timer", 5000L, adjustTimerDataMap).toActionObject()
+
+        tvAnnotationFactory.setAnnotations(
+            listOf(
+                createTimerActionObject,
+                startTimerActionObject,
+                adjustTimerActionObject
+            )
+        )
+
+
+        tvAnnotationFactory.build(5000L, isPlaying = true, interrupted = false)
+
+
+        val expectedResult = ArrayList<Set<MutablePair<CreateTimerEntity, String>>>()
+        expectedResult.add(
+            setOf(
+                MutablePair(
+                    CreateTimerEntity(
+                        "${"$"}scoreboardTimer",
+                        5000L,
+                        ScreenTimerFormat.MINUTES_SECONDS,
+                        ScreenTimerDirection.UP,
+                        0L,
+                        1000L,
+                        -1L
+                    ), "42000"
+                )
+            )
+        )
+        Mockito.verify(timerHolder).notifyTimers(argThat(TimerArrayMatcher(expectedResult)))
+
+    }
+
+    @Test
+    fun `adjustTimer afterward`() {
+        val createTimerDataMap = buildMap<String, Any> {
+            put("name", "${"$"}scoreboardTimer")
+            put("format", "ms")
+            put("direction", "up")
+            put("start_value", 0L)
+            put("step", 1000L)
+            put("cap_value", -1L)
+        }
+        val createTimerActionObject =
+            ActionSourceData("id_1", "create_timer", 5000L, createTimerDataMap).toActionObject()
+
+        val startTimerDataMap = buildMap<String, Any> {
+            put("name", "${"$"}scoreboardTimer")
+        }
+        val startTimerActionObject =
+            ActionSourceData("id_1", "start_timer", 5000L, startTimerDataMap).toActionObject()
+
+        val adjustTimerDataMap = buildMap<String, Any> {
+            put("name", "${"$"}scoreboardTimer")
+            put("value", 42000L)
+        }
+        val adjustTimerActionObject =
+            ActionSourceData("id_1", "adjust_timer", 5000L, adjustTimerDataMap).toActionObject()
+
+        tvAnnotationFactory.setAnnotations(
+            listOf(
+                createTimerActionObject,
+                startTimerActionObject,
+                adjustTimerActionObject
+            )
+        )
+
+
+        tvAnnotationFactory.build(10000L, isPlaying = true, interrupted = false)
+
+
+        val expectedResult = ArrayList<Set<MutablePair<CreateTimerEntity, String>>>()
+        expectedResult.add(
+            setOf(
+                MutablePair(
+                    CreateTimerEntity(
+                        "${"$"}scoreboardTimer",
+                        5000L,
+                        ScreenTimerFormat.MINUTES_SECONDS,
+                        ScreenTimerDirection.UP,
+                        0L,
+                        1000L,
+                        -1L
+                    ), "47000"
+                )
+            )
+        )
+        Mockito.verify(timerHolder).notifyTimers(argThat(TimerArrayMatcher(expectedResult)))
+
+    }
+
+    /**endregion */
 
 
 }
