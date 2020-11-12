@@ -11,15 +11,12 @@ import tv.mycujoo.mls.entity.CreateTimerEntity
 import tv.mycujoo.mls.helper.ShowOverlayActionHelper
 import tv.mycujoo.mls.helper.VariableActionHelper
 import tv.mycujoo.mls.helper.VariableActionHelper.Companion.getIncrementVariableCurrentAct
-import tv.mycujoo.mls.manager.ITimerHolder
 import tv.mycujoo.mls.manager.TimerKeeper
-import tv.mycujoo.mls.manager.contracts.TimerHelper
 import tv.mycujoo.mls.model.MutablePair
 
 class TvAnnotationFactory(
     private val tvAnnotationListener: TvAnnotationListener,
-    private val timerKeeper: TimerKeeper,
-    private val timerHolder: ITimerHolder
+    private val timerKeeper: TimerKeeper
 ) {
 
     private lateinit var sortedActionList: List<ActionObject>
@@ -45,8 +42,7 @@ class TvAnnotationFactory(
         if (this::sortedActionList.isInitialized.not()) {
             return
         }
-
-        val timers: ArrayList<Set<MutablePair<CreateTimerEntity, String>>> = ArrayList()
+        val timers: HashMap<String, MutablePair<CreateTimerEntity, String>> = HashMap()
 
         sortedActionList.forEach() {
             if (currentPosition + 1000L < it.offset) {
@@ -141,57 +137,32 @@ class TvAnnotationFactory(
                 CREATE_TIMER -> {
                     it.toCreateTimerEntity()?.let { createTimerEntity ->
                         timerKeeper.createTimer(createTimerEntity)
-                        val set = setOf(
-                            MutablePair(
-                                createTimerEntity,
-                                createTimerEntity.startValue.toString()
-                            )
-                        )
-                        timers.add(set)
                     }
 
                 }
                 START_TIMER -> {
                     it.toStartTimerEntity()?.let { startTimerEntity ->
                         timerKeeper.startTimer(startTimerEntity, currentPosition)
-                        timerKeeper.notify(startTimerEntity.name)
-
-                        timers.forEach { set ->
-                            set.filter { p -> p.first.name == (startTimerEntity.name) }
-                                .forEach { pair ->
-                                    pair.second = TimerHelper.start(startTimerEntity, pair, currentPosition)
-                                }
-                        }
                     }
                 }
                 PAUSE_TIMER -> {
                     it.toPauseTimerEntity()?.let { pauseTimerEntity ->
                         timerKeeper.pauseTimer(pauseTimerEntity, currentPosition)
-
-                        timers.forEach { set ->
-                            set.filter { p -> p.first.name == (pauseTimerEntity.name) }
-                                .forEach { pair ->
-                                    pair.second = TimerHelper.pause(pauseTimerEntity, pair, currentPosition)
-                                }
-                        }
-
                     }
                 }
                 ADJUST_TIMER -> {
                     it.toAdjustTimerEntity()?.let { adjustTimerEntity ->
-
-                        timers.forEach { set ->
-                            set.filter { p -> p.first.name == (adjustTimerEntity.name) }
-                                .forEach { pair ->
-                                    pair.second = TimerHelper.adjust(adjustTimerEntity, pair, currentPosition)
-                                }
-                        }
+                        timerKeeper.adjustTimer(adjustTimerEntity, currentPosition)
                     }
                 }
-                SKIP_TIMER -> TODO()
+                SKIP_TIMER -> {
+                    it.toSkipTimerEntity()?.let {skipTimerEntity ->
+                        timerKeeper.skipTimer(skipTimerEntity)
+                    }
+                }
             }
         }
 
-        timerHolder.notifyTimers(timers)
+        timerKeeper.notify(timers)
     }
 }

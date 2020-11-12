@@ -113,7 +113,7 @@ class DataMapper {
             var startValue = INVALID_LONG_VALUE
             var step = INVALID_LONG_VALUE
             var capValue = INVALID_LONG_VALUE
-            var value = INVALID_LONG_VALUE
+            var value = 0L
 
             rawDataMap.let { data ->
                 data.keys.forEach { key ->
@@ -129,17 +129,65 @@ class DataMapper {
                         "direction" -> {
                             any?.let { direction = ScreenTimerDirection.fromValue(it as String) }
                         }
-                        "startValue" -> {
-                            any?.let { startValue = (it as Double).toLong() }
+                        "start_value" -> {
+                            any?.let {
+                                when (it) {
+                                    is Double -> {
+                                        startValue = it.toLong()
+                                    }
+                                    is Long -> {
+                                        startValue = it
+                                    }
+                                    else -> {
+                                        // should not happen
+                                    }
+                                }
+                            }
                         }
                         "step" -> {
-                            any?.let { step = (it as Double).toLong() }
+                            any?.let {
+                                when (it) {
+                                    is Double -> {
+                                        step = it.toLong()
+                                    }
+                                    is Long -> {
+                                        step = it
+                                    }
+                                    else -> {
+                                        // should not happen
+                                    }
+                                }
+                            }
                         }
                         "cap_value" -> {
-                            any?.let { capValue = (it as Double).toLong() }
+                            any?.let {
+                                when (it) {
+                                    is Double -> {
+                                        capValue = it.toLong()
+                                    }
+                                    is Long -> {
+                                        capValue = it
+                                    }
+                                    else -> {
+                                        // should not happen
+                                    }
+                                }
+                            }
                         }
                         "value" -> {
-                            any?.let { value = (it as Double).toLong() }
+                            any?.let {
+                                when (it) {
+                                    is Double -> {
+                                        value = it.toLong()
+                                    }
+                                    is Long -> {
+                                        value = it
+                                    }
+                                    else -> {
+                                        // should not happen
+                                    }
+                                }
+                            }
                         }
                         else -> {
                         }

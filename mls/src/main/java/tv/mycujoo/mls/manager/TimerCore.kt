@@ -28,7 +28,8 @@ class TimerCore(
     private val capValue: Long
 ) {
     private var currentTime = startValue
-    private var isAlive = false
+    private var isAlive = true
+    private var isTicking = true
     private val step: Long
 
 
@@ -109,6 +110,9 @@ class TimerCore(
         startTimerEntity: StartTimerEntity,
         now: Long
     ) {
+        if (isTicking.not()){
+            return
+        }
         isAlive = true
         when (direction) {
             UP -> {
@@ -125,11 +129,14 @@ class TimerCore(
 
     }
 
-    fun setTime(pauseTimerEntity: PauseTimerEntity) {
-        // todo
+    fun setTime(pauseTimerEntity: PauseTimerEntity, now: Long) {
+        isTicking = false
     }
 
     fun setTime(adjustTimerEntity: AdjustTimerEntity, now: Long) {
+        if (isTicking.not()){
+            return
+        }
         isAlive = true
         val passedTimeFromAdjust = now - adjustTimerEntity.offset
         currentTime = (passedTimeFromAdjust / 1000L) * step
@@ -137,6 +144,9 @@ class TimerCore(
     }
 
     fun setTime(skipTimerEntity: SkipTimerEntity) {
+        if (isTicking.not()){
+            return
+        }
         isAlive = true
         currentTime += skipTimerEntity.value
     }

@@ -2,6 +2,7 @@ package tv.mycujoo.mls.manager.contracts
 
 import tv.mycujoo.mls.entity.AdjustTimerEntity
 import tv.mycujoo.mls.entity.CreateTimerEntity
+import tv.mycujoo.mls.entity.PauseTimerEntity
 import tv.mycujoo.mls.entity.StartTimerEntity
 import tv.mycujoo.mls.model.MutablePair
 import tv.mycujoo.mls.model.ScreenTimerDirection
@@ -49,6 +50,14 @@ class TimerHelper {
             }
 
             return currentTime.toString()
+        }
+
+        fun pause(
+            pauseTimerEntity: PauseTimerEntity,
+            pair: MutablePair<CreateTimerEntity, String>,
+            now: Long
+        ): String {
+            return pauseTimerEntity.offset.toString()
         }
     }
 

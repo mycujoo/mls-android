@@ -37,14 +37,13 @@ class OverlayFactory : IOverlayFactory {
             variableTranslator.getValue(entry)?.let {
                 scaffoldView.initialVariables(Pair(entry, it))
             }
+
+            timerKeeper.getTimerRelayList().firstOrNull { it.timerCore.name == entry }?.let {
+                timerKeeper.observe(entry) { scaffoldView.onVariableUpdated(it) }
+
+                scaffoldView.initialVariables(Pair(entry, timerKeeper.getValue(entry)))
+            }
         }
-
-        overlayEntity.variablePlaceHolders.forEach { entry ->
-            timerKeeper.observe(entry) { scaffoldView.onVariableUpdated(it) }
-
-            scaffoldView.initialVariables(Pair(entry, timerKeeper.getValue(entry)))
-        }
-
 
         try {
             val svg: SVG

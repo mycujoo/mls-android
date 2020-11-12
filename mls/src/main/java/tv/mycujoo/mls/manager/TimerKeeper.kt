@@ -5,10 +5,16 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import tv.mycujoo.mls.entity.*
+import tv.mycujoo.mls.model.MutablePair
+import java.util.HashMap
 
 class TimerKeeper(private val dispatcher: CoroutineScope) : ITimerKeeper {
 
     private val timerRelayList = ArrayList<TimerTwin>()
+
+    override fun getTimerRelayList(): List<TimerTwin>{
+        return timerRelayList
+    }
 
     fun createTimer(createTimerEntity: CreateTimerEntity) {
         val timerRelay = TimerTwin(
@@ -57,7 +63,7 @@ class TimerKeeper(private val dispatcher: CoroutineScope) : ITimerKeeper {
 
     fun pauseTimer(pauseTimerEntity: PauseTimerEntity, currentTime: Long) {
         timerRelayList.firstOrNull { it.timerCore.name == pauseTimerEntity.name }?.let { timerTwin ->
-            timerTwin.timerCore.setTime(pauseTimerEntity)
+            timerTwin.timerCore.setTime(pauseTimerEntity, currentTime)
         }
     }
 
@@ -93,5 +99,12 @@ class TimerKeeper(private val dispatcher: CoroutineScope) : ITimerKeeper {
             }
     }
 
+    override fun notify(timers: HashMap<String, MutablePair<CreateTimerEntity, String>>) {
+        timerRelayList.forEach { timerTwin ->
+            timers[timerTwin.timerCore.name]?.let { pair ->
+                timerTwin.timerRelay.accept(pair.second)
 
+            }
+        }
+    }
 }
