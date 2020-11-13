@@ -7,12 +7,11 @@ import tv.mycujoo.domain.entity.OverlayAct.*
 import tv.mycujoo.domain.entity.VariableAct.CLEAR
 import tv.mycujoo.domain.entity.VariableAct.CREATE_VARIABLE
 import tv.mycujoo.domain.entity.models.ActionType.*
-import tv.mycujoo.mls.entity.CreateTimerEntity
 import tv.mycujoo.mls.helper.ShowOverlayActionHelper
 import tv.mycujoo.mls.helper.VariableActionHelper
 import tv.mycujoo.mls.helper.VariableActionHelper.Companion.getIncrementVariableCurrentAct
 import tv.mycujoo.mls.manager.TimerKeeper
-import tv.mycujoo.mls.model.MutablePair
+import tv.mycujoo.mls.manager.TimerVariable
 
 class TvAnnotationFactory(
     private val tvAnnotationListener: TvAnnotationListener,
@@ -42,7 +41,8 @@ class TvAnnotationFactory(
         if (this::sortedActionList.isInitialized.not()) {
             return
         }
-        val timers: HashMap<String, MutablePair<CreateTimerEntity, String>> = HashMap()
+        val timerVariables: HashMap<String, TimerVariable> = HashMap()
+
 
         sortedActionList.forEach() {
             if (currentPosition + 1000L < it.offset) {
@@ -136,33 +136,50 @@ class TvAnnotationFactory(
                 }
                 CREATE_TIMER -> {
                     it.toCreateTimerEntity()?.let { createTimerEntity ->
-                        timerKeeper.createTimer(createTimerEntity)
+                        timerKeeper.createTimerPublisher(createTimerEntity.name)
+
+                        timerVariables[createTimerEntity.name] =
+                            TimerVariable(
+                                createTimerEntity.name,
+                                createTimerEntity.format,
+                                createTimerEntity.direction,
+                                createTimerEntity.startValue,
+                                createTimerEntity.capValue
+                            )
                     }
 
                 }
                 START_TIMER -> {
                     it.toStartTimerEntity()?.let { startTimerEntity ->
-                        timerKeeper.startTimer(startTimerEntity, currentPosition)
+                        timerVariables[startTimerEntity.name]?.let { timerVariable ->
+                            timerVariable.start(startTimerEntity, currentPosition)
+                        }
                     }
                 }
                 PAUSE_TIMER -> {
                     it.toPauseTimerEntity()?.let { pauseTimerEntity ->
-                        timerKeeper.pauseTimer(pauseTimerEntity, currentPosition)
+                        timerVariables[pauseTimerEntity.name]?.let { timerVariable ->
+                            timerVariable.pause(pauseTimerEntity, currentPosition)
+                        }
                     }
                 }
                 ADJUST_TIMER -> {
                     it.toAdjustTimerEntity()?.let { adjustTimerEntity ->
-                        timerKeeper.adjustTimer(adjustTimerEntity, currentPosition)
+                        timerVariables[adjustTimerEntity.name]?.let { timerVariable ->
+                            timerVariable.adjust(adjustTimerEntity, currentPosition)
+                        }
                     }
                 }
                 SKIP_TIMER -> {
-                    it.toSkipTimerEntity()?.let {skipTimerEntity ->
-                        timerKeeper.skipTimer(skipTimerEntity)
+                    it.toSkipTimerEntity()?.let { skipTimerEntity ->
+                        timerVariables[skipTimerEntity.name]?.let { timerVariable ->
+                            timerVariable.skip(skipTimerEntity, currentPosition)
+                        }
                     }
                 }
             }
         }
 
-        timerKeeper.notify(timers)
+        timerKeeper.notify(timerVariables)
     }
 }
