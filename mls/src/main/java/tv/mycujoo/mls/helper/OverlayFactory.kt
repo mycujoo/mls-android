@@ -38,9 +38,10 @@ class OverlayFactory : IOverlayFactory {
                 scaffoldView.initialVariables(Pair(entry, it))
             }
 
-            timerKeeper.getTimerRelayList().firstOrNull { it.timerCore.name == entry }?.let {
+            timerKeeper.getTimerNames().firstOrNull {
+                it == entry
+            }?.let {
                 timerKeeper.observe(entry) { scaffoldView.onVariableUpdated(it) }
-
                 scaffoldView.initialVariables(Pair(entry, timerKeeper.getValue(entry)))
             }
         }

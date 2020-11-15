@@ -1,19 +1,39 @@
 package tv.mycujoo.mls.manager
 
-import android.util.Log
 import com.jakewharton.rxrelay3.BehaviorRelay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import tv.mycujoo.mls.entity.*
-import tv.mycujoo.mls.model.MutablePair
-import java.util.HashMap
 
 class TimerKeeper(private val dispatcher: CoroutineScope) : ITimerKeeper {
 
     private val timerRelayList = ArrayList<TimerTwin>()
+    private val timerPublisherMap = HashMap<String, BehaviorRelay<String>>()
 
-    override fun getTimerRelayList(): List<TimerTwin>{
+    override fun getTimerRelayList(): List<TimerTwin> {
         return timerRelayList
+    }
+
+    override fun getTimerNames(): List<String> {
+        return timerPublisherMap.keys.toList()
+    }
+
+    fun createTimerPublisher(name: String) {
+        if (timerPublisherMap.containsKey(name)) {
+            return
+        }
+        timerPublisherMap[name] = (BehaviorRelay.createDefault(""))
+    }
+
+    override fun observe(timerName: String, callback: (Pair<String, String>) -> Unit) {
+        dispatcher.launch {
+            timerPublisherMap[timerName]?.let { behaviorRelay ->
+                behaviorRelay.subscribe {
+                    callback.invoke(Pair(timerName, it))
+                }
+            }
+        }
+
     }
 
     fun createTimer(createTimerEntity: CreateTimerEntity) {
@@ -32,21 +52,9 @@ class TimerKeeper(private val dispatcher: CoroutineScope) : ITimerKeeper {
         timerRelayList.add(timerRelay)
     }
 
-    override fun observe(timerName: String, callback: (Pair<String, String>) -> Unit) {
-        dispatcher.launch {
-            timerRelayList.firstOrNull { it.timerCore.name == timerName }
-                ?.let { timerTwin ->
-                    timerTwin.timerRelay.subscribe {
-                        callback.invoke(Pair(timerName, timerTwin.timerCore.getFormattedTime()))
-                    }
-                }
-        }
-    }
-
 
     override fun getValue(name: String): String {
-        return timerRelayList.firstOrNull { it.timerCore.name == name }?.timerCore?.getFormattedTime()
-            ?: ""
+        return timerPublisherMap[name]?.value ?: ""
     }
 
     /**region Using commands [Entities]*/
@@ -62,9 +70,10 @@ class TimerKeeper(private val dispatcher: CoroutineScope) : ITimerKeeper {
     }
 
     fun pauseTimer(pauseTimerEntity: PauseTimerEntity, currentTime: Long) {
-        timerRelayList.firstOrNull { it.timerCore.name == pauseTimerEntity.name }?.let { timerTwin ->
-            timerTwin.timerCore.setTime(pauseTimerEntity, currentTime)
-        }
+        timerRelayList.firstOrNull { it.timerCore.name == pauseTimerEntity.name }
+            ?.let { timerTwin ->
+                timerTwin.timerCore.setTime(pauseTimerEntity, currentTime)
+            }
     }
 
 
@@ -84,7 +93,6 @@ class TimerKeeper(private val dispatcher: CoroutineScope) : ITimerKeeper {
 
 
     fun killTimer(timerName: String) {
-        Log.d("TimeKeeper", "killTimer() for $timerName")
         dispatcher.launch {
             timerRelayList.firstOrNull { it.timerCore.name == timerName }?.let { timerTwin ->
                 timerTwin.timerCore.kill()
@@ -99,12 +107,12 @@ class TimerKeeper(private val dispatcher: CoroutineScope) : ITimerKeeper {
             }
     }
 
-    override fun notify(timers: HashMap<String, MutablePair<CreateTimerEntity, String>>) {
-        timerRelayList.forEach { timerTwin ->
-            timers[timerTwin.timerCore.name]?.let { pair ->
-                timerTwin.timerRelay.accept(pair.second)
-
+    override fun notify(timerVariables: HashMap<String, TimerVariable>) {
+        timerPublisherMap.forEach { e ->
+            timerVariables[e.key]?.let { timerVariable ->
+                e.value.accept(timerVariable.getTime())
             }
         }
+
     }
 }
