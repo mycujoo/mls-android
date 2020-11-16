@@ -11,7 +11,18 @@
     android:focusable="true"
     android:tag="event_info_dialog">
 
+    <ImageView
+        android:id="@+id/eventInfoPreEventDialog_posterView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/eventInfoPreEventDialog_canvasView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@color/black"

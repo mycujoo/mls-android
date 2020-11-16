@@ -9,16 +9,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import android.widget.ImageButton
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
 import androidx.annotation.MainThread
 import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.test.espresso.idling.CountingIdlingResource
+import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.PlayerView
@@ -63,6 +61,7 @@ class MLSPlayerView @JvmOverloads constructor(
 
     private lateinit var viewHandler: IViewHandler
 
+    private var eventPosterUrl: String? = null
     private lateinit var eventInfoTitle: String
     private lateinit var eventInfoDescription: String
     private lateinit var eventDateTime: String
@@ -481,6 +480,10 @@ class MLSPlayerView @JvmOverloads constructor(
     /**endregion */
 
     /**region Event Info related functions*/
+    fun setPosterInfo(posterUrl: String?) {
+        eventPosterUrl = posterUrl
+    }
+
     fun setEventInfo(title: String, description: String, startTime: String) {
         eventInfoTitle = title
         eventInfoDescription = description
@@ -496,10 +499,23 @@ class MLSPlayerView @JvmOverloads constructor(
                     .inflate(R.layout.dialog_event_info_pre_event_layout, this, false)
             eventInfoDialogContainerLayout.addView(informationDialog)
 
-            informationDialog.eventInfoPreEventDialog_titleTextView.text = eventInfoTitle
-            informationDialog.informationDialog_bodyTextView.text = eventInfoDescription
-            informationDialog.informationDialog_dateTimeTextView.text =
-                DateTimeHelper.getDateTime(eventDateTime)
+            if (eventPosterUrl != null) {
+                informationDialog.eventInfoPreEventDialog_posterView.visibility = View.VISIBLE
+                informationDialog.eventInfoPreEventDialog_canvasView.visibility = View.GONE
+
+                Glide.with(informationDialog.eventInfoPreEventDialog_posterView)
+                    .load(eventPosterUrl)
+                    .into(informationDialog.eventInfoPreEventDialog_posterView as ImageView)
+            } else {
+                informationDialog.eventInfoPreEventDialog_canvasView.visibility = View.VISIBLE
+                informationDialog.eventInfoPreEventDialog_posterView.visibility = View.GONE
+
+                informationDialog.eventInfoPreEventDialog_titleTextView.text = eventInfoTitle
+                informationDialog.informationDialog_bodyTextView.text = eventInfoDescription
+                informationDialog.informationDialog_dateTimeTextView.text =
+                    DateTimeHelper.getDateTime(eventDateTime)
+            }
+
 
         }
 

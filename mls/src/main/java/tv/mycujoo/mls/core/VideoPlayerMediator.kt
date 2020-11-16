@@ -304,6 +304,7 @@ class VideoPlayerMediator(
 
     private fun playVideoOrDisplayEventInfo(event: EventEntity) {
         playerView.setEventInfo(event.title, event.description, event.start_time)
+        playerView.setPosterInfo(event.poster_url)
         if (videoPlayerConfig.showEventInfoButton) {
             playerView.showEventInfoButton()
         } else {

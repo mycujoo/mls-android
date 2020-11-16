@@ -208,7 +208,7 @@ class MLSPlayerViewTest {
     }
 
     @Test
-    fun displayEventInfoForPreEvent_shouldDisplayEventInfo() {
+    fun displayEventInfoForPreEvent_shouldDisplayEventInfoWithData() {
         MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
@@ -217,6 +217,26 @@ class MLSPlayerViewTest {
 
         onView(withText("title_0")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
         onView(withText("desc_0")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+    }
+
+    @Test
+    fun displayEventInfoForPreEvent_shouldDisplayEventInfoWithPoster() {
+        MLSPlayerView.setPosterInfo("sample_url")
+
+
+        MLSPlayerView.showEventInformationPreEventDialog()
+
+
+        onView(withId(R.id.eventInfoPreEventDialog_posterView)).check(
+            matches(
+                withEffectiveVisibility(Visibility.VISIBLE)
+            )
+        )
+        onView(withId(R.id.eventInfoPreEventDialog_canvasView)).check(
+            matches(
+                withEffectiveVisibility(Visibility.GONE)
+            )
+        )
     }
 
     @Test
