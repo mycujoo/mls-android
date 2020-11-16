@@ -10,11 +10,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.leanback.app.VideoSupportFragment
 import androidx.leanback.app.VideoSupportFragmentGlueHost
 import androidx.leanback.media.PlaybackGlue
+import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
@@ -87,7 +90,7 @@ class TvVideoPlayer(
         val layoutParams = FrameLayout.LayoutParams(120, 120)
         layoutParams.gravity = Gravity.CENTER
         progressBar.visibility = View.GONE
-        (videoSupportFragment.view!! as FrameLayout).addView(progressBar, layoutParams)
+        (videoSupportFragment.requireView() as FrameLayout).addView(progressBar, layoutParams)
         controllerAgent = ControllerAgent(player!!)
         controllerAgent.setBufferProgressBar(progressBar)
         mTransportControlGlue =
@@ -144,7 +147,7 @@ class TvVideoPlayer(
         if (videoSupportFragment.view == null) {
             throw IllegalArgumentException("Fragment must be supported in a state which has active view!")
         } else {
-            val rootView = videoSupportFragment.view!! as FrameLayout
+            val rootView = videoSupportFragment.requireView() as FrameLayout
 
             tvOverlayContainer = TvOverlayContainer(rootView.context)
             rootView.addView(
@@ -296,7 +299,12 @@ class TvVideoPlayer(
             player!!.prepare(hlsFactory.createMediaSource(Uri.parse(event.streams.first().fullUrl)))
             eventInfoContainerLayout.visibility = View.GONE
         } else {
-            displayPreEventInformationLayout(event.title, event.description, event.start_time)
+        displayPreEventInformationLayout(
+            event.poster_url,
+            event.title,
+            event.description,
+            event.start_time
+        )
         }
     }
 
@@ -304,6 +312,7 @@ class TvVideoPlayer(
 
     /**region Event-information layout*/
     private fun displayPreEventInformationLayout(
+        posterUrl: String?,
         title: String,
         description: String,
         startTime: String
@@ -320,12 +329,25 @@ class TvVideoPlayer(
                 )
         eventInfoContainerLayout.addView(informationLayout)
 
-        informationLayout.findViewById<TextView>(R.id.eventInfoPreEventDialog_titleTextView).text =
-            title
-        informationLayout.findViewById<TextView>(R.id.informationDialog_bodyTextView).text =
-            description
-        informationLayout.findViewById<TextView>(R.id.informationDialog_dateTimeTextView).text =
-            DateTimeHelper.getDateTime(startTime)
+
+        if (posterUrl != null) {
+        val posterImageView =
+            informationLayout.findViewById<ImageView>(R.id.eventInfoPreEventDialog_posterView)
+        val canvasView =
+            informationLayout.findViewById<ConstraintLayout>(R.id.eventInfoPreEventDialog_canvasView)
+        Glide.with(posterImageView).load(posterUrl)
+            .into(posterImageView)
+
+        posterImageView.visibility = View.VISIBLE
+        canvasView.visibility = View.GONE
+        } else {
+            informationLayout.findViewById<TextView>(R.id.eventInfoPreEventDialog_titleTextView).text =
+                title
+            informationLayout.findViewById<TextView>(R.id.informationDialog_bodyTextView).text =
+                description
+            informationLayout.findViewById<TextView>(R.id.informationDialog_dateTimeTextView).text =
+                DateTimeHelper.getDateTime(startTime)
+        }
     }
     /**endregion */
 }
