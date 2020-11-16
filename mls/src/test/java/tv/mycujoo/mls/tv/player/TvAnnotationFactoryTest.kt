@@ -1,6 +1,9 @@
 package tv.mycujoo.mls.tv.player
 
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.argThat
+import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.never
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -11,11 +14,9 @@ import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.domain.entity.models.ParsedOverlayRelatedData
 import tv.mycujoo.domain.entity.models.ParsedTimerRelatedData
 import tv.mycujoo.mls.TestData
-import tv.mycujoo.mls.entity.CreateTimerEntity
-import tv.mycujoo.mls.manager.ITimerHolder
 import tv.mycujoo.mls.manager.TimerKeeper
-import tv.mycujoo.mls.matcher.TimerArrayMatcher
-import tv.mycujoo.mls.model.MutablePair
+import tv.mycujoo.mls.manager.TimerVariable
+import tv.mycujoo.mls.matcher.TimerMapMatcher
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerFormat
 import tv.mycujoo.mls.toActionObject
@@ -32,16 +33,14 @@ class TvAnnotationFactoryTest {
     @Mock
     lateinit var timerKeeper: TimerKeeper
 
-    @Mock
-    lateinit var timerHolder: ITimerHolder
+    val timerKeeperArgumentCaptor = argumentCaptor<TimerKeeper>()
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         tvAnnotationFactory = TvAnnotationFactory(
             tvAnnotationListener,
-            timerKeeper,
-            timerHolder
+            timerKeeper
         )
     }
 
@@ -374,7 +373,6 @@ class TvAnnotationFactoryTest {
         Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<HideOverlayActionEntity>())
         Mockito.verify(tvAnnotationListener, never()).createVariable(any())
         Mockito.verify(tvAnnotationListener, never()).incrementVariable(any())
-        Mockito.verify(timerKeeper).createTimer(any())
     }
 
     @Test
@@ -407,7 +405,6 @@ class TvAnnotationFactoryTest {
         Mockito.verify(tvAnnotationListener, never()).incrementVariable(any())
         Mockito.verify(timerKeeper, never()).createTimer(any())
         Mockito.verify(timerKeeper).startTimer(any(), any())
-        Mockito.verify(timerKeeper).notify(any())
     }
 
     @Test
@@ -428,7 +425,6 @@ class TvAnnotationFactoryTest {
         Mockito.verify(tvAnnotationListener, never()).incrementVariable(any())
         Mockito.verify(timerKeeper, never()).createTimer(any())
         Mockito.verify(timerKeeper, never()).startTimer(any(), any())
-        Mockito.verify(timerKeeper, never()).notify(any())
         Mockito.verify(timerKeeper).pauseTimer(any(), any())
     }
 
@@ -451,26 +447,12 @@ class TvAnnotationFactoryTest {
 
         tvAnnotationFactory.build(5000L, isPlaying = true, interrupted = false)
 
-        val expectedResult = ArrayList<Set<MutablePair<CreateTimerEntity, String>>>()
-        expectedResult.add(
-            setOf(
-                MutablePair(
-                    CreateTimerEntity(
-                        "${"$"}scoreboardTimer",
-                        5000L,
-                        ScreenTimerFormat.MINUTES_SECONDS,
-                        ScreenTimerDirection.UP,
-                        0L,
-                        1000L,
-                        -1L
-                    ), "0"
-                )
-            )
+        val expectedResult = HashMap<String, TimerVariable>()
+        expectedResult["${"$"}scoreboardTimer"] = TimerVariable(
+            "${"$"}scoreboardTimer", ScreenTimerFormat.MINUTES_SECONDS,
+            ScreenTimerDirection.UP, 0L, -1L
         )
-
-
-        Mockito.verify(timerHolder).notifyTimers(argThat(TimerArrayMatcher(expectedResult)))
-
+        Mockito.verify(timerKeeper).notify(argThat(TimerMapMatcher(expectedResult)))
     }
 
     @Test
@@ -491,24 +473,13 @@ class TvAnnotationFactoryTest {
         tvAnnotationFactory.build(5000L, isPlaying = true, interrupted = false)
         tvAnnotationFactory.build(5500L, isPlaying = true, interrupted = false)
 
-        val expectedResult = ArrayList<Set<MutablePair<CreateTimerEntity, String>>>()
-        expectedResult.add(
-            setOf(
-                MutablePair(
-                    CreateTimerEntity(
-                        "${"$"}scoreboardTimer",
-                        5000L,
-                        ScreenTimerFormat.MINUTES_SECONDS,
-                        ScreenTimerDirection.UP,
-                        0L,
-                        1000L,
-                        -1L
-                    ), "0"
-                )
-            )
-        )
-        Mockito.verify(timerHolder, times(2)).notifyTimers(argThat(TimerArrayMatcher(expectedResult)))
 
+        val expectedResult = HashMap<String, TimerVariable>()
+        expectedResult["${"$"}scoreboardTimer"] = TimerVariable(
+            "${"$"}scoreboardTimer", ScreenTimerFormat.MINUTES_SECONDS,
+            ScreenTimerDirection.UP, 0L, -1L
+        )
+        Mockito.verify(timerKeeper).notify(argThat(TimerMapMatcher(expectedResult)))
     }
 
 
@@ -538,24 +509,15 @@ class TvAnnotationFactoryTest {
 
         tvAnnotationFactory.build(5000L, isPlaying = true, interrupted = false)
 
-        val expectedResult = ArrayList<Set<MutablePair<CreateTimerEntity, String>>>()
-        expectedResult.add(
-            setOf(
-                MutablePair(
-                    CreateTimerEntity(
-                        "${"$"}scoreboardTimer",
-                        5000L,
-                        ScreenTimerFormat.MINUTES_SECONDS,
-                        ScreenTimerDirection.UP,
-                        0L,
-                        1000L,
-                        -1L
-                    ), "0"
-                )
-            )
+        val expectedResult = HashMap<String, TimerVariable>()
+        expectedResult["${"$"}scoreboardTimer"] = TimerVariable(
+            "${"$"}scoreboardTimer", ScreenTimerFormat.MINUTES_SECONDS,
+            ScreenTimerDirection.UP, 0L, -1L
         )
-        Mockito.verify(timerHolder).notifyTimers(argThat(TimerArrayMatcher(expectedResult)))
+
+        Mockito.verify(timerKeeper).notify(argThat(TimerMapMatcher(expectedResult)))
     }
+
     @Test
     fun `startTimer afterward`() {
         val createTimerDataMap = buildMap<String, Any> {
@@ -579,23 +541,14 @@ class TvAnnotationFactoryTest {
 
         tvAnnotationFactory.build(6000L, isPlaying = true, interrupted = false)
 
-        val expectedResult = ArrayList<Set<MutablePair<CreateTimerEntity, String>>>()
-        expectedResult.add(
-            setOf(
-                MutablePair(
-                    CreateTimerEntity(
-                        "${"$"}scoreboardTimer",
-                        5000L,
-                        ScreenTimerFormat.MINUTES_SECONDS,
-                        ScreenTimerDirection.UP,
-                        0L,
-                        1000L,
-                        -1L
-                    ), "1000"
-                )
-            )
+        val expectedResult = HashMap<String, TimerVariable>()
+        expectedResult["${"$"}scoreboardTimer"] = TimerVariable(
+            "${"$"}scoreboardTimer", ScreenTimerFormat.MINUTES_SECONDS,
+            ScreenTimerDirection.UP, 1000L, -1L
         )
-        Mockito.verify(timerHolder).notifyTimers(argThat(TimerArrayMatcher(expectedResult)))
+
+
+        Mockito.verify(timerKeeper).notify(argThat(TimerMapMatcher(expectedResult)))
     }
 
     /**endregion */
@@ -639,25 +592,14 @@ class TvAnnotationFactoryTest {
 
         tvAnnotationFactory.build(5000L, isPlaying = true, interrupted = false)
 
-
-        val expectedResult = ArrayList<Set<MutablePair<CreateTimerEntity, String>>>()
-        expectedResult.add(
-            setOf(
-                MutablePair(
-                    CreateTimerEntity(
-                        "${"$"}scoreboardTimer",
-                        5000L,
-                        ScreenTimerFormat.MINUTES_SECONDS,
-                        ScreenTimerDirection.UP,
-                        0L,
-                        1000L,
-                        -1L
-                    ), "42000"
-                )
-            )
+        val expectedResult = HashMap<String, TimerVariable>()
+        expectedResult["${"$"}scoreboardTimer"] = TimerVariable(
+            "${"$"}scoreboardTimer", ScreenTimerFormat.MINUTES_SECONDS,
+            ScreenTimerDirection.UP, 42000L, -1L
         )
-        Mockito.verify(timerHolder).notifyTimers(argThat(TimerArrayMatcher(expectedResult)))
 
+
+        Mockito.verify(timerKeeper).notify(argThat(TimerMapMatcher(expectedResult)))
     }
 
     @Test
@@ -697,25 +639,13 @@ class TvAnnotationFactoryTest {
 
         tvAnnotationFactory.build(10000L, isPlaying = true, interrupted = false)
 
-
-        val expectedResult = ArrayList<Set<MutablePair<CreateTimerEntity, String>>>()
-        expectedResult.add(
-            setOf(
-                MutablePair(
-                    CreateTimerEntity(
-                        "${"$"}scoreboardTimer",
-                        5000L,
-                        ScreenTimerFormat.MINUTES_SECONDS,
-                        ScreenTimerDirection.UP,
-                        0L,
-                        1000L,
-                        -1L
-                    ), "47000"
-                )
-            )
+        val expectedResult = HashMap<String, TimerVariable>()
+        expectedResult["${"$"}scoreboardTimer"] = TimerVariable(
+            "${"$"}scoreboardTimer", ScreenTimerFormat.MINUTES_SECONDS,
+            ScreenTimerDirection.UP, 47000, -1L
         )
-        Mockito.verify(timerHolder).notifyTimers(argThat(TimerArrayMatcher(expectedResult)))
 
+        Mockito.verify(timerKeeper).notify(argThat(TimerMapMatcher(expectedResult)))
     }
 
     /**endregion */
