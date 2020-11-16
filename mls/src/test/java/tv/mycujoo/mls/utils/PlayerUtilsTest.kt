@@ -56,6 +56,7 @@ class PlayerUtilsTest {
                 "event_title",
                 "event_desc",
                 "",
+                null,
                 location,
                 "",
                 "",

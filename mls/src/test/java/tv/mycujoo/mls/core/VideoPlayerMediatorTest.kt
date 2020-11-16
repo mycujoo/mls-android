@@ -549,6 +549,7 @@ class VideoPlayerMediatorTest {
                 "",
                 "",
                 "",
+                null,
                 location,
                 "",
                 "",

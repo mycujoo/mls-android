@@ -341,6 +341,7 @@ class MLSPlayerViewTest {
                 "",
                 "",
                 "",
+                null,
                 location,
                 "",
                 "",

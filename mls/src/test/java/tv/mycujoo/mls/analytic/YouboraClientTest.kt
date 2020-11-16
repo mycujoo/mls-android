@@ -96,6 +96,7 @@ class YouboraClientTest {
                 "",
                 "",
                 "",
+                null,
                 location,
                 "",
                 "",

@@ -206,6 +206,7 @@ class VideoPlayerTest {
             "",
             "",
             "",
+            null,
             location,
             "",
             "",
