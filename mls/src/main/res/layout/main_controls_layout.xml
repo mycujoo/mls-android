@@ -271,6 +271,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_marginRight="4dp"
                     android:background="#80000000"
                     android:visibility="gone"
                     tools:visibility="visible">
@@ -328,6 +329,20 @@
                         android:layout_marginEnd="8dp"
                         android:background="@android:color/transparent"
                         android:src="@drawable/ic_fullscreen_24dp" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/controller_castImageButtonContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <ImageButton
+                        android:id="@+id/controller_castImageButton"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@android:color/transparent"
+                        android:src="@drawable/ic_cast_24" />
                 </FrameLayout>
 
             </LinearLayout>

@@ -282,6 +282,7 @@ class MLSPlayerView @JvmOverloads constructor(
             showBackForwardsButtons(config.showBackForwardsButtons)
             showSeekBar(config.showSeekBar)
             showFullScreenButton(config.showFullScreenButton)
+            showCastButton(config.showCastButton)
             showTimers(config.showTimers)
 
 
@@ -340,6 +341,16 @@ class MLSPlayerView @JvmOverloads constructor(
                 VISIBLE
         } else {
             findViewById<FrameLayout>(R.id.controller_fullscreenImageButtonContainer).visibility =
+                View.GONE
+        }
+    }
+
+    private fun showCastButton(showCastButton: Boolean) {
+        if (showCastButton) {
+            findViewById<FrameLayout>(R.id.controller_castImageButtonContainer).visibility =
+                VISIBLE
+        } else {
+            findViewById<FrameLayout>(R.id.controller_castImageButtonContainer).visibility =
                 View.GONE
         }
     }

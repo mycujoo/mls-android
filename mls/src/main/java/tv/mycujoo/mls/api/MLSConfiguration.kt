@@ -21,6 +21,7 @@ fun defaultVideoPlayerConfig(): VideoPlayerConfig {
         showTimers = true,
         showFullScreenButton = false,
         showLiveViewers = true,
-        showEventInfoButton = true
+        showEventInfoButton = true,
+        showCastButton = false
     )
 }
