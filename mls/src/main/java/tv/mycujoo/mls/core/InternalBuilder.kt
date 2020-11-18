@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.res.AssetManager
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.gms.cast.framework.CastContext
 import com.npaw.youbora.lib6.YouboraLog
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Options
@@ -49,6 +50,8 @@ open class InternalBuilder(private val activity: Activity, private val logLevel:
     lateinit var reactorSocket: IReactorSocket
     private lateinit var mainWebSocketListener: MainWebSocketListener
 
+    lateinit var castContext: CastContext
+
     var uuid: String? = null
 
 
@@ -64,6 +67,7 @@ open class InternalBuilder(private val activity: Activity, private val logLevel:
         mainWebSocketListener = MainWebSocketListener()
         reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener)
 
+        castContext = CastContext.getSharedInstance(activity)
     }
 
     fun getAssetManager(): AssetManager = activity.assets

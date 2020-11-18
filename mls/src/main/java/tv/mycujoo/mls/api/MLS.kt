@@ -90,6 +90,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
             internalBuilder.dispatcher,
             dataManager,
             emptyList(),
+            internalBuilder.castContext,
             internalBuilder.logger
         )
 
@@ -164,9 +165,12 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         if (Util.SDK_INT < Build.VERSION_CODES.N) {
             initializePlayerView(MLSPlayerView)
         }
+        videoPlayerMediator.onResume()
     }
 
     override fun onPause() {
+        videoPlayerMediator.onPause()
+
         if (Util.SDK_INT < Build.VERSION_CODES.N) {
             release()
         }

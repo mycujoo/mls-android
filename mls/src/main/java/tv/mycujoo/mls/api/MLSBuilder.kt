@@ -50,7 +50,6 @@ open class MLSBuilder {
 
 
     open fun build(): MLS {
-
         internalBuilder = InternalBuilder(activity!!, mlsConfiguration.logLevel)
         internalBuilder.initialize()
 

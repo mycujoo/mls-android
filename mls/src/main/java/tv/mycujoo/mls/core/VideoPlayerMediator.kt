@@ -1,11 +1,19 @@
 package tv.mycujoo.mls.core
 
 import android.app.Activity
+import android.util.Log
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.ui.TimeBar
+import com.google.android.gms.cast.MediaInfo
+import com.google.android.gms.cast.MediaLoadRequestData
+import com.google.android.gms.cast.MediaMetadata
+import com.google.android.gms.cast.framework.CastContext
+import com.google.android.gms.cast.framework.CastSession
+import com.google.android.gms.cast.framework.SessionManagerListener
+import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.npaw.youbora.lib6.plugin.Options
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +27,7 @@ import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.VideoPlayer
+import tv.mycujoo.mls.cast.MediaItem
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.enum.C
@@ -33,6 +42,10 @@ import tv.mycujoo.mls.mediator.AnnotationMediator
 import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.player.IPlayer
+import tv.mycujoo.mls.player.PlaybackLocation
+import tv.mycujoo.mls.player.PlaybackLocation.LOCAL
+import tv.mycujoo.mls.player.PlaybackLocation.REMOTE
+import tv.mycujoo.mls.player.PlaybackState
 import tv.mycujoo.mls.player.Player.Companion.createExoPlayer
 import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
 import tv.mycujoo.mls.utils.StringUtils
@@ -45,12 +58,10 @@ class VideoPlayerMediator(
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     private val timelineMarkerActionEntities: List<TimelineMarkerEntity>,
+    private val castContext: CastContext,
     logger: Logger
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
-
-    private var joined: Boolean = false
-    private var updateId: String? = null
 
     /**region Fields*/
     private lateinit var player: IPlayer
@@ -62,13 +73,28 @@ class VideoPlayerMediator(
     private lateinit var youboraClient: YouboraClient
     private var logged = false
 
+    private var joined: Boolean = false
+    private var updateId: String? = null
     private lateinit var streamUrlPullJob: Job
+
+    private var castSession: CastSession? = null
+    private lateinit var sessionManagerListener: SessionManagerListener<CastSession>
+    private var mediaItem: MediaItem? = null
+    private var playbackState: PlaybackState = PlaybackState.IDLE
+    private var playbackLocation: PlaybackLocation = LOCAL
+
     /**endregion */
 
     /**region Initialization*/
+    init {
+        initCastListener()
+        castSession = castContext.sessionManager.currentCastSession
+    }
+
     fun initialize(MLSPlayerView: MLSPlayerView, player: IPlayer, builder: MLSBuilder) {
         this.playerView = MLSPlayerView
         this.player = player
+
 
         player.getDirectInstance()?.let {
             videoPlayer = VideoPlayer(it, this, MLSPlayerView)
@@ -101,6 +127,7 @@ class VideoPlayerMediator(
             }
 
             initPlayerViewWrapper(MLSPlayerView, player)
+            initCastListener()
         }
     }
 
@@ -113,7 +140,7 @@ class VideoPlayerMediator(
         player: IPlayer
     ) {
         MLSPlayerView.prepare(
-            OverlayViewHelper(viewHandler, OverlayFactory() ,AnimationFactory()),
+            OverlayViewHelper(viewHandler, OverlayFactory(), AnimationFactory()),
             viewHandler,
             timelineMarkerActionEntities
         )
@@ -168,6 +195,79 @@ class VideoPlayerMediator(
 
         MLSPlayerView.config(videoPlayerConfig)
     }
+
+    private fun initCastListener() {
+        sessionManagerListener = object : SessionManagerListener<CastSession> {
+            override fun onSessionStarting(session: CastSession?) {
+            }
+
+            override fun onSessionStarted(session: CastSession?, sessionId: String?) {
+                onApplicationConnected(session);
+            }
+
+            override fun onSessionStartFailed(session: CastSession?, error: Int) {
+                onApplicationDisconnected()
+            }
+
+            override fun onSessionResuming(session: CastSession?, sessionId: String?) {
+            }
+
+            override fun onSessionResumed(session: CastSession?, wasSuspended: Boolean) {
+                onApplicationConnected(session)
+            }
+
+
+            override fun onSessionResumeFailed(session: CastSession?, error: Int) {
+                onApplicationDisconnected()
+            }
+
+            override fun onSessionSuspended(session: CastSession?, reason: Int) {
+            }
+
+            override fun onSessionEnding(session: CastSession?) {
+            }
+
+            override fun onSessionEnded(session: CastSession?, error: Int) {
+                onApplicationDisconnected()
+            }
+
+            private fun onApplicationConnected(theSession: CastSession?) {
+                requireNotNull(theSession)
+                castSession = theSession
+                if (mediaItem != null) {
+                    if (playbackState == PlaybackState.PLAYING) {
+                        player.pause()
+                        loadRemoteMedia(player.currentPosition())
+                        return
+                    } else {
+                        playbackState = PlaybackState.IDLE
+                        updatePlaybackLocation(REMOTE)
+                    }
+                }
+            }
+
+
+            private fun onApplicationDisconnected() {
+                updatePlaybackLocation(LOCAL)
+                playbackState = PlaybackState.IDLE
+            }
+
+        }
+    }
+
+
+    fun onResume() {
+        castContext.sessionManager.addSessionManagerListener(
+            sessionManagerListener, CastSession::class.java
+        )
+    }
+
+    fun onPause() {
+        castContext.sessionManager.removeSessionManagerListener(
+            sessionManagerListener, CastSession::class.java
+        )
+    }
+
 
     fun reInitialize(MLSPlayerView: MLSPlayerView) {
         player.create(
@@ -271,6 +371,7 @@ class VideoPlayerMediator(
     /**region Playback functions*/
     override fun playVideo(event: EventEntity) {
         playVideo(event.id)
+        updateMediaItem(event)
     }
 
     override fun playVideo(eventId: String) {
@@ -313,6 +414,7 @@ class VideoPlayerMediator(
 
         if (mayPlayVideo(event)) {
             logged = false
+            updateMediaItem(event)
 
             play(event.streams.first())
             playerView.hideEventInfoDialog()
@@ -337,6 +439,63 @@ class VideoPlayerMediator(
     }
     /**endregion */
 
+    /**region Cast*/
+    private fun loadRemoteMedia(currentPosition: Long) {
+        if (castSession == null || mediaItem == null) {
+            Log.e("VideoPlayerMediator", "castSession or media-item is null")
+            return
+        }
+        val remoteMediaClient: RemoteMediaClient = castSession!!.remoteMediaClient
+            ?: return
+
+
+        remoteMediaClient.load(
+            MediaLoadRequestData.Builder()
+                .setMediaInfo(buildMediaInfo(mediaItem!!.url, player.duration()))
+                .setAutoplay(true)
+                .setCurrentTime(currentPosition).build()
+        )
+
+    }
+
+    private fun buildMediaInfo(url: String, duration: Long): MediaInfo {
+        val movieMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE)
+//        movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, mSelectedMedia.getStudio())
+        movieMetadata.putString(MediaMetadata.KEY_TITLE, "test title")
+//        movieMetadata.addImage(WebImage(Uri.parse(mSelectedMedia.getImage(0))))
+//        movieMetadata.addImage(WebImage(Uri.parse(mSelectedMedia.getImage(1))))
+        return MediaInfo.Builder(url)
+            .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+            .setContentType("videos/mp4")
+            .setMetadata(movieMetadata)
+            .setStreamDuration(duration)
+            .build()
+    }
+
+    private fun updatePlaybackLocation(location: PlaybackLocation) {
+        playbackLocation = location
+        when (playbackLocation) {
+            LOCAL -> {
+                if (playbackState == PlaybackState.PLAYING || playbackState == PlaybackState.BUFFERING) {
+                } else {
+
+                }
+            }
+            REMOTE -> {
+
+            }
+        }
+    }
+
+    private fun updateMediaItem(eventEntity: EventEntity) {
+        eventEntity.streams.firstOrNull()?.fullUrl?.let { url ->
+            mediaItem = MediaItem(url)
+        }
+
+    }
+
+
+    /**endregion */
 
     /**region Reactor function*/
     private fun fetchActions(event: EventEntity, updateId: String) {

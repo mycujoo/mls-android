@@ -139,6 +139,12 @@ class Player : IPlayer {
 
     }
 
+    override fun pause() {
+        exoPlayer?.let {
+            it.playWhenReady = false
+        }
+    }
+
     override fun loadLastVideo() {
         if (licenseUrl != null) {
             play(uri.toString(), licenseUrl.toString(), false)

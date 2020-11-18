@@ -166,7 +166,8 @@ class VideoPlayerMediatorTest {
             dispatcher,
             dataManager,
             emptyList(),
-            internalBuilder.logger
+            internalBuilder.logger,
+            internalBuilder.castContext
         )
         videoPlayerMediator.initialize(playerView, player, MLSBuilder)
         videoPlayerMediator.setAnnotationMediator(annotationMediator)

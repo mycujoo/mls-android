@@ -15,11 +15,13 @@ import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
+import androidx.mediarouter.app.MediaRouteButton
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.PlayerView
+import com.google.android.gms.cast.framework.CastButtonFactory
 import kotlinx.android.synthetic.main.dialog_event_info_pre_event_layout.view.*
 import kotlinx.android.synthetic.main.dialog_event_info_started_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
@@ -119,6 +121,10 @@ class MLSPlayerView @JvmOverloads constructor(
                 uiEventListener.onFullScreenButtonClicked(isFullScreen)
             }
         }
+
+        val mediaRouteButton = findViewById<MediaRouteButton>(R.id.controller_mediaRouteButton)
+        CastButtonFactory.setUpMediaRouteButton(context, mediaRouteButton)
+
 
         updateFullscreenButtonImage()
 

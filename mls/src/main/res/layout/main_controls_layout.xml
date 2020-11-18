@@ -336,10 +336,21 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
 
+                    <androidx.mediarouter.app.MediaRouteButton
+                        android:id="@+id/controller_mediaRouteButton"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:visibility="visible"
+                        android:scaleType="center"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/ic_cast_24"
+                        />
+
                     <ImageButton
                         android:id="@+id/controller_castImageButton"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
+                        android:visibility="gone"
                         android:layout_marginEnd="8dp"
                         android:background="@android:color/transparent"
                         android:src="@drawable/ic_cast_24" />

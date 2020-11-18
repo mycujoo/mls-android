@@ -24,5 +24,6 @@ interface IPlayer {
 
     fun play(uriString: String, autoPlay: Boolean)
     fun play(uriString: String, licenseUrl: String, autoPlay: Boolean)
+    fun pause()
     fun loadLastVideo()
 }
