@@ -62,5 +62,14 @@ class StringUtils {
                 null
             }
         }
+
+        fun getSegmentTimeStamp(name: String): String {
+            val keyword = "segment_"
+            val underscore = "_"
+            return if (name.contains(keyword, true)) {
+                name.substringAfter(keyword).substringBefore(underscore)
+            } else
+                ""
+        }
     }
 }
