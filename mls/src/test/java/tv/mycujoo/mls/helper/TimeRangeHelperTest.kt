@@ -27,4 +27,11 @@ class TimeRangeHelperTest {
     fun `given higher range timer-marker, should return false`() {
         assertTrue(TimeRangeHelper.isInRange(210F, 200))
     }
+
+    @Test
+    fun `test isCurrentTimeInDvrWindowDuration()`() {
+        assertTrue(TimeRangeHelper.isCurrentTimeInDvrWindowDuration(1000L, 1000000L))
+        assertTrue(TimeRangeHelper.isCurrentTimeInDvrWindowDuration(980000L, 1000000L))
+        assertFalse(TimeRangeHelper.isCurrentTimeInDvrWindowDuration(981000L, 1000000L))
+    }
 }
