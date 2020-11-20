@@ -7,7 +7,11 @@ import com.google.android.exoplayer2.source.hls.HlsMediaSource
 
 interface IPlayer {
     fun isReady(): Boolean
-    fun create(mediaFactory: HlsMediaSource.Factory, exoPlayer: SimpleExoPlayer)
+    fun create(
+        mediaFactory: HlsMediaSource.Factory,
+        exoPlayer: SimpleExoPlayer,
+        mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
+    )
 
     // will be removed!
     fun getDirectInstance(): ExoPlayer?
@@ -25,4 +29,7 @@ interface IPlayer {
     fun play(uriString: String, autoPlay: Boolean)
     fun play(uriString: String, licenseUrl: String, autoPlay: Boolean)
     fun loadLastVideo()
+
+    fun isInValidSegment(): Boolean
+    fun dvrWindowSize(): Long
 }

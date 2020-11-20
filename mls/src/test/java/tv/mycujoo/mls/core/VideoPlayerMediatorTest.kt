@@ -36,6 +36,7 @@ import tv.mycujoo.mls.network.socket.MainWebSocketListener
 import tv.mycujoo.mls.network.socket.ReactorListener
 import tv.mycujoo.mls.network.socket.ReactorSocket
 import tv.mycujoo.mls.player.IPlayer
+import tv.mycujoo.mls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mls.player.Player
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
@@ -93,6 +94,8 @@ class VideoPlayerMediatorTest {
     @Mock
     lateinit var exoPlayer: SimpleExoPlayer
     private lateinit var exoPlayerMainEventListener: MainEventListener
+    @Mock
+    lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
 
 
     @Mock
@@ -155,7 +158,7 @@ class VideoPlayerMediatorTest {
         whenever(dispatcher.coroutineContext).thenReturn(coroutineTestRule.testDispatcher)
 
         player = Player()
-        player.create(mediaFactory, exoPlayer)
+        player.create(mediaFactory, exoPlayer, mediaOnLoadCompletedListener)
 
 
         whenever(exoPlayer.addListener(any())).then { storeExoPlayerListener(it) }

@@ -14,6 +14,7 @@ import tv.mycujoo.mls.core.IAnnotationFactory
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.enum.MessageLevel
+import tv.mycujoo.mls.helper.TimeRangeHelper.Companion.isCurrentTimeInDvrWindowDuration
 import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.player.IPlayer
 import tv.mycujoo.mls.widgets.MLSPlayerView
@@ -120,11 +121,20 @@ class AnnotationMediator(
                 if (playbackState == STATE_READY && hasPendingSeek) {
                     hasPendingSeek = false
 
-                    annotationFactory.build(
+
+                    val currentTimeInDvrWindowDuration = isCurrentTimeInDvrWindowDuration(
                         player.currentPosition(),
-                        isPlaying = player.isPlaying(),
-                        interrupted = true
+                        player.dvrWindowSize()
                     )
+                    if (currentTimeInDvrWindowDuration) {
+                        annotationFactory.build(
+                            player.currentPosition(),
+                            isPlaying = player.isPlaying(),
+                            interrupted = true
+                        )
+                    } else {
+                        // TODO use timestamps for calculation
+                    }
                 }
             }
 

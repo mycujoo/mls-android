@@ -33,6 +33,7 @@ import tv.mycujoo.mls.mediator.AnnotationMediator
 import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.player.IPlayer
+import tv.mycujoo.mls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mls.player.Player.Companion.createExoPlayer
 import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
 import tv.mycujoo.mls.utils.StringUtils
@@ -170,9 +171,11 @@ class VideoPlayerMediator(
     }
 
     fun reInitialize(MLSPlayerView: MLSPlayerView) {
+        val exoPlayer = createExoPlayer(MLSPlayerView.context)
         player.create(
             createMediaFactory(MLSPlayerView.context),
-            createExoPlayer(MLSPlayerView.context)
+            exoPlayer,
+            MediaOnLoadCompletedListener(exoPlayer)
         )
 
         initPlayerViewWrapper(MLSPlayerView, player)

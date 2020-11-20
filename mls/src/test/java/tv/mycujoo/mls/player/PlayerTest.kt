@@ -2,6 +2,7 @@ package tv.mycujoo.mls.player
 
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
@@ -26,6 +27,9 @@ class PlayerTest {
     lateinit var mediaFactory: HlsMediaSource.Factory
 
     @Mock
+    lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
+
+    @Mock
     lateinit var hlsMediaSource: HlsMediaSource
 
 
@@ -36,7 +40,7 @@ class PlayerTest {
     }
 
     private fun initPlayer() {
-        player.create(mediaFactory, exoPlayer)
+        player.create(mediaFactory, exoPlayer, mediaOnLoadCompletedListener)
     }
 
     @Test
@@ -180,9 +184,9 @@ class PlayerTest {
         player.play(SAMPLE_URI, true)
 
 
-        val mediaItemCaptor = argumentCaptor<MediaItem>()
+        val mediaSourceCaptor = argumentCaptor<MediaSource>()
         val resetPositionCaptor = argumentCaptor<Boolean>()
-        verify(exoPlayer).setMediaItem(mediaItemCaptor.capture(), resetPositionCaptor.capture())
+        verify(exoPlayer).setMediaSource(mediaSourceCaptor.capture(), resetPositionCaptor.capture())
         assertTrue { resetPositionCaptor.firstValue }
 
     }
@@ -205,6 +209,17 @@ class PlayerTest {
         val resetPositionCaptor = argumentCaptor<Boolean>()
         verify(exoPlayer).setMediaItem(mediaItemCaptor.capture(), resetPositionCaptor.capture())
         assertFalse { resetPositionCaptor.firstValue }
+    }
+
+    @Test
+    fun `given discontinuity segment, should add it to discontinuity array`() {
+        initPlayer()
+        whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
+        whenever(exoPlayer.setMediaSource(any(), any<Boolean>())).then {
+            val mediaSource = it.arguments[0] as MediaSource
+            mediaSource
+        }
+
 
     }
 

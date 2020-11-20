@@ -2,6 +2,7 @@ package tv.mycujoo.mls.player
 
 import android.content.Context
 import android.net.Uri
+import android.os.Handler
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
@@ -12,6 +13,7 @@ class Player : IPlayer {
 
     private var exoPlayer: SimpleExoPlayer? = null
     private lateinit var mediaFactory: HlsMediaSource.Factory
+    private lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
 
 
     private var resumePosition: Long = C.INDEX_UNSET.toLong()
@@ -23,9 +25,14 @@ class Player : IPlayer {
     private var uri: Uri? = null
     private var licenseUrl: Uri? = null
 
-    override fun create(mediaFactory: HlsMediaSource.Factory, exoPlayer: SimpleExoPlayer) {
+    override fun create(
+        mediaFactory: HlsMediaSource.Factory,
+        exoPlayer: SimpleExoPlayer,
+        mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
+    ) {
         this.mediaFactory = mediaFactory
         this.exoPlayer = exoPlayer
+        this.mediaOnLoadCompletedListener = mediaOnLoadCompletedListener
     }
 
     override fun isReady(): Boolean {
@@ -131,7 +138,11 @@ class Player : IPlayer {
             }
         } else {
             exoPlayer?.let {
-                it.setMediaItem(mediaItem, true)
+                val handler = Handler()
+
+                val hlsMediaSource = mediaFactory.createMediaSource(mediaItem)
+                hlsMediaSource.addEventListener(handler, mediaOnLoadCompletedListener)
+                it.setMediaSource(hlsMediaSource, true)
                 it.prepare()
                 it.playWhenReady = autoPlay
             }
@@ -147,6 +158,20 @@ class Player : IPlayer {
                 play(it.toString(), false)
             }
         }
+    }
+
+    override fun isInValidSegment(): Boolean {
+        if (exoPlayer == null) {
+            return false
+        }
+        val currentPosition = exoPlayer!!.currentPosition
+        return mediaOnLoadCompletedListener.getDiscontinuityBoundaries()
+            .any { it.first <= currentPosition && it.second >= currentPosition }
+    }
+
+
+    override fun dvrWindowSize(): Long {
+        return mediaOnLoadCompletedListener.getDvrWindowDuration()
     }
 
     companion object {

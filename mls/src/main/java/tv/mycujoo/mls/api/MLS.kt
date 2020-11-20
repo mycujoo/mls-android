@@ -23,6 +23,7 @@ import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.mediator.AnnotationMediator
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.network.RemoteApi
+import tv.mycujoo.mls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mls.player.Player
 import tv.mycujoo.mls.player.Player.Companion.createExoPlayer
 import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
@@ -94,9 +95,11 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         )
 
         player = Player().apply {
+            val exoPlayer = createExoPlayer(context)
             create(
                 createMediaFactory(context),
-                createExoPlayer(context)
+                exoPlayer,
+                MediaOnLoadCompletedListener(exoPlayer)
             )
         }
 
