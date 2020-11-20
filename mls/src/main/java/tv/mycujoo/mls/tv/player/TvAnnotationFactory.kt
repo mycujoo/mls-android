@@ -7,6 +7,7 @@ import tv.mycujoo.domain.entity.OverlayAct.*
 import tv.mycujoo.domain.entity.VariableAct.CLEAR
 import tv.mycujoo.domain.entity.VariableAct.CREATE_VARIABLE
 import tv.mycujoo.domain.entity.models.ActionType.*
+import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.helper.ShowOverlayActionHelper
 import tv.mycujoo.mls.helper.VariableActionHelper
 import tv.mycujoo.mls.helper.VariableActionHelper.Companion.getIncrementVariableCurrentAct
@@ -45,7 +46,7 @@ class TvAnnotationFactory(
 
 
         sortedActionList.forEach() {
-            if (currentPosition + 1000L < it.offset) {
+            if (currentPosition + ONE_SECOND_IN_MS < it.offset) {
                 return@forEach
             }
             when (it.type) {
@@ -98,7 +99,7 @@ class TvAnnotationFactory(
                     }
                 }
                 HIDE_OVERLAY -> {
-                    if (currentPosition + 1000L > it.offset) {
+                    if (currentPosition + ONE_SECOND_IN_MS > it.offset) {
                         tvAnnotationListener.removeOverlay(it.toHideOverlayActionEntity()!!)
                     }
 

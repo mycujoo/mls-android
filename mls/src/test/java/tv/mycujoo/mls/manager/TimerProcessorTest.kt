@@ -8,11 +8,12 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
-import tv.mycujoo.mls.model.ScreenTimerDirection
-import tv.mycujoo.mls.model.ScreenTimerFormat
 import tv.mycujoo.mls.entity.AdjustTimerEntity
 import tv.mycujoo.mls.entity.CreateTimerEntity
 import tv.mycujoo.mls.entity.StartTimerEntity
+import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
+import tv.mycujoo.mls.model.ScreenTimerDirection
+import tv.mycujoo.mls.model.ScreenTimerFormat
 import tv.mycujoo.mls.widgets.TimerCollection
 
 @ExperimentalCoroutinesApi
@@ -288,8 +289,8 @@ class TimerProcessorTest {
 
         private const val INVALID = -1L
         private const val ZERO_SECONDS = 0L
-        private const val ONE_SECONDS = 1000L
-        private const val TWO_SECONDS = 1000L
+        private const val ONE_SECONDS = ONE_SECOND_IN_MS
+        private const val TWO_SECONDS = 2000L
         private const val FIVE_SECONDS = 5000L
         private const val FIFTEEN_SECONDS = 15000L
         private const val TWENTY_FIVE_SECONDS = 25000L

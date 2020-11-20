@@ -28,6 +28,7 @@ import tv.mycujoo.fake.FakeViewHandler
 import tv.mycujoo.mls.BlankActivity
 import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.R
+import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.widgets.ScaffoldView
 
 /**
@@ -127,7 +128,7 @@ class AnimationFactoryTest {
 
     @Test
     fun createAddViewDynamicAnimation_ShouldCreateAnimationWithGivenDuration() {
-        val transitionSpec = TransitionSpec(1000L, AnimationType.SLIDE_FROM_TOP, 123L)
+        val transitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.SLIDE_FROM_TOP, 123L)
 
 
         val anim = animationFactory.createAddViewDynamicAnimation(
@@ -143,7 +144,7 @@ class AnimationFactoryTest {
 
     @Test
     fun givenSLIDE_FROM_TOP_createAddViewDynamicAnimationShouldCreateAnimationOnYProperty() {
-        val transitionSpec = TransitionSpec(1000L, AnimationType.SLIDE_FROM_TOP, 123L)
+        val transitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.SLIDE_FROM_TOP, 123L)
 
 
         val anim = animationFactory.createAddViewDynamicAnimation(
@@ -159,7 +160,7 @@ class AnimationFactoryTest {
 
     @Test
     fun givenSLIDE_FROM_BOTTOM_createAddViewDynamicAnimationShouldCreateAnimationOnYProperty() {
-        val transitionSpec = TransitionSpec(1000L, AnimationType.SLIDE_FROM_BOTTOM, 123L)
+        val transitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.SLIDE_FROM_BOTTOM, 123L)
 
 
         val anim = animationFactory.createAddViewDynamicAnimation(
@@ -175,7 +176,7 @@ class AnimationFactoryTest {
 
     @Test
     fun givenSLIDE_FROM_LEFT_createAddViewDynamicAnimationShouldCreateAnimationOnXProperty() {
-        val transitionSpec = TransitionSpec(1000L, AnimationType.SLIDE_FROM_LEFT, 123L)
+        val transitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.SLIDE_FROM_LEFT, 123L)
 
 
         val anim = animationFactory.createAddViewDynamicAnimation(
@@ -191,7 +192,7 @@ class AnimationFactoryTest {
 
     @Test
     fun givenSLIDE_FROM_RIGHT_createAddViewDynamicAnimationShouldCreateAnimationOnXProperty() {
-        val transitionSpec = TransitionSpec(1000L, AnimationType.SLIDE_FROM_RIGHT, 123L)
+        val transitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.SLIDE_FROM_RIGHT, 123L)
 
 
         val anim = animationFactory.createAddViewDynamicAnimation(
@@ -207,7 +208,7 @@ class AnimationFactoryTest {
 
     @Test
     fun givenInvalidIntroDynamicAnimation_createAddViewDynamicAnimationShouldReturnNull() {
-        val transitionSpecForNone = TransitionSpec(1000L, AnimationType.NONE, 123L)
+        val transitionSpecForNone = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.NONE, 123L)
         val objectAnimatorForAnimationTypeNONE = animationFactory.createAddViewDynamicAnimation(
             overlayHost,
             scaffoldView,
@@ -215,7 +216,7 @@ class AnimationFactoryTest {
             viewHandler
         )
 
-        val transitionSpecForFadeOut = TransitionSpec(1000L, AnimationType.FADE_OUT, 123L)
+        val transitionSpecForFadeOut = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.FADE_OUT, 123L)
         val objectAnimatorForAnimationTypeFADEOUT = animationFactory.createAddViewDynamicAnimation(
             overlayHost,
             scaffoldView,
@@ -223,7 +224,7 @@ class AnimationFactoryTest {
             viewHandler
         )
 
-        val transitionSpecForFadeIn = TransitionSpec(1000L, AnimationType.FADE_IN, 123L)
+        val transitionSpecForFadeIn = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.FADE_IN, 123L)
         val objectAnimatorForAnimationTypeFADEIN = animationFactory.createAddViewDynamicAnimation(
             overlayHost,
             scaffoldView,
@@ -241,8 +242,8 @@ class AnimationFactoryTest {
     /**region createRemoveViewStaticAnimation() tests*/
     @Test
     fun createRemoveViewStaticAnimation_ShouldCreateAnimationWithGivenDuration() {
-        val introTransitionSpec = TransitionSpec(1000L, AnimationType.NONE, 123L)
-        val outroTransitionSpec = TransitionSpec(1000L, AnimationType.FADE_OUT, 123L)
+        val introTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.NONE, 123L)
+        val outroTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.FADE_OUT, 123L)
 
 
         val anim = animationFactory.createRemoveViewStaticAnimation(
@@ -257,12 +258,12 @@ class AnimationFactoryTest {
 
     @Test
     fun givenFADE_OUT_createRemoveViewStaticAnimationShouldCreateAnimationOnALPHAProperty() {
-        val transitionSpec = TransitionSpec(1000L, AnimationType.FADE_OUT, 123L)
+        val transitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.FADE_OUT, 123L)
 
 
         val anim = animationFactory.createRemoveViewStaticAnimation(
             overlayHost,
-            getSampleOverlayEntity(transitionSpec, 1000L),
+            getSampleOverlayEntity(transitionSpec, ONE_SECOND_IN_MS),
             scaffoldView,
             viewHandler
         )
@@ -272,8 +273,8 @@ class AnimationFactoryTest {
 
     @Test
     fun createRemoveViewStaticAnimation_ShouldRemoveAnimationAfterAnimationEnds() {
-        val introTransitionSpec = TransitionSpec(1000L, AnimationType.NONE, 123L)
-        val outroTransitionSpec = TransitionSpec(1000L, AnimationType.FADE_OUT, 123L)
+        val introTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.NONE, 123L)
+        val outroTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.FADE_OUT, 123L)
         val overlayEntity = getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
 
         var anim: ObjectAnimator? = null
@@ -293,8 +294,8 @@ class AnimationFactoryTest {
 
     @Test
     fun createRemoveViewStaticAnimation_ShouldRemoveViewAfterAnimationEnds() {
-        val introTransitionSpec = TransitionSpec(1000L, AnimationType.NONE, 123L)
-        val outroTransitionSpec = TransitionSpec(1000L, AnimationType.FADE_OUT, 123L)
+        val introTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.NONE, 123L)
+        val outroTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.FADE_OUT, 123L)
         val overlayEntity = getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
 
         var anim: ObjectAnimator? = null
@@ -316,8 +317,8 @@ class AnimationFactoryTest {
     /**region createRemoveViewDynamicAnimation() tests*/
     @Test
     fun createRemoveViewDynamicAnimation_ShouldCreateAnimationWithGivenDuration() {
-        val introTransitionSpec = TransitionSpec(1000L, AnimationType.NONE, 123L)
-        val outroTransitionSpec = TransitionSpec(1000L, AnimationType.SLIDE_TO_TOP, 123L)
+        val introTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.NONE, 123L)
+        val outroTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.SLIDE_TO_TOP, 123L)
 
 
         val anim = animationFactory.createRemoveViewDynamicAnimation(
@@ -332,8 +333,8 @@ class AnimationFactoryTest {
 
     @Test
     fun givenSLIDE_TO_TOP_createRemoveViewDynamicAnimationShouldCreateAnimationOnYProperty() {
-        val introTransitionSpec = TransitionSpec(1000L, AnimationType.NONE, 123L)
-        val outroTransitionSpec = TransitionSpec(1000L, AnimationType.SLIDE_TO_TOP, 123L)
+        val introTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.NONE, 123L)
+        val outroTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.SLIDE_TO_TOP, 123L)
 
 
         val anim = animationFactory.createRemoveViewDynamicAnimation(
@@ -348,8 +349,8 @@ class AnimationFactoryTest {
 
     @Test
     fun givenSLIDE_TO_BOTTOM_createRemoveViewDynamicAnimationShouldCreateAnimationOnYProperty() {
-        val introTransitionSpec = TransitionSpec(1000L, AnimationType.NONE, 123L)
-        val outroTransitionSpec = TransitionSpec(1000L, AnimationType.SLIDE_TO_BOTTOM, 123L)
+        val introTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.NONE, 123L)
+        val outroTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.SLIDE_TO_BOTTOM, 123L)
 
 
         val anim = animationFactory.createRemoveViewDynamicAnimation(
@@ -364,8 +365,8 @@ class AnimationFactoryTest {
 
     @Test
     fun givenSLIDE_TO_LEFT_createRemoveViewDynamicAnimationShouldCreateAnimationOnXProperty() {
-        val introTransitionSpec = TransitionSpec(1000L, AnimationType.NONE, 123L)
-        val outroTransitionSpec = TransitionSpec(1000L, AnimationType.SLIDE_TO_LEFT, 123L)
+        val introTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.NONE, 123L)
+        val outroTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.SLIDE_TO_LEFT, 123L)
 
 
         val anim = animationFactory.createRemoveViewDynamicAnimation(
@@ -381,8 +382,8 @@ class AnimationFactoryTest {
 
     @Test
     fun givenSLIDE_TO_RIGHT_createRemoveViewDynamicAnimationShouldCreateAnimationOnXProperty() {
-        val introTransitionSpec = TransitionSpec(1000L, AnimationType.NONE, 123L)
-        val outroTransitionSpec = TransitionSpec(1000L, AnimationType.SLIDE_TO_RIGHT, 123L)
+        val introTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.NONE, 123L)
+        val outroTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.SLIDE_TO_RIGHT, 123L)
 
 
         val anim = animationFactory.createRemoveViewDynamicAnimation(
@@ -398,8 +399,8 @@ class AnimationFactoryTest {
 
     @Test
     fun givenInvalidOutroDynamicAnimation_createRemoveViewDynamicAnimationShouldReturnNull() {
-        val introTransitionSpec = TransitionSpec(1000L, AnimationType.NONE, 123L)
-        val outroTransitionSpecForNone = TransitionSpec(1000L, AnimationType.NONE, 123L)
+        val introTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.NONE, 123L)
+        val outroTransitionSpecForNone = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.NONE, 123L)
 
 
         val animForNone = animationFactory.createRemoveViewDynamicAnimation(
@@ -409,7 +410,7 @@ class AnimationFactoryTest {
             viewHandler
         )
 
-        val transitionSpecForFadeOut = TransitionSpec(1000L, AnimationType.FADE_OUT, 123L)
+        val transitionSpecForFadeOut = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.FADE_OUT, 123L)
         val animForFADEOUT = animationFactory.createAddViewDynamicAnimation(
             overlayHost,
             scaffoldView,
@@ -417,7 +418,7 @@ class AnimationFactoryTest {
             viewHandler
         )
 
-        val transitionSpecForFadeIn = TransitionSpec(1000L, AnimationType.FADE_IN, 123L)
+        val transitionSpecForFadeIn = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.FADE_IN, 123L)
         val animForFADEIN = animationFactory.createAddViewDynamicAnimation(
             overlayHost,
             scaffoldView,
@@ -433,8 +434,8 @@ class AnimationFactoryTest {
 
     @Test
     fun createRemoveViewDynamicAnimation_ShouldRemoveAnimationAfterAnimationEnds() {
-        val introTransitionSpec = TransitionSpec(1000L, AnimationType.NONE, 123L)
-        val outroTransitionSpec = TransitionSpec(1000L, AnimationType.SLIDE_TO_TOP, 123L)
+        val introTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.NONE, 123L)
+        val outroTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.SLIDE_TO_TOP, 123L)
         val overlayEntity = getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
 
         var anim: ObjectAnimator? = null
@@ -454,8 +455,8 @@ class AnimationFactoryTest {
 
     @Test
     fun createRemoveViewDynamicAnimation_ShouldRemoveViewAfterAnimationEnds() {
-        val introTransitionSpec = TransitionSpec(1000L, AnimationType.NONE, 123L)
-        val outroTransitionSpec = TransitionSpec(1000L, AnimationType.SLIDE_TO_TOP, 123L)
+        val introTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.NONE, 123L)
+        val outroTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.SLIDE_TO_TOP, 123L)
         val overlayEntity = getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
 
         var anim: ObjectAnimator? = null
@@ -479,8 +480,8 @@ class AnimationFactoryTest {
     /**region createLingeringIntroViewAnimation() test*/
     @Test
     fun createLingeringIntroViewAnimation_ShouldCreateAnimationWithGivenDuration() {
-        val transitionSpec = TransitionSpec(1000L, AnimationType.FADE_IN, 123L)
-        val overlayEntity = getSampleOverlayEntity(transitionSpec, 1000L)
+        val transitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.FADE_IN, 123L)
+        val overlayEntity = getSampleOverlayEntity(transitionSpec, ONE_SECOND_IN_MS)
 
 
         var anim: ObjectAnimator? = null
@@ -501,8 +502,8 @@ class AnimationFactoryTest {
 
     @Test
     fun createLingeringIntroViewAnimation_ShouldCreateAnimationWithGivenAnimationPosition() {
-        val transitionSpec = TransitionSpec(1000L, AnimationType.FADE_IN, 123L)
-        val overlayEntity = getSampleOverlayEntity(transitionSpec, 1000L)
+        val transitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.FADE_IN, 123L)
+        val overlayEntity = getSampleOverlayEntity(transitionSpec, ONE_SECOND_IN_MS)
 
 
         var anim: ObjectAnimator? = null
@@ -523,8 +524,8 @@ class AnimationFactoryTest {
 
     @Test
     fun createLingeringIntroViewAnimation_ShouldCreateAnimationWithAnimationIsPlayingState() {
-        val transitionSpec = TransitionSpec(1000L, AnimationType.FADE_IN, 123L)
-        val overlayEntity = getSampleOverlayEntity(transitionSpec, 1000L)
+        val transitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.FADE_IN, 123L)
+        val overlayEntity = getSampleOverlayEntity(transitionSpec, ONE_SECOND_IN_MS)
 
 
         var animPlaying: ObjectAnimator? = null

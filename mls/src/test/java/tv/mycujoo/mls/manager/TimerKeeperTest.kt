@@ -10,6 +10,7 @@ import tv.mycujoo.mls.entity.AdjustTimerEntity
 import tv.mycujoo.mls.entity.CreateTimerEntity
 import tv.mycujoo.mls.entity.SkipTimerEntity
 import tv.mycujoo.mls.entity.StartTimerEntity
+import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import kotlin.test.assertEquals
 
 @ExperimentalCoroutinesApi
@@ -52,7 +53,7 @@ class TimerKeeperTest {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
             0L,
-            1000L
+            ONE_SECOND_IN_MS
         )
         timerKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
@@ -72,7 +73,7 @@ class TimerKeeperTest {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
             10000L,
-            1000L
+            ONE_SECOND_IN_MS
         )
         timerKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
@@ -93,7 +94,7 @@ class TimerKeeperTest {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
             60000L,
-            1000L
+            ONE_SECOND_IN_MS
         )
         timerKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
@@ -114,7 +115,7 @@ class TimerKeeperTest {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
             120000L,
-            1000L
+            ONE_SECOND_IN_MS
         )
         timerKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
@@ -135,7 +136,7 @@ class TimerKeeperTest {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.MINUTES_SECONDS,
             0L,
-            1000L
+            ONE_SECOND_IN_MS
         )
         timerKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
@@ -156,7 +157,7 @@ class TimerKeeperTest {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.MINUTES_SECONDS,
             10000L,
-            1000L
+            ONE_SECOND_IN_MS
         )
         timerKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
@@ -177,7 +178,7 @@ class TimerKeeperTest {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.MINUTES_SECONDS,
             60000L,
-            1000L
+            ONE_SECOND_IN_MS
         )
         timerKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
@@ -197,7 +198,7 @@ class TimerKeeperTest {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.MINUTES_SECONDS,
             120000L,
-            1000L
+            ONE_SECOND_IN_MS
         )
         timerKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
@@ -217,7 +218,7 @@ class TimerKeeperTest {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
             0L,
-            1000L
+            ONE_SECOND_IN_MS
         )
         timerKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
@@ -240,7 +241,7 @@ class TimerKeeperTest {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
             0L,
-            1000L
+            ONE_SECOND_IN_MS
         )
         timerKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
@@ -265,7 +266,7 @@ class TimerKeeperTest {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
             0L,
-            1000L
+            ONE_SECOND_IN_MS
         )
         timerKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
@@ -305,7 +306,7 @@ class TimerKeeperTest {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
             10000L,
-            1000L
+            ONE_SECOND_IN_MS
         )
         timerKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
@@ -324,7 +325,7 @@ class TimerKeeperTest {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
             10000L,
-            1000L
+            ONE_SECOND_IN_MS
         )
         timerKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
@@ -343,7 +344,7 @@ class TimerKeeperTest {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
             10000L,
-            1000L
+            ONE_SECOND_IN_MS
         )
         timerKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
@@ -363,7 +364,7 @@ class TimerKeeperTest {
         val createScreenTimerEntity = getSampleCreateScreenTimerEntity(
             ScreenTimerFormat.SECONDS,
             10000L,
-            1000L
+            ONE_SECOND_IN_MS
         )
         timerKeeper.createTimer(createScreenTimerEntity)
         var actualValue = ""
@@ -487,7 +488,7 @@ class TimerKeeperTest {
     ): CreateTimerEntity {
         return CreateTimerEntity(
             SAMPLE_NAME_0,
-            1000L,
+            ONE_SECOND_IN_MS,
             format,
             ScreenTimerDirection.UP,
             startValue,
@@ -503,11 +504,11 @@ class TimerKeeperTest {
     ): CreateTimerEntity {
         return CreateTimerEntity(
             SAMPLE_NAME_0,
-            1000L,
+            ONE_SECOND_IN_MS,
             format,
             screenTimerDirection,
             startValue,
-            1000L,
+            ONE_SECOND_IN_MS,
             500000L
         )
     }
@@ -520,11 +521,11 @@ class TimerKeeperTest {
     ): CreateTimerEntity {
         return CreateTimerEntity(
             SAMPLE_NAME_0,
-            1000L,
+            ONE_SECOND_IN_MS,
             format,
             screenTimerDirection,
             startValue,
-            1000L,
+            ONE_SECOND_IN_MS,
             capValue
         )
     }
@@ -534,7 +535,7 @@ class TimerKeeperTest {
 
         private const val INVALID = -1L
         private const val ZERO_SECONDS = 0L
-        private const val ONE_SECONDS = 1000L
+        private const val ONE_SECONDS = ONE_SECOND_IN_MS
         private const val TWO_SECONDS = 2000L
         private const val FIVE_SECONDS = 5000L
         private const val TEN_SECONDS = 10000L

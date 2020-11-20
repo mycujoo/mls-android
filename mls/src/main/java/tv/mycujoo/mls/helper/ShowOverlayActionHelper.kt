@@ -3,11 +3,12 @@ package tv.mycujoo.mls.helper
 import tv.mycujoo.domain.entity.ActionObject
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.OverlayAct
+import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 
 class ShowOverlayActionHelper {
     companion object {
         private fun hasNotReached(currentTime: Long, actionObject: ActionObject): Boolean {
-            return (actionObject.offset > currentTime) && (actionObject.offset + 1000L > currentTime)
+            return (actionObject.offset > currentTime) && (actionObject.offset + ONE_SECOND_IN_MS > currentTime)
         }
 
         private fun hasPassedDuration(currentTime: Long, actionObject: ActionObject): Boolean {
@@ -71,7 +72,7 @@ class ShowOverlayActionHelper {
             currentTime: Long,
             actionObject: ActionObject
         ): Boolean {
-            return (actionObject.offset >= currentTime) && (actionObject.offset < currentTime + 1000L)
+            return (actionObject.offset >= currentTime) && (actionObject.offset < currentTime + ONE_SECOND_IN_MS)
         }
 
         fun outroIsInCurrentTimeRange(
@@ -85,7 +86,7 @@ class ShowOverlayActionHelper {
                 return false
             }
             val outroOffset = actionObject.offset + actionObject.overlayRelatedData.duration
-            return (outroOffset >= currentTime) && (outroOffset < currentTime + 1000L)
+            return (outroOffset >= currentTime) && (outroOffset < currentTime + ONE_SECOND_IN_MS)
         }
 
         private fun isLingeringInIntroAnimation(

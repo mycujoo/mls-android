@@ -6,6 +6,7 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import kotlinx.coroutines.CoroutineScope
 import tv.mycujoo.domain.entity.ActionObject
+import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.OverlayFactory
@@ -25,8 +26,9 @@ class TvAnnotationMediator(
 
     private var tvAnnotationFactory: TvAnnotationFactory
     private var tvAnnotationListener: TvAnnotationListener
-    private val viewHandler :
-        ViewHandler = ViewHandler(coroutineScope, CountingIdlingResource("ViewIdentifierManager"))
+    private val viewHandler:
+            ViewHandler =
+        ViewHandler(coroutineScope, CountingIdlingResource("ViewIdentifierManager"))
 
     private var hasPendingSeek: Boolean = false
 
@@ -44,7 +46,8 @@ class TvAnnotationMediator(
             )
 
 
-        tvAnnotationFactory = TvAnnotationFactory(tvAnnotationListener, viewHandler.getTimerKeeper())
+        tvAnnotationFactory =
+            TvAnnotationFactory(tvAnnotationListener, viewHandler.getTimerKeeper())
 
         player.addListener(object : Player.EventListener {
             override fun onPositionDiscontinuity(reason: Int) {
@@ -67,7 +70,7 @@ class TvAnnotationMediator(
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                if (isPlaying){
+                if (isPlaying) {
                     viewHandler.getAnimations().forEach { it.resume() }
                 } else {
                     viewHandler.getAnimations().forEach { it.pause() }
@@ -95,7 +98,12 @@ class TvAnnotationMediator(
             handler.post(exoRunnable)
         }
 
-        scheduler.scheduleAtFixedRate(scheduledRunnable, 1000L, 1000L, TimeUnit.MILLISECONDS)
+        scheduler.scheduleAtFixedRate(
+            scheduledRunnable,
+            ONE_SECOND_IN_MS,
+            ONE_SECOND_IN_MS,
+            TimeUnit.MILLISECONDS
+        )
     }
 
     fun feed(actionObjectList: List<ActionObject>) {

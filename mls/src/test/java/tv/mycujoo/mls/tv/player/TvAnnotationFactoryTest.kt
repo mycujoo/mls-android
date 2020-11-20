@@ -14,6 +14,7 @@ import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.domain.entity.models.ParsedOverlayRelatedData
 import tv.mycujoo.domain.entity.models.ParsedTimerRelatedData
 import tv.mycujoo.mls.TestData
+import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.manager.TimerKeeper
 import tv.mycujoo.mls.manager.TimerVariable
 import tv.mycujoo.mls.matcher.TimerMapMatcher
@@ -352,7 +353,7 @@ class TvAnnotationFactoryTest {
             ScreenTimerFormat.MINUTES_SECONDS,
             ScreenTimerDirection.UP,
             0L,
-            1000L,
+            ONE_SECOND_IN_MS,
             -1L,
             0L
         )
@@ -382,7 +383,7 @@ class TvAnnotationFactoryTest {
             ScreenTimerFormat.MINUTES_SECONDS,
             ScreenTimerDirection.UP,
             0L,
-            1000L,
+            ONE_SECOND_IN_MS,
             -1L,
             0L
         )
@@ -437,7 +438,7 @@ class TvAnnotationFactoryTest {
             put("format", "ms")
             put("direction", "up")
             put("start_value", 0L)
-            put("step", 1000L)
+            put("step", ONE_SECOND_IN_MS)
             put("cap_value", -1L)
         }
         val createTimerActionObject =
@@ -462,7 +463,7 @@ class TvAnnotationFactoryTest {
             put("format", "ms")
             put("direction", "up")
             put("start_value", 0L)
-            put("step", 1000L)
+            put("step", ONE_SECOND_IN_MS)
             put("cap_value", -1L)
         }
         val createTimerActionObject =
@@ -493,7 +494,7 @@ class TvAnnotationFactoryTest {
             put("format", "ms")
             put("direction", "up")
             put("start_value", 0L)
-            put("step", 1000L)
+            put("step", ONE_SECOND_IN_MS)
             put("cap_value", -1L)
         }
         val createTimerActionObject =
@@ -525,7 +526,7 @@ class TvAnnotationFactoryTest {
             put("format", "ms")
             put("direction", "up")
             put("start_value", 0L)
-            put("step", 1000L)
+            put("step", ONE_SECOND_IN_MS)
             put("cap_value", -1L)
         }
         val createTimerActionObject =
@@ -544,7 +545,7 @@ class TvAnnotationFactoryTest {
         val expectedResult = HashMap<String, TimerVariable>()
         expectedResult["${"$"}scoreboardTimer"] = TimerVariable(
             "${"$"}scoreboardTimer", ScreenTimerFormat.MINUTES_SECONDS,
-            ScreenTimerDirection.UP, 1000L, -1L
+            ScreenTimerDirection.UP, ONE_SECOND_IN_MS, -1L
         )
 
 
@@ -562,7 +563,7 @@ class TvAnnotationFactoryTest {
             put("format", "ms")
             put("direction", "up")
             put("start_value", 0L)
-            put("step", 1000L)
+            put("step", ONE_SECOND_IN_MS)
             put("cap_value", -1L)
         }
         val createTimerActionObject =
@@ -609,7 +610,7 @@ class TvAnnotationFactoryTest {
             put("format", "ms")
             put("direction", "up")
             put("start_value", 0L)
-            put("step", 1000L)
+            put("step", ONE_SECOND_IN_MS)
             put("cap_value", -1L)
         }
         val createTimerActionObject =

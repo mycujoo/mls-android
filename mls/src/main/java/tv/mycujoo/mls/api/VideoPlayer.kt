@@ -8,6 +8,7 @@ import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.core.VideoPlayerMediator
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
+import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.widgets.MLSPlayerView
 
 class VideoPlayer(
@@ -68,7 +69,7 @@ class VideoPlayer(
     override fun seekTo(position: Int) {
         optimisticSeekingPosition = position
 
-        exoPlayer.seekTo(position * 1000L)
+        exoPlayer.seekTo(position * ONE_SECOND_IN_MS)
     }
 
     override fun currentTime(): Int {

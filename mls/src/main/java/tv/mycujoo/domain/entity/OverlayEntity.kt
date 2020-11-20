@@ -1,5 +1,6 @@
 package tv.mycujoo.domain.entity
 
+import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasIntroAnimation
 import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasOutroAnimation
 
@@ -53,7 +54,7 @@ data class OverlayEntity(
     private fun introIsInCurrentTimeRange(
         currentTime: Long
     ): Boolean {
-        return (introTransitionSpec.offset >= currentTime) && (introTransitionSpec.offset < currentTime + 1000L)
+        return (introTransitionSpec.offset >= currentTime) && (introTransitionSpec.offset < currentTime + ONE_SECOND_IN_MS)
     }
 
     private fun outroIsInCurrentTimeRange(
@@ -64,7 +65,7 @@ data class OverlayEntity(
             return false
         }
 
-        return (outroTransitionSpec.offset >= currentTime) && (outroTransitionSpec.offset < currentTime + 1000L)
+        return (outroTransitionSpec.offset >= currentTime) && (outroTransitionSpec.offset < currentTime + ONE_SECOND_IN_MS)
     }
 
     private fun isLingeringInIntroAnimation(

@@ -5,6 +5,7 @@ import tv.mycujoo.mls.entity.AdjustTimerEntity
 import tv.mycujoo.mls.entity.PauseTimerEntity
 import tv.mycujoo.mls.entity.SkipTimerEntity
 import tv.mycujoo.mls.entity.StartTimerEntity
+import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerDirection.DOWN
 import tv.mycujoo.mls.model.ScreenTimerDirection.UP
@@ -35,9 +36,9 @@ class TimerCore(
 
     init {
         if (direction == UP) {
-            step = 1000L
+            step = ONE_SECOND_IN_MS
         } else {
-            step = -1000L
+            step = -ONE_SECOND_IN_MS
         }
     }
 
@@ -75,16 +76,16 @@ class TimerCore(
         return if (time >= 60000L) {
             // 1 minute or more, so M is present
             val minutes = time / 60000L
-            val seconds = ((time % 60000L) / 1000L).toString()
+            val seconds = ((time % 60000L) / ONE_SECOND_IN_MS).toString()
             "$minutes:${seconds.padStart(2, '0')}"
         } else {
-            val seconds = (time / 1000L).toString()
+            val seconds = (time / ONE_SECOND_IN_MS).toString()
 
             "0:${seconds.padStart(2, '0')}"
         }
     }
 
-    private fun getTimeInSecondFormat(time: Long) = (time / 1000L).toString()
+    private fun getTimeInSecondFormat(time: Long) = (time / ONE_SECOND_IN_MS).toString()
 
     private fun timeIsWithinCapValue(): Boolean {
         if (capValue == -1L) {
@@ -110,7 +111,7 @@ class TimerCore(
         startTimerEntity: StartTimerEntity,
         now: Long
     ) {
-        if (isTicking.not()){
+        if (isTicking.not()) {
             return
         }
         isAlive = true
@@ -118,12 +119,12 @@ class TimerCore(
             UP -> {
                 currentTime = now + startValue
                 val dif = currentTime - startTimerEntity.offset
-                currentTime = (dif / 1000L) * step
+                currentTime = (dif / ONE_SECOND_IN_MS) * step
             }
             DOWN -> {
                 currentTime = now - startValue
                 val dif = currentTime - startTimerEntity.offset
-                currentTime = (dif / 1000L) * step
+                currentTime = (dif / ONE_SECOND_IN_MS) * step
             }
         }
 
@@ -134,17 +135,17 @@ class TimerCore(
     }
 
     fun setTime(adjustTimerEntity: AdjustTimerEntity, now: Long) {
-        if (isTicking.not()){
+        if (isTicking.not()) {
             return
         }
         isAlive = true
         val passedTimeFromAdjust = now - adjustTimerEntity.offset
-        currentTime = (passedTimeFromAdjust / 1000L) * step
+        currentTime = (passedTimeFromAdjust / ONE_SECOND_IN_MS) * step
         currentTime += adjustTimerEntity.value
     }
 
     fun setTime(skipTimerEntity: SkipTimerEntity) {
-        if (isTicking.not()){
+        if (isTicking.not()) {
             return
         }
         isAlive = true

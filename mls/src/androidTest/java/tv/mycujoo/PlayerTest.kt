@@ -104,7 +104,7 @@ class PlayerTest {
         )
 
         UiThreadStatement.runOnUiThread {
-//            playerViewWrapper.showOverlay(getShowOverlayActionEntity(1000L))
+//            playerViewWrapper.showOverlay(getShowOverlayActionEntity(ONE_SECOND_IN_MS))
         }
 
         onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
@@ -122,7 +122,7 @@ class PlayerTest {
         )
 
         UiThreadStatement.runOnUiThread {
-//            playerViewWrapper.showOverlay(getShowOverlayActionEntity(1000L))
+//            playerViewWrapper.showOverlay(getShowOverlayActionEntity(ONE_SECOND_IN_MS))
         }
 
         onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
@@ -139,7 +139,7 @@ class PlayerTest {
             doesNotExist()
         )
         UiThreadStatement.runOnUiThread {
-//            playerViewWrapper.showOverlay(getShowOverlayActionEntity(1000L))
+//            playerViewWrapper.showOverlay(getShowOverlayActionEntity(ONE_SECOND_IN_MS))
         }
         onView(withClassName(TypeMatcher(ProportionalImageView::class.java.canonicalName))).check(
             matches(
