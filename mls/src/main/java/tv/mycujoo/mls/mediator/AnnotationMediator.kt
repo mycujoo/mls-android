@@ -13,6 +13,7 @@ import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
 import tv.mycujoo.mls.core.IAnnotationFactory
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.enum.C
+import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.enum.MessageLevel
 import tv.mycujoo.mls.helper.TimeRangeHelper.Companion.isCurrentTimeInDvrWindowDuration
 import tv.mycujoo.mls.manager.Logger
@@ -48,7 +49,7 @@ class AnnotationMediator(
 
                 annotationFactory.build(
                     currentPosition,
-                    isPlaying = player.isPlaying(),
+                    player = player,
                     interrupted = false
                 )
 
@@ -59,7 +60,12 @@ class AnnotationMediator(
         val scheduledRunnable = Runnable {
             handler.post(exoRunnable)
         }
-        scheduler.scheduleAtFixedRate(scheduledRunnable, 1000L, 1000L, TimeUnit.MILLISECONDS)
+        scheduler.scheduleAtFixedRate(
+            scheduledRunnable,
+            ONE_SECOND_IN_MS,
+            ONE_SECOND_IN_MS,
+            TimeUnit.MILLISECONDS
+        )
 
     }
 
@@ -129,7 +135,7 @@ class AnnotationMediator(
                     if (currentTimeInDvrWindowDuration) {
                         annotationFactory.build(
                             player.currentPosition(),
-                            isPlaying = player.isPlaying(),
+                            player = player,
                             interrupted = true
                         )
                     } else {
@@ -156,7 +162,7 @@ class AnnotationMediator(
     override var onSizeChangedCallback = {
         annotationFactory.build(
             player.currentPosition(),
-            isPlaying = player.isPlaying(),
+            player = player,
             interrupted = false
         )
     }

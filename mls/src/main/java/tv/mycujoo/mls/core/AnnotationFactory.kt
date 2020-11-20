@@ -11,6 +11,7 @@ import tv.mycujoo.mls.helper.HideOverlayActionHelper
 import tv.mycujoo.mls.helper.IDownloaderClient
 import tv.mycujoo.mls.helper.ShowOverlayActionHelper
 import tv.mycujoo.mls.manager.contracts.IViewHandler
+import tv.mycujoo.mls.player.IPlayer
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.Condition
 import java.util.concurrent.locks.ReentrantLock
@@ -59,7 +60,7 @@ class AnnotationFactory(
         return sortedActionList
     }
 
-    override fun build(currentPosition: Long, isPlaying: Boolean, interrupted: Boolean) {
+    override fun build(currentPosition: Long, player: IPlayer, interrupted: Boolean) {
         if (this::sortedActionList.isInitialized.not()) {
             return
         }
@@ -70,12 +71,17 @@ class AnnotationFactory(
         atomicInt.incrementAndGet()
 
         val variables = mutableSetOf<Variable>()
-
         val timelineMarkers = ArrayList<TimelineMarkerEntity>()
+
+        val isPlaying = player.isPlaying()
+        val isInPurgatory = player.isInValidSegment().not()
 
         sortedActionList.forEach {
             when (it.type) {
                 SHOW_OVERLAY -> {
+                    if (isInPurgatory) {
+                        return@forEach
+                    }
 
                     val act =
                         ShowOverlayActionHelper.getOverlayActionCurrentAct(
@@ -261,4 +267,5 @@ class AnnotationFactory(
         lock.unlock()
 
     }
+
 }

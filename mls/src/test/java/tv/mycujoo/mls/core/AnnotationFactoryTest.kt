@@ -12,9 +12,11 @@ import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.ActionSourceData
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.models.ActionType
+import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.helper.IDownloaderClient
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.matcher.OverlayEntityMatcher
+import tv.mycujoo.mls.player.IPlayer
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.test.assertTrue
 
@@ -30,6 +32,9 @@ class AnnotationFactoryTest {
     lateinit var annotationListener: IAnnotationListener
 
     @Mock
+    lateinit var player: IPlayer
+
+    @Mock
     lateinit var downloaderClient: IDownloaderClient
 
     @Mock
@@ -39,16 +44,24 @@ class AnnotationFactoryTest {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         val reentrantLock = ReentrantLock()
-        annotationFactory = AnnotationFactory(annotationListener, downloaderClient, viewHandler, reentrantLock, reentrantLock.newCondition())
+        annotationFactory = AnnotationFactory(
+            annotationListener,
+            downloaderClient,
+            viewHandler,
+            reentrantLock,
+            reentrantLock.newCondition()
+        )
     }
 
     @Test
     fun `sort timer related actions based on priority`() {
         val dataMap = buildMap<String, Any> {}
-        val actionSourceDataOfAdjustTimer = ActionSourceData("id_01", "adjust_timer", 5000L, dataMap)
+        val actionSourceDataOfAdjustTimer =
+            ActionSourceData("id_01", "adjust_timer", 5000L, dataMap)
         val actionSourceDataOfPauseTimer = ActionSourceData("id_01", "pause_timer", 5000L, dataMap)
         val actionSourceDataOfStartTimer = ActionSourceData("id_01", "start_timer", 5000L, dataMap)
-        val actionSourceDataOfCreateTimer = ActionSourceData("id_01", "create_timer", 5000L, dataMap)
+        val actionSourceDataOfCreateTimer =
+            ActionSourceData("id_01", "create_timer", 5000L, dataMap)
         val actionResponse = ActionResponse(
             listOf(
                 actionSourceDataOfAdjustTimer,
@@ -77,7 +90,7 @@ class AnnotationFactoryTest {
             .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
 
 
-        annotationFactory.build(4001L, true, interrupted = false)
+        annotationFactory.build(4001L, player, interrupted = false)
 
 
         verify(annotationListener).addOverlay(argThat(OverlayEntityMatcher("id_01")))
@@ -95,7 +108,7 @@ class AnnotationFactoryTest {
         annotationFactory.setAnnotations(actionResponse)
 
 
-        annotationFactory.build(15000L, true, interrupted = false)
+        annotationFactory.build(15000L, player, interrupted = false)
 
 
         verify(annotationListener).removeOverlay(argThat(OverlayEntityMatcher("id_01")))
@@ -118,7 +131,7 @@ class AnnotationFactoryTest {
             .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
 
 
-        annotationFactory.build(5001L, true, interrupted = true)
+        annotationFactory.build(5001L, player, interrupted = true)
 
 
 
@@ -140,7 +153,7 @@ class AnnotationFactoryTest {
             .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
 
 
-        annotationFactory.build(5001L, true, interrupted = true)
+        annotationFactory.build(5001L, player, interrupted = true)
 
 
         verify(annotationListener).addOrUpdateLingeringMidwayOverlay(
@@ -162,7 +175,7 @@ class AnnotationFactoryTest {
             .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
 
 
-        annotationFactory.build(11001L, true, interrupted = true)
+        annotationFactory.build(11001L, player, interrupted = true)
 
 
         verify(annotationListener).addOrUpdateLingeringOutroOverlay(
@@ -183,7 +196,7 @@ class AnnotationFactoryTest {
         annotationFactory.setAnnotations(actionResponse)
 
 
-        annotationFactory.build(0L, true, interrupted = true)
+        annotationFactory.build(0L, player, interrupted = true)
 
 
         verify(annotationListener).removeLingeringOverlay(argThat(OverlayEntityMatcher("id_01")))
@@ -201,7 +214,7 @@ class AnnotationFactoryTest {
         annotationFactory.setAnnotations(actionResponse)
 
 
-        annotationFactory.build(10000L, true, interrupted = true)
+        annotationFactory.build(10000L, player, interrupted = true)
 
 
         verify(annotationListener).removeLingeringOverlay(argThat(OverlayEntityMatcher("id_01")))
@@ -211,7 +224,7 @@ class AnnotationFactoryTest {
 
     companion object {
         private const val INVALID = -1L
-        private const val ONE_SECONDS = 1000L
+        private const val ONE_SECONDS = ONE_SECOND_IN_MS
         private const val TWO_SECONDS = 2000L
         private const val FIVE_SECONDS = 5000L
         private const val FIFTEEN_SECONDS = 15000L

@@ -11,6 +11,7 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import tv.mycujoo.mls.core.IAnnotationFactory
 import tv.mycujoo.mls.data.IDataManager
+import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.enum.LogLevel
 import tv.mycujoo.mls.helper.IDownloaderClient
 import tv.mycujoo.mls.manager.Logger
@@ -84,8 +85,8 @@ class AnnotationMediatorTest {
         whenever(
             scheduledExecutorService.scheduleAtFixedRate(
                 any<Runnable>(),
-                eq(1000L),
-                eq(1000L),
+                eq(ONE_SECOND_IN_MS),
+                eq(ONE_SECOND_IN_MS),
                 eq(TimeUnit.MILLISECONDS)
             )
         ).then {
@@ -126,8 +127,8 @@ class AnnotationMediatorTest {
         assert(this::eventListener.isInitialized)
         verify(scheduledExecutorService).scheduleAtFixedRate(
             any(),
-            eq(1000L),
-            eq(1000L),
+            eq(ONE_SECOND_IN_MS),
+            eq(ONE_SECOND_IN_MS),
             eq(TimeUnit.MILLISECONDS)
         )
     }
