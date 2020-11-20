@@ -75,6 +75,7 @@ class TvAnnotationFactoryTest {
             "id_0",
             ActionType.SHOW_OVERLAY,
             500L,
+            -1L,
             parsedOverlayRelatedData,
             null,
             null
@@ -107,6 +108,7 @@ class TvAnnotationFactoryTest {
             "id_0",
             ActionType.SHOW_OVERLAY,
             500L,
+            -1L,
             parsedOverlayRelatedData,
             null,
             null
@@ -139,6 +141,7 @@ class TvAnnotationFactoryTest {
             "id_0",
             ActionType.SHOW_OVERLAY,
             500L,
+            -1L,
             parsedOverlayRelatedData,
             null,
             null
@@ -250,6 +253,7 @@ class TvAnnotationFactoryTest {
             "id_0",
             ActionType.HIDE_OVERLAY,
             5000L,
+            -1L,
             parsedOverlayRelatedData,
             null,
             null
@@ -281,6 +285,7 @@ class TvAnnotationFactoryTest {
             "id_0",
             ActionType.HIDE_OVERLAY,
             5000L,
+            -1L,
             parsedOverlayRelatedData,
             null,
             null
@@ -306,6 +311,7 @@ class TvAnnotationFactoryTest {
             "id_5",
             ActionType.SET_VARIABLE,
             5000L,
+            -1L,
             null,
             null,
             dataMap
@@ -330,6 +336,7 @@ class TvAnnotationFactoryTest {
             "id_5",
             ActionType.INCREMENT_VARIABLE,
             5000L,
+            -1L,
             null,
             null,
             dataMap
@@ -361,6 +368,7 @@ class TvAnnotationFactoryTest {
             "id_6",
             ActionType.CREATE_TIMER,
             5000L,
+            -1L,
             null,
             parsedTimerRelatedData,
             null
@@ -391,6 +399,7 @@ class TvAnnotationFactoryTest {
             "id_6",
             ActionType.START_TIMER,
             5000L,
+            -1L,
             null,
             parsedTimerRelatedData,
             null
@@ -414,7 +423,7 @@ class TvAnnotationFactoryTest {
             put("name", "${"$"}scoreboardTimer")
         }
         val pauseTimerActionObject =
-            ActionSourceData("id_1", "pause_timer", 5000L, pauseTimerDataMap).toActionObject()
+            ActionSourceData("id_1", "pause_timer", 5000L, -1L, pauseTimerDataMap).toActionObject()
         tvAnnotationFactory.setAnnotations(listOf(pauseTimerActionObject))
 
         tvAnnotationFactory.build(5000L, isPlaying = true, interrupted = false)
@@ -442,7 +451,13 @@ class TvAnnotationFactoryTest {
             put("cap_value", -1L)
         }
         val createTimerActionObject =
-            ActionSourceData("id_1", "create_timer", 5000L, createTimerDataMap).toActionObject()
+            ActionSourceData(
+                "id_1",
+                "create_timer",
+                5000L,
+                -1L,
+                createTimerDataMap
+            ).toActionObject()
         tvAnnotationFactory.setAnnotations(listOf(createTimerActionObject))
 
 
@@ -467,7 +482,13 @@ class TvAnnotationFactoryTest {
             put("cap_value", -1L)
         }
         val createTimerActionObject =
-            ActionSourceData("id_1", "create_timer", 5000L, createTimerDataMap).toActionObject()
+            ActionSourceData(
+                "id_1",
+                "create_timer",
+                5000L,
+                -1L,
+                createTimerDataMap
+            ).toActionObject()
         tvAnnotationFactory.setAnnotations(listOf(createTimerActionObject))
 
 
@@ -498,12 +519,18 @@ class TvAnnotationFactoryTest {
             put("cap_value", -1L)
         }
         val createTimerActionObject =
-            ActionSourceData("id_1", "create_timer", 5000L, createTimerDataMap).toActionObject()
+            ActionSourceData(
+                "id_1",
+                "create_timer",
+                5000L,
+                -1L,
+                createTimerDataMap
+            ).toActionObject()
         val startTimerDataMap = buildMap<String, Any> {
             put("name", "${"$"}scoreboardTimer")
         }
         val startTimerActionObject =
-            ActionSourceData("id_1", "start_timer", 5000L, startTimerDataMap).toActionObject()
+            ActionSourceData("id_1", "start_timer", 5000L, -1L, startTimerDataMap).toActionObject()
 
         tvAnnotationFactory.setAnnotations(listOf(createTimerActionObject, startTimerActionObject))
 
@@ -530,12 +557,18 @@ class TvAnnotationFactoryTest {
             put("cap_value", -1L)
         }
         val createTimerActionObject =
-            ActionSourceData("id_1", "create_timer", 5000L, createTimerDataMap).toActionObject()
+            ActionSourceData(
+                "id_1",
+                "create_timer",
+                5000L,
+                -1L,
+                createTimerDataMap
+            ).toActionObject()
         val startTimerDataMap = buildMap<String, Any> {
             put("name", "${"$"}scoreboardTimer")
         }
         val startTimerActionObject =
-            ActionSourceData("id_1", "start_timer", 5000L, startTimerDataMap).toActionObject()
+            ActionSourceData("id_1", "start_timer", 5000L, -1L, startTimerDataMap).toActionObject()
 
         tvAnnotationFactory.setAnnotations(listOf(createTimerActionObject, startTimerActionObject))
 
@@ -567,20 +600,32 @@ class TvAnnotationFactoryTest {
             put("cap_value", -1L)
         }
         val createTimerActionObject =
-            ActionSourceData("id_1", "create_timer", 5000L, createTimerDataMap).toActionObject()
+            ActionSourceData(
+                "id_1",
+                "create_timer",
+                5000L,
+                -1L,
+                createTimerDataMap
+            ).toActionObject()
 
         val startTimerDataMap = buildMap<String, Any> {
             put("name", "${"$"}scoreboardTimer")
         }
         val startTimerActionObject =
-            ActionSourceData("id_1", "start_timer", 5000L, startTimerDataMap).toActionObject()
+            ActionSourceData("id_1", "start_timer", 5000L, -1L, startTimerDataMap).toActionObject()
 
         val adjustTimerDataMap = buildMap<String, Any> {
             put("name", "${"$"}scoreboardTimer")
             put("value", 42000L)
         }
         val adjustTimerActionObject =
-            ActionSourceData("id_1", "adjust_timer", 5000L, adjustTimerDataMap).toActionObject()
+            ActionSourceData(
+                "id_1",
+                "adjust_timer",
+                5000L,
+                -1L,
+                adjustTimerDataMap
+            ).toActionObject()
 
         tvAnnotationFactory.setAnnotations(
             listOf(
@@ -614,20 +659,32 @@ class TvAnnotationFactoryTest {
             put("cap_value", -1L)
         }
         val createTimerActionObject =
-            ActionSourceData("id_1", "create_timer", 5000L, createTimerDataMap).toActionObject()
+            ActionSourceData(
+                "id_1",
+                "create_timer",
+                5000L,
+                -1L,
+                createTimerDataMap
+            ).toActionObject()
 
         val startTimerDataMap = buildMap<String, Any> {
             put("name", "${"$"}scoreboardTimer")
         }
         val startTimerActionObject =
-            ActionSourceData("id_1", "start_timer", 5000L, startTimerDataMap).toActionObject()
+            ActionSourceData("id_1", "start_timer", 5000L, -1L, startTimerDataMap).toActionObject()
 
         val adjustTimerDataMap = buildMap<String, Any> {
             put("name", "${"$"}scoreboardTimer")
             put("value", 42000L)
         }
         val adjustTimerActionObject =
-            ActionSourceData("id_1", "adjust_timer", 5000L, adjustTimerDataMap).toActionObject()
+            ActionSourceData(
+                "id_1",
+                "adjust_timer",
+                5000L,
+                -1L,
+                adjustTimerDataMap
+            ).toActionObject()
 
         tvAnnotationFactory.setAnnotations(
             listOf(
