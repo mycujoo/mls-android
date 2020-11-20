@@ -15,11 +15,12 @@ class TimelineMarkerMapperTest {
         val color = "#334455"
 
 
-        val actionSourceData = ActionSourceData("id_01", "show_timeline_marker", 5000L, buildMap {
-            put("seek_offset", seekOffset)
-            put("label", title)
-            put("color", color)
-        })
+        val actionSourceData =
+            ActionSourceData("id_01", "show_timeline_marker", 5000L, -1L, buildMap {
+                put("seek_offset", seekOffset)
+                put("label", title)
+                put("color", color)
+            })
 
 
         val timelineMarker = TimelineMarkerMapper.mapToTimelineMarker(actionSourceData)
@@ -33,12 +34,16 @@ class TimelineMarkerMapperTest {
 
     @Test
     fun `given invalid actionSourceData, should return null`() {
-        val actionSourceDataWithNullId = ActionSourceData(null, "show_timeline_marker", 5000L, buildMap {})
-        val actionSourceDataWitWrongType = ActionSourceData(null, "show_overlay", 5000L, buildMap {})
+        val actionSourceDataWithNullId =
+            ActionSourceData(null, "show_timeline_marker", 5000L, -1L, buildMap {})
+        val actionSourceDataWitWrongType =
+            ActionSourceData(null, "show_overlay", 5000L, -1L, buildMap {})
 
 
-        val timelineMarkerFromNullId = TimelineMarkerMapper.mapToTimelineMarker(actionSourceDataWithNullId)
-        val timelineMarkerFromWrongType = TimelineMarkerMapper.mapToTimelineMarker(actionSourceDataWitWrongType)
+        val timelineMarkerFromNullId =
+            TimelineMarkerMapper.mapToTimelineMarker(actionSourceDataWithNullId)
+        val timelineMarkerFromWrongType =
+            TimelineMarkerMapper.mapToTimelineMarker(actionSourceDataWitWrongType)
 
 
         assertNull(timelineMarkerFromNullId)

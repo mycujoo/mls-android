@@ -12,6 +12,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -221,6 +222,36 @@ class PlayerTest {
         }
 
 
+    }
+
+    @Test
+    fun `isInValidSegment() empty list`() {
+        initPlayer()
+        val copyOnWriteArrayList = CopyOnWriteArrayList<Pair<Long, Long>>()
+        whenever(mediaOnLoadCompletedListener.getDiscontinuityBoundaries()).thenReturn(
+            copyOnWriteArrayList
+        )
+
+
+        assertTrue { player.isInValidSegment(5000000L) }
+    }
+
+    @Test
+    fun `isInValidSegment() with discontinuity segment`() {
+        initPlayer()
+        val copyOnWriteArrayList = CopyOnWriteArrayList<Pair<Long, Long>>()
+        copyOnWriteArrayList.add(Pair(5000000, 10000))
+        whenever(mediaOnLoadCompletedListener.getDiscontinuityBoundaries()).thenReturn(
+            copyOnWriteArrayList
+        )
+
+
+        assertTrue { player.isInValidSegment(4980000L) }
+        assertTrue { player.isInValidSegment(4999000L) }
+        assertFalse { player.isInValidSegment(5000000L) }
+        assertFalse { player.isInValidSegment(5005000L) }
+        assertFalse { player.isInValidSegment(5010000L) }
+        assertTrue { player.isInValidSegment(5011000L) }
     }
 
     companion object {

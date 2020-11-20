@@ -74,9 +74,9 @@ class AnnotationFactory(
         val timelineMarkers = ArrayList<TimelineMarkerEntity>()
 
         val isPlaying = player.isPlaying()
-        val isInPurgatory = player.isInValidSegment().not()
 
         sortedActionList.forEach {
+            val isInPurgatory = player.isInValidSegment(it.absoluteTime).not()
             when (it.type) {
                 SHOW_OVERLAY -> {
                     if (isInPurgatory) {

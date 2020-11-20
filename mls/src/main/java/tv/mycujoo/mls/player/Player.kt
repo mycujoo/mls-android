@@ -160,13 +160,12 @@ class Player : IPlayer {
         }
     }
 
-    override fun isInValidSegment(): Boolean {
+    override fun isInValidSegment(targetAbsoluteTime: Long): Boolean {
         if (exoPlayer == null) {
             return false
         }
-        val currentPosition = exoPlayer!!.currentPosition
         return mediaOnLoadCompletedListener.getDiscontinuityBoundaries()
-            .any { it.first <= currentPosition && it.second >= currentPosition }
+            .none { it.first <= targetAbsoluteTime && it.first + it.second >= targetAbsoluteTime }
     }
 
 

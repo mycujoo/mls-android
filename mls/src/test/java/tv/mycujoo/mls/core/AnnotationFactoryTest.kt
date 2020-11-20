@@ -57,11 +57,13 @@ class AnnotationFactoryTest {
     fun `sort timer related actions based on priority`() {
         val dataMap = buildMap<String, Any> {}
         val actionSourceDataOfAdjustTimer =
-            ActionSourceData("id_01", "adjust_timer", 5000L, dataMap)
-        val actionSourceDataOfPauseTimer = ActionSourceData("id_01", "pause_timer", 5000L, dataMap)
-        val actionSourceDataOfStartTimer = ActionSourceData("id_01", "start_timer", 5000L, dataMap)
+            ActionSourceData("id_01", "adjust_timer", 5000L, -1L, dataMap)
+        val actionSourceDataOfPauseTimer =
+            ActionSourceData("id_01", "pause_timer", 5000L, -1L, dataMap)
+        val actionSourceDataOfStartTimer =
+            ActionSourceData("id_01", "start_timer", 5000L, -1L, dataMap)
         val actionSourceDataOfCreateTimer =
-            ActionSourceData("id_01", "create_timer", 5000L, dataMap)
+            ActionSourceData("id_01", "create_timer", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(
             listOf(
                 actionSourceDataOfAdjustTimer,
@@ -83,7 +85,7 @@ class AnnotationFactoryTest {
     @Test
     fun `given ShowOverlay action, should add overlay`() {
         val dataMap = buildMap<String, Any> {}
-        val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, dataMap)
+        val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
         annotationFactory.setAnnotations(actionResponse)
         Mockito.`when`(downloaderClient.download(any(), any()))
@@ -103,7 +105,7 @@ class AnnotationFactoryTest {
             put("animateout_duration", 3000.toDouble())
             put("duration", 10000.toDouble())
         }
-        val actionSourceData = ActionSourceData("id_01", "hide_overlay", 5000L, dataMap)
+        val actionSourceData = ActionSourceData("id_01", "hide_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
         annotationFactory.setAnnotations(actionResponse)
 
@@ -124,7 +126,7 @@ class AnnotationFactoryTest {
             put("animatein_type", "fade_in")
             put("animatein_duration", 3000.toDouble())
         }
-        val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, dataMap)
+        val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
         annotationFactory.setAnnotations(actionResponse)
         Mockito.`when`(downloaderClient.download(any(), any()))
@@ -146,7 +148,7 @@ class AnnotationFactoryTest {
     @Test
     fun `given lingering midway overlay, should addOrUpdate overlay`() {
         val dataMap = buildMap<String, Any> {}
-        val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, dataMap)
+        val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
         annotationFactory.setAnnotations(actionResponse)
         Mockito.`when`(downloaderClient.download(any(), any()))
@@ -168,7 +170,7 @@ class AnnotationFactoryTest {
             put("animateout_duration", 3000.toDouble())
             put("duration", 5000.toDouble())
         }
-        val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, dataMap)
+        val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
         annotationFactory.setAnnotations(actionResponse)
         Mockito.`when`(downloaderClient.download(any(), any()))
@@ -191,7 +193,7 @@ class AnnotationFactoryTest {
             put("animateout_type", "fade_out")
             put("animateout_duration", 3000.toDouble())
         }
-        val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, dataMap)
+        val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
         annotationFactory.setAnnotations(actionResponse)
 
@@ -209,7 +211,7 @@ class AnnotationFactoryTest {
             put("animateout_type", "fade_out")
             put("animateout_duration", 1000.toDouble())
         }
-        val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, dataMap)
+        val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
         annotationFactory.setAnnotations(actionResponse)
 
