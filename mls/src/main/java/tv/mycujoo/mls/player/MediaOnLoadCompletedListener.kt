@@ -15,6 +15,7 @@ class MediaOnLoadCompletedListener(private var exoPlayer: SimpleExoPlayer) :
     private val discontinuityBoundaries = DiscontinuityBoundaries()
     private var dvrWindowDuration = -1L
 
+    // For now we work with SECOND since that is provided in name of segments instead of MS
     fun getDiscontinuityBoundaries(): CopyOnWriteArrayList<Pair<Long, Long>> {
         return discontinuityBoundaries.getBoundaries()
     }

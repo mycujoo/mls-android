@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.player
 
 import com.google.android.exoplayer2.source.hls.playlist.HlsMediaPlaylist
+import tv.mycujoo.mls.utils.StringUtils
 import java.util.concurrent.CopyOnWriteArrayList
 
 class DiscontinuityBoundaries : IDiscontinuityBoundaries {
@@ -15,12 +16,20 @@ class DiscontinuityBoundaries : IDiscontinuityBoundaries {
         }
         segments.forEach { segment ->
             if (segment.relativeDiscontinuitySequence > 0) {
-                list.add(
-                    Pair(
-                        segment.relativeStartTimeUs,
-                        segment.durationUs
+
+                val segmentTimeStamp = StringUtils.getSegmentTimeStamp(segment.url)
+                if (segmentTimeStamp.toLong() != -1L &&
+                    segment.durationUs != 0L
+                ) {
+                    var duration = segment.durationUs
+                    duration /= 1000000
+                    list.add(
+                        Pair(
+                            segmentTimeStamp.toLong(),
+                            duration
+                        )
                     )
-                )
+                }
             }
         }
     }

@@ -160,7 +160,7 @@ class Player : IPlayer {
         }
     }
 
-    override fun isInValidSegment(targetAbsoluteTime: Long): Boolean {
+    override fun isWithinValidSegment(targetAbsoluteTime: Long): Boolean {
         if (exoPlayer == null) {
             return false
         }

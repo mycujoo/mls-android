@@ -76,10 +76,10 @@ class AnnotationFactory(
         val isPlaying = player.isPlaying()
 
         sortedActionList.forEach {
-            val isInPurgatory = player.isInValidSegment(it.absoluteTime).not()
+            val isInGap = player.isWithinValidSegment(it.absoluteTime).not()
             when (it.type) {
                 SHOW_OVERLAY -> {
-                    if (isInPurgatory) {
+                    if (isInGap) {
                         return@forEach
                     }
 

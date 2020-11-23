@@ -225,7 +225,7 @@ class PlayerTest {
     }
 
     @Test
-    fun `isInValidSegment() empty list`() {
+    fun `isWithinValidSegment() empty list`() {
         initPlayer()
         val copyOnWriteArrayList = CopyOnWriteArrayList<Pair<Long, Long>>()
         whenever(mediaOnLoadCompletedListener.getDiscontinuityBoundaries()).thenReturn(
@@ -233,25 +233,55 @@ class PlayerTest {
         )
 
 
-        assertTrue { player.isInValidSegment(5000000L) }
+        assertTrue { player.isWithinValidSegment(5000000L) }
     }
 
     @Test
-    fun `isInValidSegment() with discontinuity segment`() {
+    fun `isWithinValidSegment() with discontinuity segment`() {
         initPlayer()
         val copyOnWriteArrayList = CopyOnWriteArrayList<Pair<Long, Long>>()
-        copyOnWriteArrayList.add(Pair(5000000, 10000))
+        // 1605693500 is Wednesday, 18 November 2020 09:58:20
+        copyOnWriteArrayList.add(Pair(1605693500, 10))
         whenever(mediaOnLoadCompletedListener.getDiscontinuityBoundaries()).thenReturn(
             copyOnWriteArrayList
         )
 
 
-        assertTrue { player.isInValidSegment(4980000L) }
-        assertTrue { player.isInValidSegment(4999000L) }
-        assertFalse { player.isInValidSegment(5000000L) }
-        assertFalse { player.isInValidSegment(5005000L) }
-        assertFalse { player.isInValidSegment(5010000L) }
-        assertTrue { player.isInValidSegment(5011000L) }
+        assertTrue { player.isWithinValidSegment(1605693498) }
+        assertTrue { player.isWithinValidSegment(1605693499) }
+        assertFalse { player.isWithinValidSegment(1605693500) }
+        assertFalse { player.isWithinValidSegment(1605693505) }
+        assertFalse { player.isWithinValidSegment(1605693510) }
+        assertTrue { player.isWithinValidSegment(1605693511) }
+    }
+
+    @Test
+    fun `isWithinValidSegment() with multiple discontinuity segments`() {
+        initPlayer()
+        val copyOnWriteArrayList = CopyOnWriteArrayList<Pair<Long, Long>>()
+        // 1605693500 is Wednesday, 18 November 2020 09:58:20
+        copyOnWriteArrayList.add(Pair(1605693500, 10))
+        // 1605694500 is Wednesday, 18 November 2020 10:15:00
+        copyOnWriteArrayList.add(Pair(1605694500, 5))
+
+        whenever(mediaOnLoadCompletedListener.getDiscontinuityBoundaries()).thenReturn(
+            copyOnWriteArrayList
+        )
+
+
+        assertTrue { player.isWithinValidSegment(1605693498) }
+        assertTrue { player.isWithinValidSegment(1605693499) }
+        assertFalse { player.isWithinValidSegment(1605693500) }
+        assertFalse { player.isWithinValidSegment(1605693505) }
+        assertFalse { player.isWithinValidSegment(1605693510) }
+        assertTrue { player.isWithinValidSegment(1605693511) }
+
+        assertTrue { player.isWithinValidSegment(1605694498) }
+        assertTrue { player.isWithinValidSegment(1605694499) }
+        assertFalse { player.isWithinValidSegment(1605694500) }
+        assertFalse { player.isWithinValidSegment(1605694505) }
+        assertTrue { player.isWithinValidSegment(1605694506) }
+        assertTrue { player.isWithinValidSegment(1605694507) }
     }
 
     companion object {
