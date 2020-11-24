@@ -23,7 +23,7 @@ open class ViewHandler(
     private val attachedViewList: ArrayList<ScaffoldView> = ArrayList()
 
     private val variableTranslator = VariableTranslator(dispatcher)
-    private val timeKeeper = TimerKeeper(dispatcher)
+    private val timeKeeper = VariableKeeper(dispatcher)
 
     /**endregion */
 
@@ -128,7 +128,7 @@ open class ViewHandler(
         return variableTranslator
     }
 
-    override fun getTimerKeeper(): TimerKeeper {
+    override fun getVariableKeeper(): VariableKeeper {
         return timeKeeper
     }
     /**endregion */

@@ -124,11 +124,11 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         videoPlayerMediator.initialize(MLSPlayerView, player, builder)
 
 
-        val annotationListener = AnnotationListener(MLSPlayerView, viewHandler)
+        val annotationListener =
+            AnnotationListener(MLSPlayerView, viewHandler, DownloaderClient(okHttpClient))
         val lock = ReentrantLock()
         val annotationFactory = AnnotationFactory(
             annotationListener,
-            DownloaderClient(okHttpClient),
             viewHandler,
             lock,
             lock.newCondition()

@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.core
 
 import tv.mycujoo.domain.entity.*
+import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.widgets.MLSPlayerView
 
@@ -15,16 +16,20 @@ import tv.mycujoo.mls.widgets.MLSPlayerView
  */
 class AnnotationListener(
     private val MLSPlayerView: MLSPlayerView,
-    private val viewHandler: IViewHandler
+    private val viewHandler: IViewHandler,
+    private val downloaderClient: DownloaderClient
 ) :
     IAnnotationListener {
     override fun addOverlay(overlayEntity: OverlayEntity) {
-        overlayEntity.isOnScreen = true
-        if (overlayEntity.introTransitionSpec.animationType == AnimationType.NONE) {
-            MLSPlayerView.onNewOverlayWithNoAnimation(overlayEntity)
-        } else {
-            MLSPlayerView.onNewOverlayWithAnimation(overlayEntity)
+        downloaderClient.download(overlayEntity) {
+            it.isOnScreen = true
+            if (it.introTransitionSpec.animationType == AnimationType.NONE) {
+                MLSPlayerView.onNewOverlayWithNoAnimation(it)
+            } else {
+                MLSPlayerView.onNewOverlayWithAnimation(it)
+            }
         }
+
     }
 
     override fun removeOverlay(overlayEntity: OverlayEntity) {
@@ -45,19 +50,21 @@ class AnnotationListener(
         animationPosition: Long,
         isPlaying: Boolean
     ) {
-        overlayEntity.isOnScreen = true
-        if (viewHandler.overlayBlueprintIsAttached(overlayEntity.id)) {
-            MLSPlayerView.updateLingeringIntroOverlay(
-                overlayEntity,
-                animationPosition,
-                isPlaying
-            )
-        } else {
-            MLSPlayerView.addLingeringIntroOverlay(
-                overlayEntity,
-                animationPosition,
-                isPlaying
-            )
+        downloaderClient.download(overlayEntity) {
+            overlayEntity.isOnScreen = true
+            if (viewHandler.overlayBlueprintIsAttached(overlayEntity.id)) {
+                MLSPlayerView.updateLingeringIntroOverlay(
+                    overlayEntity,
+                    animationPosition,
+                    isPlaying
+                )
+            } else {
+                MLSPlayerView.addLingeringIntroOverlay(
+                    overlayEntity,
+                    animationPosition,
+                    isPlaying
+                )
+            }
         }
     }
 
@@ -67,29 +74,34 @@ class AnnotationListener(
         isPlaying: Boolean
     ) {
         overlayEntity.isOnScreen = true
-        if (viewHandler.overlayBlueprintIsAttached(overlayEntity.id)) {
-            MLSPlayerView.updateLingeringOutroOverlay(
-                overlayEntity,
-                animationPosition,
-                isPlaying
-            )
-        } else {
-            MLSPlayerView.addLingeringOutroOverlay(
-                overlayEntity,
-                animationPosition,
-                isPlaying
-            )
+        downloaderClient.download(overlayEntity) {
+            if (viewHandler.overlayBlueprintIsAttached(it.id)) {
+                MLSPlayerView.updateLingeringOutroOverlay(
+                    it,
+                    animationPosition,
+                    isPlaying
+                )
+            } else {
+                MLSPlayerView.addLingeringOutroOverlay(
+                    it,
+                    animationPosition,
+                    isPlaying
+                )
+            }
         }
 
     }
 
     override fun addOrUpdateLingeringMidwayOverlay(overlayEntity: OverlayEntity) {
         overlayEntity.isOnScreen = true
-        if (viewHandler.overlayBlueprintIsAttached(overlayEntity.id)) {
-            MLSPlayerView.updateLingeringMidwayOverlay(overlayEntity)
-        } else {
-            MLSPlayerView.addLingeringMidwayOverlay(overlayEntity)
+        downloaderClient.download(overlayEntity) {
+            if (viewHandler.overlayBlueprintIsAttached(it.id)) {
+                MLSPlayerView.updateLingeringMidwayOverlay(it)
+            } else {
+                MLSPlayerView.addLingeringMidwayOverlay(it)
+            }
         }
+
     }
 
     override fun removeLingeringOverlay(overlayEntity: OverlayEntity) {

@@ -5,7 +5,7 @@ import android.util.Log
 import android.view.View
 import com.caverock.androidsvg.SVG
 import tv.mycujoo.domain.entity.OverlayEntity
-import tv.mycujoo.mls.manager.ITimerKeeper
+import tv.mycujoo.mls.manager.IVariableKeeper
 import tv.mycujoo.mls.manager.VariableTranslator
 import tv.mycujoo.mls.widgets.ScaffoldView
 
@@ -15,11 +15,10 @@ class OverlayFactory : IOverlayFactory {
         context: Context,
         overlayEntity: OverlayEntity,
         variableTranslator: VariableTranslator,
-        timerKeeper: ITimerKeeper
+        variableKeeper: IVariableKeeper
     ): ScaffoldView {
 
         val size = overlayEntity.viewSpec.size!!
-
         val scaffoldView = ScaffoldView(size.first, size.second, context)
         scaffoldView.id = View.generateViewId()
         scaffoldView.tag = overlayEntity.id
@@ -29,31 +28,26 @@ class OverlayFactory : IOverlayFactory {
 
         overlayEntity.variablePlaceHolders.forEach { entry ->
             // VALUE of place-holder, is the KEY in the set_variable map
-            variableTranslator.createVariableTripleIfNotExisted(entry)
-            variableTranslator.observe(
-                entry
-            ) { scaffoldView.onVariableUpdated(it) }
-
-            variableTranslator.getValue(entry)?.let {
-                scaffoldView.initialVariables(Pair(entry, it))
-            }
-
-            timerKeeper.getTimerNames().firstOrNull {
+            variableKeeper.getTimerNames().firstOrNull {
                 it == entry
             }?.let {
-                timerKeeper.observe(entry) { scaffoldView.onVariableUpdated(it) }
-                scaffoldView.initialVariables(Pair(entry, timerKeeper.getValue(entry)))
+                variableKeeper.observeOnTimer(entry) { scaffoldView.onVariableUpdated(it) }
+                scaffoldView.initialVariables(Pair(entry, variableKeeper.getValue(entry)))
+            }
+
+            variableKeeper.getVariableNames().find { it == entry }?.let {
+                variableKeeper.observeOnVariable(entry) { scaffoldView.onVariableUpdated(it) }
+                scaffoldView.initialVariables(Pair(entry, variableKeeper.getValue(entry)))
             }
         }
 
         try {
             val svg: SVG
             var rawString = overlayEntity.svgData!!.svgString!!
-
             overlayEntity.variablePlaceHolders.forEach { placeHolder ->
                 var value = variableTranslator.getValue(placeHolder)
                 if (value == null) {
-                    value = timerKeeper.getValue(placeHolder)
+                    value = variableKeeper.getValue(placeHolder)
                 }
                 rawString =
                     rawString.replace(placeHolder, value.toString())

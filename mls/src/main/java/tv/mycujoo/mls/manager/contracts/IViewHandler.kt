@@ -1,7 +1,7 @@
 package tv.mycujoo.mls.manager.contracts
 
 import android.animation.ObjectAnimator
-import tv.mycujoo.mls.manager.TimerKeeper
+import tv.mycujoo.mls.manager.VariableKeeper
 import tv.mycujoo.mls.manager.VariableTranslator
 import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ScaffoldView
@@ -29,5 +29,5 @@ interface IViewHandler {
     fun decrementIdlingResource()
 
     fun getVariableTranslator(): VariableTranslator
-    fun getTimerKeeper(): TimerKeeper
+    fun getVariableKeeper(): VariableKeeper
 }

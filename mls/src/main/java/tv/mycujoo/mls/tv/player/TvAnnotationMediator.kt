@@ -47,7 +47,7 @@ class TvAnnotationMediator(
 
 
         tvAnnotationFactory =
-            TvAnnotationFactory(tvAnnotationListener, viewHandler.getTimerKeeper())
+            TvAnnotationFactory(tvAnnotationListener, viewHandler.getVariableKeeper())
 
         player.addListener(object : Player.EventListener {
             override fun onPositionDiscontinuity(reason: Int) {

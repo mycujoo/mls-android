@@ -21,6 +21,7 @@ data class EventEntity(
 
 data class Stream(
     @SerializedName("id") val id: String,
+    @SerializedName("dvr_window") val dvrWindow: Long,
     @SerializedName("full_url") val fullUrl: String?,
     @SerializedName("widevine") val widevine: Widevine?
 )

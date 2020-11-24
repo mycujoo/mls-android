@@ -1,19 +1,19 @@
 package tv.mycujoo.mls.helper
 
 import tv.mycujoo.domain.entity.ActionObject
-import tv.mycujoo.domain.entity.OverlayAct
+import tv.mycujoo.domain.entity.HideOverlayAct
 
 class HideOverlayActionHelper {
     companion object {
         fun getOverlayActionCurrentAct(
             currentTime: Long,
             actionObject: ActionObject
-        ): OverlayAct {
+        ): HideOverlayAct {
             if (ShowOverlayActionHelper.outroIsInCurrentTimeRange(currentTime, actionObject)) {
-                return OverlayAct.OUTRO
+                return HideOverlayAct.OUTRO
             }
 
-            return OverlayAct.DO_NOTHING
+            return HideOverlayAct.DO_NOTHING
         }
     }
 }

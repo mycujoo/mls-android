@@ -3,17 +3,15 @@ package tv.mycujoo.mls.core
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argThat
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.ActionSourceData
-import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
-import tv.mycujoo.mls.helper.IDownloaderClient
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.matcher.OverlayEntityMatcher
 import tv.mycujoo.mls.player.IPlayer
@@ -27,15 +25,11 @@ class AnnotationFactoryTest {
     private lateinit var annotationFactory: AnnotationFactory
 
     /**endregion */
-
     @Mock
     lateinit var annotationListener: IAnnotationListener
 
     @Mock
     lateinit var player: IPlayer
-
-    @Mock
-    lateinit var downloaderClient: IDownloaderClient
 
     @Mock
     lateinit var viewHandler: IViewHandler
@@ -46,11 +40,12 @@ class AnnotationFactoryTest {
         val reentrantLock = ReentrantLock()
         annotationFactory = AnnotationFactory(
             annotationListener,
-            downloaderClient,
             viewHandler,
             reentrantLock,
             reentrantLock.newCondition()
         )
+
+        whenever(player.dvrWindowSize()).thenReturn(60000)
     }
 
     @Test
@@ -72,7 +67,7 @@ class AnnotationFactoryTest {
                 actionSourceDataOfCreateTimer
             )
         )
-        annotationFactory.setAnnotations(actionResponse)
+        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
 
 
         assertTrue { annotationFactory.actionList()[0].type == ActionType.CREATE_TIMER }
@@ -87,9 +82,10 @@ class AnnotationFactoryTest {
         val dataMap = buildMap<String, Any> {}
         val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse)
-        Mockito.`when`(downloaderClient.download(any(), any()))
-            .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
+        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+//        Mockito.`when`(downloaderClient.download(any(), any()))
+//            .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
+        whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
 
         annotationFactory.build(4001L, player, interrupted = false)
@@ -107,7 +103,7 @@ class AnnotationFactoryTest {
         }
         val actionSourceData = ActionSourceData("id_01", "hide_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse)
+        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
 
 
         annotationFactory.build(15000L, player, interrupted = false)
@@ -128,9 +124,8 @@ class AnnotationFactoryTest {
         }
         val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse)
-        Mockito.`when`(downloaderClient.download(any(), any()))
-            .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
+        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
 
         annotationFactory.build(5001L, player, interrupted = true)
@@ -150,9 +145,8 @@ class AnnotationFactoryTest {
         val dataMap = buildMap<String, Any> {}
         val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse)
-        Mockito.`when`(downloaderClient.download(any(), any()))
-            .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
+        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
 
         annotationFactory.build(5001L, player, interrupted = true)
@@ -172,9 +166,8 @@ class AnnotationFactoryTest {
         }
         val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse)
-        Mockito.`when`(downloaderClient.download(any(), any()))
-            .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
+        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
 
         annotationFactory.build(11001L, player, interrupted = true)
@@ -195,7 +188,8 @@ class AnnotationFactoryTest {
         }
         val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse)
+        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
 
         annotationFactory.build(0L, player, interrupted = true)
@@ -213,7 +207,8 @@ class AnnotationFactoryTest {
         }
         val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse)
+        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
 
         annotationFactory.build(10000L, player, interrupted = true)

@@ -11,12 +11,12 @@ import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.helper.ShowOverlayActionHelper
 import tv.mycujoo.mls.helper.VariableActionHelper
 import tv.mycujoo.mls.helper.VariableActionHelper.Companion.getIncrementVariableCurrentAct
-import tv.mycujoo.mls.manager.TimerKeeper
 import tv.mycujoo.mls.manager.TimerVariable
+import tv.mycujoo.mls.manager.VariableKeeper
 
 class TvAnnotationFactory(
     private val tvAnnotationListener: TvAnnotationListener,
-    private val timerKeeper: TimerKeeper
+    private val variableKeeper: VariableKeeper
 ) {
 
     private lateinit var sortedActionList: List<ActionObject>
@@ -137,7 +137,7 @@ class TvAnnotationFactory(
                 }
                 CREATE_TIMER -> {
                     it.toCreateTimerEntity()?.let { createTimerEntity ->
-                        timerKeeper.createTimerPublisher(createTimerEntity.name)
+                        variableKeeper.createTimerPublisher(createTimerEntity.name)
 
                         timerVariables[createTimerEntity.name] =
                             TimerVariable(
@@ -181,6 +181,6 @@ class TvAnnotationFactory(
             }
         }
 
-        timerKeeper.notify(timerVariables)
+        variableKeeper.notifyTimers(timerVariables)
     }
 }
