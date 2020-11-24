@@ -20,11 +20,6 @@ class MediaOnLoadCompletedListener(private var exoPlayer: SimpleExoPlayer) :
         return discontinuityBoundaries.getBoundaries()
     }
 
-    fun getDvrWindowDuration(): Long {
-        return dvrWindowDuration
-    }
-
-
     override fun onLoadCompleted(
         windowIndex: Int,
         mediaPeriodId: MediaSource.MediaPeriodId?,
@@ -45,13 +40,11 @@ class MediaOnLoadCompletedListener(private var exoPlayer: SimpleExoPlayer) :
 
                 (window.manifest as HlsManifest).mediaPlaylist.segments.let {
                     discontinuityBoundaries.segments(it)
-
                 }
             }
         } else {
             clear()
         }
-
 
     }
 

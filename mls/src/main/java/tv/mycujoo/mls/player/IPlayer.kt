@@ -26,10 +26,16 @@ interface IPlayer {
 
     fun release()
 
-    fun play(uriString: String, autoPlay: Boolean)
-    fun play(uriString: String, licenseUrl: String, autoPlay: Boolean)
+    fun play(uriString: String, dvrWindowSize: Long = Long.MAX_VALUE, autoPlay: Boolean)
+    fun play(
+        uriString: String,
+        dvrWindowSize: Long = Long.MAX_VALUE,
+        licenseUrl: String,
+        autoPlay: Boolean
+    )
+
     fun loadLastVideo()
 
-    fun isWithinValidSegment(targetAbsoluteTime: Long): Boolean
+    fun isWithinValidSegment(targetAbsoluteTime: Long): Boolean?
     fun dvrWindowSize(): Long
 }

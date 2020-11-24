@@ -114,7 +114,7 @@ class VideoPlayerMediator(
         player: IPlayer
     ) {
         MLSPlayerView.prepare(
-            OverlayViewHelper(viewHandler, OverlayFactory() ,AnimationFactory()),
+            OverlayViewHelper(viewHandler, OverlayFactory(), AnimationFactory()),
             viewHandler,
             timelineMarkerActionEntities
         )
@@ -300,7 +300,7 @@ class VideoPlayerMediator(
     }
 
     fun playExternalSourceVideo(videoUri: String) {
-        player.play(videoUri, videoPlayerConfig.autoPlay)
+        player.play(videoUri, Long.MAX_VALUE, videoPlayerConfig.autoPlay)
         playerView.hideEventInfoDialog()
         playerView.hideEventInfoButton()
     }
@@ -330,11 +330,12 @@ class VideoPlayerMediator(
         if (stream.widevine?.fullUrl != null && stream.widevine?.licenseUrl != null) {
             player.play(
                 stream.widevine.fullUrl,
+                stream.dvrWindow,
                 stream.widevine.licenseUrl,
                 videoPlayerConfig.autoPlay
             )
         } else if (stream.fullUrl != null) {
-            player.play(stream.fullUrl, videoPlayerConfig.autoPlay)
+            player.play(stream.fullUrl, stream.dvrWindow, videoPlayerConfig.autoPlay)
         }
 
     }

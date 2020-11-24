@@ -182,7 +182,7 @@ class PlayerTest {
         initPlayer()
         whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
 
-        player.play(SAMPLE_URI, true)
+        player.play(SAMPLE_URI, Long.MAX_VALUE,true)
 
 
         val mediaSourceCaptor = argumentCaptor<MediaSource>()
@@ -203,7 +203,7 @@ class PlayerTest {
         initPlayer()
 
 
-        player.play(SAMPLE_URI, true)
+        player.play(SAMPLE_URI, Long.MAX_VALUE,true)
 
 
         val mediaItemCaptor = argumentCaptor<MediaItem>()
@@ -233,7 +233,7 @@ class PlayerTest {
         )
 
 
-        assertTrue { player.isWithinValidSegment(5000000L) }
+        assertTrue { player.isWithinValidSegment(5000000L)!! }
     }
 
     @Test
@@ -247,12 +247,12 @@ class PlayerTest {
         )
 
 
-        assertTrue { player.isWithinValidSegment(1605693498) }
-        assertTrue { player.isWithinValidSegment(1605693499) }
-        assertFalse { player.isWithinValidSegment(1605693500) }
-        assertFalse { player.isWithinValidSegment(1605693505) }
-        assertFalse { player.isWithinValidSegment(1605693510) }
-        assertTrue { player.isWithinValidSegment(1605693511) }
+        assertTrue { player.isWithinValidSegment(1605693498)!! }
+        assertTrue { player.isWithinValidSegment(1605693499)!! }
+        assertFalse { player.isWithinValidSegment(1605693500)!! }
+        assertFalse { player.isWithinValidSegment(1605693505)!! }
+        assertFalse { player.isWithinValidSegment(1605693510)!! }
+        assertTrue { player.isWithinValidSegment(1605693511)!! }
     }
 
     @Test
@@ -269,19 +269,19 @@ class PlayerTest {
         )
 
 
-        assertTrue { player.isWithinValidSegment(1605693498) }
-        assertTrue { player.isWithinValidSegment(1605693499) }
-        assertFalse { player.isWithinValidSegment(1605693500) }
-        assertFalse { player.isWithinValidSegment(1605693505) }
-        assertFalse { player.isWithinValidSegment(1605693510) }
-        assertTrue { player.isWithinValidSegment(1605693511) }
+        assertTrue { player.isWithinValidSegment(1605693498)!! }
+        assertTrue { player.isWithinValidSegment(1605693499)!! }
+        assertFalse { player.isWithinValidSegment(1605693500)!! }
+        assertFalse { player.isWithinValidSegment(1605693505)!! }
+        assertFalse { player.isWithinValidSegment(1605693510)!! }
+        assertTrue { player.isWithinValidSegment(1605693511)!! }
 
-        assertTrue { player.isWithinValidSegment(1605694498) }
-        assertTrue { player.isWithinValidSegment(1605694499) }
-        assertFalse { player.isWithinValidSegment(1605694500) }
-        assertFalse { player.isWithinValidSegment(1605694505) }
-        assertTrue { player.isWithinValidSegment(1605694506) }
-        assertTrue { player.isWithinValidSegment(1605694507) }
+        assertTrue { player.isWithinValidSegment(1605694498)!! }
+        assertTrue { player.isWithinValidSegment(1605694499)!! }
+        assertFalse { player.isWithinValidSegment(1605694500)!! }
+        assertFalse { player.isWithinValidSegment(1605694505)!! }
+        assertTrue { player.isWithinValidSegment(1605694506)!! }
+        assertTrue { player.isWithinValidSegment(1605694507)!! }
     }
 
     companion object {

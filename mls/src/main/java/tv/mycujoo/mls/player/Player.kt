@@ -23,6 +23,7 @@ class Player : IPlayer {
     private var playbackPosition: Long = -1L
 
     private var uri: Uri? = null
+    private var dvrWindowSize: Long = Long.MAX_VALUE
     private var licenseUrl: Uri? = null
 
     override fun create(
@@ -100,15 +101,22 @@ class Player : IPlayer {
     }
 
 
-    override fun play(uriString: String, autoPlay: Boolean) {
+    override fun play(uriString: String, dvrWindowSize: Long, autoPlay: Boolean) {
         this.uri = Uri.parse(uriString)
+        this.dvrWindowSize = dvrWindowSize
         val mediaItem = MediaItem.Builder().setUri(uri).build()
         play(mediaItem, autoPlay)
 
     }
 
-    override fun play(uriString: String, licenseUrl: String, autoPlay: Boolean) {
+    override fun play(
+        uriString: String,
+        dvrWindowSize: Long,
+        licenseUrl: String,
+        autoPlay: Boolean
+    ) {
         this.uri = Uri.parse(uriString)
+        this.dvrWindowSize = dvrWindowSize
         this.licenseUrl = Uri.parse(licenseUrl)
 
         val mediaItem = MediaItem.Builder()
@@ -152,17 +160,20 @@ class Player : IPlayer {
 
     override fun loadLastVideo() {
         if (licenseUrl != null) {
-            play(uri.toString(), licenseUrl.toString(), false)
+            play(uri.toString(), dvrWindowSize, licenseUrl.toString(), false)
         } else {
             uri?.let {
-                play(it.toString(), false)
+                play(it.toString(), dvrWindowSize, false)
             }
         }
     }
 
-    override fun isWithinValidSegment(targetAbsoluteTime: Long): Boolean {
+    override fun isWithinValidSegment(targetAbsoluteTime: Long): Boolean? {
         if (exoPlayer == null) {
-            return false
+            return null
+        }
+        if (targetAbsoluteTime == -1L) {
+            return null
         }
         return mediaOnLoadCompletedListener.getDiscontinuityBoundaries()
             .none { it.first <= targetAbsoluteTime && it.first + it.second >= targetAbsoluteTime }
@@ -170,7 +181,8 @@ class Player : IPlayer {
 
 
     override fun dvrWindowSize(): Long {
-        return mediaOnLoadCompletedListener.getDvrWindowDuration()
+        return dvrWindowSize
+
     }
 
     companion object {
