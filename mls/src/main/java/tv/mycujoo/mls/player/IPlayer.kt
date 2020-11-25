@@ -20,6 +20,7 @@ interface IPlayer {
 
     fun seekTo(offset: Long)
     fun currentPosition(): Long
+    fun currentAbsoluteTime(): Long
     fun duration(): Long
     fun isLive(): Boolean
     fun isPlaying(): Boolean

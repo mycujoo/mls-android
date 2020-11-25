@@ -5,9 +5,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-class DiscontinuityBoundariesTest {
+class SegmentProcessorTest {
 
-    private lateinit var discontinuityBoundaries: DiscontinuityBoundaries
+    private lateinit var segmentProcessor: SegmentProcessor
 
     var contentSegment = HlsMediaPlaylist.Segment(
         "https://dc9jagk60w3y3mt6171f-0428f4.p5cdn.com/amir/ckhkdu7u801zw010167b2moe5/1080p/1080_segment_1605693445_00000.ts",
@@ -52,33 +52,33 @@ class DiscontinuityBoundariesTest {
 
     @Before
     fun setUp() {
-        discontinuityBoundaries = DiscontinuityBoundaries()
+        segmentProcessor = SegmentProcessor()
     }
 
     @Test
     fun `empty test`() {
-        assertTrue(discontinuityBoundaries.getBoundaries().isEmpty())
+        assertTrue(segmentProcessor.getDiscontinuityBoundaries().isEmpty())
     }
 
     @Test
     fun `segment with content test`() {
-        discontinuityBoundaries.segments(listOf(contentSegment))
+        segmentProcessor.process(listOf(contentSegment))
 
-        assertTrue(discontinuityBoundaries.getBoundaries().isEmpty())
+        assertTrue(segmentProcessor.getDiscontinuityBoundaries().isEmpty())
     }
 
     @Test
     fun `segment with discontinuity test`() {
-        discontinuityBoundaries.segments(listOf(discontinuitySegment))
+        segmentProcessor.process(listOf(discontinuitySegment))
 
-        assertTrue(discontinuityBoundaries.getBoundaries().isNotEmpty())
+        assertTrue(segmentProcessor.getDiscontinuityBoundaries().isNotEmpty())
     }
 
     @Test
     fun `should ignore discontinuity segment with zero duration`() {
-        discontinuityBoundaries.segments(listOf(discontinuitySegmentWithZeroDuration))
+        segmentProcessor.process(listOf(discontinuitySegmentWithZeroDuration))
 
-        assertTrue(discontinuityBoundaries.getBoundaries().isEmpty())
+        assertTrue(segmentProcessor.getDiscontinuityBoundaries().isEmpty())
     }
 
 

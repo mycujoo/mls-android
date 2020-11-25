@@ -56,6 +56,19 @@ class Player : IPlayer {
         return exoPlayer?.currentPosition ?: -1L
     }
 
+    override fun currentAbsoluteTime(): Long {
+        exoPlayer?.let { exoplayer ->
+            val windowStartTime = mediaOnLoadCompletedListener.getWindowStartTime()
+            if (windowStartTime == -1L) {
+                return windowStartTime
+            }
+
+            return windowStartTime + (exoplayer.currentPosition / 1000)
+        }
+
+        return -1L
+    }
+
     override fun duration(): Long {
         return exoPlayer?.duration ?: -1L
     }
