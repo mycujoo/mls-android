@@ -38,7 +38,7 @@ class SegmentProcessor : ISegmentProcessor {
                 ) {
                     val epochInMS = MathUtils.convertToEpochInMS(segmentTimeStamp.toLong())
                     var duration = segment.durationUs
-                    duration /= 1000000
+                    duration /= 1000
                     dcSegmentsList.add(
                         Pair(
                             epochInMS,

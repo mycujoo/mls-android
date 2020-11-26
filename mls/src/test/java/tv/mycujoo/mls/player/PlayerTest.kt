@@ -116,6 +116,33 @@ class PlayerTest {
     }
 
     @Test
+    fun `absolute time test at the beginning`() {
+        initPlayer()
+        whenever(exoPlayer.currentPosition).thenReturn(0L)
+        whenever(mediaOnLoadCompletedListener.getWindowStartTime()).thenReturn(1605609882000L)
+
+        assertEquals(1605609882000L, player.currentAbsoluteTime())
+    }
+
+    @Test
+    fun `absolute time test after beginning`() {
+        initPlayer()
+        whenever(exoPlayer.currentPosition).thenReturn(4000L)
+        whenever(mediaOnLoadCompletedListener.getWindowStartTime()).thenReturn(1605609882000L)
+
+        assertEquals(1605609886000L, player.currentAbsoluteTime())
+    }
+
+    @Test
+    fun `absolute time test without window-start-time`() {
+        initPlayer()
+        whenever(exoPlayer.currentPosition).thenReturn(4000L)
+        whenever(mediaOnLoadCompletedListener.getWindowStartTime()).thenReturn(-1L)
+
+        assertEquals(-1L, player.currentAbsoluteTime())
+    }
+
+    @Test
     fun `given uninitialized state, should return -1 as duration`() {
         //not initialized
 
@@ -182,7 +209,7 @@ class PlayerTest {
         initPlayer()
         whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
 
-        player.play(SAMPLE_URI, Long.MAX_VALUE,true)
+        player.play(SAMPLE_URI, Long.MAX_VALUE, true)
 
 
         val mediaSourceCaptor = argumentCaptor<MediaSource>()
@@ -203,7 +230,7 @@ class PlayerTest {
         initPlayer()
 
 
-        player.play(SAMPLE_URI, Long.MAX_VALUE,true)
+        player.play(SAMPLE_URI, Long.MAX_VALUE, true)
 
 
         val mediaItemCaptor = argumentCaptor<MediaItem>()

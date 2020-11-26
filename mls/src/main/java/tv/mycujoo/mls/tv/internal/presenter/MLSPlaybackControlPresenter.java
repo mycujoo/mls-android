@@ -238,7 +238,7 @@ public class MLSPlaybackControlPresenter extends MLSControlBarPresenter {
     }
 
     public int getTotalTime(ViewHolder vh) {
-        return MathUtils.safeLongToInt(getTotalTimeLong(vh));
+        return MathUtils.Companion.safeLongToInt(getTotalTimeLong(vh));
     }
 
     public long getTotalTimeLong(ViewHolder vh) {
@@ -254,7 +254,7 @@ public class MLSPlaybackControlPresenter extends MLSControlBarPresenter {
     }
 
     public int getCurrentTime(ViewHolder vh) {
-        return MathUtils.safeLongToInt(getCurrentTimeLong(vh));
+        return MathUtils.Companion.safeLongToInt(getCurrentTimeLong(vh));
     }
 
     public long getCurrentTimeLong(ViewHolder vh) {
@@ -270,7 +270,7 @@ public class MLSPlaybackControlPresenter extends MLSControlBarPresenter {
     }
 
     public int getSecondaryProgress(ViewHolder vh) {
-        return MathUtils.safeLongToInt(getSecondaryProgressLong(vh));
+        return MathUtils.Companion.safeLongToInt(getSecondaryProgressLong(vh));
     }
 
     public long getSecondaryProgressLong(ViewHolder vh) {

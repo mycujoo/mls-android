@@ -12,12 +12,15 @@ import java.util.concurrent.CopyOnWriteArrayList
 class MediaOnLoadCompletedListener(private var exoPlayer: SimpleExoPlayer) :
     MediaSourceEventListener {
 
-    private val discontinuityBoundaries = DiscontinuityBoundaries()
-    private var dvrWindowDuration = -1L
+    private val segmentProcessor = SegmentProcessor()
 
     // For now we work with SECOND since that is provided in name of segments instead of MS
     fun getDiscontinuityBoundaries(): CopyOnWriteArrayList<Pair<Long, Long>> {
-        return discontinuityBoundaries.getBoundaries()
+        return segmentProcessor.getDiscontinuityBoundaries()
+    }
+
+    fun getWindowStartTime(): Long {
+        return segmentProcessor.getWindowStartTime()
     }
 
     override fun onLoadCompleted(
@@ -32,14 +35,8 @@ class MediaOnLoadCompletedListener(private var exoPlayer: SimpleExoPlayer) :
             val window = Timeline.Window()
             exoPlayer.currentTimeline.getWindow(0, window)
             if (window.manifest is HlsManifest) {
-                // calculate window
-                window.windowStartTimeMs
-                window.durationMs
-
-                dvrWindowDuration = window.durationMs
-
                 (window.manifest as HlsManifest).mediaPlaylist.segments.let {
-                    discontinuityBoundaries.segments(it)
+                    segmentProcessor.process(it)
                 }
             }
         } else {
@@ -49,7 +46,6 @@ class MediaOnLoadCompletedListener(private var exoPlayer: SimpleExoPlayer) :
     }
 
     fun clear() {
-        dvrWindowDuration = -1L
-        discontinuityBoundaries.clear()
+        segmentProcessor.clear()
     }
 }

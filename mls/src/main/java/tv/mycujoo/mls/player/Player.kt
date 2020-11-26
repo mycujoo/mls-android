@@ -63,7 +63,7 @@ class Player : IPlayer {
                 return windowStartTime
             }
 
-            return windowStartTime + (exoplayer.currentPosition / 1000)
+            return windowStartTime + exoplayer.currentPosition
         }
 
         return -1L

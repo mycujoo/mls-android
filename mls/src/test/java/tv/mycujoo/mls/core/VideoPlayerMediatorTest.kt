@@ -94,6 +94,7 @@ class VideoPlayerMediatorTest {
     @Mock
     lateinit var exoPlayer: SimpleExoPlayer
     private lateinit var exoPlayerMainEventListener: MainEventListener
+
     @Mock
     lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
 
@@ -519,7 +520,7 @@ class VideoPlayerMediatorTest {
     /**region Fake data*/
     companion object {
         private fun getSampleStreamList(): List<Stream> {
-            return listOf(Stream("stream_id_0", "stream_url", null))
+            return listOf(Stream("stream_id_0", Long.MAX_VALUE, "stream_url", null))
         }
 
         fun getSampleEventEntity(
