@@ -1,7 +1,7 @@
 package tv.mycujoo.mls.core
 
 import tv.mycujoo.domain.entity.*
-import tv.mycujoo.mls.helper.DownloaderClient
+import tv.mycujoo.mls.helper.IDownloaderClient
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.widgets.MLSPlayerView
 
@@ -17,7 +17,7 @@ import tv.mycujoo.mls.widgets.MLSPlayerView
 class AnnotationListener(
     private val MLSPlayerView: MLSPlayerView,
     private val viewHandler: IViewHandler,
-    private val downloaderClient: DownloaderClient
+    private val downloaderClient: IDownloaderClient
 ) :
     IAnnotationListener {
     override fun addOverlay(overlayEntity: OverlayEntity) {

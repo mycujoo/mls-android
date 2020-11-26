@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.player
 
 import com.google.android.exoplayer2.source.hls.playlist.HlsMediaPlaylist
+import tv.mycujoo.mls.utils.MathUtils
 import tv.mycujoo.mls.utils.StringUtils
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -23,8 +24,10 @@ class SegmentProcessor : ISegmentProcessor {
         segments.forEachIndexed { index, segment ->
             if (index == 0) {
                 val segmentTimeStamp = StringUtils.getSegmentTimeStamp(segment.url)
-                if (segmentTimeStamp.toLong() != -1L) {
-                    windowStartTime = segmentTimeStamp.toLong()
+                windowStartTime = if (segmentTimeStamp.toLong() != -1L) {
+                    MathUtils.convertToEpochInMS(segmentTimeStamp.toLong())
+                } else {
+                    -1L
                 }
             }
             if (segment.relativeDiscontinuitySequence > 0) {
@@ -33,11 +36,12 @@ class SegmentProcessor : ISegmentProcessor {
                 if (segmentTimeStamp.toLong() != -1L &&
                     segment.durationUs != 0L
                 ) {
+                    val epochInMS = MathUtils.convertToEpochInMS(segmentTimeStamp.toLong())
                     var duration = segment.durationUs
                     duration /= 1000000
                     dcSegmentsList.add(
                         Pair(
-                            segmentTimeStamp.toLong(),
+                            epochInMS,
                             duration
                         )
                     )
