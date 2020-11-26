@@ -18,6 +18,14 @@ class HideOverlayActionHelper {
             ) {
                 return HideOverlayAct.OUTRO
             }
+            if (ShowOverlayActionHelper.isLingeringInOutroAnimation(
+                    timeSystem,
+                    currentTime,
+                    actionObject
+                )
+            ) {
+                return HideOverlayAct.LINGERING_OUTRO
+            }
 
             return HideOverlayAct.DO_NOTHING
         }

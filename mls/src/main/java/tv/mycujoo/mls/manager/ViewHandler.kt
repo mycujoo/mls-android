@@ -128,7 +128,7 @@ open class ViewHandler(
         return variableTranslator
     }
 
-    override fun getVariableKeeper(): VariableKeeper {
+    override fun getVariableKeeper(): IVariableKeeper {
         return timeKeeper
     }
     /**endregion */

@@ -2,6 +2,7 @@ package tv.mycujoo.domain.entity
 
 enum class HideOverlayAct {
     DO_NOTHING,
-    OUTRO
+    OUTRO,
+    LINGERING_OUTRO
 
 }

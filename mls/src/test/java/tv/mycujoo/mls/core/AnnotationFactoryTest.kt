@@ -12,6 +12,7 @@ import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.ActionSourceData
 import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
+import tv.mycujoo.mls.manager.IVariableKeeper
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.matcher.OverlayEntityMatcher
 import tv.mycujoo.mls.player.IPlayer
@@ -34,9 +35,16 @@ class AnnotationFactoryTest {
     @Mock
     lateinit var viewHandler: IViewHandler
 
+    @Mock
+    lateinit var variableKeeper: IVariableKeeper
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+
+        whenever(player.dvrWindowSize()).thenReturn(60000)
+        whenever(viewHandler.getVariableKeeper()).thenReturn(variableKeeper)
+
         val reentrantLock = ReentrantLock()
         annotationFactory = AnnotationFactory(
             annotationListener,
@@ -45,7 +53,6 @@ class AnnotationFactoryTest {
             reentrantLock.newCondition()
         )
 
-        whenever(player.dvrWindowSize()).thenReturn(60000)
     }
 
     @Test
@@ -104,11 +111,11 @@ class AnnotationFactoryTest {
         val actionResponse = ActionResponse(listOf(actionSourceData))
         annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
 
-        val buildPoint = BuildPoint(5001L, -1L, player, isPlaying = true, isInterrupted = false)
+        val buildPoint = BuildPoint(15001L, -1L, player, isPlaying = true, isInterrupted = false)
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).removeOverlay(argThat(OverlayEntityMatcher("id_01")))
+        verify(annotationListener).removeLingeringOverlay(argThat(OverlayEntityMatcher("id_01")))
     }
 
     /**endregion */

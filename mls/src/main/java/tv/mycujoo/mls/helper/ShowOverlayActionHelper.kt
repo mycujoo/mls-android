@@ -277,7 +277,7 @@ class ShowOverlayActionHelper {
                     ))
         }
 
-        private fun isLingeringInOutroAnimation(
+        fun isLingeringInOutroAnimation(
             timeSystem: TimeSystem,
             currentTime: Long,
             actionObject: ActionObject

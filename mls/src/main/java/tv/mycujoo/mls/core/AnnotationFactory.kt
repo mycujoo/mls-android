@@ -255,6 +255,9 @@ class AnnotationFactory(
             HideOverlayAct.OUTRO -> {
                 annotationListener.removeOverlay(actionObject.toOverlayEntity()!!)
             }
+            HideOverlayAct.LINGERING_OUTRO -> {
+                annotationListener.removeLingeringOverlay(actionObject.toOverlayEntity()!!)
+            }
         }
     }
 

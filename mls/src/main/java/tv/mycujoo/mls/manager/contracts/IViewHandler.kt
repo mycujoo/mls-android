@@ -1,7 +1,7 @@
 package tv.mycujoo.mls.manager.contracts
 
 import android.animation.ObjectAnimator
-import tv.mycujoo.mls.manager.VariableKeeper
+import tv.mycujoo.mls.manager.IVariableKeeper
 import tv.mycujoo.mls.manager.VariableTranslator
 import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ScaffoldView
@@ -9,7 +9,7 @@ import tv.mycujoo.mls.widgets.ScaffoldView
 interface IViewHandler {
 
     fun setOverlayHost(overlayHost: OverlayHost)
-    fun getOverlayHost() : OverlayHost
+    fun getOverlayHost(): OverlayHost
 
 
     fun addAnimation(id: String, objectAnimator: ObjectAnimator)
@@ -29,5 +29,5 @@ interface IViewHandler {
     fun decrementIdlingResource()
 
     fun getVariableTranslator(): VariableTranslator
-    fun getVariableKeeper(): VariableKeeper
+    fun getVariableKeeper(): IVariableKeeper
 }

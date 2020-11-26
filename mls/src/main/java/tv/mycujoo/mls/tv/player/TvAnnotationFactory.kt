@@ -12,12 +12,12 @@ import tv.mycujoo.mls.helper.ShowOverlayActionHelper
 import tv.mycujoo.mls.helper.TimeSystem
 import tv.mycujoo.mls.helper.VariableActionHelper
 import tv.mycujoo.mls.helper.VariableActionHelper.Companion.getIncrementVariableCurrentAct
+import tv.mycujoo.mls.manager.IVariableKeeper
 import tv.mycujoo.mls.manager.TimerVariable
-import tv.mycujoo.mls.manager.VariableKeeper
 
 class TvAnnotationFactory(
     private val tvAnnotationListener: TvAnnotationListener,
-    private val variableKeeper: VariableKeeper
+    private val variableKeeper: IVariableKeeper
 ) {
 
     private lateinit var sortedActionList: List<ActionObject>
