@@ -4,6 +4,8 @@ import tv.mycujoo.domain.entity.ActionObject
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.OverlayAct
 import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
+import tv.mycujoo.mls.helper.TimeSystem.ABSOLUTE
+import tv.mycujoo.mls.helper.TimeSystem.RELATIVE
 
 class ShowOverlayActionHelper {
     companion object {
@@ -11,32 +13,51 @@ class ShowOverlayActionHelper {
             return (actionObject.offset > currentTime) && (actionObject.offset + ONE_SECOND_IN_MS > currentTime)
         }
 
-        private fun hasPassedDuration(currentTime: Long, actionObject: ActionObject): Boolean {
-            return if (actionObject.overlayRelatedData?.duration != -1L) {
-                if (actionObject.overlayRelatedData?.outroAnimationDuration != -1L) {
-                    (actionObject.offset + actionObject.overlayRelatedData?.duration!! + actionObject.overlayRelatedData.outroAnimationDuration < currentTime)
-                } else {
-                    (actionObject.offset + actionObject.overlayRelatedData.duration < currentTime)
+        private fun hasPassedDuration(
+            timeSystem: TimeSystem,
+            currentTime: Long,
+            actionObject: ActionObject
+        ): Boolean {
+            when (timeSystem) {
+                RELATIVE -> {
+                    return if (actionObject.overlayRelatedData?.duration != -1L) {
+                        if (actionObject.overlayRelatedData?.outroAnimationDuration != -1L) {
+                            (actionObject.offset + actionObject.overlayRelatedData?.duration!! + actionObject.overlayRelatedData.outroAnimationDuration < currentTime)
+                        } else {
+                            (actionObject.offset + actionObject.overlayRelatedData.duration < currentTime)
+                        }
+                    } else {
+                        false
+                    }
                 }
-            } else {
-                false
+                ABSOLUTE -> {
+                    return if (actionObject.overlayRelatedData?.duration != -1L) {
+                        if (actionObject.overlayRelatedData?.outroAnimationDuration != -1L) {
+                            (actionObject.absoluteTime + actionObject.overlayRelatedData?.duration!! + actionObject.overlayRelatedData.outroAnimationDuration < currentTime)
+                        } else {
+                            (actionObject.absoluteTime + actionObject.overlayRelatedData.duration < currentTime)
+                        }
+                    } else {
+                        false
+                    }
+                }
             }
-
         }
 
         fun getOverlayActionCurrentAct(
+            timeSystem: TimeSystem,
             currentTime: Long,
             actionObject: ActionObject,
             interrupted: Boolean
         ): OverlayAct {
             if (interrupted.not()) {
-                if (introIsInCurrentTimeRange(currentTime, actionObject)) {
+                if (introIsInCurrentTimeRange(timeSystem, currentTime, actionObject)) {
                     return OverlayAct.INTRO
                 }
-                if (outroIsInCurrentTimeRange(currentTime, actionObject)) {
+                if (outroIsInCurrentTimeRange(timeSystem, currentTime, actionObject)) {
                     return OverlayAct.OUTRO
                 }
-                if (hasPassedDuration(currentTime, actionObject) || hasNotReached(
+                if (hasPassedDuration(timeSystem, currentTime, actionObject) || hasNotReached(
                         currentTime,
                         actionObject
                     )
@@ -46,16 +67,16 @@ class ShowOverlayActionHelper {
                 return OverlayAct.DO_NOTHING
             }
 
-            if (isLingeringInIntroAnimation(currentTime, actionObject)) {
+            if (isLingeringInIntroAnimation(timeSystem, currentTime, actionObject)) {
                 return OverlayAct.LINGERING_INTRO
             }
-            if (isLingeringInOutroAnimation(currentTime, actionObject)) {
+            if (isLingeringInOutroAnimation(timeSystem, currentTime, actionObject)) {
                 return OverlayAct.LINGERING_OUTRO
             }
-            if (isLingeringInMidway(currentTime, actionObject)) {
+            if (isLingeringInMidway(timeSystem, currentTime, actionObject)) {
                 return OverlayAct.LINGERING_MIDWAY
             }
-            if (hasPassedDuration(currentTime, actionObject) || hasNotReached(
+            if (hasPassedDuration(timeSystem, currentTime, actionObject) || hasNotReached(
                     currentTime,
                     actionObject
                 )
@@ -64,18 +85,26 @@ class ShowOverlayActionHelper {
             }
 
             return OverlayAct.DO_NOTHING
-
-
         }
 
         private fun introIsInCurrentTimeRange(
+            timeSystem: TimeSystem,
             currentTime: Long,
             actionObject: ActionObject
         ): Boolean {
-            return (actionObject.offset >= currentTime) && (actionObject.offset < currentTime + ONE_SECOND_IN_MS)
+            return when (timeSystem) {
+                RELATIVE -> {
+                    (actionObject.offset >= currentTime) && (actionObject.offset < currentTime + ONE_SECOND_IN_MS)
+                }
+                ABSOLUTE -> {
+                    (actionObject.absoluteTime >= currentTime) && (actionObject.absoluteTime < currentTime + ONE_SECOND_IN_MS)
+                }
+            }
+
         }
 
         fun outroIsInCurrentTimeRange(
+            timeSystem: TimeSystem,
             currentTime: Long,
             actionObject: ActionObject
         ): Boolean {
@@ -85,89 +114,174 @@ class ShowOverlayActionHelper {
             ) {
                 return false
             }
-            val outroOffset = actionObject.offset + actionObject.overlayRelatedData.duration
-            return (outroOffset >= currentTime) && (outroOffset < currentTime + ONE_SECOND_IN_MS)
+            return when (timeSystem) {
+                RELATIVE -> {
+                    val outroOffset = actionObject.offset + actionObject.overlayRelatedData.duration
+                    (outroOffset >= currentTime) && (outroOffset < currentTime + ONE_SECOND_IN_MS)
+                }
+                ABSOLUTE -> {
+                    val outroOffset =
+                        actionObject.absoluteTime + actionObject.overlayRelatedData.duration
+                    (outroOffset >= currentTime) && (outroOffset < currentTime + ONE_SECOND_IN_MS)
+                }
+            }
+
         }
 
         private fun isLingeringInIntroAnimation(
+            timeSystem: TimeSystem,
             currentTime: Long,
             actionObject: ActionObject
         ): Boolean {
-            if (actionObject.offset > currentTime) {
-                return false
+            when (timeSystem) {
+                RELATIVE -> {
+                    if (actionObject.offset > currentTime) {
+                        return false
+                    }
+
+                    val leftBound = actionObject.offset
+                    val rightBound =
+                        actionObject.offset + actionObject.overlayRelatedData!!.introAnimationDuration
+
+                    return (leftBound <= currentTime) && (currentTime < rightBound)
+                }
+                ABSOLUTE -> {
+                    if (actionObject.absoluteTime > currentTime) {
+                        return false
+                    }
+
+                    val leftBound = actionObject.absoluteTime
+                    val rightBound =
+                        actionObject.absoluteTime + actionObject.overlayRelatedData!!.introAnimationDuration
+
+                    return (leftBound <= currentTime) && (currentTime < rightBound)
+                }
             }
 
-            val leftBound = actionObject.offset
-            val rightBound =
-                actionObject.offset + actionObject.overlayRelatedData!!.introAnimationDuration
-
-            return (leftBound <= currentTime) && (currentTime < rightBound)
         }
 
-        private fun isLingeringInMidway(currentTime: Long, actionObject: ActionObject): Boolean {
-            fun isLingeringUnbounded(currentTime: Long, actionObject: ActionObject): Boolean {
-                if (actionObject.offset > currentTime) {
-                    return false
-                }
+        private fun isLingeringInMidway(
+            timeSystem: TimeSystem,
+            currentTime: Long,
+            actionObject: ActionObject
+        ): Boolean {
+            fun isLingeringUnbounded(
+                timeSystem: TimeSystem,
+                currentTime: Long,
+                actionObject: ActionObject
+            ): Boolean {
                 if (actionObject.overlayRelatedData == null) {
                     return false
                 }
                 if (actionObject.overlayRelatedData.duration != -1L) {
                     return false
                 }
+                when (timeSystem) {
+                    RELATIVE -> {
+                        if (actionObject.offset > currentTime) {
+                            return false
+                        }
 
-                // there is no outro specified at all
-                if (actionObject.overlayRelatedData.outroAnimationType == AnimationType.UNSPECIFIED || actionObject.overlayRelatedData.outroAnimationDuration == -1L) {
-                    return if (AnimationClassifierHelper.hasOutroAnimation(actionObject.overlayRelatedData.outroAnimationType)) {
-                        currentTime > actionObject.offset + actionObject.overlayRelatedData.outroAnimationDuration
-                    } else {
-                        currentTime > actionObject.offset
+                        // there is no outro specified at all
+                        if (actionObject.overlayRelatedData.outroAnimationType == AnimationType.UNSPECIFIED || actionObject.overlayRelatedData.outroAnimationDuration == -1L) {
+                            return if (AnimationClassifierHelper.hasOutroAnimation(actionObject.overlayRelatedData.outroAnimationType)) {
+                                currentTime > actionObject.offset + actionObject.overlayRelatedData.outroAnimationDuration
+                            } else {
+                                currentTime > actionObject.offset
+                            }
+                        }
+                        return false
+                    }
+                    ABSOLUTE -> {
+                        if (actionObject.absoluteTime > currentTime) {
+                            return false
+                        }
+
+                        // there is no outro specified at all
+                        if (actionObject.overlayRelatedData.outroAnimationType == AnimationType.UNSPECIFIED || actionObject.overlayRelatedData.outroAnimationDuration == -1L) {
+                            return if (AnimationClassifierHelper.hasOutroAnimation(actionObject.overlayRelatedData.outroAnimationType)) {
+                                currentTime > actionObject.absoluteTime + actionObject.overlayRelatedData.outroAnimationDuration
+                            } else {
+                                currentTime > actionObject.absoluteTime
+                            }
+                        }
+                        return false
                     }
                 }
-                return false
+
             }
 
-            fun isLingeringBounded(currentTime: Long, actionObject: ActionObject): Boolean {
-                if (actionObject.offset > currentTime) {
-                    return false
-                }
+            fun isLingeringBounded(
+                timeSystem: TimeSystem,
+                currentTime: Long,
+                actionObject: ActionObject
+            ): Boolean {
                 if (actionObject.overlayRelatedData == null) {
                     return false
                 }
                 if (actionObject.overlayRelatedData.duration == -1L) {
                     return false
                 }
+                when (timeSystem) {
+                    RELATIVE -> {
+                        if (actionObject.offset == -1L) {
+                            return false
+                        }
 
-                if (actionObject.offset == -1L) {
-                    return false
+                        if (actionObject.offset > currentTime) {
+                            return false
+                        }
+
+                        var leftBound = actionObject.offset
+                        var rightBound = 0L
+
+                        if (AnimationClassifierHelper.hasIntroAnimation(actionObject.overlayRelatedData.introAnimationType)) {
+                            leftBound =
+                                actionObject.offset + actionObject.overlayRelatedData.introAnimationDuration
+                        }
+
+                        rightBound =
+                            actionObject.offset + actionObject.overlayRelatedData.duration
+
+                        return (currentTime > leftBound) && (currentTime < rightBound)
+                    }
+                    ABSOLUTE -> {
+                        if (actionObject.absoluteTime == -1L) {
+                            return false
+                        }
+                        if (actionObject.absoluteTime > currentTime) {
+                            return false
+                        }
+
+
+                        var leftBound = actionObject.absoluteTime
+                        var rightBound = 0L
+
+                        if (AnimationClassifierHelper.hasIntroAnimation(actionObject.overlayRelatedData.introAnimationType)) {
+                            leftBound =
+                                actionObject.absoluteTime + actionObject.overlayRelatedData.introAnimationDuration
+                        }
+
+                        rightBound =
+                            actionObject.absoluteTime + actionObject.overlayRelatedData.duration
+
+                        return (currentTime > leftBound) && (currentTime < rightBound)
+                    }
                 }
 
-                var leftBound = actionObject.offset
-                var rightBound = 0L
-
-                if (AnimationClassifierHelper.hasIntroAnimation(actionObject.overlayRelatedData.introAnimationType)) {
-                    leftBound =
-                        actionObject.offset + actionObject.overlayRelatedData.introAnimationDuration
-                }
-
-                rightBound =
-                    actionObject.offset + actionObject.overlayRelatedData.duration
-
-                return (currentTime > leftBound) && (currentTime < rightBound)
             }
 
-            return (isLingeringUnbounded(currentTime, actionObject) || isLingeringBounded(
-                currentTime, actionObject
-            ))
+            return (isLingeringUnbounded(timeSystem, currentTime, actionObject) ||
+                    isLingeringBounded(
+                        timeSystem, currentTime, actionObject
+                    ))
         }
 
         private fun isLingeringInOutroAnimation(
+            timeSystem: TimeSystem,
             currentTime: Long,
             actionObject: ActionObject
         ): Boolean {
-            if (actionObject.offset > currentTime) {
-                return false
-            }
             if (actionObject.overlayRelatedData == null) {
                 return false
             }
@@ -179,12 +293,32 @@ class ShowOverlayActionHelper {
             if (actionObject.overlayRelatedData.outroAnimationDuration == -1L) {
                 return false
             }
+            when (timeSystem) {
+                RELATIVE -> {
+                    if (actionObject.offset > currentTime) {
+                        return false
+                    }
 
-            val leftBound = actionObject.offset + actionObject.overlayRelatedData.duration
-            var rightBound =
-                actionObject.offset + actionObject.overlayRelatedData.duration + actionObject.overlayRelatedData.outroAnimationDuration
+                    val leftBound = actionObject.offset + actionObject.overlayRelatedData.duration
+                    val rightBound =
+                        actionObject.offset + actionObject.overlayRelatedData.duration + actionObject.overlayRelatedData.outroAnimationDuration
 
-            return (leftBound <= currentTime) && (currentTime < rightBound)
+                    return (leftBound <= currentTime) && (currentTime < rightBound)
+                }
+                ABSOLUTE -> {
+                    if (actionObject.absoluteTime > currentTime) {
+                        return false
+                    }
+
+                    val leftBound =
+                        actionObject.absoluteTime + actionObject.overlayRelatedData.duration
+                    val rightBound =
+                        actionObject.absoluteTime + actionObject.overlayRelatedData.duration + actionObject.overlayRelatedData.outroAnimationDuration
+
+                    return (leftBound <= currentTime) && (currentTime < rightBound)
+                }
+            }
+
         }
 
 
