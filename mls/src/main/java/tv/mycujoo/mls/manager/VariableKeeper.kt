@@ -20,14 +20,14 @@ class VariableKeeper(private val dispatcher: CoroutineScope) : IVariableKeeper {
         return variablePublisherMap.keys.toList()
     }
 
-    fun createTimerPublisher(name: String) {
+    override fun createTimerPublisher(name: String) {
         if (timerPublisherMap.containsKey(name)) {
             return
         }
         timerPublisherMap[name] = (BehaviorRelay.createDefault(""))
     }
 
-    fun createVariablePublisher(name: String) {
+    override fun createVariablePublisher(name: String) {
         if (variablePublisherMap.containsKey(name)) {
             return
         }

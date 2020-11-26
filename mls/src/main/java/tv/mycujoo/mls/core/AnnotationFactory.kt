@@ -69,14 +69,19 @@ class AnnotationFactory(
 
         val timelineMarkers = ArrayList<TimelineMarkerEntity>()
 
-        var currentTimeInDvrWindowDuration = TimeRangeHelper.isCurrentTimeInDvrWindowDuration(
+        var currentTimeInInDvrWindowDuration = TimeRangeHelper.isCurrentTimeInDvrWindowDuration(
             buildPoint.currentRelativePosition,
             Long.MAX_VALUE // todo! This should be filled from Stream's dvr-window size value
         )
 
-        currentTimeInDvrWindowDuration = true
+/*
+        TODO!
+        This is a temporary solution until api provides absolute timestamp.
+        if (currentTimeInInDvrWindowDuration.not()){
+            return
+        }*/
 
-        if (currentTimeInDvrWindowDuration) {
+        if (currentTimeInInDvrWindowDuration) {
             sortedActionList.forEach {
                 when (it.type) {
                     SHOW_OVERLAY -> {
@@ -166,7 +171,7 @@ class AnnotationFactory(
                         val act =
                             ShowOverlayActionHelper.getOverlayActionCurrentAct(
                                 TimeSystem.ABSOLUTE,
-                                buildPoint.currentRelativePosition,
+                                buildPoint.currentAbsolutePosition,
                                 it,
                                 buildPoint.isInterrupted
                             )

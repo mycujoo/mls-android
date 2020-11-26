@@ -2,8 +2,8 @@ package tv.mycujoo.mls.tv.player
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argThat
-import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.times
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -15,8 +15,8 @@ import tv.mycujoo.domain.entity.models.ParsedOverlayRelatedData
 import tv.mycujoo.domain.entity.models.ParsedTimerRelatedData
 import tv.mycujoo.mls.TestData
 import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
-import tv.mycujoo.mls.manager.TimerKeeper
 import tv.mycujoo.mls.manager.TimerVariable
+import tv.mycujoo.mls.manager.VariableKeeper
 import tv.mycujoo.mls.matcher.TimerMapMatcher
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerFormat
@@ -32,16 +32,14 @@ class TvAnnotationFactoryTest {
     lateinit var tvAnnotationListener: TvAnnotationListener
 
     @Mock
-    lateinit var timerKeeper: TimerKeeper
-
-    val timerKeeperArgumentCaptor = argumentCaptor<TimerKeeper>()
+    lateinit var variableKeeper: VariableKeeper
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         tvAnnotationFactory = TvAnnotationFactory(
             tvAnnotationListener,
-            timerKeeper
+            variableKeeper
         )
     }
 
@@ -413,8 +411,6 @@ class TvAnnotationFactoryTest {
         Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<HideOverlayActionEntity>())
         Mockito.verify(tvAnnotationListener, never()).createVariable(any())
         Mockito.verify(tvAnnotationListener, never()).incrementVariable(any())
-        Mockito.verify(timerKeeper, never()).createTimer(any())
-        Mockito.verify(timerKeeper).startTimer(any(), any())
     }
 
     @Test
@@ -433,9 +429,6 @@ class TvAnnotationFactoryTest {
         Mockito.verify(tvAnnotationListener, never()).removeOverlay(any<HideOverlayActionEntity>())
         Mockito.verify(tvAnnotationListener, never()).createVariable(any())
         Mockito.verify(tvAnnotationListener, never()).incrementVariable(any())
-        Mockito.verify(timerKeeper, never()).createTimer(any())
-        Mockito.verify(timerKeeper, never()).startTimer(any(), any())
-        Mockito.verify(timerKeeper).pauseTimer(any(), any())
     }
 
 
@@ -468,8 +461,9 @@ class TvAnnotationFactoryTest {
             "${"$"}scoreboardTimer", ScreenTimerFormat.MINUTES_SECONDS,
             ScreenTimerDirection.UP, 0L, -1L
         )
-        Mockito.verify(timerKeeper).notify(argThat(TimerMapMatcher(expectedResult)))
+        Mockito.verify(variableKeeper).notifyTimers(argThat(TimerMapMatcher(expectedResult)))
     }
+
 
     @Test
     fun `createTimer started multiple`() {
@@ -501,7 +495,8 @@ class TvAnnotationFactoryTest {
             "${"$"}scoreboardTimer", ScreenTimerFormat.MINUTES_SECONDS,
             ScreenTimerDirection.UP, 0L, -1L
         )
-        Mockito.verify(timerKeeper).notify(argThat(TimerMapMatcher(expectedResult)))
+        Mockito.verify(variableKeeper, times(2))
+            .notifyTimers(argThat(TimerMapMatcher(expectedResult)))
     }
 
 
@@ -543,7 +538,7 @@ class TvAnnotationFactoryTest {
             ScreenTimerDirection.UP, 0L, -1L
         )
 
-        Mockito.verify(timerKeeper).notify(argThat(TimerMapMatcher(expectedResult)))
+        Mockito.verify(variableKeeper).notifyTimers(argThat(TimerMapMatcher(expectedResult)))
     }
 
     @Test
@@ -582,7 +577,7 @@ class TvAnnotationFactoryTest {
         )
 
 
-        Mockito.verify(timerKeeper).notify(argThat(TimerMapMatcher(expectedResult)))
+        Mockito.verify(variableKeeper).notifyTimers(argThat(TimerMapMatcher(expectedResult)))
     }
 
     /**endregion */
@@ -645,7 +640,7 @@ class TvAnnotationFactoryTest {
         )
 
 
-        Mockito.verify(timerKeeper).notify(argThat(TimerMapMatcher(expectedResult)))
+        Mockito.verify(variableKeeper).notifyTimers(argThat(TimerMapMatcher(expectedResult)))
     }
 
     @Test
@@ -703,7 +698,7 @@ class TvAnnotationFactoryTest {
             ScreenTimerDirection.UP, 47000, -1L
         )
 
-        Mockito.verify(timerKeeper).notify(argThat(TimerMapMatcher(expectedResult)))
+        Mockito.verify(variableKeeper).notifyTimers(argThat(TimerMapMatcher(expectedResult)))
     }
 
     /**endregion */

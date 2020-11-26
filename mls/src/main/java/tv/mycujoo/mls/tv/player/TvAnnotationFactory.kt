@@ -9,6 +9,7 @@ import tv.mycujoo.domain.entity.VariableAct.CREATE_VARIABLE
 import tv.mycujoo.domain.entity.models.ActionType.*
 import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.helper.ShowOverlayActionHelper
+import tv.mycujoo.mls.helper.TimeSystem
 import tv.mycujoo.mls.helper.VariableActionHelper
 import tv.mycujoo.mls.helper.VariableActionHelper.Companion.getIncrementVariableCurrentAct
 import tv.mycujoo.mls.manager.TimerVariable
@@ -59,6 +60,7 @@ class TvAnnotationFactory(
                 SHOW_OVERLAY -> {
                     val act =
                         ShowOverlayActionHelper.getOverlayActionCurrentAct(
+                            TimeSystem.RELATIVE,
                             currentPosition,
                             it,
                             interrupted

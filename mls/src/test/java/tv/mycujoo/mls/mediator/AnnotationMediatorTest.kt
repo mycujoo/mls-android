@@ -15,7 +15,7 @@ import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.enum.LogLevel
 import tv.mycujoo.mls.helper.IDownloaderClient
 import tv.mycujoo.mls.manager.Logger
-import tv.mycujoo.mls.manager.TimerKeeper
+import tv.mycujoo.mls.manager.VariableKeeper
 import tv.mycujoo.mls.manager.VariableTranslator
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.player.IPlayer
@@ -46,7 +46,7 @@ class AnnotationMediatorTest {
     lateinit var viewHandler: IViewHandler
 
     @Mock
-    lateinit var timerKeeper: TimerKeeper
+    lateinit var variableKeeper: VariableKeeper
 
     @Mock
     lateinit var variableTranslator: VariableTranslator
@@ -79,7 +79,7 @@ class AnnotationMediatorTest {
         MockitoAnnotations.initMocks(this)
         testCoroutineScope = TestCoroutineScope()
 
-        whenever(viewHandler.getTimerKeeper()).thenReturn(timerKeeper)
+        whenever(viewHandler.getVariableKeeper()).thenReturn(variableKeeper)
         whenever(viewHandler.getVariableTranslator()).thenReturn(variableTranslator)
 
         whenever(

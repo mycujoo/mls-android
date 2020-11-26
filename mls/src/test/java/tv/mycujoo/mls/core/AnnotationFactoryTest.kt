@@ -83,12 +83,11 @@ class AnnotationFactoryTest {
         val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
         annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
-//        Mockito.`when`(downloaderClient.download(any(), any()))
-//            .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
 
-        annotationFactory.build(4001L, player, interrupted = false)
+        val buildPoint = BuildPoint(4001L, -1L, player, isPlaying = true, isInterrupted = false)
+        annotationFactory.build(buildPoint)
 
 
         verify(annotationListener).addOverlay(argThat(OverlayEntityMatcher("id_01")))
@@ -105,8 +104,8 @@ class AnnotationFactoryTest {
         val actionResponse = ActionResponse(listOf(actionSourceData))
         annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
 
-
-        annotationFactory.build(15000L, player, interrupted = false)
+        val buildPoint = BuildPoint(5001L, -1L, player, isPlaying = true, isInterrupted = false)
+        annotationFactory.build(buildPoint)
 
 
         verify(annotationListener).removeOverlay(argThat(OverlayEntityMatcher("id_01")))
@@ -127,8 +126,8 @@ class AnnotationFactoryTest {
         annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
-
-        annotationFactory.build(5001L, player, interrupted = true)
+        val buildPoint = BuildPoint(5001L, -1L, player, isPlaying = true, isInterrupted = true)
+        annotationFactory.build(buildPoint)
 
 
 
@@ -148,8 +147,8 @@ class AnnotationFactoryTest {
         annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
-
-        annotationFactory.build(5001L, player, interrupted = true)
+        val buildPoint = BuildPoint(5001L, -1L, player, isPlaying = true, isInterrupted = true)
+        annotationFactory.build(buildPoint)
 
 
         verify(annotationListener).addOrUpdateLingeringMidwayOverlay(
@@ -170,7 +169,9 @@ class AnnotationFactoryTest {
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
 
-        annotationFactory.build(11001L, player, interrupted = true)
+        val buildPoint = BuildPoint(11001L, -1L, player, isPlaying = true, isInterrupted = true)
+        annotationFactory.build(buildPoint)
+
 
 
         verify(annotationListener).addOrUpdateLingeringOutroOverlay(
@@ -191,8 +192,8 @@ class AnnotationFactoryTest {
         annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
-
-        annotationFactory.build(0L, player, interrupted = true)
+        val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true, isInterrupted = true)
+        annotationFactory.build(buildPoint)
 
 
         verify(annotationListener).removeLingeringOverlay(argThat(OverlayEntityMatcher("id_01")))
@@ -210,8 +211,8 @@ class AnnotationFactoryTest {
         annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
-
-        annotationFactory.build(10000L, player, interrupted = true)
+        val buildPoint = BuildPoint(10000L, -1L, player, isPlaying = true, isInterrupted = true)
+        annotationFactory.build(buildPoint)
 
 
         verify(annotationListener).removeLingeringOverlay(argThat(OverlayEntityMatcher("id_01")))
