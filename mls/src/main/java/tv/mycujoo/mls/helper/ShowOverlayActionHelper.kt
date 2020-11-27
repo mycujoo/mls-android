@@ -9,8 +9,20 @@ import tv.mycujoo.mls.helper.TimeSystem.RELATIVE
 
 class ShowOverlayActionHelper {
     companion object {
-        private fun hasNotReached(currentTime: Long, actionObject: ActionObject): Boolean {
-            return (actionObject.offset > currentTime) && (actionObject.offset + ONE_SECOND_IN_MS > currentTime)
+        private fun hasNotReached(
+            timeSystem: TimeSystem,
+            currentTime: Long,
+            actionObject: ActionObject
+        ): Boolean {
+            return when (timeSystem) {
+                RELATIVE -> {
+                    (actionObject.offset > currentTime) && (actionObject.offset + ONE_SECOND_IN_MS > currentTime)
+                }
+                ABSOLUTE -> {
+                    (actionObject.absoluteTime > currentTime) && (actionObject.absoluteTime + ONE_SECOND_IN_MS > currentTime)
+                }
+            }
+
         }
 
         private fun hasPassedDuration(
@@ -58,6 +70,7 @@ class ShowOverlayActionHelper {
                     return OverlayAct.OUTRO
                 }
                 if (hasPassedDuration(timeSystem, currentTime, actionObject) || hasNotReached(
+                        timeSystem,
                         currentTime,
                         actionObject
                     )
@@ -77,6 +90,7 @@ class ShowOverlayActionHelper {
                 return OverlayAct.LINGERING_MIDWAY
             }
             if (hasPassedDuration(timeSystem, currentTime, actionObject) || hasNotReached(
+                    timeSystem,
                     currentTime,
                     actionObject
                 )
