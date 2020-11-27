@@ -70,8 +70,9 @@ class AnnotationFactory(
         val timelineMarkers = ArrayList<TimelineMarkerEntity>()
 
         var currentTimeInInDvrWindowDuration = TimeRangeHelper.isCurrentTimeInDvrWindowDuration(
-            buildPoint.currentRelativePosition,
-            Long.MAX_VALUE // todo! This should be filled from Stream's dvr-window size value
+            buildPoint.player.duration(),
+            buildPoint.player.dvrWindowSize()
+            // Long.MAX_VALUE // todo! This should be filled from Stream's dvr-window size value
         )
 
 /*
@@ -179,9 +180,13 @@ class AnnotationFactory(
 
                     }
                     HIDE_OVERLAY -> {
-                        if (buildPoint.currentAbsolutePosition + 1 >= it.absoluteTime) {
-                            annotationListener.removeOverlay(it.toOverlayEntity()!!)
-                        }
+                        val act =
+                            HideOverlayActionHelper.getOverlayActionCurrentAct(
+                                TimeSystem.ABSOLUTE,
+                                buildPoint.currentAbsolutePosition,
+                                it
+                            )
+                        hideOverlay(it, act)
                     }
 
                     CREATE_TIMER -> {
@@ -363,12 +368,10 @@ class AnnotationFactory(
         buildPoint: BuildPoint
     ) {
         actionObject.toSkipTimerEntity()?.let { skipTimerEntity ->
-            timerVariables[skipTimerEntity.name]?.let { timerVariable ->
-                timerVariable.skip(
-                    skipTimerEntity,
-                    buildPoint.currentRelativePosition
-                )
-            }
+            timerVariables[skipTimerEntity.name]?.skip(
+                skipTimerEntity,
+                buildPoint.currentRelativePosition
+            )
         }
     }
 
@@ -378,12 +381,10 @@ class AnnotationFactory(
         buildPoint: BuildPoint
     ) {
         actionObject.toAdjustTimerEntity()?.let { adjustTimerEntity ->
-            timerVariables[adjustTimerEntity.name]?.let { timerVariable ->
-                timerVariable.adjust(
-                    adjustTimerEntity,
-                    buildPoint.currentRelativePosition
-                )
-            }
+            timerVariables[adjustTimerEntity.name]?.adjust(
+                adjustTimerEntity,
+                buildPoint.currentRelativePosition
+            )
         }
     }
 
@@ -393,12 +394,10 @@ class AnnotationFactory(
         buildPoint: BuildPoint
     ) {
         actionObject.toPauseTimerEntity()?.let { pauseTimerEntity ->
-            timerVariables[pauseTimerEntity.name]?.let { timerVariable ->
-                timerVariable.pause(
-                    pauseTimerEntity,
-                    buildPoint.currentRelativePosition
-                )
-            }
+            timerVariables[pauseTimerEntity.name]?.pause(
+                pauseTimerEntity,
+                buildPoint.currentRelativePosition
+            )
         }
     }
 
@@ -408,12 +407,10 @@ class AnnotationFactory(
         buildPoint: BuildPoint
     ) {
         actionObject.toStartTimerEntity()?.let { startTimerEntity ->
-            timerVariables[startTimerEntity.name]?.let { timerVariable ->
-                timerVariable.start(
-                    startTimerEntity,
-                    buildPoint.currentRelativePosition
-                )
-            }
+            timerVariables[startTimerEntity.name]?.start(
+                startTimerEntity,
+                buildPoint.currentRelativePosition
+            )
         }
     }
 
