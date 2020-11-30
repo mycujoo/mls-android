@@ -6,6 +6,8 @@ import tv.mycujoo.domain.entity.models.ActionType.*
 import tv.mycujoo.mls.helper.*
 import tv.mycujoo.mls.manager.TimerVariable
 import tv.mycujoo.mls.manager.contracts.IViewHandler
+import tv.mycujoo.mls.utils.TimeUtils
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.Condition
 import java.util.concurrent.locks.ReentrantLock
@@ -20,7 +22,11 @@ class AnnotationFactory(
     private val variableKeeper = viewHandler.getVariableKeeper()
     private val atomicInt = AtomicInteger()
 
-    private lateinit var sortedActionList: List<ActionObject>
+    private var sortedActionList =
+        CopyOnWriteArrayList<ActionObject>()// actions, sorted by offset, then by priority
+    private var adjustedActionList =
+        CopyOnWriteArrayList<ActionObject>()// sortedActionList + adjusted offset time
+    private var timeSystem = TimeSystem.RELATIVE
 
     override fun setAnnotations(actionObjectList: List<ActionObject>) {
         lock.lock()
@@ -41,8 +47,8 @@ class AnnotationFactory(
             deleteActions.add(actionObject)
         }
 
-        sortedActionList =
-            sortedTemp.filter { actionObject -> deleteActions.none { actionObject.id == it.id } }
+        sortedActionList.clear()
+        sortedActionList.addAll(sortedTemp.filter { actionObject -> deleteActions.none { actionObject.id == it.id } })
 
 
         atomicInt.decrementAndGet()
@@ -55,9 +61,40 @@ class AnnotationFactory(
     }
 
     override fun build(buildPoint: BuildPoint) {
-        if (this::sortedActionList.isInitialized.not()) {
-            return
+        val currentTimeInInDvrWindowDuration = TimeRangeHelper.isCurrentTimeInDvrWindowDuration(
+            buildPoint.player.duration(),
+//            buildPoint.player.dvrWindowSize()
+            Long.MAX_VALUE // todo! This should be filled from Stream's dvr-window size value
+        )
+
+        if (currentTimeInInDvrWindowDuration) {
+            timeSystem = TimeSystem.RELATIVE
+            adjustedActionList.clear()
+            process(buildPoint, currentTimeInInDvrWindowDuration, sortedActionList)
+
+        } else {
+            timeSystem = TimeSystem.ABSOLUTE
+            adjustedActionList.clear()
+            sortedActionList.forEach {
+                adjustedActionList.add(
+                    it.copy(
+                        offset = TimeUtils.convertRelativeTimeToAbsolute(
+                            buildPoint.player.dvrWindowStartTime(),
+                            it.absoluteTime
+                        )
+                    )
+                )
+            }
+            process(buildPoint, currentTimeInInDvrWindowDuration, adjustedActionList)
+
         }
+    }
+
+    private fun process(
+        buildPoint: BuildPoint,
+        isInDvrWindow: Boolean,
+        list: List<ActionObject>
+    ) {
         lock.lock()
         if (atomicInt.get() > 0) {
             busyCondition.await()
@@ -68,174 +105,82 @@ class AnnotationFactory(
         val varVariables: HashMap<String, SetVariableEntity> = HashMap()
 
         val timelineMarkers = ArrayList<TimelineMarkerEntity>()
-
-        var currentTimeInInDvrWindowDuration = TimeRangeHelper.isCurrentTimeInDvrWindowDuration(
-            buildPoint.player.duration(),
-            buildPoint.player.dvrWindowSize()
-            // Long.MAX_VALUE // todo! This should be filled from Stream's dvr-window size value
-        )
-
-/*
-        TODO!
-        This is a temporary solution until api provides absolute timestamp.
-        if (currentTimeInInDvrWindowDuration.not()){
-            return
-        }*/
-
-        if (currentTimeInInDvrWindowDuration) {
-            sortedActionList.forEach {
-                when (it.type) {
-                    SHOW_OVERLAY -> {
-                        val act =
-                            ShowOverlayActionHelper.getOverlayActionCurrentAct(
-                                TimeSystem.RELATIVE,
-                                buildPoint.currentRelativePosition,
-                                it,
-                                buildPoint.isInterrupted
-                            )
-                        showOverlay(it, act, buildPoint)
+        list.forEach {
+            val isInGap =
+                buildPoint.player.isWithinValidSegment(it.absoluteTime)?.not() ?: false
+            when (it.type) {
+                SHOW_OVERLAY -> {
+                    if (isInDvrWindow.not() && isInGap) {
+                        return@forEach
                     }
-                    HIDE_OVERLAY -> {
-                        val act =
-                            HideOverlayActionHelper.getOverlayActionCurrentAct(
-                                TimeSystem.RELATIVE,
-                                buildPoint.currentRelativePosition,
-                                it
-                            )
-                        hideOverlay(it, act)
+                    val act =
+                        ShowOverlayActionHelper.getOverlayActionCurrentAct(
+                            buildPoint.currentRelativePosition,
+                            it,
+                            buildPoint.isInterrupted
+                        )
+                    showOverlay(it, act, buildPoint)
+                }
+                HIDE_OVERLAY -> {
+                    val act =
+                        HideOverlayActionHelper.getOverlayActionCurrentAct(
+                            buildPoint.currentRelativePosition,
+                            it,
+                            buildPoint.isInterrupted
+                        )
+                    hideOverlay(it, act)
+                }
+                CREATE_TIMER -> {
+                    if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
+                        createTimer(it, timerVariables)
                     }
-                    CREATE_TIMER -> {
-                        if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
-                            createTimer(it, timerVariables)
-                        }
+                }
+                START_TIMER -> {
+                    if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
+                        startTimer(it, timerVariables, buildPoint)
                     }
-                    START_TIMER -> {
-                        if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
-                            startTimer(it, timerVariables, buildPoint)
-                        }
+                }
+                PAUSE_TIMER -> {
+                    if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
+                        pauseTimer(it, timerVariables, buildPoint)
                     }
-                    PAUSE_TIMER -> {
-                        if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
-                            pauseTimer(it, timerVariables, buildPoint)
-                        }
+                }
+                ADJUST_TIMER -> {
+                    if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
+                        adjustTimer(it, timerVariables, buildPoint)
                     }
-                    ADJUST_TIMER -> {
-                        if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
-                            adjustTimer(it, timerVariables, buildPoint)
-                        }
+                }
+                SKIP_TIMER -> {
+                    if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
+                        skipTimer(it, timerVariables, buildPoint)
                     }
-                    SKIP_TIMER -> {
-                        if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
-                            skipTimer(it, timerVariables, buildPoint)
-                        }
-                    }
+                }
 
 
-                    SET_VARIABLE -> {
-                        if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
-                            setVariable(it, buildPoint, varVariables)
-                        }
+                SET_VARIABLE -> {
+                    if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
+                        setVariable(it, buildPoint, varVariables)
                     }
+                }
 
-                    INCREMENT_VARIABLE -> {
-                        if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
-                            incrementVariable(it, buildPoint, varVariables)
-                        }
+                INCREMENT_VARIABLE -> {
+                    if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
+                        incrementVariable(it, buildPoint, varVariables)
                     }
+                }
 
 
-                    SHOW_TIMELINE_MARKER -> {
-                        it.toTimelineMarkerEntity()?.let { timelineMarkerEntity ->
-                            timelineMarkers.add(timelineMarkerEntity)
-                        }
+                SHOW_TIMELINE_MARKER -> {
+                    it.toTimelineMarkerEntity()?.let { timelineMarkerEntity ->
+                        timelineMarkers.add(timelineMarkerEntity)
                     }
+                }
 
-                    DELETE_ACTION -> {
-                        // do nothing
-                    }
-
-                    UNKNOWN -> {
-                        // should not happen
-                    }
+                DELETE_ACTION,
+                UNKNOWN -> {
+                    // should not happen
                 }
             }
-
-        } else {
-            sortedActionList.forEach {
-                if (it.absoluteTime == -1L) {
-                    return@forEach
-                }
-                val isInGap =
-                    buildPoint.player.isWithinValidSegment(it.absoluteTime)?.not() ?: false
-                when (it.type) {
-                    SHOW_OVERLAY -> {
-                        val act =
-                            ShowOverlayActionHelper.getOverlayActionCurrentAct(
-                                TimeSystem.ABSOLUTE,
-                                buildPoint.currentAbsolutePosition,
-                                it,
-                                buildPoint.isInterrupted
-                            )
-                        showOverlay(it, act, buildPoint)
-
-                    }
-                    HIDE_OVERLAY -> {
-                        val act =
-                            HideOverlayActionHelper.getOverlayActionCurrentAct(
-                                TimeSystem.ABSOLUTE,
-                                buildPoint.currentAbsolutePosition,
-                                it
-                            )
-                        hideOverlay(it, act)
-                    }
-
-                    CREATE_TIMER -> {
-                        if (buildPoint.currentAbsolutePosition + 1 >= it.absoluteTime) {
-                            createTimer(it, timerVariables)
-                        }
-                    }
-                    START_TIMER -> {
-                        if (buildPoint.currentAbsolutePosition + 1 >= it.absoluteTime) {
-                            startTimer(it, timerVariables, buildPoint)
-                        }
-                    }
-                    PAUSE_TIMER -> {
-                        if (buildPoint.currentAbsolutePosition + 1 >= it.absoluteTime) {
-                            pauseTimer(it, timerVariables, buildPoint)
-                        }
-                    }
-                    ADJUST_TIMER -> {
-                        if (buildPoint.currentAbsolutePosition + 1 >= it.absoluteTime) {
-                            adjustTimer(it, timerVariables, buildPoint)
-                        }
-                    }
-                    SKIP_TIMER -> {
-                        if (buildPoint.currentAbsolutePosition + 1 >= it.absoluteTime) {
-                            skipTimer(it, timerVariables, buildPoint)
-                        }
-                    }
-
-                    SHOW_TIMELINE_MARKER -> TODO()
-
-                    SET_VARIABLE -> {
-                        if (buildPoint.currentAbsolutePosition + 1 >= it.absoluteTime) {
-                            setVariable(it, buildPoint, varVariables)
-                        }
-                    }
-                    INCREMENT_VARIABLE -> {
-                        if (buildPoint.currentAbsolutePosition + 1 >= it.absoluteTime) {
-                            incrementVariable(it, buildPoint, varVariables)
-                        }
-                    }
-
-                    UNKNOWN,
-                    DELETE_ACTION -> {
-                        // do nothing
-                    }
-                }
-
-            }
-
         }
 
         variableKeeper.notifyTimers(timerVariables)
@@ -246,7 +191,6 @@ class AnnotationFactory(
         atomicInt.decrementAndGet()
         busyCondition.signal()
         lock.unlock()
-
     }
 
     private fun hideOverlay(
@@ -257,11 +201,14 @@ class AnnotationFactory(
             HideOverlayAct.DO_NOTHING -> {
                 // do nothing
             }
-            HideOverlayAct.OUTRO -> {
+            HideOverlayAct.OUTRO_IN_RANGE -> {
                 annotationListener.removeOverlay(actionObject.toOverlayEntity()!!)
             }
-            HideOverlayAct.LINGERING_OUTRO -> {
+            HideOverlayAct.OUTRO_LINGERING -> {
                 annotationListener.removeLingeringOverlay(actionObject.toOverlayEntity()!!)
+            }
+            HideOverlayAct.OUTRO_LEFTOVER -> {
+                annotationListener.removeOverlay(actionObject.toHideOverlayActionEntity()!!)
             }
         }
     }

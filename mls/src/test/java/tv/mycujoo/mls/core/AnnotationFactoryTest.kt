@@ -110,17 +110,16 @@ class AnnotationFactoryTest {
         val dataMap = buildMap<String, Any> {
             put("animateout_type", "fade_out")
             put("animateout_duration", 3000.toDouble())
-            put("duration", 10000.toDouble())
         }
         val actionSourceData = ActionSourceData("id_01", "hide_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
         annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
 
-        val buildPoint = BuildPoint(15001L, -1L, player, isPlaying = true, isInterrupted = false)
+        val buildPoint = BuildPoint(4001L, -1L, player, isPlaying = true, isInterrupted = false)
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).removeLingeringOverlay(argThat(OverlayEntityMatcher("id_01")))
+        verify(annotationListener).removeOverlay(argThat(OverlayEntityMatcher("id_01")))
         verify(annotationListener, never()).addOverlay(any())
     }
 
@@ -136,6 +135,7 @@ class AnnotationFactoryTest {
         annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
 
 
         val buildPoint =
@@ -153,21 +153,21 @@ class AnnotationFactoryTest {
         val dataMap = buildMap<String, Any> {
             put("animateout_type", "fade_out")
             put("animateout_duration", 3000.toDouble())
-            put("duration", 10000.toDouble())
         }
         val actionSourceData =
             ActionSourceData("id_01", "hide_overlay", -1L, 1605609887000L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
         annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
         whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609885000L)
 
 
         val buildPoint =
-            BuildPoint(15001L, 1605609897001L, player, isPlaying = true, isInterrupted = false)
+            BuildPoint(1001L, 1605609886001L, player, isPlaying = true, isInterrupted = false)
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).removeLingeringOverlay(argThat(OverlayEntityMatcher("id_01")))
+        verify(annotationListener).removeOverlay(argThat(OverlayEntityMatcher("id_01")))
         verify(annotationListener, never()).addOverlay(any())
     }
     /**endregion */
@@ -305,6 +305,7 @@ class AnnotationFactoryTest {
         annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
 
 
         val buildPoint =
@@ -334,6 +335,7 @@ class AnnotationFactoryTest {
         annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
 
 
         val buildPoint =
@@ -362,6 +364,7 @@ class AnnotationFactoryTest {
         annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
 
 
         val buildPoint =
@@ -384,14 +387,16 @@ class AnnotationFactoryTest {
             put("animateout_type", "fade_out")
             put("animateout_duration", 3000.toDouble())
         }
-        val actionSourceData = ActionSourceData("id_01", "show_overlay", -1L, 1605609887000L, dataMap)
+        val actionSourceData =
+            ActionSourceData("id_01", "show_overlay", -1L, 1605609887000L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
         annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         whenever(player.duration()).thenReturn(120000L)
 
 
-        val buildPoint = BuildPoint(0L, 1605609882000L, player, isPlaying = true, isInterrupted = true)
+        val buildPoint =
+            BuildPoint(0L, 1605609882000L, player, isPlaying = true, isInterrupted = true)
         annotationFactory.build(buildPoint)
 
 
@@ -407,14 +412,16 @@ class AnnotationFactoryTest {
             put("animateout_type", "fade_out")
             put("animateout_duration", 1000.toDouble())
         }
-        val actionSourceData = ActionSourceData("id_01", "show_overlay", -1L, 1605609887000L, dataMap)
+        val actionSourceData =
+            ActionSourceData("id_01", "show_overlay", -1L, 1605609887000L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
         annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         whenever(player.duration()).thenReturn(120000L)
 
 
-        val buildPoint = BuildPoint(10000L, 1605609892000L, player, isPlaying = true, isInterrupted = true)
+        val buildPoint =
+            BuildPoint(10000L, 1605609892000L, player, isPlaying = true, isInterrupted = true)
         annotationFactory.build(buildPoint)
 
 

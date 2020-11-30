@@ -2,32 +2,81 @@ package tv.mycujoo.mls.helper
 
 import tv.mycujoo.domain.entity.ActionObject
 import tv.mycujoo.domain.entity.HideOverlayAct
+import tv.mycujoo.domain.entity.models.ActionType
+import tv.mycujoo.mls.enum.C
 
 class HideOverlayActionHelper {
     companion object {
         fun getOverlayActionCurrentAct(
-            timeSystem: TimeSystem,
             currentTime: Long,
-            actionObject: ActionObject
+            actionObject: ActionObject,
+            interrupted: Boolean
         ): HideOverlayAct {
-            if (ShowOverlayActionHelper.outroIsInCurrentTimeRange(
-                    timeSystem,
-                    currentTime,
-                    actionObject
-                )
-            ) {
-                return HideOverlayAct.OUTRO
+            if (actionObject.type != ActionType.HIDE_OVERLAY) {
+                throw IllegalArgumentException("Action type should be HIDE_OVERLAY!")
             }
-            if (ShowOverlayActionHelper.isLingeringInOutroAnimation(
-                    timeSystem,
-                    currentTime,
-                    actionObject
-                )
-            ) {
-                return HideOverlayAct.LINGERING_OUTRO
+            if (interrupted.not()) {
+                if (outroIsInCurrentTimeRange(currentTime, actionObject)) {
+                    return HideOverlayAct.OUTRO_IN_RANGE
+                }
+            } else {
+                if (outroIsInCurrentTimeRange(currentTime, actionObject)) {
+                    return HideOverlayAct.OUTRO_IN_RANGE
+                }
+                if (isHideOverlayActionOutroLingering(
+                        currentTime,
+                        actionObject
+                    )
+                ) {
+                    return HideOverlayAct.OUTRO_LINGERING
+                }
+                if (isHideOverlayActionOutroLeftover(currentTime, actionObject)) {
+                    return HideOverlayAct.OUTRO_LEFTOVER
+                }
             }
 
             return HideOverlayAct.DO_NOTHING
+        }
+
+        private fun isHideOverlayActionOutroLingering(
+            currentTime: Long,
+            actionObject: ActionObject
+        ): Boolean {
+            if (actionObject.overlayRelatedData == null) {
+                return false
+            }
+            if (actionObject.overlayRelatedData.outroAnimationDuration == -1L) {
+                return false
+            }
+
+            if (actionObject.offset > currentTime) {
+                return false
+            }
+
+            val leftBound = actionObject.offset
+            val rightBound =
+                actionObject.offset + actionObject.overlayRelatedData.outroAnimationDuration
+
+            return (leftBound <= currentTime) && (currentTime < rightBound)
+        }
+
+        private fun isHideOverlayActionOutroLeftover(
+            currentTime: Long,
+            actionObject: ActionObject
+        ): Boolean {
+            val outroOffset =
+                actionObject.offset
+            return outroOffset <= currentTime
+        }
+
+        private fun outroIsInCurrentTimeRange(
+            currentTime: Long,
+            actionObject: ActionObject
+        ): Boolean {
+            val outroOffset =
+                actionObject.offset
+
+            return (outroOffset >= currentTime) && (outroOffset < currentTime + C.ONE_SECOND_IN_MS)
         }
     }
 }

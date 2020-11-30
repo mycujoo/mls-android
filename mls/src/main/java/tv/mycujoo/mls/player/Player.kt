@@ -76,7 +76,7 @@ class Player : IPlayer {
 
     override fun isLive(): Boolean {
         exoPlayer?.let {
-            return (it.isCurrentWindowDynamic) || (it.duration == C.POSITION_UNSET.toLong())
+            return (it.isCurrentWindowDynamic) && (it.duration == C.POSITION_UNSET.toLong())
         }
 
         return false

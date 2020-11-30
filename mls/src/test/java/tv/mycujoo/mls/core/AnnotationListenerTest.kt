@@ -1,12 +1,15 @@
 package tv.mycujoo.mls.core
 
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import tv.mycujoo.domain.entity.AnimationType
+import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.OverlayEntityTest
 import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.mls.helper.IDownloaderClient
@@ -35,6 +38,8 @@ class AnnotationListenerTest {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         annotationListener = AnnotationListener(playerView, viewHandler, downloaderClient)
+        Mockito.`when`(downloaderClient.download(any(), any()))
+            .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
     }
 
     /**region addOverlay() tests*/
