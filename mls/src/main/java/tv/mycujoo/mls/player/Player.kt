@@ -24,6 +24,7 @@ class Player : IPlayer {
 
     private var uri: Uri? = null
     private var dvrWindowSize: Long = Long.MAX_VALUE
+    private var dvrWindowStartTime: Long = -1L
     private var licenseUrl: Uri? = null
 
     override fun create(
@@ -58,12 +59,12 @@ class Player : IPlayer {
 
     override fun currentAbsoluteTime(): Long {
         exoPlayer?.let { exoplayer ->
-            val windowStartTime = mediaOnLoadCompletedListener.getWindowStartTime()
-            if (windowStartTime == -1L) {
-                return windowStartTime
+            dvrWindowStartTime = mediaOnLoadCompletedListener.getWindowStartTime()
+            if (dvrWindowStartTime == -1L) {
+                return -1L
             }
 
-            return windowStartTime + exoplayer.currentPosition
+            return dvrWindowStartTime + exoplayer.currentPosition
         }
 
         return -1L
@@ -196,6 +197,14 @@ class Player : IPlayer {
     override fun dvrWindowSize(): Long {
         return dvrWindowSize
 
+    }
+
+    override fun dvrWindowStartTime(): Long {
+        exoPlayer?.let { _ ->
+            dvrWindowStartTime = mediaOnLoadCompletedListener.getWindowStartTime()
+        }
+
+        return dvrWindowStartTime
     }
 
     companion object {

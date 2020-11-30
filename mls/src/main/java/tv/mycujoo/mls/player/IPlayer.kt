@@ -39,4 +39,5 @@ interface IPlayer {
 
     fun isWithinValidSegment(targetAbsoluteTime: Long): Boolean?
     fun dvrWindowSize(): Long
+    fun dvrWindowStartTime(): Long
 }

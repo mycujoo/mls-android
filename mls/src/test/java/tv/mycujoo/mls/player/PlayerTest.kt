@@ -143,6 +143,22 @@ class PlayerTest {
     }
 
     @Test
+    fun `dvrWindow-start-time valid`() {
+        initPlayer()
+        whenever(mediaOnLoadCompletedListener.getWindowStartTime()).thenReturn(1605609882000L)
+
+        assertEquals(1605609882000L, player.dvrWindowStartTime())
+    }
+
+    @Test
+    fun `dvrWindow-start-time invalid`() {
+        initPlayer()
+        whenever(mediaOnLoadCompletedListener.getWindowStartTime()).thenReturn(-1L)
+
+        assertEquals(-1L, player.dvrWindowStartTime())
+    }
+
+    @Test
     fun `given uninitialized state, should return -1 as duration`() {
         //not initialized
 
