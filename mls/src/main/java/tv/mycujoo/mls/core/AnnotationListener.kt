@@ -42,7 +42,7 @@ class AnnotationListener(
     }
 
     override fun removeOverlay(hideOverlayActionEntity: HideOverlayActionEntity) {
-        TODO("Not yet implemented")
+        MLSPlayerView.onOverlayRemovalWithNoAnimation(hideOverlayActionEntity)
     }
 
     override fun addOrUpdateLingeringIntroOverlay(
