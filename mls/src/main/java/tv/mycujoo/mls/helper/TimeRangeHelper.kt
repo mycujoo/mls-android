@@ -14,7 +14,7 @@ class TimeRangeHelper {
             return currentTime >= offset
         }
 
-        fun isCurrentTimeInDvrWindowDuration(duration: Long, dvrWindowDuration: Long) : Boolean{
+        fun isCurrentTimeInDvrWindowDuration(duration: Long, dvrWindowDuration: Long): Boolean {
             return duration + 20000L <= dvrWindowDuration
         }
 
