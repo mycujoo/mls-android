@@ -82,7 +82,7 @@ class TvVideoPlayer(
     private var controllerAgent: ControllerAgent
 
     private var tvAnnotationMediator: TvAnnotationMediator
-    private var tvOverlayContainer: TvOverlayContainer
+    private var overlayContainer: ConstraintLayout
     /**endregion */
 
     /**region Initializing*/
@@ -158,16 +158,16 @@ class TvVideoPlayer(
         } else {
             val rootView = videoSupportFragment.requireView() as FrameLayout
 
-            tvOverlayContainer = TvOverlayContainer(rootView.context)
+            overlayContainer = ConstraintLayout(rootView.context)
             rootView.addView(
-                tvOverlayContainer,
+                overlayContainer,
                 2,
                 FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
             )
 
             tvAnnotationMediator = TvAnnotationMediator(
                 player,
-                tvOverlayContainer,
+                overlayContainer,
                 Executors.newScheduledThreadPool(1),
                 Handler(Looper.getMainLooper()),
                 dispatcher,

@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.tv.player
 
 import android.os.Handler
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.Player
 import kotlinx.coroutines.CoroutineScope
@@ -19,7 +20,7 @@ import java.util.concurrent.TimeUnit
 
 class TvAnnotationMediator(
     player: IPlayer,
-    tvOverlayContainer: TvOverlayContainer,
+    overlayContainer: ConstraintLayout,
     scheduler: ScheduledExecutorService,
     handler: Handler,
     coroutineScope: CoroutineScope,
@@ -35,14 +36,14 @@ class TvAnnotationMediator(
     private var hasPendingSeek: Boolean = false
 
     init {
-        viewHandler.setOverlayHost(tvOverlayContainer)
+        viewHandler.setOverlayHost(overlayContainer)
 
         val overlayViewHelper =
             OverlayViewHelper(viewHandler, OverlayFactory(), AnimationFactory())
 
         tvAnnotationListener =
             TvAnnotationListener(
-                tvOverlayContainer,
+                overlayContainer,
                 overlayViewHelper,
                 downloaderClient
             )
