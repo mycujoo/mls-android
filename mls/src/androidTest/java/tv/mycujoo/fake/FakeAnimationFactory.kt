@@ -1,12 +1,12 @@
 package tv.mycujoo.fake
 
 import android.animation.ObjectAnimator
+import androidx.constraintlayout.widget.ConstraintLayout
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.manager.contracts.IViewHandler
-import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ScaffoldView
 
 class FakeAnimationFactory : AnimationFactory() {
@@ -26,7 +26,7 @@ class FakeAnimationFactory : AnimationFactory() {
     }
 
     override fun createAddViewDynamicAnimation(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         scaffoldView: ScaffoldView,
         introTransitionSpec: TransitionSpec,
         viewHandler: IViewHandler
@@ -44,7 +44,7 @@ class FakeAnimationFactory : AnimationFactory() {
     }
 
     override fun createRemoveViewStaticAnimation(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         overlayEntity: OverlayEntity,
         overlayView: ScaffoldView,
         viewHandler: IViewHandler
@@ -58,7 +58,7 @@ class FakeAnimationFactory : AnimationFactory() {
     }
 
     override fun createRemoveViewDynamicAnimation(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         overlayEntity: OverlayEntity,
         overlayView: ScaffoldView,
         viewHandler: IViewHandler
@@ -71,7 +71,7 @@ class FakeAnimationFactory : AnimationFactory() {
     }
 
     override fun createLingeringIntroViewAnimation(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         scaffoldView: ScaffoldView,
         overlayEntity: OverlayEntity,
         animationPosition: Long,
@@ -100,7 +100,7 @@ class FakeAnimationFactory : AnimationFactory() {
     }
 
     override fun createLingeringOutroAnimation(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         scaffoldView: ScaffoldView,
         overlayEntity: OverlayEntity,
         animationPosition: Long,

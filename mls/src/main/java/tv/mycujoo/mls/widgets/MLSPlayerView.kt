@@ -49,7 +49,7 @@ class MLSPlayerView @JvmOverloads constructor(
 
     /**region UI Fields*/
     var playerView: PlayerView
-    var overlayHost: OverlayHost
+    var overlayHost: ConstraintLayout
 
     private var bufferView: ProgressBar
 
@@ -88,7 +88,7 @@ class MLSPlayerView @JvmOverloads constructor(
         initAttributes(attrs, context)
 
         playerView = findViewById(R.id.exoPlayerView)
-        overlayHost = OverlayHost(context)
+        overlayHost = ConstraintLayout(context)
         playerView.findViewById<AspectRatioFrameLayout>(R.id.exo_content_frame).addView(overlayHost)
 
 
