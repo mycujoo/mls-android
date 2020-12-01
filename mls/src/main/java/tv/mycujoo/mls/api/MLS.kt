@@ -30,7 +30,6 @@ import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import java.util.*
 import java.util.concurrent.Executors
-import java.util.concurrent.locks.ReentrantLock
 
 
 class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
@@ -116,7 +115,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         MLSPlayerView: MLSPlayerView
     ) {
         if (mediatorInitialized) {
-            videoPlayerMediator.reInitialize(MLSPlayerView)
+            videoPlayerMediator.reInitialize(MLSPlayerView, builder)
             return
         }
         mediatorInitialized = true
@@ -125,8 +124,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
 
         val annotationListener =
-            AnnotationListener(MLSPlayerView, viewHandler, DownloaderClient(okHttpClient))
-        val lock = ReentrantLock()
+            AnnotationListener(MLSPlayerView, builder.internalBuilder.overlayViewHelper, DownloaderClient(okHttpClient))
         val annotationFactory = AnnotationFactory(
             annotationListener,
             viewHandler.getVariableKeeper()

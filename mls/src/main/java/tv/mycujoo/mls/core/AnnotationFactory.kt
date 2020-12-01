@@ -43,8 +43,8 @@ class AnnotationFactory(
     override fun build(buildPoint: BuildPoint) {
         val currentTimeInInDvrWindowDuration = TimeRangeHelper.isCurrentTimeInDvrWindowDuration(
             buildPoint.player.duration(),
-            buildPoint.player.dvrWindowSize()
-//            Long.MAX_VALUE // todo! This should be filled from Stream's dvr-window size value
+//            buildPoint.player.dvrWindowSize()
+            Long.MAX_VALUE // todo! This should be filled from Stream's dvr-window size value
         )
 
         if (currentTimeInInDvrWindowDuration) {

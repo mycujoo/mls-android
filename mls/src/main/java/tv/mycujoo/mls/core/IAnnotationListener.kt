@@ -1,6 +1,8 @@
 package tv.mycujoo.mls.core
 
-import tv.mycujoo.domain.entity.*
+import tv.mycujoo.domain.entity.HideOverlayActionEntity
+import tv.mycujoo.domain.entity.OverlayEntity
+import tv.mycujoo.domain.entity.TimelineMarkerEntity
 
 interface IAnnotationListener {
 
@@ -31,10 +33,4 @@ interface IAnnotationListener {
      * clears entire screen
      */
     fun clearScreen(idList: List<String>)
-    
-    
-    fun createVariable(variableEntity: SetVariableEntity)
-    fun incrementVariable(incrementVariableEntity: IncrementVariableEntity)
-
-
 }

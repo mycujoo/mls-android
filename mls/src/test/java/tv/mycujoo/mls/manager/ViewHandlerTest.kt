@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.manager
 
 import android.animation.ObjectAnimator
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.test.espresso.idling.CountingIdlingResource
 import kotlinx.coroutines.CoroutineScope
 import org.junit.Before
@@ -20,7 +21,7 @@ class ViewHandlerTest {
     private lateinit var viewHandler: IViewHandler
 
     @Mock
-    lateinit var overLayHost: OverlayHost
+    lateinit var overLayHost: ConstraintLayout
 
     @Mock
     lateinit var view0: ScaffoldView

@@ -78,12 +78,4 @@ class TvAnnotationListener(
     override fun clearScreen(idList: List<String>) {
 //        todo!
     }
-
-    override fun createVariable(variableEntity: SetVariableEntity) {
-        overlayViewHelper.setVariable(variableEntity)
-    }
-
-    override fun incrementVariable(incrementVariableEntity: IncrementVariableEntity) {
-        overlayViewHelper.incrementVariable(incrementVariableEntity)
-    }
 }
