@@ -7,9 +7,10 @@ import tv.mycujoo.domain.entity.OverlayAct.*
 import tv.mycujoo.domain.entity.VariableAct.CLEAR
 import tv.mycujoo.domain.entity.VariableAct.CREATE_VARIABLE
 import tv.mycujoo.domain.entity.models.ActionType.*
+import tv.mycujoo.mls.core.BuildPoint
+import tv.mycujoo.mls.core.IAnnotationFactory
 import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.helper.ShowOverlayActionHelper
-import tv.mycujoo.mls.helper.TimeSystem
 import tv.mycujoo.mls.helper.VariableActionHelper
 import tv.mycujoo.mls.helper.VariableActionHelper.Companion.getIncrementVariableCurrentAct
 import tv.mycujoo.mls.manager.IVariableKeeper
@@ -18,11 +19,19 @@ import tv.mycujoo.mls.manager.TimerVariable
 class TvAnnotationFactory(
     private val tvAnnotationListener: TvAnnotationListener,
     private val variableKeeper: IVariableKeeper
-) {
+) : IAnnotationFactory {
 
     private lateinit var sortedActionList: List<ActionObject>
 
-    fun setAnnotations(actionObjectList: List<ActionObject>) {
+    override fun build(buildPoint: BuildPoint) {
+        TODO("Not yet implemented")
+    }
+
+    override fun actionList(): List<ActionObject> {
+        return sortedActionList
+    }
+
+    override fun setAnnotations(actionObjectList: List<ActionObject>) {
         val sortedTemp =
             actionObjectList
                 .sortedWith(compareBy<ActionObject> { it.offset }.thenByDescending { it.priority })
