@@ -1,7 +1,10 @@
 package tv.mycujoo.mls.core
 
-import tv.mycujoo.domain.entity.*
-import tv.mycujoo.mls.manager.contracts.IViewHandler
+import tv.mycujoo.domain.entity.HideOverlayActionEntity
+import tv.mycujoo.domain.entity.OverlayEntity
+import tv.mycujoo.domain.entity.TimelineMarkerEntity
+import tv.mycujoo.mls.helper.IDownloaderClient
+import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.widgets.MLSPlayerView
 
 /**
@@ -15,29 +18,26 @@ import tv.mycujoo.mls.widgets.MLSPlayerView
  */
 class AnnotationListener(
     private val MLSPlayerView: MLSPlayerView,
-    private val viewHandler: IViewHandler
+    private val overlayViewHelper: OverlayViewHelper,
+    private val downloaderClient: IDownloaderClient
 ) :
     IAnnotationListener {
     override fun addOverlay(overlayEntity: OverlayEntity) {
-        overlayEntity.isOnScreen = true
-        if (overlayEntity.introTransitionSpec.animationType == AnimationType.NONE) {
-            MLSPlayerView.onNewOverlayWithNoAnimation(overlayEntity)
-        } else {
-            MLSPlayerView.onNewOverlayWithAnimation(overlayEntity)
+        downloaderClient.download(overlayEntity) {
+            overlayViewHelper.addView(
+                MLSPlayerView.context,
+                MLSPlayerView.overlayHost,
+                it
+            )
         }
     }
 
     override fun removeOverlay(overlayEntity: OverlayEntity) {
-        overlayEntity.isOnScreen = false
-        if (overlayEntity.outroTransitionSpec.animationType == AnimationType.NONE) {
-            MLSPlayerView.onOverlayRemovalWithNoAnimation(overlayEntity)
-        } else {
-            MLSPlayerView.onOverlayRemovalWithAnimation(overlayEntity)
-        }
+        overlayViewHelper.removeView(MLSPlayerView.overlayHost, overlayEntity)
     }
 
     override fun removeOverlay(hideOverlayActionEntity: HideOverlayActionEntity) {
-        TODO("Not yet implemented")
+        overlayViewHelper.removeView(MLSPlayerView.overlayHost, hideOverlayActionEntity)
     }
 
     override fun addOrUpdateLingeringIntroOverlay(
@@ -45,16 +45,10 @@ class AnnotationListener(
         animationPosition: Long,
         isPlaying: Boolean
     ) {
-        overlayEntity.isOnScreen = true
-        if (viewHandler.overlayBlueprintIsAttached(overlayEntity.id)) {
-            MLSPlayerView.updateLingeringIntroOverlay(
-                overlayEntity,
-                animationPosition,
-                isPlaying
-            )
-        } else {
-            MLSPlayerView.addLingeringIntroOverlay(
-                overlayEntity,
+        downloaderClient.download(overlayEntity) {
+            overlayViewHelper.addOrUpdateLingeringIntroOverlay(
+                MLSPlayerView.overlayHost,
+                it,
                 animationPosition,
                 isPlaying
             )
@@ -66,35 +60,24 @@ class AnnotationListener(
         animationPosition: Long,
         isPlaying: Boolean
     ) {
-        overlayEntity.isOnScreen = true
-        if (viewHandler.overlayBlueprintIsAttached(overlayEntity.id)) {
-            MLSPlayerView.updateLingeringOutroOverlay(
-                overlayEntity,
-                animationPosition,
-                isPlaying
-            )
-        } else {
-            MLSPlayerView.addLingeringOutroOverlay(
-                overlayEntity,
+        downloaderClient.download(overlayEntity) {
+            overlayViewHelper.addOrUpdateLingeringOutroOverlay(
+                MLSPlayerView.overlayHost,
+                it,
                 animationPosition,
                 isPlaying
             )
         }
-
     }
 
     override fun addOrUpdateLingeringMidwayOverlay(overlayEntity: OverlayEntity) {
-        overlayEntity.isOnScreen = true
-        if (viewHandler.overlayBlueprintIsAttached(overlayEntity.id)) {
-            MLSPlayerView.updateLingeringMidwayOverlay(overlayEntity)
-        } else {
-            MLSPlayerView.addLingeringMidwayOverlay(overlayEntity)
+        downloaderClient.download(overlayEntity) {
+            overlayViewHelper.updateLingeringMidwayOverlay(MLSPlayerView.overlayHost, it)
         }
     }
 
     override fun removeLingeringOverlay(overlayEntity: OverlayEntity) {
-        overlayEntity.isOnScreen = false
-        MLSPlayerView.removeLingeringOverlay(overlayEntity)
+        overlayViewHelper.removeView(MLSPlayerView.overlayHost, overlayEntity)
     }
 
     override fun setTimelineMarkers(timelineMarkerEntityList: List<TimelineMarkerEntity>) {
@@ -103,13 +86,5 @@ class AnnotationListener(
 
     override fun clearScreen(idList: List<String>) {
         MLSPlayerView.clearScreen(idList)
-    }
-
-    override fun createVariable(setVariable: SetVariableEntity) {
-        TODO("Not yet implemented")
-    }
-
-    override fun incrementVariable(incrementVariableEntity: IncrementVariableEntity) {
-        TODO("Not yet implemented")
     }
 }

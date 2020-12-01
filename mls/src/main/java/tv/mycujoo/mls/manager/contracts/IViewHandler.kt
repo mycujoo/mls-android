@@ -1,15 +1,15 @@
 package tv.mycujoo.mls.manager.contracts
 
 import android.animation.ObjectAnimator
-import tv.mycujoo.mls.manager.TimerKeeper
+import androidx.constraintlayout.widget.ConstraintLayout
+import tv.mycujoo.mls.manager.IVariableKeeper
 import tv.mycujoo.mls.manager.VariableTranslator
-import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ScaffoldView
 
 interface IViewHandler {
 
-    fun setOverlayHost(overlayHost: OverlayHost)
-    fun getOverlayHost() : OverlayHost
+    fun setOverlayHost(overlayHost: ConstraintLayout)
+    fun getOverlayHost(): ConstraintLayout
 
 
     fun addAnimation(id: String, objectAnimator: ObjectAnimator)
@@ -29,5 +29,5 @@ interface IViewHandler {
     fun decrementIdlingResource()
 
     fun getVariableTranslator(): VariableTranslator
-    fun getTimerKeeper(): TimerKeeper
+    fun getVariableKeeper(): IVariableKeeper
 }

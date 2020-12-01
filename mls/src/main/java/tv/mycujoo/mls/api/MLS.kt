@@ -23,13 +23,13 @@ import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.mediator.AnnotationMediator
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.network.RemoteApi
+import tv.mycujoo.mls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mls.player.Player
 import tv.mycujoo.mls.player.Player.Companion.createExoPlayer
 import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import java.util.*
 import java.util.concurrent.Executors
-import java.util.concurrent.locks.ReentrantLock
 
 
 class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
@@ -94,9 +94,11 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         )
 
         player = Player().apply {
+            val exoPlayer = createExoPlayer(context)
             create(
                 createMediaFactory(context),
-                createExoPlayer(context)
+                exoPlayer,
+                MediaOnLoadCompletedListener(exoPlayer)
             )
         }
 
@@ -113,7 +115,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         MLSPlayerView: MLSPlayerView
     ) {
         if (mediatorInitialized) {
-            videoPlayerMediator.reInitialize(MLSPlayerView)
+            videoPlayerMediator.reInitialize(MLSPlayerView, builder)
             return
         }
         mediatorInitialized = true
@@ -121,14 +123,11 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         videoPlayerMediator.initialize(MLSPlayerView, player, builder)
 
 
-        val annotationListener = AnnotationListener(MLSPlayerView, viewHandler)
-        val lock = ReentrantLock()
+        val annotationListener =
+            AnnotationListener(MLSPlayerView, builder.internalBuilder.overlayViewHelper, DownloaderClient(okHttpClient))
         val annotationFactory = AnnotationFactory(
             annotationListener,
-            DownloaderClient(okHttpClient),
-            viewHandler,
-            lock,
-            lock.newCondition()
+            viewHandler.getVariableKeeper()
         )
         annotationMediator = AnnotationMediator(
             MLSPlayerView,

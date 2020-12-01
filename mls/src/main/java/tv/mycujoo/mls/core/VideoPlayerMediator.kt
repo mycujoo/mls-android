@@ -23,8 +23,6 @@ import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.enum.MessageLevel
-import tv.mycujoo.mls.helper.AnimationFactory
-import tv.mycujoo.mls.helper.OverlayFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mls.manager.Logger
@@ -33,6 +31,7 @@ import tv.mycujoo.mls.mediator.AnnotationMediator
 import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.player.IPlayer
+import tv.mycujoo.mls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mls.player.Player.Companion.createExoPlayer
 import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
 import tv.mycujoo.mls.utils.StringUtils
@@ -100,7 +99,7 @@ class VideoPlayerMediator(
                 initAnalytic(builder.internalBuilder, builder.activity!!, it)
             }
 
-            initPlayerViewWrapper(MLSPlayerView, player)
+            initPlayerViewWrapper(MLSPlayerView, player, builder.internalBuilder.overlayViewHelper)
         }
     }
 
@@ -110,10 +109,11 @@ class VideoPlayerMediator(
 
     private fun initPlayerViewWrapper(
         MLSPlayerView: MLSPlayerView,
-        player: IPlayer
+        player: IPlayer,
+        overlayViewHelper: OverlayViewHelper
     ) {
         MLSPlayerView.prepare(
-            OverlayViewHelper(viewHandler, OverlayFactory() ,AnimationFactory()),
+            overlayViewHelper,
             viewHandler,
             timelineMarkerActionEntities
         )
@@ -169,13 +169,15 @@ class VideoPlayerMediator(
         MLSPlayerView.config(videoPlayerConfig)
     }
 
-    fun reInitialize(MLSPlayerView: MLSPlayerView) {
+    fun reInitialize(MLSPlayerView: MLSPlayerView, builder: MLSBuilder) {
+        val exoPlayer = createExoPlayer(MLSPlayerView.context)
         player.create(
             createMediaFactory(MLSPlayerView.context),
-            createExoPlayer(MLSPlayerView.context)
+            exoPlayer,
+            MediaOnLoadCompletedListener(exoPlayer)
         )
 
-        initPlayerViewWrapper(MLSPlayerView, player)
+        initPlayerViewWrapper(MLSPlayerView, player, builder.internalBuilder.overlayViewHelper)
         dataManager.currentEvent?.let {
             joinEvent(it)
         }
@@ -297,7 +299,7 @@ class VideoPlayerMediator(
     }
 
     fun playExternalSourceVideo(videoUri: String) {
-        player.play(videoUri, videoPlayerConfig.autoPlay)
+        player.play(videoUri, Long.MAX_VALUE, videoPlayerConfig.autoPlay)
         playerView.hideEventInfoDialog()
         playerView.hideEventInfoButton()
     }
@@ -327,11 +329,12 @@ class VideoPlayerMediator(
         if (stream.widevine?.fullUrl != null && stream.widevine?.licenseUrl != null) {
             player.play(
                 stream.widevine.fullUrl,
+                stream.dvrWindow,
                 stream.widevine.licenseUrl,
                 videoPlayerConfig.autoPlay
             )
         } else if (stream.fullUrl != null) {
-            player.play(stream.fullUrl, videoPlayerConfig.autoPlay)
+            player.play(stream.fullUrl, stream.dvrWindow, videoPlayerConfig.autoPlay)
         }
 
     }

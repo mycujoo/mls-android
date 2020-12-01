@@ -2,6 +2,7 @@ package tv.mycujoo.mls.player
 
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
@@ -11,6 +12,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -26,6 +28,9 @@ class PlayerTest {
     lateinit var mediaFactory: HlsMediaSource.Factory
 
     @Mock
+    lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
+
+    @Mock
     lateinit var hlsMediaSource: HlsMediaSource
 
 
@@ -36,7 +41,7 @@ class PlayerTest {
     }
 
     private fun initPlayer() {
-        player.create(mediaFactory, exoPlayer)
+        player.create(mediaFactory, exoPlayer, mediaOnLoadCompletedListener)
     }
 
     @Test
@@ -111,6 +116,49 @@ class PlayerTest {
     }
 
     @Test
+    fun `absolute time test at the beginning`() {
+        initPlayer()
+        whenever(exoPlayer.currentPosition).thenReturn(0L)
+        whenever(mediaOnLoadCompletedListener.getWindowStartTime()).thenReturn(1605609882000L)
+
+        assertEquals(1605609882000L, player.currentAbsoluteTime())
+    }
+
+    @Test
+    fun `absolute time test after beginning`() {
+        initPlayer()
+        whenever(exoPlayer.currentPosition).thenReturn(4000L)
+        whenever(mediaOnLoadCompletedListener.getWindowStartTime()).thenReturn(1605609882000L)
+
+        assertEquals(1605609886000L, player.currentAbsoluteTime())
+    }
+
+    @Test
+    fun `absolute time test without window-start-time`() {
+        initPlayer()
+        whenever(exoPlayer.currentPosition).thenReturn(4000L)
+        whenever(mediaOnLoadCompletedListener.getWindowStartTime()).thenReturn(-1L)
+
+        assertEquals(-1L, player.currentAbsoluteTime())
+    }
+
+    @Test
+    fun `dvrWindow-start-time valid`() {
+        initPlayer()
+        whenever(mediaOnLoadCompletedListener.getWindowStartTime()).thenReturn(1605609882000L)
+
+        assertEquals(1605609882000L, player.dvrWindowStartTime())
+    }
+
+    @Test
+    fun `dvrWindow-start-time invalid`() {
+        initPlayer()
+        whenever(mediaOnLoadCompletedListener.getWindowStartTime()).thenReturn(-1L)
+
+        assertEquals(-1L, player.dvrWindowStartTime())
+    }
+
+    @Test
     fun `given uninitialized state, should return -1 as duration`() {
         //not initialized
 
@@ -177,12 +225,12 @@ class PlayerTest {
         initPlayer()
         whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
 
-        player.play(SAMPLE_URI, true)
+        player.play(SAMPLE_URI, Long.MAX_VALUE, true)
 
 
-        val mediaItemCaptor = argumentCaptor<MediaItem>()
+        val mediaSourceCaptor = argumentCaptor<MediaSource>()
         val resetPositionCaptor = argumentCaptor<Boolean>()
-        verify(exoPlayer).setMediaItem(mediaItemCaptor.capture(), resetPositionCaptor.capture())
+        verify(exoPlayer).setMediaSource(mediaSourceCaptor.capture(), resetPositionCaptor.capture())
         assertTrue { resetPositionCaptor.firstValue }
 
     }
@@ -198,14 +246,85 @@ class PlayerTest {
         initPlayer()
 
 
-        player.play(SAMPLE_URI, true)
+        player.play(SAMPLE_URI, Long.MAX_VALUE, true)
 
 
         val mediaItemCaptor = argumentCaptor<MediaItem>()
         val resetPositionCaptor = argumentCaptor<Boolean>()
         verify(exoPlayer).setMediaItem(mediaItemCaptor.capture(), resetPositionCaptor.capture())
         assertFalse { resetPositionCaptor.firstValue }
+    }
 
+    @Test
+    fun `given discontinuity segment, should add it to discontinuity array`() {
+        initPlayer()
+        whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
+        whenever(exoPlayer.setMediaSource(any(), any<Boolean>())).then {
+            val mediaSource = it.arguments[0] as MediaSource
+            mediaSource
+        }
+
+
+    }
+
+    @Test
+    fun `isWithinValidSegment() empty list`() {
+        initPlayer()
+        val copyOnWriteArrayList = CopyOnWriteArrayList<Pair<Long, Long>>()
+        whenever(mediaOnLoadCompletedListener.getDiscontinuityBoundaries()).thenReturn(
+            copyOnWriteArrayList
+        )
+
+
+        assertTrue { player.isWithinValidSegment(5000000L)!! }
+    }
+
+    @Test
+    fun `isWithinValidSegment() with discontinuity segment`() {
+        initPlayer()
+        val copyOnWriteArrayList = CopyOnWriteArrayList<Pair<Long, Long>>()
+        // 1605693500 is Wednesday, 18 November 2020 09:58:20
+        copyOnWriteArrayList.add(Pair(1605693500, 10))
+        whenever(mediaOnLoadCompletedListener.getDiscontinuityBoundaries()).thenReturn(
+            copyOnWriteArrayList
+        )
+
+
+        assertTrue { player.isWithinValidSegment(1605693498)!! }
+        assertTrue { player.isWithinValidSegment(1605693499)!! }
+        assertFalse { player.isWithinValidSegment(1605693500)!! }
+        assertFalse { player.isWithinValidSegment(1605693505)!! }
+        assertFalse { player.isWithinValidSegment(1605693510)!! }
+        assertTrue { player.isWithinValidSegment(1605693511)!! }
+    }
+
+    @Test
+    fun `isWithinValidSegment() with multiple discontinuity segments`() {
+        initPlayer()
+        val copyOnWriteArrayList = CopyOnWriteArrayList<Pair<Long, Long>>()
+        // 1605693500 is Wednesday, 18 November 2020 09:58:20
+        copyOnWriteArrayList.add(Pair(1605693500, 10))
+        // 1605694500 is Wednesday, 18 November 2020 10:15:00
+        copyOnWriteArrayList.add(Pair(1605694500, 5))
+
+        whenever(mediaOnLoadCompletedListener.getDiscontinuityBoundaries()).thenReturn(
+            copyOnWriteArrayList
+        )
+
+
+        assertTrue { player.isWithinValidSegment(1605693498)!! }
+        assertTrue { player.isWithinValidSegment(1605693499)!! }
+        assertFalse { player.isWithinValidSegment(1605693500)!! }
+        assertFalse { player.isWithinValidSegment(1605693505)!! }
+        assertFalse { player.isWithinValidSegment(1605693510)!! }
+        assertTrue { player.isWithinValidSegment(1605693511)!! }
+
+        assertTrue { player.isWithinValidSegment(1605694498)!! }
+        assertTrue { player.isWithinValidSegment(1605694499)!! }
+        assertFalse { player.isWithinValidSegment(1605694500)!! }
+        assertFalse { player.isWithinValidSegment(1605694505)!! }
+        assertTrue { player.isWithinValidSegment(1605694506)!! }
+        assertTrue { player.isWithinValidSegment(1605694507)!! }
     }
 
     companion object {

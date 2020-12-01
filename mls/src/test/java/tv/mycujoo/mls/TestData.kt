@@ -1,6 +1,7 @@
 package tv.mycujoo.mls
 
 import tv.mycujoo.domain.entity.*
+import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 
 class TestData {
     companion object {
@@ -9,7 +10,7 @@ class TestData {
                 "id_0",
                 null,
                 ViewSpec(null, null),
-                TransitionSpec(0L, animationType, 1000L),
+                TransitionSpec(0L, animationType, ONE_SECOND_IN_MS),
                 TransitionSpec(-1L, AnimationType.NONE, -1L),
                 emptyList()
             )
@@ -21,7 +22,7 @@ class TestData {
                 null,
                 ViewSpec(null, null),
                 TransitionSpec(0L, AnimationType.NONE, 0L),
-                TransitionSpec(0L, animationType, 1000L),
+                TransitionSpec(0L, animationType, ONE_SECOND_IN_MS),
                 emptyList()
             )
         }
@@ -31,7 +32,7 @@ class TestData {
                 "id_0",
                 null,
                 animationType,
-                1000L
+                ONE_SECOND_IN_MS
             )
         }
     }

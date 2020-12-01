@@ -8,5 +8,4 @@ sealed class TimerEntity {
     data class PauseTimer(val pauseTimerEntity: PauseTimerEntity) : TimerEntity()
     data class AdjustTimer(val adjustTimerEntity: AdjustTimerEntity) : TimerEntity()
     data class SkipTimer(val skipTimerEntity: SkipTimerEntity) : TimerEntity()
-    data class KillTimer(val timerName: String) : TimerEntity()
 }

@@ -26,6 +26,7 @@ import tv.mycujoo.fake.FakeAnimationFactory
 import tv.mycujoo.matchers.TypeMatcher
 import tv.mycujoo.mls.BlankActivity
 import tv.mycujoo.mls.R
+import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.manager.ViewHandler
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import tv.mycujoo.mls.widgets.ScaffoldView
@@ -436,7 +437,7 @@ class OverlayViewHelperTest {
 
         val svgData = SvgData(null, null, sampleSvgString)
 
-        val introTransitionSpec = TransitionSpec(1000L, AnimationType.NONE, 0L)
+        val introTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.NONE, 0L)
         val outroTransitionSpec = TransitionSpec(2000L, AnimationType.NONE, 0L)
 
         return OverlayEntity(
@@ -454,7 +455,7 @@ class OverlayViewHelperTest {
 
         val svgData = SvgData(null, null, sampleSvgString)
 
-        val introTransitionSpec = TransitionSpec(1000L, introAnimationType, 600L)
+        val introTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, introAnimationType, 600L)
         val outroTransitionSpec = TransitionSpec(2000L, AnimationType.NONE, 3000L)
 
         return OverlayEntity(
@@ -475,7 +476,7 @@ class OverlayViewHelperTest {
 
         val svgData = SvgData(null, null, sampleSvgString)
 
-        val introTransitionSpec = TransitionSpec(1000L, introAnimationType, 300L)
+        val introTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, introAnimationType, 300L)
         val outroTransitionSpec = TransitionSpec(2000L, outroAnimationType, 600L)
 
         return OverlayEntity(

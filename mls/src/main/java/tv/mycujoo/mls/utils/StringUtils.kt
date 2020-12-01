@@ -62,5 +62,21 @@ class StringUtils {
                 null
             }
         }
+
+        /**
+         * Reads Segment url name and returns [String] presentation of absolute time value or "-1".
+         *
+         * @param name Segment url name [String] which should be read.
+         * @return Returns `-1` if the the segment name is not in correct format. Else
+         * returns the absolute time from segment url name as [String].
+         */
+        fun getSegmentTimeStamp(name: String): String {
+            val keyword = "segment_"
+            val underscore = "_"
+            return if (name.contains(keyword, true)) {
+                name.substringAfter(keyword).substringBefore(underscore)
+            } else
+                "-1"
+        }
     }
 }

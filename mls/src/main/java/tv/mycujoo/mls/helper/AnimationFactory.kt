@@ -3,11 +3,11 @@ package tv.mycujoo.mls.helper
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.view.View
+import androidx.constraintlayout.widget.ConstraintLayout
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.mls.manager.contracts.IViewHandler
-import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ScaffoldView
 
 open class AnimationFactory {
@@ -32,7 +32,7 @@ open class AnimationFactory {
     }
 
     open fun createAddViewDynamicAnimation(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         scaffoldView: ScaffoldView,
         introTransitionSpec: TransitionSpec,
         viewHandler: IViewHandler
@@ -118,7 +118,7 @@ open class AnimationFactory {
     }
 
     open fun createRemoveViewStaticAnimation(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         overlayEntity: OverlayEntity,
         overlayView: ScaffoldView,
         viewHandler: IViewHandler
@@ -150,7 +150,7 @@ open class AnimationFactory {
     }
 
     open fun createRemoveViewDynamicAnimation(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         overlayEntity: OverlayEntity,
         view: ScaffoldView,
         viewHandler: IViewHandler
@@ -223,7 +223,7 @@ open class AnimationFactory {
     }
 
     open fun createLingeringIntroViewAnimation(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         scaffoldView: ScaffoldView,
         overlayEntity: OverlayEntity,
         animationPosition: Long,
@@ -331,7 +331,7 @@ open class AnimationFactory {
     }
 
     open fun createLingeringOutroAnimation(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         scaffoldView: ScaffoldView,
         overlayEntity: OverlayEntity,
         animationPosition: Long,

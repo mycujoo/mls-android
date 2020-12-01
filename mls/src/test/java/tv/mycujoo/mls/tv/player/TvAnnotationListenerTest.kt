@@ -8,7 +8,8 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
-import tv.mycujoo.domain.entity.*
+import tv.mycujoo.domain.entity.AnimationType
+import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.mls.TestData.Companion.sampleEntityWithIntroAnimation
 import tv.mycujoo.mls.TestData.Companion.sampleEntityWithOutroAnimation
 import tv.mycujoo.mls.TestData.Companion.sampleHideOverlayEntity
@@ -138,26 +139,5 @@ class TvAnnotationListenerTest {
 
         Mockito.verify(overlayViewHelper)
             .removeView(tvOverlayContainer, overlayEntity)
-    }
-
-    @Test
-    fun setVariable() {
-        val variable = Variable("\$awayscore", VariableType.LONG, 0)
-        val setVariableEntity = SetVariableEntity("id_0", 5000L, variable)
-        tvAnnotationListener.createVariable(setVariableEntity)
-
-
-        Mockito.verify(overlayViewHelper)
-            .setVariable(setVariableEntity)
-    }
-
-    @Test
-    fun incrementVariable() {
-        val incrementVariableEntity = IncrementVariableEntity("id_0", 5000L, "\$awayscore", 2L)
-        tvAnnotationListener.incrementVariable(incrementVariableEntity)
-
-
-        Mockito.verify(overlayViewHelper)
-            .incrementVariable(incrementVariableEntity)
     }
 }

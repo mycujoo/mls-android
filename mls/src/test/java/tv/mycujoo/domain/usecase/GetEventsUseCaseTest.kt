@@ -15,10 +15,10 @@ import org.junit.Test
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import tv.mycujoo.data.repository.EventsRepository
+import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.params.EventListParams
 import tv.mycujoo.mls.CoroutineTestRule
-import tv.mycujoo.mls.model.Event
 import tv.mycujoo.mls.network.MlsApi
 import java.net.HttpURLConnection
 import kotlin.test.assertEquals
@@ -61,7 +61,7 @@ class GetEventsUseCaseTest {
 
     @Test
     fun `given generic error, should return error`() = runBlocking<Unit> {
-        val arrayList = ArrayList<Event>(0)
+        val arrayList = ArrayList<EventEntity>(0)
         val toJson = Gson().toJson(arrayList)
         val response = MockResponse()
             .setBody(toJson)

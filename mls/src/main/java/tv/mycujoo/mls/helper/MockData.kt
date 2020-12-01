@@ -1,16 +1,7 @@
-package tv.mycujoo.mls.tv.player
-
-import android.content.Context
-import android.util.AttributeSet
-import tv.mycujoo.mls.widgets.OverlayHost
-
-class TvOverlayContainer @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : OverlayHost(context, attrs, defStyleAttr) {
+package tv.mycujoo.mls.helper
 
 
-    companion object {
-        val sampleSvgString = """
+val sampleSvgString = """
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="457px" height="69px" viewBox="0 0 457 69" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <!-- Generator: Sketch 63.1 (92452) - https://sketch.com -->
@@ -46,6 +37,3 @@ class TvOverlayContainer @JvmOverloads constructor(
     </g>
 </svg>
     """.trimIndent()
-    }
-
-}

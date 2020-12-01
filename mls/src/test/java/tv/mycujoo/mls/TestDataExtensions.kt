@@ -26,6 +26,7 @@ fun OverlayEntity.toActionObject(offset: Long, duration : Long): ActionObject {
         id,
         ActionType.SHOW_OVERLAY,
         offset,
+        -1L,
         parsedOverlayRelatedData,
         null,
         null
