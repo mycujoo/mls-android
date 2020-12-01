@@ -162,7 +162,7 @@ class TvVideoPlayer(
             )
 
             tvAnnotationMediator = TvAnnotationMediator(
-                player.getDirectInstance()!!,
+                player,
                 tvOverlayContainer,
                 Executors.newScheduledThreadPool(1),
                 Handler(Looper.getMainLooper()),

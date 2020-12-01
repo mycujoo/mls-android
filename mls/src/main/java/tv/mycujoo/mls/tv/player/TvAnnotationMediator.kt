@@ -2,7 +2,6 @@ package tv.mycujoo.mls.tv.player
 
 import android.os.Handler
 import androidx.test.espresso.idling.CountingIdlingResource
-import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import kotlinx.coroutines.CoroutineScope
 import tv.mycujoo.domain.entity.ActionObject
@@ -12,11 +11,12 @@ import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.OverlayFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.ViewHandler
+import tv.mycujoo.mls.player.IPlayer
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
 class TvAnnotationMediator(
-    player: ExoPlayer,
+    player: IPlayer,
     tvOverlayContainer: TvOverlayContainer,
     scheduler: ScheduledExecutorService,
     handler: Handler,
@@ -61,8 +61,8 @@ class TvAnnotationMediator(
                     hasPendingSeek = false
 
                     tvAnnotationFactory.build(
-                        player.currentPosition,
-                        isPlaying = player.isPlaying,
+                        player.currentPosition(),
+                        isPlaying = player.isPlaying(),
                         interrupted = true
                     )
                 }
@@ -83,8 +83,8 @@ class TvAnnotationMediator(
         })
 
         val exoRunnable = Runnable {
-            if (player.isPlaying) {
-                val currentPosition = player.currentPosition
+            if (player.isPlaying()) {
+                val currentPosition = player.currentPosition()
 
                 tvAnnotationFactory.build(
                     currentPosition,
