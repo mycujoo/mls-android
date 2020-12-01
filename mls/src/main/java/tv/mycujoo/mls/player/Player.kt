@@ -120,7 +120,9 @@ class Player : IPlayer {
 
 
     override fun play(uriString: String, dvrWindowSize: Long, autoPlay: Boolean) {
-        this.uri = Uri.parse(uriString)
+//        this.uri = Uri.parse(uriString) todo uncomment this
+        this.uri =
+            Uri.parse("https://europe-west-hls.mls.mycujoo.tv/amir/ckhkdu7u801zw010167b2moe5/1080p/playlist.m3u8")
         this.dvrWindowSize = dvrWindowSize
         val mediaItem = MediaItem.Builder().setUri(uri).build()
         play(mediaItem, autoPlay)

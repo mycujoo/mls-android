@@ -5,6 +5,8 @@ import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.Player
 import kotlinx.coroutines.CoroutineScope
 import tv.mycujoo.domain.entity.ActionObject
+import tv.mycujoo.mls.core.AnnotationFactory
+import tv.mycujoo.mls.core.BuildPoint
 import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.helper.DownloaderClient
@@ -24,7 +26,7 @@ class TvAnnotationMediator(
     downloaderClient: DownloaderClient
 ) {
 
-    private var tvAnnotationFactory: TvAnnotationFactory
+    private var annotationFactory: AnnotationFactory
     private var tvAnnotationListener: TvAnnotationListener
     private val viewHandler:
             ViewHandler =
@@ -46,8 +48,8 @@ class TvAnnotationMediator(
             )
 
 
-        tvAnnotationFactory =
-            TvAnnotationFactory(tvAnnotationListener, viewHandler.getVariableKeeper())
+        annotationFactory =
+            AnnotationFactory(tvAnnotationListener, viewHandler.getVariableKeeper())
 
         player.addListener(object : Player.EventListener {
             override fun onPositionDiscontinuity(reason: Int) {
@@ -60,10 +62,14 @@ class TvAnnotationMediator(
                 if (playbackState == Player.STATE_READY && hasPendingSeek) {
                     hasPendingSeek = false
 
-                    tvAnnotationFactory.build(
-                        player.currentPosition(),
-                        isPlaying = player.isPlaying(),
-                        interrupted = true
+                    annotationFactory.build(
+                        BuildPoint(
+                            player.currentPosition(),
+                            player.currentAbsoluteTime(),
+                            player,
+                            player.isPlaying(),
+                            true
+                        )
                     )
                 }
 
@@ -84,12 +90,14 @@ class TvAnnotationMediator(
 
         val exoRunnable = Runnable {
             if (player.isPlaying()) {
-                val currentPosition = player.currentPosition()
-
-                tvAnnotationFactory.build(
-                    currentPosition,
-                    isPlaying = true,
-                    interrupted = false
+                annotationFactory.build(
+                    BuildPoint(
+                        player.currentPosition(),
+                        player.currentAbsoluteTime(),
+                        player,
+                        isPlaying = true,
+                        isInterrupted = false
+                    )
                 )
             }
         }
@@ -107,6 +115,6 @@ class TvAnnotationMediator(
     }
 
     fun feed(actionObjectList: List<ActionObject>) {
-        tvAnnotationFactory.setAnnotations(actionObjectList)
+        annotationFactory.setAnnotations(actionObjectList)
     }
 }

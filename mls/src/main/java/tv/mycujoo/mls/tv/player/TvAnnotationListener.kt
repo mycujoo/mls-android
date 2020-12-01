@@ -72,11 +72,11 @@ class TvAnnotationListener(
     }
 
     override fun setTimelineMarkers(timelineMarkerEntityList: List<TimelineMarkerEntity>) {
-        TODO("Not yet implemented")
+//        todo!
     }
 
     override fun clearScreen(idList: List<String>) {
-        TODO("Not yet implemented")
+//        todo!
     }
 
     override fun createVariable(variableEntity: SetVariableEntity) {

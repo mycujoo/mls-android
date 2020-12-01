@@ -7,16 +7,15 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.ActionSourceData
+import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.models.ActionType
-import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.manager.IVariableKeeper
-import tv.mycujoo.mls.manager.contracts.IViewHandler
+import tv.mycujoo.mls.matcher.HideOverlayEntityMatcher
 import tv.mycujoo.mls.matcher.OverlayEntityMatcher
 import tv.mycujoo.mls.player.IPlayer
-import java.util.concurrent.locks.ReentrantLock
 import kotlin.test.assertTrue
 
-@ExperimentalStdlibApi
+@OptIn(ExperimentalStdlibApi::class)
 class AnnotationFactoryTest {
 
     /**region subject under test*/
@@ -32,28 +31,20 @@ class AnnotationFactoryTest {
     lateinit var player: IPlayer
 
     @Mock
-    lateinit var viewHandler: IViewHandler
-
-    @Mock
     lateinit var variableKeeper: IVariableKeeper
     /**endregion */
 
-    /**region setup*/
+    /**region Setup*/
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
         whenever(player.dvrWindowSize()).thenReturn(60000)
-        whenever(viewHandler.getVariableKeeper()).thenReturn(variableKeeper)
 
-        val reentrantLock = ReentrantLock()
         annotationFactory = AnnotationFactory(
             annotationListener,
-            viewHandler,
-            reentrantLock,
-            reentrantLock.newCondition()
+            variableKeeper
         )
-
     }
     /**endregion */
 
@@ -115,14 +106,15 @@ class AnnotationFactoryTest {
         val actionResponse = ActionResponse(listOf(actionSourceData))
         annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
 
+
         val buildPoint = BuildPoint(4001L, -1L, player, isPlaying = true, isInterrupted = false)
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).removeOverlay(argThat(OverlayEntityMatcher("id_01")))
+        verify(annotationListener).removeOverlay(argThat(HideOverlayEntityMatcher("id_01")))
+        verify(annotationListener, never()).removeOverlay(any<OverlayEntity>())
         verify(annotationListener, never()).addOverlay(any())
     }
-
     /**endregion */
 
     /**region Regular play mode - Absolute time system*/
@@ -167,7 +159,8 @@ class AnnotationFactoryTest {
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).removeOverlay(argThat(OverlayEntityMatcher("id_01")))
+        verify(annotationListener).removeOverlay(argThat(HideOverlayEntityMatcher("id_01")))
+        verify(annotationListener, never()).removeOverlay(any<OverlayEntity>())
         verify(annotationListener, never()).addOverlay(any())
     }
     /**endregion */
@@ -431,15 +424,4 @@ class AnnotationFactoryTest {
     }
 
     /**endregion */
-
-    companion object {
-        private const val INVALID = -1L
-        private const val ONE_SECONDS = ONE_SECOND_IN_MS
-        private const val TWO_SECONDS = 2000L
-        private const val FIVE_SECONDS = 5000L
-        private const val FIFTEEN_SECONDS = 15000L
-        private const val TWENTY_FIVE_SECONDS = 25000L
-    }
-
-
 }

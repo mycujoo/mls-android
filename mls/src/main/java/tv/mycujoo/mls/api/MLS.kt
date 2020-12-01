@@ -129,9 +129,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         val lock = ReentrantLock()
         val annotationFactory = AnnotationFactory(
             annotationListener,
-            viewHandler,
-            lock,
-            lock.newCondition()
+            viewHandler.getVariableKeeper()
         )
         annotationMediator = AnnotationMediator(
             MLSPlayerView,
