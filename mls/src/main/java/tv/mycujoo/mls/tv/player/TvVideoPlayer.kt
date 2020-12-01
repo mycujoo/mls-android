@@ -19,8 +19,6 @@ import androidx.leanback.app.VideoSupportFragmentGlueHost
 import androidx.leanback.media.PlaybackGlue
 import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
@@ -46,6 +44,11 @@ import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.network.socket.IReactorSocket
+import tv.mycujoo.mls.player.IPlayer
+import tv.mycujoo.mls.player.MediaOnLoadCompletedListener
+import tv.mycujoo.mls.player.Player
+import tv.mycujoo.mls.player.Player.Companion.createExoPlayer
+import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
 import tv.mycujoo.mls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackTransportControlGlueImpl
@@ -67,7 +70,7 @@ class TvVideoPlayer(
 
 
     /**region Fields*/
-    var player: SimpleExoPlayer? = null
+    var player: IPlayer
     private var leanbackAdapter: LeanbackPlayerAdapter
     private var glueHost: VideoSupportFragmentGlueHost
     private var mTransportControlGlue: MLSPlaybackTransportControlGlueImpl<LeanbackPlayerAdapter>
@@ -80,9 +83,15 @@ class TvVideoPlayer(
 
     /**region Initializing*/
     init {
-        player = SimpleExoPlayer.Builder(activity).build()
-        player!!.playWhenReady = mlsTVConfiguration.videoPlayerConfig.autoPlay
-        leanbackAdapter = LeanbackPlayerAdapter(activity, player!!, 1000)
+        player = Player()
+            .apply {
+                val hlsMediaFactory = createMediaFactory(activity)
+                val exoplayer = createExoPlayer(activity)
+                val mediaOnLoadCompletedListener = MediaOnLoadCompletedListener(exoplayer)
+                create(hlsMediaFactory, exoplayer, mediaOnLoadCompletedListener)
+            }
+        player.getDirectInstance()!!.playWhenReady = mlsTVConfiguration.videoPlayerConfig.autoPlay
+        leanbackAdapter = LeanbackPlayerAdapter(activity, player.getDirectInstance()!!, 1000)
         glueHost = VideoSupportFragmentGlueHost(videoSupportFragment)
 
         val progressBar = ProgressBar(activity)
@@ -91,7 +100,7 @@ class TvVideoPlayer(
         layoutParams.gravity = Gravity.CENTER
         progressBar.visibility = View.GONE
         (videoSupportFragment.requireView() as FrameLayout).addView(progressBar, layoutParams)
-        controllerAgent = ControllerAgent(player!!)
+        controllerAgent = ControllerAgent(player.getPlayer()!!)
         controllerAgent.setBufferProgressBar(progressBar)
         mTransportControlGlue =
             MLSPlaybackTransportControlGlueImpl(
@@ -119,27 +128,23 @@ class TvVideoPlayer(
             })
         }
 
-        player!!.addListener(object : Player.EventListener {
+        player.addListener(object : com.google.android.exoplayer2.Player.EventListener {
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 if (playbackState == ExoPlayer.STATE_READY) {
                     mTransportControlGlue.seekProvider?.let {
-                        (it as MLSPlaybackSeekDataProvider).setSeekPositions(player!!.duration)
+                        (it as MLSPlaybackSeekDataProvider).setSeekPositions(player.duration())
                     }
                 }
 
-                player?.let {
-                    isLive = player!!.isCurrentWindowDynamic
-                    if (isLive) {
-                        if (it.currentPosition + 15000L >= it.duration) {
-                            controllerAgent.setControllerLiveMode(MLSPlayerView.LiveState.LIVE_ON_THE_EDGE)
-                        } else {
-                            controllerAgent.setControllerLiveMode(MLSPlayerView.LiveState.LIVE_TRAILING)
-                        }
+                if (player.isLive()) {
+                    if (player.currentPosition() + 15000L >= player.duration()) {
+                        controllerAgent.setControllerLiveMode(MLSPlayerView.LiveState.LIVE_ON_THE_EDGE)
                     } else {
-                        // VOD
-                        controllerAgent.setControllerLiveMode(MLSPlayerView.LiveState.VOD)
+                        controllerAgent.setControllerLiveMode(MLSPlayerView.LiveState.LIVE_TRAILING)
                     }
-
+                } else {
+                    // VOD
+                    controllerAgent.setControllerLiveMode(MLSPlayerView.LiveState.VOD)
                 }
             }
         })
@@ -157,7 +162,7 @@ class TvVideoPlayer(
             )
 
             tvAnnotationMediator = TvAnnotationMediator(
-                player!!,
+                player.getDirectInstance()!!,
                 tvOverlayContainer,
                 Executors.newScheduledThreadPool(1),
                 Handler(Looper.getMainLooper()),
@@ -247,7 +252,7 @@ class TvVideoPlayer(
             val hlsFactory =
                 HlsMediaSource.Factory(DefaultDataSourceFactory(activity, userAgent))
 
-            player!!.prepare(hlsFactory.createMediaSource(Uri.parse(url)))
+            player.getDirectInstance()!!.prepare(hlsFactory.createMediaSource(Uri.parse(url)))
         } else {
             val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(
                 activity,
@@ -255,7 +260,7 @@ class TvVideoPlayer(
             )
             val videoSource: MediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
                 .createMediaSource(Uri.parse(url))
-            player!!.prepare(videoSource)
+            player.getDirectInstance()!!.prepare(videoSource)
         }
     }
 
@@ -296,15 +301,16 @@ class TvVideoPlayer(
             val hlsFactory =
                 HlsMediaSource.Factory(DefaultDataSourceFactory(activity, userAgent))
 
-            player!!.prepare(hlsFactory.createMediaSource(Uri.parse(event.streams.first().fullUrl)))
+            player.getDirectInstance()!!
+                .prepare(hlsFactory.createMediaSource(Uri.parse(event.streams.first().fullUrl)))
             eventInfoContainerLayout.visibility = View.GONE
         } else {
-        displayPreEventInformationLayout(
-            event.poster_url,
-            event.title,
-            event.description,
-            event.start_time
-        )
+            displayPreEventInformationLayout(
+                event.poster_url,
+                event.title,
+                event.description,
+                event.start_time
+            )
         }
     }
 
@@ -331,15 +337,15 @@ class TvVideoPlayer(
 
 
         if (posterUrl != null) {
-        val posterImageView =
-            informationLayout.findViewById<ImageView>(R.id.eventInfoPreEventDialog_posterView)
-        val canvasView =
-            informationLayout.findViewById<ConstraintLayout>(R.id.eventInfoPreEventDialog_canvasView)
-        Glide.with(posterImageView).load(posterUrl)
-            .into(posterImageView)
+            val posterImageView =
+                informationLayout.findViewById<ImageView>(R.id.eventInfoPreEventDialog_posterView)
+            val canvasView =
+                informationLayout.findViewById<ConstraintLayout>(R.id.eventInfoPreEventDialog_canvasView)
+            Glide.with(posterImageView).load(posterUrl)
+                .into(posterImageView)
 
-        posterImageView.visibility = View.VISIBLE
-        canvasView.visibility = View.GONE
+            posterImageView.visibility = View.VISIBLE
+            canvasView.visibility = View.GONE
         } else {
             informationLayout.findViewById<TextView>(R.id.eventInfoPreEventDialog_titleTextView).text =
                 title

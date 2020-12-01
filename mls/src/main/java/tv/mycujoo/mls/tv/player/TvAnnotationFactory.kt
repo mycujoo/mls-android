@@ -60,7 +60,6 @@ class TvAnnotationFactory(
                 SHOW_OVERLAY -> {
                     val act =
                         ShowOverlayActionHelper.getOverlayActionCurrentAct(
-                            TimeSystem.RELATIVE,
                             currentPosition,
                             it,
                             interrupted

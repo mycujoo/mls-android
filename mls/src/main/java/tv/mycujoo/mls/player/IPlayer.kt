@@ -15,6 +15,7 @@ interface IPlayer {
 
     // will be removed!
     fun getDirectInstance(): ExoPlayer?
+    fun getPlayer(): Player?
 
     fun addListener(eventListener: Player.EventListener)
 

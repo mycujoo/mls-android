@@ -45,6 +45,10 @@ class Player : IPlayer {
         return exoPlayer
     }
 
+    override fun getPlayer(): Player? {
+        return exoPlayer
+    }
+
     override fun addListener(eventListener: Player.EventListener) {
         exoPlayer?.addListener(eventListener)
     }
