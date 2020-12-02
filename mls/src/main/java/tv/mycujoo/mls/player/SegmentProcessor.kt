@@ -24,7 +24,7 @@ class SegmentProcessor : ISegmentProcessor {
         segments.forEachIndexed { index, segment ->
             if (index == 0) {
                 val segmentTimeStamp = StringUtils.getSegmentTimeStamp(segment.url)
-                windowStartTime = if (segmentTimeStamp.toLong() != -1L) {
+                windowStartTime = if (segmentTimeStamp != "-1") {
                     MathUtils.convertToEpochInMS(segmentTimeStamp.toLong())
                 } else {
                     -1L

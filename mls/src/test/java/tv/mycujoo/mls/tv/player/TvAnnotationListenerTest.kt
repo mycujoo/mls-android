@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.tv.player
 
 import android.content.Context
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Before
@@ -21,7 +22,7 @@ class TvAnnotationListenerTest {
     private lateinit var tvAnnotationListener: TvAnnotationListener
 
     @Mock
-    lateinit var tvOverlayContainer: TvOverlayContainer
+    lateinit var tvOverlayContainer: ConstraintLayout
 
     @Mock
     lateinit var context: Context
