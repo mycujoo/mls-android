@@ -24,7 +24,7 @@ class SegmentProcessor : ISegmentProcessor {
         segments.forEachIndexed { index, segment ->
             if (index == 0) {
                 val segmentTimeStamp = StringUtils.getSegmentTimeStamp(segment.url)
-                windowStartTime = if (segmentTimeStamp != "-1") {
+                windowStartTime = if (segmentTimeStamp != -1L) {
                     MathUtils.convertToEpochInMS(segmentTimeStamp.toLong())
                 } else {
                     -1L
@@ -33,10 +33,10 @@ class SegmentProcessor : ISegmentProcessor {
             if (segment.relativeDiscontinuitySequence > 0) {
 
                 val segmentTimeStamp = StringUtils.getSegmentTimeStamp(segment.url)
-                if (segmentTimeStamp.toLong() != -1L &&
+                if (segmentTimeStamp != -1L &&
                     segment.durationUs != 0L
                 ) {
-                    val epochInMS = MathUtils.convertToEpochInMS(segmentTimeStamp.toLong())
+                    val epochInMS = MathUtils.convertToEpochInMS(segmentTimeStamp)
                     var duration = segment.durationUs
                     duration /= 1000
                     dcSegmentsList.add(

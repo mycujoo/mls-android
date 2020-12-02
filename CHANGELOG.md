@@ -6,8 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1-alpha03 & 1.1.1-alpha04] - 2020-12-02
+### Fixed
+- Segment post-fix constant bug
+
 ## [1.1.1-alpha02] - 2020-12-01
 ### Added
 - Support of both relative & absolute time-stamps in Annotations
-- Add Pre-event poster
-- Add Overlays to TV-SDK
+- Pre-event poster
+- Overlays in TV-SDK
