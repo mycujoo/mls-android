@@ -91,8 +91,8 @@ class StringUtilsTest {
     fun `given valid segment name, should return timestamp`() {
         assertEquals("1601048398", StringUtils.getSegmentTimeStamp("segment_1601048398"))
         assertEquals(
-            "1601048398",
-            StringUtils.getSegmentTimeStamp("https://dc9jagk60w3y3mt6171f-b03c88.p5cdn.com/shervin/ckfieucs8000y0114j6pdcucf/1080p/1080_segment_1601048398_00004.ts")
+            "1601048398000",
+            StringUtils.getSegmentTimeStamp("https://dc9jagk60w3y3mt6171f-b03c88.p5cdn.com/shervin/ckfieucs8000y0114j6pdcucf/1080p/1080_segment_1601048398000.ts")
         )
     }
 

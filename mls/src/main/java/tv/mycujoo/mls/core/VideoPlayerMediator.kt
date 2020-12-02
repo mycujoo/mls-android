@@ -390,7 +390,7 @@ class VideoPlayerMediator(
     private fun handleLiveModeState() {
         if (player.isLive()) {
             isLive = true
-            if (player.currentPosition() + 15000L >= player.duration()) {
+            if (player.currentPosition() + 20000L >= player.duration()) {
                 playerView.setLiveMode(MLSPlayerView.LiveState.LIVE_ON_THE_EDGE)
             } else {
                 playerView.setLiveMode(MLSPlayerView.LiveState.LIVE_TRAILING)

@@ -30,10 +30,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
-import tv.mycujoo.domain.entity.*
-import tv.mycujoo.domain.entity.models.ActionType
-import tv.mycujoo.domain.entity.models.ParsedOverlayRelatedData
-import tv.mycujoo.domain.entity.models.ParsedTimerRelatedData
+import tv.mycujoo.domain.entity.EventEntity
+import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.api.MLSTVConfiguration
 import tv.mycujoo.mls.core.AbstractPlayerMediator
@@ -45,8 +43,6 @@ import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.model.JoinTimelineParam
-import tv.mycujoo.mls.model.ScreenTimerDirection
-import tv.mycujoo.mls.model.ScreenTimerFormat
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.player.IPlayer
 import tv.mycujoo.mls.player.MediaOnLoadCompletedListener
@@ -141,7 +137,7 @@ class TvVideoPlayer(
                 }
 
                 if (player.isLive()) {
-                    if (player.currentPosition() + 15000L >= player.duration()) {
+                    if (player.currentPosition() + 20000L >= player.duration()) {
                         controllerAgent.setControllerLiveMode(MLSPlayerView.LiveState.LIVE_ON_THE_EDGE)
                     } else {
                         controllerAgent.setControllerLiveMode(MLSPlayerView.LiveState.LIVE_TRAILING)
