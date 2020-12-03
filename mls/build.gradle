@@ -129,6 +129,7 @@ dependencies {
     testImplementation 'joda-time:joda-time:2.10.6'
 
     implementation 'com.google.android.gms:play-services-cast-framework:19.0.0'
+    implementation 'androidx.mediarouter:mediarouter:1.2.0'
 
 
     //TV

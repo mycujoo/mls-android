@@ -123,11 +123,8 @@ class MLSPlayerView @JvmOverloads constructor(
             }
         }
 
-        val mediaRouteButton = findViewById<MediaRouteButton>(R.id.controller_mediaRouteButton)
-        CastButtonFactory.setUpMediaRouteButton(context, mediaRouteButton)
-
-
         updateFullscreenButtonImage()
+        setCastButtonAlwaysVisible()
 
     }
 
@@ -139,6 +136,9 @@ class MLSPlayerView @JvmOverloads constructor(
         this.overlayViewHelper = overlayViewHelper
         this.viewHandler = viewHandler
         initMlsTimeBar(timelineMarkers)
+
+        val mediaRouteButton = findViewById<MediaRouteButton>(R.id.controller_mediaRouteButton)
+        CastButtonFactory.setUpMediaRouteButton(context, mediaRouteButton)
     }
 
     private fun initAttributes(attrs: AttributeSet?, context: Context) {
@@ -226,6 +226,11 @@ class MLSPlayerView @JvmOverloads constructor(
             fullScreenButton.setImageResource(R.drawable.ic_fullscreen_24dp)
         }
     }
+
+    private fun setCastButtonAlwaysVisible() {
+        findViewById<MediaRouteButton>(R.id.controller_mediaRouteButton).setAlwaysVisible(true)
+    }
+
 
     private fun removeFullscreenButton() {
         findViewById<ImageButton>(R.id.controller_fullscreenImageButton).visibility = View.GONE
@@ -638,6 +643,7 @@ class MLSPlayerView @JvmOverloads constructor(
             }
 
     }
+
     fun onOverlayRemovalWithNoAnimation(overlayEntity: HideOverlayActionEntity) {
         overlayHost.children.filter { it.tag == overlayEntity.id }
             .forEach {

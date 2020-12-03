@@ -118,7 +118,7 @@ class VideoPlayerMediator(
                 initAnalytic(builder.internalBuilder, builder.activity!!, it)
             }
 
-            initPlayerViewWrapper(MLSPlayerView, player, builder.internalBuilder.overlayViewHelper)
+            initPlayerView(MLSPlayerView, player, builder.internalBuilder.overlayViewHelper)
         }
     }
 
@@ -126,7 +126,7 @@ class VideoPlayerMediator(
         this.annotationMediator = annotationMediator
     }
 
-    private fun initPlayerViewWrapper(
+    private fun initPlayerView(
         MLSPlayerView: MLSPlayerView,
         player: IPlayer,
         overlayViewHelper: OverlayViewHelper
@@ -196,7 +196,7 @@ class VideoPlayerMediator(
             MediaOnLoadCompletedListener(exoPlayer)
         )
 
-        initPlayerViewWrapper(MLSPlayerView, player, builder.internalBuilder.overlayViewHelper)
+        initPlayerView(MLSPlayerView, player, builder.internalBuilder.overlayViewHelper)
         dataManager.currentEvent?.let {
             joinEvent(it)
         }

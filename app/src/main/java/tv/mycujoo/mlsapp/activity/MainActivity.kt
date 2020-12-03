@@ -76,7 +76,8 @@ class MainActivity : AppCompatActivity() {
                             showTimers = true,
                             showFullScreenButton = true,
                             showLiveViewers = true,
-                            showEventInfoButton = false
+                            showEventInfoButton = false,
+                            showCastButton = true
                         )
                     )
                 )
