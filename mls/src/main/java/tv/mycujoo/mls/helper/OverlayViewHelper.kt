@@ -14,8 +14,6 @@ import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasDynamicOutro
 import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasStaticIntroAnimation
 import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasStaticOutroAnimation
 import tv.mycujoo.mls.manager.contracts.IViewHandler
-import tv.mycujoo.mls.tv.player.TvOverlayContainer
-import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ProportionalImageView
 import tv.mycujoo.mls.widgets.ScaffoldView
 
@@ -28,7 +26,7 @@ class OverlayViewHelper(
     /**region Add view*/
     fun addView(
         context: Context,
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         overlayEntity: OverlayEntity
     ) {
         if (overlayEntity.introTransitionSpec.animationType == AnimationType.NONE ||
@@ -52,7 +50,7 @@ class OverlayViewHelper(
     /**region Add view with animation*/
     fun addViewWithAnimation(
         context: Context,
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         overlayEntity: OverlayEntity
     ) {
         viewHandler.incrementIdlingResource()
@@ -63,7 +61,7 @@ class OverlayViewHelper(
                     context,
                     overlayEntity,
                     viewHandler.getVariableTranslator(),
-                    viewHandler.getTimerKeeper()
+                    viewHandler.getVariableKeeper()
                 )
 
             when {
@@ -93,7 +91,7 @@ class OverlayViewHelper(
     }
 
     private fun doAddViewWithDynamicAnimation(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         scaffoldView: ScaffoldView,
         positionGuide: PositionGuide,
         introTransitionSpec: TransitionSpec
@@ -132,7 +130,7 @@ class OverlayViewHelper(
     }
 
     private fun doAddViewWithStaticAnimation(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         scaffoldView: ScaffoldView,
         positionGuide: PositionGuide,
         introTransitionSpec: TransitionSpec
@@ -172,7 +170,7 @@ class OverlayViewHelper(
     /**region Add view with NO animation*/
     fun addViewWithNoAnimation(
         context: Context,
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         overlayEntity: OverlayEntity
     ) {
         viewHandler.incrementIdlingResource()
@@ -182,7 +180,7 @@ class OverlayViewHelper(
                 context,
                 overlayEntity,
                 viewHandler.getVariableTranslator(),
-                viewHandler.getTimerKeeper()
+                viewHandler.getVariableKeeper()
             )
 
         doAddViewWithNoAnimation(
@@ -195,7 +193,7 @@ class OverlayViewHelper(
 
 
     private fun doAddViewWithNoAnimation(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         scaffoldView: ScaffoldView,
         positionGuide: PositionGuide
     ) {
@@ -229,7 +227,7 @@ class OverlayViewHelper(
 
     /**region Remove view*/
     fun removeView(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         overlayEntity: OverlayEntity
     ) {
         if (overlayEntity.outroTransitionSpec.animationType == AnimationType.NONE ||
@@ -242,17 +240,20 @@ class OverlayViewHelper(
     }
 
     fun removeView(
-        overlayHost: TvOverlayContainer,
+        overlayHost: ConstraintLayout,
         hideOverlayActionEntity: HideOverlayActionEntity
     ) {
         removeViewWithNoAnimation(overlayHost, hideOverlayActionEntity.id)
     }
 
-    private fun removeViewWithNoAnimation(overlayHost: OverlayHost, overlayEntity: OverlayEntity) {
+    private fun removeViewWithNoAnimation(
+        overlayHost: ConstraintLayout,
+        overlayEntity: OverlayEntity
+    ) {
         removeViewWithNoAnimation(overlayHost, overlayEntity.id)
     }
 
-    private fun removeViewWithNoAnimation(overlayHost: OverlayHost, overlayId: String) {
+    private fun removeViewWithNoAnimation(overlayHost: ConstraintLayout, overlayId: String) {
         overlayHost.children.filter { it.tag == overlayId }
             .forEach {
                 viewHandler.detachOverlayView(it as ScaffoldView)
@@ -264,7 +265,7 @@ class OverlayViewHelper(
 
     /**region Remove view with animation*/
     fun removeViewWithAnimation(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         overlayEntity: OverlayEntity
     ) {
         viewHandler.incrementIdlingResource()
@@ -290,7 +291,7 @@ class OverlayViewHelper(
     }
 
     private fun removeViewWithStaticAnimation(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         overlayEntity: OverlayEntity
     ) {
         overlayHost.post {
@@ -311,7 +312,7 @@ class OverlayViewHelper(
     }
 
     private fun removeViewWithDynamicAnimation(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         overlayEntity: OverlayEntity
     ) {
         overlayHost.post {
@@ -345,7 +346,7 @@ class OverlayViewHelper(
 
     /**region Add lingering view with animation*/
     fun addLingeringIntroViewWithAnimation(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         overlayEntity: OverlayEntity,
         animationPosition: Long,
         isPlaying: Boolean
@@ -359,7 +360,7 @@ class OverlayViewHelper(
                     overlayHost.context,
                     overlayEntity,
                     viewHandler.getVariableTranslator(),
-                    viewHandler.getTimerKeeper()
+                    viewHandler.getVariableKeeper()
                 )
 
             scaffoldView.doOnLayout {
@@ -411,7 +412,7 @@ class OverlayViewHelper(
     }
 
     fun updateLingeringIntroOverlay(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         overlayEntity: OverlayEntity,
         animationPosition: Long,
         isPlaying: Boolean
@@ -450,7 +451,7 @@ class OverlayViewHelper(
 
 
     fun addLingeringOutroViewWithAnimation(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         overlayEntity: OverlayEntity,
         animationPosition: Long,
         isPlaying: Boolean
@@ -462,7 +463,7 @@ class OverlayViewHelper(
                     overlayHost.context,
                     overlayEntity,
                     viewHandler.getVariableTranslator(),
-                    viewHandler.getTimerKeeper()
+                    viewHandler.getVariableKeeper()
                 )
 
             scaffoldView.doOnLayout {
@@ -503,7 +504,7 @@ class OverlayViewHelper(
     }
 
     fun updateLingeringOutroOverlay(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         overlayEntity: OverlayEntity,
         animationPosition: Long,
         isPlaying: Boolean
@@ -531,7 +532,7 @@ class OverlayViewHelper(
     }
 
     fun updateLingeringMidwayOverlay(
-        overlayHost: OverlayHost,
+        overlayHost: ConstraintLayout,
         overlayEntity: OverlayEntity
     ) {
         val scaffoldView = viewHandler.getOverlayView(overlayEntity.id) ?: return
@@ -563,7 +564,7 @@ class OverlayViewHelper(
 
     /**region Add or Update lingering intro view*/
     fun addOrUpdateLingeringIntroOverlay(
-        tvOverlayContainer: TvOverlayContainer,
+        tvOverlayContainer: ConstraintLayout,
         overlayEntity: OverlayEntity,
         animationPosition: Long,
         isPlaying: Boolean
@@ -588,7 +589,7 @@ class OverlayViewHelper(
 
     /**region Add or Update lingering outro view*/
     fun addOrUpdateLingeringOutroOverlay(
-        tvOverlayContainer: TvOverlayContainer,
+        tvOverlayContainer: ConstraintLayout,
         overlayEntity: OverlayEntity,
         animationPosition: Long,
         isPlaying: Boolean

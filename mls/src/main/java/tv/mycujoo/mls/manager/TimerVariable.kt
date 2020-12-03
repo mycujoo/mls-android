@@ -16,11 +16,14 @@ class TimerVariable(
 ) : ITimer {
     private var currentTime = startValue
     private val step: Long
-    private var isTicking = true
+    private val commands = ArrayList<TimerEntity>()
 
     init {
         if (currentTime == -1L) {
             currentTime = 0L
+        }
+        if (startValue != -1L) {
+            currentTime = startValue
         }
         step = if (direction == ScreenTimerDirection.UP) {
             1000L
@@ -54,50 +57,90 @@ class TimerVariable(
     }
 
     override fun start(startTimerEntity: StartTimerEntity, now: Long) {
-        isTicking = true // only for re-starting
-        calculate(startTimerEntity.offset, now)
+        commands.add(TimerEntity.StartTimer(startTimerEntity))
+        recalculate(now)
     }
 
     override fun pause(pauseTimerEntity: PauseTimerEntity, now: Long) {
-        isTicking = false
-        calculate(pauseTimerEntity.offset, now)
-    }
-
-    private fun calculate(offset: Long, now: Long) {
-        when (direction) {
-            ScreenTimerDirection.UP -> {
-                currentTime = now + startValue
-                val dif = currentTime - offset
-                currentTime = (dif / 1000L) * step
-            }
-            ScreenTimerDirection.DOWN -> {
-                currentTime = now - startValue
-                val dif = currentTime - offset
-                currentTime = (dif / 1000L) * step
-            }
-        }
+        commands.add(TimerEntity.PauseTimer(pauseTimerEntity))
+        recalculate(now)
     }
 
 
     override fun adjust(adjustTimerEntity: AdjustTimerEntity, now: Long) {
-        if (isTicking.not()) {
-            return
-        }
-        val passedTimeFromAdjust = now - adjustTimerEntity.offset
-        currentTime = (passedTimeFromAdjust / 1000L) * step
-        currentTime += adjustTimerEntity.value
+        commands.add(TimerEntity.AdjustTimer(adjustTimerEntity))
+        recalculate(now)
     }
 
     override fun skip(skipTimerEntity: SkipTimerEntity, now: Long) {
-        if (isTicking.not()) {
-            return
-        }
-        currentTime += skipTimerEntity.value
+        commands.add(TimerEntity.SkipTimer(skipTimerEntity))
+        recalculate(now)
     }
 
     /**endregion */
 
     /**region Private functions*/
+    private fun recalculate(now: Long) {
+        var startOffset = 0L
+        var pauseOffset = 0L
+        var adjustEntity: AdjustTimerEntity? = null
+        var skipTimerEntity: SkipTimerEntity? = null
+        commands.forEach {
+            when (it) {
+                is TimerEntity.StartTimer -> {
+                    startOffset = it.startTimerEntity.offset
+
+                }
+                is TimerEntity.PauseTimer -> {
+                    pauseOffset = it.pauseTimerEntity.offset
+                }
+                is TimerEntity.AdjustTimer -> {
+                    adjustEntity = it.adjustTimerEntity
+                }
+
+                is TimerEntity.SkipTimer -> {
+                    skipTimerEntity = it.skipTimerEntity
+                }
+
+                else -> {
+                }
+            }
+        }
+        when (direction) {
+            ScreenTimerDirection.UP -> {
+                currentTime = startValue + now - startOffset
+
+                if (pauseOffset != 0L) {
+                    currentTime -= now - pauseOffset
+                }
+
+                adjustEntity?.let {
+                    currentTime = startValue + now - it.offset + it.value
+                }
+
+                skipTimerEntity?.let {
+                    currentTime += it.value
+                }
+
+            }
+            ScreenTimerDirection.DOWN -> {
+                currentTime = startValue - (now - startOffset)
+
+                if (pauseOffset != 0L) {
+                    currentTime += now - pauseOffset
+                }
+
+                adjustEntity?.let {
+                    currentTime = startValue - (now - it.offset + it.value)
+                }
+
+                skipTimerEntity?.let {
+                    currentTime -= it.value
+                }
+            }
+        }
+    }
+
     private fun getTimeInMinutesSecondFormat(time: Long): String {
         return if (time >= 60000L) {
             // 1 minute or more, so M is present

@@ -14,6 +14,7 @@ data class ActionObject(
     val id: String,
     val type: ActionType,
     val offset: Long,
+    val absoluteTime: Long,
     val overlayRelatedData: ParsedOverlayRelatedData?,
     val timerRelatedData: ParsedTimerRelatedData?,
     val rawData: Map<String, Any>?
@@ -278,7 +279,7 @@ data class ActionObject(
                     }
                     "amount" -> {
                         any?.let {
-                            when(it){
+                            when (it) {
                                 is Double -> {
                                     variableAmount = it as Double
                                 }

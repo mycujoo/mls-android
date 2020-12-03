@@ -1,50 +1,56 @@
 package tv.mycujoo.mls.tv.player
 
 import android.os.Handler
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.test.espresso.idling.CountingIdlingResource
-import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import kotlinx.coroutines.CoroutineScope
 import tv.mycujoo.domain.entity.ActionObject
+import tv.mycujoo.mls.core.AnnotationFactory
+import tv.mycujoo.mls.core.BuildPoint
+import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.OverlayFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.ViewHandler
+import tv.mycujoo.mls.player.IPlayer
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
 class TvAnnotationMediator(
-    player: ExoPlayer,
-    tvOverlayContainer: TvOverlayContainer,
+    player: IPlayer,
+    overlayContainer: ConstraintLayout,
     scheduler: ScheduledExecutorService,
     handler: Handler,
     coroutineScope: CoroutineScope,
     downloaderClient: DownloaderClient
 ) {
 
-    private var tvAnnotationFactory: TvAnnotationFactory
+    private var annotationFactory: AnnotationFactory
     private var tvAnnotationListener: TvAnnotationListener
-    private val viewHandler :
-        ViewHandler = ViewHandler(coroutineScope, CountingIdlingResource("ViewIdentifierManager"))
+    private val viewHandler:
+            ViewHandler =
+        ViewHandler(coroutineScope, CountingIdlingResource("ViewIdentifierManager"))
 
     private var hasPendingSeek: Boolean = false
 
     init {
-        viewHandler.setOverlayHost(tvOverlayContainer)
+        viewHandler.setOverlayHost(overlayContainer)
 
         val overlayViewHelper =
             OverlayViewHelper(viewHandler, OverlayFactory(), AnimationFactory())
 
         tvAnnotationListener =
             TvAnnotationListener(
-                tvOverlayContainer,
+                overlayContainer,
                 overlayViewHelper,
                 downloaderClient
             )
 
 
-        tvAnnotationFactory = TvAnnotationFactory(tvAnnotationListener, viewHandler.getTimerKeeper())
+        annotationFactory =
+            AnnotationFactory(tvAnnotationListener, viewHandler.getVariableKeeper())
 
         player.addListener(object : Player.EventListener {
             override fun onPositionDiscontinuity(reason: Int) {
@@ -57,17 +63,21 @@ class TvAnnotationMediator(
                 if (playbackState == Player.STATE_READY && hasPendingSeek) {
                     hasPendingSeek = false
 
-                    tvAnnotationFactory.build(
-                        player.currentPosition,
-                        isPlaying = player.isPlaying,
-                        interrupted = true
+                    annotationFactory.build(
+                        BuildPoint(
+                            player.currentPosition(),
+                            player.currentAbsoluteTime(),
+                            player,
+                            player.isPlaying(),
+                            true
+                        )
                     )
                 }
 
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                if (isPlaying){
+                if (isPlaying) {
                     viewHandler.getAnimations().forEach { it.resume() }
                 } else {
                     viewHandler.getAnimations().forEach { it.pause() }
@@ -80,13 +90,15 @@ class TvAnnotationMediator(
         })
 
         val exoRunnable = Runnable {
-            if (player.isPlaying) {
-                val currentPosition = player.currentPosition
-
-                tvAnnotationFactory.build(
-                    currentPosition,
-                    isPlaying = true,
-                    interrupted = false
+            if (player.isPlaying()) {
+                annotationFactory.build(
+                    BuildPoint(
+                        player.currentPosition(),
+                        player.currentAbsoluteTime(),
+                        player,
+                        isPlaying = true,
+                        isInterrupted = false
+                    )
                 )
             }
         }
@@ -95,10 +107,15 @@ class TvAnnotationMediator(
             handler.post(exoRunnable)
         }
 
-        scheduler.scheduleAtFixedRate(scheduledRunnable, 1000L, 1000L, TimeUnit.MILLISECONDS)
+        scheduler.scheduleAtFixedRate(
+            scheduledRunnable,
+            ONE_SECOND_IN_MS,
+            ONE_SECOND_IN_MS,
+            TimeUnit.MILLISECONDS
+        )
     }
 
     fun feed(actionObjectList: List<ActionObject>) {
-        tvAnnotationFactory.setAnnotations(actionObjectList)
+        annotationFactory.setAnnotations(actionObjectList)
     }
 }

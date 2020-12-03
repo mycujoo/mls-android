@@ -2,6 +2,7 @@ package tv.mycujoo.mls.player
 
 import android.content.Context
 import android.net.Uri
+import android.os.Handler
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
@@ -12,6 +13,7 @@ class Player : IPlayer {
 
     private var exoPlayer: SimpleExoPlayer? = null
     private lateinit var mediaFactory: HlsMediaSource.Factory
+    private lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
 
 
     private var resumePosition: Long = C.INDEX_UNSET.toLong()
@@ -21,11 +23,18 @@ class Player : IPlayer {
     private var playbackPosition: Long = -1L
 
     private var uri: Uri? = null
+    private var dvrWindowSize: Long = Long.MAX_VALUE
+    private var dvrWindowStartTime: Long = -1L
     private var licenseUrl: Uri? = null
 
-    override fun create(mediaFactory: HlsMediaSource.Factory, exoPlayer: SimpleExoPlayer) {
+    override fun create(
+        mediaFactory: HlsMediaSource.Factory,
+        exoPlayer: SimpleExoPlayer,
+        mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
+    ) {
         this.mediaFactory = mediaFactory
         this.exoPlayer = exoPlayer
+        this.mediaOnLoadCompletedListener = mediaOnLoadCompletedListener
     }
 
     override fun isReady(): Boolean {
@@ -33,6 +42,10 @@ class Player : IPlayer {
     }
 
     override fun getDirectInstance(): ExoPlayer? {
+        return exoPlayer
+    }
+
+    override fun getPlayer(): Player? {
         return exoPlayer
     }
 
@@ -48,13 +61,26 @@ class Player : IPlayer {
         return exoPlayer?.currentPosition ?: -1L
     }
 
+    override fun currentAbsoluteTime(): Long {
+        exoPlayer?.let { exoplayer ->
+            dvrWindowStartTime = mediaOnLoadCompletedListener.getWindowStartTime()
+            if (dvrWindowStartTime == -1L) {
+                return -1L
+            }
+
+            return dvrWindowStartTime + exoplayer.currentPosition
+        }
+
+        return -1L
+    }
+
     override fun duration(): Long {
         return exoPlayer?.duration ?: -1L
     }
 
     override fun isLive(): Boolean {
         exoPlayer?.let {
-            return (it.isCurrentWindowDynamic) || (it.duration == C.POSITION_UNSET.toLong())
+            return (it.isCurrentWindowDynamic && it.contentPosition != 0L)
         }
 
         return false
@@ -93,15 +119,22 @@ class Player : IPlayer {
     }
 
 
-    override fun play(uriString: String, autoPlay: Boolean) {
+    override fun play(uriString: String, dvrWindowSize: Long, autoPlay: Boolean) {
         this.uri = Uri.parse(uriString)
+        this.dvrWindowSize = dvrWindowSize
         val mediaItem = MediaItem.Builder().setUri(uri).build()
         play(mediaItem, autoPlay)
 
     }
 
-    override fun play(uriString: String, licenseUrl: String, autoPlay: Boolean) {
+    override fun play(
+        uriString: String,
+        dvrWindowSize: Long,
+        licenseUrl: String,
+        autoPlay: Boolean
+    ) {
         this.uri = Uri.parse(uriString)
+        this.dvrWindowSize = dvrWindowSize
         this.licenseUrl = Uri.parse(licenseUrl)
 
         val mediaItem = MediaItem.Builder()
@@ -131,7 +164,11 @@ class Player : IPlayer {
             }
         } else {
             exoPlayer?.let {
-                it.setMediaItem(mediaItem, true)
+                val handler = Handler()
+
+                val hlsMediaSource = mediaFactory.createMediaSource(mediaItem)
+                hlsMediaSource.addEventListener(handler, mediaOnLoadCompletedListener)
+                it.setMediaSource(hlsMediaSource, true)
                 it.prepare()
                 it.playWhenReady = autoPlay
             }
@@ -147,12 +184,37 @@ class Player : IPlayer {
 
     override fun loadLastVideo() {
         if (licenseUrl != null) {
-            play(uri.toString(), licenseUrl.toString(), false)
+            play(uri.toString(), dvrWindowSize, licenseUrl.toString(), false)
         } else {
             uri?.let {
-                play(it.toString(), false)
+                play(it.toString(), dvrWindowSize, false)
             }
         }
+    }
+
+    override fun isWithinValidSegment(targetAbsoluteTime: Long): Boolean? {
+        if (exoPlayer == null) {
+            return null
+        }
+        if (targetAbsoluteTime == -1L) {
+            return null
+        }
+        return mediaOnLoadCompletedListener.getDiscontinuityBoundaries()
+            .none { it.first <= targetAbsoluteTime && it.first + it.second >= targetAbsoluteTime }
+    }
+
+
+    override fun dvrWindowSize(): Long {
+        return dvrWindowSize
+
+    }
+
+    override fun dvrWindowStartTime(): Long {
+        exoPlayer?.let { _ ->
+            dvrWindowStartTime = mediaOnLoadCompletedListener.getWindowStartTime()
+        }
+
+        return dvrWindowStartTime
     }
 
     companion object {

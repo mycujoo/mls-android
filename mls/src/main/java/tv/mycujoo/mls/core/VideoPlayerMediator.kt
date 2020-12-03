@@ -32,8 +32,6 @@ import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.enum.MessageLevel
-import tv.mycujoo.mls.helper.AnimationFactory
-import tv.mycujoo.mls.helper.OverlayFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mls.manager.Logger
@@ -41,12 +39,9 @@ import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.mediator.AnnotationMediator
 import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.network.socket.IReactorSocket
-import tv.mycujoo.mls.player.IPlayer
-import tv.mycujoo.mls.player.PlaybackLocation
+import tv.mycujoo.mls.player.*
 import tv.mycujoo.mls.player.PlaybackLocation.LOCAL
 import tv.mycujoo.mls.player.PlaybackLocation.REMOTE
-import tv.mycujoo.mls.player.PlaybackState
-import tv.mycujoo.mls.player.Player.Companion.createExoPlayer
 import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
 import tv.mycujoo.mls.utils.StringUtils
 import tv.mycujoo.mls.widgets.MLSPlayerView
@@ -86,15 +81,12 @@ class VideoPlayerMediator(
     /**endregion */
 
     /**region Initialization*/
-    init {
+    fun initialize(MLSPlayerView: MLSPlayerView, player: IPlayer, builder: MLSBuilder) {
         initCastListener()
         castSession = castContext.sessionManager.currentCastSession
-    }
 
-    fun initialize(MLSPlayerView: MLSPlayerView, player: IPlayer, builder: MLSBuilder) {
         this.playerView = MLSPlayerView
         this.player = player
-
 
         player.getDirectInstance()?.let {
             videoPlayer = VideoPlayer(it, this, MLSPlayerView)
@@ -126,8 +118,7 @@ class VideoPlayerMediator(
                 initAnalytic(builder.internalBuilder, builder.activity!!, it)
             }
 
-            initPlayerViewWrapper(MLSPlayerView, player)
-            initCastListener()
+            initPlayerViewWrapper(MLSPlayerView, player, builder.internalBuilder.overlayViewHelper)
         }
     }
 
@@ -137,10 +128,11 @@ class VideoPlayerMediator(
 
     private fun initPlayerViewWrapper(
         MLSPlayerView: MLSPlayerView,
-        player: IPlayer
+        player: IPlayer,
+        overlayViewHelper: OverlayViewHelper
     ) {
         MLSPlayerView.prepare(
-            OverlayViewHelper(viewHandler, OverlayFactory(), AnimationFactory()),
+            overlayViewHelper,
             viewHandler,
             timelineMarkerActionEntities
         )
@@ -194,6 +186,51 @@ class VideoPlayerMediator(
         })
 
         MLSPlayerView.config(videoPlayerConfig)
+    }
+
+    fun reInitialize(MLSPlayerView: MLSPlayerView, builder: MLSBuilder) {
+        val exoPlayer = Player.createExoPlayer(MLSPlayerView.context)
+        player.create(
+            createMediaFactory(MLSPlayerView.context),
+            exoPlayer,
+            MediaOnLoadCompletedListener(exoPlayer)
+        )
+
+        initPlayerViewWrapper(MLSPlayerView, player, builder.internalBuilder.overlayViewHelper)
+        dataManager.currentEvent?.let {
+            joinEvent(it)
+        }
+    }
+
+    fun attachPlayer(playerView: MLSPlayerView) {
+        playerView.playerView.player = player.getDirectInstance()
+        playerView.playerView.hideController()
+
+        if (hasAnalytic) {
+            youboraClient.start()
+        }
+
+    }
+
+    private fun initAnalytic(
+        internalBuilder: InternalBuilder,
+        activity: Activity,
+        exoPlayer: ExoPlayer
+    ) {
+        val youboraOptions = Options()
+        youboraOptions.accountCode = if (BuildConfig.DEBUG) {
+            "mycujoodev"
+        } else {
+            "mycujoo"
+        }
+        youboraOptions.isAutoDetectBackground = true
+
+        val plugin = internalBuilder.createYouboraPlugin(youboraOptions, activity)
+
+        plugin.activity = activity
+        plugin.adapter = internalBuilder.createExoPlayerAdapter(exoPlayer)
+
+        youboraClient = internalBuilder.createYouboraClient(plugin)
     }
 
     private fun initCastListener() {
@@ -255,7 +292,6 @@ class VideoPlayerMediator(
         }
     }
 
-
     fun onResume() {
         castContext.sessionManager.addSessionManagerListener(
             sessionManagerListener, CastSession::class.java
@@ -268,49 +304,6 @@ class VideoPlayerMediator(
         )
     }
 
-
-    fun reInitialize(MLSPlayerView: MLSPlayerView) {
-        player.create(
-            createMediaFactory(MLSPlayerView.context),
-            createExoPlayer(MLSPlayerView.context)
-        )
-
-        initPlayerViewWrapper(MLSPlayerView, player)
-        dataManager.currentEvent?.let {
-            joinEvent(it)
-        }
-    }
-
-    fun attachPlayer(playerView: MLSPlayerView) {
-        playerView.playerView.player = player.getDirectInstance()
-        playerView.playerView.hideController()
-
-        if (hasAnalytic) {
-            youboraClient.start()
-        }
-
-    }
-
-    private fun initAnalytic(
-        internalBuilder: InternalBuilder,
-        activity: Activity,
-        exoPlayer: ExoPlayer
-    ) {
-        val youboraOptions = Options()
-        youboraOptions.accountCode = if (BuildConfig.DEBUG) {
-            "mycujoodev"
-        } else {
-            "mycujoo"
-        }
-        youboraOptions.isAutoDetectBackground = true
-
-        val plugin = internalBuilder.createYouboraPlugin(youboraOptions, activity)
-
-        plugin.activity = activity
-        plugin.adapter = internalBuilder.createExoPlayerAdapter(exoPlayer)
-
-        youboraClient = internalBuilder.createYouboraClient(plugin)
-    }
 
     fun config(videoPlayerConfig: VideoPlayerConfig) {
         if (this::playerView.isInitialized.not()) {
@@ -398,7 +391,7 @@ class VideoPlayerMediator(
     }
 
     fun playExternalSourceVideo(videoUri: String) {
-        player.play(videoUri, videoPlayerConfig.autoPlay)
+        player.play(videoUri, Long.MAX_VALUE, videoPlayerConfig.autoPlay)
         playerView.hideEventInfoDialog()
         playerView.hideEventInfoButton()
     }
@@ -416,6 +409,7 @@ class VideoPlayerMediator(
             logged = false
             updateMediaItem(event)
 
+
             play(event.streams.first())
             playerView.hideEventInfoDialog()
         } else {
@@ -429,73 +423,17 @@ class VideoPlayerMediator(
         if (stream.widevine?.fullUrl != null && stream.widevine?.licenseUrl != null) {
             player.play(
                 stream.widevine.fullUrl,
+                stream.dvrWindow,
                 stream.widevine.licenseUrl,
                 videoPlayerConfig.autoPlay
             )
         } else if (stream.fullUrl != null) {
-            player.play(stream.fullUrl, videoPlayerConfig.autoPlay)
+            player.play(stream.fullUrl, stream.dvrWindow, videoPlayerConfig.autoPlay)
         }
 
     }
     /**endregion */
 
-    /**region Cast*/
-    private fun loadRemoteMedia(currentPosition: Long) {
-        if (castSession == null || mediaItem == null) {
-            Log.e("VideoPlayerMediator", "castSession or media-item is null")
-            return
-        }
-        val remoteMediaClient: RemoteMediaClient = castSession!!.remoteMediaClient
-            ?: return
-
-
-        remoteMediaClient.load(
-            MediaLoadRequestData.Builder()
-                .setMediaInfo(buildMediaInfo(mediaItem!!.url, player.duration()))
-                .setAutoplay(true)
-                .setCurrentTime(currentPosition).build()
-        )
-
-    }
-
-    private fun buildMediaInfo(url: String, duration: Long): MediaInfo {
-        val movieMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE)
-//        movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, mSelectedMedia.getStudio())
-        movieMetadata.putString(MediaMetadata.KEY_TITLE, "test title")
-//        movieMetadata.addImage(WebImage(Uri.parse(mSelectedMedia.getImage(0))))
-//        movieMetadata.addImage(WebImage(Uri.parse(mSelectedMedia.getImage(1))))
-        return MediaInfo.Builder(url)
-            .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-            .setContentType("videos/mp4")
-            .setMetadata(movieMetadata)
-            .setStreamDuration(duration)
-            .build()
-    }
-
-    private fun updatePlaybackLocation(location: PlaybackLocation) {
-        playbackLocation = location
-        when (playbackLocation) {
-            LOCAL -> {
-                if (playbackState == PlaybackState.PLAYING || playbackState == PlaybackState.BUFFERING) {
-                } else {
-
-                }
-            }
-            REMOTE -> {
-
-            }
-        }
-    }
-
-    private fun updateMediaItem(eventEntity: EventEntity) {
-        eventEntity.streams.firstOrNull()?.fullUrl?.let { url ->
-            mediaItem = MediaItem(url)
-        }
-
-    }
-
-
-    /**endregion */
 
     /**region Reactor function*/
     private fun fetchActions(event: EventEntity, updateId: String) {
@@ -546,7 +484,7 @@ class VideoPlayerMediator(
     private fun handleLiveModeState() {
         if (player.isLive()) {
             isLive = true
-            if (player.currentPosition() + 15000L >= player.duration()) {
+            if (player.currentPosition() + 20000L >= player.duration()) {
                 playerView.setLiveMode(MLSPlayerView.LiveState.LIVE_ON_THE_EDGE)
             } else {
                 playerView.setLiveMode(MLSPlayerView.LiveState.LIVE_TRAILING)
@@ -622,5 +560,62 @@ class VideoPlayerMediator(
         return player
     }
 
+    /**region Cast*/
+    private fun loadRemoteMedia(currentPosition: Long) {
+        if (castSession == null || mediaItem == null) {
+            Log.e("VideoPlayerMediator", "castSession or media-item is null")
+            return
+        }
+        val remoteMediaClient: RemoteMediaClient = castSession!!.remoteMediaClient
+            ?: return
+
+
+        remoteMediaClient.load(
+            MediaLoadRequestData.Builder()
+                .setMediaInfo(buildMediaInfo(mediaItem!!.url, player.duration()))
+                .setAutoplay(true)
+                .setCurrentTime(currentPosition).build()
+        )
+
+    }
+
+    private fun buildMediaInfo(url: String, duration: Long): MediaInfo {
+        val movieMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE)
+//        movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, mSelectedMedia.getStudio())
+        movieMetadata.putString(MediaMetadata.KEY_TITLE, "test title")
+//        movieMetadata.addImage(WebImage(Uri.parse(mSelectedMedia.getImage(0))))
+//        movieMetadata.addImage(WebImage(Uri.parse(mSelectedMedia.getImage(1))))
+        return MediaInfo.Builder(url)
+            .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+            .setContentType("videos/mp4")
+            .setMetadata(movieMetadata)
+            .setStreamDuration(duration)
+            .build()
+    }
+
+    private fun updatePlaybackLocation(location: PlaybackLocation) {
+        playbackLocation = location
+        when (playbackLocation) {
+            LOCAL -> {
+                if (playbackState == PlaybackState.PLAYING || playbackState == PlaybackState.BUFFERING) {
+                } else {
+
+                }
+            }
+            REMOTE -> {
+
+            }
+        }
+    }
+
+    private fun updateMediaItem(eventEntity: EventEntity) {
+        eventEntity.streams.firstOrNull()?.fullUrl?.let { url ->
+            mediaItem = MediaItem(url)
+        }
+
+    }
+
+
+    /**endregion */
 
 }

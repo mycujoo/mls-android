@@ -4,6 +4,7 @@ import tv.mycujoo.mls.entity.AdjustTimerEntity
 import tv.mycujoo.mls.entity.CreateTimerEntity
 import tv.mycujoo.mls.entity.PauseTimerEntity
 import tv.mycujoo.mls.entity.StartTimerEntity
+import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.model.MutablePair
 import tv.mycujoo.mls.model.ScreenTimerDirection
 
@@ -19,7 +20,7 @@ class TimerHelper {
             val createTimerEntity = pair.first
 
             val passedTimeFromAdjust = now - adjustTimerEntity.offset
-            currentTime = (passedTimeFromAdjust / 1000L) * createTimerEntity.step
+            currentTime = (passedTimeFromAdjust / ONE_SECOND_IN_MS) * createTimerEntity.step
             currentTime += adjustTimerEntity.value
             return currentTime.toString()
         }
@@ -40,12 +41,12 @@ class TimerHelper {
                 ScreenTimerDirection.UP -> {
                     currentTime = now + startValue
                     val dif = currentTime - startTimerEntity.offset
-                    currentTime = (dif / 1000L) * createTimerEntity.step
+                    currentTime = (dif / ONE_SECOND_IN_MS) * createTimerEntity.step
                 }
                 ScreenTimerDirection.DOWN -> {
                     currentTime = now - startValue
                     val dif = currentTime - startTimerEntity.offset
-                    currentTime = (dif / 1000L) * createTimerEntity.step
+                    currentTime = (dif / ONE_SECOND_IN_MS) * createTimerEntity.step
                 }
             }
 

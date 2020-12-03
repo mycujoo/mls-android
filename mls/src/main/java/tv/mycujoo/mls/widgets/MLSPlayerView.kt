@@ -26,6 +26,7 @@ import kotlinx.android.synthetic.main.dialog_event_info_pre_event_layout.view.*
 import kotlinx.android.synthetic.main.dialog_event_info_started_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
 import kotlinx.android.synthetic.main.player_view_wrapper.view.*
+import tv.mycujoo.domain.entity.HideOverlayActionEntity
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mls.R
@@ -50,7 +51,7 @@ class MLSPlayerView @JvmOverloads constructor(
 
     /**region UI Fields*/
     var playerView: PlayerView
-    var overlayHost: OverlayHost
+    var overlayHost: ConstraintLayout
 
     private var bufferView: ProgressBar
 
@@ -89,7 +90,7 @@ class MLSPlayerView @JvmOverloads constructor(
         initAttributes(attrs, context)
 
         playerView = findViewById(R.id.exoPlayerView)
-        overlayHost = OverlayHost(context)
+        overlayHost = ConstraintLayout(context)
         playerView.findViewById<AspectRatioFrameLayout>(R.id.exo_content_frame).addView(overlayHost)
 
 
@@ -628,6 +629,16 @@ class MLSPlayerView @JvmOverloads constructor(
     }
 
     fun onOverlayRemovalWithNoAnimation(overlayEntity: OverlayEntity) {
+        overlayHost.children.filter { it.tag == overlayEntity.id }
+            .forEach {
+                if (this::viewHandler.isInitialized) {
+                    viewHandler.detachOverlayView(it as ScaffoldView)
+                    viewHandler.removeAnimation(overlayEntity.id)
+                }
+            }
+
+    }
+    fun onOverlayRemovalWithNoAnimation(overlayEntity: HideOverlayActionEntity) {
         overlayHost.children.filter { it.tag == overlayEntity.id }
             .forEach {
                 if (this::viewHandler.isInitialized) {

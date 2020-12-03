@@ -77,7 +77,7 @@ class YouboraClientTest {
         const val UUID = "uuid_0"
 
         private fun getSampleStreamList(): List<Stream> {
-            return listOf(Stream("stream_id_0", "stream_url", null))
+            return listOf(Stream("stream_id_0", Long.MAX_VALUE, "stream_url", null))
         }
 
         fun getSampleEventEntity(

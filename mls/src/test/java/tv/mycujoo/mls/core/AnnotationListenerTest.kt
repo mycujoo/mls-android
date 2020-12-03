@@ -1,15 +1,21 @@
 package tv.mycujoo.mls.core
 
+import android.content.Context
+import androidx.constraintlayout.widget.ConstraintLayout
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import tv.mycujoo.domain.entity.AnimationType
+import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.OverlayEntityTest
 import tv.mycujoo.domain.entity.TransitionSpec
-import tv.mycujoo.mls.manager.ViewHandler
+import tv.mycujoo.mls.helper.IDownloaderClient
+import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.widgets.MLSPlayerView
 
 class AnnotationListenerTest {
@@ -23,14 +29,27 @@ class AnnotationListenerTest {
     lateinit var playerView: MLSPlayerView
 
     @Mock
-    lateinit var viewHandler: ViewHandler
+    lateinit var overlayContainer: ConstraintLayout
+
+    @Mock
+    lateinit var overlayViewHelper: OverlayViewHelper
+
+    @Mock
+    lateinit var context: Context
+
+    @Mock
+    lateinit var downloaderClient: IDownloaderClient
 
     /**endregion */
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        annotationListener = AnnotationListener(playerView, viewHandler)
+        annotationListener = AnnotationListener(playerView, overlayViewHelper, downloaderClient)
+        whenever(playerView.overlayHost).thenReturn(overlayContainer)
+        whenever(playerView.context).thenReturn(context)
+        Mockito.`when`(downloaderClient.download(any(), any()))
+            .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
     }
 
     /**region addOverlay() tests*/
@@ -42,7 +61,7 @@ class AnnotationListenerTest {
         annotationListener.addOverlay(overlayEntity)
 
 
-        verify(playerView).onNewOverlayWithAnimation(overlayEntity)
+        verify(overlayViewHelper).addView(context, overlayContainer, overlayEntity)
     }
 
     @Test
@@ -53,19 +72,7 @@ class AnnotationListenerTest {
         annotationListener.addOverlay(overlayEntity)
 
 
-        verify(playerView).onNewOverlayWithNoAnimation(overlayEntity)
-    }
-
-    @Test
-    fun `given overlay to add, should mark it as its on screen`() {
-        val introTransitionSpec = TransitionSpec(15000L, AnimationType.NONE, 2000L)
-        val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, 25000L)
-        // overlayEntity.isOnScreen = false // default value
-
-        annotationListener.addOverlay(overlayEntity)
-
-
-        assert(overlayEntity.isOnScreen)
+        verify(overlayViewHelper).addView(context, overlayContainer, overlayEntity)
     }
     /**endregion */
 
@@ -74,38 +81,26 @@ class AnnotationListenerTest {
     fun `given overlay with outro animation to remove, should remove it with animation`() {
         val introTransitionSpec = TransitionSpec(15000L, AnimationType.FADE_IN, 2000L)
         val outroTransitionSpec = TransitionSpec(25000L, AnimationType.FADE_OUT, 2000L)
-        val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
+        val overlayEntity =
+            OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
 
         annotationListener.removeOverlay(overlayEntity)
 
 
-        verify(playerView).onOverlayRemovalWithAnimation(overlayEntity)
+        verify(overlayViewHelper).removeView(overlayContainer, overlayEntity)
     }
 
     @Test
     fun `given overlay without outro animation to remove, should remove it with animation`() {
         val introTransitionSpec = TransitionSpec(15000L, AnimationType.FADE_IN, 2000L)
         val outroTransitionSpec = TransitionSpec(25000L, AnimationType.NONE, 2000L)
-        val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
+        val overlayEntity =
+            OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
 
         annotationListener.removeOverlay(overlayEntity)
 
 
-        verify(playerView).onOverlayRemovalWithNoAnimation(overlayEntity)
-    }
-
-    @Test
-    fun `given overlay without outro animation to remove, should mark it as its not on screen`() {
-        val introTransitionSpec = TransitionSpec(15000L, AnimationType.FADE_IN, 2000L)
-        val outroTransitionSpec = TransitionSpec(25000L, AnimationType.NONE, 2000L)
-        val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
-        overlayEntity.isOnScreen = true
-
-
-        annotationListener.removeOverlay(overlayEntity)
-
-
-        assert(overlayEntity.isOnScreen.not())
+        verify(overlayViewHelper).removeView(overlayContainer, overlayEntity)
     }
     /**endregion */
 
@@ -114,40 +109,34 @@ class AnnotationListenerTest {
     fun `given lingering-intro overlay which is attached, should update it`() {
         val introTransitionSpec = TransitionSpec(15000L, AnimationType.NONE, 2000L)
         val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, 25000L)
-        whenever(viewHandler.overlayBlueprintIsAttached(overlayEntity.id)).thenReturn(true)
 
 
         annotationListener.addOrUpdateLingeringIntroOverlay(overlayEntity, 123L, true)
 
 
-        verify(playerView).updateLingeringIntroOverlay(overlayEntity, 123L, true)
+        verify(overlayViewHelper).addOrUpdateLingeringIntroOverlay(
+            overlayContainer,
+            overlayEntity,
+            123L,
+            true
+        )
     }
 
     @Test
     fun `given lingering-intro overlay which is not attached, should add it as lingering`() {
         val introTransitionSpec = TransitionSpec(15000L, AnimationType.NONE, 2000L)
         val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, 25000L)
-        whenever(viewHandler.overlayBlueprintIsAttached(overlayEntity.id)).thenReturn(false)
 
 
         annotationListener.addOrUpdateLingeringIntroOverlay(overlayEntity, 123L, true)
 
 
-        verify(playerView).addLingeringIntroOverlay(overlayEntity, 123L, true)
-    }
-
-    @Test
-    fun `given lingering-intro overlay, should mark it as its not on screen`() {
-        val introTransitionSpec = TransitionSpec(15000L, AnimationType.NONE, 2000L)
-        val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, 25000L)
-        // overlayEntity.isOnScreen = false // default value
-
-
-        annotationListener.addOrUpdateLingeringIntroOverlay(overlayEntity, 123L, true)
-
-
-        assert(overlayEntity.isOnScreen)
-
+        verify(overlayViewHelper).addOrUpdateLingeringIntroOverlay(
+            overlayContainer,
+            overlayEntity,
+            123L,
+            true
+        )
     }
     /**endregion */
 
@@ -156,42 +145,37 @@ class AnnotationListenerTest {
     fun `given lingering-outro overlay which is attached, should update it`() {
         val introTransitionSpec = TransitionSpec(15000L, AnimationType.FADE_IN, 2000L)
         val outroTransitionSpec = TransitionSpec(25000L, AnimationType.NONE, 2000L)
-        val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
-        whenever(viewHandler.overlayBlueprintIsAttached(overlayEntity.id)).thenReturn(true)
+        val overlayEntity =
+            OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
 
 
         annotationListener.addOrUpdateLingeringOutroOverlay(overlayEntity, 123L, true)
 
 
-        verify(playerView).updateLingeringOutroOverlay(overlayEntity, 123L, true)
+        verify(overlayViewHelper).addOrUpdateLingeringOutroOverlay(
+            overlayContainer,
+            overlayEntity,
+            123L,
+            true
+        )
     }
 
     @Test
     fun `given lingering-outro overlay which is not attached, should add it as lingering`() {
         val introTransitionSpec = TransitionSpec(15000L, AnimationType.FADE_IN, 2000L)
         val outroTransitionSpec = TransitionSpec(25000L, AnimationType.NONE, 2000L)
-        val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
-        whenever(viewHandler.overlayBlueprintIsAttached(overlayEntity.id)).thenReturn(false)
-
-
-        annotationListener.addOrUpdateLingeringOutroOverlay(overlayEntity, 123L, true)
-
-
-        verify(playerView).addLingeringOutroOverlay(overlayEntity, 123L, true)
-    }
-
-    @Test
-    fun `given lingering-outro overlay, should mark it as its not on screen`() {
-        val introTransitionSpec = TransitionSpec(15000L, AnimationType.FADE_IN, 2000L)
-        val outroTransitionSpec = TransitionSpec(25000L, AnimationType.NONE, 2000L)
-        val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
-        // overlayEntity.isOnScreen = false // default value
-
+        val overlayEntity =
+            OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
 
         annotationListener.addOrUpdateLingeringOutroOverlay(overlayEntity, 123L, true)
 
 
-        assert(overlayEntity.isOnScreen)
+        verify(overlayViewHelper).addOrUpdateLingeringOutroOverlay(
+            overlayContainer,
+            overlayEntity,
+            123L,
+            true
+        )
     }
     /**endregion */
 
@@ -200,43 +184,28 @@ class AnnotationListenerTest {
     fun `given lingering-midway overlay which is attached, should update it`() {
         val introTransitionSpec = TransitionSpec(15000L, AnimationType.UNSPECIFIED, -1L)
         val outroTransitionSpec = TransitionSpec(25000L, AnimationType.UNSPECIFIED, -1L)
-        val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
-        whenever(viewHandler.overlayBlueprintIsAttached(overlayEntity.id)).thenReturn(true)
+        val overlayEntity =
+            OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
 
 
         annotationListener.addOrUpdateLingeringMidwayOverlay(overlayEntity)
 
 
-        verify(playerView).updateLingeringMidwayOverlay(overlayEntity)
+        verify(overlayViewHelper).updateLingeringMidwayOverlay(overlayContainer, overlayEntity)
     }
 
     @Test
     fun `given lingering-midway overlay which is not attached, should add it as lingering`() {
         val introTransitionSpec = TransitionSpec(15000L, AnimationType.UNSPECIFIED, -1L)
         val outroTransitionSpec = TransitionSpec(25000L, AnimationType.UNSPECIFIED, -1L)
-        val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
-        whenever(viewHandler.overlayBlueprintIsAttached(overlayEntity.id)).thenReturn(false)
+        val overlayEntity =
+            OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
 
 
         annotationListener.addOrUpdateLingeringMidwayOverlay(overlayEntity)
 
 
-        verify(playerView).addLingeringMidwayOverlay(overlayEntity)
-    }
-
-
-    @Test
-    fun `given lingering-midway overlay, should mark it as its not on screen`() {
-        val introTransitionSpec = TransitionSpec(15000L, AnimationType.UNSPECIFIED, -1L)
-        val outroTransitionSpec = TransitionSpec(25000L, AnimationType.UNSPECIFIED, -1L)
-        val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
-        // overlayEntity.isOnScreen = false // default value
-
-
-        annotationListener.addOrUpdateLingeringMidwayOverlay(overlayEntity)
-
-
-        assert(overlayEntity.isOnScreen)
+        verify(overlayViewHelper).updateLingeringMidwayOverlay(overlayContainer, overlayEntity)
     }
     /**endregion */
 
@@ -251,19 +220,7 @@ class AnnotationListenerTest {
         annotationListener.removeLingeringOverlay(overlayEntity)
 
 
-        assert(overlayEntity.isOnScreen.not())
-    }
-
-    @Test
-    fun `given remove lingering overlay, should remove it`() {
-        val introTransitionSpec = TransitionSpec(15000L, AnimationType.NONE, 2000L)
-        val overlayEntity = OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, 25000L)
-        overlayEntity.isOnScreen = true
-
-        annotationListener.removeLingeringOverlay(overlayEntity)
-
-
-        verify(playerView).removeLingeringOverlay(overlayEntity)
+        verify(overlayViewHelper).removeView(overlayContainer, overlayEntity)
     }
     /**endregion */
 

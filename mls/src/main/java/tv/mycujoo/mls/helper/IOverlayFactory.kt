@@ -2,7 +2,7 @@ package tv.mycujoo.mls.helper
 
 import android.content.Context
 import tv.mycujoo.domain.entity.OverlayEntity
-import tv.mycujoo.mls.manager.ITimerKeeper
+import tv.mycujoo.mls.manager.IVariableKeeper
 import tv.mycujoo.mls.manager.VariableTranslator
 import tv.mycujoo.mls.widgets.ScaffoldView
 
@@ -11,6 +11,6 @@ interface IOverlayFactory {
         context: Context,
         overlayEntity: OverlayEntity,
         variableTranslator: VariableTranslator,
-        timerKeeper: ITimerKeeper
+        variableKeeper: IVariableKeeper
     ): ScaffoldView
 }

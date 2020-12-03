@@ -2,10 +2,10 @@ package tv.mycujoo.mls.manager
 
 import android.animation.ObjectAnimator
 import android.util.Log
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.test.espresso.idling.CountingIdlingResource
 import kotlinx.coroutines.CoroutineScope
 import tv.mycujoo.mls.manager.contracts.IViewHandler
-import tv.mycujoo.mls.widgets.OverlayHost
 import tv.mycujoo.mls.widgets.ScaffoldView
 
 open class ViewHandler(
@@ -15,7 +15,7 @@ open class ViewHandler(
 
 
     /**region Fields*/
-    private lateinit var overlayHost: OverlayHost
+    private lateinit var overlayHost: ConstraintLayout
 
     private var viewIdToIdMap = mutableMapOf<String, Int>()
     private var animations = ArrayList<Pair<String, ObjectAnimator>>()
@@ -23,16 +23,16 @@ open class ViewHandler(
     private val attachedViewList: ArrayList<ScaffoldView> = ArrayList()
 
     private val variableTranslator = VariableTranslator(dispatcher)
-    private val timeKeeper = TimerKeeper(dispatcher)
+    private val timeKeeper = VariableKeeper(dispatcher)
 
     /**endregion */
 
     /**region OverlayHost*/
-    override fun setOverlayHost(overlayHost: OverlayHost) {
+    override fun setOverlayHost(overlayHost: ConstraintLayout) {
         this.overlayHost = overlayHost
     }
 
-    override fun getOverlayHost(): OverlayHost {
+    override fun getOverlayHost(): ConstraintLayout {
        return overlayHost
     }
     /**endregion */
@@ -128,7 +128,7 @@ open class ViewHandler(
         return variableTranslator
     }
 
-    override fun getTimerKeeper(): TimerKeeper {
+    override fun getVariableKeeper(): IVariableKeeper {
         return timeKeeper
     }
     /**endregion */

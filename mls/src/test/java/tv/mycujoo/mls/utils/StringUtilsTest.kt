@@ -1,9 +1,9 @@
 package tv.mycujoo.mls.utils
 
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class StringUtilsTest{
+class StringUtilsTest {
     @Test
     fun `given null should return 0`() {
 
@@ -71,4 +71,41 @@ class StringUtilsTest{
         assertEquals("1M", resultOf1010000)
         assertEquals("1.1M", resultOf1100000)
     }
+
+    @Test
+    fun `given invalid segment name, should return -1L`() {
+        assertEquals(-1L, StringUtils.getSegmentTimeStamp(""))
+        assertEquals(-1L, StringUtils.getSegmentTimeStamp("a"))
+        assertEquals(-1L, StringUtils.getSegmentTimeStamp("1"))
+        assertEquals(
+            -1L,
+            StringUtils.getSegmentTimeStamp("https://dc9jagk60w3y3mt6171f-b03c88.p5cdn.com")
+        )
+        assertEquals(
+            -1L,
+            StringUtils.getSegmentTimeStamp("https://dc9jagk60w3y3mt6171f-b03c88.p5cdn.com/shervin/ckfieucs8000y0114j6pdcucf/1080p/1080_segment_")
+        )
+        assertEquals(
+            -1L,
+            StringUtils.getSegmentTimeStamp("https://dc9jagk60w3y3mt6171f-b03c88.p5cdn.com/shervin/ckfieucs8000y0114j6pdcucf/1080p/1080_segment_1601048398000.ts")
+        )
+        assertEquals(
+            -1L,
+            StringUtils.getSegmentTimeStamp("https://dc9jagk60w3y3mt6171f-b03c88.p5cdn.com/shervin/ckfieucs8000y0114j6pdcucf/1080p/1080_segment__.ts")
+        )
+        assertEquals(
+            -1L,
+            StringUtils.getSegmentTimeStamp("https://dc9jagk60w3y3mt6171f-b03c88.p5cdn.com/shervin/ckfieucs8000y0114j6pdcucf/1080p/1080_segment_a_.ts")
+        )
+    }
+
+    @Test
+    fun `given valid segment name, should return timestamp`() {
+        assertEquals(1601048398L, StringUtils.getSegmentTimeStamp("segment_1601048398"))
+        assertEquals(
+            1601048398000L,
+            StringUtils.getSegmentTimeStamp("https://dc9jagk60w3y3mt6171f-b03c88.p5cdn.com/shervin/ckfieucs8000y0114j6pdcucf/1080p/1080_segment_1601048398000_00004.ts")
+        )
+    }
+
 }

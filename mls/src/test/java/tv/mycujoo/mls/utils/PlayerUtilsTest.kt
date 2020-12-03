@@ -31,7 +31,7 @@ class PlayerUtilsTest {
 
     companion object {
         fun eventWithRawVideo(): EventEntity {
-            return event(listOf(Stream("stream_id", "sample_url", null)))
+            return event(listOf(Stream("stream_id", Long.MAX_VALUE, "sample_url", null)))
         }
 
         fun eventWithNoVideo(): EventEntity {
@@ -40,12 +40,12 @@ class PlayerUtilsTest {
 
         fun eventWithWidevineVideo(): EventEntity {
             val widevine = Widevine("sample_url", "license_url")
-            return event(listOf(Stream("stream_id", null, widevine)))
+            return event(listOf(Stream("stream_id", Long.MAX_VALUE, null, widevine)))
         }
 
         fun eventWithBothWidevineAndRawVideo(): EventEntity {
             val widevine = Widevine("sample_url", "license_url")
-            return event(listOf(Stream("stream_id", "license_url", widevine)))
+            return event(listOf(Stream("stream_id", Long.MAX_VALUE, "license_url", widevine)))
         }
 
         private fun event(streams: List<Stream>): EventEntity {

@@ -8,13 +8,19 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tv.mycujoo.data.entity.ActionResponse
-import tv.mycujoo.domain.entity.Result
-import tv.mycujoo.domain.usecase.GetActionsFromJSONUseCase
+import tv.mycujoo.domain.entity.*
+import tv.mycujoo.domain.entity.models.ActionType
+import tv.mycujoo.domain.entity.models.ParsedOverlayRelatedData
+import tv.mycujoo.domain.entity.models.ParsedTimerRelatedData
+import tv.mycujoo.mls.core.BuildPoint
 import tv.mycujoo.mls.core.IAnnotationFactory
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.enum.C
+import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.enum.MessageLevel
 import tv.mycujoo.mls.manager.Logger
+import tv.mycujoo.mls.model.ScreenTimerDirection
+import tv.mycujoo.mls.model.ScreenTimerFormat
 import tv.mycujoo.mls.player.IPlayer
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import java.util.concurrent.ScheduledExecutorService
@@ -46,9 +52,13 @@ class AnnotationMediator(
                 val currentPosition = player.currentPosition()
 
                 annotationFactory.build(
-                    currentPosition,
-                    isPlaying = player.isPlaying(),
-                    interrupted = false
+                    BuildPoint(
+                        currentPosition,
+                        player.currentAbsoluteTime(),
+                        player,
+                        player.isPlaying(),
+                        false
+                    )
                 )
 
                 playerView.updateTime(currentPosition, player.duration())
@@ -58,13 +68,15 @@ class AnnotationMediator(
         val scheduledRunnable = Runnable {
             handler.post(exoRunnable)
         }
-        scheduler.scheduleAtFixedRate(scheduledRunnable, 1000L, 1000L, TimeUnit.MILLISECONDS)
+        scheduler.scheduleAtFixedRate(
+            scheduledRunnable,
+            ONE_SECOND_IN_MS,
+            ONE_SECOND_IN_MS,
+            TimeUnit.MILLISECONDS
+        )
 
     }
 
-    private fun feed() {
-        annotationFactory.setAnnotations(GetActionsFromJSONUseCase.result())
-    }
 
     override fun fetchActions(
         timelineId: String,
@@ -93,7 +105,7 @@ class AnnotationMediator(
     }
 
     override fun feed(actionResponse: ActionResponse) {
-        annotationFactory.setAnnotations(actionResponse)
+        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
     }
 
     private fun initEventListener(player: IPlayer) {
@@ -121,9 +133,13 @@ class AnnotationMediator(
                     hasPendingSeek = false
 
                     annotationFactory.build(
-                        player.currentPosition(),
-                        isPlaying = player.isPlaying(),
-                        interrupted = true
+                        BuildPoint(
+                            player.currentPosition(),
+                            player.currentAbsoluteTime(),
+                            player,
+                            player.isPlaying(),
+                            true
+                        )
                     )
                 }
             }
@@ -145,10 +161,15 @@ class AnnotationMediator(
 
     override var onSizeChangedCallback = {
         annotationFactory.build(
-            player.currentPosition(),
-            isPlaying = player.isPlaying(),
-            interrupted = false
+            BuildPoint(
+                player.currentPosition(),
+                player.currentAbsoluteTime(),
+                player,
+                player.isPlaying(),
+                false
+            )
         )
     }
+
     /**endregion */
 }

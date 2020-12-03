@@ -47,6 +47,7 @@ import tv.mycujoo.mls.model.SingleLiveEvent
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.ReactorCallback
 import tv.mycujoo.mls.player.IPlayer
+import tv.mycujoo.mls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mls.player.Player
 import tv.mycujoo.mls.player.Player.Companion.createExoPlayer
 import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
@@ -156,9 +157,11 @@ class MLSPlayerViewTest {
 
         UiThreadStatement.runOnUiThread {
             player = Player()
+            val exoPlayer = createExoPlayer(MLSPlayerView.context)
             player.create(
                 createMediaFactory(MLSPlayerView.context),
-                createExoPlayer(MLSPlayerView.context)
+                exoPlayer,
+                MediaOnLoadCompletedListener(exoPlayer)
             )
 
             videoPlayerMediator = VideoPlayerMediator(
@@ -405,7 +408,7 @@ class MLSPlayerViewTest {
     /**region Fake data*/
     companion object {
         private fun getSampleStreamList(): List<Stream> {
-            return listOf(Stream("stream_id_0", "stream_url", null))
+            return listOf(Stream("stream_id_0", Long.MAX_VALUE, "stream_url", null))
         }
 
         fun getSampleEventEntity(streams: List<Stream>): EventEntity {

@@ -17,6 +17,9 @@ import tv.mycujoo.mls.di.DaggerMlsComponent
 import tv.mycujoo.mls.di.NetworkModule
 import tv.mycujoo.mls.enum.LogLevel
 import tv.mycujoo.mls.enum.LogLevel.*
+import tv.mycujoo.mls.helper.AnimationFactory
+import tv.mycujoo.mls.helper.OverlayFactory
+import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.IPrefManager
 import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.manager.ViewHandler
@@ -46,6 +49,8 @@ open class InternalBuilder(private val activity: Activity, private val logLevel:
     lateinit var prefManager: IPrefManager
 
     lateinit var viewHandler: IViewHandler
+    lateinit var overlayViewHelper: OverlayViewHelper
+
 
     lateinit var reactorSocket: IReactorSocket
     private lateinit var mainWebSocketListener: MainWebSocketListener
@@ -63,6 +68,8 @@ open class InternalBuilder(private val activity: Activity, private val logLevel:
         logger = Logger(logLevel)
 
         viewHandler = ViewHandler(dispatcher, CountingIdlingResource("ViewIdentifierManager"))
+
+        overlayViewHelper = OverlayViewHelper(viewHandler, OverlayFactory(), AnimationFactory())
 
         mainWebSocketListener = MainWebSocketListener()
         reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener)

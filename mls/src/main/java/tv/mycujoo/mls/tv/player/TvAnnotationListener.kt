@@ -1,12 +1,13 @@
 package tv.mycujoo.mls.tv.player
 
+import androidx.constraintlayout.widget.ConstraintLayout
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.mls.core.IAnnotationListener
 import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.OverlayViewHelper
 
 class TvAnnotationListener(
-    private val tvOverlayContainer: TvOverlayContainer,
+    private val overlayContainer: ConstraintLayout,
     private val overlayViewHelper:
     OverlayViewHelper,
     private val downloaderClient: DownloaderClient
@@ -16,19 +17,19 @@ class TvAnnotationListener(
     override fun addOverlay(overlayEntity: OverlayEntity) {
         downloaderClient.download(overlayEntity) {
             overlayViewHelper.addView(
-                tvOverlayContainer.context,
-                tvOverlayContainer,
+                overlayContainer.context,
+                overlayContainer,
                 it
             )
         }
     }
 
     override fun removeOverlay(overlayEntity: OverlayEntity) {
-        overlayViewHelper.removeView(tvOverlayContainer, overlayEntity)
+        overlayViewHelper.removeView(overlayContainer, overlayEntity)
     }
 
     override fun removeOverlay(hideOverlayActionEntity: HideOverlayActionEntity) {
-        overlayViewHelper.removeView(tvOverlayContainer, hideOverlayActionEntity)
+        overlayViewHelper.removeView(overlayContainer, hideOverlayActionEntity)
     }
 
     override fun addOrUpdateLingeringIntroOverlay(
@@ -38,7 +39,7 @@ class TvAnnotationListener(
     ) {
         downloaderClient.download(overlayEntity) {
             overlayViewHelper.addOrUpdateLingeringIntroOverlay(
-                tvOverlayContainer,
+                overlayContainer,
                 it,
                 animationPosition,
                 isPlaying
@@ -53,7 +54,7 @@ class TvAnnotationListener(
     ) {
         downloaderClient.download(overlayEntity) {
             overlayViewHelper.addOrUpdateLingeringOutroOverlay(
-                tvOverlayContainer,
+                overlayContainer,
                 it,
                 animationPosition,
                 isPlaying
@@ -63,27 +64,19 @@ class TvAnnotationListener(
 
     override fun addOrUpdateLingeringMidwayOverlay(overlayEntity: OverlayEntity) {
         downloaderClient.download(overlayEntity) {
-            overlayViewHelper.updateLingeringMidwayOverlay(tvOverlayContainer, it)
+            overlayViewHelper.updateLingeringMidwayOverlay(overlayContainer, it)
         }
     }
 
     override fun removeLingeringOverlay(overlayEntity: OverlayEntity) {
-        overlayViewHelper.removeView(tvOverlayContainer, overlayEntity)
+        overlayViewHelper.removeView(overlayContainer, overlayEntity)
     }
 
     override fun setTimelineMarkers(timelineMarkerEntityList: List<TimelineMarkerEntity>) {
-        TODO("Not yet implemented")
+//        todo!
     }
 
     override fun clearScreen(idList: List<String>) {
-        TODO("Not yet implemented")
-    }
-
-    override fun createVariable(variableEntity: SetVariableEntity) {
-        overlayViewHelper.setVariable(variableEntity)
-    }
-
-    override fun incrementVariable(incrementVariableEntity: IncrementVariableEntity) {
-        overlayViewHelper.incrementVariable(incrementVariableEntity)
+//        todo!
     }
 }
