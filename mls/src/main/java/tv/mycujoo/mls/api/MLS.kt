@@ -90,7 +90,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
             internalBuilder.dispatcher,
             dataManager,
             emptyList(),
-            internalBuilder.castContext,
+            builder.mCaster,
             internalBuilder.logger
         )
 
@@ -125,7 +125,11 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
 
         val annotationListener =
-            AnnotationListener(MLSPlayerView, builder.internalBuilder.overlayViewHelper, DownloaderClient(okHttpClient))
+            AnnotationListener(
+                MLSPlayerView,
+                builder.internalBuilder.overlayViewHelper,
+                DownloaderClient(okHttpClient)
+            )
         val annotationFactory = AnnotationFactory(
             annotationListener,
             viewHandler.getVariableKeeper()

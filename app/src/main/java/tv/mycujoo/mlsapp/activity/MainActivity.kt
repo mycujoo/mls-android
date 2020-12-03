@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
 
         MLS =
             MLSBuilder()
-                .publicKey("3HFCBP4EQJME2EH8H0SBH9RCST0IR269")
+                .publicKey("YOUR_PUBLIC_KEY_HERE")
                 .withActivity(this)
                 .setPlayerEventsListener(playerEventsListener)
                 .setUIEventListener(uiEventListener)
@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
 
 
         mainActivityPlayButton.setOnClickListener {
-            MLS.getVideoPlayer().playVideo("1i0dFTpeKi0o5hHv0s3dVLQ8jON")
+            MLS.getVideoPlayer().playVideo("EVENT_ID_HERE")
         }
         mainActivityPlayButton2.setOnClickListener {
             MLS.getDataProvider().fetchEvents(

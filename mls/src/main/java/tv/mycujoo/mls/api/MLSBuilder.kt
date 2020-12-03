@@ -6,6 +6,7 @@ import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
+import tv.mycujoo.cast.ICaster
 import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
@@ -27,6 +28,8 @@ open class MLSBuilder {
         private set
     internal var mlsConfiguration: MLSConfiguration = MLSConfiguration()
         private set
+    internal var mCaster: ICaster? = null
+        private set
 
     internal var hasAnnotation: Boolean = false
         private set
@@ -34,10 +37,11 @@ open class MLSBuilder {
         private set
 
     fun publicKey(publicKey: String) = apply {
-       if(publicKey == "YOUR_PUBLIC_KEY_HERE"){
-           throw IllegalArgumentException("Public key must be set!")
-       }
-        this.publicKey = publicKey }
+        if (publicKey == "YOUR_PUBLIC_KEY_HERE") {
+            throw IllegalArgumentException("Public key must be set!")
+        }
+        this.publicKey = publicKey
+    }
 
     fun withActivity(activity: Activity) = apply { this.activity = activity }
 
@@ -60,6 +64,10 @@ open class MLSBuilder {
 
     fun setConfiguration(mlsConfiguration: MLSConfiguration) = apply {
         this.mlsConfiguration = mlsConfiguration
+    }
+
+    fun setCaster(caster: ICaster) = apply {
+        this.mCaster = caster
     }
 
     fun createExoPlayer(context: Context): SimpleExoPlayer? {

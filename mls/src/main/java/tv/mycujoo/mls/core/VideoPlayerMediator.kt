@@ -1,24 +1,17 @@
 package tv.mycujoo.mls.core
 
 import android.app.Activity
-import android.util.Log
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.ui.TimeBar
-import com.google.android.gms.cast.MediaInfo
-import com.google.android.gms.cast.MediaLoadRequestData
-import com.google.android.gms.cast.MediaMetadata
-import com.google.android.gms.cast.framework.CastContext
-import com.google.android.gms.cast.framework.CastSession
-import com.google.android.gms.cast.framework.SessionManagerListener
-import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.npaw.youbora.lib6.plugin.Options
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import tv.mycujoo.cast.ICaster
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.Stream
@@ -53,7 +46,7 @@ class VideoPlayerMediator(
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     private val timelineMarkerActionEntities: List<TimelineMarkerEntity>,
-    private val castContext: CastContext,
+    private val caster: ICaster?,
     logger: Logger
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
@@ -72,8 +65,7 @@ class VideoPlayerMediator(
     private var updateId: String? = null
     private lateinit var streamUrlPullJob: Job
 
-    private var castSession: CastSession? = null
-    private lateinit var sessionManagerListener: SessionManagerListener<CastSession>
+
     private var mediaItem: MediaItem? = null
     private var playbackState: PlaybackState = PlaybackState.IDLE
     private var playbackLocation: PlaybackLocation = LOCAL
@@ -82,8 +74,9 @@ class VideoPlayerMediator(
 
     /**region Initialization*/
     fun initialize(MLSPlayerView: MLSPlayerView, player: IPlayer, builder: MLSBuilder) {
-        initCastListener()
-        castSession = castContext.sessionManager.currentCastSession
+        caster?.initialize()
+//        initCastListener()
+//        castSession = castContext.sessionManager.currentCastSession
 
         this.playerView = MLSPlayerView
         this.player = player
@@ -233,75 +226,13 @@ class VideoPlayerMediator(
         youboraClient = internalBuilder.createYouboraClient(plugin)
     }
 
-    private fun initCastListener() {
-        sessionManagerListener = object : SessionManagerListener<CastSession> {
-            override fun onSessionStarting(session: CastSession?) {
-            }
-
-            override fun onSessionStarted(session: CastSession?, sessionId: String?) {
-                onApplicationConnected(session);
-            }
-
-            override fun onSessionStartFailed(session: CastSession?, error: Int) {
-                onApplicationDisconnected()
-            }
-
-            override fun onSessionResuming(session: CastSession?, sessionId: String?) {
-            }
-
-            override fun onSessionResumed(session: CastSession?, wasSuspended: Boolean) {
-                onApplicationConnected(session)
-            }
-
-
-            override fun onSessionResumeFailed(session: CastSession?, error: Int) {
-                onApplicationDisconnected()
-            }
-
-            override fun onSessionSuspended(session: CastSession?, reason: Int) {
-            }
-
-            override fun onSessionEnding(session: CastSession?) {
-            }
-
-            override fun onSessionEnded(session: CastSession?, error: Int) {
-                onApplicationDisconnected()
-            }
-
-            private fun onApplicationConnected(theSession: CastSession?) {
-                requireNotNull(theSession)
-                castSession = theSession
-                if (mediaItem != null) {
-                    if (playbackState == PlaybackState.PLAYING) {
-                        player.pause()
-                        loadRemoteMedia(player.currentPosition())
-                        return
-                    } else {
-                        playbackState = PlaybackState.IDLE
-                        updatePlaybackLocation(REMOTE)
-                    }
-                }
-            }
-
-
-            private fun onApplicationDisconnected() {
-                updatePlaybackLocation(LOCAL)
-                playbackState = PlaybackState.IDLE
-            }
-
-        }
-    }
 
     fun onResume() {
-        castContext.sessionManager.addSessionManagerListener(
-            sessionManagerListener, CastSession::class.java
-        )
+        caster?.onResume()
     }
 
     fun onPause() {
-        castContext.sessionManager.removeSessionManagerListener(
-            sessionManagerListener, CastSession::class.java
-        )
+        caster?.onPause()
     }
 
 
@@ -562,36 +493,36 @@ class VideoPlayerMediator(
 
     /**region Cast*/
     private fun loadRemoteMedia(currentPosition: Long) {
-        if (castSession == null || mediaItem == null) {
-            Log.e("VideoPlayerMediator", "castSession or media-item is null")
-            return
-        }
-        val remoteMediaClient: RemoteMediaClient = castSession!!.remoteMediaClient
-            ?: return
-
-
-        remoteMediaClient.load(
-            MediaLoadRequestData.Builder()
-                .setMediaInfo(buildMediaInfo(mediaItem!!.url, player.duration()))
-                .setAutoplay(true)
-                .setCurrentTime(currentPosition).build()
-        )
+//        if (castSession == null || mediaItem == null) {
+//            Log.e("VideoPlayerMediator", "castSession or media-item is null")
+//            return
+//        }
+//        val remoteMediaClient: RemoteMediaClient = castSession!!.remoteMediaClient
+//            ?: return
+//
+//
+//        remoteMediaClient.load(
+//            MediaLoadRequestData.Builder()
+//                .setMediaInfo(buildMediaInfo(mediaItem!!.url, player.duration()))
+//                .setAutoplay(true)
+//                .setCurrentTime(currentPosition).build()
+//        )
 
     }
 
-    private fun buildMediaInfo(url: String, duration: Long): MediaInfo {
-        val movieMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE)
-//        movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, mSelectedMedia.getStudio())
-        movieMetadata.putString(MediaMetadata.KEY_TITLE, "test title")
-//        movieMetadata.addImage(WebImage(Uri.parse(mSelectedMedia.getImage(0))))
-//        movieMetadata.addImage(WebImage(Uri.parse(mSelectedMedia.getImage(1))))
-        return MediaInfo.Builder(url)
-            .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-            .setContentType("videos/mp4")
-            .setMetadata(movieMetadata)
-            .setStreamDuration(duration)
-            .build()
-    }
+//    private fun buildMediaInfo(url: String, duration: Long): MediaInfo {
+//        val movieMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE)
+////        movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, mSelectedMedia.getStudio())
+//        movieMetadata.putString(MediaMetadata.KEY_TITLE, "test title")
+////        movieMetadata.addImage(WebImage(Uri.parse(mSelectedMedia.getImage(0))))
+////        movieMetadata.addImage(WebImage(Uri.parse(mSelectedMedia.getImage(1))))
+//        return MediaInfo.Builder(url)
+//            .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+//            .setContentType("videos/mp4")
+//            .setMetadata(movieMetadata)
+//            .setStreamDuration(duration)
+//            .build()
+//    }
 
     private fun updatePlaybackLocation(location: PlaybackLocation) {
         playbackLocation = location
