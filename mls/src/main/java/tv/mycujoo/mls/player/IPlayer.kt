@@ -1,15 +1,16 @@
 package tv.mycujoo.mls.player
 
+import android.os.Handler
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
-import com.google.android.exoplayer2.source.hls.HlsMediaSource
 
 interface IPlayer {
     fun isReady(): Boolean
     fun create(
-        mediaFactory: HlsMediaSource.Factory,
+        mediaFactory: MediaFactory,
         exoPlayer: SimpleExoPlayer,
+        handler: Handler,
         mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
     )
 
@@ -35,6 +36,7 @@ interface IPlayer {
         licenseUrl: String,
         autoPlay: Boolean
     )
+
     fun pause()
 
     fun loadLastVideo()

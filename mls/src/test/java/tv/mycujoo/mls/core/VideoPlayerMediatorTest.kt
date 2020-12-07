@@ -40,8 +40,7 @@ import tv.mycujoo.mls.network.socket.MainWebSocketListener
 import tv.mycujoo.mls.network.socket.ReactorListener
 import tv.mycujoo.mls.network.socket.ReactorSocket
 import tv.mycujoo.mls.player.IPlayer
-import tv.mycujoo.mls.player.MediaOnLoadCompletedListener
-import tv.mycujoo.mls.player.Player
+import tv.mycujoo.mls.player.MediaFactory
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
 
@@ -92,7 +91,7 @@ class VideoPlayerMediatorTest {
     @Mock
     lateinit var activity: AppCompatActivity
 
-
+    @Mock
     lateinit var player: IPlayer
 
     @Mock
@@ -100,14 +99,13 @@ class VideoPlayerMediatorTest {
     private lateinit var exoPlayerMainEventListener: MainEventListener
 
     @Mock
-    lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
-
-
-    @Mock
-    lateinit var mediaFactory: HlsMediaSource.Factory
+    lateinit var mediaFactory: MediaFactory
 
     @Mock
     lateinit var hlsMediaSource: HlsMediaSource
+
+    @Mock
+    lateinit var mediaItem: MediaItem
 
     @Mock
     lateinit var timeBar: MLSTimeBar
@@ -156,8 +154,7 @@ class VideoPlayerMediatorTest {
 
         whenever(MLSBuilder.activity).thenReturn(activity)
         whenever(MLSBuilder.createExoPlayer(any())).thenReturn(exoPlayer)
-        whenever(MLSBuilder.createMediaFactory(any())).thenReturn(mediaFactory)
-        whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
+        whenever(mediaFactory.createHlsMediaSource(any())).thenReturn(hlsMediaSource)
 
         whenever(MLSBuilder.createReactorListener(any())).thenReturn(reactorListener)
         whenever(MLSBuilder.mlsConfiguration).thenReturn(MLSConfiguration())
@@ -168,7 +165,6 @@ class VideoPlayerMediatorTest {
         whenever(internalBuilder.createExoPlayerAdapter(any())).thenReturn(exoplayer2Adapter)
         whenever(internalBuilder.createYouboraClient(any())).thenReturn(youboraClient)
         whenever(internalBuilder.logger).thenReturn(logger)
-//        whenever(internalBuilder.castContext).thenReturn(castContext)
         whenever(castContext.sessionManager).thenReturn(sessionManager)
         whenever(sessionManager.currentCastSession).thenReturn(castSession)
 
@@ -177,11 +173,10 @@ class VideoPlayerMediatorTest {
 
         whenever(dispatcher.coroutineContext).thenReturn(coroutineTestRule.testDispatcher)
 
-        player = Player()
-        player.create(mediaFactory, exoPlayer, mediaOnLoadCompletedListener)
+        whenever(player.getDirectInstance()).thenReturn(exoPlayer)
 
 
-        whenever(exoPlayer.addListener(any())).then { storeExoPlayerListener(it) }
+        whenever(player.addListener(any())).then { storeExoPlayerListener(it) }
         videoPlayerMediator = VideoPlayerMediator(
             videoPlayerConfig,
             viewHandler,
@@ -200,7 +195,6 @@ class VideoPlayerMediatorTest {
         if (it.arguments[0] is MainEventListener) {
             exoPlayerMainEventListener = it.arguments[0] as MainEventListener
         }
-
     }
 
     @After
@@ -239,14 +233,14 @@ class VideoPlayerMediatorTest {
                 eventEntityDetails
             )
         )
-        whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
+        whenever(mediaFactory.createMediaItem(any())).thenReturn(mediaItem)
+        whenever(mediaFactory.createHlsMediaSource(any())).thenReturn(hlsMediaSource)
 
 
         videoPlayerMediator.playVideo(eventEntityDetails)
 
 
-        verify(exoPlayer).setMediaItem(any(), any<Boolean>())
-
+        verify(player).play(any(), any(), any())
     }
 
     @Test
@@ -269,7 +263,7 @@ class VideoPlayerMediatorTest {
     fun `given event without streamUrl, should not play video`() = runBlockingTest {
         val event: EventEntity = getSampleEventEntity(emptyList())
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
-        whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
+        whenever(mediaFactory.createHlsMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
 
 
         videoPlayerMediator.playVideo(event)
@@ -383,12 +377,13 @@ class VideoPlayerMediatorTest {
     fun `given external video uri to play, should play`() = runBlockingTest {
         val externalVideoUri =
             "https://dc9jagk60w3y3mt6171f-b03c88.p5cdn.com/shervin/cke8cohm8001u0176j5ahnlo7/master.m3u8"
+        whenever(mediaFactory.createMediaItem(any())).thenReturn(mediaItem)
 
 
         videoPlayerMediator.playExternalSourceVideo(externalVideoUri)
 
 
-        verify(exoPlayer).setMediaItem(any(), any<Boolean>())
+        verify(player).play(any(), any(), any())
     }
 
     @Ignore("Event Status is not done on server yet")

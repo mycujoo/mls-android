@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.core
 
 import android.app.Activity
+import android.os.Handler
 import android.util.Log
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player.STATE_BUFFERING
@@ -241,8 +242,9 @@ class VideoPlayerMediator(
     fun reInitialize(MLSPlayerView: MLSPlayerView, builder: MLSBuilder) {
         val exoPlayer = Player.createExoPlayer(MLSPlayerView.context)
         player.create(
-            createMediaFactory(MLSPlayerView.context),
+            MediaFactory(createMediaFactory(MLSPlayerView.context), com.google.android.exoplayer2.MediaItem.Builder()),
             exoPlayer,
+            Handler(),
             MediaOnLoadCompletedListener(exoPlayer)
         )
 

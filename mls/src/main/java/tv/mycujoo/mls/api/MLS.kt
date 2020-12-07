@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import com.caverock.androidsvg.SVG
+import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.util.Util
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
@@ -23,6 +24,7 @@ import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.mediator.AnnotationMediator
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.network.RemoteApi
+import tv.mycujoo.mls.player.MediaFactory
 import tv.mycujoo.mls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mls.player.Player
 import tv.mycujoo.mls.player.Player.Companion.createExoPlayer
@@ -97,8 +99,9 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         player = Player().apply {
             val exoPlayer = createExoPlayer(context)
             create(
-                createMediaFactory(context),
+                MediaFactory(createMediaFactory(context), MediaItem.Builder()),
                 exoPlayer,
+                Handler(),
                 MediaOnLoadCompletedListener(exoPlayer)
             )
         }

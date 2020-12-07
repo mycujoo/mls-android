@@ -19,6 +19,7 @@ import androidx.leanback.app.VideoSupportFragmentGlueHost
 import androidx.leanback.media.PlaybackGlue
 import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
@@ -45,6 +46,7 @@ import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.player.IPlayer
+import tv.mycujoo.mls.player.MediaFactory
 import tv.mycujoo.mls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mls.player.Player
 import tv.mycujoo.mls.player.Player.Companion.createExoPlayer
@@ -88,7 +90,12 @@ class TvVideoPlayer(
                 val hlsMediaFactory = createMediaFactory(activity)
                 val exoplayer = createExoPlayer(activity)
                 val mediaOnLoadCompletedListener = MediaOnLoadCompletedListener(exoplayer)
-                create(hlsMediaFactory, exoplayer, mediaOnLoadCompletedListener)
+                create(
+                    MediaFactory(createMediaFactory(activity), MediaItem.Builder()),
+                    exoplayer,
+                    Handler(),
+                    mediaOnLoadCompletedListener
+                )
             }
         player.getDirectInstance()!!.playWhenReady = mlsTVConfiguration.videoPlayerConfig.autoPlay
         leanbackAdapter = LeanbackPlayerAdapter(activity, player.getDirectInstance()!!, 1000)

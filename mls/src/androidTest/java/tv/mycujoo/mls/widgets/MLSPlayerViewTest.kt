@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.widgets
 
 import android.content.Intent
+import android.os.Handler
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageButton
@@ -17,6 +18,7 @@ import androidx.test.espresso.idling.CountingIdlingResource
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.internal.runner.junit4.statement.UiThreadStatement
+import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.ui.PlayerControlView
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -47,6 +49,7 @@ import tv.mycujoo.mls.model.SingleLiveEvent
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.ReactorCallback
 import tv.mycujoo.mls.player.IPlayer
+import tv.mycujoo.mls.player.MediaFactory
 import tv.mycujoo.mls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mls.player.Player
 import tv.mycujoo.mls.player.Player.Companion.createExoPlayer
@@ -159,8 +162,9 @@ class MLSPlayerViewTest {
             player = Player()
             val exoPlayer = createExoPlayer(MLSPlayerView.context)
             player.create(
-                createMediaFactory(MLSPlayerView.context),
+                MediaFactory(createMediaFactory(MLSPlayerView.context), MediaItem.Builder()),
                 exoPlayer,
+                Handler(),
                 MediaOnLoadCompletedListener(exoPlayer)
             )
 
@@ -334,27 +338,29 @@ class MLSPlayerViewTest {
     fun showCastButton() {
         setupPlayer()
 
-        MLSPlayerView.config(
-            VideoPlayerConfig(
-                primaryColor = "#FFFFFF",
-                secondaryColor = "#000000",
-                autoPlay = true,
-                enableControls = true,
-                showPlayPauseButtons = true,
-                showBackForwardsButtons = true,
-                showSeekBar = true,
-                showTimers = true,
-                showFullScreenButton = true,
-                showLiveViewers = true,
-                showEventInfoButton = true,
-                showCastButton = false
+        UiThreadStatement.runOnUiThread {
+            MLSPlayerView.config(
+                VideoPlayerConfig(
+                    primaryColor = "#FFFFFF",
+                    secondaryColor = "#000000",
+                    autoPlay = true,
+                    enableControls = true,
+                    showPlayPauseButtons = true,
+                    showBackForwardsButtons = true,
+                    showSeekBar = true,
+                    showTimers = true,
+                    showFullScreenButton = true,
+                    showLiveViewers = true,
+                    showEventInfoButton = true,
+                    showCastButton = true
+                )
             )
-        )
+        }
 
 
         onView(withId(R.id.controller_castImageButtonContainer)).check(
             matches(
-                withEffectiveVisibility(Visibility.GONE)
+                withEffectiveVisibility(Visibility.VISIBLE)
             )
         )
     }
@@ -363,22 +369,24 @@ class MLSPlayerViewTest {
     fun hideCastButton() {
         setupPlayer()
 
-        MLSPlayerView.config(
-            VideoPlayerConfig(
-                primaryColor = "#FFFFFF",
-                secondaryColor = "#000000",
-                autoPlay = true,
-                enableControls = true,
-                showPlayPauseButtons = true,
-                showBackForwardsButtons = true,
-                showSeekBar = true,
-                showTimers = true,
-                showFullScreenButton = true,
-                showLiveViewers = true,
-                showEventInfoButton = true,
-                showCastButton = false
+        UiThreadStatement.runOnUiThread {
+            MLSPlayerView.config(
+                VideoPlayerConfig(
+                    primaryColor = "#FFFFFF",
+                    secondaryColor = "#000000",
+                    autoPlay = true,
+                    enableControls = true,
+                    showPlayPauseButtons = true,
+                    showBackForwardsButtons = true,
+                    showSeekBar = true,
+                    showTimers = true,
+                    showFullScreenButton = true,
+                    showLiveViewers = true,
+                    showEventInfoButton = true,
+                    showCastButton = false
+                )
             )
-        )
+        }
 
 
         onView(withId(R.id.controller_castImageButtonContainer)).check(
