@@ -22,6 +22,7 @@ import org.junit.*
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.invocation.InvocationOnMock
+import tv.mycujoo.cast.Caster
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.mls.CoroutineTestRule
@@ -138,6 +139,9 @@ class VideoPlayerMediatorTest {
     @Mock
     lateinit var castSession: CastSession
 
+    @Mock
+    lateinit var caster: Caster
+
 
     @Before
     fun setUp() {
@@ -164,7 +168,7 @@ class VideoPlayerMediatorTest {
         whenever(internalBuilder.createExoPlayerAdapter(any())).thenReturn(exoplayer2Adapter)
         whenever(internalBuilder.createYouboraClient(any())).thenReturn(youboraClient)
         whenever(internalBuilder.logger).thenReturn(logger)
-        whenever(internalBuilder.castContext).thenReturn(castContext)
+//        whenever(internalBuilder.castContext).thenReturn(castContext)
         whenever(castContext.sessionManager).thenReturn(sessionManager)
         whenever(sessionManager.currentCastSession).thenReturn(castSession)
 
@@ -185,7 +189,7 @@ class VideoPlayerMediatorTest {
             dispatcher,
             dataManager,
             emptyList(),
-            internalBuilder.castContext,
+            caster,
             internalBuilder.logger
         )
         videoPlayerMediator.initialize(playerView, player, MLSBuilder)

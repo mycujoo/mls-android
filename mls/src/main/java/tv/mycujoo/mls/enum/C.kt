@@ -11,5 +11,11 @@ class C {
 
         const val ONE_SECOND_IN_MS = 1000L
 
+        const val CAST_LICENSE_URL_KEY ="publicKey"
+        const val CAST_PROTECTION_SYSTEM_KEY ="publicKey"
+        const val CAST_PUBLIC_KEY_KEY ="publicKey"
+        const val CAST_EVENT_ID_KEY ="eventId"
+        const val CAST_PSEUDO_USER_ID_KEY ="pseudoUserId"
+
     }
 }

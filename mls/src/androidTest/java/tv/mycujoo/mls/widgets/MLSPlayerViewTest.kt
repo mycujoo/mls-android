@@ -171,8 +171,8 @@ class MLSPlayerViewTest {
                 GlobalScope,
                 dataManager,
                 emptyList(),
-                Logger(LogLevel.MINIMAL),
-                internalBuilder.castContext
+                null,
+                Logger(LogLevel.MINIMAL)
             )
             videoPlayerMediator.initialize(
                 MLSPlayerView,
