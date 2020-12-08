@@ -10,13 +10,14 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.util.Util
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
-import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.mls.core.AnnotationFactory
 import tv.mycujoo.mls.core.AnnotationListener
 import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.core.VideoPlayerMediator
 import tv.mycujoo.mls.data.IDataManager
+import tv.mycujoo.mls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
+import tv.mycujoo.mls.enum.C.Companion.UUID_PREF_KEY
 import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.SVGAssetResolver
 import tv.mycujoo.mls.manager.IPrefManager
@@ -37,7 +38,7 @@ import java.util.concurrent.Executors
 class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
 
-    /**region MLS fields*/
+    /**region Fields*/
     private lateinit var eventsRepository: EventsRepository
 
     private lateinit var dispatcher: CoroutineScope
@@ -66,10 +67,9 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         this.context = builder.activity!!
 
         api = RemoteApi()
-
     }
 
-    fun initialize(internalBuilder: InternalBuilder) {
+    fun initializeComponent(internalBuilder: InternalBuilder) {
         this.eventsRepository = internalBuilder.eventsRepository
         this.dispatcher = internalBuilder.dispatcher
         this.okHttpClient = internalBuilder.okHttpClient
@@ -79,7 +79,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
         persistPublicKey(this.builder.publicKey)
 
-        internalBuilder.uuid = prefManager.get("UUID") ?: UUID.randomUUID().toString()
+        internalBuilder.uuid = prefManager.get(UUID_PREF_KEY) ?: UUID.randomUUID().toString()
         persistUUIDIfNotStoredAlready(internalBuilder.uuid!!)
         internalBuilder.reactorSocket.setUUID(internalBuilder.uuid!!)
 
@@ -152,7 +152,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         videoPlayerMediator.setAnnotationMediator(annotationMediator)
     }
 
-    private fun initializePlayerView(MLSPlayerView: MLSPlayerView) {
+    private fun initializeView(MLSPlayerView: MLSPlayerView) {
         this.playerView = MLSPlayerView
         this.viewHandler.setOverlayHost(MLSPlayerView.overlayHost)
         initializeMediators(MLSPlayerView)
@@ -163,13 +163,13 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
     /**region Over-ridden Functions*/
     override fun onStart(MLSPlayerView: MLSPlayerView) {
         if (Util.SDK_INT >= Build.VERSION_CODES.N) {
-            initializePlayerView(MLSPlayerView)
+            initializeView(MLSPlayerView)
         }
     }
 
     override fun onResume(MLSPlayerView: MLSPlayerView) {
         if (Util.SDK_INT < Build.VERSION_CODES.N) {
-            initializePlayerView(MLSPlayerView)
+            initializeView(MLSPlayerView)
         }
         videoPlayerMediator.onResume()
     }
@@ -205,38 +205,14 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
     /**region msc Functions*/
     private fun persistPublicKey(publicKey: String) {
-        prefManager.persist("PUBLIC_KEY", publicKey)
+        prefManager.persist(PUBLIC_KEY_PREF_KEY, publicKey)
     }
 
     private fun persistUUIDIfNotStoredAlready(uuid: String) {
-        val storedUUID = prefManager.get("UUID")
+        val storedUUID = prefManager.get(UUID_PREF_KEY)
         if (storedUUID == null) {
-            prefManager.persist("UUID", uuid)
+            prefManager.persist(UUID_PREF_KEY, uuid)
         }
-    }
-
-    private fun displayPreviewModeWithEventInfo(event: EventEntity) {
-        if (!this::playerView.isInitialized) {
-            return
-        }
-
-        playerView.hideEventInfoButton()
-        playerView.showEventInformationPreEventDialog()
-    }
-
-    private fun setEventInfoToPlayerViewWrapper(event: EventEntity) {
-        if (!this::playerView.isInitialized) {
-            return
-        }
-
-        playerView.setEventInfo(event.title, event.description, event.start_time)
-    }
-
-    private fun hidePreviewMode() {
-        if (!this::playerView.isInitialized) {
-            return
-        }
-        playerView.hideEventInfoDialog()
     }
     /**endregion */
 }

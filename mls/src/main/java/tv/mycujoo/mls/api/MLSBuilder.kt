@@ -27,9 +27,6 @@ open class MLSBuilder {
         private set
     internal var mCaster: ICaster? = null
         private set
-
-    internal var hasAnnotation: Boolean = false
-        private set
     internal var hasAnalytic: Boolean = true
         private set
 
@@ -42,22 +39,11 @@ open class MLSBuilder {
 
     fun withActivity(activity: Activity) = apply { this.activity = activity }
 
-
     fun setPlayerEventsListener(playerEventsListener: tv.mycujoo.mls.api.PlayerEventsListener) =
         apply { this.playerEventsListener = PlayerEventsListener(playerEventsListener) }
 
     fun setUIEventListener(uiEventListener: UIEventListener) =
         apply { this.uiEventListener = uiEventListener }
-
-
-    open fun build(): MLS {
-        internalBuilder = InternalBuilder(activity!!, mlsConfiguration.logLevel)
-        internalBuilder.initialize()
-
-        val mls = MLS(this)
-        mls.initialize(internalBuilder)
-        return mls
-    }
 
     fun setConfiguration(mlsConfiguration: MLSConfiguration) = apply {
         this.mlsConfiguration = mlsConfiguration
@@ -73,6 +59,15 @@ open class MLSBuilder {
 
     fun createReactorListener(reactorCallback: ReactorCallback): ReactorListener {
         return ReactorListener(reactorCallback)
+    }
+
+    open fun build(): MLS {
+        internalBuilder = InternalBuilder(activity!!, mlsConfiguration.logLevel)
+        internalBuilder.initialize()
+
+        val mls = MLS(this)
+        mls.initializeComponent(internalBuilder)
+        return mls
     }
 
 }

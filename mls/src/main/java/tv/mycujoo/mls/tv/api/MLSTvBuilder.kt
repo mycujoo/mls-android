@@ -2,6 +2,7 @@ package tv.mycujoo.mls.tv.api
 
 import android.app.Activity
 import tv.mycujoo.mls.api.MLSTVConfiguration
+import tv.mycujoo.mls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
 import tv.mycujoo.mls.enum.LogLevel
 
 class MLSTvBuilder {
@@ -31,7 +32,7 @@ class MLSTvBuilder {
 
     open fun build(): MLSTV {
         val internalBuilder = MLSTvInternalBuilder(activity!!, logLevel)
-        internalBuilder.prefManager.persist("PUBLIC_KEY", publicKey)
+        internalBuilder.prefManager.persist(PUBLIC_KEY_PREF_KEY, publicKey)
         return MLSTV(
             activity!!,
             mlsTVConfiguration,

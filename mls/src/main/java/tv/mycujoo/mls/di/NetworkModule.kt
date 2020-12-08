@@ -10,6 +10,7 @@ import okhttp3.OkHttpClient
 import okio.Buffer
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import tv.mycujoo.mls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
 import tv.mycujoo.mls.manager.IPrefManager
 import tv.mycujoo.mls.network.MlsApi
 import java.nio.charset.Charset
@@ -41,7 +42,7 @@ open class NetworkModule(val context: Context) {
             .connectTimeout(30, TimeUnit.SECONDS)
             .addInterceptor { chain: Interceptor.Chain ->
                 val newRequest = chain.request().newBuilder()
-                    .addHeader("Authorization", "Bearer " + prefManager.get("PUBLIC_KEY"))
+                    .addHeader("Authorization", "Bearer " + prefManager.get(PUBLIC_KEY_PREF_KEY))
                     .removeHeader("Pragma")
                     .removeHeader("Cache-Control")
                     .addHeader("Cache-Control", "public, max-age=$maxAgeInSecond")
