@@ -201,11 +201,11 @@ class VideoPlayerMediator(
                     return
                 }
                 updatePlaybackLocation(REMOTE)
-                if (player.isPlaying()) {
-                    player.pause()
-                }
                 mediaItem?.let {
                     loadRemoteMedia(it)
+                }
+                if (player.isPlaying()) {
+                    player.pause()
                 }
             }
 
