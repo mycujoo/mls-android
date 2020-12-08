@@ -8,11 +8,8 @@ import com.google.android.gms.cast.framework.media.CastMediaOptions
 
 /**
  * Extend this class to use MLS-Cast.
- * Activity name & Receiver App id must be provided.
  */
 abstract class MLSCastOptionsProviderAbstract : OptionsProvider {
-
-    abstract fun getReceiverAppId(): String
 
     override fun getCastOptions(context: Context?): CastOptions {
         requireNotNull(context)
@@ -20,7 +17,7 @@ abstract class MLSCastOptionsProviderAbstract : OptionsProvider {
             .build()
 
         val castOption = CastOptions.Builder()
-            .setReceiverApplicationId(getReceiverAppId())
+            .setReceiverApplicationId(context.getString(R.string.mls_cast_app_id))
             .setCastMediaOptions(mediaOptions)
             .build()
         return castOption
