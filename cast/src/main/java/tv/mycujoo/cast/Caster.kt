@@ -54,6 +54,8 @@ class Caster : ICaster {
 
             override fun onSessionEnding(session: CastSession?) {
                 castSession = session
+                castListener.onDisconnecting(session)
+
             }
 
             override fun onSessionEnded(session: CastSession?, error: Int) {

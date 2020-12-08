@@ -5,9 +5,11 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player.*
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
+import com.google.android.gms.cast.MediaLoadOptions
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.SessionManager
+import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.nhaarman.mockitokotlin2.*
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Plugin
@@ -23,6 +25,7 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.invocation.InvocationOnMock
 import tv.mycujoo.cast.Caster
+import tv.mycujoo.cast.ICastListener
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.mls.CoroutineTestRule
@@ -138,7 +141,11 @@ class VideoPlayerMediatorTest {
     lateinit var castSession: CastSession
 
     @Mock
+    lateinit var remoteMediaClient: RemoteMediaClient
+
+    @Mock
     lateinit var caster: Caster
+    lateinit var castListener: ICastListener
 
 
     @Before
@@ -167,6 +174,8 @@ class VideoPlayerMediatorTest {
         whenever(internalBuilder.logger).thenReturn(logger)
         whenever(castContext.sessionManager).thenReturn(sessionManager)
         whenever(sessionManager.currentCastSession).thenReturn(castSession)
+        whenever(caster.getRemoteMediaClient()).thenReturn(remoteMediaClient)
+
 
         whenever(playerView.context).thenReturn(activity)
         whenever(playerView.getTimeBar()).thenReturn(timeBar)
@@ -177,6 +186,7 @@ class VideoPlayerMediatorTest {
 
 
         whenever(player.addListener(any())).then { storeExoPlayerListener(it) }
+        whenever(caster.initialize(any(), any())).then { storeCastListener(it) }
         videoPlayerMediator = VideoPlayerMediator(
             videoPlayerConfig,
             viewHandler,
@@ -191,9 +201,15 @@ class VideoPlayerMediatorTest {
         videoPlayerMediator.setAnnotationMediator(annotationMediator)
     }
 
-    private fun storeExoPlayerListener(it: InvocationOnMock) {
-        if (it.arguments[0] is MainEventListener) {
-            exoPlayerMainEventListener = it.arguments[0] as MainEventListener
+    private fun storeExoPlayerListener(invocationOnMock: InvocationOnMock) {
+        if (invocationOnMock.arguments[0] is MainEventListener) {
+            exoPlayerMainEventListener = invocationOnMock.arguments[0] as MainEventListener
+        }
+    }
+
+    private fun storeCastListener(invocationOnMock: InvocationOnMock) {
+        if (invocationOnMock.arguments[1] is ICastListener) {
+            castListener = invocationOnMock.arguments[1] as ICastListener
         }
     }
 
@@ -531,6 +547,60 @@ class VideoPlayerMediatorTest {
 
         verify(youboraClient, never()).logEvent(any(), any())
     }
+
+    /**region Cast*/
+    @Test
+    fun `should load remote media, when connected to remote player`() {
+        videoPlayerMediator.playVideo(getSampleEventEntity("id_0"))
+
+        castListener.onConnected(castSession)
+
+        verify(caster.getRemoteMediaClient()!!).load(any(), any<MediaLoadOptions>())
+    }
+
+    @Test
+    fun `should pause local player, when connected to remote player`() {
+        whenever(player.isPlaying()).thenReturn(true)
+        videoPlayerMediator.playVideo(getSampleEventEntity("id_0"))
+
+        castListener.onConnected(castSession)
+
+        verify(player).pause()
+    }
+
+    @Test
+    fun `should not pause local player if it's not playing, when connected to remote player`() {
+        whenever(player.isPlaying()).thenReturn(false)
+        videoPlayerMediator.playVideo(getSampleEventEntity("id_0"))
+
+        castListener.onConnected(castSession)
+
+        verify(player, never()).pause()
+    }
+
+    @Test
+    fun `should update local position, when disconnect from remote player`() {
+        whenever(castSession.remoteMediaClient).thenReturn(remoteMediaClient)
+        whenever(remoteMediaClient.approximateStreamPosition).thenReturn(33333L)
+
+        castListener.onDisconnecting(castSession)
+
+        verify(player).seekTo(33333L)
+    }
+
+
+    @Test
+    fun `should update local player play status, when disconnect from remote player`() {
+        whenever(castSession.remoteMediaClient).thenReturn(remoteMediaClient)
+        whenever(remoteMediaClient.isPlaying).thenReturn(true)
+
+        castListener.onDisconnecting(castSession)
+
+        verify(player).play()
+    }
+
+
+    /**endregion */
 
     /**region Fake data*/
     companion object {

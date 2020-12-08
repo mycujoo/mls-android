@@ -209,8 +209,19 @@ class VideoPlayerMediator(
                 }
             }
 
+            fun onApplicationDisconnecting(session: CastSession?) {
+                updatePlaybackLocation(LOCAL)
+                session?.remoteMediaClient?.let { remoteMediaClient ->
+                    player.seekTo(remoteMediaClient.approximateStreamPosition)
+                    if (remoteMediaClient.isPlaying) {
+                        player.play()
+                    } else {
+                        player.pause()
+                    }
+                }
+            }
 
-            fun onApplicationDisconnected() {
+            fun onApplicationDisconnected(session: CastSession?) {
                 updatePlaybackLocation(LOCAL)
             }
 
@@ -224,13 +235,15 @@ class VideoPlayerMediator(
                 }
 
                 override fun onConnected(session: CastSession?) {
-                    Log.d("VideoPlayerMediator", "onConnected callback")
                     onApplicationConnected(session)
                 }
 
+                override fun onDisconnecting(session: CastSession?) {
+                    onApplicationDisconnecting(session)
+                }
+
                 override fun onDisconnected(session: CastSession?) {
-                    Log.d("VideoPlayerMediator", "onDisconnected callback")
-                    onApplicationDisconnected()
+                    onApplicationDisconnected(session)
 
                 }
             }
@@ -242,7 +255,10 @@ class VideoPlayerMediator(
     fun reInitialize(MLSPlayerView: MLSPlayerView, builder: MLSBuilder) {
         val exoPlayer = Player.createExoPlayer(MLSPlayerView.context)
         player.create(
-            MediaFactory(createMediaFactory(MLSPlayerView.context), com.google.android.exoplayer2.MediaItem.Builder()),
+            MediaFactory(
+                createMediaFactory(MLSPlayerView.context),
+                com.google.android.exoplayer2.MediaItem.Builder()
+            ),
             exoPlayer,
             Handler(),
             MediaOnLoadCompletedListener(exoPlayer)
