@@ -175,6 +175,12 @@ class Player : IPlayer {
 
     }
 
+    override fun play() {
+        exoPlayer?.let {
+            it.playWhenReady = true
+        }
+    }
+
     override fun pause() {
         exoPlayer?.let {
             it.playWhenReady = false

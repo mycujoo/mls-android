@@ -332,6 +332,22 @@ class PlayerTest {
         assertTrue { player.isWithinValidSegment(1605694507)!! }
     }
 
+    @Test
+    fun pause() {
+        initPlayer()
+        player.pause()
+
+        verify(exoPlayer).playWhenReady = false
+    }
+
+    @Test
+    fun play() {
+        initPlayer()
+        player.play()
+
+        verify(exoPlayer).playWhenReady = true
+    }
+
     companion object {
         const val SAMPLE_URI = "https://mycujoo.tv"
     }

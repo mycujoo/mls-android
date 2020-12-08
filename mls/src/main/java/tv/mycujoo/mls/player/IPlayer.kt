@@ -37,6 +37,7 @@ interface IPlayer {
         autoPlay: Boolean
     )
 
+    fun play()
     fun pause()
 
     fun loadLastVideo()
