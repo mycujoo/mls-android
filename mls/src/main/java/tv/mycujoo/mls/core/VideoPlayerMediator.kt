@@ -2,7 +2,6 @@ package tv.mycujoo.mls.core
 
 import android.app.Activity
 import android.os.Handler
-import android.util.Log
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.Player.STATE_READY
@@ -27,7 +26,6 @@ import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.VideoPlayer
-import tv.mycujoo.mls.cast.MediaItem
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.enum.C
@@ -78,7 +76,6 @@ class VideoPlayerMediator(
     private lateinit var streamUrlPullJob: Job
 
 
-    private var mediaItem: MediaItem? = null
     private var playbackState: PlaybackState = PlaybackState.IDLE
     private var playbackLocation: PlaybackLocation = LOCAL
     private var publicKey: String = ""
@@ -201,7 +198,7 @@ class VideoPlayerMediator(
                     return
                 }
                 updatePlaybackLocation(REMOTE)
-                mediaItem?.let {
+                dataManager.currentEvent?.let {
                     loadRemoteMedia(it)
                 }
                 if (player.isPlaying()) {
@@ -370,7 +367,7 @@ class VideoPlayerMediator(
     /**region Playback functions*/
     override fun playVideo(event: EventEntity) {
         playVideo(event.id)
-        updateMediaItem(event)
+        storeEvent(event)
     }
 
     override fun playVideo(eventId: String) {
@@ -413,9 +410,7 @@ class VideoPlayerMediator(
 
         if (mayPlayVideo(event)) {
             logged = false
-            updateMediaItem(event)
-
-
+            storeEvent(event)
             play(event.streams.first())
             playerView.hideEventInfoDialog()
         } else {
@@ -585,13 +580,18 @@ class VideoPlayerMediator(
     }
 
     /**region Cast*/
-    private fun loadRemoteMedia(mediaItem: MediaItem) {
+    private fun loadRemoteMedia(event: EventEntity) {
+        if (event.streams.isEmpty() || event.streams.first().fullUrl == null) {
+            return
+        }
+        val fullUrl = event.streams.first().fullUrl!!
+
         caster?.getRemoteMediaClient()?.let {
             val customData = JSONObject().put(CAST_PUBLIC_KEY_KEY, publicKey)
-                .put(CAST_EVENT_ID_KEY, mediaItem.id)
+                .put(CAST_EVENT_ID_KEY, event.id)
                 .put(CAST_PSEUDO_USER_ID_KEY, uuid)
             val mediaInfo =
-                MediaInfoBuilder.build(mediaItem.url, mediaItem.title, customData)
+                MediaInfoBuilder.build(fullUrl, event.title, event.thumbnailUrl, customData)
 
             val mediaLoadOptions: MediaLoadOptions =
                 MediaLoadOptions.Builder().setAutoplay(player.isPlaying())
@@ -605,11 +605,8 @@ class VideoPlayerMediator(
         playbackLocation = location
     }
 
-    private fun updateMediaItem(eventEntity: EventEntity) {
-        eventEntity.streams.firstOrNull()?.fullUrl?.let { url ->
-            mediaItem = MediaItem(eventEntity.id, url, eventEntity.title)
-        }
-
+    private fun storeEvent(eventEntity: EventEntity) {
+        dataManager.currentEvent = eventEntity
     }
 
     /**endregion */

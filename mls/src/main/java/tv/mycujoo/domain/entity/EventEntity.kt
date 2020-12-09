@@ -6,7 +6,7 @@ data class EventEntity(
     @SerializedName("id") val id: String,
     @SerializedName("title") val title: String,
     @SerializedName("description") val description: String,
-    @SerializedName("thumbnail_url") val thumbnail_url: String,
+    @SerializedName("thumbnail_url") val thumbnailUrl: String,
     @SerializedName("poster_url") val poster_url: String?,
     @SerializedName("location") val location: Location,
     @SerializedName("organiser") val organiser: String,
