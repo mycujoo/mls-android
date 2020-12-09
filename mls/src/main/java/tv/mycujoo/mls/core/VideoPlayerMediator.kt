@@ -30,8 +30,11 @@ import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.enum.C.Companion.CAST_EVENT_ID_KEY
+import tv.mycujoo.mls.enum.C.Companion.CAST_LICENSE_URL_KEY
+import tv.mycujoo.mls.enum.C.Companion.CAST_PROTECTION_SYSTEM_KEY
 import tv.mycujoo.mls.enum.C.Companion.CAST_PSEUDO_USER_ID_KEY
 import tv.mycujoo.mls.enum.C.Companion.CAST_PUBLIC_KEY_KEY
+import tv.mycujoo.mls.enum.C.Companion.DRM_WIDEVINE
 import tv.mycujoo.mls.enum.MessageLevel
 import tv.mycujoo.mls.helper.MediaInfoBuilder
 import tv.mycujoo.mls.helper.OverlayViewHelper
@@ -585,11 +588,17 @@ class VideoPlayerMediator(
             return
         }
         val fullUrl = event.streams.first().fullUrl!!
+        val widevine = event.streams.first().widevine
 
         caster?.getRemoteMediaClient()?.let {
-            val customData = JSONObject().put(CAST_PUBLIC_KEY_KEY, publicKey)
+            val customData = JSONObject()
                 .put(CAST_EVENT_ID_KEY, event.id)
+                .put(CAST_PUBLIC_KEY_KEY, publicKey)
                 .put(CAST_PSEUDO_USER_ID_KEY, uuid)
+            if (widevine?.licenseUrl != null) {
+                customData.put(CAST_LICENSE_URL_KEY, widevine.licenseUrl)
+                    .put(CAST_PROTECTION_SYSTEM_KEY, DRM_WIDEVINE)
+            }
             val mediaInfo =
                 MediaInfoBuilder.build(fullUrl, event.title, event.thumbnailUrl, customData)
 

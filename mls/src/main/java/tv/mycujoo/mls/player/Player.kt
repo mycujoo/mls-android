@@ -8,6 +8,7 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
+import tv.mycujoo.mls.enum.C.Companion.DRM_WIDEVINE
 
 class Player : IPlayer {
 
@@ -139,7 +140,7 @@ class Player : IPlayer {
         this.licenseUrl = Uri.parse(licenseUrl)
 
         val mediaItem = MediaItem.Builder()
-            .setDrmUuid(Util.getDrmUuid("widevine"))
+            .setDrmUuid(Util.getDrmUuid(DRM_WIDEVINE))
             .setDrmLicenseUri(licenseUrl)
             .setUri(uriString)
             .build()
