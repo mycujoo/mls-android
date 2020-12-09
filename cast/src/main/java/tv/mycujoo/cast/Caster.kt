@@ -1,15 +1,29 @@
 package tv.mycujoo.cast
 
+import android.view.ViewStub
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.SessionManagerListener
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 
-class Caster : ICaster {
+
+class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
     private lateinit var castContext: CastContext
     private var castSession: CastSession? = null
     private lateinit var sessionManagerListener: SessionManagerListener<CastSession>
     private lateinit var castListener: ICastListener
+
+    init {
+        inflateMiniController(miniControllerViewStub)
+
+    }
+
+    private fun inflateMiniController(miniControllerViewStub: ViewStub?) {
+        miniControllerViewStub?.let {
+            it.layoutResource = R.layout.view_cast_mini_controller
+            it.inflate()
+        }
+    }
 
     override fun initialize(castProvider: ICastContextProvider, castListener: ICastListener) {
         castContext = castProvider.getCastContext()
