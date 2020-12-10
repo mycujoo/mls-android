@@ -37,6 +37,8 @@ import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.TimelineMarkerManager
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.widgets.MLSPlayerView.LiveState.*
+import tv.mycujoo.mls.widgets.PlayerControllerMode.EXO_MODE
+import tv.mycujoo.mls.widgets.PlayerControllerMode.REMOTE_CONTROLLER
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterest
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterestType
@@ -249,6 +251,25 @@ class MLSPlayerView @JvmOverloads constructor(
         )
     }
 
+    override fun getRemotePlayerControllerView(): RemotePlayerControllerView {
+        return findViewById(R.id.remotePlayerControllerView)
+    }
+
+    override fun switchMode(mode: PlayerControllerMode) {
+        when (mode) {
+            EXO_MODE -> {
+                playerView.visibility = View.VISIBLE
+                findViewById<RemotePlayerControllerView>(R.id.remotePlayerControllerView).visibility =
+                    View.GONE
+            }
+            REMOTE_CONTROLLER -> {
+                playerView.visibility = View.GONE
+                findViewById<RemotePlayerControllerView>(R.id.remotePlayerControllerView).visibility =
+                    View.VISIBLE
+
+            }
+        }
+    }
 
     override fun showBuffering() {
         bufferView.visibility = View.VISIBLE
