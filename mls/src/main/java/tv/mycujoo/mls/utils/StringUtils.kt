@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.utils
 
+import com.google.android.exoplayer2.C
 import java.io.IOException
 import java.io.InputStream
 import java.text.DecimalFormat
@@ -8,6 +9,30 @@ import java.util.*
 
 class StringUtils {
     companion object {
+        /**
+         * Returns the specified millisecond time formatted as a string.
+         *
+         * @param timeMs The time to format as a string, in milliseconds.
+         * @return The time formatted as a string.
+         */
+        fun getFormattedTime(
+            timeMs: Long,
+            stringBuilder: StringBuilder,
+            timeFormatter: Formatter
+        ): String? {
+            var timeMs = timeMs
+            if (timeMs == C.TIME_UNSET) {
+                timeMs = 0
+            }
+            val totalSeconds = timeMs / 1000
+            val seconds = totalSeconds % 60
+            val minutes = totalSeconds / 60 % 60
+            val hours = totalSeconds / 3600
+            stringBuilder.setLength(0)
+            return if (hours > 0) timeFormatter.format("%d:%02d:%02d", hours, minutes, seconds)
+                .toString() else timeFormatter.format("%02d:%02d", minutes, seconds).toString()
+        }
+
         fun getNumberOfViewers(count: String?): String {
             if (count.isNullOrEmpty()) {
                 return "0"

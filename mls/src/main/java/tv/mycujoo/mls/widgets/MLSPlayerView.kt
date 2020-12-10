@@ -36,6 +36,7 @@ import tv.mycujoo.mls.helper.DateTimeHelper
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.TimelineMarkerManager
 import tv.mycujoo.mls.manager.contracts.IViewHandler
+import tv.mycujoo.mls.utils.StringUtils.Companion.getFormattedTime
 import tv.mycujoo.mls.widgets.MLSPlayerView.LiveState.*
 import tv.mycujoo.mls.widgets.PlayerControllerMode.EXO_MODE
 import tv.mycujoo.mls.widgets.PlayerControllerMode.REMOTE_CONTROLLER
@@ -493,9 +494,9 @@ class MLSPlayerView @JvmOverloads constructor(
         if (isScrubbing) {
             return
         }
-        positionTextView.text = getStringForTime(time)
+        positionTextView.text = getFormattedTime(time, timeFormatBuilder, timeFormatter)
 
-        durationTextView.text = getStringForTime(duration)
+        durationTextView.text = getFormattedTime(duration, timeFormatBuilder, timeFormatter)
     }
 
     fun scrubStopAt(position: Long) {
@@ -509,33 +510,10 @@ class MLSPlayerView @JvmOverloads constructor(
     }
 
     fun scrubbedTo(position: Long) {
-        positionTextView.text = getStringForTime(position)
+        positionTextView.text = getFormattedTime(position, timeFormatBuilder, timeFormatter)
     }
     /**endregion */
 
-    /**region Private functions*/
-    /**
-     * Returns the specified millisecond time formatted as a string.
-     *
-     * @param timeMs The time to format as a string, in milliseconds.
-     * @return The time formatted as a string.
-     */
-    private fun getStringForTime(
-        timeMs: Long
-    ): String? {
-        var timeMs = timeMs
-        if (timeMs == C.TIME_UNSET) {
-            timeMs = 0
-        }
-        val totalSeconds = timeMs / 1000
-        val seconds = totalSeconds % 60
-        val minutes = totalSeconds / 60 % 60
-        val hours = totalSeconds / 3600
-        this.timeFormatBuilder.setLength(0)
-        return if (hours > 0) timeFormatter.format("%d:%02d:%02d", hours, minutes, seconds)
-            .toString() else timeFormatter.format("%02d:%02d", minutes, seconds).toString()
-    }
-    /**endregion */
 
     /**region New Annotation structure*/
     override fun continueOverlayAnimations() {

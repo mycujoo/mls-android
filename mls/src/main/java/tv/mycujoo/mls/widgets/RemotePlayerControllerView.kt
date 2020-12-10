@@ -6,20 +6,23 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.mediarouter.app.MediaRouteButton
 import com.google.android.exoplayer2.ui.TimeBar
 import com.google.android.gms.cast.framework.CastButtonFactory
 import tv.mycujoo.mls.R
+import tv.mycujoo.mls.utils.StringUtils
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
+import java.util.*
 
 class RemotePlayerControllerView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
+    /**region Fields*/
     var listener: RemotePlayerControllerListener? = null
-    private val timeBar: MLSTimeBar
     private val playButtonContainer: FrameLayout
     private val playButton: ImageButton
     private val pauseButton: ImageButton
@@ -27,8 +30,15 @@ class RemotePlayerControllerView @JvmOverloads constructor(
     private val fastForwardButton: ImageButton
     private val rewindContainer: FrameLayout
     private val rewindButton: ImageButton
+    private val timeBar: MLSTimeBar
+    private val currentPositionTextView: TextView
+    private val durationTextView: TextView
 
     private val mediaRouteButton: MediaRouteButton
+
+    private var timeFormatBuilder = StringBuilder()
+    private var timeFormatter = Formatter(timeFormatBuilder, Locale.getDefault())
+    /**endregion */
 
 
     /**region Initializing*/
@@ -42,6 +52,8 @@ class RemotePlayerControllerView @JvmOverloads constructor(
         rewindContainer = findViewById(R.id.remoteControllerRewButtonContainerLayout)
         rewindButton = findViewById(R.id.remoteControllerRewindButton)
         timeBar = findViewById(R.id.timeBar)
+        currentPositionTextView = findViewById(R.id.remoteControllerCurrentPositionTextView)
+        durationTextView = findViewById(R.id.remoteControllerDurationTextView)
         initButtonsListener()
         initTimeBarListener()
 
@@ -78,10 +90,15 @@ class RemotePlayerControllerView @JvmOverloads constructor(
     /**region Controls*/
     fun setDuration(duration: Long) {
         timeBar.setDuration(duration)
+        durationTextView.text =
+            StringUtils.getFormattedTime(duration, timeFormatBuilder, timeFormatter)
     }
 
     fun setPosition(position: Long) {
         timeBar.setPosition(position)
+        currentPositionTextView.text =
+            StringUtils.getFormattedTime(position, timeFormatBuilder, timeFormatter)
+
     }
 
     fun setTimeBarPlayedColor(@ColorInt color: Int) {
