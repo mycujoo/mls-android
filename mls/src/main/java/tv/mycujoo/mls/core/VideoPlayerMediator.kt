@@ -50,6 +50,7 @@ import tv.mycujoo.mls.player.PlaybackLocation.REMOTE
 import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
 import tv.mycujoo.mls.utils.StringUtils
 import tv.mycujoo.mls.widgets.MLSPlayerView
+import tv.mycujoo.mls.widgets.PlayerControllerMode
 
 
 class VideoPlayerMediator(
@@ -201,6 +202,7 @@ class VideoPlayerMediator(
                     return
                 }
                 updatePlaybackLocation(REMOTE)
+                switchControllerMode(REMOTE)
                 dataManager.currentEvent?.let {
                     loadRemoteMedia(it)
                 }
@@ -211,6 +213,7 @@ class VideoPlayerMediator(
 
             fun onApplicationDisconnecting(session: CastSession?) {
                 updatePlaybackLocation(LOCAL)
+                switchControllerMode(LOCAL)
                 session?.remoteMediaClient?.let { remoteMediaClient ->
                     player.seekTo(remoteMediaClient.approximateStreamPosition)
                     if (remoteMediaClient.isPlaying) {
@@ -223,6 +226,7 @@ class VideoPlayerMediator(
 
             fun onApplicationDisconnected(session: CastSession?) {
                 updatePlaybackLocation(LOCAL)
+                switchControllerMode(LOCAL)
             }
 
             val castListener = object : ICastListener {
@@ -245,6 +249,13 @@ class VideoPlayerMediator(
                 override fun onDisconnected(session: CastSession?) {
                     onApplicationDisconnected(session)
 
+                }
+
+                override fun onRemoteProgressUpdate(progressMs: Long, durationMs: Long) {
+                    playerView.getRemotePlayerControllerView().setPosition(progressMs)
+                    playerView.getRemotePlayerControllerView().setDuration(durationMs)
+                    player.pause()
+//                    player.seekTo(progressMs)
                 }
             }
 
@@ -613,6 +624,18 @@ class VideoPlayerMediator(
     private fun updatePlaybackLocation(location: PlaybackLocation) {
         playbackLocation = location
     }
+
+    private fun switchControllerMode(playbackLocation: PlaybackLocation) {
+        when (playbackLocation) {
+            LOCAL -> {
+                playerView.switchMode(PlayerControllerMode.EXO_MODE)
+            }
+            REMOTE -> {
+                playerView.switchMode(PlayerControllerMode.REMOTE_CONTROLLER)
+            }
+        }
+    }
+
 
     private fun storeEvent(eventEntity: EventEntity) {
         dataManager.currentEvent = eventEntity
