@@ -8,6 +8,7 @@ import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.ui.TimeBar
 import com.google.android.gms.cast.MediaLoadOptions
+import com.google.android.gms.cast.MediaSeekOptions
 import com.google.android.gms.cast.framework.CastSession
 import com.npaw.youbora.lib6.plugin.Options
 import kotlinx.coroutines.CoroutineScope
@@ -200,7 +201,8 @@ class VideoPlayerMediator(
         fun addRemotePlayerControllerListener() {
             playerView.getRemotePlayerControllerView().listener = object : RemotePlayerControllerListener {
                 override fun onSeekTo(newPosition: Long) {
-                    caster?.getRemoteMediaClient()?.seek(newPosition)
+                    val mediaSeekOptions = MediaSeekOptions.Builder().setPosition(newPosition).build()
+                    caster?.getRemoteMediaClient()?.seek(mediaSeekOptions)
                 }
 
                 override fun onFastForward(amount: Long) {
