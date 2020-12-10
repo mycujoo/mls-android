@@ -51,6 +51,7 @@ import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
 import tv.mycujoo.mls.utils.StringUtils
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import tv.mycujoo.mls.widgets.PlayerControllerMode
+import tv.mycujoo.mls.widgets.RemotePlayerControllerListener
 
 
 class VideoPlayerMediator(
@@ -196,6 +197,21 @@ class VideoPlayerMediator(
         player: IPlayer,
         MLSPlayerView: MLSPlayerView
     ) {
+        fun addRemotePlayerControllerListener() {
+            playerView.getRemotePlayerControllerView().listener = object : RemotePlayerControllerListener {
+                override fun onSeekTo(newPosition: Long) {
+                    caster?.getRemoteMediaClient()?.seek(newPosition)
+                }
+
+                override fun onFastForward(amount: Long) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onRewind(amount: Long) {
+                    TODO("Not yet implemented")
+                }
+            }
+        }
         caster?.let {
             fun onApplicationConnected(castSession: CastSession?) {
                 if (castSession == null) {
@@ -203,6 +219,7 @@ class VideoPlayerMediator(
                 }
                 updatePlaybackLocation(REMOTE)
                 switchControllerMode(REMOTE)
+                addRemotePlayerControllerListener()
                 dataManager.currentEvent?.let {
                     loadRemoteMedia(it)
                 }
