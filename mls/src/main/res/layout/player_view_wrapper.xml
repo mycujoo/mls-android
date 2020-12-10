@@ -13,8 +13,8 @@
         android:layout_height="wrap_content"
         app:controller_layout_id="@layout/main_controls_layout"
         app:fastforward_increment="10000"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:rewind_increment="10000" />
 
@@ -22,6 +22,11 @@
         android:id="@+id/remotePlayerControllerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="@id/exoPlayerView"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/exoPlayerView"
         android:background="@color/black" />
 
     <FrameLayout

@@ -4,8 +4,10 @@ import android.content.Context
 import android.graphics.PorterDuff
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -21,8 +23,10 @@ class RemotePlayerControllerView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
+
     /**region Fields*/
     var listener: RemotePlayerControllerListener? = null
+    private val bufferingProgressBar: ProgressBar
     private val playButtonContainer: FrameLayout
     private val playButton: ImageButton
     private val pauseButton: ImageButton
@@ -44,6 +48,7 @@ class RemotePlayerControllerView @JvmOverloads constructor(
     /**region Initializing*/
     init {
         LayoutInflater.from(context).inflate(R.layout.view_remote_player_controller, this, true)
+        bufferingProgressBar = findViewById(R.id.remoteControllerBufferingProgressBar)
         playButtonContainer = findViewById(R.id.remoteControllerPlayPauseButtonContainerLayout)
         playButton = findViewById(R.id.remoteControllerPlay)
         pauseButton = findViewById(R.id.remoteControllerPause)
@@ -85,9 +90,33 @@ class RemotePlayerControllerView @JvmOverloads constructor(
             }
         })
     }
-    /**endregion */
 
     /**region Controls*/
+    fun setPlayStatus(isPlaying: Boolean, isBuffering: Boolean? = null) {
+        when (isBuffering) {
+            true -> {
+                bufferingProgressBar.visibility = View.VISIBLE
+            }
+            else -> {
+                bufferingProgressBar.visibility = View.GONE
+            }
+        }
+
+        when (isPlaying) {
+            true -> {
+                playButton.visibility = View.GONE
+                pauseButton.visibility = View.VISIBLE
+            }
+            false -> {
+                if (isBuffering == true) {
+                    return
+                }
+                playButton.visibility = View.VISIBLE
+                pauseButton.visibility = View.GONE
+            }
+        }
+    }
+
     fun setDuration(duration: Long) {
         timeBar.setDuration(duration)
         durationTextView.text =

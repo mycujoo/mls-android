@@ -286,8 +286,10 @@ class VideoPlayerMediator(
                 override fun onRemoteProgressUpdate(progressMs: Long, durationMs: Long) {
                     playerView.getRemotePlayerControllerView().setPosition(progressMs)
                     playerView.getRemotePlayerControllerView().setDuration(durationMs)
-                    player.pause()
-//                    player.seekTo(progressMs)
+                }
+
+                override fun onRemotePlayStatusUpdate(isPlaying: Boolean, isBuffering: Boolean) {
+                    playerView.getRemotePlayerControllerView().setPlayStatus(isPlaying, isBuffering)
                 }
             }
 

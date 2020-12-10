@@ -33,7 +33,13 @@ class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
 
     private fun initSessionManagerListener(castListener: ICastListener): SessionManagerListener<CastSession> {
         val progressListener =
-            RemoteMediaClient.ProgressListener { progressMs, durationMs -> castListener.onRemoteProgressUpdate(progressMs, durationMs) }
+            RemoteMediaClient.ProgressListener { progressMs, durationMs ->
+                castListener.onRemoteProgressUpdate(progressMs, durationMs)
+                getRemoteMediaClient()?.let {
+                    castListener.onRemotePlayStatusUpdate(it.isPlaying, it.isBuffering)
+                }
+
+            }
 
         this.castListener = castListener
         return object : SessionManagerListener<CastSession> {
