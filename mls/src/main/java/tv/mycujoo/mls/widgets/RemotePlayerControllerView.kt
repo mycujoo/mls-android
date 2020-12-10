@@ -1,8 +1,11 @@
 package tv.mycujoo.mls.widgets
 
 import android.content.Context
+import android.graphics.PorterDuff
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.widget.FrameLayout
+import android.widget.ImageButton
 import androidx.annotation.ColorInt
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.mediarouter.app.MediaRouteButton
@@ -17,6 +20,13 @@ class RemotePlayerControllerView @JvmOverloads constructor(
 
     var listener: RemotePlayerControllerListener? = null
     private val timeBar: MLSTimeBar
+    private val playButtonContainer: FrameLayout
+    private val playButton: ImageButton
+    private val pauseButton: ImageButton
+    private val fastForwardContainer: FrameLayout
+    private val fastForwardButton: ImageButton
+    private val rewindContainer: FrameLayout
+    private val rewindButton: ImageButton
 
     private val mediaRouteButton: MediaRouteButton
 
@@ -24,12 +34,30 @@ class RemotePlayerControllerView @JvmOverloads constructor(
     /**region Initializing*/
     init {
         LayoutInflater.from(context).inflate(R.layout.view_remote_player_controller, this, true)
+        playButtonContainer = findViewById(R.id.remoteControllerPlayPauseButtonContainerLayout)
+        playButton = findViewById(R.id.remoteControllerPlay)
+        pauseButton = findViewById(R.id.remoteControllerPause)
+        fastForwardContainer = findViewById(R.id.remoteControllerFastForwardButtonContainerLayout)
+        fastForwardButton = findViewById(R.id.remoteControllerFastForwardButton)
+        rewindContainer = findViewById(R.id.remoteControllerRewButtonContainerLayout)
+        rewindButton = findViewById(R.id.remoteControllerRewindButton)
         timeBar = findViewById(R.id.timeBar)
+        initButtonsListener()
         initTimeBarListener()
 
 
         mediaRouteButton = findViewById(R.id.mediaRouteButton)
         CastButtonFactory.setUpMediaRouteButton(context, mediaRouteButton)
+    }
+
+    private fun initButtonsListener() {
+        val fastForward = { listener?.onFastForward(10000L) }
+        fastForwardContainer.setOnClickListener { fastForward.invoke() }
+        fastForwardButton.setOnClickListener { fastForward.invoke() }
+
+        val rewind = { listener?.onSeekTo(-10000L) }
+        rewindContainer.setOnClickListener { rewind.invoke() }
+        rewindButton.setOnClickListener { rewind.invoke() }
     }
 
     private fun initTimeBarListener() {
@@ -58,6 +86,25 @@ class RemotePlayerControllerView @JvmOverloads constructor(
 
     fun setTimeBarPlayedColor(@ColorInt color: Int) {
         timeBar.setPlayedColor(color)
+    }
+
+    fun setPlayerMainButtonsColor(@ColorInt primaryColor: Int) {
+        playButton.setColorFilter(
+            primaryColor,
+            PorterDuff.Mode.SRC_ATOP
+        )
+        pauseButton.setColorFilter(
+            primaryColor,
+            PorterDuff.Mode.SRC_ATOP
+        )
+        fastForwardButton.setColorFilter(
+            primaryColor,
+            PorterDuff.Mode.SRC_ATOP
+        )
+        rewindButton.setColorFilter(
+            primaryColor,
+            PorterDuff.Mode.SRC_ATOP
+        )
     }
 
 

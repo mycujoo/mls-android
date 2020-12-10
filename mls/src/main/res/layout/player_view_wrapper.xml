@@ -21,9 +21,8 @@
     <tv.mycujoo.mls.widgets.RemotePlayerControllerView
         android:id="@+id/remotePlayerControllerView"
         android:layout_width="match_parent"
-        android:visibility="gone"
         android:layout_height="match_parent"
-        android:background="@color/blue" />
+        android:background="@color/black" />
 
     <FrameLayout
         android:id="@+id/eventInfoDialogContainerLayout"

@@ -53,6 +53,7 @@ import tv.mycujoo.mls.utils.StringUtils
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import tv.mycujoo.mls.widgets.PlayerControllerMode
 import tv.mycujoo.mls.widgets.RemotePlayerControllerListener
+import kotlin.math.max
 
 
 class VideoPlayerMediator(
@@ -199,20 +200,32 @@ class VideoPlayerMediator(
         MLSPlayerView: MLSPlayerView
     ) {
         fun addRemotePlayerControllerListener() {
-            playerView.getRemotePlayerControllerView().listener = object : RemotePlayerControllerListener {
-                override fun onSeekTo(newPosition: Long) {
-                    val mediaSeekOptions = MediaSeekOptions.Builder().setPosition(newPosition).build()
-                    caster?.getRemoteMediaClient()?.seek(mediaSeekOptions)
-                }
+            playerView.getRemotePlayerControllerView().listener =
+                object : RemotePlayerControllerListener {
+                    override fun onSeekTo(newPosition: Long) {
+                        val mediaSeekOptions =
+                            MediaSeekOptions.Builder().setPosition(newPosition).build()
+                        caster?.getRemoteMediaClient()?.seek(mediaSeekOptions)
+                    }
 
-                override fun onFastForward(amount: Long) {
-                    TODO("Not yet implemented")
-                }
+                    override fun onFastForward(amount: Long) {
+                        caster?.getRemoteMediaClient()?.let {
+                            val newPosition = it.approximateStreamPosition + amount
+                            val mediaSeekOptions =
+                                MediaSeekOptions.Builder().setPosition(newPosition).build()
+                            it.seek(mediaSeekOptions)
+                        }
+                    }
 
-                override fun onRewind(amount: Long) {
-                    TODO("Not yet implemented")
+                    override fun onRewind(amount: Long) {
+                        caster?.getRemoteMediaClient()?.let {
+                            val newPosition = max(it.approximateStreamPosition + amount, 0L)
+                            val mediaSeekOptions =
+                                MediaSeekOptions.Builder().setPosition(newPosition).build()
+                            it.seek(mediaSeekOptions)
+                        }
+                    }
                 }
-            }
         }
         caster?.let {
             fun onApplicationConnected(castSession: CastSession?) {

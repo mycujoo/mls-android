@@ -290,22 +290,7 @@ class MLSPlayerView @JvmOverloads constructor(
             setTimelineMarkerColor(config)
 
             bufferView.indeterminateTintList = ColorStateList.valueOf(primaryColor)
-            findViewById<ImageButton>(R.id.exo_play).setColorFilter(
-                primaryColor,
-                PorterDuff.Mode.SRC_ATOP
-            )
-            findViewById<ImageButton>(R.id.exo_pause).setColorFilter(
-                primaryColor,
-                PorterDuff.Mode.SRC_ATOP
-            )
-            findViewById<ImageButton>(R.id.exo_rew).setColorFilter(
-                primaryColor,
-                PorterDuff.Mode.SRC_ATOP
-            )
-            findViewById<ImageButton>(R.id.exo_ffwd).setColorFilter(
-                primaryColor,
-                PorterDuff.Mode.SRC_ATOP
-            )
+            setPlayerMainButtonsColor(primaryColor)
 
             playerView.player?.playWhenReady = config.autoPlay
 
@@ -343,6 +328,31 @@ class MLSPlayerView @JvmOverloads constructor(
         } catch (e: Exception) {
             Log.e("PlayerViewWrapper", e.message)
         }
+    }
+
+    /**
+     * Set exo-player & remote-player main buttons [Play, Pause, Fast-Forward & Rewind] color
+     */
+    private fun setPlayerMainButtonsColor(primaryColor: Int) {
+        findViewById<ImageButton>(R.id.exo_play).setColorFilter(
+            primaryColor,
+            PorterDuff.Mode.SRC_ATOP
+        )
+
+        findViewById<ImageButton>(R.id.exo_pause).setColorFilter(
+            primaryColor,
+            PorterDuff.Mode.SRC_ATOP
+        )
+        findViewById<ImageButton>(R.id.exo_rew).setColorFilter(
+            primaryColor,
+            PorterDuff.Mode.SRC_ATOP
+        )
+        findViewById<ImageButton>(R.id.exo_ffwd).setColorFilter(
+            primaryColor,
+            PorterDuff.Mode.SRC_ATOP
+        )
+
+        remotePlayerControllerView.setPlayerMainButtonsColor(primaryColor)
     }
 
     private fun setTimelineMarkerColor(config: VideoPlayerConfig) {
