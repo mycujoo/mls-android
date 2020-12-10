@@ -3,6 +3,7 @@ package tv.mycujoo.mls.widgets
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import androidx.annotation.ColorInt
 import androidx.constraintlayout.widget.ConstraintLayout
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
@@ -27,6 +28,10 @@ class RemotePlayerControllerView @JvmOverloads constructor(
 
     fun setPosition(position: Long) {
         timeBar.setPosition(position)
+    }
+
+    fun setTimeBarPlayedColor(@ColorInt color: Int) {
+        timeBar.setPlayedColor(color)
     }
 
 
