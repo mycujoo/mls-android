@@ -7,4 +7,5 @@ interface ICastListener {
     fun onConnected(session: CastSession?)
     fun onDisconnecting(session: CastSession?)
     fun onDisconnected(session: CastSession?)
+    fun onRemoteProgressUpdate(progressMs: Long, durationMs: Long)
 }
