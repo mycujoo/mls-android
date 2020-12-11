@@ -57,7 +57,7 @@ class MLSPlayerView @JvmOverloads constructor(
     var playerView: PlayerView
     var overlayHost: ConstraintLayout
 
-    private var bufferView: ProgressBar
+    private var bufferingProgressBar: ProgressBar
 
     private var fullScreenButton: ImageButton
     private val remotePlayerControllerView: RemotePlayerControllerView
@@ -99,7 +99,7 @@ class MLSPlayerView @JvmOverloads constructor(
         playerView.findViewById<AspectRatioFrameLayout>(R.id.exo_content_frame).addView(overlayHost)
 
 
-        bufferView = findViewById(R.id.controller_buffering)
+        bufferingProgressBar = findViewById(R.id.controller_buffering)
         playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
 
         findViewById<FrameLayout>(R.id.controller_informationButtonLayout).setOnClickListener {
@@ -275,11 +275,11 @@ class MLSPlayerView @JvmOverloads constructor(
     }
 
     override fun showBuffering() {
-        bufferView.visibility = View.VISIBLE
+        bufferingProgressBar.visibility = View.VISIBLE
     }
 
     override fun hideBuffering() {
-        bufferView.visibility = View.GONE
+        bufferingProgressBar.visibility = View.GONE
     }
 
     /**region Configuration*/
@@ -291,7 +291,7 @@ class MLSPlayerView @JvmOverloads constructor(
             setTimeBarsColor(primaryColor)
             setTimelineMarkerColor(config)
 
-            bufferView.indeterminateTintList = ColorStateList.valueOf(primaryColor)
+            setBufferingProgressBarsColor(primaryColor)
             setPlayerMainButtonsColor(primaryColor)
 
             playerView.player?.playWhenReady = config.autoPlay
@@ -357,12 +357,6 @@ class MLSPlayerView @JvmOverloads constructor(
         remotePlayerControllerView.setPlayerMainButtonsColor(primaryColor)
     }
 
-    private fun setTimelineMarkerColor(config: VideoPlayerConfig) {
-        val timelineMarkerView =
-            findViewById<TimelineMarkerView>(R.id.exo_timelineMarkerView)
-        timelineMarkerView.initialize(config.secondaryColor)
-    }
-
     /**
      * Set exo-player time-bar & remote-player timer-bar played-color
      */
@@ -371,6 +365,20 @@ class MLSPlayerView @JvmOverloads constructor(
         mlsTimeBar.setPlayedColor(primaryColor)
 
         remotePlayerControllerView.setTimeBarPlayedColor(primaryColor)
+    }
+
+    private fun setTimelineMarkerColor(config: VideoPlayerConfig) {
+        val timelineMarkerView =
+            findViewById<TimelineMarkerView>(R.id.exo_timelineMarkerView)
+        timelineMarkerView.initialize(config.secondaryColor)
+    }
+
+    /**
+     * Set exo-player & remote-player buffering progress-bar color
+     */
+    private fun setBufferingProgressBarsColor(primaryColor: Int) {
+        bufferingProgressBar.indeterminateTintList = ColorStateList.valueOf(primaryColor)
+        remotePlayerControllerView.setBufferingProgressBarsColor(primaryColor)
     }
 
     private fun showControlsContainer(show: Boolean) {

@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.widgets
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -139,27 +140,31 @@ class RemotePlayerControllerView @JvmOverloads constructor(
         timeBar.setPlayedColor(color)
     }
 
-    fun setPlayerMainButtonsColor(@ColorInt primaryColor: Int) {
+    fun setPlayerMainButtonsColor(@ColorInt color: Int) {
         playButton.setColorFilter(
-            primaryColor,
+            color,
             PorterDuff.Mode.SRC_ATOP
         )
         pauseButton.setColorFilter(
-            primaryColor,
+            color,
             PorterDuff.Mode.SRC_ATOP
         )
         fastForwardButton.setColorFilter(
-            primaryColor,
+            color,
             PorterDuff.Mode.SRC_ATOP
         )
         rewindButton.setColorFilter(
-            primaryColor,
+            color,
             PorterDuff.Mode.SRC_ATOP
         )
     }
 
     fun setLiveMode(liveState: MLSPlayerView.LiveState) {
         liveBadgeView.setLiveMode(liveState)
+    }
+
+    fun setBufferingProgressBarsColor(@ColorInt color: Int) {
+        bufferingProgressBar.indeterminateTintList = ColorStateList.valueOf(color)
     }
 
 
