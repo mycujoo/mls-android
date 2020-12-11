@@ -45,6 +45,8 @@ import tv.mycujoo.mls.network.socket.ReactorSocket
 import tv.mycujoo.mls.player.IPlayer
 import tv.mycujoo.mls.player.MediaFactory
 import tv.mycujoo.mls.widgets.MLSPlayerView
+import tv.mycujoo.mls.widgets.PlayerControllerMode
+import tv.mycujoo.mls.widgets.RemotePlayerControllerView
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
 
 
@@ -60,6 +62,8 @@ class VideoPlayerMediatorTest {
     @Mock
     private lateinit var playerView: MLSPlayerView
 
+    @Mock
+    private lateinit var remotePlayerControllerView: RemotePlayerControllerView
 
     @Mock
     lateinit var MLSBuilder: MLSBuilder
@@ -167,6 +171,7 @@ class VideoPlayerMediatorTest {
         whenever(MLSBuilder.mlsConfiguration).thenReturn(MLSConfiguration())
         whenever(MLSBuilder.hasAnalytic).thenReturn(true)
 
+        whenever(MLSBuilder.publicKey).thenReturn("SAMPLE_PUBLIC_KEY")
         whenever(MLSBuilder.internalBuilder).thenReturn(internalBuilder)
         whenever(internalBuilder.createYouboraPlugin(any(), any())).thenReturn(youboraPlugin)
         whenever(internalBuilder.createExoPlayerAdapter(any())).thenReturn(exoplayer2Adapter)
@@ -179,6 +184,7 @@ class VideoPlayerMediatorTest {
 
         whenever(playerView.context).thenReturn(activity)
         whenever(playerView.getTimeBar()).thenReturn(timeBar)
+        whenever(playerView.getRemotePlayerControllerView()).thenReturn(remotePlayerControllerView)
 
         whenever(dispatcher.coroutineContext).thenReturn(coroutineTestRule.testDispatcher)
 
@@ -549,14 +555,38 @@ class VideoPlayerMediatorTest {
     }
 
     /**region Cast*/
+
     @Test
-    fun `should load remote media, when connected to remote player`() {
-        videoPlayerMediator.playVideo(getSampleEventEntity("id_0"))
+    fun `should load remote media, when connected to remote player`() = runBlockingTest {
+        val event =
+            getSampleEventEntity(listOf(Stream("id_0", 60000000L, "http://www.google.com", null)))
+        whenever(dataManager.currentEvent).thenReturn(event)
 
         castListener.onConnected(castSession)
 
         verify(caster.getRemoteMediaClient()!!).load(any(), any<MediaLoadOptions>())
     }
+
+    @Test
+    fun `should do nothing, when connected to remote player with null cast-session`() {
+        castListener.onConnected(null)
+
+
+        verify(caster.getRemoteMediaClient()!!, never()).load(any(), any<MediaLoadOptions>())
+        verify(playerView, never()).switchMode(any())
+        verify(player, never()).isPlaying()
+        verify(player, never()).pause()
+    }
+
+
+    @Test
+    fun `should set PlayerView mode to REMOTE, when connected to remote player`() {
+        castListener.onConnected(castSession)
+
+
+        verify(playerView).switchMode(PlayerControllerMode.REMOTE_CONTROLLER)
+    }
+
 
     @Test
     fun `should pause local player, when connected to remote player`() {
@@ -579,7 +609,7 @@ class VideoPlayerMediatorTest {
     }
 
     @Test
-    fun `should update local position, when disconnect from remote player`() {
+    fun `should update local position, when disconnecting from remote player`() {
         whenever(castSession.remoteMediaClient).thenReturn(remoteMediaClient)
         whenever(remoteMediaClient.approximateStreamPosition).thenReturn(33333L)
 
@@ -587,7 +617,6 @@ class VideoPlayerMediatorTest {
 
         verify(player).seekTo(33333L)
     }
-
 
     @Test
     fun `should update local player play status, when disconnect from remote player`() {
@@ -597,6 +626,14 @@ class VideoPlayerMediatorTest {
         castListener.onDisconnecting(castSession)
 
         verify(player).play()
+    }
+
+    @Test
+    fun `should set PlayerView mode to EXO_MODE, when disconnecting from remote player`() {
+        castListener.onDisconnecting(castSession)
+
+
+        verify(playerView).switchMode(PlayerControllerMode.EXO_MODE)
     }
 
 

@@ -15,7 +15,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 import tv.mycujoo.cast.CastContextProvider
 import tv.mycujoo.cast.ICastListener
 import tv.mycujoo.cast.ICaster
@@ -30,13 +29,8 @@ import tv.mycujoo.mls.api.VideoPlayer
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.enum.C
-import tv.mycujoo.mls.enum.C.Companion.CAST_EVENT_ID_KEY
-import tv.mycujoo.mls.enum.C.Companion.CAST_LICENSE_URL_KEY
-import tv.mycujoo.mls.enum.C.Companion.CAST_PROTECTION_SYSTEM_KEY
-import tv.mycujoo.mls.enum.C.Companion.CAST_PSEUDO_USER_ID_KEY
-import tv.mycujoo.mls.enum.C.Companion.CAST_PUBLIC_KEY_KEY
-import tv.mycujoo.mls.enum.C.Companion.DRM_WIDEVINE
 import tv.mycujoo.mls.enum.MessageLevel
+import tv.mycujoo.mls.helper.CustomDataBuilder
 import tv.mycujoo.mls.helper.MediaInfoBuilder
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
@@ -237,6 +231,12 @@ class VideoPlayerMediator(
                     }
                 }
         }
+
+        fun updateRemotePlayerWithLocalPlayerData() {
+            playerView.getRemotePlayerControllerView().setPosition(player.currentPosition())
+            playerView.getRemotePlayerControllerView().setDuration(player.duration())
+        }
+
         caster?.let {
             fun onApplicationConnected(castSession: CastSession?) {
                 if (castSession == null) {
@@ -245,6 +245,7 @@ class VideoPlayerMediator(
                 updatePlaybackLocation(REMOTE)
                 switchControllerMode(REMOTE)
                 addRemotePlayerControllerListener()
+                updateRemotePlayerWithLocalPlayerData()
                 dataManager.currentEvent?.let {
                     loadRemoteMedia(it)
                 }
@@ -651,14 +652,8 @@ class VideoPlayerMediator(
         val widevine = event.streams.first().widevine
 
         caster?.getRemoteMediaClient()?.let {
-            val customData = JSONObject()
-                .put(CAST_EVENT_ID_KEY, event.id)
-                .put(CAST_PUBLIC_KEY_KEY, publicKey)
-                .put(CAST_PSEUDO_USER_ID_KEY, uuid)
-            if (widevine?.licenseUrl != null) {
-                customData.put(CAST_LICENSE_URL_KEY, widevine.licenseUrl)
-                    .put(CAST_PROTECTION_SYSTEM_KEY, DRM_WIDEVINE)
-            }
+            val customData =
+                CustomDataBuilder.build(event.id, publicKey, uuid, widevine)
             val mediaInfo =
                 MediaInfoBuilder.build(fullUrl, event.title, event.thumbnailUrl, customData)
 
