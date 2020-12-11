@@ -9,11 +9,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.ProgressBar
 import androidx.annotation.MainThread
 import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.mediarouter.app.MediaRouteButton
 import androidx.test.espresso.idling.CountingIdlingResource
@@ -37,7 +39,6 @@ import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.TimelineMarkerManager
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.utils.StringUtils.Companion.getFormattedTime
-import tv.mycujoo.mls.widgets.MLSPlayerView.LiveState.*
 import tv.mycujoo.mls.widgets.PlayerControllerMode.EXO_MODE
 import tv.mycujoo.mls.widgets.PlayerControllerMode.REMOTE_CONTROLLER
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
@@ -109,7 +110,7 @@ class MLSPlayerView @JvmOverloads constructor(
         }
 
 
-        val liveBadgeTextView = findViewById<TextView>(R.id.controller_liveBadgeTextView)
+        val liveBadgeTextView = findViewById<LiveBadgeView>(R.id.controller_liveBadgeView)
         liveBadgeTextView.setOnClickListener {
             playerView.player?.seekTo(C.TIME_UNSET)
             it.isEnabled = false
@@ -456,25 +457,7 @@ class MLSPlayerView @JvmOverloads constructor(
     /**endregion */
 
     override fun setLiveMode(liveState: LiveState) {
-        when (liveState) {
-            LIVE_ON_THE_EDGE -> {
-                controller_liveBadgeTextView.visibility = View.VISIBLE
-
-                controller_liveBadgeTextView.background =
-                    ContextCompat.getDrawable(context, R.drawable.bg_live)
-                controller_liveBadgeTextView.isEnabled = false
-            }
-            LIVE_TRAILING -> {
-                controller_liveBadgeTextView.visibility = View.VISIBLE
-
-                controller_liveBadgeTextView.background =
-                    ContextCompat.getDrawable(context, R.drawable.bg_live_gray)
-                controller_liveBadgeTextView.isEnabled = true
-            }
-            VOD -> {
-                controller_liveBadgeTextView.visibility = View.GONE
-            }
-        }
+        controller_liveBadgeView.setLiveMode(liveState)
     }
 
     override fun updateViewersCounter(count: String) {

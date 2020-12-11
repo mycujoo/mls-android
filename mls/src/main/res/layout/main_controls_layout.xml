@@ -245,13 +245,12 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintRight_toRightOf="parent">
 
-                <TextView
-                    android:id="@+id/controller_liveBadgeTextView"
+                <tv.mycujoo.mls.widgets.LiveBadgeView
+                    android:id="@+id/controller_liveBadgeView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginRight="8dp"
-                    android:background="@drawable/bg_live"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
@@ -259,12 +258,11 @@
                     android:paddingTop="2dp"
                     android:paddingRight="4dp"
                     android:paddingBottom="2dp"
-                    android:text="@string/live"
-                    android:textColor="@color/white"
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:visibility="gone"
                     tools:visibility="visible" />
+
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/controller_viewersCountLayout"
