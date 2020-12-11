@@ -9,4 +9,5 @@ interface ICastListener {
     fun onDisconnected(session: CastSession?)
     fun onRemoteProgressUpdate(progressMs: Long, durationMs: Long)
     fun onRemotePlayStatusUpdate(isPlaying: Boolean, isBuffering: Boolean)
+    fun onRemoteLiveStatusUpdate(isLive: Boolean)
 }

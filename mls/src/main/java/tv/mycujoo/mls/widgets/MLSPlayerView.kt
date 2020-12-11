@@ -456,6 +456,9 @@ class MLSPlayerView @JvmOverloads constructor(
 
     /**endregion */
 
+    /**
+     * Set exo-player & remote-player LIVE badge state
+     */
     override fun setLiveMode(liveState: LiveState) {
         controller_liveBadgeView.setLiveMode(liveState)
     }

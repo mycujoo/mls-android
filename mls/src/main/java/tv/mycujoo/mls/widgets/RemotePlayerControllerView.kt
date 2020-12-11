@@ -38,6 +38,7 @@ class RemotePlayerControllerView @JvmOverloads constructor(
     private val currentPositionTextView: TextView
     private val durationTextView: TextView
 
+    private val liveBadgeView: LiveBadgeView
     private val mediaRouteButton: MediaRouteButton
 
     private var timeFormatBuilder = StringBuilder()
@@ -63,6 +64,7 @@ class RemotePlayerControllerView @JvmOverloads constructor(
         initTimeBarListener()
 
 
+        liveBadgeView = findViewById(R.id.remoteControllerLiveBadgeView)
         mediaRouteButton = findViewById(R.id.mediaRouteButton)
         CastButtonFactory.setUpMediaRouteButton(context, mediaRouteButton)
     }
@@ -151,6 +153,10 @@ class RemotePlayerControllerView @JvmOverloads constructor(
             primaryColor,
             PorterDuff.Mode.SRC_ATOP
         )
+    }
+
+    fun setLiveMode(liveState: MLSPlayerView.LiveState) {
+        liveBadgeView.setLiveMode(liveState)
     }
 
 

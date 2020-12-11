@@ -51,6 +51,8 @@ import tv.mycujoo.mls.player.PlaybackLocation.REMOTE
 import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
 import tv.mycujoo.mls.utils.StringUtils
 import tv.mycujoo.mls.widgets.MLSPlayerView
+import tv.mycujoo.mls.widgets.MLSPlayerView.LiveState.LIVE_ON_THE_EDGE
+import tv.mycujoo.mls.widgets.MLSPlayerView.LiveState.VOD
 import tv.mycujoo.mls.widgets.PlayerControllerMode
 import tv.mycujoo.mls.widgets.RemotePlayerControllerListener
 import kotlin.math.max
@@ -290,6 +292,11 @@ class VideoPlayerMediator(
 
                 override fun onRemotePlayStatusUpdate(isPlaying: Boolean, isBuffering: Boolean) {
                     playerView.getRemotePlayerControllerView().setPlayStatus(isPlaying, isBuffering)
+                }
+
+                override fun onRemoteLiveStatusUpdate(isLive: Boolean) {
+                    playerView.getRemotePlayerControllerView()
+                        .setLiveMode(if (isLive) LIVE_ON_THE_EDGE else VOD)
                 }
             }
 
@@ -534,14 +541,14 @@ class VideoPlayerMediator(
         if (player.isLive()) {
             isLive = true
             if (player.currentPosition() + 20000L >= player.duration()) {
-                playerView.setLiveMode(MLSPlayerView.LiveState.LIVE_ON_THE_EDGE)
+                playerView.setLiveMode(LIVE_ON_THE_EDGE)
             } else {
                 playerView.setLiveMode(MLSPlayerView.LiveState.LIVE_TRAILING)
             }
         } else {
             // VOD
             isLive = false
-            playerView.setLiveMode(MLSPlayerView.LiveState.VOD)
+            playerView.setLiveMode(VOD)
         }
 
     }

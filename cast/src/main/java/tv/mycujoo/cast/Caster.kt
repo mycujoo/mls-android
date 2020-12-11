@@ -37,6 +37,7 @@ class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
                 castListener.onRemoteProgressUpdate(progressMs, durationMs)
                 getRemoteMediaClient()?.let {
                     castListener.onRemotePlayStatusUpdate(it.isPlaying, it.isBuffering)
+                    castListener.onRemoteLiveStatusUpdate(it.isLiveStream)
                 }
 
             }

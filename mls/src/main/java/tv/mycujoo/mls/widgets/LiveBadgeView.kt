@@ -13,6 +13,7 @@ class LiveBadgeView @JvmOverloads constructor(
 ) : AppCompatTextView(context, attrs, defStyleAttr) {
 
     init {
+        text = context.getString(R.string.live)
         background = ContextCompat.getDrawable(context, R.drawable.bg_live)
         setTextColor(ContextCompat.getColor(context, R.color.white))
     }
