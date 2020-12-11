@@ -70,6 +70,9 @@ class RemotePlayerControllerView @JvmOverloads constructor(
     }
 
     private fun initButtonsListener() {
+        playButton.setOnClickListener { listener?.onPlay() }
+        pauseButton.setOnClickListener { listener?.onPause() }
+
         val fastForward = { listener?.onFastForward(10000L) }
         fastForwardContainer.setOnClickListener { fastForward.invoke() }
         fastForwardButton.setOnClickListener { fastForward.invoke() }

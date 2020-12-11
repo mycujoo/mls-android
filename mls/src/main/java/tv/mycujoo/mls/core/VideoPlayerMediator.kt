@@ -204,6 +204,14 @@ class VideoPlayerMediator(
         fun addRemotePlayerControllerListener() {
             playerView.getRemotePlayerControllerView().listener =
                 object : RemotePlayerControllerListener {
+                    override fun onPlay() {
+                        caster?.getRemoteMediaClient()?.play()
+                    }
+
+                    override fun onPause() {
+                        caster?.getRemoteMediaClient()?.pause()
+                    }
+
                     override fun onSeekTo(newPosition: Long) {
                         val mediaSeekOptions =
                             MediaSeekOptions.Builder().setPosition(newPosition).build()

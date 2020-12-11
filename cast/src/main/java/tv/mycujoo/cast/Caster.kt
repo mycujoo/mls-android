@@ -44,6 +44,7 @@ class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
 
         this.castListener = castListener
         return object : SessionManagerListener<CastSession> {
+            private val UPDATE_INTERVAL: Long = 500L
             override fun onSessionStarting(session: CastSession?) {
                 castSession = session
             }
@@ -51,7 +52,10 @@ class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
             override fun onSessionStarted(session: CastSession?, sessionId: String?) {
                 castSession = session
                 castListener.onConnected(session)
-                castSession?.remoteMediaClient?.addProgressListener(progressListener, 1000L)
+                castSession?.remoteMediaClient?.addProgressListener(
+                    progressListener,
+                    UPDATE_INTERVAL
+                )
             }
 
             override fun onSessionStartFailed(session: CastSession?, error: Int) {
