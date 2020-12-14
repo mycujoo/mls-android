@@ -130,9 +130,6 @@ class MLSPlayerView @JvmOverloads constructor(
         updateFullscreenButtonImage()
 
         remotePlayerControllerView = findViewById(R.id.remotePlayerControllerView)
-
-        setCastButtonAlwaysVisible()
-
     }
 
     fun prepare(
@@ -234,11 +231,6 @@ class MLSPlayerView @JvmOverloads constructor(
         }
     }
 
-    private fun setCastButtonAlwaysVisible() {
-        findViewById<MediaRouteButton>(R.id.controller_mediaRouteButton).setAlwaysVisible(true)
-    }
-
-
     private fun removeFullscreenButton() {
         findViewById<ImageButton>(R.id.controller_fullscreenImageButton).visibility = View.GONE
     }
@@ -272,6 +264,17 @@ class MLSPlayerView @JvmOverloads constructor(
 
             }
         }
+    }
+
+    override fun setCastButtonVisibility(showButton: Boolean) {
+        if (showButton) {
+            findViewById<MediaRouteButton>(R.id.controller_mediaRouteButton).visibility =
+                View.VISIBLE
+        } else {
+            findViewById<MediaRouteButton>(R.id.controller_mediaRouteButton).visibility = View.GONE
+        }
+
+        remotePlayerControllerView.setCastButtonVisibility(showButton)
     }
 
     override fun showBuffering() {

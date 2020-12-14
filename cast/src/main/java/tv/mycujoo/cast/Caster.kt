@@ -1,8 +1,10 @@
 package tv.mycujoo.cast
 
+import android.net.wifi.p2p.WifiP2pDevice.CONNECTED
 import android.view.ViewStub
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastSession
+import com.google.android.gms.cast.framework.CastState.*
 import com.google.android.gms.cast.framework.SessionManagerListener
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 
@@ -29,6 +31,22 @@ class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
         castContext = castProvider.getCastContext()
         castSession = castContext.sessionManager.currentCastSession
         sessionManagerListener = initSessionManagerListener(castListener)
+
+        castContext.addCastStateListener { state ->
+            when (state) {
+                NO_DEVICES_AVAILABLE -> {
+                    castListener.onCastStateUpdated(false)
+                }
+                NOT_CONNECTED,
+                CONNECTING,
+                CONNECTED -> {
+                    castListener.onCastStateUpdated(true)
+                }
+                else -> {
+                    castListener.onCastStateUpdated(false)
+                }
+            }
+        }
     }
 
     private fun initSessionManagerListener(castListener: ICastListener): SessionManagerListener<CastSession> {

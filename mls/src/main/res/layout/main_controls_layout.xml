@@ -333,8 +333,7 @@
                     android:id="@+id/controller_castImageButtonContainer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:background="@color/exo_white">
+                    android:layout_marginEnd="8dp">
 
                     <androidx.mediarouter.app.MediaRouteButton
                         android:id="@+id/controller_mediaRouteButton"
@@ -343,7 +342,7 @@
                         android:layout_gravity="center"
                         android:scaleType="center"
                         android:src="@drawable/ic_cast_24"
-                        android:visibility="visible" />
+                        android:visibility="gone" />
                 </FrameLayout>
 
             </LinearLayout>

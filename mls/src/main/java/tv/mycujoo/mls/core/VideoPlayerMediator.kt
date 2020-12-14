@@ -307,6 +307,10 @@ class VideoPlayerMediator(
                     playerView.getRemotePlayerControllerView()
                         .setLiveMode(if (isLive) LIVE_ON_THE_EDGE else VOD)
                 }
+
+                override fun onCastStateUpdated(showButton: Boolean) {
+                    playerView.setCastButtonVisibility(showButton)
+                }
             }
 
             it.initialize(CastContextProvider(MLSPlayerView.context), castListener)

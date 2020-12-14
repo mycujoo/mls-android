@@ -167,6 +167,14 @@ class RemotePlayerControllerView @JvmOverloads constructor(
         bufferingProgressBar.indeterminateTintList = ColorStateList.valueOf(color)
     }
 
+    fun setCastButtonVisibility(showButton: Boolean) {
+        if (showButton) {
+            mediaRouteButton.visibility = View.VISIBLE
+        } else {
+            mediaRouteButton.visibility = View.GONE
+        }
+    }
+
 
     /**endregion */
 }
