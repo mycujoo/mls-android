@@ -9,7 +9,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import kotlinx.android.synthetic.main.activity_main.*
-import tv.mycujoo.cast.Caster
+import tv.mycujoo.mls.caster.Caster
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.EventStatus
 import tv.mycujoo.domain.entity.OrderByEventsParam
@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
 
         MLS =
             MLSBuilder()
-                .publicKey("YOUR_PUBLIC_KEY_HERE")
+                .publicKey("3HFCBP4EQJME2EH8H0SBH9RCST0IR269")
                 .withActivity(this)
                 .setPlayerEventsListener(playerEventsListener)
                 .setUIEventListener(uiEventListener)
@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
 
 
         mainActivityPlayButton.setOnClickListener {
-            MLS.getVideoPlayer().playVideo("EVENT_ID_HERE")
+            MLS.getVideoPlayer().playVideo("1i0dFTpeKi0o5hHv0s3dVLQ8jON")
         }
         mainActivityPlayButton2.setOnClickListener {
             MLS.getDataProvider().fetchEvents(
@@ -104,6 +104,7 @@ class MainActivity : AppCompatActivity() {
                 }
             )
         }
+
 
     }
 

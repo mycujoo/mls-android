@@ -50,7 +50,7 @@ dependencies {
 
 
     implementation project(":mls")
-    implementation project(":cast")
+    implementation project(':caster')
     implementation "androidx.recyclerview:recyclerview:1.1.0"
 
 

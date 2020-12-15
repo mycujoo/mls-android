@@ -128,7 +128,7 @@ dependencies {
     implementation 'joda-time:joda-time:2.10.6'
     testImplementation 'joda-time:joda-time:2.10.6'
 
-    implementation project(":cast")
+    implementation project(":caster")
 
 
     //TV

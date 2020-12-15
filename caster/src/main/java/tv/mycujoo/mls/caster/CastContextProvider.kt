@@ -1,4 +1,4 @@
-package tv.mycujoo.cast
+package tv.mycujoo.mls.caster
 
 import android.content.Context
 import com.google.android.gms.cast.framework.CastContext

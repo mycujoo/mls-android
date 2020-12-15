@@ -1,4 +1,4 @@
-package tv.mycujoo.cast
+package tv.mycujoo.mls.caster
 
 import android.net.wifi.p2p.WifiP2pDevice.CONNECTED
 import android.view.ViewStub

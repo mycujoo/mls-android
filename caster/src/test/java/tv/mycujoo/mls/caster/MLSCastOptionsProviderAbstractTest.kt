@@ -1,4 +1,4 @@
-package tv.mycujoo.cast
+package tv.mycujoo.mls.caster
 
 import org.junit.Before
 

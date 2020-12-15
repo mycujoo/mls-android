@@ -24,8 +24,8 @@ import org.junit.*
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.invocation.InvocationOnMock
-import tv.mycujoo.cast.Caster
-import tv.mycujoo.cast.ICastListener
+import tv.mycujoo.mls.caster.Caster
+import tv.mycujoo.mls.caster.ICastListener
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.mls.CoroutineTestRule
@@ -149,7 +149,7 @@ class VideoPlayerMediatorTest {
 
     @Mock
     lateinit var caster: Caster
-    lateinit var castListener: ICastListener
+    lateinit var castListener: tv.mycujoo.mls.caster.ICastListener
 
 
     @Before
@@ -214,8 +214,8 @@ class VideoPlayerMediatorTest {
     }
 
     private fun storeCastListener(invocationOnMock: InvocationOnMock) {
-        if (invocationOnMock.arguments[1] is ICastListener) {
-            castListener = invocationOnMock.arguments[1] as ICastListener
+        if (invocationOnMock.arguments[1] is tv.mycujoo.mls.caster.ICastListener) {
+            castListener = invocationOnMock.arguments[1] as tv.mycujoo.mls.caster.ICastListener
         }
     }
 

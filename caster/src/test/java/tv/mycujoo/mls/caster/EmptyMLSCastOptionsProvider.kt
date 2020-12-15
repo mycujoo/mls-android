@@ -1,3 +1,3 @@
-package tv.mycujoo.cast
+package tv.mycujoo.mls.caster
 
 class EmptyMLSCastOptionsProvider : MLSCastOptionsProviderAbstract()

@@ -15,9 +15,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import tv.mycujoo.cast.CastContextProvider
-import tv.mycujoo.cast.ICastListener
-import tv.mycujoo.cast.ICaster
+import tv.mycujoo.mls.caster.ICastListener
+import tv.mycujoo.mls.caster.ICaster
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.Stream
@@ -26,6 +25,7 @@ import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.VideoPlayer
+import tv.mycujoo.mls.caster.CastContextProvider
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.enum.C
@@ -272,7 +272,7 @@ class VideoPlayerMediator(
                 switchControllerMode(LOCAL)
             }
 
-            val castListener = object : ICastListener {
+            val castListener = object : tv.mycujoo.mls.caster.ICastListener {
                 override fun onPlaybackLocationUpdated(isLocal: Boolean) {
                     if (isLocal) {
                         updatePlaybackLocation(LOCAL)
