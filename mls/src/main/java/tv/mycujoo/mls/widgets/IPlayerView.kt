@@ -23,4 +23,8 @@ interface IPlayerView {
 
     fun showBuffering()
     fun hideBuffering()
+
+    fun getRemotePlayerControllerView() : RemotePlayerControllerView
+    fun switchMode(mode: PlayerControllerMode)
+    fun setCastButtonVisibility(showButton: Boolean)
 }

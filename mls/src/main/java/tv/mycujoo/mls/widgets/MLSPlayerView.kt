@@ -9,17 +9,21 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.ProgressBar
 import androidx.annotation.MainThread
 import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import androidx.core.view.children
+import androidx.mediarouter.app.MediaRouteButton
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.PlayerView
+import com.google.android.gms.cast.framework.CastButtonFactory
 import kotlinx.android.synthetic.main.dialog_event_info_pre_event_layout.view.*
 import kotlinx.android.synthetic.main.dialog_event_info_started_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
@@ -34,7 +38,9 @@ import tv.mycujoo.mls.helper.DateTimeHelper
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.TimelineMarkerManager
 import tv.mycujoo.mls.manager.contracts.IViewHandler
-import tv.mycujoo.mls.widgets.MLSPlayerView.LiveState.*
+import tv.mycujoo.mls.utils.StringUtils.Companion.getFormattedTime
+import tv.mycujoo.mls.widgets.PlayerControllerMode.EXO_MODE
+import tv.mycujoo.mls.widgets.PlayerControllerMode.REMOTE_CONTROLLER
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterest
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterestType
@@ -51,9 +57,10 @@ class MLSPlayerView @JvmOverloads constructor(
     var playerView: PlayerView
     var overlayHost: ConstraintLayout
 
-    private var bufferView: ProgressBar
+    private var bufferingProgressBar: ProgressBar
 
     private var fullScreenButton: ImageButton
+    private val remotePlayerControllerView: RemotePlayerControllerView
     /**endregion */
 
     /**region Fields*/
@@ -92,7 +99,7 @@ class MLSPlayerView @JvmOverloads constructor(
         playerView.findViewById<AspectRatioFrameLayout>(R.id.exo_content_frame).addView(overlayHost)
 
 
-        bufferView = findViewById(R.id.controller_buffering)
+        bufferingProgressBar = findViewById(R.id.controller_buffering)
         playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
 
         findViewById<FrameLayout>(R.id.controller_informationButtonLayout).setOnClickListener {
@@ -103,7 +110,7 @@ class MLSPlayerView @JvmOverloads constructor(
         }
 
 
-        val liveBadgeTextView = findViewById<TextView>(R.id.controller_liveBadgeTextView)
+        val liveBadgeTextView = findViewById<LiveBadgeView>(R.id.controller_liveBadgeView)
         liveBadgeTextView.setOnClickListener {
             playerView.player?.seekTo(C.TIME_UNSET)
             it.isEnabled = false
@@ -120,9 +127,9 @@ class MLSPlayerView @JvmOverloads constructor(
                 uiEventListener.onFullScreenButtonClicked(isFullScreen)
             }
         }
-
         updateFullscreenButtonImage()
 
+        remotePlayerControllerView = findViewById(R.id.remotePlayerControllerView)
     }
 
     fun prepare(
@@ -133,6 +140,9 @@ class MLSPlayerView @JvmOverloads constructor(
         this.overlayViewHelper = overlayViewHelper
         this.viewHandler = viewHandler
         initMlsTimeBar(timelineMarkers)
+
+        val mediaRouteButton = findViewById<MediaRouteButton>(R.id.controller_mediaRouteButton)
+        CastButtonFactory.setUpMediaRouteButton(context, mediaRouteButton)
     }
 
     private fun initAttributes(attrs: AttributeSet?, context: Context) {
@@ -238,13 +248,41 @@ class MLSPlayerView @JvmOverloads constructor(
         )
     }
 
+    override fun getRemotePlayerControllerView(): RemotePlayerControllerView {
+        return findViewById(R.id.remotePlayerControllerView)
+    }
+
+    override fun switchMode(mode: PlayerControllerMode) {
+        when (mode) {
+            EXO_MODE -> {
+                playerView.visibility = View.VISIBLE
+                remotePlayerControllerView.visibility = View.GONE
+            }
+            REMOTE_CONTROLLER -> {
+                playerView.visibility = View.GONE
+                remotePlayerControllerView.visibility = View.VISIBLE
+
+            }
+        }
+    }
+
+    override fun setCastButtonVisibility(showButton: Boolean) {
+        if (showButton) {
+            findViewById<MediaRouteButton>(R.id.controller_mediaRouteButton).visibility =
+                View.VISIBLE
+        } else {
+            findViewById<MediaRouteButton>(R.id.controller_mediaRouteButton).visibility = View.GONE
+        }
+
+        remotePlayerControllerView.setCastButtonVisibility(showButton)
+    }
 
     override fun showBuffering() {
-        bufferView.visibility = View.VISIBLE
+        bufferingProgressBar.visibility = View.VISIBLE
     }
 
     override fun hideBuffering() {
-        bufferView.visibility = View.GONE
+        bufferingProgressBar.visibility = View.GONE
     }
 
     /**region Configuration*/
@@ -253,29 +291,11 @@ class MLSPlayerView @JvmOverloads constructor(
             val primaryColor = Color.parseColor(config.primaryColor)
             val secondaryColor = Color.parseColor(config.secondaryColor)
 
-            val mlsTimeBar = findViewById<MLSTimeBar>(R.id.exo_progress)
-            mlsTimeBar.setPlayedColor(primaryColor)
-            val timelineMarkerView =
-                findViewById<TimelineMarkerView>(R.id.exo_timelineMarkerView)
-            timelineMarkerView.initialize(config.secondaryColor)
+            setTimeBarsColor(primaryColor)
+            setTimelineMarkerColor(config)
 
-            bufferView.indeterminateTintList = ColorStateList.valueOf(primaryColor)
-            findViewById<ImageButton>(R.id.exo_play).setColorFilter(
-                primaryColor,
-                PorterDuff.Mode.SRC_ATOP
-            )
-            findViewById<ImageButton>(R.id.exo_pause).setColorFilter(
-                primaryColor,
-                PorterDuff.Mode.SRC_ATOP
-            )
-            findViewById<ImageButton>(R.id.exo_rew).setColorFilter(
-                primaryColor,
-                PorterDuff.Mode.SRC_ATOP
-            )
-            findViewById<ImageButton>(R.id.exo_ffwd).setColorFilter(
-                primaryColor,
-                PorterDuff.Mode.SRC_ATOP
-            )
+            setBufferingProgressBarsColor(primaryColor)
+            setPlayerMainButtonsColor(primaryColor)
 
             playerView.player?.playWhenReady = config.autoPlay
 
@@ -283,6 +303,7 @@ class MLSPlayerView @JvmOverloads constructor(
             showBackForwardsButtons(config.showBackForwardsButtons)
             showSeekBar(config.showSeekBar)
             showFullScreenButton(config.showFullScreenButton)
+            showCastButton(config.showCastButton)
             showTimers(config.showTimers)
 
 
@@ -314,6 +335,55 @@ class MLSPlayerView @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Set exo-player & remote-player main buttons [Play, Pause, Fast-Forward & Rewind] color
+     */
+    private fun setPlayerMainButtonsColor(primaryColor: Int) {
+        findViewById<ImageButton>(R.id.exo_play).setColorFilter(
+            primaryColor,
+            PorterDuff.Mode.SRC_ATOP
+        )
+
+        findViewById<ImageButton>(R.id.exo_pause).setColorFilter(
+            primaryColor,
+            PorterDuff.Mode.SRC_ATOP
+        )
+        findViewById<ImageButton>(R.id.exo_rew).setColorFilter(
+            primaryColor,
+            PorterDuff.Mode.SRC_ATOP
+        )
+        findViewById<ImageButton>(R.id.exo_ffwd).setColorFilter(
+            primaryColor,
+            PorterDuff.Mode.SRC_ATOP
+        )
+
+        remotePlayerControllerView.setPlayerMainButtonsColor(primaryColor)
+    }
+
+    /**
+     * Set exo-player time-bar & remote-player timer-bar played-color
+     */
+    private fun setTimeBarsColor(primaryColor: Int) {
+        val mlsTimeBar = findViewById<MLSTimeBar>(R.id.exo_progress)
+        mlsTimeBar.setPlayedColor(primaryColor)
+
+        remotePlayerControllerView.setTimeBarPlayedColor(primaryColor)
+    }
+
+    private fun setTimelineMarkerColor(config: VideoPlayerConfig) {
+        val timelineMarkerView =
+            findViewById<TimelineMarkerView>(R.id.exo_timelineMarkerView)
+        timelineMarkerView.initialize(config.secondaryColor)
+    }
+
+    /**
+     * Set exo-player & remote-player buffering progress-bar color
+     */
+    private fun setBufferingProgressBarsColor(primaryColor: Int) {
+        bufferingProgressBar.indeterminateTintList = ColorStateList.valueOf(primaryColor)
+        remotePlayerControllerView.setBufferingProgressBarsColor(primaryColor)
+    }
+
     private fun showControlsContainer(show: Boolean) {
         if (show) {
             findViewById<ConstraintLayout>(R.id.controlsLayoutContainer).visibility =
@@ -341,6 +411,16 @@ class MLSPlayerView @JvmOverloads constructor(
                 VISIBLE
         } else {
             findViewById<FrameLayout>(R.id.controller_fullscreenImageButtonContainer).visibility =
+                View.GONE
+        }
+    }
+
+    private fun showCastButton(showCastButton: Boolean) {
+        if (showCastButton) {
+            findViewById<FrameLayout>(R.id.controller_castImageButtonContainer).visibility =
+                VISIBLE
+        } else {
+            findViewById<FrameLayout>(R.id.controller_castImageButtonContainer).visibility =
                 View.GONE
         }
     }
@@ -387,26 +467,11 @@ class MLSPlayerView @JvmOverloads constructor(
 
     /**endregion */
 
+    /**
+     * Set exo-player & remote-player LIVE badge state
+     */
     override fun setLiveMode(liveState: LiveState) {
-        when (liveState) {
-            LIVE_ON_THE_EDGE -> {
-                controller_liveBadgeTextView.visibility = View.VISIBLE
-
-                controller_liveBadgeTextView.background =
-                    ContextCompat.getDrawable(context, R.drawable.bg_live)
-                controller_liveBadgeTextView.isEnabled = false
-            }
-            LIVE_TRAILING -> {
-                controller_liveBadgeTextView.visibility = View.VISIBLE
-
-                controller_liveBadgeTextView.background =
-                    ContextCompat.getDrawable(context, R.drawable.bg_live_gray)
-                controller_liveBadgeTextView.isEnabled = true
-            }
-            VOD -> {
-                controller_liveBadgeTextView.visibility = View.GONE
-            }
-        }
+        controller_liveBadgeView.setLiveMode(liveState)
     }
 
     override fun updateViewersCounter(count: String) {
@@ -426,9 +491,9 @@ class MLSPlayerView @JvmOverloads constructor(
         if (isScrubbing) {
             return
         }
-        positionTextView.text = getStringForTime(time)
+        positionTextView.text = getFormattedTime(time, timeFormatBuilder, timeFormatter)
 
-        durationTextView.text = getStringForTime(duration)
+        durationTextView.text = getFormattedTime(duration, timeFormatBuilder, timeFormatter)
     }
 
     fun scrubStopAt(position: Long) {
@@ -442,33 +507,10 @@ class MLSPlayerView @JvmOverloads constructor(
     }
 
     fun scrubbedTo(position: Long) {
-        positionTextView.text = getStringForTime(position)
+        positionTextView.text = getFormattedTime(position, timeFormatBuilder, timeFormatter)
     }
     /**endregion */
 
-    /**region Private functions*/
-    /**
-     * Returns the specified millisecond time formatted as a string.
-     *
-     * @param timeMs The time to format as a string, in milliseconds.
-     * @return The time formatted as a string.
-     */
-    private fun getStringForTime(
-        timeMs: Long
-    ): String? {
-        var timeMs = timeMs
-        if (timeMs == C.TIME_UNSET) {
-            timeMs = 0
-        }
-        val totalSeconds = timeMs / 1000
-        val seconds = totalSeconds % 60
-        val minutes = totalSeconds / 60 % 60
-        val hours = totalSeconds / 3600
-        this.timeFormatBuilder.setLength(0)
-        return if (hours > 0) timeFormatter.format("%d:%02d:%02d", hours, minutes, seconds)
-            .toString() else timeFormatter.format("%02d:%02d", minutes, seconds).toString()
-    }
-    /**endregion */
 
     /**region New Annotation structure*/
     override fun continueOverlayAnimations() {
@@ -621,6 +663,7 @@ class MLSPlayerView @JvmOverloads constructor(
             }
 
     }
+
     fun onOverlayRemovalWithNoAnimation(overlayEntity: HideOverlayActionEntity) {
         overlayHost.children.filter { it.tag == overlayEntity.id }
             .forEach {

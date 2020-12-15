@@ -8,11 +8,13 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
+import tv.mycujoo.mls.enum.C.Companion.DRM_WIDEVINE
 
 class Player : IPlayer {
 
     private var exoPlayer: SimpleExoPlayer? = null
-    private lateinit var mediaFactory: HlsMediaSource.Factory
+    private lateinit var mediaFactory: MediaFactory
+    private lateinit var handler: Handler
     private lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
 
 
@@ -28,12 +30,14 @@ class Player : IPlayer {
     private var licenseUrl: Uri? = null
 
     override fun create(
-        mediaFactory: HlsMediaSource.Factory,
+        mediaFactory: MediaFactory,
         exoPlayer: SimpleExoPlayer,
+        handler: Handler,
         mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
     ) {
         this.mediaFactory = mediaFactory
         this.exoPlayer = exoPlayer
+        this.handler = handler
         this.mediaOnLoadCompletedListener = mediaOnLoadCompletedListener
     }
 
@@ -120,11 +124,9 @@ class Player : IPlayer {
 
 
     override fun play(uriString: String, dvrWindowSize: Long, autoPlay: Boolean) {
-        this.uri = Uri.parse(uriString)
         this.dvrWindowSize = dvrWindowSize
-        val mediaItem = MediaItem.Builder().setUri(uri).build()
+        val mediaItem = mediaFactory.createMediaItem(uriString)
         play(mediaItem, autoPlay)
-
     }
 
     override fun play(
@@ -138,7 +140,7 @@ class Player : IPlayer {
         this.licenseUrl = Uri.parse(licenseUrl)
 
         val mediaItem = MediaItem.Builder()
-            .setDrmUuid(Util.getDrmUuid("widevine"))
+            .setDrmUuid(Util.getDrmUuid(DRM_WIDEVINE))
             .setDrmLicenseUri(licenseUrl)
             .setUri(uriString)
             .build()
@@ -164,9 +166,7 @@ class Player : IPlayer {
             }
         } else {
             exoPlayer?.let {
-                val handler = Handler()
-
-                val hlsMediaSource = mediaFactory.createMediaSource(mediaItem)
+                val hlsMediaSource = mediaFactory.createHlsMediaSource(mediaItem)
                 hlsMediaSource.addEventListener(handler, mediaOnLoadCompletedListener)
                 it.setMediaSource(hlsMediaSource, true)
                 it.prepare()
@@ -174,6 +174,18 @@ class Player : IPlayer {
             }
         }
 
+    }
+
+    override fun play() {
+        exoPlayer?.let {
+            it.playWhenReady = true
+        }
+    }
+
+    override fun pause() {
+        exoPlayer?.let {
+            it.playWhenReady = false
+        }
     }
 
     override fun loadLastVideo() {

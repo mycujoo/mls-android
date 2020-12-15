@@ -30,7 +30,6 @@ import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.manager.ViewHandler
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import tv.mycujoo.mls.widgets.ScaffoldView
-import tv.mycujoo.sampleSvgString
 
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi

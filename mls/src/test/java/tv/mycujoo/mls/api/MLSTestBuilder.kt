@@ -7,7 +7,7 @@ class MLSTestBuilder : MLSBuilder() {
         internalBuilder.initialize()
 
         val mls = MLS(this)
-        mls.initialize(internalBuilder)
+        mls.initializeComponent(internalBuilder)
         return mls
     }
 

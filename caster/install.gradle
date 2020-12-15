@@ -1,0 +1,51 @@
+apply plugin: 'com.github.dcendents.android-maven'
+
+group = 'tv.mycujoo.mls-caster' // CREATE A GROUP ID FOR LIBRARY
+
+install {
+    repositories.mavenInstaller {
+
+        pom {
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+                configurations.implementation.allDependencies.each { dependency ->
+                    if (dependency.group != null) {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', dependency.group)
+                        dependencyNode.appendNode('artifactId', dependency.name)
+                        dependencyNode.appendNode('version', dependency.version)
+                    }
+                }
+            }
+            project {
+                packaging 'aar'
+                groupId 'tv.mycujoo.mls-caster' // CREATE A GROUP ID FOR LIBRARY
+                artifactId 'caster' // THE NAME OF MODULE
+
+                name 'caster' // LIBRARY NAME
+                description 'MLS Android SDK' // LIBRARY DESCRIPTION
+                url 'https://github.com/mycujoo/mls-caster' // SITE
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'sherviiin' // USER ID
+                        name 'Shervin Shoorei' //USER NAME
+                        email 'shervinox@gmail.com' //USER EMAIL
+                    }
+                }
+                scm {
+                    connection 'https://github.com/mycujoo/mls-caster.git' // GIT REPO
+                    developerConnection 'https://github.com/mycujoo/mls-caster.git' // GIT REPO
+                    url 'https://github.com/mycujoo/mls-caster' // WEBSITE
+
+                }
+            }
+        }
+    }
+}

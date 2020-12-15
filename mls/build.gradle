@@ -59,6 +59,7 @@ android {
     testOptions {
         unitTests {
             includeAndroidResources = true
+            unitTests.returnDefaultValues = true
         }
     }
 }
@@ -78,7 +79,7 @@ dependencies {
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testImplementation "org.mockito:mockito-core:3.0.0"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
-//    androidTestImplementation "org.mockito:mockito-core:3.0.0"
+    testImplementation 'org.json:json:20180813'
     androidTestImplementation 'org.mockito:mockito-android:2.7.15'
     androidTestImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
@@ -126,6 +127,10 @@ dependencies {
 
     implementation 'joda-time:joda-time:2.10.6'
     testImplementation 'joda-time:joda-time:2.10.6'
+
+    implementation 'androidx.mediarouter:mediarouter:1.2.0'
+    implementation 'com.google.android.gms:play-services-cast-framework:19.0.0'
+
 
     //TV
     api "androidx.leanback:leanback-preference:1.0.0"

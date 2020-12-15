@@ -5,6 +5,10 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player.*
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
+import com.google.android.gms.cast.MediaLoadOptions
+import com.google.android.gms.cast.framework.CastContext
+import com.google.android.gms.cast.framework.CastSession
+import com.google.android.gms.cast.framework.SessionManager
 import com.nhaarman.mockitokotlin2.*
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Plugin
@@ -26,6 +30,7 @@ import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.MLSConfiguration
 import tv.mycujoo.mls.api.defaultVideoPlayerConfig
+import tv.mycujoo.mls.caster.ICaster
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.manager.Logger
@@ -36,9 +41,10 @@ import tv.mycujoo.mls.network.socket.MainWebSocketListener
 import tv.mycujoo.mls.network.socket.ReactorListener
 import tv.mycujoo.mls.network.socket.ReactorSocket
 import tv.mycujoo.mls.player.IPlayer
-import tv.mycujoo.mls.player.MediaOnLoadCompletedListener
-import tv.mycujoo.mls.player.Player
+import tv.mycujoo.mls.player.MediaFactory
 import tv.mycujoo.mls.widgets.MLSPlayerView
+import tv.mycujoo.mls.widgets.PlayerControllerMode
+import tv.mycujoo.mls.widgets.RemotePlayerControllerView
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
 
 
@@ -54,6 +60,8 @@ class VideoPlayerMediatorTest {
     @Mock
     private lateinit var playerView: MLSPlayerView
 
+    @Mock
+    private lateinit var remotePlayerControllerView: RemotePlayerControllerView
 
     @Mock
     lateinit var MLSBuilder: MLSBuilder
@@ -88,7 +96,7 @@ class VideoPlayerMediatorTest {
     @Mock
     lateinit var activity: AppCompatActivity
 
-
+    @Mock
     lateinit var player: IPlayer
 
     @Mock
@@ -96,14 +104,13 @@ class VideoPlayerMediatorTest {
     private lateinit var exoPlayerMainEventListener: MainEventListener
 
     @Mock
-    lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
-
-
-    @Mock
-    lateinit var mediaFactory: HlsMediaSource.Factory
+    lateinit var mediaFactory: MediaFactory
 
     @Mock
     lateinit var hlsMediaSource: HlsMediaSource
+
+    @Mock
+    lateinit var mediaItem: MediaItem
 
     @Mock
     lateinit var timeBar: MLSTimeBar
@@ -126,6 +133,19 @@ class VideoPlayerMediatorTest {
     @Mock
     lateinit var logger: Logger
 
+    @Mock
+    lateinit var castContext: CastContext
+
+    @Mock
+    lateinit var sessionManager: SessionManager
+
+    @Mock
+    lateinit var castSession: CastSession
+
+    @Mock
+    lateinit var caster: ICaster
+    lateinit var castListener: tv.mycujoo.mls.caster.ICastListener
+
 
     @Before
     fun setUp() {
@@ -140,29 +160,32 @@ class VideoPlayerMediatorTest {
 
         whenever(MLSBuilder.activity).thenReturn(activity)
         whenever(MLSBuilder.createExoPlayer(any())).thenReturn(exoPlayer)
-        whenever(MLSBuilder.createMediaFactory(any())).thenReturn(mediaFactory)
-        whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
+        whenever(mediaFactory.createHlsMediaSource(any())).thenReturn(hlsMediaSource)
 
         whenever(MLSBuilder.createReactorListener(any())).thenReturn(reactorListener)
         whenever(MLSBuilder.mlsConfiguration).thenReturn(MLSConfiguration())
         whenever(MLSBuilder.hasAnalytic).thenReturn(true)
 
+        whenever(MLSBuilder.publicKey).thenReturn("SAMPLE_PUBLIC_KEY")
         whenever(MLSBuilder.internalBuilder).thenReturn(internalBuilder)
         whenever(internalBuilder.createYouboraPlugin(any(), any())).thenReturn(youboraPlugin)
         whenever(internalBuilder.createExoPlayerAdapter(any())).thenReturn(exoplayer2Adapter)
         whenever(internalBuilder.createYouboraClient(any())).thenReturn(youboraClient)
         whenever(internalBuilder.logger).thenReturn(logger)
+        whenever(castContext.sessionManager).thenReturn(sessionManager)
+        whenever(sessionManager.currentCastSession).thenReturn(castSession)
 
         whenever(playerView.context).thenReturn(activity)
         whenever(playerView.getTimeBar()).thenReturn(timeBar)
+        whenever(playerView.getRemotePlayerControllerView()).thenReturn(remotePlayerControllerView)
 
         whenever(dispatcher.coroutineContext).thenReturn(coroutineTestRule.testDispatcher)
 
-        player = Player()
-        player.create(mediaFactory, exoPlayer, mediaOnLoadCompletedListener)
+        whenever(player.getDirectInstance()).thenReturn(exoPlayer)
 
 
-        whenever(exoPlayer.addListener(any())).then { storeExoPlayerListener(it) }
+        whenever(player.addListener(any())).then { storeExoPlayerListener(it) }
+        whenever(caster.initialize(any(), any())).then { storeCastListener(it) }
         videoPlayerMediator = VideoPlayerMediator(
             videoPlayerConfig,
             viewHandler,
@@ -170,17 +193,23 @@ class VideoPlayerMediatorTest {
             dispatcher,
             dataManager,
             emptyList(),
+            caster,
             internalBuilder.logger
         )
         videoPlayerMediator.initialize(playerView, player, MLSBuilder)
         videoPlayerMediator.setAnnotationMediator(annotationMediator)
     }
 
-    private fun storeExoPlayerListener(it: InvocationOnMock) {
-        if (it.arguments[0] is MainEventListener) {
-            exoPlayerMainEventListener = it.arguments[0] as MainEventListener
+    private fun storeExoPlayerListener(invocationOnMock: InvocationOnMock) {
+        if (invocationOnMock.arguments[0] is MainEventListener) {
+            exoPlayerMainEventListener = invocationOnMock.arguments[0] as MainEventListener
         }
+    }
 
+    private fun storeCastListener(invocationOnMock: InvocationOnMock) {
+        if (invocationOnMock.arguments[1] is tv.mycujoo.mls.caster.ICastListener) {
+            castListener = invocationOnMock.arguments[1] as tv.mycujoo.mls.caster.ICastListener
+        }
     }
 
     @After
@@ -219,14 +248,14 @@ class VideoPlayerMediatorTest {
                 eventEntityDetails
             )
         )
-        whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
+        whenever(mediaFactory.createMediaItem(any())).thenReturn(mediaItem)
+        whenever(mediaFactory.createHlsMediaSource(any())).thenReturn(hlsMediaSource)
 
 
         videoPlayerMediator.playVideo(eventEntityDetails)
 
 
-        verify(exoPlayer).setMediaItem(any(), any<Boolean>())
-
+        verify(player).play(any(), any(), any())
     }
 
     @Test
@@ -249,7 +278,7 @@ class VideoPlayerMediatorTest {
     fun `given event without streamUrl, should not play video`() = runBlockingTest {
         val event: EventEntity = getSampleEventEntity(emptyList())
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
-        whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
+        whenever(mediaFactory.createHlsMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
 
 
         videoPlayerMediator.playVideo(event)
@@ -363,12 +392,13 @@ class VideoPlayerMediatorTest {
     fun `given external video uri to play, should play`() = runBlockingTest {
         val externalVideoUri =
             "https://dc9jagk60w3y3mt6171f-b03c88.p5cdn.com/shervin/cke8cohm8001u0176j5ahnlo7/master.m3u8"
+        whenever(mediaFactory.createMediaItem(any())).thenReturn(mediaItem)
 
 
         videoPlayerMediator.playExternalSourceVideo(externalVideoUri)
 
 
-        verify(exoPlayer).setMediaItem(any(), any<Boolean>())
+        verify(player).play(any(), any(), any())
     }
 
     @Ignore("Event Status is not done on server yet")
@@ -516,6 +546,71 @@ class VideoPlayerMediatorTest {
 
         verify(youboraClient, never()).logEvent(any(), any())
     }
+
+    /**region Cast*/
+
+    @Test
+    fun `should load remote media, when connected to remote player`() = runBlockingTest {
+        val event =
+            getSampleEventEntity(listOf(Stream("id_0", 60000000L, "http://www.google.com", null)))
+        whenever(dataManager.currentEvent).thenReturn(event)
+
+        castListener.onConnected(castSession)
+
+        verify(caster).loadRemoteMedia(any(), any<MediaLoadOptions>())
+    }
+
+    @Test
+    fun `should do nothing, when connected to remote player with null cast-session`() {
+        castListener.onConnected(null)
+
+
+        verify(caster, never()).loadRemoteMedia(any(), any<MediaLoadOptions>())
+        verify(playerView, never()).switchMode(any())
+        verify(player, never()).isPlaying()
+        verify(player, never()).pause()
+    }
+
+
+    @Test
+    fun `should set PlayerView mode to REMOTE, when connected to remote player`() {
+        castListener.onConnected(castSession)
+
+
+        verify(playerView).switchMode(PlayerControllerMode.REMOTE_CONTROLLER)
+    }
+
+
+    @Test
+    fun `should pause local player, when connected to remote player`() {
+        whenever(player.isPlaying()).thenReturn(true)
+        videoPlayerMediator.playVideo(getSampleEventEntity("id_0"))
+
+        castListener.onConnected(castSession)
+
+        verify(player).pause()
+    }
+
+    @Test
+    fun `should not pause local player if it's not playing, when connected to remote player`() {
+        whenever(player.isPlaying()).thenReturn(false)
+        videoPlayerMediator.playVideo(getSampleEventEntity("id_0"))
+
+        castListener.onConnected(castSession)
+
+        verify(player, never()).pause()
+    }
+
+    @Test
+    fun `should set PlayerView mode to EXO_MODE, when disconnecting from remote player`() {
+        castListener.onDisconnecting(castSession)
+
+
+        verify(playerView).switchMode(PlayerControllerMode.EXO_MODE)
+    }
+
+
+    /**endregion */
 
     /**region Fake data*/
     companion object {

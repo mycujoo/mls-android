@@ -16,6 +16,7 @@ import tv.mycujoo.mls.api.MLS
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.MLSConfiguration
 import tv.mycujoo.mls.api.PlayerEventsListener
+import tv.mycujoo.mls.caster.Caster
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.widgets.MLSPlayerView
@@ -76,10 +77,12 @@ class MainActivity : AppCompatActivity() {
                             showTimers = true,
                             showFullScreenButton = true,
                             showLiveViewers = true,
-                            showEventInfoButton = false
+                            showEventInfoButton = false,
+                            showCastButton = true
                         )
                     )
                 )
+                .setCaster(Caster(mainActivity_miniControllerPlaceHolder)) // optional
                 .build()
 
 
@@ -101,6 +104,7 @@ class MainActivity : AppCompatActivity() {
                 }
             )
         }
+
 
     }
 

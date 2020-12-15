@@ -1,11 +1,15 @@
 package tv.mycujoo.mls.core
 
 import android.app.Activity
+import android.os.Handler
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.ui.TimeBar
+import com.google.android.gms.cast.MediaLoadOptions
+import com.google.android.gms.cast.MediaSeekOptions
+import com.google.android.gms.cast.framework.CastSession
 import com.npaw.youbora.lib6.plugin.Options
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,10 +23,13 @@ import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.VideoPlayer
+import tv.mycujoo.mls.caster.ICaster
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.enum.MessageLevel
+import tv.mycujoo.mls.helper.CustomDataBuilder
+import tv.mycujoo.mls.helper.MediaInfoBuilder
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mls.manager.Logger
@@ -30,12 +37,17 @@ import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.mediator.AnnotationMediator
 import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.network.socket.IReactorSocket
-import tv.mycujoo.mls.player.IPlayer
-import tv.mycujoo.mls.player.MediaOnLoadCompletedListener
-import tv.mycujoo.mls.player.Player.Companion.createExoPlayer
+import tv.mycujoo.mls.player.*
+import tv.mycujoo.mls.player.PlaybackLocation.LOCAL
+import tv.mycujoo.mls.player.PlaybackLocation.REMOTE
 import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
 import tv.mycujoo.mls.utils.StringUtils
 import tv.mycujoo.mls.widgets.MLSPlayerView
+import tv.mycujoo.mls.widgets.MLSPlayerView.LiveState.LIVE_ON_THE_EDGE
+import tv.mycujoo.mls.widgets.MLSPlayerView.LiveState.VOD
+import tv.mycujoo.mls.widgets.PlayerControllerMode
+import tv.mycujoo.mls.widgets.RemotePlayerControllerListener
+
 
 class VideoPlayerMediator(
     private var videoPlayerConfig: VideoPlayerConfig,
@@ -44,12 +56,10 @@ class VideoPlayerMediator(
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     private val timelineMarkerActionEntities: List<TimelineMarkerEntity>,
+    private val caster: ICaster?,
     logger: Logger
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
-
-    private var joined: Boolean = false
-    private var updateId: String? = null
 
     /**region Fields*/
     private lateinit var player: IPlayer
@@ -61,13 +71,24 @@ class VideoPlayerMediator(
     private lateinit var youboraClient: YouboraClient
     private var logged = false
 
+    private var joined: Boolean = false
+    private var updateId: String? = null
     private lateinit var streamUrlPullJob: Job
+
+
+    private var playbackState: PlaybackState = PlaybackState.IDLE
+    private var playbackLocation: PlaybackLocation = LOCAL
+    private var publicKey: String = ""
+    private var uuid: String? = ""
+
     /**endregion */
 
     /**region Initialization*/
     fun initialize(MLSPlayerView: MLSPlayerView, player: IPlayer, builder: MLSBuilder) {
         this.playerView = MLSPlayerView
         this.player = player
+        publicKey = builder.publicKey
+        uuid = builder.internalBuilder.uuid
 
         player.getDirectInstance()?.let {
             videoPlayer = VideoPlayer(it, this, MLSPlayerView)
@@ -99,7 +120,8 @@ class VideoPlayerMediator(
                 initAnalytic(builder.internalBuilder, builder.activity!!, it)
             }
 
-            initPlayerViewWrapper(MLSPlayerView, player, builder.internalBuilder.overlayViewHelper)
+            initPlayerView(MLSPlayerView, player, builder.internalBuilder.overlayViewHelper)
+            initCaster(player, MLSPlayerView)
         }
     }
 
@@ -107,7 +129,7 @@ class VideoPlayerMediator(
         this.annotationMediator = annotationMediator
     }
 
-    private fun initPlayerViewWrapper(
+    private fun initPlayerView(
         MLSPlayerView: MLSPlayerView,
         player: IPlayer,
         overlayViewHelper: OverlayViewHelper
@@ -122,21 +144,19 @@ class VideoPlayerMediator(
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 super.onPlayerStateChanged(playWhenReady, playbackState)
 
+                handlePlaybackStatus(playWhenReady, playbackState)
                 handleBufferingProgressBarVisibility(playbackState, playWhenReady)
-
                 handleLiveModeState()
-
                 handlePlayStatusOfOverlayAnimationsWhileBuffering(playbackState, playWhenReady)
 
                 logEventIfNeeded(playbackState)
-
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 super.onIsPlayingChanged(isPlaying)
 
+                handlePlaybackStatus(isPlaying)
                 handlePlayStatusOfOverlayAnimationsOnPlayPause(isPlaying)
-
             }
 
         }
@@ -153,7 +173,6 @@ class VideoPlayerMediator(
             override fun onScrubStart(timeBar: TimeBar, position: Long) {
                 //do nothing
                 MLSPlayerView.scrubStartedAt(position)
-
             }
 
             override fun onScrubStop(timeBar: TimeBar, position: Long, canceled: Boolean) {
@@ -169,15 +188,135 @@ class VideoPlayerMediator(
         MLSPlayerView.config(videoPlayerConfig)
     }
 
+    private fun initCaster(
+        player: IPlayer,
+        MLSPlayerView: MLSPlayerView
+    ) {
+        fun addRemotePlayerControllerListener() {
+            playerView.getRemotePlayerControllerView().listener =
+                object : RemotePlayerControllerListener {
+                    override fun onPlay() {
+                        caster?.play()
+                    }
+
+                    override fun onPause() {
+                        caster?.pause()
+                    }
+
+                    override fun onSeekTo(newPosition: Long) {
+                        val mediaSeekOptions =
+                            MediaSeekOptions.Builder().setPosition(newPosition).build()
+                        caster?.seek(mediaSeekOptions)
+                    }
+
+                    override fun onFastForward(amount: Long) {
+                        caster?.fastForward(amount)
+                    }
+
+                    override fun onRewind(amount: Long) {
+                        caster?.rewind(amount)
+                    }
+                }
+        }
+
+        fun updateRemotePlayerWithLocalPlayerData() {
+            playerView.getRemotePlayerControllerView().setPosition(player.currentPosition())
+            playerView.getRemotePlayerControllerView().setDuration(player.duration())
+        }
+
+        caster?.let {
+            fun onApplicationConnected(castSession: CastSession?) {
+                if (castSession == null) {
+                    return
+                }
+                updatePlaybackLocation(REMOTE)
+                switchControllerMode(REMOTE)
+                addRemotePlayerControllerListener()
+                updateRemotePlayerWithLocalPlayerData()
+                dataManager.currentEvent?.let {
+                    loadRemoteMedia(it)
+                }
+                if (player.isPlaying()) {
+                    player.pause()
+                }
+            }
+
+            fun onApplicationDisconnecting(session: CastSession?) {
+                updatePlaybackLocation(LOCAL)
+                switchControllerMode(LOCAL)
+                session?.remoteMediaClient?.let { remoteMediaClient ->
+                    player.seekTo(remoteMediaClient.approximateStreamPosition)
+                    if (remoteMediaClient.isPlaying) {
+                        player.play()
+                    } else {
+                        player.pause()
+                    }
+                }
+            }
+
+            fun onApplicationDisconnected(session: CastSession?) {
+                updatePlaybackLocation(LOCAL)
+                switchControllerMode(LOCAL)
+            }
+
+            val castListener = object : tv.mycujoo.mls.caster.ICastListener {
+                override fun onPlaybackLocationUpdated(isLocal: Boolean) {
+                    if (isLocal) {
+                        updatePlaybackLocation(LOCAL)
+                    } else {
+                        updatePlaybackLocation(REMOTE)
+                    }
+                }
+
+                override fun onConnected(session: CastSession?) {
+                    onApplicationConnected(session)
+                }
+
+                override fun onDisconnecting(session: CastSession?) {
+                    onApplicationDisconnecting(session)
+                }
+
+                override fun onDisconnected(session: CastSession?) {
+                    onApplicationDisconnected(session)
+
+                }
+
+                override fun onRemoteProgressUpdate(progressMs: Long, durationMs: Long) {
+                    playerView.getRemotePlayerControllerView().setPosition(progressMs)
+                    playerView.getRemotePlayerControllerView().setDuration(durationMs)
+                }
+
+                override fun onRemotePlayStatusUpdate(isPlaying: Boolean, isBuffering: Boolean) {
+                    playerView.getRemotePlayerControllerView().setPlayStatus(isPlaying, isBuffering)
+                }
+
+                override fun onRemoteLiveStatusUpdate(isLive: Boolean) {
+                    playerView.getRemotePlayerControllerView()
+                        .setLiveMode(if (isLive) LIVE_ON_THE_EDGE else VOD)
+                }
+
+                override fun onCastStateUpdated(showButton: Boolean) {
+                    playerView.setCastButtonVisibility(showButton)
+                }
+            }
+
+            it.initialize(MLSPlayerView.context, castListener)
+        }
+    }
+
     fun reInitialize(MLSPlayerView: MLSPlayerView, builder: MLSBuilder) {
-        val exoPlayer = createExoPlayer(MLSPlayerView.context)
+        val exoPlayer = Player.createExoPlayer(MLSPlayerView.context)
         player.create(
-            createMediaFactory(MLSPlayerView.context),
+            MediaFactory(
+                createMediaFactory(MLSPlayerView.context),
+                com.google.android.exoplayer2.MediaItem.Builder()
+            ),
             exoPlayer,
+            Handler(),
             MediaOnLoadCompletedListener(exoPlayer)
         )
 
-        initPlayerViewWrapper(MLSPlayerView, player, builder.internalBuilder.overlayViewHelper)
+        initPlayerView(MLSPlayerView, player, builder.internalBuilder.overlayViewHelper)
         dataManager.currentEvent?.let {
             joinEvent(it)
         }
@@ -213,6 +352,16 @@ class VideoPlayerMediator(
 
         youboraClient = internalBuilder.createYouboraClient(plugin)
     }
+
+
+    fun onResume() {
+        caster?.onResume()
+    }
+
+    fun onPause() {
+        caster?.onPause()
+    }
+
 
     fun config(videoPlayerConfig: VideoPlayerConfig) {
         if (this::playerView.isInitialized.not()) {
@@ -273,6 +422,7 @@ class VideoPlayerMediator(
     /**region Playback functions*/
     override fun playVideo(event: EventEntity) {
         playVideo(event.id)
+        storeEvent(event)
     }
 
     override fun playVideo(eventId: String) {
@@ -315,7 +465,7 @@ class VideoPlayerMediator(
 
         if (mayPlayVideo(event)) {
             logged = false
-
+            storeEvent(event)
             play(event.streams.first())
             playerView.hideEventInfoDialog()
         } else {
@@ -326,7 +476,7 @@ class VideoPlayerMediator(
 
     private fun play(stream: Stream) {
 
-        if (stream.widevine?.fullUrl != null && stream.widevine?.licenseUrl != null) {
+        if (stream.widevine?.fullUrl != null && stream.widevine.licenseUrl != null) {
             player.play(
                 stream.widevine.fullUrl,
                 stream.dvrWindow,
@@ -391,14 +541,14 @@ class VideoPlayerMediator(
         if (player.isLive()) {
             isLive = true
             if (player.currentPosition() + 20000L >= player.duration()) {
-                playerView.setLiveMode(MLSPlayerView.LiveState.LIVE_ON_THE_EDGE)
+                playerView.setLiveMode(LIVE_ON_THE_EDGE)
             } else {
                 playerView.setLiveMode(MLSPlayerView.LiveState.LIVE_TRAILING)
             }
         } else {
             // VOD
             isLive = false
-            playerView.setLiveMode(MLSPlayerView.LiveState.VOD)
+            playerView.setLiveMode(VOD)
         }
 
     }
@@ -435,6 +585,24 @@ class VideoPlayerMediator(
         }
     }
 
+    private fun handlePlaybackStatus(playWhenReady: Boolean, playbackState: Int) {
+        if (playWhenReady) {
+            if (playbackState == 3) {
+                this.playbackState = PlaybackState.PLAYING
+            }
+        } else {
+            this.playbackState = PlaybackState.IDLE
+        }
+    }
+
+    private fun handlePlaybackStatus(isPlaying: Boolean) {
+        if (isPlaying) {
+            this.playbackState = PlaybackState.PLAYING
+        } else {
+            this.playbackState = PlaybackState.IDLE
+        }
+    }
+
     private fun logEventIfNeeded(playbackState: Int) {
         if (!hasAnalytic) {
             return
@@ -466,5 +634,46 @@ class VideoPlayerMediator(
         return player
     }
 
+    /**region Cast*/
+    private fun loadRemoteMedia(event: EventEntity) {
+        if (event.streams.isEmpty() || event.streams.first().fullUrl == null) {
+            return
+        }
+        val fullUrl = event.streams.first().fullUrl!!
+        val widevine = event.streams.first().widevine
+
+        val customData =
+            CustomDataBuilder.build(event.id, publicKey, uuid, widevine)
+        val mediaInfo =
+            MediaInfoBuilder.build(fullUrl, event.title, event.thumbnailUrl, customData)
+
+        val mediaLoadOptions: MediaLoadOptions =
+            MediaLoadOptions.Builder().setAutoplay(player.isPlaying())
+                .setPlayPosition(player.currentPosition())
+                .build()
+        caster?.loadRemoteMedia(mediaInfo, mediaLoadOptions)
+    }
+
+    private fun updatePlaybackLocation(location: PlaybackLocation) {
+        playbackLocation = location
+    }
+
+    private fun switchControllerMode(playbackLocation: PlaybackLocation) {
+        when (playbackLocation) {
+            LOCAL -> {
+                playerView.switchMode(PlayerControllerMode.EXO_MODE)
+            }
+            REMOTE -> {
+                playerView.switchMode(PlayerControllerMode.REMOTE_CONTROLLER)
+            }
+        }
+    }
+
+
+    private fun storeEvent(eventEntity: EventEntity) {
+        dataManager.currentEvent = eventEntity
+    }
+
+    /**endregion */
 
 }

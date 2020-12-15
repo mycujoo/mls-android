@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.player
 
+import android.os.Handler
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.MediaSource
@@ -25,7 +26,10 @@ class PlayerTest {
     lateinit var exoPlayer: SimpleExoPlayer
 
     @Mock
-    lateinit var mediaFactory: HlsMediaSource.Factory
+    lateinit var mediaFactory: MediaFactory
+
+    @Mock
+    lateinit var handler: Handler
 
     @Mock
     lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
@@ -41,7 +45,7 @@ class PlayerTest {
     }
 
     private fun initPlayer() {
-        player.create(mediaFactory, exoPlayer, mediaOnLoadCompletedListener)
+        player.create(mediaFactory, exoPlayer, handler, mediaOnLoadCompletedListener)
     }
 
     @Test
@@ -190,6 +194,7 @@ class PlayerTest {
     fun `given valid state, should return exo player live state as isLive`() {
         initPlayer()
         whenever(exoPlayer.isCurrentWindowDynamic).thenReturn(true)
+        whenever(exoPlayer.currentPosition).thenReturn(1000L)
 
 
         assertEquals(true, player.isLive())
@@ -223,7 +228,7 @@ class PlayerTest {
     @Test
     fun `given uri to play when no resume data is available, should start from the beginning`() {
         initPlayer()
-        whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
+        whenever(mediaFactory.createHlsMediaSource(any())).thenReturn(hlsMediaSource)
 
         player.play(SAMPLE_URI, Long.MAX_VALUE, true)
 
@@ -238,7 +243,7 @@ class PlayerTest {
     @Test
     fun `given uri to play when resume data is available, should start from resume position`() {
         initPlayer()
-        whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
+        whenever(mediaFactory.createHlsMediaSource(any())).thenReturn(hlsMediaSource)
         whenever(exoPlayer.currentWindowIndex).thenReturn(0)
         whenever(exoPlayer.isCurrentWindowSeekable).thenReturn(true)
         whenever(exoPlayer.currentPosition).thenReturn(42L)
@@ -258,7 +263,7 @@ class PlayerTest {
     @Test
     fun `given discontinuity segment, should add it to discontinuity array`() {
         initPlayer()
-        whenever(mediaFactory.createMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
+        whenever(mediaFactory.createHlsMediaSource(any())).thenReturn(hlsMediaSource)
         whenever(exoPlayer.setMediaSource(any(), any<Boolean>())).then {
             val mediaSource = it.arguments[0] as MediaSource
             mediaSource
@@ -325,6 +330,22 @@ class PlayerTest {
         assertFalse { player.isWithinValidSegment(1605694505)!! }
         assertTrue { player.isWithinValidSegment(1605694506)!! }
         assertTrue { player.isWithinValidSegment(1605694507)!! }
+    }
+
+    @Test
+    fun pause() {
+        initPlayer()
+        player.pause()
+
+        verify(exoPlayer).playWhenReady = false
+    }
+
+    @Test
+    fun play() {
+        initPlayer()
+        player.play()
+
+        verify(exoPlayer).playWhenReady = true
     }
 
     companion object {
