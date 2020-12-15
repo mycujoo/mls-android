@@ -12,7 +12,7 @@ MLS Android SDK enables apps to play videos that are hosted on MyCujoo Live Serv
 
 Add dependency to SDK in app-level build.gradle file:
 
-    implementation 'tv.mycujoo.mls-android:mls:LATEST_VERSION_HERE'
+    implementation 'tv.mycujoo.mls-android:mls:MLS_LATEST_VERSION_HERE'
     
 #### Add MLSPlayerView
 
@@ -90,7 +90,10 @@ in order to communicate with SDK, MLS class must be instantiated. Init MLS whene
         // use VideoPlayer to play video
         val videoPlayer = MLS.getVideoPlayer()
         videoPlayer.playVideo("EVENT_ID_HERE") // or event object itself
-
-
-
-
+        
+       
+      
+#### Caster Module (Google Cast support)
+If you are intreseted to support Google Cast in MLS, import Caster module and provide it in building of MLS-component.
+[Here](https://github.com/mycujoo/mls-android/blob/master/README.md]) is the document on how to do it.
+Also, [VideoActivityWithCaster](https://github.com/mycujoo/mls-android-sample-app/blob/master/app/src/main/java/tv/mycujoo/mlssampleapp/VideoActivityWithCaster.kt#L86) in [Sample-App](https://github.com/mycujoo/mls-android-sample-app) demonstrates it as an full example 
