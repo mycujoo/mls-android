@@ -1,7 +1,11 @@
 package tv.mycujoo.mls.caster
 
+import android.content.Context
 import android.net.wifi.p2p.WifiP2pDevice.CONNECTED
 import android.view.ViewStub
+import com.google.android.gms.cast.MediaInfo
+import com.google.android.gms.cast.MediaLoadOptions
+import com.google.android.gms.cast.MediaSeekOptions
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.CastState.*
@@ -27,8 +31,8 @@ class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
         }
     }
 
-    override fun initialize(castProvider: ICastContextProvider, castListener: ICastListener) {
-        castContext = castProvider.getCastContext()
+    override fun initialize(context: Context?, castListener: ICastListener) {
+        castContext = CastContextProvider(context!!).getCastContext()
         castSession = castContext.sessionManager.currentCastSession
         sessionManagerListener = initSessionManagerListener(castListener)
 
@@ -112,7 +116,42 @@ class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
         }
     }
 
-    override fun getRemoteMediaClient(): RemoteMediaClient? {
+    override fun loadRemoteMedia(mediaInfo: MediaInfo, mediaLoadOptions: MediaLoadOptions) {
+        getRemoteMediaClient()?.load(mediaInfo, mediaLoadOptions)
+    }
+
+    override fun play() {
+        getRemoteMediaClient()?.play()
+    }
+
+    override fun pause() {
+        getRemoteMediaClient()?.pause()
+    }
+
+    override fun seek(mediaSeekOptions: MediaSeekOptions?) {
+        getRemoteMediaClient()?.seek(mediaSeekOptions)
+    }
+
+    override fun fastForward(amount: Long) {
+        getRemoteMediaClient()?.let {
+            val newPosition = it.approximateStreamPosition + amount
+            val mediaSeekOptions =
+                MediaSeekOptions.Builder().setPosition(newPosition).build()
+            it.seek(mediaSeekOptions)
+        }
+    }
+
+    override fun rewind(amount: Long) {
+        getRemoteMediaClient()?.let {
+            val newPosition = kotlin.math.max(it.approximateStreamPosition + amount, 0L)
+            val mediaSeekOptions =
+                MediaSeekOptions.Builder().setPosition(newPosition).build()
+            it.seek(mediaSeekOptions)
+        }
+    }
+
+
+    private fun getRemoteMediaClient(): RemoteMediaClient? {
         return castSession?.remoteMediaClient
     }
 

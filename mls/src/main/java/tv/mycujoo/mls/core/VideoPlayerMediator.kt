@@ -15,8 +15,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import tv.mycujoo.mls.caster.ICastListener
-import tv.mycujoo.mls.caster.ICaster
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.Stream
@@ -25,7 +23,7 @@ import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.VideoPlayer
-import tv.mycujoo.mls.caster.CastContextProvider
+import tv.mycujoo.mls.caster.ICaster
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.enum.C
@@ -49,7 +47,6 @@ import tv.mycujoo.mls.widgets.MLSPlayerView.LiveState.LIVE_ON_THE_EDGE
 import tv.mycujoo.mls.widgets.MLSPlayerView.LiveState.VOD
 import tv.mycujoo.mls.widgets.PlayerControllerMode
 import tv.mycujoo.mls.widgets.RemotePlayerControllerListener
-import kotlin.math.max
 
 
 class VideoPlayerMediator(
@@ -199,35 +196,25 @@ class VideoPlayerMediator(
             playerView.getRemotePlayerControllerView().listener =
                 object : RemotePlayerControllerListener {
                     override fun onPlay() {
-                        caster?.getRemoteMediaClient()?.play()
+                        caster?.play()
                     }
 
                     override fun onPause() {
-                        caster?.getRemoteMediaClient()?.pause()
+                        caster?.pause()
                     }
 
                     override fun onSeekTo(newPosition: Long) {
                         val mediaSeekOptions =
                             MediaSeekOptions.Builder().setPosition(newPosition).build()
-                        caster?.getRemoteMediaClient()?.seek(mediaSeekOptions)
+                        caster?.seek(mediaSeekOptions)
                     }
 
                     override fun onFastForward(amount: Long) {
-                        caster?.getRemoteMediaClient()?.let {
-                            val newPosition = it.approximateStreamPosition + amount
-                            val mediaSeekOptions =
-                                MediaSeekOptions.Builder().setPosition(newPosition).build()
-                            it.seek(mediaSeekOptions)
-                        }
+                        caster?.fastForward(amount)
                     }
 
                     override fun onRewind(amount: Long) {
-                        caster?.getRemoteMediaClient()?.let {
-                            val newPosition = max(it.approximateStreamPosition + amount, 0L)
-                            val mediaSeekOptions =
-                                MediaSeekOptions.Builder().setPosition(newPosition).build()
-                            it.seek(mediaSeekOptions)
-                        }
+                        caster?.rewind(amount)
                     }
                 }
         }
@@ -313,7 +300,7 @@ class VideoPlayerMediator(
                 }
             }
 
-            it.initialize(CastContextProvider(MLSPlayerView.context), castListener)
+            it.initialize(MLSPlayerView.context, castListener)
         }
     }
 
@@ -655,18 +642,16 @@ class VideoPlayerMediator(
         val fullUrl = event.streams.first().fullUrl!!
         val widevine = event.streams.first().widevine
 
-        caster?.getRemoteMediaClient()?.let {
-            val customData =
-                CustomDataBuilder.build(event.id, publicKey, uuid, widevine)
-            val mediaInfo =
-                MediaInfoBuilder.build(fullUrl, event.title, event.thumbnailUrl, customData)
+        val customData =
+            CustomDataBuilder.build(event.id, publicKey, uuid, widevine)
+        val mediaInfo =
+            MediaInfoBuilder.build(fullUrl, event.title, event.thumbnailUrl, customData)
 
-            val mediaLoadOptions: MediaLoadOptions =
-                MediaLoadOptions.Builder().setAutoplay(player.isPlaying())
-                    .setPlayPosition(player.currentPosition())
-                    .build()
-            it.load(mediaInfo, mediaLoadOptions)
-        }
+        val mediaLoadOptions: MediaLoadOptions =
+            MediaLoadOptions.Builder().setAutoplay(player.isPlaying())
+                .setPlayPosition(player.currentPosition())
+                .build()
+        caster?.loadRemoteMedia(mediaInfo, mediaLoadOptions)
     }
 
     private fun updatePlaybackLocation(location: PlaybackLocation) {

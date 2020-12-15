@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.caster
 
+import android.content.Context
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.SessionManager
@@ -24,6 +25,9 @@ class CasterTest {
     lateinit var castListener: ICastListener
 
     @Mock
+    lateinit var context: Context
+
+    @Mock
     lateinit var castContext: CastContext
 
     @Mock
@@ -45,7 +49,7 @@ class CasterTest {
 
         caster = Caster()
 
-        caster.initialize(castProvider, castListener)
+        caster.initialize(context, castListener)
     }
 
     @Test

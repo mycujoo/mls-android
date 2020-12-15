@@ -52,9 +52,10 @@ dependencies {
     testImplementation "org.mockito:mockito-core:3.0.0"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
 
-
     api 'androidx.mediarouter:mediarouter:1.2.0'
     api 'com.google.android.gms:play-services-cast-framework:19.0.0'
+
+    implementation project(":mls")
 }
 
 apply from: 'install.gradle'
