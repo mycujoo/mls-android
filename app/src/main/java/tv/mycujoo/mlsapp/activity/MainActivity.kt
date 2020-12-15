@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity() {
                         )
                     )
                 )
-                .setCaster(Caster(this))
+                .setCaster(Caster(mainActivity_miniControllerPlaceHolder)) // optional
                 .build()
 
 
