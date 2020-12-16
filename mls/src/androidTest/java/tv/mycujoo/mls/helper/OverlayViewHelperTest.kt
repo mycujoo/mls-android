@@ -434,7 +434,7 @@ class OverlayViewHelperTest {
     private fun getSampleOverlayEntity(): OverlayEntity {
         val viewSpec = ViewSpec(PositionGuide(left = 10F, top = 10F), Pair(30F, 0F))
 
-        val svgData = SvgData(null, null, sampleSvgString)
+        val svgData = SvgData( null, sampleSvgString)
 
         val introTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, AnimationType.NONE, 0L)
         val outroTransitionSpec = TransitionSpec(2000L, AnimationType.NONE, 0L)
@@ -452,7 +452,7 @@ class OverlayViewHelperTest {
     private fun getSampleOverlayEntity(introAnimationType: AnimationType): OverlayEntity {
         val viewSpec = ViewSpec(PositionGuide(left = 10F, top = 10F), Pair(30F, 0F))
 
-        val svgData = SvgData(null, null, sampleSvgString)
+        val svgData = SvgData(null, sampleSvgString)
 
         val introTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, introAnimationType, 600L)
         val outroTransitionSpec = TransitionSpec(2000L, AnimationType.NONE, 3000L)
@@ -473,7 +473,7 @@ class OverlayViewHelperTest {
     ): OverlayEntity {
         val viewSpec = ViewSpec(PositionGuide(left = 10F, top = 10F), Pair(30F, 0F))
 
-        val svgData = SvgData(null, null, sampleSvgString)
+        val svgData = SvgData(null,  sampleSvgString)
 
         val introTransitionSpec = TransitionSpec(ONE_SECOND_IN_MS, introAnimationType, 300L)
         val outroTransitionSpec = TransitionSpec(2000L, outroAnimationType, 600L)

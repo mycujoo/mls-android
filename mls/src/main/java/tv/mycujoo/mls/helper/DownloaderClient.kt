@@ -41,7 +41,7 @@ class DownloaderClient(val okHttpClient: OkHttpClient) : IDownloaderClient {
 
                     callback(
                         overlayEntity.copy(
-                            svgData = SvgData(svgUrl, null, svgString)
+                            svgData = SvgData(svgUrl, svgString)
                         )
                     )
                 }

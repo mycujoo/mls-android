@@ -22,7 +22,6 @@ data class ActionEntity(
     fun toOverlayBlueprint(): OverlayBlueprint {
         val svgData = SvgData(
             svgUrl,
-            svgInputStream,
             null
         )
         val viewSpec = ViewSpec(position, size)

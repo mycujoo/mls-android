@@ -58,7 +58,6 @@ data class ActionObject(
         }
         val svgData = SvgData(
             overlayRelatedData.svgUrl,
-            null,
             null
         )
         val viewSpec = ViewSpec(overlayRelatedData.positionGuide, overlayRelatedData.sizePair)
