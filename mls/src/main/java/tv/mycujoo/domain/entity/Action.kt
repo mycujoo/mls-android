@@ -1,5 +1,8 @@
 package tv.mycujoo.domain.entity
 
+import tv.mycujoo.mls.model.ScreenTimerDirection
+import tv.mycujoo.mls.model.ScreenTimerFormat
+
 sealed class Action {
     /**region Abstract fields*/
     abstract val id: String
@@ -37,7 +40,12 @@ sealed class Action {
     /**region Timer related*/
     data class CreateTimerAction(
         override val id: String, override var offset: Long,
-        override var absoluteTime: Long
+        override var absoluteTime: Long,
+        val name: String,
+        val format: ScreenTimerFormat = ScreenTimerFormat.MINUTES_SECONDS,
+        val direction: ScreenTimerDirection = ScreenTimerDirection.UP,
+        val startValue: Long = 0L,
+        val capValue: Long
     ) : Action() {
         override val priority: Int = 1000
     }
