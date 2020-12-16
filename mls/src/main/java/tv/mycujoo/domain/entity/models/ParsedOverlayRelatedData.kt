@@ -6,7 +6,7 @@ import tv.mycujoo.domain.entity.PositionGuide
 data class ParsedOverlayRelatedData(
     val id: String,
     val svgUrl: String,
-    val duration: Long,
+    val duration: Long?,
     val positionGuide: PositionGuide,
     val sizePair: Pair<Float, Float>,
     val introAnimationType: AnimationType,

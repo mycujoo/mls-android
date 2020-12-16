@@ -44,7 +44,27 @@ data class ActionSourceData(
 
         when (newType) {
             SHOW_OVERLAY -> {
-                return Action.ShowOverlayAction(newId, newOffset, newAbsoluteTime)
+                val relatedData = DataMapper.parseOverlayRelatedData(data)
+                if (relatedData != null) {
+                    return Action.ShowOverlayAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        duration = relatedData.duration,
+                        viewSpec = ViewSpec(
+                            relatedData.positionGuide,
+                            relatedData.sizePair
+                        ),
+                        svgData = SvgData(relatedData.svgUrl),
+                        introAnimationSpec = TransitionSpec(
+                            newOffset,
+                            relatedData.introAnimationType,
+                            relatedData.introAnimationDuration
+                        ),
+                        outroAnimationSpec = null, // todo
+                        placeHolders = relatedData.variablePlaceHolders
+                    )
+                }
             }
             HIDE_OVERLAY -> {
                 return Action.HideOverlayAction(newId, newOffset, newAbsoluteTime)
@@ -80,7 +100,10 @@ data class ActionSourceData(
             DELETE_ACTION -> {
                 return Action.DeleteAction(newId, newOffset, newAbsoluteTime)
             }
-            UNKNOWN -> TODO()
+            UNKNOWN -> {
+                // do nothing, returns InvalidAction
+            }
         }
+        return Action.InvalidAction(newId, newOffset, newAbsoluteTime)
     }
 }

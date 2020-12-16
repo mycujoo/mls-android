@@ -12,7 +12,13 @@ sealed class Action {
     /**region Overlay related*/
     data class ShowOverlayAction(
         override val id: String, override var offset: Long,
-        override var absoluteTime: Long
+        override var absoluteTime: Long,
+        val svgData: SvgData? = null,
+        val duration: Long? = null,
+        val viewSpec: ViewSpec? = null,
+        val introAnimationSpec: TransitionSpec? = null,
+        val outroAnimationSpec: TransitionSpec? = null,
+        val placeHolders: List<String> = emptyList()
     ) : Action() {
         override val priority: Int = 0
     }
@@ -97,6 +103,13 @@ sealed class Action {
         override var absoluteTime: Long
     ) : Action() {
         override val priority: Int = 2000
+    }
+
+    data class InvalidAction(
+        override val id: String, override var offset: Long,
+        override var absoluteTime: Long
+    ) : Action() {
+        override val priority: Int = 0
     }
     /**endregion */
 
