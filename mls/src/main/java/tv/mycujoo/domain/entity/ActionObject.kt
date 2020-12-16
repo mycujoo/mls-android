@@ -183,7 +183,7 @@ data class ActionObject(
         var variableName = INVALID_STRING_VALUE
         var variableType = VariableType.UNSPECIFIED
         var variableValue: Any = INVALID_LONG_VALUE
-        var variableDoublePrecision = ActionMapper.INVALID_INT_VALUE
+        var variableDoublePrecision : Int? = null
 
         rawData.let { data ->
             data.keys.forEach { key ->
@@ -253,7 +253,7 @@ data class ActionObject(
         }
 
 
-        val variable = Variable(variableName, variableType, variableValue)
+        val variable = Variable(variableName, variableType, variableValue, variableDoublePrecision)
         return SetVariableEntity(id, offset, variable)
     }
 

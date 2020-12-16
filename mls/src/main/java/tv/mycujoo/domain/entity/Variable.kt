@@ -2,7 +2,12 @@ package tv.mycujoo.domain.entity
 
 import tv.mycujoo.domain.entity.VariableType.*
 
-class Variable(var name: String, val type: VariableType, var value: Any) {
+class Variable(
+    var name: String,
+    val type: VariableType,
+    var value: Any,
+    private val doublePrecision: Int? = null
+) {
 
     fun printValue(): String {
         return when (type) {
@@ -10,7 +15,11 @@ class Variable(var name: String, val type: VariableType, var value: Any) {
                 ""
             }
             DOUBLE -> {
-                (value as Double).toString()
+                if (doublePrecision != null) {
+                    String.format("%.${doublePrecision}f", value)
+                } else {
+                    (value as Double).toString()
+                }
             }
             LONG -> {
                 (value as Long).toString()
