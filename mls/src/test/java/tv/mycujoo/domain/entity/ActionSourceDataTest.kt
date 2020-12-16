@@ -137,9 +137,23 @@ class ActionSourceDataTest {
 
     @Test
     fun `mapping to PauseTimerAction`() {
-        val actionSourceData = ActionSourceData("id", ActionType.PAUSE_TIMER.type, 1000L, -1L, null)
+        val id = "id"
+        val offset = 1000L
+        val absoluteTime = -1L
+        val data = buildMap<String, Any> {
+            put("name", "timer")
+        }
+        val actionSourceData = ActionSourceData(id, ActionType.PAUSE_TIMER.type,  offset, absoluteTime, data)
 
-        assertTrue { actionSourceData.toAction() is Action.PauseTimerAction }
+        val action = actionSourceData.toAction()
+
+
+        assertTrue { action is Action.PauseTimerAction }
+        val pauseTimerAction = action as Action.PauseTimerAction
+        assertEquals(id, action.id)
+        assertEquals(offset, action.offset)
+        assertEquals(absoluteTime, action.absoluteTime)
+        assertEquals(data["name"], pauseTimerAction.name)
     }
 
     @Test

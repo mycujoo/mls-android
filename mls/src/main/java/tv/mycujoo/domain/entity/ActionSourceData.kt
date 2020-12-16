@@ -88,14 +88,14 @@ data class ActionSourceData(
                 val relatedData = DataMapper.parseTimerRelatedData(data)
                 if (relatedData != null) {
                     return Action.CreateTimerAction(
-                        newId,
-                        newOffset,
-                        newAbsoluteTime,
-                        relatedData.name,
-                        relatedData.format,
-                        relatedData.direction,
-                        relatedData.startValue,
-                        relatedData.capValue
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        name = relatedData.name,
+                        format = relatedData.format,
+                        direction = relatedData.direction,
+                        startValue = relatedData.startValue,
+                        capValue = relatedData.capValue
                     )
                 }
             }
@@ -103,15 +103,23 @@ data class ActionSourceData(
                 val relatedData = DataMapper.parseTimerRelatedData(data)
                 if (relatedData != null) {
                     return Action.StartTimerAction(
-                        newId,
-                        newOffset,
-                        newAbsoluteTime,
-                        relatedData.name
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        name = relatedData.name
                     )
                 }
             }
             PAUSE_TIMER -> {
-                return Action.PauseTimerAction(newId, newOffset, newAbsoluteTime)
+                val relatedData = DataMapper.parseTimerRelatedData(data)
+                if (relatedData != null) {
+                    return Action.PauseTimerAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        name = relatedData.name
+                    )
+                }
             }
             ADJUST_TIMER -> {
                 return Action.AdjustTimerAction(newId, newOffset, newAbsoluteTime)
