@@ -19,9 +19,9 @@ class ShowOverlayActionHelper {
             actionObject: ActionObject
         ): Boolean {
 
-            return if (actionObject.overlayRelatedData?.duration != -1L) {
-                if (actionObject.overlayRelatedData?.outroAnimationDuration != -1L) {
-                    (actionObject.offset + actionObject.overlayRelatedData?.duration!! + actionObject.overlayRelatedData.outroAnimationDuration + ONE_SECOND_IN_MS < currentTime)
+            return if (actionObject.overlayRelatedData?.duration != null) {
+                if (actionObject.overlayRelatedData.outroAnimationDuration != -1L) {
+                    (actionObject.offset + actionObject.overlayRelatedData.duration + actionObject.overlayRelatedData.outroAnimationDuration + ONE_SECOND_IN_MS < currentTime)
                 } else {
                     (actionObject.offset + actionObject.overlayRelatedData.duration < currentTime)
                 }
@@ -85,8 +85,7 @@ class ShowOverlayActionHelper {
             actionObject: ActionObject
         ): Boolean {
             // there is no duration OR, there is no outro animation duration specified
-            if (actionObject.overlayRelatedData == null ||
-                actionObject.overlayRelatedData.duration <= 0L ||
+            if (actionObject.overlayRelatedData?.duration == null ||
                 actionObject.overlayRelatedData.outroAnimationDuration <= 0L
             ) {
                 return false
@@ -138,7 +137,7 @@ class ShowOverlayActionHelper {
                 }
 
                 // there is no outro specified at all
-                if (actionObject.overlayRelatedData.outroAnimationType == AnimationType.UNSPECIFIED || actionObject.overlayRelatedData.outroAnimationDuration == -1L) {
+                if (actionObject.overlayRelatedData.outroAnimationType == AnimationType.NONE || actionObject.overlayRelatedData.outroAnimationDuration == -1L) {
                     return if (AnimationClassifierHelper.hasOutroAnimation(actionObject.overlayRelatedData.outroAnimationType)) {
                         currentTime > actionObject.offset + actionObject.overlayRelatedData.outroAnimationDuration
                     } else {
@@ -156,7 +155,7 @@ class ShowOverlayActionHelper {
                 if (actionObject.overlayRelatedData == null) {
                     return false
                 }
-                if (actionObject.overlayRelatedData.duration == -1L) {
+                if (actionObject.overlayRelatedData.duration == null) {
                     return false
                 }
 
@@ -199,7 +198,7 @@ class ShowOverlayActionHelper {
                 return false
             }
 
-            if (actionObject.overlayRelatedData.duration == -1L) {
+            if (actionObject.overlayRelatedData.duration == null) {
                 return false
             }
 

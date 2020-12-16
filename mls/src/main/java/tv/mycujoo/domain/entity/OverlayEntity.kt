@@ -61,7 +61,7 @@ data class OverlayEntity(
         currentTime: Long
     ): Boolean {
         // there is no outro specified at all
-        if (outroTransitionSpec.animationType == AnimationType.UNSPECIFIED) {
+        if (outroTransitionSpec.animationType == AnimationType.NONE) {
             return false
         }
 
@@ -89,7 +89,7 @@ data class OverlayEntity(
             }
 
             // there is no outro specified at all
-            if (outroTransitionSpec.animationType == AnimationType.UNSPECIFIED || outroTransitionSpec.animationDuration == -1L) {
+            if (outroTransitionSpec.animationType == AnimationType.NONE || outroTransitionSpec.animationDuration == -1L) {
                 return if (hasIntroAnimation(introTransitionSpec.animationType)) {
                     currentTime > introTransitionSpec.offset + introTransitionSpec.animationDuration
                 } else {

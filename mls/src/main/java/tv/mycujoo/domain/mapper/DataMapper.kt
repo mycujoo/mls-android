@@ -22,7 +22,7 @@ class DataMapper {
 
             var newId = INVALID_STRING_VALUE
             var svgUrl = INVALID_STRING_VALUE
-            var duration = INVALID_LONG_VALUE
+            var duration: Long? = null
             val positionGuide = PositionGuide()
             val sizePair = MutablePair(INVALID_FLOAT_VALUE, INVALID_FLOAT_VALUE)
 
@@ -50,7 +50,17 @@ class DataMapper {
                             any?.let { retrieveSize(sizePair, it) }
                         }
                         "duration" -> {
-                            any?.let { duration = (it as Double).toLong() }
+                            any?.let {
+                                duration = when (it) {
+                                    is Long -> {
+                                        it
+                                    }
+                                    else -> {
+                                        (it as Double).toLong()
+                                    }
+                                }
+                            }
+
                         }
                         "animatein_type" -> {
                             any?.let {
@@ -58,7 +68,16 @@ class DataMapper {
                             }
                         }
                         "animatein_duration" -> {
-                            any?.let { introAnimationDuration = (it as Double).toLong() }
+                            any?.let {
+                                introAnimationDuration = when (it) {
+                                    is Long -> {
+                                        it
+                                    }
+                                    else -> {
+                                        (it as Double).toLong()
+                                    }
+                                }
+                            }
 
                         }
                         "animateout_type" -> {

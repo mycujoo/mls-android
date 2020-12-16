@@ -68,7 +68,7 @@ data class ActionObject(
         )
 
         val outroTransitionSpec: TransitionSpec =
-            if (overlayRelatedData.duration > 0L) {
+            if (overlayRelatedData.duration != null) {
                 TransitionSpec(
                     offset + overlayRelatedData.duration,
                     if (overlayRelatedData.outroAnimationType == AnimationType.UNSPECIFIED) {
