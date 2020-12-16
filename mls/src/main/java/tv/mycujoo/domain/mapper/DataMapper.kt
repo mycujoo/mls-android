@@ -28,7 +28,7 @@ class DataMapper {
 
             var introAnimationType = AnimationType.NONE
             var introAnimationDuration = INVALID_LONG_VALUE
-            var outroAnimationType = AnimationType.UNSPECIFIED
+            var outroAnimationType = AnimationType.NONE
             var outroAnimationDuration = INVALID_LONG_VALUE
 
             var variablePlaceHolders = emptyList<String>()

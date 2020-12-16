@@ -29,8 +29,7 @@ class OverlayViewHelper(
         overlayHost: ConstraintLayout,
         overlayEntity: OverlayEntity
     ) {
-        if (overlayEntity.introTransitionSpec.animationType == AnimationType.NONE ||
-            overlayEntity.introTransitionSpec.animationType == AnimationType.UNSPECIFIED
+        if (overlayEntity.introTransitionSpec.animationType == AnimationType.NONE
         ) {
             addViewWithNoAnimation(
                 context,
@@ -230,9 +229,7 @@ class OverlayViewHelper(
         overlayHost: ConstraintLayout,
         overlayEntity: OverlayEntity
     ) {
-        if (overlayEntity.outroTransitionSpec.animationType == AnimationType.NONE ||
-            overlayEntity.outroTransitionSpec.animationType == AnimationType.UNSPECIFIED
-        ) {
+        if (overlayEntity.outroTransitionSpec.animationType == AnimationType.NONE) {
             removeViewWithNoAnimation(overlayHost, overlayEntity)
         } else {
             removeViewWithAnimation(overlayHost, overlayEntity)

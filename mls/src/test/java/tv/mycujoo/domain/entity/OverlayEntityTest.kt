@@ -174,7 +174,7 @@ class OverlayEntityTest {
     @Test
     fun `given forceUpdate after into offset when no outro offset is available, should return LINGERING_MIDWAY`() {
         val introTransitionSpec = TransitionSpec(FIFTEEN_SECONDS, AnimationType.NONE, ONE_SECONDS)
-        val outroTransitionSpec = TransitionSpec(INVALID, AnimationType.UNSPECIFIED, 0L)
+        val outroTransitionSpec = TransitionSpec(INVALID, AnimationType.NONE, 0L)
         val sampleOverlayEntity = getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
 
 

@@ -182,8 +182,8 @@ class AnnotationListenerTest {
     /**region addOrUpdateLingeringMidwayOverlay() tests*/
     @Test
     fun `given lingering-midway overlay which is attached, should update it`() {
-        val introTransitionSpec = TransitionSpec(15000L, AnimationType.UNSPECIFIED, -1L)
-        val outroTransitionSpec = TransitionSpec(25000L, AnimationType.UNSPECIFIED, -1L)
+        val introTransitionSpec = TransitionSpec(15000L, AnimationType.NONE, -1L)
+        val outroTransitionSpec = TransitionSpec(25000L, AnimationType.NONE, -1L)
         val overlayEntity =
             OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
 
@@ -196,8 +196,8 @@ class AnnotationListenerTest {
 
     @Test
     fun `given lingering-midway overlay which is not attached, should add it as lingering`() {
-        val introTransitionSpec = TransitionSpec(15000L, AnimationType.UNSPECIFIED, -1L)
-        val outroTransitionSpec = TransitionSpec(25000L, AnimationType.UNSPECIFIED, -1L)
+        val introTransitionSpec = TransitionSpec(15000L, AnimationType.NONE, -1L)
+        val outroTransitionSpec = TransitionSpec(25000L, AnimationType.NONE, -1L)
         val overlayEntity =
             OverlayEntityTest.getSampleOverlayEntity(introTransitionSpec, outroTransitionSpec)
 

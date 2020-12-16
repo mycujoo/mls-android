@@ -71,7 +71,7 @@ data class ActionObject(
             if (overlayRelatedData.duration != null) {
                 TransitionSpec(
                     offset + overlayRelatedData.duration,
-                    if (overlayRelatedData.outroAnimationType == AnimationType.UNSPECIFIED) {
+                    if (overlayRelatedData.outroAnimationType == AnimationType.NONE) {
                         AnimationType.NONE
                     } else {
                         overlayRelatedData.outroAnimationType
@@ -81,7 +81,7 @@ data class ActionObject(
             } else {
                 TransitionSpec(
                     -1L,
-                    AnimationType.UNSPECIFIED,
+                    AnimationType.NONE,
                     -1L
                 )
             }
