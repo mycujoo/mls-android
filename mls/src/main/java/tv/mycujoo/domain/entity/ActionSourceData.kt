@@ -2,6 +2,7 @@ package tv.mycujoo.domain.entity
 
 import com.google.gson.annotations.SerializedName
 import tv.mycujoo.domain.entity.models.ActionType
+import tv.mycujoo.domain.entity.models.ActionType.*
 import tv.mycujoo.domain.mapper.DataMapper
 
 data class ActionSourceData(
@@ -29,5 +30,57 @@ data class ActionSourceData(
             DataMapper.parseTimerRelatedData(data),
             data
         )
+    }
+
+
+    fun toAction(): Action {
+        val newId = id.orEmpty()
+        val newType = ActionType.fromValueOrUnknown(this.type.orEmpty())
+        var newOffset: Long = -1L
+        offset?.let { newOffset = it }
+        var newAbsoluteTime: Long = -1L
+        absoluteTime?.let { newAbsoluteTime = it }
+
+
+        when (newType) {
+            SHOW_OVERLAY -> {
+                return Action.ShowOverlayAction(newId, newOffset, newAbsoluteTime)
+            }
+            HIDE_OVERLAY -> {
+                return Action.HideOverlayAction(newId, newOffset, newAbsoluteTime)
+            }
+
+            CREATE_TIMER -> {
+                return Action.CreateTimerAction(newId, newOffset, newAbsoluteTime)
+            }
+            START_TIMER -> {
+                return Action.StartTimerAction(newId, newOffset, newAbsoluteTime)
+            }
+            PAUSE_TIMER -> {
+                return Action.PauseTimerAction(newId, newOffset, newAbsoluteTime)
+            }
+            ADJUST_TIMER -> {
+                return Action.AdjustTimerAction(newId, newOffset, newAbsoluteTime)
+            }
+            SKIP_TIMER -> {
+                return Action.SkipTimerAction(newId, newOffset, newAbsoluteTime)
+            }
+
+            SET_VARIABLE -> {
+                return Action.CreateVariableAction(newId, newOffset, newAbsoluteTime)
+            }
+            INCREMENT_VARIABLE -> {
+                return Action.IncrementVariableAction(newId, newOffset, newAbsoluteTime)
+            }
+
+            SHOW_TIMELINE_MARKER -> {
+                return Action.MarkTimelineAction(newId, newOffset, newAbsoluteTime)
+            }
+
+            DELETE_ACTION -> {
+                return Action.DeleteAction(newId, newOffset, newAbsoluteTime)
+            }
+            UNKNOWN -> TODO()
+        }
     }
 }
