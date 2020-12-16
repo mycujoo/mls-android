@@ -7,7 +7,7 @@ import tv.mycujoo.domain.entity.*
 class VariableActionHelperTest {
     @Test
     fun `SetVariableAction not reached`() {
-        val variable = Variable("\$awayscore", VariableType.LONG, 0)
+        val variable = Variable.LongVariable("\$awayscore", 0L)
         val setVariableEntity = SetVariableEntity("id_0", 5000L, variable)
 
         val act =
@@ -18,7 +18,7 @@ class VariableActionHelperTest {
 
     @Test
     fun `SetVariableAction reached`() {
-        val variable = Variable("\$awayscore", VariableType.LONG, 0)
+        val variable = Variable.LongVariable("\$awayscore", 0L)
         val setVariableEntity = SetVariableEntity("id_0", 5000L, variable)
 
         val act =

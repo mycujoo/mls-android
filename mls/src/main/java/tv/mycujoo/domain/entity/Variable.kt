@@ -1,32 +1,83 @@
 package tv.mycujoo.domain.entity
 
-import tv.mycujoo.domain.entity.VariableType.*
+sealed class Variable {
+    abstract val name: String
+    abstract fun printValue(): String
+    abstract fun increment(amount: Any)
 
-class Variable(
-    var name: String,
-    val type: VariableType,
-    var value: Any,
-    private val doublePrecision: Int? = null
-) {
+    data class LongVariable(override val name: String, var value: Long) : Variable() {
+        override fun printValue(): String {
+            return value.toString()
+        }
 
-    fun printValue(): String {
-        return when (type) {
-            UNSPECIFIED -> {
-                ""
-            }
-            DOUBLE -> {
-                if (doublePrecision != null) {
-                    String.format("%.${doublePrecision}f", value)
-                } else {
-                    (value as Double).toString()
+        override fun increment(amount: Any) {
+            when (amount) {
+                is Long -> {
+                    value += amount
                 }
-            }
-            LONG -> {
-                (value as Long).toString()
-            }
-            STRING -> {
-                (value as String)
+                is Double -> {
+                    value += amount.toLong()
+                }
+                else -> {
+                    // should not happen
+                }
             }
         }
     }
+
+    data class DoubleVariable(
+        override val name: String,
+        var value: Double,
+        val doublePrecision: Int? = null
+    ) : Variable() {
+        override fun printValue(): String {
+            return if (doublePrecision != null) {
+                String.format("%.${doublePrecision}f", value)
+            } else {
+                value.toString()
+            }
+        }
+
+        override fun increment(amount: Any) {
+            when (amount) {
+                is Long -> {
+                    value += amount.toDouble()
+                }
+                is Double -> {
+                    value += amount
+                }
+                else -> {
+                    // should not happen
+                }
+            }
+        }
+    }
+
+    data class StringVariable(override val name: String, var value: String) : Variable() {
+        override fun printValue(): String {
+            return value
+        }
+
+        override fun increment(amount: Any) {
+            when (amount) {
+                is String -> {
+                    value = amount
+                }
+                else -> {
+                    // should not happen
+                }
+            }
+        }
+    }
+
+    data class InvalidVariable(override val name: String) : Variable() {
+        override fun printValue(): String {
+            return ""
+        }
+
+        override fun increment(amount: Any) {
+            // do nothing
+        }
+    }
+
 }

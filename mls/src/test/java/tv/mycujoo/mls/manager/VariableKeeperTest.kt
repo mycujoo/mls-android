@@ -4,9 +4,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.Before
 import org.junit.Test
-import tv.mycujoo.domain.entity.SetVariableEntity
 import tv.mycujoo.domain.entity.Variable
-import tv.mycujoo.domain.entity.VariableType
+import tv.mycujoo.domain.entity.SetVariableEntity
 import tv.mycujoo.mls.model.MutablePair
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerFormat
@@ -216,7 +215,7 @@ class VariableKeeperTest {
     }
 
     private fun getSampleSetVariableEntity(id: String): SetVariableEntity {
-        val variable = Variable(id, VariableType.LONG, 0L)
+        val variable = Variable.LongVariable(id, 0L)
         return SetVariableEntity(
             id,
             0L,

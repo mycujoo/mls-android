@@ -754,7 +754,7 @@ class OverlayViewHelper(
     fun setVariable(variable: SetVariableEntity) {
         viewHandler.getVariableTranslator().createVariableTripleIfNotExisted(variable.variable.name)
         viewHandler.getVariableTranslator()
-            .emitNewValue(variable.variable.name, variable.variable.value)
+            .emitNewValue(variable.variable.name, variable.variable.printValue())
     }
 
     fun incrementVariable(incrementVariableEntity: IncrementVariableEntity) {

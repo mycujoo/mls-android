@@ -1,10 +1,10 @@
 package tv.mycujoo.domain.entity
 
+import tv.mycujoo.domain.entity.VariableType.*
 import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.domain.entity.models.ActionType.*
 import tv.mycujoo.domain.entity.models.ParsedOverlayRelatedData
 import tv.mycujoo.domain.entity.models.ParsedTimerRelatedData
-import tv.mycujoo.domain.mapper.ActionMapper
 import tv.mycujoo.domain.mapper.ActionMapper.Companion.INVALID_FLOAT_VALUE
 import tv.mycujoo.domain.mapper.ActionMapper.Companion.INVALID_LONG_VALUE
 import tv.mycujoo.domain.mapper.ActionMapper.Companion.INVALID_STRING_VALUE
@@ -181,9 +181,9 @@ data class ActionObject(
         }
 
         var variableName = INVALID_STRING_VALUE
-        var variableType = VariableType.UNSPECIFIED
+        var variableType = UNSPECIFIED
         var variableValue: Any = INVALID_LONG_VALUE
-        var variableDoublePrecision : Int? = null
+        var variableDoublePrecision: Int? = null
 
         rawData.let { data ->
             data.keys.forEach { key ->
@@ -217,32 +217,32 @@ data class ActionObject(
         when (rawData["value"]) {
             is Double -> {
                 when (variableType) {
-                    VariableType.DOUBLE -> {
+                    DOUBLE -> {
                         variableValue =
                             rawData["value"] as Double
                     }
-                    VariableType.LONG -> {
+                    LONG -> {
                         variableValue =
                             (rawData["value"] as Double).toLong()
                     }
-                    VariableType.STRING,
-                    VariableType.UNSPECIFIED -> {
+                    STRING,
+                    UNSPECIFIED -> {
                         // should not happen
                     }
                 }
             }
             is Long -> {
                 when (variableType) {
-                    VariableType.DOUBLE -> {
+                    DOUBLE -> {
                         variableValue =
                             (rawData["value"] as Long).toDouble()
                     }
-                    VariableType.LONG -> {
+                    LONG -> {
                         variableValue =
                             rawData["value"] as Long
                     }
-                    VariableType.STRING,
-                    VariableType.UNSPECIFIED -> {
+                    STRING,
+                    UNSPECIFIED -> {
                         // should not happen
                     }
                 }
@@ -253,8 +253,24 @@ data class ActionObject(
         }
 
 
-        val variable = Variable(variableName, variableType, variableValue, variableDoublePrecision)
-        return SetVariableEntity(id, offset, variable)
+        val kVariable = when (variableType) {
+            UNSPECIFIED ->
+                Variable.InvalidVariable(variableName)
+            DOUBLE -> {
+                Variable.DoubleVariable(
+                    variableName,
+                    variableValue as Double,
+                    variableDoublePrecision
+                )
+            }
+            LONG -> {
+                Variable.LongVariable(variableName, variableValue as Long)
+            }
+            STRING -> {
+                Variable.StringVariable(variableName, variableValue as String)
+            }
+        }
+        return SetVariableEntity(id, offset, kVariable)
     }
 
     fun toIncrementVariableEntity(): IncrementVariableEntity? {

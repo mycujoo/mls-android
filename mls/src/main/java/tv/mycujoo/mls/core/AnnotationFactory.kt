@@ -348,10 +348,7 @@ class AnnotationFactory(
             when (act) {
                 IncrementVariableCurrentAct.INCREMENT -> {
                     varVariables[incrementVariableEntity.name]?.let { setVariableEntity ->
-                        ActionVariableHelper.incrementVariable(
-                            setVariableEntity.variable,
-                            incrementVariableEntity
-                        )
+                        setVariableEntity.variable.increment(incrementVariableEntity.amount)
 
                     }
                 }
