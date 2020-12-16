@@ -52,7 +52,8 @@ sealed class Action {
 
     data class StartTimerAction(
         override val id: String, override var offset: Long,
-        override var absoluteTime: Long
+        override var absoluteTime: Long,
+        val name: String
     ) : Action() {
         override val priority: Int = 500
     }

@@ -86,7 +86,7 @@ class ActionSourceDataTest {
         val offset = 1000L
         val absoluteTime = -1L
         val data = buildMap<String, Any> {
-            put("name", "scoreboard1")
+            put("name", "timer1")
             put("format", "ms")
             put("direction", "up")
             put("start_value", 0L)
@@ -113,10 +113,27 @@ class ActionSourceDataTest {
 
     @Test
     fun `mapping to StartTimerAction`() {
-        val actionSourceData = ActionSourceData("id", ActionType.START_TIMER.type, 1000L, -1L, null)
+        val id = "id"
+        val offset = 1000L
+        val absoluteTime = -1L
+        val data = buildMap<String, Any> {
+            put("name", "timer")
+        }
+        val actionSourceData = ActionSourceData(id, ActionType.START_TIMER.type,  offset, absoluteTime, data)
 
-        assertTrue { actionSourceData.toAction() is Action.StartTimerAction }
+
+        val action = actionSourceData.toAction()
+
+
+        assertTrue { action is Action.StartTimerAction }
+        val startTimerAction = action as Action.StartTimerAction
+        assertEquals(id, action.id)
+        assertEquals(offset, action.offset)
+        assertEquals(absoluteTime, action.absoluteTime)
+        assertEquals(data["name"], startTimerAction.name)
     }
+
+
 
     @Test
     fun `mapping to PauseTimerAction`() {

@@ -100,7 +100,15 @@ data class ActionSourceData(
                 }
             }
             START_TIMER -> {
-                return Action.StartTimerAction(newId, newOffset, newAbsoluteTime)
+                val relatedData = DataMapper.parseTimerRelatedData(data)
+                if (relatedData != null) {
+                    return Action.StartTimerAction(
+                        newId,
+                        newOffset,
+                        newAbsoluteTime,
+                        relatedData.name
+                    )
+                }
             }
             PAUSE_TIMER -> {
                 return Action.PauseTimerAction(newId, newOffset, newAbsoluteTime)
