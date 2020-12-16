@@ -34,17 +34,49 @@ class ActionSourceDataTest {
         assertEquals(absoluteTime, action.absoluteTime)
         assertEquals(data["svg_url"], showOverlayAction.svgData?.svgUrl)
         assertEquals(data["duration"], showOverlayAction.duration)
-        assertEquals(data["animatein_type"], showOverlayAction.introAnimationSpec?.animationType?.type)
-        assertEquals(data["animatein_duration"], showOverlayAction.introAnimationSpec?.animationDuration)
+        assertEquals(
+            data["animatein_type"],
+            showOverlayAction.introAnimationSpec?.animationType?.type
+        )
+        assertEquals(
+            data["animatein_duration"],
+            showOverlayAction.introAnimationSpec?.animationDuration
+        )
         assertEquals(data["variable_positions"], showOverlayAction.placeHolders)
     }
 
     @Test
     fun `mapping to HideOverlayAction`() {
-        val actionSourceData =
-            ActionSourceData("id", ActionType.HIDE_OVERLAY.type, 1000L, -1L, null)
+        val id = "id"
+        val offset = 1000L
+        val absoluteTime = -1L
+        val data = buildMap<String, Any> {
+            put("animateout_type", "fade_out")
+            put("animateout_duration", 3000L)
+            put("custom_id", "scoreboard1")
+        }
 
-        assertTrue { actionSourceData.toAction() is Action.HideOverlayAction }
+        val actionSourceData =
+            ActionSourceData(id, ActionType.HIDE_OVERLAY.type, offset, absoluteTime, data)
+
+
+        val action = actionSourceData.toAction()
+
+
+        assertTrue { action is Action.HideOverlayAction }
+        val hideOverlayAction = action as Action.HideOverlayAction
+        assertEquals(id, action.id)
+        assertEquals(offset, action.offset)
+        assertEquals(absoluteTime, action.absoluteTime)
+        assertEquals(
+            data["animateout_type"],
+            hideOverlayAction.outroAnimationSpec?.animationType?.type
+        )
+        assertEquals(
+            data["animateout_duration"],
+            hideOverlayAction.outroAnimationSpec?.animationDuration
+        )
+        assertEquals(data["custom_id"], hideOverlayAction.customId)
     }
 
 

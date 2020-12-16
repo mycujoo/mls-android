@@ -86,16 +86,17 @@ class DataMapper {
                             }
                         }
                         "animateout_duration" -> {
-                            any?.let { outroAnimationDuration = (it as Double).toLong() }
+                            any?.let {
+                                outroAnimationDuration = when (it) {
+                                    is Long -> {
+                                        it
+                                    }
+                                    else -> {
+                                        (it as Double).toLong()
+                                    }
+                                }
+                            }
                         }
-
-//                        "label" -> {
-//                            any?.let { label = it as String }
-//                        }
-//
-//                        "color" -> {
-//                            any?.let { color = it as String }
-//                        }
                         "variable_positions" -> {
                             any?.let { variablePlaceHolders = it as List<String> }
                         }

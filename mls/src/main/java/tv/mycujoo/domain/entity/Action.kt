@@ -26,7 +26,9 @@ sealed class Action {
 
     data class HideOverlayAction(
         override val id: String, override var offset: Long,
-        override var absoluteTime: Long
+        override var absoluteTime: Long,
+        val outroAnimationSpec: TransitionSpec? = null,
+        val customId: String? = null
     ) : Action() {
         override val priority: Int = 0
     }

@@ -67,7 +67,21 @@ data class ActionSourceData(
                 }
             }
             HIDE_OVERLAY -> {
-                return Action.HideOverlayAction(newId, newOffset, newAbsoluteTime)
+                val relatedData = DataMapper.parseOverlayRelatedData(data)
+                if (relatedData != null) {
+                    return Action.HideOverlayAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        outroAnimationSpec = TransitionSpec(
+                            newOffset,
+                            relatedData.outroAnimationType,
+                            relatedData.outroAnimationDuration
+                        ),
+                        customId = relatedData.id
+                    )
+
+                }
             }
 
             CREATE_TIMER -> {
