@@ -26,7 +26,7 @@ data class ActionSourceData(
             newType,
             newOffset,
             newAbsoluteTime,
-            DataMapper.extractOverlayRelatedData(data),
+            DataMapper.extractShowOverlayRelatedData(data),
             DataMapper.extractTimerRelatedData(data),
             data
         )
@@ -44,7 +44,7 @@ data class ActionSourceData(
 
         when (newType) {
             SHOW_OVERLAY -> {
-                val relatedData = DataMapper.extractOverlayRelatedData(data)
+                val relatedData = DataMapper.extractShowOverlayRelatedData(data)
                 if (relatedData != null) {
                     return Action.ShowOverlayAction(
                         id = newId,
@@ -67,7 +67,7 @@ data class ActionSourceData(
                 }
             }
             HIDE_OVERLAY -> {
-                val relatedData = DataMapper.extractOverlayRelatedData(data)
+                val relatedData = DataMapper.extractHideOverlayRelatedData(data)
                 if (relatedData != null) {
                     return Action.HideOverlayAction(
                         id = newId,

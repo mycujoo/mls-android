@@ -97,6 +97,7 @@ class ActionSourceDataTest {
 
     /**endregion */
 
+    /**region 'Hide' Overlay related*/
     @Test
     fun `mapping to HideOverlayAction`() {
         val id = "id"
@@ -130,6 +131,28 @@ class ActionSourceDataTest {
         )
         assertEquals(data["custom_id"], hideOverlayAction.customId)
     }
+
+    @Test
+    fun `mapping to HideOverlayAction with no custom_id`() {
+        val id = "id"
+        val offset = 1000L
+        val absoluteTime = -1L
+        val data = buildMap<String, Any> {
+            put("animateout_type", "fade_out")
+            put("animateout_duration", 3000L)
+            // custom_id is not provided
+        }
+
+        val actionSourceData =
+            ActionSourceData(id, ActionType.HIDE_OVERLAY.type, offset, absoluteTime, data)
+
+
+        val action = actionSourceData.toAction()
+
+
+        assertTrue { action is Action.InvalidAction }
+    }
+    /**endregion */
 
 
     @Test

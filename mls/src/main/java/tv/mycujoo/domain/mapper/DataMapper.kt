@@ -17,7 +17,7 @@ class DataMapper {
         private const val INVALID_INT_VALUE = -1
         private const val INVALID_FLOAT_VALUE = -1F
 
-        fun extractOverlayRelatedData(rawDataMap: Map<String, Any>?): ExtractedShowOverlayRelatedData? {
+        fun extractShowOverlayRelatedData(rawDataMap: Map<String, Any>?): ExtractedShowOverlayRelatedData? {
             if (rawDataMap == null) {
                 return null
             }
@@ -132,7 +132,7 @@ class DataMapper {
                 return null
             }
 
-            var newId = INVALID_STRING_VALUE
+            var newId: String? = null
             var outroAnimationType = AnimationType.NONE
             var outroAnimationDuration = INVALID_LONG_VALUE
 
@@ -165,11 +165,11 @@ class DataMapper {
                         }
                     }
                 }
-//                if (svgUrl == null){
-//                    return null
-//                }
+                if (newId == null) {
+                    return null
+                }
                 return ExtractedHideOverlayRelatedData(
-                    newId,
+                    newId!!,
                     outroAnimationType,
                     outroAnimationDuration
                 )
