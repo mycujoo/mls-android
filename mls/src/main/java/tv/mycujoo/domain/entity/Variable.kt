@@ -70,7 +70,7 @@ sealed class Variable {
         }
     }
 
-    data class InvalidVariable(override val name: String) : Variable() {
+    data class InvalidVariable(override val name: String = "") : Variable() {
         override fun printValue(): String {
             return ""
         }

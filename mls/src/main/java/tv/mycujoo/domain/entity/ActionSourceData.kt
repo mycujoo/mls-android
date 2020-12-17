@@ -148,7 +148,14 @@ data class ActionSourceData(
             }
 
             SET_VARIABLE -> {
-                return Action.CreateVariableAction(newId, newOffset, newAbsoluteTime)
+                val variable = DataMapper.mapToVariable(data)
+                return Action.CreateVariableAction(
+                    id = newId,
+                    offset = newOffset,
+                    absoluteTime = newAbsoluteTime,
+                    variable = variable
+                )
+
             }
             INCREMENT_VARIABLE -> {
                 return Action.IncrementVariableAction(newId, newOffset, newAbsoluteTime)

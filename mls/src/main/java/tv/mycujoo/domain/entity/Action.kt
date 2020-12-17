@@ -90,7 +90,8 @@ sealed class Action {
 
     data class CreateVariableAction(
         override val id: String, override var offset: Long,
-        override var absoluteTime: Long
+        override var absoluteTime: Long,
+        val variable: Variable
     ) : Action() {
         override val priority: Int = 1000
     }

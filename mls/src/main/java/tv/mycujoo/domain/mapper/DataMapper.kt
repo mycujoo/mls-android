@@ -2,8 +2,12 @@ package tv.mycujoo.domain.mapper
 
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.PositionGuide
+import tv.mycujoo.domain.entity.Variable
+import tv.mycujoo.domain.entity.VariableType
+import tv.mycujoo.domain.entity.VariableType.*
 import tv.mycujoo.domain.entity.models.ParsedOverlayRelatedData
 import tv.mycujoo.domain.entity.models.ParsedTimerRelatedData
+import tv.mycujoo.domain.entity.models.ParsedVariableRelatedData
 import tv.mycujoo.mls.model.MutablePair
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerFormat
@@ -224,6 +228,131 @@ class DataMapper {
                     value
                 )
             }
+        }
+
+        fun mapToVariable(rawDataMap: Map<String, Any>?): Variable {
+            val data = parseVariableRelatedData(rawDataMap)
+            if (data?.name == null) {
+                return Variable.InvalidVariable()
+            }
+
+            return when (data.variableType) {
+                UNSPECIFIED -> Variable.InvalidVariable()
+                DOUBLE -> Variable.DoubleVariable(
+                    name = data.name,
+                    value = data.variableValue as Double,
+                    doublePrecision = data.variableDoublePrecision
+                )
+                LONG -> {
+                    Variable.LongVariable(
+                        name = data.name,
+                        value = data.variableValue as Long
+                    )
+                }
+                STRING -> {
+                    Variable.StringVariable(
+                        name = data.name,
+                        value = data.variableValue as String
+                    )
+                }
+            }
+        }
+
+        private fun parseVariableRelatedData(rawDataMap: Map<String, Any>?): ParsedVariableRelatedData? {
+            if (rawDataMap == null) {
+                return null
+            }
+
+            var variableName: String? = null
+            var variableType = UNSPECIFIED
+            var variableValue: Any? = null
+            var variableDoublePrecision: Int? = null
+
+            rawDataMap.let { data ->
+                data.keys.forEach { key ->
+                    val any = data[key]
+                    when (key) {
+                        "name" -> {
+                            any?.let { variableName = it as String }
+                        }
+                        "type" -> {
+                            any?.let { variableType = VariableType.fromValueOrNone(it as String) }
+                        }
+                        "double_precision" -> {
+                            any?.let {
+                                when (it) {
+                                    is Double -> {
+                                        variableDoublePrecision = it.toInt()
+                                    }
+                                    is Int -> {
+                                        variableDoublePrecision = it
+                                    }
+                                    else -> {
+                                        // should not happen
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            when (rawDataMap["value"]) {
+                is Double -> {
+                    when (variableType) {
+                        DOUBLE -> {
+                            variableValue =
+                                rawDataMap["value"] as Double
+                        }
+                        LONG -> {
+                            variableValue =
+                                (rawDataMap["value"] as Double).toLong()
+                        }
+                        STRING,
+                        UNSPECIFIED -> {
+                            // should not happen
+                        }
+                    }
+                }
+                is Long -> {
+                    when (variableType) {
+                        DOUBLE -> {
+                            variableValue =
+                                (rawDataMap["value"] as Long).toDouble()
+                        }
+                        LONG -> {
+                            variableValue =
+                                rawDataMap["value"] as Long
+                        }
+                        STRING,
+                        UNSPECIFIED -> {
+                            // should not happen
+                        }
+                    }
+                }
+                is String -> {
+                    when (variableType) {
+                        DOUBLE,
+                        LONG,
+                        UNSPECIFIED -> {
+                            // do nothing
+                        }
+                        STRING -> {
+                            variableValue = rawDataMap["value"]
+                        }
+                    }
+                }
+                else -> {
+                    // should not happen
+                }
+            }
+
+            return ParsedVariableRelatedData(
+                name = variableName,
+                variableType = variableType,
+                variableValue = variableValue,
+                variableDoublePrecision = variableDoublePrecision
+            )
         }
 
         private fun retrieveSize(

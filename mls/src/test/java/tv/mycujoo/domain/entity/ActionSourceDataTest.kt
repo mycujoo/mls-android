@@ -205,10 +205,25 @@ class ActionSourceDataTest {
 
     @Test
     fun `mapping to CreateVariableAction`() {
+        val id = "id"
+        val offset = 1000L
+        val absoluteTime = -1L
+        val data = buildMap<String, Any> {
+            put("name", "var1")
+            put("value", 0L)
+            put("type", "long")
+        }
         val actionSourceData =
-            ActionSourceData("id", ActionType.SET_VARIABLE.type, 1000L, -1L, null)
+            ActionSourceData(id, ActionType.SET_VARIABLE.type, offset, absoluteTime, data)
 
-        assertTrue { actionSourceData.toAction() is Action.CreateVariableAction }
+        val action = actionSourceData.toAction()
+        assertTrue { action is Action.CreateVariableAction }
+        val createVariableAction = action as Action.CreateVariableAction
+        assertEquals(id, action.id)
+        assertEquals(offset, action.offset)
+        assertEquals(absoluteTime, action.absoluteTime)
+        assertEquals(data["name"], createVariableAction.variable.name)
+        assertEquals(data["value"].toString(), createVariableAction.variable.printValue())
     }
 
     @Test
