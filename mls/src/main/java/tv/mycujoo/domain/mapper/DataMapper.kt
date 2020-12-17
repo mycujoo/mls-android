@@ -5,10 +5,7 @@ import tv.mycujoo.domain.entity.PositionGuide
 import tv.mycujoo.domain.entity.Variable
 import tv.mycujoo.domain.entity.VariableType
 import tv.mycujoo.domain.entity.VariableType.*
-import tv.mycujoo.domain.entity.models.ExtractedIncrementVariableData
-import tv.mycujoo.domain.entity.models.ExtractedOverlayRelatedData
-import tv.mycujoo.domain.entity.models.ExtractedSetVariableData
-import tv.mycujoo.domain.entity.models.ExtractedTimerRelatedData
+import tv.mycujoo.domain.entity.models.*
 import tv.mycujoo.mls.model.MutablePair
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerFormat
@@ -397,6 +394,61 @@ class DataMapper {
             return ExtractedIncrementVariableData(name = variableName!!, amount = variableAmount!!)
         }
 
+        fun extractMarkTimelineData(rawDataMap: Map<String, Any>?): ExtractedMarkTimelineData? {
+            if (rawDataMap == null) {
+                return null
+            }
+
+            var seekOffset = 0L
+            var label: String? = null
+            var color: String? = null
+
+            rawDataMap.let { data ->
+                data.keys.forEach { key ->
+                    val any = data[key]
+                    when (key) {
+
+                        "seek_offset" -> {
+                            any?.let {
+                                when (it) {
+                                    is Double -> {
+                                        seekOffset = it.toLong()
+                                    }
+                                    is Long -> {
+                                        seekOffset = it
+                                    }
+                                    else -> {
+                                        // do nothing
+                                    }
+                                }
+                            }
+                        }
+                        "label" -> {
+                            any?.let { label = it as String }
+                        }
+
+                        "color" -> {
+                            any?.let { color = it as String }
+                        }
+                        else -> {
+                            // do nothing
+                        }
+                    }
+                }
+            }
+
+
+            if (label == null || color == null) {
+                return null
+            }
+            return ExtractedMarkTimelineData(
+                seekOffset = seekOffset,
+                label = label!!,
+                color = color!!
+            )
+        }
+
+
         private fun extractSize(
             sizePair: MutablePair<Float, Float>,
             data: Any
@@ -459,5 +511,6 @@ class DataMapper {
 
             }
         }
+
     }
 }

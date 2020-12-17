@@ -171,7 +171,17 @@ data class ActionSourceData(
             }
 
             SHOW_TIMELINE_MARKER -> {
-                return Action.MarkTimelineAction(newId, newOffset, newAbsoluteTime)
+                val extractedMarkTimelineData = DataMapper.extractMarkTimelineData(data)
+                if (extractedMarkTimelineData != null) {
+                    return Action.MarkTimelineAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        seekOffset = extractedMarkTimelineData.seekOffset,
+                        label = extractedMarkTimelineData.label,
+                        color = extractedMarkTimelineData.color
+                    )
+                }
             }
 
             DELETE_ACTION -> {

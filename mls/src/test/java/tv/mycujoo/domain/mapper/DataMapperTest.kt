@@ -101,7 +101,42 @@ class DataMapperTest {
 
         assertEquals(data["name"], extractedIncrementVariableData!!.name)
         assertEquals(data["amount"], extractedIncrementVariableData.amount)
+    }
 
+    /**endregion */
+
+    /**region MarkTimeline functions*/
+    @Test
+    fun `extract MarkTimeline data with seek_offset`() {
+        val data = buildMap<String, Any> {
+            put("seek_offset", 10.toLong())
+            put("label", "#cccccc")
+            put("color", "Goal")
+        }
+
+
+        val extractedMarkTimelineData = DataMapper.extractMarkTimelineData(data)
+
+
+        assertEquals(data["seek_offset"], extractedMarkTimelineData!!.seekOffset)
+        assertEquals(data["label"], extractedMarkTimelineData.label)
+        assertEquals(data["color"], extractedMarkTimelineData.color)
+    }
+
+    @Test
+    fun `extract MarkTimeline data without seek_offset`() {
+        val data = buildMap<String, Any> {
+            put("label", "#cccccc")
+            put("color", "Goal")
+        }
+
+
+        val extractedMarkTimelineData = DataMapper.extractMarkTimelineData(data)
+
+
+        assertEquals(0L, extractedMarkTimelineData!!.seekOffset)
+        assertEquals(data["label"], extractedMarkTimelineData.label)
+        assertEquals(data["color"], extractedMarkTimelineData.color)
     }
 
     /**endregion */

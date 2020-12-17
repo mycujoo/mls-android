@@ -252,10 +252,26 @@ class ActionSourceDataTest {
 
     @Test
     fun `mapping to MarkTimelineAction`() {
+        val id = "id"
+        val offset = 1000L
+        val absoluteTime = -1L
+        val data = buildMap<String, Any> {
+            put("seek_offset", 1000.toLong())
+            put("label", "Goal")
+            put("color", "#ffffff")
+        }
         val actionSourceData =
-            ActionSourceData("id", ActionType.SHOW_TIMELINE_MARKER.type, 1000L, -1L, null)
+            ActionSourceData(id, ActionType.SHOW_TIMELINE_MARKER.type, offset, absoluteTime, data)
 
-        assertTrue { actionSourceData.toAction() is Action.MarkTimelineAction }
+
+        val action = actionSourceData.toAction()
+
+
+        assertTrue { action is Action.MarkTimelineAction }
+        val markTimelineAction = action as Action.MarkTimelineAction
+        assertEquals(data["seek_offset"], markTimelineAction.seekOffset)
+        assertEquals(data["label"], markTimelineAction.label)
+        assertEquals(data["color"], markTimelineAction.color)
     }
 
     @Test

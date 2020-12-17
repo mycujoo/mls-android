@@ -109,7 +109,10 @@ sealed class Action {
     /**region Timeline-marker related*/
     data class MarkTimelineAction(
         override val id: String, override var offset: Long,
-        override var absoluteTime: Long
+        override var absoluteTime: Long,
+        val seekOffset: Long,
+        val label: String,
+        val color: String
     ) : Action() {
         override val priority: Int = 0
     }
