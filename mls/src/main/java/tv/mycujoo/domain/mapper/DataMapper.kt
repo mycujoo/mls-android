@@ -5,9 +5,9 @@ import tv.mycujoo.domain.entity.PositionGuide
 import tv.mycujoo.domain.entity.Variable
 import tv.mycujoo.domain.entity.VariableType
 import tv.mycujoo.domain.entity.VariableType.*
-import tv.mycujoo.domain.entity.models.ParsedOverlayRelatedData
-import tv.mycujoo.domain.entity.models.ParsedTimerRelatedData
-import tv.mycujoo.domain.entity.models.ParsedVariableRelatedData
+import tv.mycujoo.domain.entity.models.ExtractedOverlayRelatedData
+import tv.mycujoo.domain.entity.models.ExtractedSetVariableData
+import tv.mycujoo.domain.entity.models.ExtractedTimerRelatedData
 import tv.mycujoo.mls.model.MutablePair
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerFormat
@@ -19,7 +19,7 @@ class DataMapper {
         private const val INVALID_INT_VALUE = -1
         private const val INVALID_FLOAT_VALUE = -1F
 
-        fun parseOverlayRelatedData(rawDataMap: Map<String, Any>?): ParsedOverlayRelatedData? {
+        fun extractOverlayRelatedData(rawDataMap: Map<String, Any>?): ExtractedOverlayRelatedData? {
             if (rawDataMap == null) {
                 return null
             }
@@ -48,10 +48,10 @@ class DataMapper {
                             any?.let { svgUrl = it as String }
                         }
                         "position" -> {
-                            any?.let { retrievePositionGuide(positionGuide, it) }
+                            any?.let { extractPositionGuide(positionGuide, it) }
                         }
                         "size" -> {
-                            any?.let { retrieveSize(sizePair, it) }
+                            any?.let { extractSize(sizePair, it) }
                         }
                         "duration" -> {
                             any?.let {
@@ -109,7 +109,7 @@ class DataMapper {
                         }
                     }
                 }
-                return ParsedOverlayRelatedData(
+                return ExtractedOverlayRelatedData(
                     newId,
                     svgUrl,
                     duration,
@@ -126,7 +126,7 @@ class DataMapper {
             return null
         }
 
-        fun parseTimerRelatedData(rawDataMap: Map<String, Any>?): ParsedTimerRelatedData? {
+        fun extractTimerRelatedData(rawDataMap: Map<String, Any>?): ExtractedTimerRelatedData? {
             if (rawDataMap == null) {
                 return null
             }
@@ -218,7 +218,7 @@ class DataMapper {
                     }
                 }
 
-                return ParsedTimerRelatedData(
+                return ExtractedTimerRelatedData(
                     name,
                     format,
                     direction,
@@ -231,7 +231,7 @@ class DataMapper {
         }
 
         fun mapToVariable(rawDataMap: Map<String, Any>?): Variable {
-            val data = parseVariableRelatedData(rawDataMap)
+            val data = extractSetVariableData(rawDataMap)
             if (data?.name == null) {
                 return Variable.InvalidVariable()
             }
@@ -258,7 +258,7 @@ class DataMapper {
             }
         }
 
-        private fun parseVariableRelatedData(rawDataMap: Map<String, Any>?): ParsedVariableRelatedData? {
+        private fun extractSetVariableData(rawDataMap: Map<String, Any>?): ExtractedSetVariableData? {
             if (rawDataMap == null) {
                 return null
             }
@@ -347,7 +347,7 @@ class DataMapper {
                 }
             }
 
-            return ParsedVariableRelatedData(
+            return ExtractedSetVariableData(
                 name = variableName,
                 variableType = variableType,
                 variableValue = variableValue,
@@ -355,7 +355,7 @@ class DataMapper {
             )
         }
 
-        private fun retrieveSize(
+        private fun extractSize(
             sizePair: MutablePair<Float, Float>,
             data: Any
         ) {
@@ -382,7 +382,7 @@ class DataMapper {
             }
         }
 
-        private fun retrievePositionGuide(positionGuide: PositionGuide, data: Any) {
+        private fun extractPositionGuide(positionGuide: PositionGuide, data: Any) {
             val map = data as Map<*, *>
 
             for (key in map.keys) {

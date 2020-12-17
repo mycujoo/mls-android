@@ -4,12 +4,12 @@ import tv.mycujoo.domain.entity.ActionObject
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.PositionGuide
 import tv.mycujoo.domain.entity.models.ActionType
-import tv.mycujoo.domain.entity.models.ParsedOverlayRelatedData
+import tv.mycujoo.domain.entity.models.ExtractedOverlayRelatedData
 
 fun OverlayEntity.toActionObject(offset: Long, duration : Long): ActionObject {
 
 
-    val parsedOverlayRelatedData = ParsedOverlayRelatedData(
+    val parsedOverlayRelatedData = ExtractedOverlayRelatedData(
         id,
         "",
         duration,

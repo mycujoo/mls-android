@@ -3,7 +3,7 @@ package tv.mycujoo.domain.entity.models
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.PositionGuide
 
-data class ParsedOverlayRelatedData(
+data class ExtractedOverlayRelatedData(
     val id: String,
     val svgUrl: String,
     val duration: Long?,

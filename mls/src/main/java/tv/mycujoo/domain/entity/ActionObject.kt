@@ -3,8 +3,8 @@ package tv.mycujoo.domain.entity
 import tv.mycujoo.domain.entity.VariableType.*
 import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.domain.entity.models.ActionType.*
-import tv.mycujoo.domain.entity.models.ParsedOverlayRelatedData
-import tv.mycujoo.domain.entity.models.ParsedTimerRelatedData
+import tv.mycujoo.domain.entity.models.ExtractedOverlayRelatedData
+import tv.mycujoo.domain.entity.models.ExtractedTimerRelatedData
 import tv.mycujoo.domain.mapper.ActionMapper.Companion.INVALID_FLOAT_VALUE
 import tv.mycujoo.domain.mapper.ActionMapper.Companion.INVALID_LONG_VALUE
 import tv.mycujoo.domain.mapper.ActionMapper.Companion.INVALID_STRING_VALUE
@@ -15,8 +15,8 @@ data class ActionObject(
     val type: ActionType,
     val offset: Long,
     val absoluteTime: Long,
-    val overlayRelatedData: ParsedOverlayRelatedData?,
-    val timerRelatedData: ParsedTimerRelatedData?,
+    val overlayRelatedData: ExtractedOverlayRelatedData?,
+    val timerRelatedData: ExtractedTimerRelatedData?,
     val rawData: Map<String, Any>?
 ) {
 

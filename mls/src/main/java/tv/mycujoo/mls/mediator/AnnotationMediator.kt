@@ -9,9 +9,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.*
-import tv.mycujoo.domain.entity.models.ActionType
-import tv.mycujoo.domain.entity.models.ParsedOverlayRelatedData
-import tv.mycujoo.domain.entity.models.ParsedTimerRelatedData
 import tv.mycujoo.mls.core.BuildPoint
 import tv.mycujoo.mls.core.IAnnotationFactory
 import tv.mycujoo.mls.data.IDataManager
@@ -19,8 +16,6 @@ import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.enum.MessageLevel
 import tv.mycujoo.mls.manager.Logger
-import tv.mycujoo.mls.model.ScreenTimerDirection
-import tv.mycujoo.mls.model.ScreenTimerFormat
 import tv.mycujoo.mls.player.IPlayer
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import java.util.concurrent.ScheduledExecutorService

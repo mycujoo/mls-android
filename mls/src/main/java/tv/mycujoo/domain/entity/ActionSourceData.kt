@@ -26,8 +26,8 @@ data class ActionSourceData(
             newType,
             newOffset,
             newAbsoluteTime,
-            DataMapper.parseOverlayRelatedData(data),
-            DataMapper.parseTimerRelatedData(data),
+            DataMapper.extractOverlayRelatedData(data),
+            DataMapper.extractTimerRelatedData(data),
             data
         )
     }
@@ -44,7 +44,7 @@ data class ActionSourceData(
 
         when (newType) {
             SHOW_OVERLAY -> {
-                val relatedData = DataMapper.parseOverlayRelatedData(data)
+                val relatedData = DataMapper.extractOverlayRelatedData(data)
                 if (relatedData != null) {
                     return Action.ShowOverlayAction(
                         id = newId,
@@ -67,7 +67,7 @@ data class ActionSourceData(
                 }
             }
             HIDE_OVERLAY -> {
-                val relatedData = DataMapper.parseOverlayRelatedData(data)
+                val relatedData = DataMapper.extractOverlayRelatedData(data)
                 if (relatedData != null) {
                     return Action.HideOverlayAction(
                         id = newId,
@@ -85,7 +85,7 @@ data class ActionSourceData(
             }
 
             CREATE_TIMER -> {
-                val relatedData = DataMapper.parseTimerRelatedData(data)
+                val relatedData = DataMapper.extractTimerRelatedData(data)
                 if (relatedData != null) {
                     return Action.CreateTimerAction(
                         id = newId,
@@ -100,7 +100,7 @@ data class ActionSourceData(
                 }
             }
             START_TIMER -> {
-                val relatedData = DataMapper.parseTimerRelatedData(data)
+                val relatedData = DataMapper.extractTimerRelatedData(data)
                 if (relatedData != null) {
                     return Action.StartTimerAction(
                         id = newId,
@@ -111,7 +111,7 @@ data class ActionSourceData(
                 }
             }
             PAUSE_TIMER -> {
-                val relatedData = DataMapper.parseTimerRelatedData(data)
+                val relatedData = DataMapper.extractTimerRelatedData(data)
                 if (relatedData != null) {
                     return Action.PauseTimerAction(
                         id = newId,
@@ -122,7 +122,7 @@ data class ActionSourceData(
                 }
             }
             ADJUST_TIMER -> {
-                val relatedData = DataMapper.parseTimerRelatedData(data)
+                val relatedData = DataMapper.extractTimerRelatedData(data)
                 if (relatedData != null) {
                     return Action.AdjustTimerAction(
                         id = newId,
@@ -135,7 +135,7 @@ data class ActionSourceData(
                 }
             }
             SKIP_TIMER -> {
-                val relatedData = DataMapper.parseTimerRelatedData(data)
+                val relatedData = DataMapper.extractTimerRelatedData(data)
                 if (relatedData != null) {
                     return Action.SkipTimerAction(
                         id = newId,
