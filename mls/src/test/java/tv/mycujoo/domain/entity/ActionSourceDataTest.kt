@@ -152,9 +152,10 @@ class ActionSourceDataTest {
 
         assertTrue { action is Action.InvalidAction }
     }
+
     /**endregion */
 
-
+    /**region Timer relsted*/
     @Test
     fun `mapping to CreateTimerAction`() {
         val id = "id"
@@ -208,7 +209,6 @@ class ActionSourceDataTest {
         assertEquals(absoluteTime, action.absoluteTime)
         assertEquals(data["name"], startTimerAction.name)
     }
-
 
     @Test
     fun `mapping to PauseTimerAction`() {
@@ -277,7 +277,9 @@ class ActionSourceDataTest {
 
 
     }
+    /**endregion */
 
+    /**region Variable related*/
     @Test
     fun `mapping to CreateVariableAction`() {
         val id = "id"
@@ -324,7 +326,9 @@ class ActionSourceDataTest {
         assertEquals(data["name"], incrementVariableAction.name)
         assertEquals(data["amount"], incrementVariableAction.amount)
     }
+    /**endregion */
 
+    /**region MarkTimeline related*/
     @Test
     fun `mapping to MarkTimelineAction`() {
         val id = "id"
@@ -348,6 +352,7 @@ class ActionSourceDataTest {
         assertEquals(data["label"], markTimelineAction.label)
         assertEquals(data["color"], markTimelineAction.color)
     }
+    /**endregion */
 
     /**region DeleteAction related*/
     @Test
