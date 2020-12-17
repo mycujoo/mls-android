@@ -55,9 +55,8 @@ class ActionSourceDataTest {
         val offset = 1000L
         val absoluteTime = -1L
         val data = buildMap<String, Any> {
-            put("svg_url", "sample_url")
+            // svg_url is NOT provided
             put("duration", 50000L)
-            // position is NOT provided
             put("animatein_type", "fade_in")
             put("animatein_duration", 3000L)
             put("variable_positions", listOf("v1", "v2"))
@@ -79,8 +78,9 @@ class ActionSourceDataTest {
         val offset = 1000L
         val absoluteTime = -1L
         val data = buildMap<String, Any> {
-            // svg_url is NOT provided
+            put("svg_url", "sample_url")
             put("duration", 50000L)
+            // position is NOT provided
             put("animatein_type", "fade_in")
             put("animatein_duration", 3000L)
             put("variable_positions", listOf("v1", "v2"))
@@ -94,7 +94,6 @@ class ActionSourceDataTest {
 
         assertTrue { action is Action.InvalidAction }
     }
-
     /**endregion */
 
     /**region 'Hide' Overlay related*/
@@ -351,6 +350,47 @@ class ActionSourceDataTest {
         assertEquals(data["seek_offset"], markTimelineAction.seekOffset)
         assertEquals(data["label"], markTimelineAction.label)
         assertEquals(data["color"], markTimelineAction.color)
+    }
+
+    @Test
+    fun `mapping to MarkTimelineAction with no label`() {
+        val id = "id"
+        val offset = 1000L
+        val absoluteTime = -1L
+        val data = buildMap<String, Any> {
+            put("seek_offset", 1000.toLong())
+            // label is not provided
+            put("color", "#ffffff")
+        }
+        val actionSourceData =
+            ActionSourceData(id, ActionType.SHOW_TIMELINE_MARKER.type, offset, absoluteTime, data)
+
+
+        val action = actionSourceData.toAction()
+
+
+        assertTrue { action is Action.InvalidAction }
+    }
+
+
+    @Test
+    fun `mapping to MarkTimelineAction with no color`() {
+        val id = "id"
+        val offset = 1000L
+        val absoluteTime = -1L
+        val data = buildMap<String, Any> {
+            put("seek_offset", 1000.toLong())
+            put("label", "Goal")
+            // color is not provided
+        }
+        val actionSourceData =
+            ActionSourceData(id, ActionType.SHOW_TIMELINE_MARKER.type, offset, absoluteTime, data)
+
+
+        val action = actionSourceData.toAction()
+
+
+        assertTrue { action is Action.InvalidAction }
     }
     /**endregion */
 
