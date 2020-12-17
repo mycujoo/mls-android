@@ -42,10 +42,10 @@ class HideOverlayActionHelper {
             currentTime: Long,
             actionObject: ActionObject
         ): Boolean {
-            if (actionObject.overlayRelatedData == null) {
+            if (actionObject.showOverlayRelatedData == null) {
                 return false
             }
-            if (actionObject.overlayRelatedData.outroAnimationDuration == -1L) {
+            if (actionObject.showOverlayRelatedData.outroAnimationDuration == -1L) {
                 return false
             }
 
@@ -55,7 +55,7 @@ class HideOverlayActionHelper {
 
             val leftBound = actionObject.offset
             val rightBound =
-                actionObject.offset + actionObject.overlayRelatedData.outroAnimationDuration
+                actionObject.offset + actionObject.showOverlayRelatedData.outroAnimationDuration
 
             return (leftBound <= currentTime) && (currentTime < rightBound)
         }

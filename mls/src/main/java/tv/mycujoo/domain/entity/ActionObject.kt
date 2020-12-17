@@ -3,7 +3,7 @@ package tv.mycujoo.domain.entity
 import tv.mycujoo.domain.entity.VariableType.*
 import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.domain.entity.models.ActionType.*
-import tv.mycujoo.domain.entity.models.ExtractedOverlayRelatedData
+import tv.mycujoo.domain.entity.models.ExtractedShowOverlayRelatedData
 import tv.mycujoo.domain.entity.models.ExtractedTimerRelatedData
 import tv.mycujoo.domain.mapper.ActionMapper.Companion.INVALID_FLOAT_VALUE
 import tv.mycujoo.domain.mapper.ActionMapper.Companion.INVALID_LONG_VALUE
@@ -15,7 +15,7 @@ data class ActionObject(
     val type: ActionType,
     val offset: Long,
     val absoluteTime: Long,
-    val overlayRelatedData: ExtractedOverlayRelatedData?,
+    val showOverlayRelatedData: ExtractedShowOverlayRelatedData?,
     val timerRelatedData: ExtractedTimerRelatedData?,
     val rawData: Map<String, Any>?
 ) {
@@ -53,30 +53,30 @@ data class ActionObject(
 
     /**region Overlay related*/
     fun toOverlayEntity(): OverlayEntity? {
-        if (overlayRelatedData == null) {
+        if (showOverlayRelatedData == null) {
             return null
         }
         val svgData = SvgData(
-            overlayRelatedData.svgUrl,
+            showOverlayRelatedData.svgUrl,
             null
         )
-        val viewSpec = ViewSpec(overlayRelatedData.positionGuide, overlayRelatedData.sizePair)
+        val viewSpec = ViewSpec(showOverlayRelatedData.positionGuide, showOverlayRelatedData.sizePair)
         val introTransitionSpec = TransitionSpec(
             offset,
-            overlayRelatedData.introAnimationType,
-            overlayRelatedData.introAnimationDuration
+            showOverlayRelatedData.introAnimationType,
+            showOverlayRelatedData.introAnimationDuration
         )
 
         val outroTransitionSpec: TransitionSpec =
-            if (overlayRelatedData.duration != null) {
+            if (showOverlayRelatedData.duration != null) {
                 TransitionSpec(
-                    offset + overlayRelatedData.duration,
-                    if (overlayRelatedData.outroAnimationType == AnimationType.NONE) {
+                    offset + showOverlayRelatedData.duration,
+                    if (showOverlayRelatedData.outroAnimationType == AnimationType.NONE) {
                         AnimationType.NONE
                     } else {
-                        overlayRelatedData.outroAnimationType
+                        showOverlayRelatedData.outroAnimationType
                     },
-                    overlayRelatedData.outroAnimationDuration
+                    showOverlayRelatedData.outroAnimationDuration
                 )
             } else {
                 TransitionSpec(
@@ -92,19 +92,19 @@ data class ActionObject(
             viewSpec,
             introTransitionSpec,
             outroTransitionSpec,
-            overlayRelatedData.variablePlaceHolders
+            showOverlayRelatedData.variablePlaceHolders
         )
     }
 
     fun toHideOverlayActionEntity(): HideOverlayActionEntity? {
-        if (overlayRelatedData == null) {
+        if (showOverlayRelatedData == null) {
             return null
         }
         return HideOverlayActionEntity(
             id,
-            overlayRelatedData.id,
-            overlayRelatedData.outroAnimationType,
-            overlayRelatedData.outroAnimationDuration
+            showOverlayRelatedData.id,
+            showOverlayRelatedData.outroAnimationType,
+            showOverlayRelatedData.outroAnimationDuration
         )
     }
     /**endregion */

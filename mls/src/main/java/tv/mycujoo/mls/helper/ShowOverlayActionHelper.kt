@@ -19,11 +19,11 @@ class ShowOverlayActionHelper {
             actionObject: ActionObject
         ): Boolean {
 
-            return if (actionObject.overlayRelatedData?.duration != null) {
-                if (actionObject.overlayRelatedData.outroAnimationDuration != -1L) {
-                    (actionObject.offset + actionObject.overlayRelatedData.duration + actionObject.overlayRelatedData.outroAnimationDuration + ONE_SECOND_IN_MS < currentTime)
+            return if (actionObject.showOverlayRelatedData?.duration != null) {
+                if (actionObject.showOverlayRelatedData.outroAnimationDuration != -1L) {
+                    (actionObject.offset + actionObject.showOverlayRelatedData.duration + actionObject.showOverlayRelatedData.outroAnimationDuration + ONE_SECOND_IN_MS < currentTime)
                 } else {
-                    (actionObject.offset + actionObject.overlayRelatedData.duration < currentTime)
+                    (actionObject.offset + actionObject.showOverlayRelatedData.duration < currentTime)
                 }
             } else {
                 false
@@ -85,13 +85,13 @@ class ShowOverlayActionHelper {
             actionObject: ActionObject
         ): Boolean {
             // there is no duration OR, there is no outro animation duration specified
-            if (actionObject.overlayRelatedData?.duration == null ||
-                actionObject.overlayRelatedData.outroAnimationDuration <= 0L
+            if (actionObject.showOverlayRelatedData?.duration == null ||
+                actionObject.showOverlayRelatedData.outroAnimationDuration <= 0L
             ) {
                 return false
             }
 
-            val outroOffset = actionObject.offset + actionObject.overlayRelatedData.duration
+            val outroOffset = actionObject.offset + actionObject.showOverlayRelatedData.duration
             return (outroOffset >= currentTime) && (outroOffset < currentTime + ONE_SECOND_IN_MS)
 
         }
@@ -105,13 +105,13 @@ class ShowOverlayActionHelper {
                 return false
             }
 
-            if (actionObject.overlayRelatedData == null || actionObject.overlayRelatedData.introAnimationDuration <= 0L) {
+            if (actionObject.showOverlayRelatedData == null || actionObject.showOverlayRelatedData.introAnimationDuration <= 0L) {
                 return false
             }
 
             val leftBound = actionObject.offset
             val rightBound =
-                actionObject.offset + actionObject.overlayRelatedData.introAnimationDuration
+                actionObject.offset + actionObject.showOverlayRelatedData.introAnimationDuration
 
             return (leftBound <= currentTime) && (currentTime < rightBound)
         }
@@ -125,10 +125,10 @@ class ShowOverlayActionHelper {
                 currentTime: Long,
                 actionObject: ActionObject
             ): Boolean {
-                if (actionObject.overlayRelatedData == null) {
+                if (actionObject.showOverlayRelatedData == null) {
                     return false
                 }
-                if (actionObject.overlayRelatedData.duration != -1L) {
+                if (actionObject.showOverlayRelatedData.duration != -1L) {
                     return false
                 }
 
@@ -137,9 +137,9 @@ class ShowOverlayActionHelper {
                 }
 
                 // there is no outro specified at all
-                if (actionObject.overlayRelatedData.outroAnimationType == AnimationType.NONE || actionObject.overlayRelatedData.outroAnimationDuration == -1L) {
-                    return if (AnimationClassifierHelper.hasOutroAnimation(actionObject.overlayRelatedData.outroAnimationType)) {
-                        currentTime > actionObject.offset + actionObject.overlayRelatedData.outroAnimationDuration
+                if (actionObject.showOverlayRelatedData.outroAnimationType == AnimationType.NONE || actionObject.showOverlayRelatedData.outroAnimationDuration == -1L) {
+                    return if (AnimationClassifierHelper.hasOutroAnimation(actionObject.showOverlayRelatedData.outroAnimationType)) {
+                        currentTime > actionObject.offset + actionObject.showOverlayRelatedData.outroAnimationDuration
                     } else {
                         currentTime > actionObject.offset
                     }
@@ -152,10 +152,10 @@ class ShowOverlayActionHelper {
                 currentTime: Long,
                 actionObject: ActionObject
             ): Boolean {
-                if (actionObject.overlayRelatedData == null) {
+                if (actionObject.showOverlayRelatedData == null) {
                     return false
                 }
-                if (actionObject.overlayRelatedData.duration == null) {
+                if (actionObject.showOverlayRelatedData.duration == null) {
                     return false
                 }
 
@@ -170,13 +170,13 @@ class ShowOverlayActionHelper {
                 var leftBound = actionObject.offset
                 var rightBound = 0L
 
-                if (AnimationClassifierHelper.hasIntroAnimation(actionObject.overlayRelatedData.introAnimationType)) {
+                if (AnimationClassifierHelper.hasIntroAnimation(actionObject.showOverlayRelatedData.introAnimationType)) {
                     leftBound =
-                        actionObject.offset + actionObject.overlayRelatedData.introAnimationDuration
+                        actionObject.offset + actionObject.showOverlayRelatedData.introAnimationDuration
                 }
 
                 rightBound =
-                    actionObject.offset + actionObject.overlayRelatedData.duration
+                    actionObject.offset + actionObject.showOverlayRelatedData.duration
 
                 return (currentTime > leftBound) && (currentTime < rightBound)
 
@@ -194,15 +194,15 @@ class ShowOverlayActionHelper {
             currentTime: Long,
             actionObject: ActionObject
         ): Boolean {
-            if (actionObject.overlayRelatedData == null) {
+            if (actionObject.showOverlayRelatedData == null) {
                 return false
             }
 
-            if (actionObject.overlayRelatedData.duration == null) {
+            if (actionObject.showOverlayRelatedData.duration == null) {
                 return false
             }
 
-            if (actionObject.overlayRelatedData.outroAnimationDuration == -1L) {
+            if (actionObject.showOverlayRelatedData.outroAnimationDuration == -1L) {
                 return false
             }
 
@@ -210,9 +210,9 @@ class ShowOverlayActionHelper {
                 return false
             }
 
-            val leftBound = actionObject.offset + actionObject.overlayRelatedData.duration
+            val leftBound = actionObject.offset + actionObject.showOverlayRelatedData.duration
             val rightBound =
-                actionObject.offset + actionObject.overlayRelatedData.duration + actionObject.overlayRelatedData.outroAnimationDuration
+                actionObject.offset + actionObject.showOverlayRelatedData.duration + actionObject.showOverlayRelatedData.outroAnimationDuration
 
             return (leftBound <= currentTime) && (currentTime < rightBound)
         }

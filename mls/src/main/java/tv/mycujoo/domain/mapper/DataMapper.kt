@@ -17,13 +17,13 @@ class DataMapper {
         private const val INVALID_INT_VALUE = -1
         private const val INVALID_FLOAT_VALUE = -1F
 
-        fun extractOverlayRelatedData(rawDataMap: Map<String, Any>?): ExtractedOverlayRelatedData? {
+        fun extractOverlayRelatedData(rawDataMap: Map<String, Any>?): ExtractedShowOverlayRelatedData? {
             if (rawDataMap == null) {
                 return null
             }
 
             var newId = INVALID_STRING_VALUE
-            var svgUrl = INVALID_STRING_VALUE
+            var svgUrl: String? = null
             var duration: Long? = null
             val positionGuide = PositionGuide()
             val sizePair = MutablePair(INVALID_FLOAT_VALUE, INVALID_FLOAT_VALUE)
@@ -107,21 +107,73 @@ class DataMapper {
                         }
                     }
                 }
-                return ExtractedOverlayRelatedData(
-                    newId,
-                    svgUrl,
-                    duration,
-                    positionGuide,
-                    Pair(sizePair.first, sizePair.second),
-                    introAnimationType,
-                    introAnimationDuration,
-                    outroAnimationType,
-                    outroAnimationDuration,
-                    variablePlaceHolders
-                )
+                if (svgUrl == null){
+                    return null
+                }
+                    return ExtractedShowOverlayRelatedData(
+                        newId,
+                        svgUrl!!,
+                        duration,
+                        positionGuide,
+                        Pair(sizePair.first, sizePair.second),
+                        introAnimationType,
+                        introAnimationDuration,
+                        outroAnimationType,
+                        outroAnimationDuration,
+                        variablePlaceHolders
+                    )
             }
 
             return null
+        }
+
+        fun extractHideOverlayRelatedData(rawDataMap: Map<String, Any>?): ExtractedHideOverlayRelatedData? {
+            if (rawDataMap == null) {
+                return null
+            }
+
+            var newId = INVALID_STRING_VALUE
+            var outroAnimationType = AnimationType.NONE
+            var outroAnimationDuration = INVALID_LONG_VALUE
+
+            rawDataMap.let { data ->
+                data.keys.forEach { key ->
+                    val any = data[key]
+                    when (key) {
+                        "custom_id" -> {
+                            any?.let { newId = it as String }
+                        }
+                        "animateout_type" -> {
+                            any?.let {
+                                outroAnimationType = AnimationType.fromValueOrNone(it as String)
+                            }
+                        }
+                        "animateout_duration" -> {
+                            any?.let {
+                                outroAnimationDuration = when (it) {
+                                    is Long -> {
+                                        it
+                                    }
+                                    else -> {
+                                        (it as Double).toLong()
+                                    }
+                                }
+                            }
+                        }
+                        else -> {
+                            // do nothing
+                        }
+                    }
+                }
+//                if (svgUrl == null){
+//                    return null
+//                }
+                return ExtractedHideOverlayRelatedData(
+                    newId,
+                    outroAnimationType,
+                    outroAnimationDuration
+                )
+            }
         }
 
         fun extractTimerRelatedData(rawDataMap: Map<String, Any>?): ExtractedTimerRelatedData? {
