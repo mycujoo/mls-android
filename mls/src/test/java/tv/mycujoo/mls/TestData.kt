@@ -4,6 +4,7 @@ import tv.mycujoo.domain.entity.*
 import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 
 class TestData {
+
     companion object {
         fun sampleEntityWithIntroAnimation(animationType: AnimationType): OverlayEntity {
             return OverlayEntity(
@@ -34,6 +35,14 @@ class TestData {
                 animationType,
                 ONE_SECOND_IN_MS
             )
+        }
+
+        @ExperimentalStdlibApi
+        fun samplePosition(): Map<String, Double> {
+            return buildMap {
+                put("top", 5.toDouble())
+                put("leading", 5.toDouble())
+            }
         }
     }
 

@@ -2,6 +2,7 @@ package tv.mycujoo.domain.entity
 
 import org.junit.Test
 import tv.mycujoo.domain.entity.models.ActionType
+import tv.mycujoo.mls.TestData.Companion.samplePosition
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -17,6 +18,7 @@ class ActionSourceDataTest {
         val data = buildMap<String, Any> {
             put("svg_url", "sample_url")
             put("duration", 50000L)
+            put("position", samplePosition())
             put("animatein_type", "fade_in")
             put("animatein_duration", 3000L)
             put("variable_positions", listOf("v1", "v2"))
@@ -45,8 +47,33 @@ class ActionSourceDataTest {
         )
         assertEquals(data["variable_positions"], showOverlayAction.placeHolders)
     }
+
     @Test
     fun `mapping to ShowOverlayAction with no svg_url`() {
+
+        val id = "id"
+        val offset = 1000L
+        val absoluteTime = -1L
+        val data = buildMap<String, Any> {
+            put("svg_url", "sample_url")
+            put("duration", 50000L)
+            // position is NOT provided
+            put("animatein_type", "fade_in")
+            put("animatein_duration", 3000L)
+            put("variable_positions", listOf("v1", "v2"))
+        }
+        val actionSourceData =
+            ActionSourceData(id, ActionType.SHOW_OVERLAY.type, offset, absoluteTime, data)
+
+
+        val action = actionSourceData.toAction()
+
+
+        assertTrue { action is Action.InvalidAction }
+    }
+
+    @Test
+    fun `mapping to ShowOverlayAction with no position`() {
 
         val id = "id"
         val offset = 1000L
@@ -67,6 +94,7 @@ class ActionSourceDataTest {
 
         assertTrue { action is Action.InvalidAction }
     }
+
     /**endregion */
 
     @Test

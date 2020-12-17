@@ -25,7 +25,7 @@ class DataMapper {
             var newId = INVALID_STRING_VALUE
             var svgUrl: String? = null
             var duration: Long? = null
-            val positionGuide = PositionGuide()
+            var positionGuide: PositionGuide? = null
             val sizePair = MutablePair(INVALID_FLOAT_VALUE, INVALID_FLOAT_VALUE)
 
             var introAnimationType = AnimationType.NONE
@@ -46,7 +46,7 @@ class DataMapper {
                             any?.let { svgUrl = it as String }
                         }
                         "position" -> {
-                            any?.let { extractPositionGuide(positionGuide, it) }
+                            any?.let { positionGuide = extractPositionGuide(it) }
                         }
                         "size" -> {
                             any?.let { extractSize(sizePair, it) }
@@ -107,21 +107,21 @@ class DataMapper {
                         }
                     }
                 }
-                if (svgUrl == null){
+                if (svgUrl == null || positionGuide == null) {
                     return null
                 }
-                    return ExtractedShowOverlayRelatedData(
-                        newId,
-                        svgUrl!!,
-                        duration,
-                        positionGuide,
-                        Pair(sizePair.first, sizePair.second),
-                        introAnimationType,
-                        introAnimationDuration,
-                        outroAnimationType,
-                        outroAnimationDuration,
-                        variablePlaceHolders
-                    )
+                return ExtractedShowOverlayRelatedData(
+                    newId,
+                    svgUrl!!,
+                    duration,
+                    positionGuide!!,
+                    Pair(sizePair.first, sizePair.second),
+                    introAnimationType,
+                    introAnimationDuration,
+                    outroAnimationType,
+                    outroAnimationDuration,
+                    variablePlaceHolders
+                )
             }
 
             return null
@@ -550,7 +550,8 @@ class DataMapper {
             }
         }
 
-        private fun extractPositionGuide(positionGuide: PositionGuide, data: Any) {
+        private fun extractPositionGuide(data: Any): PositionGuide {
+            val positionGuide = PositionGuide()
             val map = data as Map<*, *>
 
             for (key in map.keys) {
@@ -584,6 +585,7 @@ class DataMapper {
                 }
 
             }
+            return positionGuide
         }
 
     }
