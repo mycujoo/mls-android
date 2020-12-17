@@ -68,14 +68,18 @@ sealed class Action {
 
     data class AdjustTimerAction(
         override val id: String, override var offset: Long,
-        override var absoluteTime: Long
+        override var absoluteTime: Long,
+        val name: String,
+        val value : Long
     ) : Action() {
         override val priority: Int = 300
     }
 
     data class SkipTimerAction(
         override val id: String, override var offset: Long,
-        override var absoluteTime: Long
+        override var absoluteTime: Long,
+        val name: String,
+        val value : Long
     ) : Action() {
         override val priority: Int = 0
     }

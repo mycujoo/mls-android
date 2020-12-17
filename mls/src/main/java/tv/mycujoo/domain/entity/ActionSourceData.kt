@@ -122,10 +122,29 @@ data class ActionSourceData(
                 }
             }
             ADJUST_TIMER -> {
-                return Action.AdjustTimerAction(newId, newOffset, newAbsoluteTime)
+                val relatedData = DataMapper.parseTimerRelatedData(data)
+                if (relatedData != null) {
+                    return Action.AdjustTimerAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        name = relatedData.name,
+                        value = relatedData.value
+                    )
+
+                }
             }
             SKIP_TIMER -> {
-                return Action.SkipTimerAction(newId, newOffset, newAbsoluteTime)
+                val relatedData = DataMapper.parseTimerRelatedData(data)
+                if (relatedData != null) {
+                    return Action.SkipTimerAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        name = relatedData.name,
+                        value = relatedData.value
+                    )
+                }
             }
 
             SET_VARIABLE -> {

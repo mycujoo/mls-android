@@ -119,7 +119,8 @@ class ActionSourceDataTest {
         val data = buildMap<String, Any> {
             put("name", "timer")
         }
-        val actionSourceData = ActionSourceData(id, ActionType.START_TIMER.type,  offset, absoluteTime, data)
+        val actionSourceData =
+            ActionSourceData(id, ActionType.START_TIMER.type, offset, absoluteTime, data)
 
 
         val action = actionSourceData.toAction()
@@ -134,7 +135,6 @@ class ActionSourceDataTest {
     }
 
 
-
     @Test
     fun `mapping to PauseTimerAction`() {
         val id = "id"
@@ -143,7 +143,8 @@ class ActionSourceDataTest {
         val data = buildMap<String, Any> {
             put("name", "timer")
         }
-        val actionSourceData = ActionSourceData(id, ActionType.PAUSE_TIMER.type,  offset, absoluteTime, data)
+        val actionSourceData =
+            ActionSourceData(id, ActionType.PAUSE_TIMER.type, offset, absoluteTime, data)
 
         val action = actionSourceData.toAction()
 
@@ -157,18 +158,49 @@ class ActionSourceDataTest {
     }
 
     @Test
-    fun `mapping to SkipTimerAction`() {
-        val actionSourceData = ActionSourceData("id", ActionType.SKIP_TIMER.type, 1000L, -1L, null)
+    fun `mapping to AdjustTimerAction`() {
+        val id = "id"
+        val offset = 1000L
+        val absoluteTime = -1L
+        val data = buildMap<String, Any> {
+            put("name", "timer")
+            put("value", 3000L)
+        }
+        val actionSourceData =
+            ActionSourceData("id", ActionType.ADJUST_TIMER.type, offset, absoluteTime, data)
 
-        assertTrue { actionSourceData.toAction() is Action.SkipTimerAction }
+        val action = actionSourceData.toAction()
+        assertTrue { action is Action.AdjustTimerAction }
+        val adjustTimerAction = action as Action.AdjustTimerAction
+        assertEquals(id, action.id)
+        assertEquals(offset, action.offset)
+        assertEquals(absoluteTime, action.absoluteTime)
+        assertEquals(data["name"], adjustTimerAction.name)
+        assertEquals(data["value"], adjustTimerAction.value)
     }
 
     @Test
-    fun `mapping to AdjustTimerAction`() {
+    fun `mapping to SkipTimerAction`() {
+        val id = "id"
+        val offset = 1000L
+        val absoluteTime = -1L
+        val data = buildMap<String, Any> {
+            put("name", "timer")
+            put("value", 3000L)
+        }
         val actionSourceData =
-            ActionSourceData("id", ActionType.ADJUST_TIMER.type, 1000L, -1L, null)
+            ActionSourceData(id, ActionType.SKIP_TIMER.type, offset, absoluteTime, data)
 
-        assertTrue { actionSourceData.toAction() is Action.AdjustTimerAction }
+        val action = actionSourceData.toAction()
+        assertTrue { action is Action.SkipTimerAction }
+        val skipTimerAction = action as Action.SkipTimerAction
+        assertEquals(id, action.id)
+        assertEquals(offset, action.offset)
+        assertEquals(absoluteTime, action.absoluteTime)
+        assertEquals(data["name"], skipTimerAction.name)
+        assertEquals(data["value"], skipTimerAction.value)
+
+
     }
 
     @Test
