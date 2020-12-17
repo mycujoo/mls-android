@@ -158,7 +158,16 @@ data class ActionSourceData(
 
             }
             INCREMENT_VARIABLE -> {
-                return Action.IncrementVariableAction(newId, newOffset, newAbsoluteTime)
+                val extractedIncrementVariableData = DataMapper.extractIncrementVariableData(data)
+                if (extractedIncrementVariableData != null) {
+                    return Action.IncrementVariableAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        name = extractedIncrementVariableData.name,
+                        amount = extractedIncrementVariableData.amount
+                    )
+                }
             }
 
             SHOW_TIMELINE_MARKER -> {

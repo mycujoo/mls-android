@@ -5,6 +5,7 @@ import tv.mycujoo.domain.entity.PositionGuide
 import tv.mycujoo.domain.entity.Variable
 import tv.mycujoo.domain.entity.VariableType
 import tv.mycujoo.domain.entity.VariableType.*
+import tv.mycujoo.domain.entity.models.ExtractedIncrementVariableData
 import tv.mycujoo.domain.entity.models.ExtractedOverlayRelatedData
 import tv.mycujoo.domain.entity.models.ExtractedSetVariableData
 import tv.mycujoo.domain.entity.models.ExtractedTimerRelatedData
@@ -353,6 +354,47 @@ class DataMapper {
                 variableValue = variableValue,
                 variableDoublePrecision = variableDoublePrecision
             )
+        }
+
+        fun extractIncrementVariableData(rawDataMap: Map<String, Any>?): ExtractedIncrementVariableData? {
+            if (rawDataMap == null) {
+                return null
+            }
+
+            var variableName: String? = null
+            var variableAmount: Double? = null
+
+
+            rawDataMap.let { data ->
+                data.keys.forEach { key ->
+                    val any = data[key]
+                    when (key) {
+                        "name" -> {
+                            any?.let { variableName = it as String }
+                        }
+                        "amount" -> {
+                            any?.let {
+                                when (it) {
+                                    is Double -> {
+                                        variableAmount = it
+                                    }
+                                    is Long -> {
+                                        variableAmount = it.toDouble()
+                                    }
+                                    else -> {
+                                        // should not happen
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (variableName == null || variableAmount == null) {
+                return null
+            }
+            return ExtractedIncrementVariableData(name = variableName!!, amount = variableAmount!!)
         }
 
         private fun extractSize(

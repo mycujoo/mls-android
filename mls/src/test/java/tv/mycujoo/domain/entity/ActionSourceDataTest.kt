@@ -228,10 +228,26 @@ class ActionSourceDataTest {
 
     @Test
     fun `mapping to IncrementVariableAction`() {
+        val id = "id"
+        val offset = 1000L
+        val absoluteTime = -1L
+        val data = buildMap<String, Any> {
+            put("name", "var1")
+            put("amount", 5000.toDouble())
+        }
         val actionSourceData =
-            ActionSourceData("id", ActionType.INCREMENT_VARIABLE.type, 1000L, -1L, null)
+            ActionSourceData(id, ActionType.INCREMENT_VARIABLE.type, offset, absoluteTime, data)
 
-        assertTrue { actionSourceData.toAction() is Action.IncrementVariableAction }
+
+        val action = actionSourceData.toAction()
+
+
+        assertTrue { action is Action.IncrementVariableAction }
+        val incrementVariableAction = action as Action.IncrementVariableAction
+        assertEquals(id, action.id)
+        assertEquals(offset, action.offset)
+        assertEquals(data["name"], incrementVariableAction.name)
+        assertEquals(data["amount"], incrementVariableAction.amount)
     }
 
     @Test

@@ -70,7 +70,7 @@ sealed class Action {
         override val id: String, override var offset: Long,
         override var absoluteTime: Long,
         val name: String,
-        val value : Long
+        val value: Long
     ) : Action() {
         override val priority: Int = 300
     }
@@ -79,7 +79,7 @@ sealed class Action {
         override val id: String, override var offset: Long,
         override var absoluteTime: Long,
         val name: String,
-        val value : Long
+        val value: Long
     ) : Action() {
         override val priority: Int = 0
     }
@@ -98,7 +98,9 @@ sealed class Action {
 
     data class IncrementVariableAction(
         override val id: String, override var offset: Long,
-        override var absoluteTime: Long
+        override var absoluteTime: Long,
+        val name: String,
+        val amount: Double
     ) : Action() {
         override val priority: Int = 0
     }
