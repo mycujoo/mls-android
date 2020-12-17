@@ -122,7 +122,8 @@ sealed class Action {
     /**region Other actions*/
     data class DeleteAction(
         override val id: String, override var offset: Long,
-        override var absoluteTime: Long
+        override var absoluteTime: Long,
+        val targetActionId: String
     ) : Action() {
         override val priority: Int = 2000
     }

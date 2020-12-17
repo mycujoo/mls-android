@@ -448,6 +448,28 @@ class DataMapper {
             )
         }
 
+        fun extractDeleteActionData(rawDataMap: Map<String, Any>?): String? {
+            if (rawDataMap == null) {
+                return null
+            }
+            var targetActionId: String? = null
+
+            rawDataMap.let { data ->
+                data.keys.forEach { key ->
+                    val any = data[key]
+                    when (key) {
+                        "action_id" -> {
+                            any?.let {
+                                targetActionId = it as String
+                            }
+                        }
+                    }
+                }
+            }
+
+            return targetActionId
+        }
+
 
         private fun extractSize(
             sizePair: MutablePair<Float, Float>,

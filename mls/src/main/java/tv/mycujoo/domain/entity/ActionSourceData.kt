@@ -185,7 +185,15 @@ data class ActionSourceData(
             }
 
             DELETE_ACTION -> {
-                return Action.DeleteAction(newId, newOffset, newAbsoluteTime)
+                val extractedDeleteActionData = DataMapper.extractDeleteActionData(data)
+                if (extractedDeleteActionData != null) {
+                    return Action.DeleteAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        targetActionId = extractedDeleteActionData
+                    )
+                }
             }
             UNKNOWN -> {
                 // do nothing, returns InvalidAction

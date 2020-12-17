@@ -138,10 +138,39 @@ class DataMapperTest {
         assertEquals(data["label"], extractedMarkTimelineData.label)
         assertEquals(data["color"], extractedMarkTimelineData.color)
     }
+    /**endregion */
+
+    /**region DeleteAction functions*/
+    @Test
+    fun `extract DeleteAction data with action_id`() {
+        val data = buildMap<String, Any> {
+            put("action_id", RANDOM_STRING)
+        }
+
+
+        val extractedMarkTimelineData = DataMapper.extractDeleteActionData(data)
+
+
+        assertEquals(data["action_id"], extractedMarkTimelineData)
+    }
+
+    @Test
+    fun `extract DeleteAction data without action_id`() {
+        val data = buildMap<String, Any> {
+            put(UNRELATED, RANDOM_STRING)
+        }
+
+
+        val extractedMarkTimelineData = DataMapper.extractDeleteActionData(data)
+
+
+        assertEquals(null, extractedMarkTimelineData)
+    }
 
     /**endregion */
 
     companion object {
         const val UNRELATED = "unrelated"
+        const val RANDOM_STRING = "random_string"
     }
 }

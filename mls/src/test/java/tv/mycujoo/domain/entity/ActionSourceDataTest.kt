@@ -274,12 +274,40 @@ class ActionSourceDataTest {
         assertEquals(data["color"], markTimelineAction.color)
     }
 
+    /**region DeleteAction related*/
     @Test
     fun `mapping to DeleteAction`() {
+        val id = "id"
+        val offset = 1000L
+        val absoluteTime = -1L
+        val data = buildMap<String, Any> {
+            put("action_id", "STR")
+        }
         val actionSourceData =
-            ActionSourceData("id", ActionType.DELETE_ACTION.type, 1000L, -1L, null)
+            ActionSourceData(id, ActionType.DELETE_ACTION.type, offset, absoluteTime, data)
 
-        assertTrue { actionSourceData.toAction() is Action.DeleteAction }
+
+        val action = actionSourceData.toAction()
+        assertTrue { action is Action.DeleteAction }
+        val deleteAction = action as Action.DeleteAction
+        assertEquals(data["action_id"], deleteAction.targetActionId)
     }
+
+    @Test
+    fun `mapping to DeleteAction with invalid data`() {
+        val id = "id"
+        val offset = 1000L
+        val absoluteTime = -1L
+        val data = buildMap<String, Any> {
+            // action_id is not provided
+        }
+        val actionSourceData =
+            ActionSourceData(id, ActionType.DELETE_ACTION.type, offset, absoluteTime, data)
+
+
+        val action = actionSourceData.toAction()
+        assertTrue { action is Action.InvalidAction }
+    }
+    /**endregion */
 
 }
