@@ -19,8 +19,8 @@ sealed class Action {
         val svgData: SvgData? = null,
         val duration: Long? = null,
         val viewSpec: ViewSpec? = null,
-        val introAnimationSpec: TransitionSpec? = null,
-        val outroAnimationSpec: TransitionSpec? = null,
+        val introTransitionSpec: TransitionSpec? = null,
+        val outroTransitionSpec: TransitionSpec? = null,
         val placeHolders: List<String> = emptyList()
     ) : Action() {
         override val priority: Int = 0

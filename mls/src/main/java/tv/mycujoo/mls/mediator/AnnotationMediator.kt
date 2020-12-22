@@ -100,7 +100,7 @@ class AnnotationMediator(
     }
 
     override fun feed(actionResponse: ActionResponse) {
-        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
     }
 
     private fun initEventListener(player: IPlayer) {

@@ -1,10 +1,9 @@
 package tv.mycujoo.mls.core
 
 import tv.mycujoo.domain.entity.*
-import tv.mycujoo.domain.entity.models.ActionType
-import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.helper.*
 import tv.mycujoo.mls.manager.IVariableKeeper
+import tv.mycujoo.mls.manager.TimerEntity
 import tv.mycujoo.mls.manager.TimerVariable
 import tv.mycujoo.mls.utils.TimeUtils
 import java.util.concurrent.CopyOnWriteArrayList
@@ -15,29 +14,28 @@ class AnnotationFactory(
 ) :
     IAnnotationFactory {
 
-    private var sortedActionList =
-        CopyOnWriteArrayList<ActionObject>()// actions, sorted by offset, then by priority
-    private var adjustedActionList =
-        CopyOnWriteArrayList<ActionObject>()// sortedActionList + adjusted offset time
+    private var sortedActions =
+        CopyOnWriteArrayList<Action>()// actions, sorted by offset, then by priority
+    private var adjustedActions =
+        CopyOnWriteArrayList<Action>()// sortedActionList + adjusted offset time
     private var timeSystem = TimeSystem.RELATIVE
 
     /**region Over-ridden functions*/
-    override fun setAnnotations(actionObjectList: List<ActionObject>) {
+    override fun setActions(actions: List<Action>) {
         val sortedTemp =
-            actionObjectList
-                .sortedWith(compareBy<ActionObject> { it.offset }.thenByDescending { it.priority })
+            actions
+                .sortedWith(compareBy<Action> { it.offset }.thenByDescending { it.priority })
 
-        val deleteActions = ArrayList<ActionObject>()
-        loop@ for (actionObject in sortedTemp) {
-            if (actionObject.type != ActionType.DELETE_ACTION) {
+        val list = ArrayList<Action>()
+        loop@ for (action in sortedTemp) {
+            if ((action is Action.DeleteAction).not()) {
                 break@loop
             }
-            deleteActions.add(actionObject)
+            list.add(action)
         }
 
-        sortedActionList.clear()
-        sortedActionList.addAll(sortedTemp.filter { actionObject -> deleteActions.none { actionObject.id == it.id } })
-
+        sortedActions.clear()
+        sortedActions.addAll(sortedTemp.filter { actionObject -> list.none { actionObject.id == it.id } })
     }
 
     override fun build(buildPoint: BuildPoint) {
@@ -49,123 +47,123 @@ class AnnotationFactory(
 
         if (currentTimeInInDvrWindowDuration) {
             timeSystem = TimeSystem.RELATIVE
-            adjustedActionList.clear()
-            process(buildPoint, currentTimeInInDvrWindowDuration, sortedActionList)
+            adjustedActions.clear()
+            process(buildPoint, currentTimeInInDvrWindowDuration, sortedActions)
 
         } else {
             timeSystem = TimeSystem.ABSOLUTE
-            adjustedActionList.clear()
-            sortedActionList.forEach {
-                adjustedActionList.add(
-                    it.copy(
-                        offset = TimeUtils.convertRelativeTimeToAbsolute(
-                            buildPoint.player.dvrWindowStartTime(),
-                            it.absoluteTime
-                        )
-                    )
+            adjustedActions.clear()
+            sortedActions.forEach { action ->
+                val convertedOffset = TimeUtils.convertRelativeTimeToAbsolute(
+                    buildPoint.player.dvrWindowStartTime(),
+                    action.absoluteTime
+                )
+                action.offset = convertedOffset
+                adjustedActions.add(
+                    action
                 )
             }
-            process(buildPoint, currentTimeInInDvrWindowDuration, adjustedActionList)
+            process(buildPoint, currentTimeInInDvrWindowDuration, adjustedActions)
 
         }
 
     }
 
-    override fun actionList(): List<ActionObject> {
-        return if (adjustedActionList.isEmpty()) {
-            sortedActionList
-        } else adjustedActionList
+    override fun getCurrentActions(): List<Action> {
+        return if (adjustedActions.isNotEmpty()) {
+            adjustedActions
+        } else {
+            sortedActions
+        }
     }
+
     /**endregion */
 
     /**region Processing actions*/
     private fun process(
         buildPoint: BuildPoint,
         isInDvrWindow: Boolean,
-        list: List<ActionObject>
+        list: List<Action>
     ) {
 
         val timerVariables: HashMap<String, TimerVariable> = HashMap()
-        val varVariables: HashMap<String, SetVariableEntity> = HashMap()
+        val varVariables: HashMap<String, VariableEntity> = HashMap()
 
         val timelineMarkers = ArrayList<TimelineMarkerEntity>()
-        list.forEach {
+        list.forEach { action ->
             val isInGap =
-                buildPoint.player.isWithinValidSegment(it.absoluteTime)?.not() ?: false
-            when (it.type) {
-                ActionType.SHOW_OVERLAY -> {
+                buildPoint.player.isWithinValidSegment(action.absoluteTime)?.not() ?: false
+            when (action) {
+                is Action.ShowOverlayAction -> {
                     if (isInDvrWindow.not() && isInGap) {
                         return@forEach
                     }
                     val act =
                         ShowOverlayActionHelper.getOverlayActionCurrentAct(
                             buildPoint.currentRelativePosition,
-                            it,
+                            action,
                             buildPoint.isInterrupted
                         )
-                    showOverlay(it, act, buildPoint)
+                    showOverlay(action, act, buildPoint)
                 }
-                ActionType.HIDE_OVERLAY -> {
-//                    val act =
-//                        HideOverlayActionHelper.getOverlayActionCurrentAct(
-//                            buildPoint.currentRelativePosition,
-//                            it,
-//                            buildPoint.isInterrupted
-//                        )
-//                    hideOverlay(it, act)
-                    if (buildPoint.currentRelativePosition + C.ONE_SECOND_IN_MS > it.offset) {
-                        annotationListener.removeOverlay(it.toHideOverlayActionEntity()!!)
+                is Action.HideOverlayAction -> {
+                    val act =
+                        HideOverlayActionHelper.getOverlayActionCurrentAct(
+                            buildPoint.currentRelativePosition,
+                            action,
+                            buildPoint.isInterrupted
+                        )
+                    hideOverlay(action, act)
+                }
+                is Action.CreateTimerAction -> {
+                    if (buildPoint.currentRelativePosition + 1000L >= action.offset) {
+                        createTimer(action, timerVariables)
                     }
                 }
-                ActionType.CREATE_TIMER -> {
-                    if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
-                        createTimer(it, timerVariables)
+                is Action.StartTimerAction -> {
+                    if (buildPoint.currentRelativePosition + 1000L >= action.offset) {
+                        startTimer(action, timerVariables, buildPoint)
                     }
                 }
-                ActionType.START_TIMER -> {
-                    if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
-                        startTimer(it, timerVariables, buildPoint)
+                is Action.PauseTimerAction -> {
+                    if (buildPoint.currentRelativePosition + 1000L >= action.offset) {
+                        pauseTimer(action, timerVariables, buildPoint)
                     }
                 }
-                ActionType.PAUSE_TIMER -> {
-                    if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
-                        pauseTimer(it, timerVariables, buildPoint)
+                is Action.AdjustTimerAction -> {
+                    if (buildPoint.currentRelativePosition + 1000L >= action.offset) {
+                        adjustTimer(action, timerVariables, buildPoint)
                     }
                 }
-                ActionType.ADJUST_TIMER -> {
-                    if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
-                        adjustTimer(it, timerVariables, buildPoint)
+                is Action.SkipTimerAction -> {
+                    if (buildPoint.currentRelativePosition + 1000L >= action.offset) {
+                        skipTimer(action, timerVariables, buildPoint)
                     }
                 }
-                ActionType.SKIP_TIMER -> {
-                    if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
-                        skipTimer(it, timerVariables, buildPoint)
+                is Action.CreateVariableAction -> {
+                    if (buildPoint.currentRelativePosition + 1000L >= action.offset) {
+                        createVariable(action, buildPoint, varVariables)
                     }
                 }
-
-
-                ActionType.SET_VARIABLE -> {
-                    if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
-                        setVariable(it, buildPoint, varVariables)
+                is Action.IncrementVariableAction -> {
+                    if (buildPoint.currentRelativePosition + 1000L >= action.offset) {
+                        incrementVariable(action, buildPoint, varVariables)
                     }
                 }
-
-                ActionType.INCREMENT_VARIABLE -> {
-                    if (buildPoint.currentRelativePosition + 1000L >= it.offset) {
-                        incrementVariable(it, buildPoint, varVariables)
-                    }
+                is Action.MarkTimelineAction -> {
+                    timelineMarkers.add(
+                        TimelineMarkerEntity(
+                            action.id,
+                            action.offset,
+                            action.seekOffset,
+                            action.label,
+                            action.color
+                        )
+                    )
                 }
-
-
-                ActionType.SHOW_TIMELINE_MARKER -> {
-                    it.toTimelineMarkerEntity()?.let { timelineMarkerEntity ->
-                        timelineMarkers.add(timelineMarkerEntity)
-                    }
-                }
-
-                ActionType.DELETE_ACTION,
-                ActionType.UNKNOWN -> {
-                    // should not happen
+                is Action.DeleteAction,
+                is Action.InvalidAction -> {
+                    // do nothing
                 }
             }
         }
@@ -177,53 +175,50 @@ class AnnotationFactory(
     }
 
     private fun showOverlay(
-        actionObject: ActionObject,
+        action: Action.ShowOverlayAction,
         act: OverlayAct,
         buildPoint: BuildPoint
     ) {
         when (act) {
             OverlayAct.INTRO -> {
-                annotationListener.addOverlay(actionObject.toOverlayEntity()!!)
+                annotationListener.addOverlay(action)
             }
             OverlayAct.OUTRO,
             OverlayAct.REMOVE -> {
-                annotationListener.removeOverlay(actionObject.toOverlayEntity()!!)
+                annotationListener.removeOverlay(action.id, action.outroTransitionSpec)
             }
             OverlayAct.DO_NOTHING -> {
                 // do nothing
             }
             OverlayAct.LINGERING_INTRO -> {
-                val overlayEntity = actionObject.toOverlayEntity()!!
                 annotationListener.addOrUpdateLingeringIntroOverlay(
-                    overlayEntity,
-                    buildPoint.currentRelativePosition - overlayEntity.introTransitionSpec.offset,
+                    action,
+                    buildPoint.currentRelativePosition - action.introTransitionSpec!!.offset,
                     buildPoint.isPlaying
                 )
 
             }
             OverlayAct.LINGERING_MIDWAY -> {
                 annotationListener.addOrUpdateLingeringMidwayOverlay(
-                    actionObject.toOverlayEntity()!!
+                    action
                 )
-
             }
             OverlayAct.LINGERING_OUTRO -> {
-                val overlayEntity = actionObject.toOverlayEntity()!!
                 annotationListener.addOrUpdateLingeringOutroOverlay(
-                    overlayEntity,
-                    buildPoint.currentRelativePosition - (overlayEntity.introTransitionSpec.offset + overlayEntity.outroTransitionSpec.animationDuration),
+                    action,
+                    buildPoint.currentRelativePosition - (action.introTransitionSpec!!.offset + action.outroTransitionSpec!!.animationDuration),
                     buildPoint.isPlaying
                 )
             }
             OverlayAct.LINGERING_REMOVE -> {
-                annotationListener.removeLingeringOverlay(actionObject.toOverlayEntity()!!)
+                annotationListener.removeLingeringOverlay(action.id, action.outroTransitionSpec)
             }
 
         }
     }
 
     private fun hideOverlay(
-        actionObject: ActionObject,
+        hideOverlayAction: Action.HideOverlayAction,
         overlayActionCurrentAct: HideOverlayAct
     ) {
         when (overlayActionCurrentAct) {
@@ -231,132 +226,131 @@ class AnnotationFactory(
                 // do nothing
             }
             HideOverlayAct.OUTRO_IN_RANGE -> {
-                annotationListener.removeOverlay(actionObject.toOverlayEntity()!!)
+                annotationListener.removeOverlay(
+                    hideOverlayAction.customId!!,
+                    hideOverlayAction.outroAnimationSpec
+                )
             }
             HideOverlayAct.OUTRO_LINGERING -> {
-                annotationListener.removeLingeringOverlay(actionObject.toOverlayEntity()!!)
+                annotationListener.removeLingeringOverlay(
+                    hideOverlayAction.customId!!,
+                    hideOverlayAction.outroAnimationSpec
+                )
             }
             HideOverlayAct.OUTRO_LEFTOVER -> {
-                annotationListener.removeOverlay(actionObject.toHideOverlayActionEntity()!!)
+                annotationListener.removeOverlay(hideOverlayAction.customId!!, null)
             }
         }
     }
 
     private fun createTimer(
-        actionObject: ActionObject,
+        action: Action.CreateTimerAction,
         timerVariables: HashMap<String, TimerVariable>
     ) {
-        actionObject.toCreateTimerEntity()?.let { createTimerEntity ->
-            variableKeeper.createTimerPublisher(createTimerEntity.name)
+        variableKeeper.createTimerPublisher(action.name)
 
-            timerVariables[createTimerEntity.name] =
-                TimerVariable(
-                    createTimerEntity.name,
-                    createTimerEntity.format,
-                    createTimerEntity.direction,
-                    createTimerEntity.startValue,
-                    createTimerEntity.capValue
-                )
-        }
+        timerVariables[action.name] =
+            TimerVariable(
+                action.name,
+                action.format,
+                action.direction,
+                action.startValue,
+                action.capValue
+            )
+
     }
 
     private fun startTimer(
-        actionObject: ActionObject,
+        action: Action.StartTimerAction,
         timerVariables: HashMap<String, TimerVariable>,
         buildPoint: BuildPoint
     ) {
-        actionObject.toStartTimerEntity()?.let { startTimerEntity ->
-            timerVariables[startTimerEntity.name]?.start(
-                startTimerEntity,
-                buildPoint.currentRelativePosition
-            )
-        }
+        timerVariables[action.name]?.start(
+            TimerEntity.StartTimer(action.name, action.offset),
+            buildPoint.currentRelativePosition
+        )
+
     }
 
     private fun pauseTimer(
-        actionObject: ActionObject,
+        action: Action.PauseTimerAction,
         timerVariables: HashMap<String, TimerVariable>,
         buildPoint: BuildPoint
     ) {
-        actionObject.toPauseTimerEntity()?.let { pauseTimerEntity ->
-            timerVariables[pauseTimerEntity.name]?.pause(
-                pauseTimerEntity,
-                buildPoint.currentRelativePosition
-            )
-        }
+        timerVariables[action.name]?.pause(
+            TimerEntity.PauseTimer(action.name, action.offset),
+            buildPoint.currentRelativePosition
+        )
+
     }
 
     private fun adjustTimer(
-        actionObject: ActionObject,
+        action: Action.AdjustTimerAction,
         timerVariables: HashMap<String, TimerVariable>,
         buildPoint: BuildPoint
     ) {
-        actionObject.toAdjustTimerEntity()?.let { adjustTimerEntity ->
-            timerVariables[adjustTimerEntity.name]?.adjust(
-                adjustTimerEntity,
-                buildPoint.currentRelativePosition
-            )
-        }
+        timerVariables[action.name]?.adjust(
+            TimerEntity.AdjustTimer(action.name, action.offset, action.value),
+            buildPoint.currentRelativePosition
+        )
+
     }
 
     private fun skipTimer(
-        actionObject: ActionObject,
+        action: Action.SkipTimerAction,
         timerVariables: HashMap<String, TimerVariable>,
         buildPoint: BuildPoint
     ) {
-        actionObject.toSkipTimerEntity()?.let { skipTimerEntity ->
-            timerVariables[skipTimerEntity.name]?.skip(
-                skipTimerEntity,
-                buildPoint.currentRelativePosition
-            )
-        }
+        timerVariables[action.name]?.skip(
+            TimerEntity.SkipTimer(action.name, action.offset, action.value),
+            buildPoint.currentRelativePosition
+        )
     }
 
-    private fun setVariable(
-        actionObject: ActionObject,
+    private fun createVariable(
+        action: Action.CreateVariableAction,
         buildPoint: BuildPoint,
-        varVariables: HashMap<String, SetVariableEntity>
+        varVariables: HashMap<String, VariableEntity>
     ) {
-        actionObject.toSetVariable()?.let { setVariableEntity ->
-            val act = VariableActionHelper.getVariableCurrentAct(
-                buildPoint.currentRelativePosition,
-                setVariableEntity
-            )
-            when (act) {
-                VariableAct.CREATE_VARIABLE -> {
-                    variableKeeper.createVariablePublisher(setVariableEntity.variable.name)
-                    varVariables[setVariableEntity.variable.name] =
-                        setVariableEntity
-                }
-                VariableAct.CLEAR -> {
-                }
+        val act = VariableActionHelper.getVariableCurrentAct(
+            buildPoint.currentRelativePosition,
+            action
+        )
+        when (act) {
+            VariableAct.CREATE_VARIABLE -> {
+                variableKeeper.createVariablePublisher(action.variable.name)
+                varVariables[action.variable.name] =
+                    VariableEntity(act.name, action.offset, action.variable)
+
+            }
+            VariableAct.CLEAR -> {
             }
         }
+
     }
 
     private fun incrementVariable(
-        actionObject: ActionObject,
+        action: Action.IncrementVariableAction,
         buildPoint: BuildPoint,
-        varVariables: HashMap<String, SetVariableEntity>
+        varVariables: HashMap<String, VariableEntity>
     ) {
-        actionObject.toIncrementVariableEntity()?.let { incrementVariableEntity ->
-            val act =
-                VariableActionHelper.getIncrementVariableCurrentAct(
-                    buildPoint.currentRelativePosition,
-                    incrementVariableEntity
-                )
-            when (act) {
-                IncrementVariableCurrentAct.INCREMENT -> {
-                    varVariables[incrementVariableEntity.name]?.let { setVariableEntity ->
-                        setVariableEntity.variable.increment(incrementVariableEntity.amount)
+        val act =
+            VariableActionHelper.getIncrementVariableCurrentAct(
+                buildPoint.currentRelativePosition,
+                action
+            )
+        when (act) {
+            IncrementVariableCurrentAct.INCREMENT -> {
+                varVariables[act.name]?.let { variableEntity ->
+                    variableEntity.variable.increment(action.amount)
 
-                    }
-                }
-                IncrementVariableCurrentAct.DO_NOTHING -> {
-                    // do nothing
                 }
             }
+            IncrementVariableCurrentAct.DO_NOTHING -> {
+                // do nothing
+            }
         }
+
     }
 
     /**endregion */

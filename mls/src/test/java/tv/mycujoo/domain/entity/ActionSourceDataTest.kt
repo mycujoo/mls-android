@@ -39,11 +39,11 @@ class ActionSourceDataTest {
         assertEquals(data["duration"], showOverlayAction.duration)
         assertEquals(
             data["animatein_type"],
-            showOverlayAction.introAnimationSpec?.animationType?.type
+            showOverlayAction.introTransitionSpec?.animationType?.type
         )
         assertEquals(
             data["animatein_duration"],
-            showOverlayAction.introAnimationSpec?.animationDuration
+            showOverlayAction.introTransitionSpec?.animationDuration
         )
         assertEquals(data["variable_positions"], showOverlayAction.placeHolders)
     }
@@ -154,7 +154,7 @@ class ActionSourceDataTest {
 
     /**endregion */
 
-    /**region Timer relsted*/
+    /**region Timer related*/
     @Test
     fun `mapping to CreateTimerAction`() {
         val id = "id"

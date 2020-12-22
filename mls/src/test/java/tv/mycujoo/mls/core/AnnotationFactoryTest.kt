@@ -6,12 +6,13 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import tv.mycujoo.data.entity.ActionResponse
+import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.ActionSourceData
-import tv.mycujoo.domain.entity.OverlayEntity
+import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.domain.entity.models.ActionType
+import tv.mycujoo.mls.TestData.Companion.getSampleShowOverlayAction
 import tv.mycujoo.mls.manager.IVariableKeeper
-import tv.mycujoo.mls.matcher.HideOverlayEntityMatcher
-import tv.mycujoo.mls.matcher.OverlayEntityMatcher
+import tv.mycujoo.mls.matcher.ActionArgumentMatcher
 import tv.mycujoo.mls.player.IPlayer
 import kotlin.test.assertTrue
 
@@ -68,13 +69,13 @@ class AnnotationFactoryTest {
                 actionSourceDataOfCreateTimer
             )
         )
-        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
 
 
-        assertTrue { annotationFactory.actionList()[0].type == ActionType.CREATE_TIMER }
-        assertTrue { annotationFactory.actionList()[1].type == ActionType.START_TIMER }
-        assertTrue { annotationFactory.actionList()[2].type == ActionType.PAUSE_TIMER }
-        assertTrue { annotationFactory.actionList()[3].type == ActionType.ADJUST_TIMER }
+        assertTrue { annotationFactory.getCurrentActions()[0] is Action.CreateTimerAction }
+        assertTrue { annotationFactory.getCurrentActions()[0] is Action.StartTimerAction }
+        assertTrue { annotationFactory.getCurrentActions()[0] is Action.PauseTimerAction }
+        assertTrue { annotationFactory.getCurrentActions()[0] is Action.AdjustTimerAction }
     }
     /**endregion */
 
@@ -84,7 +85,7 @@ class AnnotationFactoryTest {
         val dataMap = buildMap<String, Any> {}
         val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
 
@@ -92,7 +93,7 @@ class AnnotationFactoryTest {
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).addOverlay(argThat(OverlayEntityMatcher("id_01")))
+        verify(annotationListener).addOverlay(argThat(ActionArgumentMatcher("id_01")) as Action.ShowOverlayAction)
         verify(annotationListener, never()).removeLingeringOverlay(any())
     }
 
@@ -104,15 +105,14 @@ class AnnotationFactoryTest {
         }
         val actionSourceData = ActionSourceData("id_01", "hide_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
 
 
         val buildPoint = BuildPoint(4001L, -1L, player, isPlaying = true, isInterrupted = false)
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).removeOverlay(argThat(HideOverlayEntityMatcher("id_01")))
-        verify(annotationListener, never()).removeOverlay(any<OverlayEntity>())
+        verify(annotationListener).removeOverlay("id_01", null)
         verify(annotationListener, never()).addOverlay(any())
     }
     /**endregion */
@@ -124,7 +124,7 @@ class AnnotationFactoryTest {
         val actionSourceData =
             ActionSourceData("id_01", "show_overlay", -1L, 1605609887000L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         whenever(player.duration()).thenReturn(120000L)
         whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
@@ -135,7 +135,7 @@ class AnnotationFactoryTest {
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).addOverlay(argThat(OverlayEntityMatcher("id_01")))
+        verify(annotationListener).addOverlay(argThat(ActionArgumentMatcher("id_01")) as Action.ShowOverlayAction)
         verify(annotationListener, never()).removeLingeringOverlay(any())
     }
 
@@ -149,7 +149,7 @@ class AnnotationFactoryTest {
         val actionSourceData =
             ActionSourceData("id_01", "hide_overlay", -1L, 1605609887000L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
         whenever(player.duration()).thenReturn(120000L)
         whenever(player.dvrWindowStartTime()).thenReturn(1605609885000L)
 
@@ -159,8 +159,8 @@ class AnnotationFactoryTest {
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).removeOverlay(argThat(HideOverlayEntityMatcher("id_01")))
-        verify(annotationListener, never()).removeOverlay(any<OverlayEntity>())
+        verify(annotationListener).removeOverlay("id_01", null)
+        verify(annotationListener, never()).removeOverlay(any(), null)
         verify(annotationListener, never()).addOverlay(any())
     }
     /**endregion */
@@ -175,7 +175,7 @@ class AnnotationFactoryTest {
         val actionSourceData =
             ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
         val buildPoint = BuildPoint(5001L, -1L, player, isPlaying = true, isInterrupted = true)
@@ -184,7 +184,7 @@ class AnnotationFactoryTest {
 
 
         verify(annotationListener).addOrUpdateLingeringIntroOverlay(
-            argThat(OverlayEntityMatcher("id_01")),
+            argThat(ActionArgumentMatcher("id_01")) as Action.ShowOverlayAction,
             any(),
             any()
         )
@@ -200,7 +200,7 @@ class AnnotationFactoryTest {
         val actionSourceData =
             ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
         val buildPoint = BuildPoint(5001L, -1L, player, isPlaying = true, isInterrupted = true)
@@ -208,7 +208,7 @@ class AnnotationFactoryTest {
 
 
         verify(annotationListener).addOrUpdateLingeringMidwayOverlay(
-            argThat(OverlayEntityMatcher("id_01"))
+            argThat(ActionArgumentMatcher("id_01")) as Action.ShowOverlayAction
         )
         verify(annotationListener, never()).addOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
@@ -224,7 +224,7 @@ class AnnotationFactoryTest {
         }
         val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
 
@@ -234,7 +234,7 @@ class AnnotationFactoryTest {
 
 
         verify(annotationListener).addOrUpdateLingeringOutroOverlay(
-            argThat(OverlayEntityMatcher("id_01")),
+            argThat(ActionArgumentMatcher("id_01")) as Action.ShowOverlayAction,
             any(),
             any()
         )
@@ -250,14 +250,14 @@ class AnnotationFactoryTest {
         }
         val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
         val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true, isInterrupted = true)
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).removeLingeringOverlay(argThat(OverlayEntityMatcher("id_01")))
+        verify(annotationListener).removeLingeringOverlay("id_01")
         verify(annotationListener, never()).addOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
     }
@@ -271,14 +271,14 @@ class AnnotationFactoryTest {
         }
         val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
         val buildPoint = BuildPoint(10000L, -1L, player, isPlaying = true, isInterrupted = true)
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).removeLingeringOverlay(argThat(OverlayEntityMatcher("id_01")))
+        verify(annotationListener).removeLingeringOverlay("id_01")
         verify(annotationListener, never()).addOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
     }
@@ -295,7 +295,7 @@ class AnnotationFactoryTest {
         val actionSourceData =
             ActionSourceData("id_01", "show_overlay", -1, 1605609887000L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         whenever(player.duration()).thenReturn(120000L)
         whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
@@ -308,7 +308,7 @@ class AnnotationFactoryTest {
 
 
         verify(annotationListener).addOrUpdateLingeringIntroOverlay(
-            argThat(OverlayEntityMatcher("id_01")),
+            argThat(ActionArgumentMatcher("id_01")) as Action.ShowOverlayAction,
             any(),
             any()
         )
@@ -325,7 +325,7 @@ class AnnotationFactoryTest {
         val actionSourceData =
             ActionSourceData("id_01", "show_overlay", -1L, 1605609887000L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         whenever(player.duration()).thenReturn(120000L)
         whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
@@ -337,7 +337,7 @@ class AnnotationFactoryTest {
 
 
         verify(annotationListener).addOrUpdateLingeringMidwayOverlay(
-            argThat(OverlayEntityMatcher("id_01"))
+            argThat(ActionArgumentMatcher("id_01")) as Action.ShowOverlayAction
         )
         verify(annotationListener, never()).addOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
@@ -354,7 +354,7 @@ class AnnotationFactoryTest {
         val actionSourceData =
             ActionSourceData("id_01", "show_overlay", -1L, 1605609887000L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         whenever(player.duration()).thenReturn(120000L)
         whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
@@ -366,7 +366,7 @@ class AnnotationFactoryTest {
 
 
         verify(annotationListener).addOrUpdateLingeringOutroOverlay(
-            argThat(OverlayEntityMatcher("id_01")),
+            argThat(ActionArgumentMatcher("id_01")) as Action.ShowOverlayAction,
             any(),
             any()
         )
@@ -382,8 +382,11 @@ class AnnotationFactoryTest {
         }
         val actionSourceData =
             ActionSourceData("id_01", "show_overlay", -1L, 1605609887000L, dataMap)
-        val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+
+        getSampleShowOverlayAction(-1L, 1605609887000L)
+
+        val actionResponse = ActionResponse(listOf())
+        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         whenever(player.duration()).thenReturn(120000L)
 
@@ -393,7 +396,7 @@ class AnnotationFactoryTest {
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).removeLingeringOverlay(argThat(OverlayEntityMatcher("id_01")))
+        verify(annotationListener).removeLingeringOverlay("id_01")
         verify(annotationListener, never()).addOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
     }
@@ -408,7 +411,7 @@ class AnnotationFactoryTest {
         val actionSourceData =
             ActionSourceData("id_01", "show_overlay", -1L, 1605609887000L, dataMap)
         val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setAnnotations(actionResponse.data.map { it.toActionObject() })
+        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         whenever(player.duration()).thenReturn(120000L)
 
@@ -418,7 +421,7 @@ class AnnotationFactoryTest {
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).removeLingeringOverlay(argThat(OverlayEntityMatcher("id_01")))
+        verify(annotationListener).removeLingeringOverlay("id_01")
         verify(annotationListener, never()).addOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
     }

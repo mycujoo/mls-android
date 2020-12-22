@@ -12,27 +12,6 @@ data class ActionSourceData(
     @SerializedName("absoluteTime") val absoluteTime: Long?,
     @SerializedName("data") val data: Map<String, Any>?
 ) {
-    fun toActionObject(): ActionObject {
-
-        val newId = id.orEmpty()
-        val newType = ActionType.fromValueOrUnknown(this.type.orEmpty())
-        var newOffset: Long = -1L
-        offset?.let { newOffset = it }
-        var newAbsoluteTime: Long = -1L
-        absoluteTime?.let { newAbsoluteTime = it }
-
-        return ActionObject(
-            newId,
-            newType,
-            newOffset,
-            newAbsoluteTime,
-            DataMapper.extractShowOverlayRelatedData(data),
-            DataMapper.extractTimerRelatedData(data),
-            data
-        )
-    }
-
-
     fun toAction(): Action {
         val newId = id.orEmpty()
         val newType = ActionType.fromValueOrUnknown(this.type.orEmpty())
@@ -46,6 +25,15 @@ data class ActionSourceData(
             SHOW_OVERLAY -> {
                 val relatedData = DataMapper.extractShowOverlayRelatedData(data)
                 if (relatedData != null) {
+
+                    var outroTransitionSpec: TransitionSpec? = null
+                    if (relatedData.duration != null) {
+                        outroTransitionSpec = TransitionSpec(
+                            newOffset + relatedData.duration,
+                            relatedData.outroAnimationType,
+                            relatedData.outroAnimationDuration
+                        )
+                    }
                     return Action.ShowOverlayAction(
                         id = newId,
                         offset = newOffset,
@@ -56,12 +44,12 @@ data class ActionSourceData(
                             relatedData.sizePair
                         ),
                         svgData = SvgData(relatedData.svgUrl),
-                        introAnimationSpec = TransitionSpec(
+                        introTransitionSpec = TransitionSpec(
                             newOffset,
                             relatedData.introAnimationType,
                             relatedData.introAnimationDuration
                         ),
-                        outroAnimationSpec = null, // todo
+                        outroTransitionSpec = outroTransitionSpec,
                         placeHolders = relatedData.variablePlaceHolders
                     )
                 }

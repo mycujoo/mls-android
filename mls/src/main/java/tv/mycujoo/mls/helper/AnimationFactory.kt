@@ -4,8 +4,8 @@ import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
+import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.AnimationType
-import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.widgets.ScaffoldView
@@ -119,12 +119,12 @@ open class AnimationFactory {
 
     open fun createRemoveViewStaticAnimation(
         overlayHost: ConstraintLayout,
-        overlayEntity: OverlayEntity,
+        showOverlayAction: Action.ShowOverlayAction,
         overlayView: ScaffoldView,
         viewHandler: IViewHandler
     ): ObjectAnimator {
         val animation = ObjectAnimator.ofFloat(overlayView, View.ALPHA, 1F, 0F)
-        animation.duration = overlayEntity.outroTransitionSpec.animationDuration
+        animation.duration = showOverlayAction.outroTransitionSpec!!.animationDuration
 
         animation.addListener(object : Animator.AnimatorListener {
             override fun onAnimationStart(animation: Animator?) {
@@ -132,7 +132,7 @@ open class AnimationFactory {
 
             override fun onAnimationEnd(animation: Animator?) {
                 viewHandler.detachOverlayView(overlayView)
-                viewHandler.removeAnimation(overlayEntity.id)
+                viewHandler.removeAnimation(showOverlayAction.id)
             }
 
             override fun onAnimationRepeat(animation: Animator?) {
@@ -143,7 +143,40 @@ open class AnimationFactory {
 
         })
 
-        viewHandler.addAnimation(overlayEntity.id, animation)
+        viewHandler.addAnimation(showOverlayAction.id, animation)
+
+        return animation
+
+    }
+
+    open fun createRemoveViewStaticAnimation(
+        overlayHost: ConstraintLayout,
+        actionId: String,
+        outroTransitionSpec: TransitionSpec,
+        overlayView: ScaffoldView,
+        viewHandler: IViewHandler
+    ): ObjectAnimator {
+        val animation = ObjectAnimator.ofFloat(overlayView, View.ALPHA, 1F, 0F)
+        animation.duration = outroTransitionSpec.animationDuration
+
+        animation.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationStart(animation: Animator?) {
+            }
+
+            override fun onAnimationEnd(animation: Animator?) {
+                viewHandler.detachOverlayView(overlayView)
+                viewHandler.removeAnimation(actionId)
+            }
+
+            override fun onAnimationRepeat(animation: Animator?) {
+            }
+
+            override fun onAnimationCancel(animation: Animator?) {
+            }
+
+        })
+
+        viewHandler.addAnimation(actionId, animation)
 
         return animation
 
@@ -151,13 +184,14 @@ open class AnimationFactory {
 
     open fun createRemoveViewDynamicAnimation(
         overlayHost: ConstraintLayout,
-        overlayEntity: OverlayEntity,
+        actionId: String,
+        outroTransitionSpec: TransitionSpec,
         view: ScaffoldView,
         viewHandler: IViewHandler
     ): ObjectAnimator? {
         var animation: ObjectAnimator? = null
 
-        when (overlayEntity.outroTransitionSpec.animationType) {
+        when (outroTransitionSpec.animationType) {
             AnimationType.SLIDE_TO_LEFT -> {
                 animation = ObjectAnimator.ofFloat(
                     view,
@@ -202,7 +236,7 @@ open class AnimationFactory {
 
                 override fun onAnimationEnd(animation: Animator?) {
                     viewHandler.detachOverlayView(view)
-                    viewHandler.removeAnimation(overlayEntity.id)
+                    viewHandler.removeAnimation(actionId)
                 }
 
                 override fun onAnimationCancel(animation: Animator?) {
@@ -214,8 +248,8 @@ open class AnimationFactory {
 
             })
 
-            animation.duration = overlayEntity.outroTransitionSpec.animationDuration
-            viewHandler.addAnimation(overlayEntity.id, animation)
+            animation.duration = outroTransitionSpec.animationDuration
+            viewHandler.addAnimation(actionId, animation)
 
         }
         return animation
@@ -225,7 +259,7 @@ open class AnimationFactory {
     open fun createLingeringIntroViewAnimation(
         overlayHost: ConstraintLayout,
         scaffoldView: ScaffoldView,
-        overlayEntity: OverlayEntity,
+        overlayEntity: Action.ShowOverlayAction,
         animationPosition: Long,
         isPlaying: Boolean,
         viewHandler: IViewHandler
@@ -236,7 +270,7 @@ open class AnimationFactory {
         var animation: ObjectAnimator? = null
 
 
-        when (overlayEntity.introTransitionSpec.animationType) {
+        when (overlayEntity.introTransitionSpec!!.animationType) {
             AnimationType.FADE_IN -> {
                 scaffoldView.x =
                     -scaffoldView.width.toFloat()
@@ -333,14 +367,14 @@ open class AnimationFactory {
     open fun createLingeringOutroAnimation(
         overlayHost: ConstraintLayout,
         scaffoldView: ScaffoldView,
-        overlayEntity: OverlayEntity,
+        overlayEntity: Action.ShowOverlayAction,
         animationPosition: Long,
         isPlaying: Boolean,
         viewHandler: IViewHandler
     ): ObjectAnimator? {
         var animation: ObjectAnimator? = null
 
-        when (overlayEntity.outroTransitionSpec.animationType) {
+        when (overlayEntity.outroTransitionSpec!!.animationType) {
             AnimationType.FADE_OUT -> {
                 animation = ObjectAnimator.ofFloat(
                     scaffoldView,
