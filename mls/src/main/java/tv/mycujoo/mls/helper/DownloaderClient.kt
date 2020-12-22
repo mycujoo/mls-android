@@ -2,7 +2,7 @@ package tv.mycujoo.mls.helper
 
 import android.util.Log
 import okhttp3.*
-import tv.mycujoo.domain.entity.OverlayEntity
+import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.SvgData
 import java.io.IOException
 import java.util.*
@@ -10,18 +10,16 @@ import java.util.*
 class DownloaderClient(val okHttpClient: OkHttpClient) : IDownloaderClient {
 
     override fun download(
-        overlayEntity: OverlayEntity,
-        callback: (OverlayEntity) -> Unit
+        showOverlayAction: Action.ShowOverlayAction,
+        callback: (Action.ShowOverlayAction) -> Unit
     ) {
-        overlayEntity.isDownloading = true
 
-        val svgUrl = overlayEntity.svgData!!.svgUrl!!
+
+        val svgUrl = showOverlayAction.svgData!!.svgUrl!!
         val request: Request = Request.Builder().url(svgUrl).build()
         okHttpClient.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                overlayEntity.isDownloading = false
-
-                Log.e("downloadSVGThenCallLis", "downloadSVGThenCallListener() - onFailure()")
+                Log.e("DownloaderClient", "downloadSVGThenCallListener() - onFailure()")
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -36,12 +34,9 @@ class DownloaderClient(val okHttpClient: OkHttpClient) : IDownloaderClient {
                     }
                     val svgString = stringBuilder.toString()
 
-                    overlayEntity.isDownloading = false
-                    overlayEntity.isOnScreen = true
-
                     callback(
-                        overlayEntity.copy(
-                            svgData = SvgData(svgUrl, null, svgString)
+                        showOverlayAction.copy(
+                            svgData = SvgData(svgUrl, svgString)
                         )
                     )
                 }

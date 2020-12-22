@@ -22,7 +22,6 @@ data class ActionEntity(
     fun toOverlayBlueprint(): OverlayBlueprint {
         val svgData = SvgData(
             svgUrl,
-            svgInputStream,
             null
         )
         val viewSpec = ViewSpec(position, size)
@@ -36,7 +35,7 @@ data class ActionEntity(
             if (duration != null && duration!! > 0L) {
                 TransitionSpec(
                     offset + duration!!,
-                    if (outroAnimationType == AnimationType.UNSPECIFIED) {
+                    if (outroAnimationType == AnimationType.NONE) {
                         AnimationType.NONE
                     } else {
                         outroAnimationType
@@ -46,7 +45,7 @@ data class ActionEntity(
             } else {
                 TransitionSpec(
                     -1L,
-                    AnimationType.UNSPECIFIED,
+                    AnimationType.NONE,
                     -1L
                 )
             }

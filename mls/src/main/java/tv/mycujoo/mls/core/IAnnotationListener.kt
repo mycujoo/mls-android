@@ -1,30 +1,30 @@
 package tv.mycujoo.mls.core
 
-import tv.mycujoo.domain.entity.HideOverlayActionEntity
-import tv.mycujoo.domain.entity.OverlayEntity
+import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
+import tv.mycujoo.domain.entity.TransitionSpec
 
 interface IAnnotationListener {
 
-    fun addOverlay(overlayEntity: OverlayEntity)
-    fun removeOverlay(overlayEntity: OverlayEntity)
-    fun removeOverlay(hideOverlayActionEntity: HideOverlayActionEntity)
+    fun addOverlay(showOverlayAction: Action.ShowOverlayAction)
+    fun removeOverlay(actionId: String, outroTransitionSpec: TransitionSpec?)
 
 
     fun addOrUpdateLingeringIntroOverlay(
-        overlayEntity: OverlayEntity, animationPosition: Long,
-        isPlaying: Boolean
-    )
-
-    fun addOrUpdateLingeringOutroOverlay(
-        overlayEntity: OverlayEntity,
+        showOverlayAction: Action.ShowOverlayAction,
         animationPosition: Long,
         isPlaying: Boolean
     )
 
-    fun addOrUpdateLingeringMidwayOverlay(overlayEntity: OverlayEntity)
+    fun addOrUpdateLingeringOutroOverlay(
+        showOverlayAction: Action.ShowOverlayAction,
+        animationPosition: Long,
+        isPlaying: Boolean
+    )
 
-    fun removeLingeringOverlay(overlayEntity: OverlayEntity)
+    fun addOrUpdateLingeringMidwayOverlay(showOverlayAction: Action.ShowOverlayAction)
+
+    fun removeLingeringOverlay(actionId: String, outroTransitionSpec: TransitionSpec? = null)
 
     fun setTimelineMarkers(timelineMarkerEntityList: List<TimelineMarkerEntity>)
 

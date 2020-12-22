@@ -1,11 +1,25 @@
 package tv.mycujoo.mls.manager
 
-import tv.mycujoo.mls.entity.*
-
 sealed class TimerEntity {
-    data class CreateTimer(val createTimerEntity: CreateTimerEntity) : TimerEntity()
-    data class StartTimer(val startTimerEntity: StartTimerEntity) : TimerEntity()
-    data class PauseTimer(val pauseTimerEntity: PauseTimerEntity) : TimerEntity()
-    data class AdjustTimer(val adjustTimerEntity: AdjustTimerEntity) : TimerEntity()
-    data class SkipTimer(val skipTimerEntity: SkipTimerEntity) : TimerEntity()
+    data class StartTimer(
+        val name: String,
+        val offset: Long
+    ) : TimerEntity()
+
+    data class PauseTimer(
+        val name: String,
+        val offset: Long
+    ) : TimerEntity()
+
+    data class AdjustTimer(
+        var name: String,
+        var offset: Long,
+        val value: Long
+    ) : TimerEntity()
+
+    data class SkipTimer(
+        var name: String,
+        var offset: Long,
+        val value: Long
+    ) : TimerEntity()
 }

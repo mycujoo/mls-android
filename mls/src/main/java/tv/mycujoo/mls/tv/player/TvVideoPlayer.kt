@@ -230,7 +230,7 @@ class TvVideoPlayer(
             when (result) {
                 is Result.Success -> {
 
-                    tvAnnotationMediator.feed(result.value.data.map { it.toActionObject() })
+                    tvAnnotationMediator.feed(result.value.data.map { it.toAction() })
 
                     if (joinTimeline) {
                         val joinTimelineParam = JoinTimelineParam(timelineId, result.value.updateId)

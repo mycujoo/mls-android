@@ -2,6 +2,7 @@ package tv.mycujoo.domain.entity
 
 import com.google.gson.annotations.SerializedName
 import tv.mycujoo.domain.entity.models.ActionType
+import tv.mycujoo.domain.entity.models.ActionType.*
 import tv.mycujoo.domain.mapper.DataMapper
 
 data class ActionSourceData(
@@ -11,8 +12,7 @@ data class ActionSourceData(
     @SerializedName("absoluteTime") val absoluteTime: Long?,
     @SerializedName("data") val data: Map<String, Any>?
 ) {
-    fun toActionObject(): ActionObject {
-
+    fun toAction(): Action {
         val newId = id.orEmpty()
         val newType = ActionType.fromValueOrUnknown(this.type.orEmpty())
         var newOffset: Long = -1L
@@ -20,14 +20,173 @@ data class ActionSourceData(
         var newAbsoluteTime: Long = -1L
         absoluteTime?.let { newAbsoluteTime = it }
 
-        return ActionObject(
-            newId,
-            newType,
-            newOffset,
-            newAbsoluteTime,
-            DataMapper.parseOverlayRelatedData(data),
-            DataMapper.parseTimerRelatedData(data),
-            data
-        )
+
+        when (newType) {
+            SHOW_OVERLAY -> {
+                val relatedData = DataMapper.extractShowOverlayRelatedData(data)
+                if (relatedData != null) {
+
+                    var outroTransitionSpec: TransitionSpec? = null
+                    if (relatedData.duration != null) {
+                        outroTransitionSpec = TransitionSpec(
+                            newOffset + relatedData.duration,
+                            relatedData.outroAnimationType,
+                            relatedData.outroAnimationDuration
+                        )
+                    }
+                    return Action.ShowOverlayAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        duration = relatedData.duration,
+                        viewSpec = ViewSpec(
+                            relatedData.positionGuide,
+                            relatedData.sizePair
+                        ),
+                        svgData = SvgData(relatedData.svgUrl),
+                        introTransitionSpec = TransitionSpec(
+                            newOffset,
+                            relatedData.introAnimationType,
+                            relatedData.introAnimationDuration
+                        ),
+                        outroTransitionSpec = outroTransitionSpec,
+                        placeHolders = relatedData.variablePlaceHolders
+                    )
+                }
+            }
+            HIDE_OVERLAY -> {
+                val relatedData = DataMapper.extractHideOverlayRelatedData(data)
+                if (relatedData != null) {
+                    return Action.HideOverlayAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        outroAnimationSpec = TransitionSpec(
+                            newOffset,
+                            relatedData.outroAnimationType,
+                            relatedData.outroAnimationDuration
+                        ),
+                        customId = relatedData.id
+                    )
+
+                }
+            }
+
+            CREATE_TIMER -> {
+                val relatedData = DataMapper.extractTimerRelatedData(data)
+                if (relatedData != null) {
+                    return Action.CreateTimerAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        name = relatedData.name,
+                        format = relatedData.format,
+                        direction = relatedData.direction,
+                        startValue = relatedData.startValue,
+                        capValue = relatedData.capValue
+                    )
+                }
+            }
+            START_TIMER -> {
+                val relatedData = DataMapper.extractTimerRelatedData(data)
+                if (relatedData != null) {
+                    return Action.StartTimerAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        name = relatedData.name
+                    )
+                }
+            }
+            PAUSE_TIMER -> {
+                val relatedData = DataMapper.extractTimerRelatedData(data)
+                if (relatedData != null) {
+                    return Action.PauseTimerAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        name = relatedData.name
+                    )
+                }
+            }
+            ADJUST_TIMER -> {
+                val relatedData = DataMapper.extractTimerRelatedData(data)
+                if (relatedData != null) {
+                    return Action.AdjustTimerAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        name = relatedData.name,
+                        value = relatedData.value
+                    )
+
+                }
+            }
+            SKIP_TIMER -> {
+                val relatedData = DataMapper.extractTimerRelatedData(data)
+                if (relatedData != null) {
+                    return Action.SkipTimerAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        name = relatedData.name,
+                        value = relatedData.value
+                    )
+                }
+            }
+
+            SET_VARIABLE -> {
+                val variable = DataMapper.mapToVariable(data)
+                return Action.CreateVariableAction(
+                    id = newId,
+                    offset = newOffset,
+                    absoluteTime = newAbsoluteTime,
+                    variable = variable
+                )
+
+            }
+            INCREMENT_VARIABLE -> {
+                val extractedIncrementVariableData = DataMapper.extractIncrementVariableData(data)
+                if (extractedIncrementVariableData != null) {
+                    return Action.IncrementVariableAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        name = extractedIncrementVariableData.name,
+                        amount = extractedIncrementVariableData.amount
+                    )
+                }
+            }
+
+            SHOW_TIMELINE_MARKER -> {
+                val extractedMarkTimelineData = DataMapper.extractMarkTimelineData(data)
+                if (extractedMarkTimelineData != null) {
+                    return Action.MarkTimelineAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        seekOffset = extractedMarkTimelineData.seekOffset,
+                        label = extractedMarkTimelineData.label,
+                        color = extractedMarkTimelineData.color
+                    )
+                }
+            }
+
+            DELETE_ACTION -> {
+                val extractedDeleteActionData = DataMapper.extractDeleteActionData(data)
+                if (extractedDeleteActionData != null) {
+                    return Action.DeleteAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        targetActionId = extractedDeleteActionData
+                    )
+                }
+            }
+            UNKNOWN -> {
+                // do nothing, returns InvalidAction
+            }
+        }
+        return Action.InvalidAction(newId, newOffset, newAbsoluteTime)
     }
 }
