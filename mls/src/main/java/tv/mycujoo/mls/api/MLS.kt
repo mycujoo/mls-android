@@ -20,6 +20,7 @@ import tv.mycujoo.mls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
 import tv.mycujoo.mls.enum.C.Companion.UUID_PREF_KEY
 import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.SVGAssetResolver
+import tv.mycujoo.mls.helper.TypeFaceFactory
 import tv.mycujoo.mls.manager.IPrefManager
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.mediator.AnnotationMediator
@@ -110,7 +111,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
     private fun initSvgRenderingLibrary(assetManager: AssetManager) {
         SVG.registerExternalFileResolver(
-            SVGAssetResolver(assetManager)
+            SVGAssetResolver(TypeFaceFactory(assetManager))
         )
     }
 
