@@ -5,7 +5,7 @@ import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.Before
 import org.junit.Test
 import tv.mycujoo.domain.entity.Variable
-import tv.mycujoo.domain.entity.SetVariableEntity
+import tv.mycujoo.domain.entity.VariableEntity
 import tv.mycujoo.mls.model.MutablePair
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerFormat
@@ -131,7 +131,7 @@ class VariableKeeperTest {
 
 
         val sampleSetVariableEntity = getSampleSetVariableEntity("name_0")
-        val hashMap = HashMap<String, SetVariableEntity>()
+        val hashMap = HashMap<String, VariableEntity>()
         hashMap[sampleSetVariableEntity.id] = sampleSetVariableEntity
         variableKeeper.notifyVariables(hashMap)
 
@@ -146,7 +146,7 @@ class VariableKeeperTest {
     fun `notifyVariable() should update variable if they do exist`() {
         val sampleSetVariableEntity = getSampleSetVariableEntity("name_0")
         variableKeeper.createVariablePublisher(sampleSetVariableEntity.id)
-        val hashMap = HashMap<String, SetVariableEntity>()
+        val hashMap = HashMap<String, VariableEntity>()
         hashMap[sampleSetVariableEntity.id] = sampleSetVariableEntity
 
         variableKeeper.notifyVariables(hashMap)
@@ -167,7 +167,7 @@ class VariableKeeperTest {
         variableKeeper.createVariablePublisher(sampleSetVariableEntity0.id)
         variableKeeper.createVariablePublisher(sampleSetVariableEntity1.id)
         variableKeeper.createVariablePublisher(sampleSetVariableEntity2.id)
-        val hashMap = HashMap<String, SetVariableEntity>()
+        val hashMap = HashMap<String, VariableEntity>()
         hashMap[sampleSetVariableEntity0.id] = sampleSetVariableEntity0
         hashMap[sampleSetVariableEntity1.id] = sampleSetVariableEntity1
         hashMap[sampleSetVariableEntity2.id] = sampleSetVariableEntity2
@@ -192,7 +192,7 @@ class VariableKeeperTest {
             actualResult.second = it.second
         }
 
-        val hashMap = HashMap<String, SetVariableEntity>()
+        val hashMap = HashMap<String, VariableEntity>()
         hashMap[sampleSetVariableEntity.id] = sampleSetVariableEntity
         variableKeeper.notifyVariables(hashMap)
 
@@ -214,9 +214,9 @@ class VariableKeeperTest {
         )
     }
 
-    private fun getSampleSetVariableEntity(id: String): SetVariableEntity {
+    private fun getSampleSetVariableEntity(id: String): VariableEntity {
         val variable = Variable.LongVariable(id, 0L)
-        return SetVariableEntity(
+        return VariableEntity(
             id,
             0L,
             variable

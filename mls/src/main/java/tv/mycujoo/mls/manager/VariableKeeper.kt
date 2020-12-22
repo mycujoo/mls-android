@@ -3,7 +3,7 @@ package tv.mycujoo.mls.manager
 import com.jakewharton.rxrelay3.BehaviorRelay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import tv.mycujoo.domain.entity.SetVariableEntity
+import tv.mycujoo.domain.entity.VariableEntity
 
 class VariableKeeper(private val dispatcher: CoroutineScope) : IVariableKeeper {
 
@@ -71,9 +71,9 @@ class VariableKeeper(private val dispatcher: CoroutineScope) : IVariableKeeper {
         }
     }
 
-    override fun notifyVariables(setVariableEntities: HashMap<String, SetVariableEntity>) {
+    override fun notifyVariables(variableEntities: HashMap<String, VariableEntity>) {
         variablePublisherMap.forEach { e ->
-            setVariableEntities[e.key]?.let { setEntityVariable ->
+            variableEntities[e.key]?.let { setEntityVariable ->
                 e.value.accept(setEntityVariable.variable.printValue())
             }
         }

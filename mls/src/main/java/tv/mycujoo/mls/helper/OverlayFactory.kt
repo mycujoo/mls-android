@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.Log
 import android.view.View
 import com.caverock.androidsvg.SVG
-import tv.mycujoo.domain.entity.OverlayEntity
+import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.mls.manager.IVariableKeeper
 import tv.mycujoo.mls.manager.VariableTranslator
 import tv.mycujoo.mls.widgets.ScaffoldView
@@ -13,20 +13,20 @@ class OverlayFactory : IOverlayFactory {
 
     override fun createScaffoldView(
         context: Context,
-        overlayEntity: OverlayEntity,
+        showOverlayAction: Action.ShowOverlayAction,
         variableTranslator: VariableTranslator,
         variableKeeper: IVariableKeeper
     ): ScaffoldView {
 
-        val size = overlayEntity.viewSpec.size!!
+        val size = showOverlayAction.viewSpec!!.size!!
         val scaffoldView = ScaffoldView(size.first, size.second, context)
         scaffoldView.id = View.generateViewId()
-        scaffoldView.tag = overlayEntity.id
+        scaffoldView.tag = showOverlayAction.id
 
-        scaffoldView.setVariablePlaceHolder(overlayEntity.variablePlaceHolders)
+        scaffoldView.setVariablePlaceHolder(showOverlayAction.placeHolders)
 
 
-        overlayEntity.variablePlaceHolders.forEach { entry ->
+        showOverlayAction.placeHolders.forEach { entry ->
             // VALUE of place-holder, is the KEY in the set_variable map
             variableKeeper.getTimerNames().firstOrNull {
                 it == entry
@@ -43,8 +43,8 @@ class OverlayFactory : IOverlayFactory {
 
         try {
             val svg: SVG
-            var rawString = overlayEntity.svgData!!.svgString!!
-            overlayEntity.variablePlaceHolders.forEach { placeHolder ->
+            var rawString = showOverlayAction.svgData!!.svgString!!
+            showOverlayAction.placeHolders.forEach { placeHolder ->
                 var value = variableTranslator.getValue(placeHolder)
                 if (value == null) {
                     value = variableKeeper.getValue(placeHolder)
@@ -58,7 +58,7 @@ class OverlayFactory : IOverlayFactory {
             svg.setDocumentWidth("100%")
             svg.setDocumentHeight("100%")
             scaffoldView.setSVG(svg)
-            scaffoldView.setSVGSource(overlayEntity.svgData!!.svgString!!)
+            scaffoldView.setSVGSource(showOverlayAction.svgData!!.svgString!!)
 
 
         } catch (e: Exception) {

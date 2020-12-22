@@ -27,20 +27,19 @@ class OverlayViewHelper(
     fun addView(
         context: Context,
         overlayHost: ConstraintLayout,
-        overlayEntity: OverlayEntity
+        showOverlayAction: Action.ShowOverlayAction
     ) {
-        if (overlayEntity.introTransitionSpec.animationType == AnimationType.NONE
-        ) {
+        if (showOverlayAction.introTransitionSpec!!.animationType == AnimationType.NONE) {
             addViewWithNoAnimation(
                 context,
                 overlayHost,
-                overlayEntity
+                showOverlayAction
             )
         } else {
             addViewWithAnimation(
                 context,
                 overlayHost,
-                overlayEntity
+                showOverlayAction
             )
         }
     }
@@ -50,7 +49,7 @@ class OverlayViewHelper(
     fun addViewWithAnimation(
         context: Context,
         overlayHost: ConstraintLayout,
-        overlayEntity: OverlayEntity
+        showOverlayAction: Action.ShowOverlayAction
     ) {
         viewHandler.incrementIdlingResource()
 
@@ -58,26 +57,26 @@ class OverlayViewHelper(
             val scaffoldView =
                 overlayFactory.createScaffoldView(
                     context,
-                    overlayEntity,
+                    showOverlayAction,
                     viewHandler.getVariableTranslator(),
                     viewHandler.getVariableKeeper()
                 )
 
             when {
-                hasStaticIntroAnimation(overlayEntity.introTransitionSpec.animationType) -> {
+                hasStaticIntroAnimation(showOverlayAction.introTransitionSpec!!.animationType) -> {
                     doAddViewWithStaticAnimation(
                         overlayHost,
                         scaffoldView,
-                        overlayEntity.viewSpec.positionGuide!!,
-                        overlayEntity.introTransitionSpec
+                        showOverlayAction.viewSpec!!.positionGuide!!,
+                        showOverlayAction.introTransitionSpec
                     )
                 }
-                hasDynamicIntroAnimation(overlayEntity.introTransitionSpec.animationType) -> {
+                hasDynamicIntroAnimation(showOverlayAction.introTransitionSpec.animationType) -> {
                     doAddViewWithDynamicAnimation(
                         overlayHost,
                         scaffoldView,
-                        overlayEntity.viewSpec.positionGuide!!,
-                        overlayEntity.introTransitionSpec
+                        showOverlayAction.viewSpec!!.positionGuide!!,
+                        showOverlayAction.introTransitionSpec
                     )
                 }
                 else -> {
@@ -170,14 +169,14 @@ class OverlayViewHelper(
     fun addViewWithNoAnimation(
         context: Context,
         overlayHost: ConstraintLayout,
-        overlayEntity: OverlayEntity
+        showOverlayAction: Action.ShowOverlayAction
     ) {
         viewHandler.incrementIdlingResource()
 
         val scaffoldView =
             overlayFactory.createScaffoldView(
                 context,
-                overlayEntity,
+                showOverlayAction,
                 viewHandler.getVariableTranslator(),
                 viewHandler.getVariableKeeper()
             )
@@ -185,7 +184,7 @@ class OverlayViewHelper(
         doAddViewWithNoAnimation(
             overlayHost,
             scaffoldView,
-            overlayEntity.viewSpec.positionGuide!!
+            showOverlayAction.viewSpec!!.positionGuide!!
         )
 
     }
@@ -227,12 +226,13 @@ class OverlayViewHelper(
     /**region Remove view*/
     fun removeView(
         overlayHost: ConstraintLayout,
-        overlayEntity: OverlayEntity
+        actionId: String,
+        outroTransitionSpec: TransitionSpec?
     ) {
-        if (overlayEntity.outroTransitionSpec.animationType == AnimationType.NONE) {
-            removeViewWithNoAnimation(overlayHost, overlayEntity)
+        if (outroTransitionSpec == null || outroTransitionSpec.animationType == AnimationType.NONE) {
+            removeViewWithNoAnimation(overlayHost, actionId)
         } else {
-            removeViewWithAnimation(overlayHost, overlayEntity)
+            removeViewWithAnimation(overlayHost, actionId, outroTransitionSpec)
         }
     }
 
@@ -241,13 +241,6 @@ class OverlayViewHelper(
         hideOverlayActionEntity: HideOverlayActionEntity
     ) {
         removeViewWithNoAnimation(overlayHost, hideOverlayActionEntity.id)
-    }
-
-    private fun removeViewWithNoAnimation(
-        overlayHost: ConstraintLayout,
-        overlayEntity: OverlayEntity
-    ) {
-        removeViewWithNoAnimation(overlayHost, overlayEntity.id)
     }
 
     private fun removeViewWithNoAnimation(overlayHost: ConstraintLayout, overlayId: String) {
@@ -263,21 +256,25 @@ class OverlayViewHelper(
     /**region Remove view with animation*/
     fun removeViewWithAnimation(
         overlayHost: ConstraintLayout,
-        overlayEntity: OverlayEntity
+        actionId: String,
+        outroTransitionSpec: TransitionSpec
     ) {
         viewHandler.incrementIdlingResource()
 
         when {
-            hasStaticOutroAnimation(overlayEntity.outroTransitionSpec.animationType) -> {
+            hasStaticOutroAnimation(outroTransitionSpec.animationType) -> {
                 removeViewWithStaticAnimation(
                     overlayHost,
-                    overlayEntity
+                    actionId,
+                    outroTransitionSpec
+
                 )
             }
-            hasDynamicOutroAnimation(overlayEntity.outroTransitionSpec.animationType) -> {
+            hasDynamicOutroAnimation(outroTransitionSpec.animationType) -> {
                 removeViewWithDynamicAnimation(
                     overlayHost,
-                    overlayEntity
+                    actionId,
+                    outroTransitionSpec
                 )
             }
             else -> {
@@ -289,15 +286,17 @@ class OverlayViewHelper(
 
     private fun removeViewWithStaticAnimation(
         overlayHost: ConstraintLayout,
-        overlayEntity: OverlayEntity
+        actionId: String,
+        outroTransitionSpec: TransitionSpec
     ) {
         overlayHost.post {
-            overlayHost.children.filter { it.tag == overlayEntity.id }.forEach { view ->
+            overlayHost.children.filter { it.tag == actionId }.forEach { view ->
                 view as ScaffoldView
 
                 val animation = animationFactory.createRemoveViewStaticAnimation(
                     overlayHost,
-                    overlayEntity,
+                    actionId,
+                    outroTransitionSpec,
                     view,
                     viewHandler
                 )
@@ -310,16 +309,17 @@ class OverlayViewHelper(
 
     private fun removeViewWithDynamicAnimation(
         overlayHost: ConstraintLayout,
-        overlayEntity: OverlayEntity
+        actionId: String,
+        outroTransitionSpec: TransitionSpec
     ) {
         overlayHost.post {
-            overlayHost.children.filter { it.tag == overlayEntity.id }.forEach { view ->
+            overlayHost.children.filter { it.tag == actionId }.forEach { view ->
                 view as ScaffoldView
-
 
                 val animation = animationFactory.createRemoveViewDynamicAnimation(
                     overlayHost,
-                    overlayEntity,
+                    actionId,
+                    outroTransitionSpec,
                     view,
                     viewHandler
                 )
@@ -336,15 +336,13 @@ class OverlayViewHelper(
             viewHandler.decrementIdlingResource()
         }
     }
-
-
     /**endregion */
 
 
     /**region Add lingering view with animation*/
     fun addLingeringIntroViewWithAnimation(
         overlayHost: ConstraintLayout,
-        overlayEntity: OverlayEntity,
+        showOverlayAction: Action.ShowOverlayAction,
         animationPosition: Long,
         isPlaying: Boolean
     ) {
@@ -355,7 +353,7 @@ class OverlayViewHelper(
             val scaffoldView =
                 overlayFactory.createScaffoldView(
                     overlayHost.context,
-                    overlayEntity,
+                    showOverlayAction,
                     viewHandler.getVariableTranslator(),
                     viewHandler.getVariableKeeper()
                 )
@@ -365,7 +363,7 @@ class OverlayViewHelper(
                 val animation = animationFactory.createLingeringIntroViewAnimation(
                     overlayHost,
                     scaffoldView,
-                    overlayEntity,
+                    showOverlayAction,
                     animationPosition,
                     isPlaying,
                     viewHandler
@@ -387,7 +385,7 @@ class OverlayViewHelper(
             )
 
 
-            val positionGuide = overlayEntity.viewSpec.positionGuide
+            val positionGuide = showOverlayAction.viewSpec!!.positionGuide
             if (positionGuide == null) {
                 // should not happen
                 Log.e("OverlayEntityView", "animation must not be null")
@@ -410,22 +408,22 @@ class OverlayViewHelper(
 
     fun updateLingeringIntroOverlay(
         overlayHost: ConstraintLayout,
-        overlayEntity: OverlayEntity,
+        showOverlayAction: Action.ShowOverlayAction,
         animationPosition: Long,
         isPlaying: Boolean
     ) {
         viewHandler.incrementIdlingResource()
 
         overlayHost.post {
-            overlayHost.children.firstOrNull { it.tag == overlayEntity.id }?.let { view ->
+            overlayHost.children.firstOrNull { it.tag == showOverlayAction.id }?.let { view ->
 
-                viewHandler.getAnimationWithTag(overlayEntity.id)?.let {
+                viewHandler.getAnimationWithTag(showOverlayAction.id)?.let {
                     it.cancel()
                 }
-                viewHandler.removeAnimation(overlayEntity.id)
+                viewHandler.removeAnimation(showOverlayAction.id)
 
                 val scaffoldView = viewHandler.getOverlayView(
-                    overlayEntity.id
+                    showOverlayAction.id
                 )
                 scaffoldView?.let {
                     viewHandler.detachOverlayView(
@@ -436,7 +434,7 @@ class OverlayViewHelper(
 
                 addLingeringIntroViewWithAnimation(
                     overlayHost,
-                    overlayEntity,
+                    showOverlayAction,
                     animationPosition,
                     isPlaying
                 )
@@ -449,7 +447,7 @@ class OverlayViewHelper(
 
     fun addLingeringOutroViewWithAnimation(
         overlayHost: ConstraintLayout,
-        overlayEntity: OverlayEntity,
+        showOverlayAction: Action.ShowOverlayAction,
         animationPosition: Long,
         isPlaying: Boolean
     ) {
@@ -458,7 +456,7 @@ class OverlayViewHelper(
             val scaffoldView =
                 overlayFactory.createScaffoldView(
                     overlayHost.context,
-                    overlayEntity,
+                    showOverlayAction,
                     viewHandler.getVariableTranslator(),
                     viewHandler.getVariableKeeper()
                 )
@@ -468,7 +466,7 @@ class OverlayViewHelper(
                 animationFactory.createLingeringOutroAnimation(
                     overlayHost,
                     scaffoldView,
-                    overlayEntity,
+                    showOverlayAction,
                     animationPosition,
                     isPlaying,
                     viewHandler
@@ -482,7 +480,7 @@ class OverlayViewHelper(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT
             )
-            val positionGuide = overlayEntity.viewSpec.positionGuide
+            val positionGuide = showOverlayAction.viewSpec?.positionGuide
             if (positionGuide == null) {
                 // should not happen
                 return@post
@@ -502,17 +500,17 @@ class OverlayViewHelper(
 
     fun updateLingeringOutroOverlay(
         overlayHost: ConstraintLayout,
-        overlayEntity: OverlayEntity,
+        showOverlayAction: Action.ShowOverlayAction,
         animationPosition: Long,
         isPlaying: Boolean
     ) {
-        val scaffoldView = viewHandler.getOverlayView(overlayEntity.id) ?: return
+        val scaffoldView = viewHandler.getOverlayView(showOverlayAction.id) ?: return
 
         overlayHost.post {
-            viewHandler.getAnimationWithTag(overlayEntity.id)?.let {
+            viewHandler.getAnimationWithTag(showOverlayAction.id)?.let {
                 it.cancel()
             }
-            viewHandler.removeAnimation(overlayEntity.id)
+            viewHandler.removeAnimation(showOverlayAction.id)
 
             viewHandler.detachOverlayView(
                 scaffoldView
@@ -520,7 +518,7 @@ class OverlayViewHelper(
 
             addLingeringOutroViewWithAnimation(
                 overlayHost,
-                overlayEntity,
+                showOverlayAction,
                 animationPosition,
                 isPlaying
             )
@@ -530,9 +528,9 @@ class OverlayViewHelper(
 
     fun updateLingeringMidwayOverlay(
         overlayHost: ConstraintLayout,
-        overlayEntity: OverlayEntity
+        showOverlayAction: Action.ShowOverlayAction
     ) {
-        val scaffoldView = viewHandler.getOverlayView(overlayEntity.id) ?: return
+        val scaffoldView = viewHandler.getOverlayView(showOverlayAction.id) ?: return
 
         overlayHost.post {
             val constraintSet = ConstraintSet()
@@ -542,7 +540,7 @@ class OverlayViewHelper(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT
             )
 
-            val positionGuide = overlayEntity.viewSpec.positionGuide!!
+            val positionGuide = showOverlayAction.viewSpec!!.positionGuide!!
 
             applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
 
@@ -562,21 +560,21 @@ class OverlayViewHelper(
     /**region Add or Update lingering intro view*/
     fun addOrUpdateLingeringIntroOverlay(
         tvOverlayContainer: ConstraintLayout,
-        overlayEntity: OverlayEntity,
+        showOverlayAction: Action.ShowOverlayAction,
         animationPosition: Long,
         isPlaying: Boolean
     ) {
-        if (viewHandler.overlayBlueprintIsAttached(overlayEntity.id)) {
+        if (viewHandler.overlayBlueprintIsAttached(showOverlayAction.id)) {
             updateLingeringIntroOverlay(
                 tvOverlayContainer,
-                overlayEntity,
+                showOverlayAction,
                 animationPosition,
                 isPlaying
             )
         } else {
             addLingeringIntroViewWithAnimation(
                 tvOverlayContainer,
-                overlayEntity,
+                showOverlayAction,
                 animationPosition,
                 isPlaying
             )
@@ -587,21 +585,21 @@ class OverlayViewHelper(
     /**region Add or Update lingering outro view*/
     fun addOrUpdateLingeringOutroOverlay(
         tvOverlayContainer: ConstraintLayout,
-        overlayEntity: OverlayEntity,
+        showOverlayAction: Action.ShowOverlayAction,
         animationPosition: Long,
         isPlaying: Boolean
     ) {
-        if (viewHandler.overlayBlueprintIsAttached(overlayEntity.id)) {
+        if (viewHandler.overlayBlueprintIsAttached(showOverlayAction.id)) {
             updateLingeringOutroOverlay(
                 tvOverlayContainer,
-                overlayEntity,
+                showOverlayAction,
                 animationPosition,
                 isPlaying
             )
         } else {
             addLingeringOutroViewWithAnimation(
                 tvOverlayContainer,
-                overlayEntity,
+                showOverlayAction,
                 animationPosition,
                 isPlaying
             )
@@ -748,7 +746,7 @@ class OverlayViewHelper(
     /**endregion */
 
     /**region Variables*/
-    fun setVariable(variable: SetVariableEntity) {
+    fun setVariable(variable: VariableEntity) {
         viewHandler.getVariableTranslator().createVariableTripleIfNotExisted(variable.variable.name)
         viewHandler.getVariableTranslator()
             .emitNewValue(variable.variable.name, variable.variable.printValue())

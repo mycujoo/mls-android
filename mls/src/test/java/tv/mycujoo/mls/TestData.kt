@@ -1,39 +1,90 @@
 package tv.mycujoo.mls
 
-import tv.mycujoo.domain.entity.*
+import tv.mycujoo.domain.entity.Action
+import tv.mycujoo.domain.entity.AnimationType
+import tv.mycujoo.domain.entity.TransitionSpec
+import tv.mycujoo.domain.entity.ViewSpec
 import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 
 class TestData {
 
     companion object {
-        fun sampleEntityWithIntroAnimation(animationType: AnimationType): OverlayEntity {
-            return OverlayEntity(
-                "id_0",
-                null,
-                ViewSpec(null, null),
-                TransitionSpec(0L, animationType, ONE_SECOND_IN_MS),
-                TransitionSpec(-1L, AnimationType.NONE, -1L),
-                emptyList()
+        fun getSampleShowOverlayAction(
+            offset: Long,
+            absoluteTime: Long
+        ): Action.ShowOverlayAction {
+            val viewSpec = ViewSpec(null, null)
+            val introTransitionSpec =
+                TransitionSpec(0L, AnimationType.NONE, 0L)
+
+            return Action.ShowOverlayAction(
+                id = "id_1001",
+                offset = 0L,
+                absoluteTime = -1L,
+                svgData = null,
+                duration = 0L,
+                viewSpec = viewSpec,
+                introTransitionSpec = introTransitionSpec,
+                outroTransitionSpec = null,
+                placeHolders = emptyList()
             )
         }
 
-        fun sampleEntityWithOutroAnimation(animationType: AnimationType): OverlayEntity {
-            return OverlayEntity(
-                "id_0",
-                null,
-                ViewSpec(null, null),
-                TransitionSpec(0L, AnimationType.NONE, 0L),
-                TransitionSpec(0L, animationType, ONE_SECOND_IN_MS),
-                emptyList()
+        fun getSampleShowOverlayAction(
+            introAnimationType: AnimationType
+        ): Action.ShowOverlayAction {
+            val viewSpec = ViewSpec(null, null)
+            val introTransitionSpec =
+                TransitionSpec(0L, introAnimationType, ONE_SECOND_IN_MS)
+
+            return Action.ShowOverlayAction(
+                id = "id_1001",
+                offset = 0L,
+                absoluteTime = -1L,
+                svgData = null,
+                duration = 0L,
+                viewSpec = viewSpec,
+                introTransitionSpec = introTransitionSpec,
+                outroTransitionSpec = null,
+                placeHolders = emptyList()
             )
         }
 
-        fun sampleHideOverlayEntity(animationType: AnimationType): HideOverlayActionEntity {
-            return HideOverlayActionEntity(
-                "id_0",
-                null,
-                animationType,
-                ONE_SECOND_IN_MS
+        fun getSampleShowOverlayActionOutro(
+            outroAnimationType: AnimationType
+        ): Action.ShowOverlayAction {
+            val viewSpec = ViewSpec(null, null)
+            val introTransitionSpec =
+                TransitionSpec(0L, AnimationType.NONE, 0L)
+            val outroTransitionSpec =
+                TransitionSpec(0L, outroAnimationType, ONE_SECOND_IN_MS)
+
+            return Action.ShowOverlayAction(
+                id = "id_1001",
+                offset = 0L,
+                absoluteTime = -1L,
+                svgData = null,
+                duration = 0L,
+                viewSpec = viewSpec,
+                introTransitionSpec = introTransitionSpec,
+                outroTransitionSpec = outroTransitionSpec,
+                placeHolders = emptyList()
+            )
+        }
+
+        fun getSampleHideOverlayAction(
+            animationType: AnimationType
+        ): Action.HideOverlayAction {
+
+            val outroTransitionSpec =
+                TransitionSpec(0L, animationType, ONE_SECOND_IN_MS)
+
+            return Action.HideOverlayAction(
+                id = "id_1001",
+                offset = 0L,
+                absoluteTime = -1L,
+                outroAnimationSpec = outroTransitionSpec,
+                customId = "id_1001"
             )
         }
 
@@ -44,7 +95,43 @@ class TestData {
                 put("leading", 5.toDouble())
             }
         }
-    }
 
+        fun getSampleShowOverlayAction(
+            introTransitionSpec: TransitionSpec,
+            outroOffset: Long
+        ): Action.ShowOverlayAction {
+            val viewSpec = ViewSpec(null, null)
+            val outroTransitionSpec = TransitionSpec(outroOffset, AnimationType.NONE, 0L)
+            return Action.ShowOverlayAction(
+                id = "id_1001",
+                offset = introTransitionSpec.offset,
+                absoluteTime = -1L,
+                svgData = null,
+                duration = 0L,
+                viewSpec = viewSpec,
+                introTransitionSpec = introTransitionSpec,
+                outroTransitionSpec = outroTransitionSpec,
+                placeHolders = emptyList()
+            )
+        }
+
+        fun getSampleShowOverlayAction(
+            introTransitionSpec: TransitionSpec,
+            outroTransitionSpec: TransitionSpec
+        ): Action.ShowOverlayAction {
+            val viewSpec = ViewSpec(null, null)
+            return Action.ShowOverlayAction(
+                id = "id_1001",
+                offset = introTransitionSpec.offset,
+                absoluteTime = -1L,
+                svgData = null,
+                duration = 0L,
+                viewSpec = viewSpec,
+                introTransitionSpec = introTransitionSpec,
+                outroTransitionSpec = outroTransitionSpec,
+                placeHolders = emptyList()
+            )
+        }
+    }
 
 }
