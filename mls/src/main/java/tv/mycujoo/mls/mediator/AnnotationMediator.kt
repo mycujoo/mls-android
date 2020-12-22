@@ -8,7 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tv.mycujoo.data.entity.ActionResponse
-import tv.mycujoo.domain.entity.*
+import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.mls.core.BuildPoint
 import tv.mycujoo.mls.core.IAnnotationFactory
 import tv.mycujoo.mls.data.IDataManager

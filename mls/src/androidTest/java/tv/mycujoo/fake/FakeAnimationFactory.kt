@@ -2,8 +2,8 @@ package tv.mycujoo.fake
 
 import android.animation.ObjectAnimator
 import androidx.constraintlayout.widget.ConstraintLayout
+import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.AnimationType
-import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.manager.contracts.IViewHandler
@@ -33,7 +33,11 @@ class FakeAnimationFactory : AnimationFactory() {
     ): ObjectAnimator? {
 
         animationRecipe =
-            AnimationRecipe(scaffoldView, introTransitionSpec.animationType, introTransitionSpec.animationDuration)
+            AnimationRecipe(
+                scaffoldView,
+                introTransitionSpec.animationType,
+                introTransitionSpec.animationDuration
+            )
 
         return super.createAddViewDynamicAnimation(
             overlayHost,
@@ -45,35 +49,51 @@ class FakeAnimationFactory : AnimationFactory() {
 
     override fun createRemoveViewStaticAnimation(
         overlayHost: ConstraintLayout,
-        overlayEntity: OverlayEntity,
+        showOverlayAction: Action.ShowOverlayAction,
         overlayView: ScaffoldView,
         viewHandler: IViewHandler
     ): ObjectAnimator {
 
-        val outroTransitionSpec = overlayEntity.outroTransitionSpec
+        val outroTransitionSpec = showOverlayAction.outroTransitionSpec
         animationRecipe =
-            AnimationRecipe(overlayView, outroTransitionSpec.animationType, outroTransitionSpec.animationDuration)
+            AnimationRecipe(
+                overlayView,
+                outroTransitionSpec!!.animationType,
+                outroTransitionSpec.animationDuration
+            )
 
-        return super.createRemoveViewStaticAnimation(overlayHost, overlayEntity, overlayView, viewHandler)
+        return super.createRemoveViewStaticAnimation(
+            overlayHost,
+            showOverlayAction,
+            overlayView,
+            viewHandler
+        )
     }
 
     override fun createRemoveViewDynamicAnimation(
         overlayHost: ConstraintLayout,
-        overlayEntity: OverlayEntity,
+        actionId: String,
+        outroTransitionSpec: TransitionSpec,
         overlayView: ScaffoldView,
         viewHandler: IViewHandler
     ): ObjectAnimator? {
-        val outroTransitionSpec = overlayEntity.outroTransitionSpec
         animationRecipe =
-            AnimationRecipe(overlayView, outroTransitionSpec.animationType, outroTransitionSpec.animationDuration)
+            AnimationRecipe(
+                overlayView,
+                outroTransitionSpec.animationType,
+                outroTransitionSpec.animationDuration
+            )
 
-        return super.createRemoveViewDynamicAnimation(overlayHost, overlayEntity, overlayView, viewHandler)
+        return super.createRemoveViewDynamicAnimation(
+            overlayHost, actionId, outroTransitionSpec,
+            overlayView, viewHandler
+        )
     }
 
     override fun createLingeringIntroViewAnimation(
         overlayHost: ConstraintLayout,
         scaffoldView: ScaffoldView,
-        overlayEntity: OverlayEntity,
+        overlayEntity: Action.ShowOverlayAction,
         animationPosition: Long,
         isPlaying: Boolean,
         viewHandler: IViewHandler
@@ -83,7 +103,7 @@ class FakeAnimationFactory : AnimationFactory() {
         animationRecipe =
             AnimationRecipe(
                 scaffoldView,
-                introTransitionSpec.animationType,
+                introTransitionSpec!!.animationType,
                 introTransitionSpec.animationDuration,
                 animationPosition,
                 isPlaying
@@ -102,7 +122,7 @@ class FakeAnimationFactory : AnimationFactory() {
     override fun createLingeringOutroAnimation(
         overlayHost: ConstraintLayout,
         scaffoldView: ScaffoldView,
-        overlayEntity: OverlayEntity,
+        overlayEntity: Action.ShowOverlayAction,
         animationPosition: Long,
         isPlaying: Boolean,
         viewHandler: IViewHandler
@@ -112,7 +132,7 @@ class FakeAnimationFactory : AnimationFactory() {
         animationRecipe =
             AnimationRecipe(
                 scaffoldView,
-                outroTransitionSpec.animationType,
+                outroTransitionSpec!!.animationType,
                 outroTransitionSpec.animationDuration,
                 animationPosition,
                 isPlaying

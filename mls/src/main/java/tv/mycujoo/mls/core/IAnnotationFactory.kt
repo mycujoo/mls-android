@@ -1,10 +1,10 @@
 package tv.mycujoo.mls.core
 
-import tv.mycujoo.domain.entity.ActionObject
+import tv.mycujoo.domain.entity.Action
 
 interface IAnnotationFactory {
-    fun setAnnotations(actionObjectList: List<ActionObject>)
+    fun setActions(actions: List<Action>)
     fun build(buildPoint: BuildPoint)
 
-    fun actionList(): List<ActionObject>
+    fun getCurrentActions(): List<Action>
 }

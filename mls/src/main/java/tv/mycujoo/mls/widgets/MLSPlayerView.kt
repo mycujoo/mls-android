@@ -28,8 +28,6 @@ import kotlinx.android.synthetic.main.dialog_event_info_pre_event_layout.view.*
 import kotlinx.android.synthetic.main.dialog_event_info_started_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
 import kotlinx.android.synthetic.main.player_view_wrapper.view.*
-import tv.mycujoo.domain.entity.HideOverlayActionEntity
-import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.UIEventListener
@@ -635,134 +633,6 @@ class MLSPlayerView @JvmOverloads constructor(
 
     /**endregion */
 
-    //regular play-mode
-    fun onNewOverlayWithNoAnimation(overlayEntity: OverlayEntity) {
-        overlayViewHelper.addViewWithNoAnimation(
-            context,
-            overlayHost,
-            overlayEntity
-        )
-    }
-
-
-    fun onNewOverlayWithAnimation(overlayEntity: OverlayEntity) {
-        overlayViewHelper.addViewWithAnimation(
-            context,
-            overlayHost,
-            overlayEntity
-        )
-    }
-
-    fun onOverlayRemovalWithNoAnimation(overlayEntity: OverlayEntity) {
-        overlayHost.children.filter { it.tag == overlayEntity.id }
-            .forEach {
-                if (this::viewHandler.isInitialized) {
-                    viewHandler.detachOverlayView(it as ScaffoldView)
-                    viewHandler.removeAnimation(overlayEntity.id)
-                }
-            }
-
-    }
-
-    fun onOverlayRemovalWithNoAnimation(overlayEntity: HideOverlayActionEntity) {
-        overlayHost.children.filter { it.tag == overlayEntity.id }
-            .forEach {
-                if (this::viewHandler.isInitialized) {
-                    viewHandler.detachOverlayView(it as ScaffoldView)
-                    viewHandler.removeAnimation(overlayEntity.id)
-                }
-            }
-
-    }
-
-    fun onOverlayRemovalWithAnimation(overlayEntity: OverlayEntity) {
-        overlayViewHelper.removeViewWithAnimation(
-            overlayHost,
-            overlayEntity
-        )
-    }
-
-    // seek or jump play-mode
-    fun addLingeringIntroOverlay(
-        overlayEntity: OverlayEntity,
-        animationPosition: Long,
-        isPlaying: Boolean
-    ) {
-        overlayViewHelper.addLingeringIntroViewWithAnimation(
-            overlayHost,
-            overlayEntity,
-            animationPosition,
-            isPlaying
-        )
-    }
-
-
-    fun updateLingeringIntroOverlay(
-        overlayEntity: OverlayEntity,
-        animationPosition: Long,
-        isPlaying: Boolean
-    ) {
-        overlayViewHelper.updateLingeringIntroOverlay(
-            overlayHost,
-            overlayEntity,
-            animationPosition,
-            isPlaying
-        )
-    }
-
-
-    fun addLingeringOutroOverlay(
-        overlayEntity: OverlayEntity,
-        animationPosition: Long,
-        isPlaying: Boolean
-    ) {
-        overlayViewHelper.addLingeringOutroViewWithAnimation(
-            overlayHost,
-            overlayEntity,
-            animationPosition,
-            isPlaying
-        )
-    }
-
-
-    fun updateLingeringOutroOverlay(
-        overlayEntity: OverlayEntity,
-        animationPosition: Long,
-        isPlaying: Boolean
-    ) {
-        overlayViewHelper.updateLingeringOutroOverlay(
-            overlayHost,
-            overlayEntity,
-            animationPosition,
-            isPlaying
-        )
-    }
-
-    fun addLingeringMidwayOverlay(overlayEntity: OverlayEntity) {
-        overlayViewHelper.addViewWithNoAnimation(
-            context,
-            overlayHost,
-            overlayEntity
-        )
-    }
-
-    fun updateLingeringMidwayOverlay(overlayEntity: OverlayEntity) {
-        overlayViewHelper.updateLingeringMidwayOverlay(
-            overlayHost,
-            overlayEntity
-        )
-    }
-
-    fun removeLingeringOverlay(overlayEntity: OverlayEntity) {
-        overlayHost.children.filter { it.tag == overlayEntity.id }
-            .forEach {
-                if (this::viewHandler.isInitialized) {
-                    viewHandler.detachOverlayView(it as ScaffoldView)
-                    viewHandler.removeAnimation(overlayEntity.id)
-                }
-            }
-    }
-
     fun clearScreen(idList: List<String>) {
         overlayHost.children
             .forEach {
@@ -796,6 +666,7 @@ class MLSPlayerView @JvmOverloads constructor(
     }
 
     /**endregion */
+
     /**region Inner classes*/
 
     enum class ResizeMode(val value: Int) {
