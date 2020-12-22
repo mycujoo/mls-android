@@ -1,9 +1,5 @@
 package tv.mycujoo.mls.manager
 
-import tv.mycujoo.mls.entity.AdjustTimerEntity
-import tv.mycujoo.mls.entity.PauseTimerEntity
-import tv.mycujoo.mls.entity.SkipTimerEntity
-import tv.mycujoo.mls.entity.StartTimerEntity
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerFormat
 
@@ -56,24 +52,24 @@ class TimerVariable(
         }
     }
 
-    override fun start(startTimerEntity: StartTimerEntity, now: Long) {
-        commands.add(TimerEntity.StartTimer(startTimerEntity))
+    override fun start(statTimer: TimerEntity.StartTimer, now: Long) {
+        commands.add(statTimer)
         recalculate(now)
     }
 
-    override fun pause(pauseTimerEntity: PauseTimerEntity, now: Long) {
-        commands.add(TimerEntity.PauseTimer(pauseTimerEntity))
+    override fun pause(pauseTimer: TimerEntity.PauseTimer, now: Long) {
+        commands.add(pauseTimer)
         recalculate(now)
     }
 
 
-    override fun adjust(adjustTimerEntity: AdjustTimerEntity, now: Long) {
-        commands.add(TimerEntity.AdjustTimer(adjustTimerEntity))
+    override fun adjust(adjustTimer: TimerEntity.AdjustTimer, now: Long) {
+        commands.add(adjustTimer)
         recalculate(now)
     }
 
-    override fun skip(skipTimerEntity: SkipTimerEntity, now: Long) {
-        commands.add(TimerEntity.SkipTimer(skipTimerEntity))
+    override fun skip(skipTimer: TimerEntity.SkipTimer, now: Long) {
+        commands.add(skipTimer)
         recalculate(now)
     }
 
@@ -83,23 +79,23 @@ class TimerVariable(
     private fun recalculate(now: Long) {
         var startOffset = 0L
         var pauseOffset = 0L
-        var adjustEntity: AdjustTimerEntity? = null
-        var skipTimerEntity: SkipTimerEntity? = null
+        var adjustTimer: TimerEntity.AdjustTimer? = null
+        var skipTimer: TimerEntity.SkipTimer? = null
         commands.forEach {
             when (it) {
                 is TimerEntity.StartTimer -> {
-                    startOffset = it.startTimerEntity.offset
+                    startOffset = it.offset
 
                 }
                 is TimerEntity.PauseTimer -> {
-                    pauseOffset = it.pauseTimerEntity.offset
+                    pauseOffset = it.offset
                 }
                 is TimerEntity.AdjustTimer -> {
-                    adjustEntity = it.adjustTimerEntity
+                    adjustTimer = it
                 }
 
                 is TimerEntity.SkipTimer -> {
-                    skipTimerEntity = it.skipTimerEntity
+                    skipTimer = it
                 }
 
                 else -> {
@@ -114,11 +110,11 @@ class TimerVariable(
                     currentTime -= now - pauseOffset
                 }
 
-                adjustEntity?.let {
+                adjustTimer?.let {
                     currentTime = startValue + now - it.offset + it.value
                 }
 
-                skipTimerEntity?.let {
+                skipTimer?.let {
                     currentTime += it.value
                 }
 
@@ -130,11 +126,11 @@ class TimerVariable(
                     currentTime += now - pauseOffset
                 }
 
-                adjustEntity?.let {
+                adjustTimer?.let {
                     currentTime = startValue - (now - it.offset + it.value)
                 }
 
-                skipTimerEntity?.let {
+                skipTimer?.let {
                     currentTime -= it.value
                 }
             }

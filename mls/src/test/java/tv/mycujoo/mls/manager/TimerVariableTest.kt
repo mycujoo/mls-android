@@ -2,10 +2,6 @@ package tv.mycujoo.mls.manager
 
 import org.junit.Before
 import org.junit.Test
-import tv.mycujoo.mls.entity.AdjustTimerEntity
-import tv.mycujoo.mls.entity.PauseTimerEntity
-import tv.mycujoo.mls.entity.SkipTimerEntity
-import tv.mycujoo.mls.entity.StartTimerEntity
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerFormat
 import kotlin.test.assertEquals
@@ -27,7 +23,7 @@ class TimerVariableTest {
         )
 
 
-        timerVariable.start(StartTimerEntity("sample_name", 3000L), 4000L)
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 4000L)
 
 
         assertEquals("0:01", timerVariable.getTime())
@@ -44,7 +40,7 @@ class TimerVariableTest {
         )
 
 
-        timerVariable.start(StartTimerEntity("sample_name", 3000L), 4000L)
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 4000L)
 
 
         assertEquals("0:11", timerVariable.getTime())
@@ -62,7 +58,7 @@ class TimerVariableTest {
         )
 
 
-        timerVariable.start(StartTimerEntity("sample_name", 3000L), 4000L)
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 4000L)
 
 
         assertEquals("0:09", timerVariable.getTime())
@@ -79,8 +75,8 @@ class TimerVariableTest {
         )
 
 
-        timerVariable.start(StartTimerEntity("sample_name", 3000L), 4000L)
-        timerVariable.start(StartTimerEntity("sample_name", 3000L), 8000L)
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 4000L)
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 8000L)
 
 
         assertEquals("0:05", timerVariable.getTime())
@@ -97,8 +93,8 @@ class TimerVariableTest {
         )
 
 
-        timerVariable.start(StartTimerEntity("sample_name", 3000L), 4000L)
-        timerVariable.start(StartTimerEntity("sample_name", 3000L), 8000L)
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 4000L)
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 8000L)
 
 
         assertEquals("0:15", timerVariable.getTime())
@@ -113,8 +109,8 @@ class TimerVariableTest {
             0L,
             -1L
         )
-        timerVariable.start(StartTimerEntity("sample_name", 3000L), 6000L)
-        timerVariable.pause(PauseTimerEntity("sample_name", 4000L), 6000L)
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 6000L)
+        timerVariable.pause(TimerEntity.PauseTimer("sample_name", 4000L), 6000L)
 
         assertEquals("0:01", timerVariable.getTime())
     }
@@ -128,8 +124,8 @@ class TimerVariableTest {
             10000L,
             -1L
         )
-        timerVariable.start(StartTimerEntity("sample_name", 3000L), 6000L)
-        timerVariable.pause(PauseTimerEntity("sample_name", 4000L), 6000L)
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 6000L)
+        timerVariable.pause(TimerEntity.PauseTimer("sample_name", 4000L), 6000L)
 
         assertEquals("0:11", timerVariable.getTime())
     }
@@ -143,8 +139,8 @@ class TimerVariableTest {
             10000L,
             -1L
         )
-        timerVariable.start(StartTimerEntity("sample_name", 3000L), 6000L)
-        timerVariable.pause(PauseTimerEntity("sample_name", 4000L), 6000L)
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 6000L)
+        timerVariable.pause(TimerEntity.PauseTimer("sample_name", 4000L), 6000L)
 
         assertEquals("0:09", timerVariable.getTime())
     }
@@ -159,9 +155,9 @@ class TimerVariableTest {
             -1L
         )
 
-        timerVariable.start(StartTimerEntity("sample_name", 3000L), 7000L)
-        timerVariable.pause(PauseTimerEntity("sample_name", 5000L), 7000L)
-        timerVariable.pause(PauseTimerEntity("sample_name", 5000L), 7000L)
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 7000L)
+        timerVariable.pause(TimerEntity.PauseTimer("sample_name", 5000L), 7000L)
+        timerVariable.pause(TimerEntity.PauseTimer("sample_name", 5000L), 7000L)
 
         assertEquals("0:02", timerVariable.getTime())
     }
@@ -175,8 +171,8 @@ class TimerVariableTest {
             0L,
             -1L
         )
-        timerVariable.start(StartTimerEntity("sample_name", 3000L), 6000L)
-        timerVariable.adjust(AdjustTimerEntity("sample_name", 4000L, 20000L), 6000L)
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 6000L)
+        timerVariable.adjust(TimerEntity.AdjustTimer("sample_name", 4000L, 20000L), 6000L)
 
         assertEquals("0:22", timerVariable.getTime())
     }
@@ -190,8 +186,8 @@ class TimerVariableTest {
             40000L,
             -1L
         )
-        timerVariable.start(StartTimerEntity("sample_name", 3000L), 6000L)
-        timerVariable.adjust(AdjustTimerEntity("sample_name", 4000L, 20000L), 6000L)
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 6000L)
+        timerVariable.adjust(TimerEntity.AdjustTimer("sample_name", 4000L, 20000L), 6000L)
 
         assertEquals("0:18", timerVariable.getTime())
     }
@@ -205,8 +201,8 @@ class TimerVariableTest {
             0L,
             -1L
         )
-        timerVariable.start(StartTimerEntity("sample_name", 3000L), 6000L)
-        timerVariable.skip(SkipTimerEntity("sample_name", 4000L, 20000L), 6000L)
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 6000L)
+        timerVariable.skip(TimerEntity.SkipTimer("sample_name", 4000L, 20000L), 6000L)
 
         assertEquals("0:23", timerVariable.getTime())
     }
@@ -220,8 +216,8 @@ class TimerVariableTest {
             40000L,
             -1L
         )
-        timerVariable.start(StartTimerEntity("sample_name", 3000L), 6000L)
-        timerVariable.skip(SkipTimerEntity("sample_name", 4000L, 20000L), 6000L)
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 6000L)
+        timerVariable.skip(TimerEntity.SkipTimer("sample_name", 4000L, 20000L), 6000L)
 
         assertEquals("0:17", timerVariable.getTime())
     }

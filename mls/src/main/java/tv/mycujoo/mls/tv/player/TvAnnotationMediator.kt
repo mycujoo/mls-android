@@ -5,7 +5,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.Player
 import kotlinx.coroutines.CoroutineScope
-import tv.mycujoo.domain.entity.ActionObject
+import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.mls.core.AnnotationFactory
 import tv.mycujoo.mls.core.BuildPoint
 import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
@@ -115,7 +115,7 @@ class TvAnnotationMediator(
         )
     }
 
-    fun feed(actionObjectList: List<ActionObject>) {
-        annotationFactory.setAnnotations(actionObjectList)
+    fun feed(actionsList: List<Action>) {
+        annotationFactory.setActions(actionsList)
     }
 }

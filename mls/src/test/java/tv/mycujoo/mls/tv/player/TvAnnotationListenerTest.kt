@@ -11,9 +11,9 @@ import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.OverlayEntity
-import tv.mycujoo.mls.TestData.Companion.sampleEntityWithIntroAnimation
-import tv.mycujoo.mls.TestData.Companion.sampleEntityWithOutroAnimation
-import tv.mycujoo.mls.TestData.Companion.sampleHideOverlayEntity
+import tv.mycujoo.mls.TestData.Companion.getSampleHideOverlayAction
+import tv.mycujoo.mls.TestData.Companion.getSampleShowOverlayAction
+import tv.mycujoo.mls.TestData.Companion.getSampleShowOverlayActionOutro
 import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.OverlayViewHelper
 
@@ -48,97 +48,105 @@ class TvAnnotationListenerTest {
 
     @Test
     fun `addOverlay`() {
-        val overlayEntity = sampleEntityWithIntroAnimation(AnimationType.NONE)
+        val action = getSampleShowOverlayAction(AnimationType.NONE)
 
         Mockito.`when`(downloaderClient.download(any(), any()))
             .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
 
 
-        tvAnnotationListener.addOverlay(overlayEntity)
+        tvAnnotationListener.addOverlay(action)
 
 
         Mockito.verify(overlayViewHelper)
-            .addView(context, tvOverlayContainer, overlayEntity)
+            .addView(context, tvOverlayContainer, action)
     }
 
 
     @Test
     fun `removeOverlay`() {
-        val overlayEntity = sampleEntityWithOutroAnimation(AnimationType.NONE)
+        val action = getSampleShowOverlayActionOutro(AnimationType.NONE)
 
 
-        tvAnnotationListener.removeOverlay(overlayEntity)
+        tvAnnotationListener.removeOverlay(action.id, action.outroTransitionSpec)
 
 
-        Mockito.verify(overlayViewHelper).removeView(tvOverlayContainer, overlayEntity)
+        Mockito.verify(overlayViewHelper)
+            .removeView(tvOverlayContainer, action.id, action.outroTransitionSpec)
     }
 
 
     @Test
     fun `removeOverlay from Hide action`() {
-        val hideOverlayEntity = sampleHideOverlayEntity(AnimationType.NONE)
+        val hideOverlayAction = getSampleHideOverlayAction(AnimationType.NONE)
 
 
-        tvAnnotationListener.removeOverlay(hideOverlayEntity)
+        tvAnnotationListener.removeOverlay(
+            hideOverlayAction.id,
+            hideOverlayAction.outroAnimationSpec
+        )
 
 
-        Mockito.verify(overlayViewHelper).removeView(tvOverlayContainer, hideOverlayEntity)
+        Mockito.verify(overlayViewHelper).removeView(
+            tvOverlayContainer,
+            hideOverlayAction.id,
+            hideOverlayAction.outroAnimationSpec
+        )
     }
 
 
     @Test
     fun `add or update lingering intro Overlay`() {
-        val overlayEntity = sampleEntityWithIntroAnimation(AnimationType.SLIDE_FROM_LEFT)
+        val action = getSampleShowOverlayAction(AnimationType.SLIDE_FROM_LEFT)
         Mockito.`when`(downloaderClient.download(any(), any()))
             .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
 
 
-        tvAnnotationListener.addOrUpdateLingeringIntroOverlay(overlayEntity, 500L, true)
+        tvAnnotationListener.addOrUpdateLingeringIntroOverlay(action, 500L, true)
 
 
         Mockito.verify(overlayViewHelper)
-            .addOrUpdateLingeringIntroOverlay(tvOverlayContainer, overlayEntity, 500L, true)
+            .addOrUpdateLingeringIntroOverlay(tvOverlayContainer, action, 500L, true)
     }
 
 
     @Test
     fun `add or update lingering outro Overlay`() {
-        val overlayEntity = sampleEntityWithIntroAnimation(AnimationType.SLIDE_FROM_LEFT)
+        val action = getSampleShowOverlayAction(AnimationType.SLIDE_FROM_LEFT)
         Mockito.`when`(downloaderClient.download(any(), any()))
             .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
 
 
-        tvAnnotationListener.addOrUpdateLingeringOutroOverlay(overlayEntity, 500L, true)
+        tvAnnotationListener.addOrUpdateLingeringOutroOverlay(action, 500L, true)
 
 
         Mockito.verify(overlayViewHelper)
-            .addOrUpdateLingeringOutroOverlay(tvOverlayContainer, overlayEntity, 500L, true)
+            .addOrUpdateLingeringOutroOverlay(tvOverlayContainer, action, 500L, true)
     }
 
     @Test
     fun `add or update lingering midway Overlay`() {
-        val overlayEntity = sampleEntityWithIntroAnimation(AnimationType.SLIDE_FROM_LEFT)
+        val action = getSampleShowOverlayAction(AnimationType.SLIDE_FROM_LEFT)
         Mockito.`when`(downloaderClient.download(any(), any()))
             .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
 
 
-        tvAnnotationListener.addOrUpdateLingeringMidwayOverlay(overlayEntity)
+        tvAnnotationListener.addOrUpdateLingeringMidwayOverlay(action)
 
 
         Mockito.verify(overlayViewHelper)
-            .updateLingeringMidwayOverlay(tvOverlayContainer, overlayEntity)
+            .updateLingeringMidwayOverlay(tvOverlayContainer, action)
     }
 
 
     @Test
     fun `remove lingering Overlay`() {
-        val overlayEntity = sampleEntityWithIntroAnimation(AnimationType.SLIDE_FROM_LEFT)
+        val action = getSampleShowOverlayAction(AnimationType.SLIDE_FROM_LEFT)
 
 
-        tvAnnotationListener.removeLingeringOverlay(overlayEntity)
+        tvAnnotationListener.removeLingeringOverlay(action.id, action.outroTransitionSpec)
 
 
         Mockito.verify(overlayViewHelper)
-            .removeView(tvOverlayContainer, overlayEntity)
+            .removeView(tvOverlayContainer, action.id, action.outroTransitionSpec)
     }
 }

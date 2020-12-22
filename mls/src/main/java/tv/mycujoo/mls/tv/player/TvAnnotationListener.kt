@@ -1,7 +1,9 @@
 package tv.mycujoo.mls.tv.player
 
 import androidx.constraintlayout.widget.ConstraintLayout
-import tv.mycujoo.domain.entity.*
+import tv.mycujoo.domain.entity.Action
+import tv.mycujoo.domain.entity.TimelineMarkerEntity
+import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.mls.core.IAnnotationListener
 import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.OverlayViewHelper
@@ -14,8 +16,8 @@ class TvAnnotationListener(
 ) : IAnnotationListener {
 
 
-    override fun addOverlay(overlayEntity: OverlayEntity) {
-        downloaderClient.download(overlayEntity) {
+    override fun addOverlay(showOverlayAction: Action.ShowOverlayAction) {
+        downloaderClient.download(showOverlayAction) {
             overlayViewHelper.addView(
                 overlayContainer.context,
                 overlayContainer,
@@ -24,20 +26,16 @@ class TvAnnotationListener(
         }
     }
 
-    override fun removeOverlay(overlayEntity: OverlayEntity) {
-        overlayViewHelper.removeView(overlayContainer, overlayEntity)
-    }
-
-    override fun removeOverlay(hideOverlayActionEntity: HideOverlayActionEntity) {
-        overlayViewHelper.removeView(overlayContainer, hideOverlayActionEntity)
+    override fun removeOverlay(actionId: String, outroTransitionSpec: TransitionSpec?) {
+        overlayViewHelper.removeView(overlayContainer, actionId, outroTransitionSpec)
     }
 
     override fun addOrUpdateLingeringIntroOverlay(
-        overlayEntity: OverlayEntity,
+        showOverlayAction: Action.ShowOverlayAction,
         animationPosition: Long,
         isPlaying: Boolean
     ) {
-        downloaderClient.download(overlayEntity) {
+        downloaderClient.download(showOverlayAction) {
             overlayViewHelper.addOrUpdateLingeringIntroOverlay(
                 overlayContainer,
                 it,
@@ -48,28 +46,31 @@ class TvAnnotationListener(
     }
 
     override fun addOrUpdateLingeringOutroOverlay(
-        overlayEntity: OverlayEntity,
+        showOverlayAction: Action.ShowOverlayAction,
         animationPosition: Long,
         isPlaying: Boolean
     ) {
-        downloaderClient.download(overlayEntity) {
+        downloaderClient.download(showOverlayAction) { downloadedShowOverlayAction ->
             overlayViewHelper.addOrUpdateLingeringOutroOverlay(
                 overlayContainer,
-                it,
+                downloadedShowOverlayAction,
                 animationPosition,
                 isPlaying
             )
         }
     }
 
-    override fun addOrUpdateLingeringMidwayOverlay(overlayEntity: OverlayEntity) {
-        downloaderClient.download(overlayEntity) {
-            overlayViewHelper.updateLingeringMidwayOverlay(overlayContainer, it)
+    override fun addOrUpdateLingeringMidwayOverlay(showOverlayAction: Action.ShowOverlayAction) {
+        downloaderClient.download(showOverlayAction) { downloadedShowOverlayAction ->
+            overlayViewHelper.updateLingeringMidwayOverlay(
+                overlayContainer,
+                downloadedShowOverlayAction
+            )
         }
     }
 
-    override fun removeLingeringOverlay(overlayEntity: OverlayEntity) {
-        overlayViewHelper.removeView(overlayContainer, overlayEntity)
+    override fun removeLingeringOverlay(actionId: String, outroTransitionSpec: TransitionSpec?) {
+        overlayViewHelper.removeView(overlayContainer, actionId, outroTransitionSpec)
     }
 
     override fun setTimelineMarkers(timelineMarkerEntityList: List<TimelineMarkerEntity>) {
