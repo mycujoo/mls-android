@@ -37,6 +37,16 @@ sealed class Action {
     ) : Action() {
         override val priority: Int = 0
     }
+
+
+    data class ReshowOverlayAction(
+        override val id: String,
+        override var offset: Long,
+        override var absoluteTime: Long,
+        val customId: String
+    ) : Action() {
+        override val priority: Int = 0
+    }
     /**endregion */
 
     /**region Timer related*/

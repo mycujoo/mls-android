@@ -72,6 +72,18 @@ data class ActionSourceData(
                 }
             }
 
+            RESHOW_OVERLAY -> {
+                val customId = DataMapper.extractReshowOverlayRelatedData(data)
+                if (customId != null) {
+                    return Action.ReshowOverlayAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        customId = customId
+                    )
+                }
+            }
+
             CREATE_TIMER -> {
                 val relatedData = DataMapper.extractTimerRelatedData(data)
                 if (relatedData != null) {

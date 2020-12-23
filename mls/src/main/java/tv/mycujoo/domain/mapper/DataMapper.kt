@@ -176,6 +176,26 @@ class DataMapper {
             }
         }
 
+        fun extractReshowOverlayRelatedData(rawDataMap: Map<String, Any>?): String? {
+            if (rawDataMap == null) {
+                return null
+            }
+
+            var customId: String? = null
+
+            rawDataMap.let { data ->
+                data.keys.forEach { key ->
+                    val any = data[key]
+                    when (key) {
+                        "custom_id" -> {
+                            any?.let { customId = it as String }
+                        }
+                    }
+                }
+            }
+            return customId
+        }
+
         fun extractTimerRelatedData(rawDataMap: Map<String, Any>?): ExtractedTimerRelatedData? {
             if (rawDataMap == null) {
                 return null

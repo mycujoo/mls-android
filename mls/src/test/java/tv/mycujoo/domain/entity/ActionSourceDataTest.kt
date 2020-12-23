@@ -154,6 +154,42 @@ class ActionSourceDataTest {
 
     /**endregion */
 
+    /**region Reshow-Overlay related*/
+    @Test
+    fun `mapping to ReshowOverlayAction`() {
+        val id = "id_1"
+        val offset = 1000L
+        val absoluteTime = -1L
+        val data = buildMap<String, Any> {
+            put("custom_id", "id_0")
+        }
+        val actionSourceData =
+            ActionSourceData(id, ActionType.RESHOW_OVERLAY.type, offset, absoluteTime, data)
+
+        val action = actionSourceData.toAction()
+
+
+        assertTrue { action is Action.ReshowOverlayAction }
+    }
+
+    @Test
+    fun `mapping to ReshowOverlayAction without customId`() {
+        val id = "id_1"
+        val offset = 1000L
+        val absoluteTime = -1L
+        val data = buildMap<String, Any> {
+            // custom_id is not provided
+        }
+        val actionSourceData =
+            ActionSourceData(id, ActionType.RESHOW_OVERLAY.type, offset, absoluteTime, data)
+
+        val action = actionSourceData.toAction()
+
+
+        assertTrue { action is Action.InvalidAction }
+    }
+    /**endregion */
+
     /**region Timer related*/
     @Test
     fun `mapping to CreateTimerAction`() {
