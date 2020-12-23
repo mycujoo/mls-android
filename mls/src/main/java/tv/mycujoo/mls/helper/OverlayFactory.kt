@@ -21,7 +21,7 @@ class OverlayFactory : IOverlayFactory {
         val size = showOverlayAction.viewSpec!!.size!!
         val scaffoldView = ScaffoldView(size.first, size.second, context)
         scaffoldView.id = View.generateViewId()
-        scaffoldView.tag = showOverlayAction.id
+        scaffoldView.tag = showOverlayAction.customId ?: showOverlayAction.id
 
         scaffoldView.setVariablePlaceHolder(showOverlayAction.placeHolders)
 

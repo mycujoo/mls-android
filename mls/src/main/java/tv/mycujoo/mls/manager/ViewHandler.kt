@@ -21,10 +21,6 @@ open class ViewHandler(
     private var animations = ArrayList<Pair<String, ObjectAnimator>>()
 
     private val attachedViewList: ArrayList<ScaffoldView> = ArrayList()
-
-    private val variableTranslator = VariableTranslator(dispatcher)
-    private val timeKeeper = VariableKeeper(dispatcher)
-
     /**endregion */
 
     /**region OverlayHost*/
@@ -33,7 +29,7 @@ open class ViewHandler(
     }
 
     override fun getOverlayHost(): ConstraintLayout {
-       return overlayHost
+        return overlayHost
     }
     /**endregion */
 
@@ -67,7 +63,8 @@ open class ViewHandler(
         }
         val viewTag = view.tag as String
         if (attachedViewList.any {
-                it.tag == viewTag }) {
+                it.tag == viewTag
+            }) {
             Log.w("ViewIdentifierManager", "Should not add an already active view")
         } else {
             attachedViewList.add(view)
@@ -96,11 +93,11 @@ open class ViewHandler(
     /**endregion */
 
     /**region Overlay objects*/
-    override fun overlayBlueprintIsNotAttached(id: String): Boolean {
+    override fun overlayIsNotAttached(id: String): Boolean {
         return attachedViewList.none { it.tag == id }
     }
 
-    override fun overlayBlueprintIsAttached(id: String): Boolean {
+    override fun overlayIsAttached(id: String): Boolean {
         return attachedViewList.any { it.tag == id }
     }
 
@@ -122,14 +119,6 @@ open class ViewHandler(
         if (idlingResource.isIdleNow.not()) {
             idlingResource.decrement()
         }
-    }
-
-    override fun getVariableTranslator(): VariableTranslator {
-        return variableTranslator
-    }
-
-    override fun getVariableKeeper(): IVariableKeeper {
-        return timeKeeper
     }
     /**endregion */
 
