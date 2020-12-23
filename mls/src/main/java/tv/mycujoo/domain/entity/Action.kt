@@ -9,7 +9,6 @@ sealed class Action {
     abstract var offset: Long
     abstract var absoluteTime: Long
     abstract val priority: Int
-
     /**endregion */
 
     /**region Overlay related*/
@@ -22,7 +21,8 @@ sealed class Action {
         val viewSpec: ViewSpec? = null,
         val introTransitionSpec: TransitionSpec? = null,
         val outroTransitionSpec: TransitionSpec? = null,
-        val placeHolders: List<String> = emptyList()
+        val placeHolders: List<String> = emptyList(),
+        val customId: String? = null
     ) : Action() {
         override val priority: Int = 0
     }

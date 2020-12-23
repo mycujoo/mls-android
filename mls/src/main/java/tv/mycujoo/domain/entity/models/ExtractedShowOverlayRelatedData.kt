@@ -4,7 +4,7 @@ import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.PositionGuide
 
 data class ExtractedShowOverlayRelatedData(
-    val id: String,
+    val customId: String?,
     val svgUrl: String,
     val duration: Long?,
     val positionGuide: PositionGuide,

@@ -22,7 +22,6 @@ class DataMapper {
                 return null
             }
 
-            var newId = INVALID_STRING_VALUE
             var svgUrl: String? = null
             var duration: Long? = null
             var positionGuide: PositionGuide? = null
@@ -34,13 +33,15 @@ class DataMapper {
             var outroAnimationDuration = INVALID_LONG_VALUE
 
             var variablePlaceHolders = emptyList<String>()
+            var customId: String? = null
+
 
             rawDataMap.let { data ->
                 data.keys.forEach { key ->
                     val any = data[key]
                     when (key) {
                         "custom_id" -> {
-                            any?.let { newId = it as String }
+                            any?.let { customId = it as String }
                         }
                         "svg_url" -> {
                             any?.let { svgUrl = it as String }
@@ -111,7 +112,7 @@ class DataMapper {
                     return null
                 }
                 return ExtractedShowOverlayRelatedData(
-                    newId,
+                    customId,
                     svgUrl!!,
                     duration,
                     positionGuide!!,
@@ -123,8 +124,6 @@ class DataMapper {
                     variablePlaceHolders
                 )
             }
-
-            return null
         }
 
         fun extractHideOverlayRelatedData(rawDataMap: Map<String, Any>?): ExtractedHideOverlayRelatedData? {

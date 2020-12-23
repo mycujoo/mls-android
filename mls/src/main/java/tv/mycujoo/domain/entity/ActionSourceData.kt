@@ -50,7 +50,8 @@ data class ActionSourceData(
                             relatedData.introAnimationDuration
                         ),
                         outroTransitionSpec = outroTransitionSpec,
-                        placeHolders = relatedData.variablePlaceHolders
+                        placeHolders = relatedData.variablePlaceHolders,
+                        customId = relatedData.customId
                     )
                 }
             }
