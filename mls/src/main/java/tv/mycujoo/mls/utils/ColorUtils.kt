@@ -22,5 +22,19 @@ class ColorUtils {
             return color?.let { ColorUtils.calculateLuminance(it) > LUMINANCE_DEGREE } ?: false
         }
 
+        fun toARGB(color: String): String {
+            if (color.length == 5) {
+                val color1 = color.replace(
+                    Regex("#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])"),
+                    "#$1$1$2$2$3$3$4$4"
+                )
+                return toARGB(color1)
+            }
+            if (color.length == 9) {
+                return "#".plus(color.substring(7, 9)).plus(color.substring(1, 7))
+            } else return color
+
+        }
+
     }
 }

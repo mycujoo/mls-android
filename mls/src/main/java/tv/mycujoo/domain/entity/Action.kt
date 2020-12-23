@@ -14,7 +14,8 @@ sealed class Action {
 
     /**region Overlay related*/
     data class ShowOverlayAction(
-        override val id: String, override var offset: Long,
+        override val id: String,
+        override var offset: Long,
         override var absoluteTime: Long,
         val svgData: SvgData? = null,
         val duration: Long? = null,
@@ -28,7 +29,8 @@ sealed class Action {
 
 
     data class HideOverlayAction(
-        override val id: String, override var offset: Long,
+        override val id: String,
+        override var offset: Long,
         override var absoluteTime: Long,
         val outroAnimationSpec: TransitionSpec? = null,
         val customId: String? = null
@@ -39,7 +41,8 @@ sealed class Action {
 
     /**region Timer related*/
     data class CreateTimerAction(
-        override val id: String, override var offset: Long,
+        override val id: String,
+        override var offset: Long,
         override var absoluteTime: Long,
         val name: String,
         val format: ScreenTimerFormat = ScreenTimerFormat.MINUTES_SECONDS,
@@ -51,7 +54,8 @@ sealed class Action {
     }
 
     data class StartTimerAction(
-        override val id: String, override var offset: Long,
+        override val id: String,
+        override var offset: Long,
         override var absoluteTime: Long,
         val name: String
     ) : Action() {
@@ -59,7 +63,8 @@ sealed class Action {
     }
 
     data class PauseTimerAction(
-        override val id: String, override var offset: Long,
+        override val id: String,
+        override var offset: Long,
         override var absoluteTime: Long,
         val name: String
     ) : Action() {
@@ -67,7 +72,8 @@ sealed class Action {
     }
 
     data class AdjustTimerAction(
-        override val id: String, override var offset: Long,
+        override val id: String,
+        override var offset: Long,
         override var absoluteTime: Long,
         val name: String,
         val value: Long
@@ -76,7 +82,8 @@ sealed class Action {
     }
 
     data class SkipTimerAction(
-        override val id: String, override var offset: Long,
+        override val id: String,
+        override var offset: Long,
         override var absoluteTime: Long,
         val name: String,
         val value: Long
@@ -89,7 +96,8 @@ sealed class Action {
     /**region Variable related*/
 
     data class CreateVariableAction(
-        override val id: String, override var offset: Long,
+        override val id: String,
+        override var offset: Long,
         override var absoluteTime: Long,
         val variable: Variable
     ) : Action() {
@@ -97,7 +105,8 @@ sealed class Action {
     }
 
     data class IncrementVariableAction(
-        override val id: String, override var offset: Long,
+        override val id: String,
+        override var offset: Long,
         override var absoluteTime: Long,
         val name: String,
         val amount: Double
@@ -108,7 +117,8 @@ sealed class Action {
 
     /**region Timeline-marker related*/
     data class MarkTimelineAction(
-        override val id: String, override var offset: Long,
+        override val id: String,
+        override var offset: Long,
         override var absoluteTime: Long,
         val seekOffset: Long,
         val label: String,
@@ -121,7 +131,8 @@ sealed class Action {
 
     /**region Other actions*/
     data class DeleteAction(
-        override val id: String, override var offset: Long,
+        override val id: String,
+        override var offset: Long,
         override var absoluteTime: Long,
         val targetActionId: String
     ) : Action() {
@@ -129,7 +140,8 @@ sealed class Action {
     }
 
     data class InvalidAction(
-        override val id: String, override var offset: Long,
+        override val id: String,
+        override var offset: Long,
         override var absoluteTime: Long
     ) : Action() {
         override val priority: Int = 0
