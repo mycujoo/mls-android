@@ -5,11 +5,13 @@ import tv.mycujoo.mls.helper.*
 import tv.mycujoo.mls.manager.IVariableKeeper
 import tv.mycujoo.mls.manager.TimerEntity
 import tv.mycujoo.mls.manager.TimerVariable
+import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.utils.TimeUtils
 import java.util.concurrent.CopyOnWriteArrayList
 
 class AnnotationFactory(
     private val annotationListener: IAnnotationListener,
+    private val viewHandler: IViewHandler,
     private val variableKeeper: IVariableKeeper
 ) :
     IAnnotationFactory {
@@ -48,7 +50,11 @@ class AnnotationFactory(
         if (currentTimeInInDvrWindowDuration) {
             timeSystem = TimeSystem.RELATIVE
             adjustedActions.clear()
-            process(buildPoint, currentTimeInInDvrWindowDuration, sortedActions)
+            return process(
+                buildPoint,
+                currentTimeInInDvrWindowDuration,
+                sortedActions
+            )
 
         } else {
             timeSystem = TimeSystem.ABSOLUTE
@@ -59,11 +65,13 @@ class AnnotationFactory(
                     action.absoluteTime
                 )
                 action.offset = convertedOffset
-                adjustedActions.add(
-                    action
-                )
+                adjustedActions.add(action)
             }
-            process(buildPoint, currentTimeInInDvrWindowDuration, adjustedActions)
+            return process(
+                buildPoint,
+                currentTimeInInDvrWindowDuration,
+                adjustedActions
+            )
 
         }
 
@@ -111,9 +119,22 @@ class AnnotationFactory(
                         HideOverlayActionHelper.getOverlayActionCurrentAct(
                             buildPoint.currentRelativePosition,
                             action,
-                            buildPoint.isInterrupted
+                            buildPoint.isInterrupted,
+                            list
                         )
                     hideOverlay(action, act)
+                }
+                is Action.ReshowOverlayAction -> {
+                    if (buildPoint.currentRelativePosition + 1000L >= action.offset) {
+                        list.firstOrNull { it is Action.ShowOverlayAction && it.customId == action.customId }
+                            ?.let {
+                                showOverlay(
+                                    it as Action.ShowOverlayAction,
+                                    OverlayAct.INTRO,
+                                    buildPoint
+                                )
+                            }
+                    }
                 }
                 is Action.CreateTimerAction -> {
                     if (buildPoint.currentRelativePosition + 1000L >= action.offset) {
@@ -206,7 +227,7 @@ class AnnotationFactory(
             OverlayAct.LINGERING_OUTRO -> {
                 annotationListener.addOrUpdateLingeringOutroOverlay(
                     action,
-                    buildPoint.currentRelativePosition - (action.introTransitionSpec!!.offset + action.outroTransitionSpec!!.animationDuration),
+                    buildPoint.currentRelativePosition - (action.offset + action.outroTransitionSpec!!.animationDuration),
                     buildPoint.isPlaying
                 )
             }
@@ -227,7 +248,7 @@ class AnnotationFactory(
             }
             HideOverlayAct.OUTRO_IN_RANGE -> {
                 annotationListener.removeOverlay(
-                    hideOverlayAction.customId!!,
+                    hideOverlayAction.customId,
                     hideOverlayAction.outroAnimationSpec
                 )
             }

@@ -9,8 +9,17 @@ class HideOverlayActionHelper {
         fun getOverlayActionCurrentAct(
             currentTime: Long,
             hideOverlayAction: Action.HideOverlayAction,
-            interrupted: Boolean
+            interrupted: Boolean,
+            list: List<Action>
         ): HideOverlayAct {
+            if (list.any {
+                    it is Action.ReshowOverlayAction &&
+                            it.customId == hideOverlayAction.customId &&
+                            (it.offset >= currentTime) && (it.offset < currentTime + C.ONE_SECOND_IN_MS)
+                }) {
+                return HideOverlayAct.DO_NOTHING
+            }
+
             if (interrupted.not()) {
                 if (outroIsInCurrentTimeRange(currentTime, hideOverlayAction)) {
                     return HideOverlayAct.OUTRO_IN_RANGE

@@ -33,7 +33,7 @@ sealed class Action {
         override var offset: Long,
         override var absoluteTime: Long,
         val outroAnimationSpec: TransitionSpec? = null,
-        val customId: String? = null
+        val customId: String
     ) : Action() {
         override val priority: Int = 0
     }

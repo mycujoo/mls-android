@@ -26,7 +26,8 @@ class TestData {
                 viewSpec = viewSpec,
                 introTransitionSpec = introTransitionSpec,
                 outroTransitionSpec = null,
-                placeHolders = emptyList()
+                placeHolders = emptyList(),
+                customId = "cid_1001"
             )
         }
 

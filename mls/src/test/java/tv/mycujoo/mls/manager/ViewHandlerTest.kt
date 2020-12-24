@@ -115,7 +115,7 @@ class ViewHandlerTest {
         Mockito.`when`(view0.tag).thenReturn(SAMPLE_TAG)
         viewHandler.attachOverlayView(view0)
 
-        assert(viewHandler.overlayBlueprintIsAttached(SAMPLE_TAG))
+        assert(viewHandler.overlayIsAttached(SAMPLE_TAG))
     }
 
     @Test
@@ -123,17 +123,17 @@ class ViewHandlerTest {
         Mockito.`when`(view0.tag).thenReturn(SAMPLE_TAG)
         viewHandler.attachOverlayView(view0)
 
-        assertFalse(viewHandler.overlayBlueprintIsNotAttached(SAMPLE_TAG))
+        assertFalse(viewHandler.overlayIsNotAttached(SAMPLE_TAG))
     }
 
     @Test
     fun `given detached overlay object, should return false for isAttached()`() {
-        assertFalse(viewHandler.overlayBlueprintIsAttached(SAMPLE_TAG))
+        assertFalse(viewHandler.overlayIsAttached(SAMPLE_TAG))
     }
 
     @Test
     fun `given detached overlay object, should return true for isNotAttached()`() {
-        assertTrue(viewHandler.overlayBlueprintIsNotAttached(SAMPLE_TAG))
+        assertTrue(viewHandler.overlayIsNotAttached(SAMPLE_TAG))
     }
 
     @Test
