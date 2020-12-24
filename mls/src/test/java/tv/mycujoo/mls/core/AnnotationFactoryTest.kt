@@ -5,9 +5,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
-import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.Action
-import tv.mycujoo.domain.entity.ActionSourceData
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.mls.TestData.Companion.getSampleShowOverlayAction
@@ -57,24 +55,19 @@ class AnnotationFactoryTest {
     /**region Sorting*/
     @Test
     fun `sort timer related actions based on priority`() {
-        val dataMap = buildMap<String, Any> {}
-        val actionSourceDataOfAdjustTimer =
-            ActionSourceData("id_01", "adjust_timer", 5000L, -1L, dataMap)
-        val actionSourceDataOfPauseTimer =
-            ActionSourceData("id_01", "pause_timer", 5000L, -1L, dataMap)
-        val actionSourceDataOfStartTimer =
-            ActionSourceData("id_01", "start_timer", 5000L, -1L, dataMap)
-        val actionSourceDataOfCreateTimer =
-            ActionSourceData("id_01", "create_timer", 5000L, -1L, dataMap)
-        val actionResponse = ActionResponse(
+        val adjustTimerAction = Action.AdjustTimerAction("id_01", 5000L, -1L, "name", 0L)
+        val pauseTimerAction = Action.PauseTimerAction("id_02", 5000L, -1L, "name")
+        val startTimerAction = Action.StartTimerAction("id_03", 5000L, -1L, "name")
+        val createTimerAction =
+            Action.CreateTimerAction("id_04", 5000L, -1L, "name", capValue = -1L)
+        annotationFactory.setActions(
             listOf(
-                actionSourceDataOfAdjustTimer,
-                actionSourceDataOfPauseTimer,
-                actionSourceDataOfStartTimer,
-                actionSourceDataOfCreateTimer
+                adjustTimerAction,
+                pauseTimerAction,
+                startTimerAction,
+                createTimerAction
             )
         )
-        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
 
 
         assertTrue { annotationFactory.getCurrentActions()[0] is Action.CreateTimerAction }
@@ -86,7 +79,7 @@ class AnnotationFactoryTest {
 
     /**region Regular play mode, Relative time system*/
     @Test
-    fun `given ShowOverlay action, should add overlay`() {
+    fun `given ShowOverlayAction, should add overlay`() {
         val action = Action.ShowOverlayAction("id_01", 5000L, -1L, null)
         annotationFactory.setActions(listOf(action))
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
@@ -101,7 +94,7 @@ class AnnotationFactoryTest {
     }
 
     @Test
-    fun `given HideOverlay action, should remove overlay`() {
+    fun `given HideOverlayAction, should remove overlay`() {
         val action = Action.HideOverlayAction("id_01", 5000L, -1L, null, "cid_1001")
         annotationFactory.setActions(listOf(action))
 
@@ -114,8 +107,9 @@ class AnnotationFactoryTest {
         verify(annotationListener, never()).addOverlay(any())
     }
 
+    /**region ReshowOverlayAction related*/
     @Test
-    fun `given ReshowOverlay action, should show overlay`() {
+    fun `given ReshowOverlayAction, should show overlay`() {
         val showOverlayAction = getSampleShowOverlayAction(5000L, -1L) // id is cid_1001
         val reshowOverlayAction = Action.ReshowOverlayAction("id_01", 8000L, -1L, "cid_1001")
         annotationFactory.setActions(listOf(showOverlayAction, reshowOverlayAction))
@@ -126,8 +120,28 @@ class AnnotationFactoryTest {
 
 
         verify(annotationListener).addOverlay(any())
+        verify(annotationListener, never()).addOrUpdateLingeringIntroOverlay(any(), any(), any())
+        verify(annotationListener, never()).addOrUpdateLingeringMidwayOverlay(any())
+        verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
     }
 
+    @Test
+    fun `given ReshowOverlayAction, without related ShowOverlay should not show overlay`() {
+        val showOverlayAction = getSampleShowOverlayAction(5000L, -1L) // id is cid_1001
+        val reshowOverlayAction = Action.ReshowOverlayAction("id_01", 8000L, -1L, "cid_1002")
+        annotationFactory.setActions(listOf(showOverlayAction, reshowOverlayAction))
+
+
+        val buildPoint = BuildPoint(7001L, -1L, player, isPlaying = true, isInterrupted = false)
+        annotationFactory.build(buildPoint)
+
+
+        verify(annotationListener, never()).addOverlay(any())
+        verify(annotationListener, never()).addOrUpdateLingeringIntroOverlay(any(), any(), any())
+        verify(annotationListener, never()).addOrUpdateLingeringMidwayOverlay(any())
+        verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
+    }
+    /**endregion */
     /**endregion */
 
     /**region Regular play mode - Absolute time system*/
