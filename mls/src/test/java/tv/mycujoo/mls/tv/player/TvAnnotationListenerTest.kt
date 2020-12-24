@@ -82,14 +82,14 @@ class TvAnnotationListenerTest {
 
         tvAnnotationListener.removeOverlay(
             hideOverlayAction.id,
-            hideOverlayAction.outroAnimationSpec
+            hideOverlayAction.outroTransitionSpec
         )
 
 
         Mockito.verify(overlayViewHelper).removeView(
             tvOverlayContainer,
             hideOverlayAction.id,
-            hideOverlayAction.outroAnimationSpec
+            hideOverlayAction.outroTransitionSpec
         )
     }
 

@@ -122,11 +122,11 @@ class ActionSourceDataTest {
         assertEquals(absoluteTime, action.absoluteTime)
         assertEquals(
             data["animateout_type"],
-            hideOverlayAction.outroAnimationSpec?.animationType?.type
+            hideOverlayAction.outroTransitionSpec?.animationType?.type
         )
         assertEquals(
             data["animateout_duration"],
-            hideOverlayAction.outroAnimationSpec?.animationDuration
+            hideOverlayAction.outroTransitionSpec?.animationDuration
         )
         assertEquals(data["custom_id"], hideOverlayAction.customId)
     }

@@ -11,6 +11,10 @@ sealed class Action {
     abstract val priority: Int
     /**endregion */
 
+    /**region Abstract functions*/
+    abstract fun updateOffset(newOffset: Long): Action
+    /**endregion */
+
     /**region Overlay related*/
     data class ShowOverlayAction(
         override val id: String,
@@ -25,6 +29,34 @@ sealed class Action {
         val customId: String? = null
     ) : Action() {
         override val priority: Int = 0
+
+
+        override fun updateOffset(newOffset: Long): ShowOverlayAction {
+            var newIntroTransitionSpec: TransitionSpec? = null
+            var newOutroTransitionSpec: TransitionSpec? = null
+
+            introTransitionSpec?.let {
+                newIntroTransitionSpec =
+                    TransitionSpec(newOffset, it.animationType, it.animationDuration)
+            }
+            outroTransitionSpec?.let {
+                newOutroTransitionSpec =
+                    TransitionSpec(newOffset, it.animationType, it.animationDuration)
+            }
+            return ShowOverlayAction(
+                id = id,
+                offset = newOffset,
+                absoluteTime = absoluteTime,
+                svgData = svgData,
+                duration = duration,
+                viewSpec = viewSpec,
+                introTransitionSpec = newIntroTransitionSpec,
+                outroTransitionSpec = newOutroTransitionSpec,
+                placeHolders = placeHolders,
+                customId = customId
+            )
+        }
+
     }
 
 
@@ -32,10 +64,25 @@ sealed class Action {
         override val id: String,
         override var offset: Long,
         override var absoluteTime: Long,
-        val outroAnimationSpec: TransitionSpec? = null,
+        val outroTransitionSpec: TransitionSpec? = null,
         val customId: String
     ) : Action() {
         override val priority: Int = 0
+
+        override fun updateOffset(newOffset: Long): HideOverlayAction {
+            var newOutroTransitionSpec: TransitionSpec? = null
+            outroTransitionSpec?.let {
+                newOutroTransitionSpec =
+                    TransitionSpec(newOffset, it.animationType, it.animationDuration)
+            }
+            return HideOverlayAction(
+                id = id,
+                offset = newOffset,
+                absoluteTime = absoluteTime,
+                outroTransitionSpec = newOutroTransitionSpec,
+                customId = customId
+            )
+        }
     }
 
 
@@ -46,6 +93,15 @@ sealed class Action {
         val customId: String
     ) : Action() {
         override val priority: Int = 0
+
+        override fun updateOffset(newOffset: Long): ReshowOverlayAction {
+            return ReshowOverlayAction(
+                id = id,
+                offset = newOffset,
+                absoluteTime = absoluteTime,
+                customId = customId
+            )
+        }
     }
     /**endregion */
 
@@ -61,6 +117,19 @@ sealed class Action {
         val capValue: Long
     ) : Action() {
         override val priority: Int = 1000
+
+        override fun updateOffset(newOffset: Long): CreateTimerAction {
+            return CreateTimerAction(
+                id = id,
+                offset = newOffset,
+                absoluteTime = absoluteTime,
+                name = name,
+                format = format,
+                direction = direction,
+                startValue = startValue,
+                capValue = capValue
+            )
+        }
     }
 
     data class StartTimerAction(
@@ -70,6 +139,15 @@ sealed class Action {
         val name: String
     ) : Action() {
         override val priority: Int = 500
+
+        override fun updateOffset(newOffset: Long): StartTimerAction {
+            return StartTimerAction(
+                id = id,
+                offset = newOffset,
+                absoluteTime = absoluteTime,
+                name = name
+            )
+        }
     }
 
     data class PauseTimerAction(
@@ -79,6 +157,15 @@ sealed class Action {
         val name: String
     ) : Action() {
         override val priority: Int = 400
+
+        override fun updateOffset(newOffset: Long): PauseTimerAction {
+            return PauseTimerAction(
+                id = id,
+                offset = newOffset,
+                absoluteTime = absoluteTime,
+                name = name
+            )
+        }
     }
 
     data class AdjustTimerAction(
@@ -89,6 +176,16 @@ sealed class Action {
         val value: Long
     ) : Action() {
         override val priority: Int = 300
+
+        override fun updateOffset(newOffset: Long): AdjustTimerAction {
+            return AdjustTimerAction(
+                id = id,
+                offset = newOffset,
+                absoluteTime = absoluteTime,
+                name = name,
+                value = value
+            )
+        }
     }
 
     data class SkipTimerAction(
@@ -99,12 +196,20 @@ sealed class Action {
         val value: Long
     ) : Action() {
         override val priority: Int = 0
+        override fun updateOffset(newOffset: Long): SkipTimerAction {
+            return SkipTimerAction(
+                id = id,
+                offset = newOffset,
+                absoluteTime = absoluteTime,
+                name = name,
+                value = value
+            )
+        }
     }
 
     /**endregion */
 
     /**region Variable related*/
-
     data class CreateVariableAction(
         override val id: String,
         override var offset: Long,
@@ -112,6 +217,14 @@ sealed class Action {
         val variable: Variable
     ) : Action() {
         override val priority: Int = 1000
+        override fun updateOffset(newOffset: Long): CreateVariableAction {
+            return CreateVariableAction(
+                id = id,
+                offset = newOffset,
+                absoluteTime = absoluteTime,
+                variable = variable
+            )
+        }
     }
 
     data class IncrementVariableAction(
@@ -122,6 +235,15 @@ sealed class Action {
         val amount: Double
     ) : Action() {
         override val priority: Int = 0
+        override fun updateOffset(newOffset: Long): IncrementVariableAction {
+            return IncrementVariableAction(
+                id = id,
+                offset = newOffset,
+                absoluteTime = absoluteTime,
+                name = name,
+                amount = amount
+            )
+        }
     }
     /**endregion */
 
@@ -135,9 +257,18 @@ sealed class Action {
         val color: String
     ) : Action() {
         override val priority: Int = 0
+        override fun updateOffset(newOffset: Long): MarkTimelineAction {
+            return MarkTimelineAction(
+                id = id,
+                offset = newOffset,
+                absoluteTime = absoluteTime,
+                seekOffset = seekOffset,
+                label = label,
+                color = color
+            )
+        }
     }
     /**endregion */
-
 
     /**region Other actions*/
     data class DeleteAction(
@@ -147,6 +278,14 @@ sealed class Action {
         val targetActionId: String
     ) : Action() {
         override val priority: Int = 2000
+        override fun updateOffset(newOffset: Long): DeleteAction {
+            return DeleteAction(
+                id = id,
+                offset = newOffset,
+                absoluteTime = absoluteTime,
+                targetActionId = targetActionId
+            )
+        }
     }
 
     data class InvalidAction(
@@ -155,7 +294,9 @@ sealed class Action {
         override var absoluteTime: Long
     ) : Action() {
         override val priority: Int = 0
+        override fun updateOffset(newOffset: Long): InvalidAction {
+            return InvalidAction(id = id, offset = newOffset, absoluteTime = absoluteTime)
+        }
     }
     /**endregion */
-
 }

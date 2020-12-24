@@ -48,7 +48,7 @@ class HideOverlayActionHelper {
             hideOverlayAction: Action.HideOverlayAction
         ): Boolean {
 
-            if (hideOverlayAction.outroAnimationSpec == null) {
+            if (hideOverlayAction.outroTransitionSpec == null) {
                 return false
             }
 
@@ -58,7 +58,7 @@ class HideOverlayActionHelper {
 
             val leftBound = hideOverlayAction.offset
             val rightBound =
-                hideOverlayAction.offset + hideOverlayAction.outroAnimationSpec.animationDuration
+                hideOverlayAction.offset + hideOverlayAction.outroTransitionSpec.animationDuration
 
             return (leftBound <= currentTime) && (currentTime < rightBound)
         }

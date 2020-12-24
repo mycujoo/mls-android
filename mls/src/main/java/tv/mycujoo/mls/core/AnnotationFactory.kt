@@ -66,6 +66,8 @@ class AnnotationFactory(
                 )
                 action.offset = convertedOffset
                 adjustedActions.add(action)
+
+//                action.seekTimeTo<Action>(400L)
             }
             return process(
                 buildPoint,
@@ -249,13 +251,13 @@ class AnnotationFactory(
             HideOverlayAct.OUTRO_IN_RANGE -> {
                 annotationListener.removeOverlay(
                     hideOverlayAction.customId,
-                    hideOverlayAction.outroAnimationSpec
+                    hideOverlayAction.outroTransitionSpec
                 )
             }
             HideOverlayAct.OUTRO_LINGERING -> {
                 annotationListener.removeLingeringOverlay(
                     hideOverlayAction.customId!!,
-                    hideOverlayAction.outroAnimationSpec
+                    hideOverlayAction.outroTransitionSpec
                 )
             }
             HideOverlayAct.OUTRO_LEFTOVER -> {

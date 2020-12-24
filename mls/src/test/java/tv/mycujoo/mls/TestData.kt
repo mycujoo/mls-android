@@ -84,7 +84,7 @@ class TestData {
                 id = "id_1001",
                 offset = 0L,
                 absoluteTime = -1L,
-                outroAnimationSpec = outroTransitionSpec,
+                outroTransitionSpec = outroTransitionSpec,
                 customId = "id_1001"
             )
         }

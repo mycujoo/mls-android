@@ -62,7 +62,7 @@ data class ActionSourceData(
                         id = newId,
                         offset = newOffset,
                         absoluteTime = newAbsoluteTime,
-                        outroAnimationSpec = TransitionSpec(
+                        outroTransitionSpec = TransitionSpec(
                             newOffset,
                             relatedData.outroAnimationType,
                             relatedData.outroAnimationDuration
