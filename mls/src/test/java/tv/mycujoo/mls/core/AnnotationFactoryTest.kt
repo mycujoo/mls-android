@@ -78,9 +78,9 @@ class AnnotationFactoryTest {
 
 
         assertTrue { annotationFactory.getCurrentActions()[0] is Action.CreateTimerAction }
-        assertTrue { annotationFactory.getCurrentActions()[0] is Action.StartTimerAction }
-        assertTrue { annotationFactory.getCurrentActions()[0] is Action.PauseTimerAction }
-        assertTrue { annotationFactory.getCurrentActions()[0] is Action.AdjustTimerAction }
+        assertTrue { annotationFactory.getCurrentActions()[1] is Action.StartTimerAction }
+        assertTrue { annotationFactory.getCurrentActions()[2] is Action.PauseTimerAction }
+        assertTrue { annotationFactory.getCurrentActions()[3] is Action.AdjustTimerAction }
     }
     /**endregion */
 
@@ -133,11 +133,8 @@ class AnnotationFactoryTest {
     /**region Regular play mode - Absolute time system*/
     @Test
     fun `given ShowOverlay action, should add overlay, absolute time system`() {
-        val dataMap = buildMap<String, Any> {}
-        val actionSourceData =
-            ActionSourceData("id_01", "show_overlay", -1L, 1605609887000L, dataMap)
-        val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
+        val action = Action.ShowOverlayAction("id_01", -1L, 1605609887000L)
+        annotationFactory.setActions(listOf(action))
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         whenever(player.duration()).thenReturn(120000L)
         whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
@@ -149,20 +146,17 @@ class AnnotationFactoryTest {
 
 
         verify(annotationListener).addOverlay(argThat(ShowOverlayActionArgumentMatcher("id_01")))
-        verify(annotationListener, never()).removeLingeringOverlay(any())
+        verify(annotationListener, never()).removeLingeringOverlay(any(), any())
     }
 
 
     @Test
     fun `given HideOverlay action, should remove overlay, absolute time system`() {
-        val dataMap = buildMap<String, Any> {
-            put("animateout_type", "fade_out")
-            put("animateout_duration", 3000.toDouble())
-        }
-        val actionSourceData =
-            ActionSourceData("id_01", "hide_overlay", -1L, 1605609887000L, dataMap)
-        val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
+        val outroTransitionSpec = TransitionSpec(3000L, AnimationType.FADE_OUT, 3000L)
+        val hideAction =
+            Action.HideOverlayAction("id_01", -1L, 1605609887000L, outroTransitionSpec, "cid_01")
+        annotationFactory.setActions(listOf(hideAction))
+        whenever(player.isWithinValidSegment(any())).thenReturn(true)
         whenever(player.duration()).thenReturn(120000L)
         whenever(player.dvrWindowStartTime()).thenReturn(1605609885000L)
 
@@ -172,8 +166,7 @@ class AnnotationFactoryTest {
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).removeOverlay("id_01", null)
-        verify(annotationListener, never()).removeOverlay(any(), null)
+        verify(annotationListener).removeOverlay("cid_01", outroTransitionSpec)
         verify(annotationListener, never()).addOverlay(any())
     }
     /**endregion */
@@ -181,39 +174,36 @@ class AnnotationFactoryTest {
     /**region Interrupted play mode, relative time system*/
     @Test
     fun `given lingering intro overlay, should addOrUpdate overlay, relative time system`() {
-        val dataMap = buildMap<String, Any> {
-            put("animatein_type", "fade_in")
-            put("animatein_duration", 3000.toDouble())
-        }
-        val actionSourceData =
-            ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
-        val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
+        val introTransitionSpec = TransitionSpec(5000L, AnimationType.FADE_IN, 3000L)
+        val action =
+            Action.ShowOverlayAction(
+                id = "id_01",
+                offset = 5000L,
+                absoluteTime = -1L, introTransitionSpec = introTransitionSpec
+            )
+        annotationFactory.setActions(listOf(action))
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
+
 
         val buildPoint = BuildPoint(5001L, -1L, player, isPlaying = true, isInterrupted = true)
         annotationFactory.build(buildPoint)
 
 
-
         verify(annotationListener).addOrUpdateLingeringIntroOverlay(
-            argThat(ShowOverlayActionArgumentMatcher("id_01")) as Action.ShowOverlayAction,
+            argThat(ShowOverlayActionArgumentMatcher("id_01")),
             any(),
             any()
         )
         verify(annotationListener, never()).addOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringMidwayOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
-        verify(annotationListener, never()).removeLingeringOverlay(any())
+        verify(annotationListener, never()).removeLingeringOverlay(any(), any())
     }
 
     @Test
     fun `given lingering midway overlay, should addOrUpdate overlay, relative time system`() {
-        val dataMap = buildMap<String, Any> {}
-        val actionSourceData =
-            ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
-        val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
+        val action = Action.ShowOverlayAction("id_01", 5000L, -1L)
+        annotationFactory.setActions(listOf(action))
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
         val buildPoint = BuildPoint(5001L, -1L, player, isPlaying = true, isInterrupted = true)
@@ -221,23 +211,15 @@ class AnnotationFactoryTest {
 
 
         verify(annotationListener).addOrUpdateLingeringMidwayOverlay(
-            argThat(ShowOverlayActionArgumentMatcher("id_01")) as Action.ShowOverlayAction
+            argThat(ShowOverlayActionArgumentMatcher("id_01"))
         )
         verify(annotationListener, never()).addOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
-        verify(annotationListener, never()).removeLingeringOverlay(any())
+        verify(annotationListener, never()).removeLingeringOverlay(any(), any())
     }
 
     @Test
     fun `given lingering outro overlay, should addOrUpdate overlay, relative time system`() {
-//        val dataMap = buildMap<String, Any> {
-//            put("animateout_type", "fade_out")
-//            put("animateout_duration", 3000.toDouble())
-//            put("duration", 5000.toDouble())
-//        }
-//        val actionSourceData = ActionSourceData("id_01", "show_overlay", 5000L, -1L, dataMap)
-//        val actionResponse = ActionResponse(listOf(actionSourceData))
-//        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
         val outroTransitionSpec = TransitionSpec(10000L, AnimationType.FADE_OUT, 3000L)
         val action = Action.ShowOverlayAction(
             id = "id_01",
@@ -256,12 +238,12 @@ class AnnotationFactoryTest {
 
 
         verify(annotationListener).addOrUpdateLingeringOutroOverlay(
-            argThat(ShowOverlayActionArgumentMatcher("id_01")) as Action.ShowOverlayAction,
+            argThat(ShowOverlayActionArgumentMatcher("id_01")),
             any(),
             any()
         )
         verify(annotationListener, never()).addOverlay(any())
-        verify(annotationListener, never()).removeLingeringOverlay(any())
+        verify(annotationListener, never()).removeLingeringOverlay(any(), any())
     }
 
     @Test
@@ -299,14 +281,14 @@ class AnnotationFactoryTest {
     /**region Interrupted play mode, absolute time system*/
     @Test
     fun `given lingering intro overlay, should addOrUpdate overlay, absolute time system`() {
-        val dataMap = buildMap<String, Any> {
-            put("animatein_type", "fade_in")
-            put("animatein_duration", 3000.toDouble())
-        }
-        val actionSourceData =
-            ActionSourceData("id_01", "show_overlay", -1, 1605609887000L, dataMap)
-        val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
+        val introTransitionSpec = TransitionSpec(0L, AnimationType.FADE_IN, 3000L)
+        val action = Action.ShowOverlayAction(
+            id = "id_01",
+            offset = -1L,
+            absoluteTime = 1605609887000L,
+            introTransitionSpec = introTransitionSpec
+        )
+        annotationFactory.setActions(listOf(action))
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         whenever(player.duration()).thenReturn(120000L)
         whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
@@ -319,24 +301,26 @@ class AnnotationFactoryTest {
 
 
         verify(annotationListener).addOrUpdateLingeringIntroOverlay(
-            argThat(ShowOverlayActionArgumentMatcher("id_01")) as Action.ShowOverlayAction,
+            argThat(ShowOverlayActionArgumentMatcher("id_01")),
             any(),
             any()
         )
         verify(annotationListener, never()).addOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringMidwayOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
-        verify(annotationListener, never()).removeLingeringOverlay(any())
+        verify(annotationListener, never()).removeLingeringOverlay(any(), any())
     }
 
 
     @Test
     fun `given lingering midway overlay, should addOrUpdate overlay, absolute time system`() {
-        val dataMap = buildMap<String, Any> {}
-        val actionSourceData =
-            ActionSourceData("id_01", "show_overlay", -1L, 1605609887000L, dataMap)
-        val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
+        val action = Action.ShowOverlayAction(
+            id = "id_01",
+            offset = -1L,
+            absoluteTime = 1605609887000L
+        )
+        annotationFactory.setActions(listOf(action))
+
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         whenever(player.duration()).thenReturn(120000L)
         whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
@@ -348,24 +332,24 @@ class AnnotationFactoryTest {
 
 
         verify(annotationListener).addOrUpdateLingeringMidwayOverlay(
-            argThat(ShowOverlayActionArgumentMatcher("id_01")) as Action.ShowOverlayAction
+            argThat(ShowOverlayActionArgumentMatcher("id_01"))
         )
         verify(annotationListener, never()).addOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
-        verify(annotationListener, never()).removeLingeringOverlay(any())
+        verify(annotationListener, never()).removeLingeringOverlay(any(), any())
     }
 
     @Test
     fun `given lingering outro overlay, should addOrUpdate overlay, absolute time system`() {
-        val dataMap = buildMap<String, Any> {
-            put("animateout_type", "fade_out")
-            put("animateout_duration", 3000.toDouble())
-            put("duration", 5000.toDouble())
-        }
-        val actionSourceData =
-            ActionSourceData("id_01", "show_overlay", -1L, 1605609887000L, dataMap)
-        val actionResponse = ActionResponse(listOf(actionSourceData))
-        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
+        val outroTransitionSpec = TransitionSpec(0L, AnimationType.FADE_OUT, 5000L)
+        val action = Action.ShowOverlayAction(
+            id = "id_01",
+            offset = -1L,
+            absoluteTime = 1605609887000L,
+            duration = 5000L,
+            outroTransitionSpec = outroTransitionSpec
+        )
+        annotationFactory.setActions(listOf(action))
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         whenever(player.duration()).thenReturn(120000L)
         whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
@@ -377,12 +361,12 @@ class AnnotationFactoryTest {
 
 
         verify(annotationListener).addOrUpdateLingeringOutroOverlay(
-            argThat(ShowOverlayActionArgumentMatcher("id_01")) as Action.ShowOverlayAction,
+            argThat(ShowOverlayActionArgumentMatcher("id_01")),
             any(),
             any()
         )
         verify(annotationListener, never()).addOverlay(any())
-        verify(annotationListener, never()).removeLingeringOverlay(any())
+        verify(annotationListener, never()).removeLingeringOverlay(any(), any())
     }
 
     @Test
@@ -405,7 +389,7 @@ class AnnotationFactoryTest {
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).removeLingeringOverlay("id_01")
+        verify(annotationListener).removeLingeringOverlay("id_01", outroTransitionSpec)
         verify(annotationListener, never()).addOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
     }

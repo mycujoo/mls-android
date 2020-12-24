@@ -113,61 +113,20 @@ class ShowOverlayActionHelper {
             currentTime: Long,
             action: Action.ShowOverlayAction
         ): Boolean {
-            fun isLingeringUnbounded(
-                currentTime: Long,
-                action: Action.ShowOverlayAction
-            ): Boolean {
-                if (action.offset > currentTime) {
-                    return false
-                }
-                if (action.duration == null) {
-                    return false
-                }
 
-                if (action.outroTransitionSpec != null) {
-                    return if (AnimationClassifierHelper.hasOutroAnimation(action.outroTransitionSpec.animationType)) {
-                        currentTime > action.offset + action.outroTransitionSpec.animationDuration
-                    } else {
-                        currentTime > action.offset
-                    }
-                }
-                return false
+
+            var leftBound = action.offset
+            if (action.introTransitionSpec != null) {
+                leftBound =
+                    action.offset + action.introTransitionSpec.animationDuration
             }
-
-
-            fun isLingeringBounded(
-                currentTime: Long,
-                action: Action.ShowOverlayAction
-            ): Boolean {
-                if (action.duration == null) {
-                    return false
-                }
-
-                if (action.offset > currentTime) {
-                    return false
-                }
-
-                var leftBound = action.offset
-                var rightBound = 0L
-
-                if (action.introTransitionSpec != null &&
-                    AnimationClassifierHelper.hasIntroAnimation(action.introTransitionSpec.animationType)
-                ) {
-                    leftBound =
-                        action.offset + action.introTransitionSpec.animationDuration
-                }
-
+            var rightBound = Long.MAX_VALUE
+            if (action.duration != null) {
                 rightBound =
                     action.offset + action.duration
-
-                return (currentTime > leftBound) && (currentTime < rightBound)
-
             }
 
-
-
-            return (isLingeringUnbounded(currentTime, action) ||
-                    isLingeringBounded(currentTime, action))
+            return (currentTime > leftBound) && (currentTime < rightBound)
         }
 
         private fun isLingeringInOutroAnimation(
