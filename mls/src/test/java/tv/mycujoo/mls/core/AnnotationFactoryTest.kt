@@ -93,6 +93,7 @@ class AnnotationFactoryTest {
         verify(annotationListener, never()).removeLingeringOverlay(any(), any())
     }
 
+    /**region HideOverlayAction related*/
     @Test
     fun `given HideOverlayAction, should remove overlay`() {
         val action = Action.HideOverlayAction("id_01", 5000L, -1L, null, "cid_1001")
@@ -106,6 +107,22 @@ class AnnotationFactoryTest {
         verify(annotationListener).removeOverlay("cid_1001", null)
         verify(annotationListener, never()).addOverlay(any())
     }
+
+    @Test
+    fun `given HideOverlayAction with ReshowOverlayAction within range, should not remove overlay`() {
+        val hideOverlayAction = Action.HideOverlayAction("id_01", 5000L, -1L, null, "cid_1001")
+        val reshowOverlayAction = Action.ReshowOverlayAction("id_01", 5000L, -1L, "cid_1001")
+        annotationFactory.setActions(listOf(hideOverlayAction, reshowOverlayAction))
+
+
+        val buildPoint = BuildPoint(4001L, -1L, player, isPlaying = true, isInterrupted = false)
+        annotationFactory.build(buildPoint)
+
+
+        verify(annotationListener, never()).removeOverlay("cid_1001", null)
+        verify(annotationListener, never()).addOverlay(any())
+    }
+    /**endregion */
 
     /**region ReshowOverlayAction related*/
     @Test
@@ -183,7 +200,33 @@ class AnnotationFactoryTest {
         verify(annotationListener).removeOverlay("cid_01", outroTransitionSpec)
         verify(annotationListener, never()).addOverlay(any())
     }
+
+    /**region ReshowOverlayAction related*/
+    @Test
+    fun `given ReshowOverlayAction, should show overlay, -absolute-time-system`() {
+        val showOverlayAction = getSampleShowOverlayAction(0L, 1605609885000L) // id is cid_1001
+        val reshowOverlayAction =
+            Action.ReshowOverlayAction("id_01", 2000L, 1605609887000L, "cid_1001")
+        annotationFactory.setActions(listOf(showOverlayAction, reshowOverlayAction))
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609885000L)
+
+
+        val buildPoint =
+            BuildPoint(1001L, 1605609886001L, player, isPlaying = true, isInterrupted = false)
+        annotationFactory.build(buildPoint)
+
+
+        verify(annotationListener).addOverlay(any())
+        verify(annotationListener, never()).addOrUpdateLingeringIntroOverlay(any(), any(), any())
+        verify(annotationListener, never()).addOrUpdateLingeringMidwayOverlay(any())
+        verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
+    }
+
     /**endregion */
+
+    /**endregion */
+
 
     /**region Interrupted play mode, relative time system*/
     @Test
