@@ -3,6 +3,7 @@ package tv.mycujoo.mls.widgets
 import android.content.Intent
 import android.os.Handler
 import android.view.View
+import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import androidx.test.core.app.ApplicationProvider
@@ -405,6 +406,30 @@ class MLSPlayerViewTest {
             )
         )
     }
+
+    @Test
+    fun whenControllerIsDisplayed_topContainerShouldBeDisplayed() {
+        onView(withId(R.id.controller_topContainer))
+            .check(
+                matches(
+                    withEffectiveVisibility(Visibility.VISIBLE)
+                )
+            )
+    }
+
+    @Test
+    fun whenControllerIsGone_topContainerShouldBeGone() {
+        MLSPlayerView.post {
+            MLSPlayerView.playerView.showController()
+            MLSPlayerView.playerView.hideController()
+        }
+
+        onView(withId(R.id.controller_topContainer))
+            .check(
+                matches(withEffectiveVisibility(Visibility.GONE))
+            )
+    }
+
 
     fun forceClick(): ViewAction {
         return object : ViewAction {

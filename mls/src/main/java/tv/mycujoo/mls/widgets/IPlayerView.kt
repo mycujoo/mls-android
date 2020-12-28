@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.widgets
 
+import android.view.View
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 
 interface IPlayerView {
@@ -27,4 +28,6 @@ interface IPlayerView {
     fun getRemotePlayerControllerView() : RemotePlayerControllerView
     fun switchMode(mode: PlayerControllerMode)
     fun setCastButtonVisibility(showButton: Boolean)
+
+    fun addToTopContainer(view: View)
 }

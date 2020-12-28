@@ -9,10 +9,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.ProgressBar
+import android.widget.*
 import androidx.annotation.MainThread
 import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -55,6 +52,7 @@ class MLSPlayerView @JvmOverloads constructor(
     /**region UI Fields*/
     var playerView: PlayerView
     var overlayHost: ConstraintLayout
+    val topContainer : LinearLayout
 
     private var bufferingProgressBar: ProgressBar
 
@@ -96,6 +94,11 @@ class MLSPlayerView @JvmOverloads constructor(
         playerView = findViewById(R.id.exoPlayerView)
         overlayHost = ConstraintLayout(context)
         playerView.findViewById<AspectRatioFrameLayout>(R.id.exo_content_frame).addView(overlayHost)
+
+        topContainer = findViewById(R.id.controller_topContainer)
+        playerView.setControllerVisibilityListener { visibility ->
+            topContainer.visibility = visibility
+        }
 
 
         bufferingProgressBar = findViewById(R.id.controller_buffering)
@@ -519,6 +522,20 @@ class MLSPlayerView @JvmOverloads constructor(
     override fun freezeOverlayAnimations() {
         viewHandler.getAnimations().forEach { it.pause() }
     }
+
+    fun clearScreen(idList: List<String>) {
+        overlayHost.children
+            .forEach {
+                if (idList.contains(it.tag)) {
+                    if (this::viewHandler.isInitialized) {
+                        viewHandler.detachOverlayView(it as ScaffoldView)
+                        viewHandler.removeAnimation(it.tag as String)
+                    }
+                }
+            }
+
+        viewHandler.clearAll()
+    }
     /**endregion */
 
     /**region Event Info related functions*/
@@ -634,20 +651,6 @@ class MLSPlayerView @JvmOverloads constructor(
 
     /**endregion */
 
-    fun clearScreen(idList: List<String>) {
-        overlayHost.children
-            .forEach {
-                if (idList.contains(it.tag)) {
-                    if (this::viewHandler.isInitialized) {
-                        viewHandler.detachOverlayView(it as ScaffoldView)
-                        viewHandler.removeAnimation(it.tag as String)
-                    }
-                }
-            }
-
-        viewHandler.clearAll()
-    }
-
 
     /**region Over-ridden Functions*/
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -655,6 +658,10 @@ class MLSPlayerView @JvmOverloads constructor(
         if (w != 0 && h != 0) {
             onSizeChangedCallback.invoke()
         }
+    }
+
+    override fun addToTopContainer(view: View) {
+        topContainer.addView(view)
     }
 
     /**endregion */
