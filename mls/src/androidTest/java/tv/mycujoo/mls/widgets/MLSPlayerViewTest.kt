@@ -314,6 +314,9 @@ class MLSPlayerViewTest {
 
     @Test
     fun whileDisplayingStartedEventDialog_shouldTogglePlayerVisibilityOnClick() {
+        UiThreadStatement.runOnUiThread {
+            setupPlayer()
+        }
         MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
         setupPlayer()
         MLSPlayerView.showEventInfoForStartedEvents()
@@ -323,7 +326,7 @@ class MLSPlayerViewTest {
 
 
         onView(withClassName(TypeMatcher(PlayerControlView::class.java.canonicalName))).check(
-            matches(withEffectiveVisibility(Visibility.VISIBLE))
+            matches(withEffectiveVisibility(Visibility.GONE))
         )
     }
 
@@ -409,7 +412,12 @@ class MLSPlayerViewTest {
 
     @Test
     fun whenControllerIsDisplayed_topContainerShouldBeDisplayed() {
-        onView(withId(R.id.controller_topContainer))
+        UiThreadStatement.runOnUiThread {
+            setupPlayer()
+            MLSPlayerView.updateControllerVisibility(true)
+        }
+
+        onView(withId(R.id.controller_topRightContainer))
             .check(
                 matches(
                     withEffectiveVisibility(Visibility.VISIBLE)
@@ -419,19 +427,22 @@ class MLSPlayerViewTest {
 
     @Test
     fun whenControllerIsGone_topContainerShouldBeGone() {
-        MLSPlayerView.post {
+        UiThreadStatement.runOnUiThread {
+            setupPlayer()
+            MLSPlayerView.updateControllerVisibility(true)
+
             MLSPlayerView.playerView.showController()
             MLSPlayerView.playerView.hideController()
         }
 
-        onView(withId(R.id.controller_topContainer))
+        onView(withId(R.id.controller_topRightContainer))
             .check(
                 matches(withEffectiveVisibility(Visibility.GONE))
             )
     }
 
     @Test
-    fun givenViewToAddToTopContainer_shouldAddIt() {
+    fun givenViewToAddToTopRightContainer_shouldAddIt() {
         var id = 0
         UiThreadStatement.runOnUiThread {
             setupPlayer()
@@ -442,14 +453,14 @@ class MLSPlayerViewTest {
             id = button.id
 
 
-            MLSPlayerView.addToTopContainer(button)
+            MLSPlayerView.addToTopRightContainer(button)
         }
 
         onView(withId(id)).check(matches(isDisplayed()))
     }
 
     @Test
-    fun givenViewToAddFromTopContainer_shouldRemoveIt() {
+    fun givenViewToAddFromTopRightContainer_shouldRemoveIt() {
         var id = 0
         UiThreadStatement.runOnUiThread {
             setupPlayer()
@@ -458,10 +469,47 @@ class MLSPlayerViewTest {
             button.text = "button"
             button.id = View.generateViewId()
             id = button.id
-            MLSPlayerView.addToTopContainer(button)
+            MLSPlayerView.addToTopRightContainer(button)
 
 
-            MLSPlayerView.removeFromTopContainer(button)
+            MLSPlayerView.removeFromTopRightContainer(button)
+        }
+
+        onView(withId(id)).check(doesNotExist())
+    }
+
+    @Test
+    fun givenViewToAddToTopLeftContainer_shouldAddIt() {
+        var id = 0
+        UiThreadStatement.runOnUiThread {
+            setupPlayer()
+            MLSPlayerView.updateControllerVisibility(true)
+            val button = Button(MLSPlayerView.context)
+            button.text = "button"
+            button.id = View.generateViewId()
+            id = button.id
+
+
+            MLSPlayerView.addToTopLeftContainer(button)
+        }
+
+        onView(withId(id)).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun givenViewToAddFromTopLeftContainer_shouldRemoveIt() {
+        var id = 0
+        UiThreadStatement.runOnUiThread {
+            setupPlayer()
+            MLSPlayerView.updateControllerVisibility(true)
+            val button = Button(MLSPlayerView.context)
+            button.text = "button"
+            button.id = View.generateViewId()
+            id = button.id
+            MLSPlayerView.addToTopLeftContainer(button)
+
+
+            MLSPlayerView.removeFromTopLeftContainer(button)
         }
 
         onView(withId(id)).check(doesNotExist())

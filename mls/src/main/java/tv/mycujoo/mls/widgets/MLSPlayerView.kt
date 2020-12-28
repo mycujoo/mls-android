@@ -52,7 +52,8 @@ class MLSPlayerView @JvmOverloads constructor(
     /**region UI Fields*/
     var playerView: PlayerView
     var overlayHost: ConstraintLayout
-    val topContainer: LinearLayout
+    private val topRightContainer: LinearLayout
+    private val topLeftContainer: LinearLayout
 
     private var bufferingProgressBar: ProgressBar
 
@@ -97,9 +98,11 @@ class MLSPlayerView @JvmOverloads constructor(
         overlayHost = ConstraintLayout(context)
         playerView.findViewById<AspectRatioFrameLayout>(R.id.exo_content_frame).addView(overlayHost)
 
-        topContainer = findViewById(R.id.controller_topContainer)
+        topRightContainer = findViewById(R.id.controller_topRightContainer)
+        topLeftContainer = findViewById(R.id.controller_topLeftContainer)
         playerView.setControllerVisibilityListener { visibility ->
-            topContainer.visibility = visibility
+            topRightContainer.visibility = visibility
+            topLeftContainer.visibility = visibility
         }
 
         externalInformationButtonLayout = findViewById(R.id.informationButtonLayout)
@@ -681,13 +684,23 @@ class MLSPlayerView @JvmOverloads constructor(
         }
     }
 
-    override fun addToTopContainer(view: View) {
-        topContainer.addView(view)
+    override fun addToTopRightContainer(view: View) {
+        topRightContainer.addView(view)
     }
 
-    override fun removeFromTopContainer(view: View) {
-        topContainer.children.any { it == view }.let {
-            topContainer.removeView(view)
+    override fun removeFromTopRightContainer(view: View) {
+        topRightContainer.children.any { it == view }.let {
+            topRightContainer.removeView(view)
+        }
+    }
+
+    override fun addToTopLeftContainer(view: View) {
+        topLeftContainer.addView(view)
+    }
+
+    override fun removeFromTopLeftContainer(view: View) {
+        topLeftContainer.children.any { it == view }.let {
+            topLeftContainer.removeView(view)
         }
     }
 

@@ -20,7 +20,7 @@
         app:rewind_increment="10000" />
 
     <LinearLayout
-        android:id="@+id/controller_topContainer"
+        android:id="@+id/controller_topRightContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:minWidth="1dp"
@@ -52,6 +52,17 @@
         </FrameLayout>
 
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/controller_topLeftContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="1dp"
+        android:minHeight="1dp"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintLeft_toLeftOf="@id/exoPlayerView"
+        app:layout_constraintTop_toTopOf="@id/exoPlayerView" />
 
     <FrameLayout
         android:id="@+id/informationButtonLayout"
