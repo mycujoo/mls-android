@@ -52,17 +52,19 @@ class MLSPlayerView @JvmOverloads constructor(
     /**region UI Fields*/
     var playerView: PlayerView
     var overlayHost: ConstraintLayout
-    val topContainer : LinearLayout
+    val topContainer: LinearLayout
 
     private var bufferingProgressBar: ProgressBar
 
     private var fullScreenButton: ImageButton
     private val remotePlayerControllerView: RemotePlayerControllerView
+    private val externalInformationButtonLayout: FrameLayout
     /**endregion */
 
     /**region Fields*/
     lateinit var uiEventListener: UIEventListener
     private var isFullScreen = false
+    private var enableControls = false
 
     private lateinit var viewHandler: IViewHandler
 
@@ -97,13 +99,10 @@ class MLSPlayerView @JvmOverloads constructor(
 
         topContainer = findViewById(R.id.controller_topContainer)
         playerView.setControllerVisibilityListener { visibility ->
-            if (visibility == View.GONE){
-                topContainer.visibility = visibility
-            } else {
-                topContainer.visibility = visibility
-            }
+            topContainer.visibility = visibility
         }
 
+        externalInformationButtonLayout = findViewById(R.id.informationButtonLayout)
 
         bufferingProgressBar = findViewById(R.id.controller_buffering)
         playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
@@ -142,6 +141,10 @@ class MLSPlayerView @JvmOverloads constructor(
         updateFullscreenButtonImage()
 
         remotePlayerControllerView = findViewById(R.id.remotePlayerControllerView)
+
+        playerView.hideController()
+        playerView.controllerAutoShow = false
+        playerView.useController = false
     }
 
     fun prepare(
@@ -249,10 +252,6 @@ class MLSPlayerView @JvmOverloads constructor(
     /**endregion */
 
     /**region Functionality*/
-    fun defaultController(hasDefaultPlayerController: Boolean) {
-        playerView.useController = hasDefaultPlayerController
-    }
-
     fun addMarker(longArray: LongArray, booleanArray: BooleanArray) {
         playerView.setExtraAdGroupMarkers(
             longArray,
@@ -326,10 +325,8 @@ class MLSPlayerView @JvmOverloads constructor(
             }
 
             // enableControls has the highest priority
-            if (config.enableControls) {
-                playerView.controllerAutoShow = true
-                showControlsContainer(true)
-            } else {
+            enableControls = config.enableControls
+            if (!enableControls) {
                 playerView.controllerAutoShow = false
                 playerView.hideController()
                 showPlayPauseButtons(false)
@@ -344,6 +341,20 @@ class MLSPlayerView @JvmOverloads constructor(
 
         } catch (e: Exception) {
             Log.e("PlayerViewWrapper", e.message)
+        }
+    }
+
+    override fun updateControllerVisibility(isPlaying: Boolean) {
+        if (enableControls && isPlaying) {
+            showControlsContainer(true)
+            playerView.controllerAutoShow = true
+            playerView.useController = true
+            playerView.showController()
+        } else {
+            showControlsContainer(false)
+            playerView.hideController()
+            playerView.controllerAutoShow = false
+            playerView.useController = false
         }
     }
 

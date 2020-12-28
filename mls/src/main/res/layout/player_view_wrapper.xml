@@ -26,6 +26,7 @@
         android:minWidth="1dp"
         android:minHeight="1dp"
         android:orientation="horizontal"
+        android:visibility="gone"
         app:layout_constraintRight_toRightOf="@id/exoPlayerView"
         app:layout_constraintTop_toTopOf="@id/exoPlayerView">
 
