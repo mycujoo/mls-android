@@ -59,15 +59,13 @@ class AnnotationFactory(
         } else {
             timeSystem = TimeSystem.ABSOLUTE
             adjustedActions.clear()
+
             sortedActions.forEach { action ->
-                val convertedOffset = TimeUtils.convertRelativeTimeToAbsolute(
+                val newOffset = TimeUtils.convertRelativeTimeToAbsolute(
                     buildPoint.player.dvrWindowStartTime(),
                     action.absoluteTime
                 )
-                action.offset = convertedOffset
-                adjustedActions.add(action)
-
-//                action.seekTimeTo<Action>(400L)
+                adjustedActions.add(action.updateOffset(newOffset))
             }
             return process(
                 buildPoint,
