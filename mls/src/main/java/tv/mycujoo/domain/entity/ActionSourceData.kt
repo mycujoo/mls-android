@@ -50,7 +50,8 @@ data class ActionSourceData(
                             relatedData.introAnimationDuration
                         ),
                         outroTransitionSpec = outroTransitionSpec,
-                        placeHolders = relatedData.variablePlaceHolders
+                        placeHolders = relatedData.variablePlaceHolders,
+                        customId = relatedData.customId
                     )
                 }
             }
@@ -61,7 +62,7 @@ data class ActionSourceData(
                         id = newId,
                         offset = newOffset,
                         absoluteTime = newAbsoluteTime,
-                        outroAnimationSpec = TransitionSpec(
+                        outroTransitionSpec = TransitionSpec(
                             newOffset,
                             relatedData.outroAnimationType,
                             relatedData.outroAnimationDuration
@@ -69,6 +70,18 @@ data class ActionSourceData(
                         customId = relatedData.id
                     )
 
+                }
+            }
+
+            RESHOW_OVERLAY -> {
+                val customId = DataMapper.extractReshowOverlayRelatedData(data)
+                if (customId != null) {
+                    return Action.ReshowOverlayAction(
+                        id = newId,
+                        offset = newOffset,
+                        absoluteTime = newAbsoluteTime,
+                        customId = customId
+                    )
                 }
             }
 

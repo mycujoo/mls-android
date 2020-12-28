@@ -19,9 +19,7 @@ import tv.mycujoo.mls.enum.LogLevel.*
 import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.helper.OverlayFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
-import tv.mycujoo.mls.manager.IPrefManager
-import tv.mycujoo.mls.manager.Logger
-import tv.mycujoo.mls.manager.ViewHandler
+import tv.mycujoo.mls.manager.*
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.MainWebSocketListener
@@ -49,6 +47,8 @@ open class InternalBuilder(private val activity: Activity, private val logLevel:
 
     lateinit var viewHandler: IViewHandler
     lateinit var overlayViewHelper: OverlayViewHelper
+    lateinit var variableTranslator: VariableTranslator
+    lateinit var variableKeeper: VariableKeeper
 
 
     lateinit var reactorSocket: IReactorSocket
@@ -65,8 +65,10 @@ open class InternalBuilder(private val activity: Activity, private val logLevel:
         logger = Logger(logLevel)
 
         viewHandler = ViewHandler(dispatcher, CountingIdlingResource("ViewIdentifierManager"))
+        variableTranslator = VariableTranslator(dispatcher)
+        variableKeeper = VariableKeeper(dispatcher)
 
-        overlayViewHelper = OverlayViewHelper(viewHandler, OverlayFactory(), AnimationFactory())
+        overlayViewHelper = OverlayViewHelper(viewHandler, OverlayFactory(), AnimationFactory(), variableTranslator, variableKeeper)
 
         mainWebSocketListener = MainWebSocketListener()
         reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener)

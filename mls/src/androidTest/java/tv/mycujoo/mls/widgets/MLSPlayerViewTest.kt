@@ -43,6 +43,8 @@ import tv.mycujoo.mls.enum.LogLevel
 import tv.mycujoo.mls.helper.OverlayFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.Logger
+import tv.mycujoo.mls.manager.VariableKeeper
+import tv.mycujoo.mls.manager.VariableTranslator
 import tv.mycujoo.mls.manager.ViewHandler
 import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.model.SingleLiveEvent
@@ -65,6 +67,8 @@ class MLSPlayerViewTest {
         GlobalScope,
         CountingIdlingResource("ViewIdentifierManager")
     )
+    private val variableTranslator = VariableTranslator(GlobalScope)
+    private val variableKeeper = VariableKeeper(GlobalScope)
 
     private var animationHelper = FakeAnimationFactory()
 
@@ -86,7 +90,13 @@ class MLSPlayerViewTest {
 
             MLSPlayerView.idlingResource = viewHandler.idlingResource
             MLSPlayerView.prepare(
-                OverlayViewHelper(viewHandler, OverlayFactory(), animationHelper),
+                OverlayViewHelper(
+                    viewHandler,
+                    OverlayFactory(),
+                    animationHelper,
+                    variableTranslator,
+                    variableKeeper
+                ),
                 viewHandler,
                 emptyList()
             )

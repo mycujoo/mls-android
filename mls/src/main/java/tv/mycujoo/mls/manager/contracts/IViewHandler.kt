@@ -2,8 +2,6 @@ package tv.mycujoo.mls.manager.contracts
 
 import android.animation.ObjectAnimator
 import androidx.constraintlayout.widget.ConstraintLayout
-import tv.mycujoo.mls.manager.IVariableKeeper
-import tv.mycujoo.mls.manager.VariableTranslator
 import tv.mycujoo.mls.widgets.ScaffoldView
 
 interface IViewHandler {
@@ -21,13 +19,10 @@ interface IViewHandler {
     fun detachOverlayView(view: ScaffoldView?)
     fun getOverlayView(id: String): ScaffoldView?
 
-    fun overlayBlueprintIsNotAttached(id: String): Boolean
-    fun overlayBlueprintIsAttached(id: String): Boolean
+    fun overlayIsNotAttached(id: String): Boolean
+    fun overlayIsAttached(id: String): Boolean
 
     fun clearAll()
     fun incrementIdlingResource()
     fun decrementIdlingResource()
-
-    fun getVariableTranslator(): VariableTranslator
-    fun getVariableKeeper(): IVariableKeeper
 }

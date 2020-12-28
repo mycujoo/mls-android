@@ -36,6 +36,7 @@ import tv.mycujoo.mls.helper.DateTimeHelper
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.TimelineMarkerManager
 import tv.mycujoo.mls.manager.contracts.IViewHandler
+import tv.mycujoo.mls.utils.ColorUtils
 import tv.mycujoo.mls.utils.StringUtils.Companion.getFormattedTime
 import tv.mycujoo.mls.widgets.PlayerControllerMode.EXO_MODE
 import tv.mycujoo.mls.widgets.PlayerControllerMode.REMOTE_CONTROLLER
@@ -188,7 +189,7 @@ class MLSPlayerView @JvmOverloads constructor(
                 it.offset,
                 it.seekOffset,
                 it.label,
-                PointOfInterestType(it.color)
+                PointOfInterestType(ColorUtils.toARGB(it.color))
             )
         }.let {
             timelineMarkerManager.setTimeLineHighlight(it)

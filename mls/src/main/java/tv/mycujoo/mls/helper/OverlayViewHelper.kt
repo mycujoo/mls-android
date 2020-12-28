@@ -13,6 +13,8 @@ import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasDynamicIntro
 import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasDynamicOutroAnimation
 import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasStaticIntroAnimation
 import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasStaticOutroAnimation
+import tv.mycujoo.mls.manager.VariableKeeper
+import tv.mycujoo.mls.manager.VariableTranslator
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.widgets.ProportionalImageView
 import tv.mycujoo.mls.widgets.ScaffoldView
@@ -20,7 +22,9 @@ import tv.mycujoo.mls.widgets.ScaffoldView
 class OverlayViewHelper(
     private val viewHandler: IViewHandler,
     private val overlayFactory: IOverlayFactory,
-    private val animationFactory: AnimationFactory
+    private val animationFactory: AnimationFactory,
+    private val variableTranslator: VariableTranslator,
+    private val variableKeeper: VariableKeeper
 ) {
 
     /**region Add view*/
@@ -58,8 +62,8 @@ class OverlayViewHelper(
                 overlayFactory.createScaffoldView(
                     context,
                     showOverlayAction,
-                    viewHandler.getVariableTranslator(),
-                    viewHandler.getVariableKeeper()
+                    variableTranslator,
+                    variableKeeper
                 )
 
             when {
@@ -177,8 +181,8 @@ class OverlayViewHelper(
             overlayFactory.createScaffoldView(
                 context,
                 showOverlayAction,
-                viewHandler.getVariableTranslator(),
-                viewHandler.getVariableKeeper()
+                variableTranslator,
+                variableKeeper
             )
 
         doAddViewWithNoAnimation(
@@ -354,8 +358,8 @@ class OverlayViewHelper(
                 overlayFactory.createScaffoldView(
                     overlayHost.context,
                     showOverlayAction,
-                    viewHandler.getVariableTranslator(),
-                    viewHandler.getVariableKeeper()
+                    variableTranslator,
+                    variableKeeper
                 )
 
             scaffoldView.doOnLayout {
@@ -457,8 +461,8 @@ class OverlayViewHelper(
                 overlayFactory.createScaffoldView(
                     overlayHost.context,
                     showOverlayAction,
-                    viewHandler.getVariableTranslator(),
-                    viewHandler.getVariableKeeper()
+                    variableTranslator,
+                    variableKeeper
                 )
 
             scaffoldView.doOnLayout {
@@ -564,7 +568,7 @@ class OverlayViewHelper(
         animationPosition: Long,
         isPlaying: Boolean
     ) {
-        if (viewHandler.overlayBlueprintIsAttached(showOverlayAction.id)) {
+        if (viewHandler.overlayIsAttached(showOverlayAction.id)) {
             updateLingeringIntroOverlay(
                 tvOverlayContainer,
                 showOverlayAction,
@@ -589,7 +593,7 @@ class OverlayViewHelper(
         animationPosition: Long,
         isPlaying: Boolean
     ) {
-        if (viewHandler.overlayBlueprintIsAttached(showOverlayAction.id)) {
+        if (viewHandler.overlayIsAttached(showOverlayAction.id)) {
             updateLingeringOutroOverlay(
                 tvOverlayContainer,
                 showOverlayAction,
@@ -747,13 +751,13 @@ class OverlayViewHelper(
 
     /**region Variables*/
     fun setVariable(variable: VariableEntity) {
-        viewHandler.getVariableTranslator().createVariableTripleIfNotExisted(variable.variable.name)
-        viewHandler.getVariableTranslator()
+        variableTranslator.createVariableTripleIfNotExisted(variable.variable.name)
+        variableTranslator
             .emitNewValue(variable.variable.name, variable.variable.printValue())
     }
 
     fun incrementVariable(incrementVariableEntity: IncrementVariableEntity) {
-        viewHandler.getVariableTranslator().getValue(incrementVariableEntity.name)
+        variableTranslator.getValue(incrementVariableEntity.name)
             ?.let { currentValue ->
                 val newValue: Any
                 newValue = when (currentValue) {
@@ -768,7 +772,7 @@ class OverlayViewHelper(
                         ""
                     }
                 }
-                viewHandler.getVariableTranslator()
+                variableTranslator
                     .emitNewValue(incrementVariableEntity.name, newValue)
             }
     }

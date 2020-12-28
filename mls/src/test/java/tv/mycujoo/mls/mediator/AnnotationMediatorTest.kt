@@ -79,9 +79,6 @@ class AnnotationMediatorTest {
         MockitoAnnotations.initMocks(this)
         testCoroutineScope = TestCoroutineScope()
 
-        whenever(viewHandler.getVariableKeeper()).thenReturn(variableKeeper)
-        whenever(viewHandler.getVariableTranslator()).thenReturn(variableTranslator)
-
         whenever(
             scheduledExecutorService.scheduleAtFixedRate(
                 any<Runnable>(),

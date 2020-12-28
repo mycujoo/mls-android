@@ -35,6 +35,9 @@ class PlayerTest {
     lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
 
     @Mock
+    lateinit var mediaItem : MediaItem
+
+    @Mock
     lateinit var hlsMediaSource: HlsMediaSource
 
 
@@ -194,7 +197,7 @@ class PlayerTest {
     fun `given valid state, should return exo player live state as isLive`() {
         initPlayer()
         whenever(exoPlayer.isCurrentWindowDynamic).thenReturn(true)
-        whenever(exoPlayer.currentPosition).thenReturn(1000L)
+        whenever(exoPlayer.contentPosition).thenReturn(1000L)
 
 
         assertEquals(true, player.isLive())
@@ -228,6 +231,7 @@ class PlayerTest {
     @Test
     fun `given uri to play when no resume data is available, should start from the beginning`() {
         initPlayer()
+        whenever(mediaFactory.createMediaItem(any())).thenReturn(mediaItem)
         whenever(mediaFactory.createHlsMediaSource(any())).thenReturn(hlsMediaSource)
 
         player.play(SAMPLE_URI, Long.MAX_VALUE, true)
@@ -243,6 +247,7 @@ class PlayerTest {
     @Test
     fun `given uri to play when resume data is available, should start from resume position`() {
         initPlayer()
+        whenever(mediaFactory.createMediaItem(any())).thenReturn(mediaItem)
         whenever(mediaFactory.createHlsMediaSource(any())).thenReturn(hlsMediaSource)
         whenever(exoPlayer.currentWindowIndex).thenReturn(0)
         whenever(exoPlayer.isCurrentWindowSeekable).thenReturn(true)

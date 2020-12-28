@@ -1,8 +1,7 @@
 package tv.mycujoo.mls.utils
 
 import android.graphics.Color
-import junit.framework.Assert.assertFalse
-import junit.framework.Assert.assertTrue
+import junit.framework.Assert.*
 import org.junit.Test
 import tv.mycujoo.mls.utils.ColorUtils.Companion.isColorBright
 
@@ -25,5 +24,37 @@ class ColorUtilsTest {
         assertFalse(mediumBlue)
         assertFalse(darkBlue)
         assertFalse(black)
+    }
+
+    @Test
+    fun colorRGBtoARGBTest() {
+        val validRGB = "#fff"
+
+        val convertedToRGBA = ColorUtils.toARGB(validRGB)
+        assertEquals(validRGB, convertedToRGBA)
+    }
+
+    @Test
+    fun colorRGBAtoAARRGGBBTest() {
+        val validRGB = "#fff0"
+
+        val convertedToRGBA = ColorUtils.toARGB(validRGB)
+        assertEquals("#00ffffff", convertedToRGBA)
+    }
+
+    @Test
+    fun colorRRGGBBtoARGBTest() {
+        val validRGB = "#ffffff"
+
+        val convertedToRGBA = ColorUtils.toARGB(validRGB)
+        assertEquals(validRGB, convertedToRGBA)
+    }
+
+    @Test
+    fun colorRRGGBBAAtoARGBTest() {
+        val validRGBA = "#ffffff00"
+
+        val convertedToARGB = ColorUtils.toARGB(validRGBA)
+        assertEquals("#00ffffff", convertedToARGB)
     }
 }

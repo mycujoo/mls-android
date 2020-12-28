@@ -22,6 +22,8 @@ import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.SVGAssetResolver
 import tv.mycujoo.mls.helper.TypeFaceFactory
 import tv.mycujoo.mls.manager.IPrefManager
+import tv.mycujoo.mls.manager.VariableKeeper
+import tv.mycujoo.mls.manager.VariableTranslator
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.mediator.AnnotationMediator
 import tv.mycujoo.mls.network.Api
@@ -60,6 +62,8 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
     private lateinit var player: Player
 
     private lateinit var viewHandler: IViewHandler
+    private lateinit var variableTranslator: VariableTranslator
+    private lateinit var variableKeeper: VariableKeeper
     /**endregion */
 
     /**region Initializing*/
@@ -136,7 +140,8 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
             )
         val annotationFactory = AnnotationFactory(
             annotationListener,
-            viewHandler.getVariableKeeper()
+            viewHandler,
+            variableKeeper
         )
         annotationMediator = AnnotationMediator(
             MLSPlayerView,

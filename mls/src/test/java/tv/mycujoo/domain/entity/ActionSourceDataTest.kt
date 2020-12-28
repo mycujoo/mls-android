@@ -122,11 +122,11 @@ class ActionSourceDataTest {
         assertEquals(absoluteTime, action.absoluteTime)
         assertEquals(
             data["animateout_type"],
-            hideOverlayAction.outroAnimationSpec?.animationType?.type
+            hideOverlayAction.outroTransitionSpec?.animationType?.type
         )
         assertEquals(
             data["animateout_duration"],
-            hideOverlayAction.outroAnimationSpec?.animationDuration
+            hideOverlayAction.outroTransitionSpec?.animationDuration
         )
         assertEquals(data["custom_id"], hideOverlayAction.customId)
     }
@@ -152,6 +152,42 @@ class ActionSourceDataTest {
         assertTrue { action is Action.InvalidAction }
     }
 
+    /**endregion */
+
+    /**region Reshow-Overlay related*/
+    @Test
+    fun `mapping to ReshowOverlayAction`() {
+        val id = "id_1"
+        val offset = 1000L
+        val absoluteTime = -1L
+        val data = buildMap<String, Any> {
+            put("custom_id", "id_0")
+        }
+        val actionSourceData =
+            ActionSourceData(id, ActionType.RESHOW_OVERLAY.type, offset, absoluteTime, data)
+
+        val action = actionSourceData.toAction()
+
+
+        assertTrue { action is Action.ReshowOverlayAction }
+    }
+
+    @Test
+    fun `mapping to ReshowOverlayAction without customId`() {
+        val id = "id_1"
+        val offset = 1000L
+        val absoluteTime = -1L
+        val data = buildMap<String, Any> {
+            // custom_id is not provided
+        }
+        val actionSourceData =
+            ActionSourceData(id, ActionType.RESHOW_OVERLAY.type, offset, absoluteTime, data)
+
+        val action = actionSourceData.toAction()
+
+
+        assertTrue { action is Action.InvalidAction }
+    }
     /**endregion */
 
     /**region Timer related*/

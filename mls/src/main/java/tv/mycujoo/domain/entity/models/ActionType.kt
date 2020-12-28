@@ -4,6 +4,7 @@ enum class ActionType(val type: String) {
     // overlay related
     SHOW_OVERLAY("show_overlay"),
     HIDE_OVERLAY("hide_overlay"),
+    RESHOW_OVERLAY("reshow_overlay"),
 
     // timer related
     CREATE_TIMER("create_timer"),

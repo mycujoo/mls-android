@@ -13,6 +13,8 @@ import tv.mycujoo.mls.helper.AnimationFactory
 import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.OverlayFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
+import tv.mycujoo.mls.manager.VariableKeeper
+import tv.mycujoo.mls.manager.VariableTranslator
 import tv.mycujoo.mls.manager.ViewHandler
 import tv.mycujoo.mls.player.IPlayer
 import java.util.concurrent.ScheduledExecutorService
@@ -32,6 +34,8 @@ class TvAnnotationMediator(
     private val viewHandler:
             ViewHandler =
         ViewHandler(coroutineScope, CountingIdlingResource("ViewIdentifierManager"))
+    private val variableTranslator = VariableTranslator(coroutineScope)
+    private val variableKeeper = VariableKeeper(coroutineScope)
 
     private var hasPendingSeek: Boolean = false
 
@@ -39,7 +43,13 @@ class TvAnnotationMediator(
         viewHandler.setOverlayHost(overlayContainer)
 
         val overlayViewHelper =
-            OverlayViewHelper(viewHandler, OverlayFactory(), AnimationFactory())
+            OverlayViewHelper(
+                viewHandler,
+                OverlayFactory(),
+                AnimationFactory(),
+                variableTranslator,
+                variableKeeper
+            )
 
         tvAnnotationListener =
             TvAnnotationListener(
@@ -50,7 +60,7 @@ class TvAnnotationMediator(
 
 
         annotationFactory =
-            AnnotationFactory(tvAnnotationListener, viewHandler.getVariableKeeper())
+            AnnotationFactory(tvAnnotationListener, viewHandler, variableKeeper)
 
         player.addListener(object : Player.EventListener {
             override fun onPositionDiscontinuity(reason: Int) {
