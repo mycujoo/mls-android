@@ -12,6 +12,7 @@ import tv.mycujoo.mls.TestData.Companion.getSampleShowOverlayAction
 import tv.mycujoo.mls.manager.IVariableKeeper
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.matcher.ShowOverlayActionArgumentMatcher
+import tv.mycujoo.mls.matcher.TransitionSpecArgumentMatcher
 import tv.mycujoo.mls.player.IPlayer
 import kotlin.test.assertTrue
 
@@ -182,7 +183,7 @@ class AnnotationFactoryTest {
 
 
     @Test
-    fun `given HideOverlay action, should remove overlay, absolute time system`() {
+    fun `given HideOverlay action, should remove overlay, -absolute-time-system`() {
         val outroTransitionSpec = TransitionSpec(3000L, AnimationType.FADE_OUT, 3000L)
         val hideAction =
             Action.HideOverlayAction("id_01", -1L, 1605609887000L, outroTransitionSpec, "cid_01")
@@ -197,7 +198,10 @@ class AnnotationFactoryTest {
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).removeOverlay("cid_01", outroTransitionSpec)
+        verify(annotationListener).removeOverlay(
+            eq("cid_01"),
+            argThat(TransitionSpecArgumentMatcher(2000L))
+        )
         verify(annotationListener, never()).addOverlay(any())
     }
 
@@ -439,6 +443,7 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(action))
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
 
 
         val buildPoint =
@@ -446,7 +451,7 @@ class AnnotationFactoryTest {
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).removeLingeringOverlay("id_01", outroTransitionSpec)
+        verify(annotationListener).removeLingeringOverlay(eq("id_01"), argThat(TransitionSpecArgumentMatcher(5000L)))
         verify(annotationListener, never()).addOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
     }

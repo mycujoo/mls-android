@@ -1,5 +1,9 @@
 package tv.mycujoo.domain.entity
 
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.*
+
 sealed class Variable {
     abstract val name: String
     abstract fun printValue(): String
@@ -32,7 +36,16 @@ sealed class Variable {
     ) : Variable() {
         override fun printValue(): String {
             return if (doublePrecision != null) {
-                String.format("%.${doublePrecision}f", value)
+                val decimalFormat = DecimalFormat()
+                decimalFormat.minimumFractionDigits = doublePrecision
+                decimalFormat.maximumFractionDigits = doublePrecision
+                val decimalFormatSymbols = DecimalFormatSymbols(Locale.ENGLISH).apply {
+                    decimalSeparator = '.'
+                }
+                decimalFormat.decimalFormatSymbols = decimalFormatSymbols
+                decimalFormat.isGroupingUsed = false
+                decimalFormat.format(value)
+
             } else {
                 value.toString()
             }

@@ -494,9 +494,7 @@ class VideoPlayerMediatorTest {
         val event = getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_SCHEDULED)
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
         videoPlayerMediator.config(defaultVideoPlayerConfig())
-
-
-        whenever(exoPlayer.isCurrentWindowDynamic).thenReturn(true)
+        whenever(player.isLive()).thenReturn(true)
 
 
         videoPlayerMediator.playVideo(event)
