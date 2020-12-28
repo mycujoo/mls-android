@@ -451,7 +451,11 @@ class VideoPlayerMediator(
     fun playExternalSourceVideo(videoUri: String) {
         player.play(videoUri, Long.MAX_VALUE, videoPlayerConfig.autoPlay)
         playerView.hideEventInfoDialog()
-        playerView.hideEventInfoButton()
+        if (videoPlayerConfig.showEventInfoButton) {
+            playerView.showEventInfoButton()
+        } else {
+            playerView.hideEventInfoButton()
+        }
     }
 
     private fun playVideoOrDisplayEventInfo(event: EventEntity) {
@@ -468,9 +472,11 @@ class VideoPlayerMediator(
             storeEvent(event)
             play(event.streams.first())
             playerView.hideEventInfoDialog()
+            playerView.updateControllerVisibility(isPlaying = true)
         } else {
             // display event info
-            playerView.showEventInformationPreEventDialog()
+            playerView.showEventInformationForPreEvent()
+            playerView.updateControllerVisibility(isPlaying = false)
         }
     }
 

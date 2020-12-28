@@ -1,15 +1,17 @@
 package tv.mycujoo.mls.widgets
 
+import android.view.View
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 
 interface IPlayerView {
 
     fun config(config: VideoPlayerConfig)
+    fun updateControllerVisibility(isPlaying: Boolean)
 
     fun updateViewersCounter(count: String)
     fun hideViewersCounter()
 
-    fun showEventInformationPreEventDialog()
+    fun showEventInformationForPreEvent()
     fun showEventInfoForStartedEvents()
     fun hideEventInfoDialog()
 
@@ -24,7 +26,12 @@ interface IPlayerView {
     fun showBuffering()
     fun hideBuffering()
 
-    fun getRemotePlayerControllerView() : RemotePlayerControllerView
+    fun getRemotePlayerControllerView(): RemotePlayerControllerView
     fun switchMode(mode: PlayerControllerMode)
     fun setCastButtonVisibility(showButton: Boolean)
+
+    fun addToTopRightContainer(view: View)
+    fun removeFromTopRightContainer(view: View)
+    fun addToTopLeftContainer(view: View)
+    fun removeFromTopLeftContainer(view: View)
 }

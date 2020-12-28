@@ -9,10 +9,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.ProgressBar
+import android.widget.*
 import androidx.annotation.MainThread
 import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -55,16 +52,20 @@ class MLSPlayerView @JvmOverloads constructor(
     /**region UI Fields*/
     var playerView: PlayerView
     var overlayHost: ConstraintLayout
+    private val topRightContainer: LinearLayout
+    private val topLeftContainer: LinearLayout
 
     private var bufferingProgressBar: ProgressBar
 
     private var fullScreenButton: ImageButton
     private val remotePlayerControllerView: RemotePlayerControllerView
+    private val externalInformationButtonLayout: FrameLayout
     /**endregion */
 
     /**region Fields*/
     lateinit var uiEventListener: UIEventListener
     private var isFullScreen = false
+    private var enableControls = false
 
     private lateinit var viewHandler: IViewHandler
 
@@ -97,6 +98,14 @@ class MLSPlayerView @JvmOverloads constructor(
         overlayHost = ConstraintLayout(context)
         playerView.findViewById<AspectRatioFrameLayout>(R.id.exo_content_frame).addView(overlayHost)
 
+        topRightContainer = findViewById(R.id.controller_topRightContainer)
+        topLeftContainer = findViewById(R.id.controller_topLeftContainer)
+        playerView.setControllerVisibilityListener { visibility ->
+            topRightContainer.visibility = visibility
+            topLeftContainer.visibility = visibility
+        }
+
+        externalInformationButtonLayout = findViewById(R.id.informationButtonLayout)
 
         bufferingProgressBar = findViewById(R.id.controller_buffering)
         playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
@@ -106,6 +115,12 @@ class MLSPlayerView @JvmOverloads constructor(
         }
         findViewById<ImageButton>(R.id.controller_informationButton).setOnClickListener {
             showEventInfoForStartedEvents()
+        }
+        findViewById<FrameLayout>(R.id.informationButtonLayout).setOnClickListener {
+            showEventInformationForPreEvent()
+        }
+        findViewById<ImageButton>(R.id.informationButton).setOnClickListener {
+            showEventInformationForPreEvent()
         }
 
 
@@ -129,6 +144,10 @@ class MLSPlayerView @JvmOverloads constructor(
         updateFullscreenButtonImage()
 
         remotePlayerControllerView = findViewById(R.id.remotePlayerControllerView)
+
+        playerView.hideController()
+        playerView.controllerAutoShow = false
+        playerView.useController = false
     }
 
     fun prepare(
@@ -236,10 +255,6 @@ class MLSPlayerView @JvmOverloads constructor(
     /**endregion */
 
     /**region Functionality*/
-    fun defaultController(hasDefaultPlayerController: Boolean) {
-        playerView.useController = hasDefaultPlayerController
-    }
-
     fun addMarker(longArray: LongArray, booleanArray: BooleanArray) {
         playerView.setExtraAdGroupMarkers(
             longArray,
@@ -313,10 +328,8 @@ class MLSPlayerView @JvmOverloads constructor(
             }
 
             // enableControls has the highest priority
-            if (config.enableControls) {
-                playerView.controllerAutoShow = true
-                showControlsContainer(true)
-            } else {
+            enableControls = config.enableControls
+            if (!enableControls) {
                 playerView.controllerAutoShow = false
                 playerView.hideController()
                 showPlayPauseButtons(false)
@@ -331,6 +344,20 @@ class MLSPlayerView @JvmOverloads constructor(
 
         } catch (e: Exception) {
             Log.e("PlayerViewWrapper", e.message)
+        }
+    }
+
+    override fun updateControllerVisibility(isPlaying: Boolean) {
+        if (enableControls && isPlaying) {
+            showControlsContainer(true)
+            playerView.controllerAutoShow = true
+            playerView.useController = true
+            playerView.showController()
+        } else {
+            showControlsContainer(false)
+            playerView.hideController()
+            playerView.controllerAutoShow = false
+            playerView.useController = false
         }
     }
 
@@ -519,6 +546,20 @@ class MLSPlayerView @JvmOverloads constructor(
     override fun freezeOverlayAnimations() {
         viewHandler.getAnimations().forEach { it.pause() }
     }
+
+    fun clearScreen(idList: List<String>) {
+        overlayHost.children
+            .forEach {
+                if (idList.contains(it.tag)) {
+                    if (this::viewHandler.isInitialized) {
+                        viewHandler.detachOverlayView(it as ScaffoldView)
+                        viewHandler.removeAnimation(it.tag as String)
+                    }
+                }
+            }
+
+        viewHandler.clearAll()
+    }
     /**endregion */
 
     /**region Event Info related functions*/
@@ -532,7 +573,7 @@ class MLSPlayerView @JvmOverloads constructor(
         eventDateTime = startTime
     }
 
-    override fun showEventInformationPreEventDialog() {
+    override fun showEventInformationForPreEvent() {
         post {
             playerView.hideController()
 
@@ -541,7 +582,7 @@ class MLSPlayerView @JvmOverloads constructor(
                     .inflate(R.layout.dialog_event_info_pre_event_layout, this, false)
             eventInfoDialogContainerLayout.addView(informationDialog)
 
-            if (eventPosterUrl != null) {
+            if (eventPosterUrl != null && eventPosterUrl!!.isNotEmpty()) {
                 informationDialog.eventInfoPreEventDialog_posterView.visibility = View.VISIBLE
                 informationDialog.eventInfoPreEventDialog_canvasView.visibility = View.GONE
 
@@ -634,26 +675,32 @@ class MLSPlayerView @JvmOverloads constructor(
 
     /**endregion */
 
-    fun clearScreen(idList: List<String>) {
-        overlayHost.children
-            .forEach {
-                if (idList.contains(it.tag)) {
-                    if (this::viewHandler.isInitialized) {
-                        viewHandler.detachOverlayView(it as ScaffoldView)
-                        viewHandler.removeAnimation(it.tag as String)
-                    }
-                }
-            }
-
-        viewHandler.clearAll()
-    }
-
 
     /**region Over-ridden Functions*/
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         if (w != 0 && h != 0) {
             onSizeChangedCallback.invoke()
+        }
+    }
+
+    override fun addToTopRightContainer(view: View) {
+        topRightContainer.addView(view)
+    }
+
+    override fun removeFromTopRightContainer(view: View) {
+        topRightContainer.children.any { it == view }.let {
+            topRightContainer.removeView(view)
+        }
+    }
+
+    override fun addToTopLeftContainer(view: View) {
+        topLeftContainer.addView(view)
+    }
+
+    override fun removeFromTopLeftContainer(view: View) {
+        topLeftContainer.children.any { it == view }.let {
+            topLeftContainer.removeView(view)
         }
     }
 

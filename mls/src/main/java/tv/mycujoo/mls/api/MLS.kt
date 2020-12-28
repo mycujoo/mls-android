@@ -81,6 +81,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         this.dataManager = internalBuilder.dataManager
         this.prefManager = internalBuilder.prefManager
         this.viewHandler = internalBuilder.viewHandler
+        this.variableKeeper = internalBuilder.variableKeeper
 
         persistPublicKey(this.builder.publicKey)
 

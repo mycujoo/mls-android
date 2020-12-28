@@ -3,6 +3,7 @@ package tv.mycujoo.mls.widgets
 import android.content.Intent
 import android.os.Handler
 import android.view.View
+import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import androidx.test.core.app.ApplicationProvider
@@ -231,7 +232,7 @@ class MLSPlayerViewTest {
         MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        MLSPlayerView.showEventInformationPreEventDialog()
+        MLSPlayerView.showEventInformationForPreEvent()
 
 
         onView(withText("title_0")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
@@ -243,7 +244,7 @@ class MLSPlayerViewTest {
         MLSPlayerView.setPosterInfo("sample_url")
 
 
-        MLSPlayerView.showEventInformationPreEventDialog()
+        MLSPlayerView.showEventInformationForPreEvent()
 
 
         onView(withId(R.id.eventInfoPreEventDialog_posterView)).check(
@@ -263,7 +264,7 @@ class MLSPlayerViewTest {
         MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        MLSPlayerView.showEventInformationPreEventDialog()
+        MLSPlayerView.showEventInformationForPreEvent()
         onView(withText("title_0")).perform(click())
 
 
@@ -313,6 +314,9 @@ class MLSPlayerViewTest {
 
     @Test
     fun whileDisplayingStartedEventDialog_shouldTogglePlayerVisibilityOnClick() {
+        UiThreadStatement.runOnUiThread {
+            setupPlayer()
+        }
         MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
         setupPlayer()
         MLSPlayerView.showEventInfoForStartedEvents()
@@ -322,7 +326,7 @@ class MLSPlayerViewTest {
 
 
         onView(withClassName(TypeMatcher(PlayerControlView::class.java.canonicalName))).check(
-            matches(withEffectiveVisibility(Visibility.VISIBLE))
+            matches(withEffectiveVisibility(Visibility.GONE))
         )
     }
 
@@ -404,6 +408,111 @@ class MLSPlayerViewTest {
                 withEffectiveVisibility(Visibility.GONE)
             )
         )
+    }
+
+    @Test
+    fun whenControllerIsDisplayed_topContainerShouldBeDisplayed() {
+        UiThreadStatement.runOnUiThread {
+            setupPlayer()
+            MLSPlayerView.updateControllerVisibility(true)
+        }
+
+        onView(withId(R.id.controller_topRightContainer))
+            .check(
+                matches(
+                    withEffectiveVisibility(Visibility.VISIBLE)
+                )
+            )
+    }
+
+    @Test
+    fun whenControllerIsGone_topContainerShouldBeGone() {
+        UiThreadStatement.runOnUiThread {
+            setupPlayer()
+            MLSPlayerView.updateControllerVisibility(true)
+
+            MLSPlayerView.playerView.showController()
+            MLSPlayerView.playerView.hideController()
+        }
+
+        onView(withId(R.id.controller_topRightContainer))
+            .check(
+                matches(withEffectiveVisibility(Visibility.GONE))
+            )
+    }
+
+    @Test
+    fun givenViewToAddToTopRightContainer_shouldAddIt() {
+        var id = 0
+        UiThreadStatement.runOnUiThread {
+            setupPlayer()
+            MLSPlayerView.updateControllerVisibility(true)
+            val button = Button(MLSPlayerView.context)
+            button.text = "button"
+            button.id = View.generateViewId()
+            id = button.id
+
+
+            MLSPlayerView.addToTopRightContainer(button)
+        }
+
+        onView(withId(id)).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun givenViewToAddFromTopRightContainer_shouldRemoveIt() {
+        var id = 0
+        UiThreadStatement.runOnUiThread {
+            setupPlayer()
+            MLSPlayerView.updateControllerVisibility(true)
+            val button = Button(MLSPlayerView.context)
+            button.text = "button"
+            button.id = View.generateViewId()
+            id = button.id
+            MLSPlayerView.addToTopRightContainer(button)
+
+
+            MLSPlayerView.removeFromTopRightContainer(button)
+        }
+
+        onView(withId(id)).check(doesNotExist())
+    }
+
+    @Test
+    fun givenViewToAddToTopLeftContainer_shouldAddIt() {
+        var id = 0
+        UiThreadStatement.runOnUiThread {
+            setupPlayer()
+            MLSPlayerView.updateControllerVisibility(true)
+            val button = Button(MLSPlayerView.context)
+            button.text = "button"
+            button.id = View.generateViewId()
+            id = button.id
+
+
+            MLSPlayerView.addToTopLeftContainer(button)
+        }
+
+        onView(withId(id)).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun givenViewToAddFromTopLeftContainer_shouldRemoveIt() {
+        var id = 0
+        UiThreadStatement.runOnUiThread {
+            setupPlayer()
+            MLSPlayerView.updateControllerVisibility(true)
+            val button = Button(MLSPlayerView.context)
+            button.text = "button"
+            button.id = View.generateViewId()
+            id = button.id
+            MLSPlayerView.addToTopLeftContainer(button)
+
+
+            MLSPlayerView.removeFromTopLeftContainer(button)
+        }
+
+        onView(withId(id)).check(doesNotExist())
     }
 
     fun forceClick(): ViewAction {
