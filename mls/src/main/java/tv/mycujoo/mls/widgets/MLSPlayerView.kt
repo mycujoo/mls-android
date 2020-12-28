@@ -97,7 +97,11 @@ class MLSPlayerView @JvmOverloads constructor(
 
         topContainer = findViewById(R.id.controller_topContainer)
         playerView.setControllerVisibilityListener { visibility ->
-            topContainer.visibility = visibility
+            if (visibility == View.GONE){
+                topContainer.visibility = visibility
+            } else {
+                topContainer.visibility = visibility
+            }
         }
 
 
@@ -109,6 +113,12 @@ class MLSPlayerView @JvmOverloads constructor(
         }
         findViewById<ImageButton>(R.id.controller_informationButton).setOnClickListener {
             showEventInfoForStartedEvents()
+        }
+        findViewById<FrameLayout>(R.id.informationButtonLayout).setOnClickListener {
+            showEventInformationForPreEvent()
+        }
+        findViewById<ImageButton>(R.id.informationButton).setOnClickListener {
+            showEventInformationForPreEvent()
         }
 
 
@@ -549,7 +559,7 @@ class MLSPlayerView @JvmOverloads constructor(
         eventDateTime = startTime
     }
 
-    override fun showEventInformationPreEventDialog() {
+    override fun showEventInformationForPreEvent() {
         post {
             playerView.hideController()
 
@@ -558,7 +568,7 @@ class MLSPlayerView @JvmOverloads constructor(
                     .inflate(R.layout.dialog_event_info_pre_event_layout, this, false)
             eventInfoDialogContainerLayout.addView(informationDialog)
 
-            if (eventPosterUrl != null) {
+            if (eventPosterUrl != null && eventPosterUrl!!.isNotEmpty()) {
                 informationDialog.eventInfoPreEventDialog_posterView.visibility = View.VISIBLE
                 informationDialog.eventInfoPreEventDialog_canvasView.visibility = View.GONE
 

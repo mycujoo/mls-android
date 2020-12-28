@@ -3,7 +3,6 @@ package tv.mycujoo.mls.widgets
 import android.content.Intent
 import android.os.Handler
 import android.view.View
-import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import androidx.test.core.app.ApplicationProvider
@@ -232,7 +231,7 @@ class MLSPlayerViewTest {
         MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        MLSPlayerView.showEventInformationPreEventDialog()
+        MLSPlayerView.showEventInformationForPreEvent()
 
 
         onView(withText("title_0")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
@@ -244,7 +243,7 @@ class MLSPlayerViewTest {
         MLSPlayerView.setPosterInfo("sample_url")
 
 
-        MLSPlayerView.showEventInformationPreEventDialog()
+        MLSPlayerView.showEventInformationForPreEvent()
 
 
         onView(withId(R.id.eventInfoPreEventDialog_posterView)).check(
@@ -264,7 +263,7 @@ class MLSPlayerViewTest {
         MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        MLSPlayerView.showEventInformationPreEventDialog()
+        MLSPlayerView.showEventInformationForPreEvent()
         onView(withText("title_0")).perform(click())
 
 
