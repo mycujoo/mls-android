@@ -30,5 +30,6 @@ interface IPlayerView {
     fun setCastButtonVisibility(showButton: Boolean)
 
     fun addToTopContainer(view: View)
+    fun removeFromTopContainer(view: View)
     fun updateControllerVisibility(isPlaying: Boolean)
 }

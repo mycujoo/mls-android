@@ -3,6 +3,7 @@ package tv.mycujoo.mls.widgets
 import android.content.Intent
 import android.os.Handler
 import android.view.View
+import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import androidx.test.core.app.ApplicationProvider
@@ -429,6 +430,42 @@ class MLSPlayerViewTest {
             )
     }
 
+    @Test
+    fun givenViewToAddToTopContainer_shouldAddIt() {
+        var id = 0
+        UiThreadStatement.runOnUiThread {
+            setupPlayer()
+            MLSPlayerView.updateControllerVisibility(true)
+            val button = Button(MLSPlayerView.context)
+            button.text = "button"
+            button.id = View.generateViewId()
+            id = button.id
+
+
+            MLSPlayerView.addToTopContainer(button)
+        }
+
+        onView(withId(id)).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun givenViewToAddFromTopContainer_shouldRemoveIt() {
+        var id = 0
+        UiThreadStatement.runOnUiThread {
+            setupPlayer()
+            MLSPlayerView.updateControllerVisibility(true)
+            val button = Button(MLSPlayerView.context)
+            button.text = "button"
+            button.id = View.generateViewId()
+            id = button.id
+            MLSPlayerView.addToTopContainer(button)
+
+
+            MLSPlayerView.removeFromTopContainer(button)
+        }
+
+        onView(withId(id)).check(doesNotExist())
+    }
 
     fun forceClick(): ViewAction {
         return object : ViewAction {

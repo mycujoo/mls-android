@@ -685,6 +685,12 @@ class MLSPlayerView @JvmOverloads constructor(
         topContainer.addView(view)
     }
 
+    override fun removeFromTopContainer(view: View) {
+        topContainer.children.any { it == view }.let {
+            topContainer.removeView(view)
+        }
+    }
+
     /**endregion */
 
     /**region Classes*/
