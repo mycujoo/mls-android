@@ -29,16 +29,11 @@ class AnnotationFactory(
             actions
                 .sortedWith(compareBy<Action> { it.offset }.thenByDescending { it.priority })
 
-        val list = ArrayList<Action>()
-        loop@ for (action in sortedTemp) {
-            if ((action is Action.DeleteAction).not()) {
-                break@loop
-            }
-            list.add(action)
-        }
+        val deleteActions = ArrayList<Action>()
+        deleteActions.addAll(sortedTemp.filterIsInstance<Action.DeleteAction>())
 
         sortedActions.clear()
-        sortedActions.addAll(sortedTemp.filter { actionObject -> list.none { actionObject.id == it.id } })
+        sortedActions.addAll(sortedTemp.filter { actionObject -> deleteActions.none { actionObject.id == it.id } })
     }
 
     override fun build(buildPoint: BuildPoint) {
