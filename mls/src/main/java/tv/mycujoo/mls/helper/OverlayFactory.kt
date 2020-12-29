@@ -45,12 +45,9 @@ class OverlayFactory : IOverlayFactory {
             val svg: SVG
             var rawString = showOverlayAction.svgData!!.svgString!!
             showOverlayAction.placeHolders.forEach { placeHolder ->
-                var value = variableTranslator.getValue(placeHolder)
-                if (value == null) {
-                    value = variableKeeper.getValue(placeHolder)
-                }
+                val value = variableKeeper.getValue(placeHolder)
                 rawString =
-                    rawString.replace(placeHolder, value.toString())
+                    rawString.replace(placeHolder, value)
             }
 
             svg = SVG.getFromString(rawString)
@@ -58,7 +55,7 @@ class OverlayFactory : IOverlayFactory {
             svg.setDocumentWidth("100%")
             svg.setDocumentHeight("100%")
             scaffoldView.setSVG(svg)
-            scaffoldView.setSVGSource(showOverlayAction.svgData!!.svgString!!)
+            scaffoldView.setSVGSource(showOverlayAction.svgData.svgString!!)
 
 
         } catch (e: Exception) {

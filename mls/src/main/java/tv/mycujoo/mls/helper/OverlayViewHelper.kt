@@ -748,33 +748,4 @@ class OverlayViewHelper(
 
 
     /**endregion */
-
-    /**region Variables*/
-    fun setVariable(variable: VariableEntity) {
-        variableTranslator.createVariableTripleIfNotExisted(variable.variable.name)
-        variableTranslator
-            .emitNewValue(variable.variable.name, variable.variable.printValue())
-    }
-
-    fun incrementVariable(incrementVariableEntity: IncrementVariableEntity) {
-        variableTranslator.getValue(incrementVariableEntity.name)
-            ?.let { currentValue ->
-                val newValue: Any
-                newValue = when (currentValue) {
-                    is Double -> {
-                        currentValue + (incrementVariableEntity.amount as Double)
-                    }
-                    is Long -> {
-                        currentValue + (incrementVariableEntity.amount as Long)
-                    }
-                    else -> {
-                        // should not happen
-                        ""
-                    }
-                }
-                variableTranslator
-                    .emitNewValue(incrementVariableEntity.name, newValue)
-            }
-    }
-    /**endregion */
 }
