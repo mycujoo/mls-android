@@ -13,6 +13,7 @@ import tv.mycujoo.mls.TestData.Companion.getSampleShowOverlayAction
 import tv.mycujoo.mls.manager.IVariableKeeper
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.matcher.ShowOverlayActionArgumentMatcher
+import tv.mycujoo.mls.matcher.TimerVariablesMapArgumentMatcher
 import tv.mycujoo.mls.matcher.TransitionSpecArgumentMatcher
 import tv.mycujoo.mls.matcher.VariablesMapArgumentMatcher
 import tv.mycujoo.mls.player.IPlayer
@@ -83,6 +84,46 @@ class AnnotationFactoryTest {
     /**endregion */
 
     /**region Handling Negative/-1L offset*/
+    @Test
+    fun `given CreateTimerAction with Negative offset, should act on it`() {
+        val action =
+            Action.CreateTimerAction("id_00", -123L, 123456L, "name", capValue = -1L)
+        annotationFactory.setActions(listOf(action))
+
+        val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true, isInterrupted = false)
+        annotationFactory.build(buildPoint)
+
+        verify(variableKeeper).notifyTimers(
+            argThat(
+                TimerVariablesMapArgumentMatcher(
+                    "name",
+                    "0:00"
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `given CreateTimerAction with -1L offset, should act on it`() {
+        val action =
+            Action.CreateTimerAction("id_00", -1L, 123456L, "name", capValue = -1L)
+        annotationFactory.setActions(listOf(action))
+
+        val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true, isInterrupted = false)
+        annotationFactory.build(buildPoint)
+
+        verify(variableKeeper).notifyTimers(
+            argThat(
+                TimerVariablesMapArgumentMatcher(
+                    "name",
+                    "0:00"
+                )
+            )
+        )
+    }
+    /**region Timer related actions*/
+
+    /**endregion */
 
     /**region Variable related actions*/
     @Test
