@@ -8,11 +8,13 @@ import org.mockito.MockitoAnnotations
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.TransitionSpec
+import tv.mycujoo.domain.entity.Variable
 import tv.mycujoo.mls.TestData.Companion.getSampleShowOverlayAction
 import tv.mycujoo.mls.manager.IVariableKeeper
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.matcher.ShowOverlayActionArgumentMatcher
 import tv.mycujoo.mls.matcher.TransitionSpecArgumentMatcher
+import tv.mycujoo.mls.matcher.VariablesMapArgumentMatcher
 import tv.mycujoo.mls.player.IPlayer
 import kotlin.test.assertTrue
 
@@ -81,16 +83,29 @@ class AnnotationFactoryTest {
     /**endregion */
 
     /**region Handling Negative/-1L offset*/
+
     @Test
-    fun `given MarkTimeLine with -1L offset, should not act on it`() {
+    fun `given CreateVariableAction with Negative offset, should act on it`() {
         val action =
-            Action.MarkTimelineAction("id_00", -1L, 123456L, 1000L, "Goal", "#ffffff")
+            Action.CreateVariableAction("id_00", -123L, 123456L, Variable.LongVariable("name", 0L))
         annotationFactory.setActions(listOf(action))
 
         val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true, isInterrupted = false)
         annotationFactory.build(buildPoint)
 
-        verify(annotationListener).setTimelineMarkers(eq(emptyList()))
+        verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name")))
+    }
+
+    @Test
+    fun `given CreateVariableAction with -1L offset, should act on it`() {
+        val action =
+            Action.CreateVariableAction("id_00", -1L, 123456L, Variable.LongVariable("name", 0L))
+        annotationFactory.setActions(listOf(action))
+
+        val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true, isInterrupted = false)
+        annotationFactory.build(buildPoint)
+
+        verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name")))
     }
 
     @Test
@@ -104,6 +119,20 @@ class AnnotationFactoryTest {
 
         verify(annotationListener).setTimelineMarkers(eq(emptyList()))
     }
+
+    @Test
+    fun `given MarkTimeLine with -1L offset, should not act on it`() {
+        val action =
+            Action.MarkTimelineAction("id_00", -1L, 123456L, 1000L, "Goal", "#ffffff")
+        annotationFactory.setActions(listOf(action))
+
+        val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true, isInterrupted = false)
+        annotationFactory.build(buildPoint)
+
+        verify(annotationListener).setTimelineMarkers(eq(emptyList()))
+    }
+
+
     /**endregion */
 
     /**region Regular play mode, Relative time system*/
