@@ -100,7 +100,7 @@ class DataMapper {
                                 }
                             }
                         }
-                        "variable_positions" -> {
+                        "variables" -> {
                             any?.let { variablePlaceHolders = it as List<String> }
                         }
 
