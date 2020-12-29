@@ -84,6 +84,8 @@ class AnnotationFactoryTest {
     /**endregion */
 
     /**region Handling Negative/-1L offset*/
+
+    /**region Timer related actions*/
     @Test
     fun `given CreateTimerAction with Negative offset, should act on it`() {
         val action =
@@ -121,7 +123,49 @@ class AnnotationFactoryTest {
             )
         )
     }
-    /**region Timer related actions*/
+
+    @Test
+    fun `given StartTimerAction with Negative offset, should act on it`() {
+        val createTimerAction =
+            Action.CreateTimerAction("id_00", -123L, 123456L, "name", capValue = -1L)
+        val startTimerAction =
+            Action.StartTimerAction("id_00", -123L, 123456L, "name")
+        annotationFactory.setActions(listOf(createTimerAction, startTimerAction))
+
+        val buildPoint = BuildPoint(1000L, -1L, player, isPlaying = true, isInterrupted = false)
+        annotationFactory.build(buildPoint)
+
+        verify(variableKeeper).notifyTimers(
+            argThat(
+                TimerVariablesMapArgumentMatcher(
+                    "name",
+                    "0:01"
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `given StartTimerAction with -1L offset, should act on it`() {
+        val createTimerAction =
+            Action.CreateTimerAction("id_00", -1L, 123456L, "name", capValue = -1L)
+        val startTimerAction =
+            Action.StartTimerAction("id_00", -1L, 123456L, "name")
+        annotationFactory.setActions(listOf(createTimerAction, startTimerAction))
+
+        val buildPoint = BuildPoint(1000L, -1L, player, isPlaying = true, isInterrupted = false)
+        annotationFactory.build(buildPoint)
+
+        verify(variableKeeper).notifyTimers(
+            argThat(
+                TimerVariablesMapArgumentMatcher(
+                    "name",
+                    "0:01"
+                )
+            )
+        )
+    }
+
 
     /**endregion */
 
