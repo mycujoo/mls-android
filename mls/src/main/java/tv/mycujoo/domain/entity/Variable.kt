@@ -8,6 +8,7 @@ sealed class Variable {
     abstract val name: String
     abstract fun printValue(): String
     abstract fun increment(amount: Any)
+    abstract fun copy(): Variable
 
     data class LongVariable(override val name: String, var value: Long) : Variable() {
         override fun printValue(): String {
@@ -27,6 +28,11 @@ sealed class Variable {
                 }
             }
         }
+
+        override fun copy(): LongVariable {
+            return LongVariable(name, value)
+        }
+
     }
 
     data class DoubleVariable(
@@ -64,6 +70,10 @@ sealed class Variable {
                 }
             }
         }
+
+        override fun copy(): DoubleVariable {
+            return DoubleVariable(name, value, doublePrecision)
+        }
     }
 
     data class StringVariable(override val name: String, var value: String) : Variable() {
@@ -81,6 +91,10 @@ sealed class Variable {
                 }
             }
         }
+
+        override fun copy(): Variable {
+            return StringVariable(name, value)
+        }
     }
 
     data class InvalidVariable(override val name: String = "") : Variable() {
@@ -90,6 +104,10 @@ sealed class Variable {
 
         override fun increment(amount: Any) {
             // do nothing
+        }
+
+        override fun copy(): InvalidVariable {
+            return InvalidVariable(name)
         }
     }
 

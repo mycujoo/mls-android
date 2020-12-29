@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.core
 
+import android.util.Log
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.helper.*
@@ -344,7 +345,7 @@ class AnnotationFactory(
         if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS > action.offset) {
             variableKeeper.createVariablePublisher(action.variable.name)
             varVariables[action.variable.name] =
-                VariableEntity(action.id, action.offset, action.variable)
+                VariableEntity(action.id, action.offset, action.variable.copy())
         }
     }
 
