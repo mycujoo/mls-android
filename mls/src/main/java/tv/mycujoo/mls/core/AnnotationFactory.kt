@@ -39,8 +39,8 @@ class AnnotationFactory(
     override fun build(buildPoint: BuildPoint) {
         val currentTimeInInDvrWindowDuration = TimeRangeHelper.isCurrentTimeInDvrWindowDuration(
             buildPoint.player.duration(),
-            buildPoint.player.dvrWindowSize()
-//            Long.MAX_VALUE // todo! This should be filled from Stream's dvr-window size value
+//            buildPoint.player.dvrWindowSize()
+            Long.MAX_VALUE // todo! This should be filled from Stream's dvr-window size value
         )
 
         if (currentTimeInInDvrWindowDuration) {
@@ -341,21 +341,11 @@ class AnnotationFactory(
         buildPoint: BuildPoint,
         varVariables: HashMap<String, VariableEntity>
     ) {
-        val act = VariableActionHelper.getVariableCurrentAct(
-            buildPoint.currentRelativePosition,
-            action
-        )
-        when (act) {
-            VariableAct.CREATE_VARIABLE -> {
-                variableKeeper.createVariablePublisher(action.variable.name)
-                varVariables[action.variable.name] =
-                    VariableEntity(action.id, action.offset, action.variable)
-
-            }
-            VariableAct.CLEAR -> {
-            }
+        if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS > action.offset) {
+            variableKeeper.createVariablePublisher(action.variable.name)
+            varVariables[action.variable.name] =
+                VariableEntity(action.id, action.offset, action.variable)
         }
-
     }
 
     private fun incrementVariable(
@@ -363,24 +353,13 @@ class AnnotationFactory(
         buildPoint: BuildPoint,
         varVariables: HashMap<String, VariableEntity>
     ) {
-        val act =
-            VariableActionHelper.getIncrementVariableCurrentAct(
-                buildPoint.currentRelativePosition,
-                action
-            )
-        when (act) {
-            IncrementVariableCurrentAct.INCREMENT -> {
-                varVariables[action.name]?.let { variableEntity ->
-                    variableEntity.variable.increment(action.amount)
-
-                }
-            }
-            IncrementVariableCurrentAct.DO_NOTHING -> {
-                // do nothing
+        if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS > action.offset) {
+            varVariables[action.name]?.let { variableEntity ->
+                variableEntity.variable.increment(action.amount)
             }
         }
-
     }
+
 
     /**endregion */
 }
