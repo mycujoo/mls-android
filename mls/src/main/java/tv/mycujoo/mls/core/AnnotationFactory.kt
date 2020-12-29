@@ -354,7 +354,7 @@ class AnnotationFactory(
             VariableAct.CREATE_VARIABLE -> {
                 variableKeeper.createVariablePublisher(action.variable.name)
                 varVariables[action.variable.name] =
-                    VariableEntity(act.name, action.offset, action.variable)
+                    VariableEntity(action.id, action.offset, action.variable)
 
             }
             VariableAct.CLEAR -> {
@@ -375,7 +375,7 @@ class AnnotationFactory(
             )
         when (act) {
             IncrementVariableCurrentAct.INCREMENT -> {
-                varVariables[act.name]?.let { variableEntity ->
+                varVariables[action.name]?.let { variableEntity ->
                     variableEntity.variable.increment(action.amount)
 
                 }

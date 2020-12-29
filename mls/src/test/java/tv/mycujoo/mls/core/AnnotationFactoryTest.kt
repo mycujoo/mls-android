@@ -84,6 +84,7 @@ class AnnotationFactoryTest {
 
     /**region Handling Negative/-1L offset*/
 
+    /**region Variable related actions*/
     @Test
     fun `given CreateVariableAction with Negative offset, should act on it`() {
         val action =
@@ -93,7 +94,7 @@ class AnnotationFactoryTest {
         val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true, isInterrupted = false)
         annotationFactory.build(buildPoint)
 
-        verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name")))
+        verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name", "0")))
     }
 
     @Test
@@ -105,9 +106,39 @@ class AnnotationFactoryTest {
         val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true, isInterrupted = false)
         annotationFactory.build(buildPoint)
 
-        verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name")))
+        verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name", "0")))
     }
 
+    @Test
+    fun `given IncrementVariableAction with Negative offset, should act on it`() {
+        val createVariableAction =
+            Action.CreateVariableAction("id_00", -123L, 123456L, Variable.LongVariable("name", 0L))
+        val incrementVariableAction =
+            Action.IncrementVariableAction("id_01", -123L, 123456L, "name", 2.toDouble())
+        annotationFactory.setActions(listOf(createVariableAction, incrementVariableAction))
+
+        val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true, isInterrupted = false)
+        annotationFactory.build(buildPoint)
+
+        verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name", "2")))
+    }
+
+    @Test
+    fun `given IncrementVariableAction with -1L offset, should act on it`() {
+        val createVariableAction =
+            Action.CreateVariableAction("id_00", -1L, 123456L, Variable.LongVariable("name", 0L))
+        val incrementVariableAction =
+            Action.IncrementVariableAction("id_01", -1L, 123456L, "name", 2.toDouble())
+        annotationFactory.setActions(listOf(createVariableAction, incrementVariableAction))
+
+        val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true, isInterrupted = false)
+        annotationFactory.build(buildPoint)
+
+        verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name", "2")))
+    }
+    /**endregion */
+
+    /**region MarkTimelineAction*/
     @Test
     fun `given MarkTimeLine with Negative offset, should not act on it`() {
         val action =
@@ -131,7 +162,7 @@ class AnnotationFactoryTest {
 
         verify(annotationListener).setTimelineMarkers(eq(emptyList()))
     }
-
+    /**endregion */
 
     /**endregion */
 
