@@ -16,6 +16,7 @@ import tv.mycujoo.mls.matcher.TransitionSpecArgumentMatcher
 import tv.mycujoo.mls.player.IPlayer
 import kotlin.test.assertTrue
 
+
 @OptIn(ExperimentalStdlibApi::class)
 class AnnotationFactoryTest {
 
@@ -51,6 +52,7 @@ class AnnotationFactoryTest {
             variableKeeper
         )
     }
+
     /**endregion */
 
     /**region Sorting*/
@@ -75,6 +77,32 @@ class AnnotationFactoryTest {
         assertTrue { annotationFactory.getCurrentActions()[1] is Action.StartTimerAction }
         assertTrue { annotationFactory.getCurrentActions()[2] is Action.PauseTimerAction }
         assertTrue { annotationFactory.getCurrentActions()[3] is Action.AdjustTimerAction }
+    }
+    /**endregion */
+
+    /**region Handling Negative/-1L offset*/
+    @Test
+    fun `given MarkTimeLine with -1L offset, should not act on it`() {
+        val action =
+            Action.MarkTimelineAction("id_00", -1L, 123456L, 1000L, "Goal", "#ffffff")
+        annotationFactory.setActions(listOf(action))
+
+        val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true, isInterrupted = false)
+        annotationFactory.build(buildPoint)
+
+        verify(annotationListener).setTimelineMarkers(eq(emptyList()))
+    }
+
+    @Test
+    fun `given MarkTimeLine with Negative offset, should not act on it`() {
+        val action =
+            Action.MarkTimelineAction("id_00", -123L, 123456L, 1000L, "Goal", "#ffffff")
+        annotationFactory.setActions(listOf(action))
+
+        val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true, isInterrupted = false)
+        annotationFactory.build(buildPoint)
+
+        verify(annotationListener).setTimelineMarkers(eq(emptyList()))
     }
     /**endregion */
 
@@ -451,7 +479,13 @@ class AnnotationFactoryTest {
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).removeLingeringOverlay(eq("id_01"), argThat(TransitionSpecArgumentMatcher(5000L)))
+        verify(annotationListener).removeLingeringOverlay(
+            eq("id_01"), argThat(
+                TransitionSpecArgumentMatcher(
+                    5000L
+                )
+            )
+        )
         verify(annotationListener, never()).addOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
     }

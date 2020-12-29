@@ -173,15 +173,17 @@ class AnnotationFactory(
                     }
                 }
                 is Action.MarkTimelineAction -> {
-                    timelineMarkers.add(
-                        TimelineMarkerEntity(
-                            action.id,
-                            action.offset,
-                            action.seekOffset,
-                            action.label,
-                            action.color
+                    if (shouldMarkTimeLine(buildPoint, action)) {
+                        timelineMarkers.add(
+                            TimelineMarkerEntity(
+                                action.id,
+                                action.offset,
+                                action.seekOffset,
+                                action.label,
+                                action.color
+                            )
                         )
-                    )
+                    }
                 }
                 is Action.DeleteAction,
                 is Action.InvalidAction -> {
@@ -194,6 +196,16 @@ class AnnotationFactory(
         variableKeeper.notifyVariables(varVariables)
 
         annotationListener.setTimelineMarkers(timelineMarkers)
+    }
+
+    private fun shouldMarkTimeLine(
+        buildPoint: BuildPoint,
+        action: Action.MarkTimelineAction
+    ): Boolean {
+        if (action.offset < 0L) {
+            return false
+        }
+        return true
     }
 
     private fun showOverlay(
