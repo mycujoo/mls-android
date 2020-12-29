@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.core
 
 import tv.mycujoo.domain.entity.*
+import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mls.helper.*
 import tv.mycujoo.mls.manager.IVariableKeeper
 import tv.mycujoo.mls.manager.TimerEntity
@@ -125,7 +126,7 @@ class AnnotationFactory(
                     hideOverlay(action, act)
                 }
                 is Action.ReshowOverlayAction -> {
-                    if (buildPoint.currentRelativePosition + 1000L >= action.offset) {
+                    if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS >= action.offset) {
                         list.firstOrNull { it is Action.ShowOverlayAction && it.customId == action.customId }
                             ?.let {
                                 showOverlay(
@@ -137,37 +138,37 @@ class AnnotationFactory(
                     }
                 }
                 is Action.CreateTimerAction -> {
-                    if (buildPoint.currentRelativePosition + 1000L >= action.offset) {
+                    if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS >= action.offset) {
                         createTimer(action, timerVariables)
                     }
                 }
                 is Action.StartTimerAction -> {
-                    if (buildPoint.currentRelativePosition + 1000L >= action.offset) {
+                    if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS >= action.offset) {
                         startTimer(action, timerVariables, buildPoint)
                     }
                 }
                 is Action.PauseTimerAction -> {
-                    if (buildPoint.currentRelativePosition + 1000L >= action.offset) {
+                    if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS >= action.offset) {
                         pauseTimer(action, timerVariables, buildPoint)
                     }
                 }
                 is Action.AdjustTimerAction -> {
-                    if (buildPoint.currentRelativePosition + 1000L >= action.offset) {
+                    if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS >= action.offset) {
                         adjustTimer(action, timerVariables, buildPoint)
                     }
                 }
                 is Action.SkipTimerAction -> {
-                    if (buildPoint.currentRelativePosition + 1000L >= action.offset) {
+                    if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS >= action.offset) {
                         skipTimer(action, timerVariables, buildPoint)
                     }
                 }
                 is Action.CreateVariableAction -> {
-                    if (buildPoint.currentRelativePosition + 1000L >= action.offset) {
+                    if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS >= action.offset) {
                         createVariable(action, buildPoint, varVariables)
                     }
                 }
                 is Action.IncrementVariableAction -> {
-                    if (buildPoint.currentRelativePosition + 1000L >= action.offset) {
+                    if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS >= action.offset) {
                         incrementVariable(action, buildPoint, varVariables)
                     }
                 }
