@@ -129,7 +129,7 @@ class AnnotationFactoryTest {
         val createTimerAction =
             Action.CreateTimerAction("id_00", -123L, 123456L, "name", capValue = -1L)
         val startTimerAction =
-            Action.StartTimerAction("id_00", -123L, 123456L, "name")
+            Action.StartTimerAction("id_01", -123L, 123456L, "name")
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction))
 
         val buildPoint = BuildPoint(1000L, -1L, player, isPlaying = true, isInterrupted = false)
@@ -150,7 +150,7 @@ class AnnotationFactoryTest {
         val createTimerAction =
             Action.CreateTimerAction("id_00", -1L, 123456L, "name", capValue = -1L)
         val startTimerAction =
-            Action.StartTimerAction("id_00", -1L, 123456L, "name")
+            Action.StartTimerAction("id_01", -1L, 123456L, "name")
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction))
 
         val buildPoint = BuildPoint(1000L, -1L, player, isPlaying = true, isInterrupted = false)
@@ -166,7 +166,51 @@ class AnnotationFactoryTest {
         )
     }
 
+    @Test
+    fun `given PauseTimerAction with Negative offset, should act on it`() {
+        val createTimerAction =
+            Action.CreateTimerAction("id_00", -2000L, 123456L, "name", capValue = -1L)
+        val startTimerAction =
+            Action.StartTimerAction("id_01", -2000L, 123456L, "name")
+        val pauseTimerAction =
+            Action.PauseTimerAction("id_01", -1000L, 123456L, "name")
+        annotationFactory.setActions(listOf(createTimerAction, startTimerAction, pauseTimerAction))
 
+        val buildPoint = BuildPoint(2000L, -1L, player, isPlaying = true, isInterrupted = false)
+        annotationFactory.build(buildPoint)
+
+        verify(variableKeeper).notifyTimers(
+            argThat(
+                TimerVariablesMapArgumentMatcher(
+                    "name",
+                    "0:01"
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `given PauseTimerAction with -1L offset, should act on it`() {
+        val createTimerAction =
+            Action.CreateTimerAction("id_00", -2000L, 123456L, "name", capValue = -1L)
+        val startTimerAction =
+            Action.StartTimerAction("id_01", -2000L, 123456L, "name")
+        val pauseTimerAction =
+            Action.PauseTimerAction("id_01", -1L, 123456L, "name")
+        annotationFactory.setActions(listOf(createTimerAction, startTimerAction, pauseTimerAction))
+
+        val buildPoint = BuildPoint(2000L, -1L, player, isPlaying = true, isInterrupted = false)
+        annotationFactory.build(buildPoint)
+
+        verify(variableKeeper).notifyTimers(
+            argThat(
+                TimerVariablesMapArgumentMatcher(
+                    "name",
+                    "0:01"
+                )
+            )
+        )
+    }
     /**endregion */
 
     /**region Variable related actions*/

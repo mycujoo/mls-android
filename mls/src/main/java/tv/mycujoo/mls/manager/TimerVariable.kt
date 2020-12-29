@@ -97,9 +97,6 @@ class TimerVariable(
                 is TimerEntity.SkipTimer -> {
                     skipTimer = it
                 }
-
-                else -> {
-                }
             }
         }
         when (direction) {
