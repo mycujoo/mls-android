@@ -1,25 +1,37 @@
 package tv.mycujoo.mls.manager
 
 sealed class TimerEntity {
+    abstract val name: String
+    abstract val offset: Long
+    abstract val priority: Int
+
     data class StartTimer(
-        val name: String,
-        val offset: Long
-    ) : TimerEntity()
+        override val name: String,
+        override val offset: Long
+    ) : TimerEntity() {
+        override val priority = 10
+    }
 
     data class PauseTimer(
-        val name: String,
-        val offset: Long
-    ) : TimerEntity()
+        override val name: String,
+        override val offset: Long
+    ) : TimerEntity() {
+        override val priority = 5
+    }
 
     data class AdjustTimer(
-        var name: String,
-        var offset: Long,
+        override var name: String,
+        override val offset: Long,
         val value: Long
-    ) : TimerEntity()
+    ) : TimerEntity() {
+        override val priority = 3
+    }
 
     data class SkipTimer(
-        var name: String,
-        var offset: Long,
+        override var name: String,
+        override val offset: Long,
         val value: Long
-    ) : TimerEntity()
+    ) : TimerEntity() {
+        override val priority = 2
+    }
 }
