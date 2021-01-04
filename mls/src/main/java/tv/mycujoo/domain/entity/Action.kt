@@ -1,7 +1,9 @@
 package tv.mycujoo.domain.entity
 
+import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerFormat
+import java.util.*
 
 sealed class Action {
     /**region Abstract fields*/
@@ -13,7 +15,13 @@ sealed class Action {
 
     /**region Abstract functions*/
     abstract fun updateOffset(newOffset: Long): Action
+
     /**endregion */
+
+    fun isTillNowOrInRange(currentTime: Long): Boolean {
+        return currentTime + C.ONE_SECOND_IN_MS > offset
+    }
+
 
     /**region Overlay related*/
     data class ShowOverlayAction(
@@ -26,7 +34,7 @@ sealed class Action {
         val introTransitionSpec: TransitionSpec? = null,
         val outroTransitionSpec: TransitionSpec? = null,
         val placeHolders: List<String> = emptyList(),
-        val customId: String? = null
+        val customId: String = UUID.randomUUID().toString()
     ) : Action() {
         override val priority: Int = 0
 
