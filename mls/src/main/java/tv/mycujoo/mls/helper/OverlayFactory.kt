@@ -21,7 +21,7 @@ class OverlayFactory : IOverlayFactory {
         val size = showOverlayAction.viewSpec!!.size!!
         val scaffoldView = ScaffoldView(size.first, size.second, context)
         scaffoldView.id = View.generateViewId()
-        scaffoldView.tag = showOverlayAction.customId ?: showOverlayAction.id
+        scaffoldView.tag = showOverlayAction.customId
 
         scaffoldView.setVariablePlaceHolder(showOverlayAction.placeHolders)
 
@@ -52,8 +52,6 @@ class OverlayFactory : IOverlayFactory {
 
             svg = SVG.getFromString(rawString)
 
-            svg.setDocumentWidth("100%")
-            svg.setDocumentHeight("100%")
             scaffoldView.setSVG(svg)
             scaffoldView.setSVGSource(showOverlayAction.svgData.svgString!!)
 
