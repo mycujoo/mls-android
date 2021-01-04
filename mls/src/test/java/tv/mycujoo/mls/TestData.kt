@@ -9,6 +9,28 @@ import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
 class TestData {
 
     companion object {
+        fun getSampleShowOverlayActionN(
+            offset: Long,
+            customId : String = "cid_1001"
+        ): Action.ShowOverlayAction {
+            val viewSpec = ViewSpec(null, null)
+            val introTransitionSpec =
+                TransitionSpec(offset, AnimationType.NONE, 0L)
+
+            return Action.ShowOverlayAction(
+                id = "id_1001",
+                offset = offset,
+                absoluteTime = -1L,
+                svgData = null,
+                duration = 0L,
+                viewSpec = viewSpec,
+                introTransitionSpec = introTransitionSpec,
+                outroTransitionSpec = null,
+                placeHolders = emptyList(),
+                customId = customId
+            )
+        }
+
         fun getSampleShowOverlayAction(
             offset: Long,
             absoluteTime: Long
@@ -86,6 +108,23 @@ class TestData {
                 absoluteTime = -1L,
                 outroTransitionSpec = outroTransitionSpec,
                 customId = "id_1001"
+            )
+        }
+
+        fun getSampleHideOverlayAction(
+            offset: Long,
+            customId : String = "cid_1001"
+        ): Action.HideOverlayAction {
+
+            val outroTransitionSpec =
+                TransitionSpec(offset, AnimationType.NONE, 0L)
+
+            return Action.HideOverlayAction(
+                id = "id_1001",
+                offset = offset,
+                absoluteTime = -1L,
+                outroTransitionSpec = outroTransitionSpec,
+                customId = customId
             )
         }
 

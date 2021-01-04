@@ -2,59 +2,78 @@ package tv.mycujoo.domain.entity
 
 import tv.mycujoo.mls.enum.C
 
-class ActionActor() {
+class ActionActor {
     /**
-     * 1/ Only actions which are until now or within range should be provided to this method.
-     * Actions which belong to future (+1000ms and more) should NOT be provided.
-     * Use untilNowOrInRange method on Action to filter for this criteria.
-     *
-     * 2/ Actions should be provided sorted based on their offset
+     * Actions should be provided sorted based on their offset
      */
     fun act(
         now: Long,
-        showMap: MutableMap<String, Action.ShowOverlayAction>,
-        hideMap: MutableMap<String, Action.HideOverlayAction>
+        showOverlayActions: ArrayList<Action.ShowOverlayAction>,
+        hideOverlayActions: ArrayList<Action.HideOverlayAction>
     ): List<Pair<ActionAct, Action>> {
-        val list = arrayListOf<Pair<ActionAct, Action>>()
-        showMap.forEach { entry ->
-            if (hideMap.any { it.key == entry.key && it.value.customId == entry.value.customId }) {
-                val hideOverlayAction = hideMap.remove(entry.key)!!
-                if (hideOverlayAction.offset >= entry.value.offset) {
-                    list.add(Pair(ActionAct.REMOVE, hideOverlayAction))
-                } else {
-                    list.add(Pair(ActionAct.INTRO, entry.value))
-                }
-                return@forEach
+        val showMap = mutableMapOf<String, Action.ShowOverlayAction>()
+        val hideMap = mutableMapOf<String, Action.HideOverlayAction>()
+
+        val filteredShowOverlayActions: ArrayList<Action.ShowOverlayAction> = arrayListOf()
+        val afterwardsShowOverlayActions: ArrayList<Action.ShowOverlayAction> = arrayListOf()
+
+        showOverlayActions.forEach {
+            if (it.isTillNowOrInRange(now)) {
+                filteredShowOverlayActions.add(it)
+            } else {
+                afterwardsShowOverlayActions.add(it)
             }
-            list.add(Pair(ActionAct.INTRO, entry.value))
         }
-        hideMap.forEach { entry ->
-            list.add(Pair(ActionAct.REMOVE, entry.value))
+
+        filteredShowOverlayActions.sortBy { it.offset }
+
+        filteredShowOverlayActions.forEach { action ->
+            val relatedHideOverlayAction =
+                hideOverlayActions.find { it.customId == action.customId }
+            if (relatedHideOverlayAction != null) {
+                hideOverlayActions.remove(relatedHideOverlayAction)
+                if (relatedHideOverlayAction.offset >= action.offset) {
+                    showMap.remove(relatedHideOverlayAction.customId)
+                    hideMap[relatedHideOverlayAction.customId] = relatedHideOverlayAction
+                } else {
+                    hideMap.remove(action.customId)
+                    showMap[action.customId] = action
+                }
+            } else {
+                hideMap.remove(action.customId)
+                showMap[action.customId] = action
+            }
+        }
+        hideOverlayActions.forEach { action ->
+            hideMap[action.customId] = action
         }
 
         val returnList = arrayListOf<Pair<ActionAct, Action>>()
-
-        list.forEach { pair ->
-            when (val action = pair.second) {
-                is Action.ShowOverlayAction -> {
-                    val act =
-                        getCurrentAct(now, action)
-
-                    returnList.add(Pair(act, action))
-                }
-                is Action.HideOverlayAction -> {
-                    returnList.add(Pair(pair.first, action))
-                }
-                else -> {
-                    // should not happen
-                }
-            }
-
+        showMap.forEach {
+            val act = getCurrentAct(now, it.value)
+            returnList.add(Pair(act, it.value))
         }
 
+        hideMap.forEach {
+            val act = getCurrentAct(now, it.value)
+            returnList.add(Pair(act, it.value))
+        }
 
+        afterwardsShowOverlayActions.forEach { afterwardsShowOverlayAction ->
+            if (returnList.none { isPresentInReturningPairList(it, afterwardsShowOverlayAction) }
+            ) {
+                returnList.add(Pair(ActionAct.REMOVE, afterwardsShowOverlayAction))
+            }
+        }
         return returnList
     }
+
+    private fun isPresentInReturningPairList(
+        it: Pair<ActionAct, Action>,
+        afterwardsShowOverlayAction: Action.ShowOverlayAction
+    ) =
+        it.second is Action.ShowOverlayAction && (it.second as Action.ShowOverlayAction).customId == afterwardsShowOverlayAction.customId ||
+                it.second is Action.HideOverlayAction && (it.second as Action.HideOverlayAction).customId == afterwardsShowOverlayAction.customId
 
     private fun getCurrentAct(
         currentTime: Long,
@@ -109,7 +128,39 @@ class ActionActor() {
                     action.offset + action.duration
             }
 
-            return (currentTime > leftBound) && (currentTime < rightBound)
+            return (currentTime > leftBound) && (currentTime + C.ONE_SECOND_IN_MS < rightBound)
+        }
+
+        fun isLingeringIntro(
+            currentTime: Long,
+            action: Action.ShowOverlayAction
+        ): Boolean {
+
+            if (action.introTransitionSpec == null || action.introTransitionSpec.animationDuration <= 0L) {
+                return false
+            }
+
+            val leftBound = action.offset
+            val rightBound =
+                action.offset + action.introTransitionSpec.animationDuration
+
+            return (leftBound <= currentTime) && (currentTime < rightBound)
+        }
+
+        fun isLingeringOutro(
+            currentTime: Long,
+            action: Action.ShowOverlayAction
+        ): Boolean {
+
+            if (action.outroTransitionSpec == null || action.outroTransitionSpec.animationDuration == -1L) {
+                return false
+            }
+
+            val leftBound = action.outroTransitionSpec.offset
+            val rightBound =
+                action.outroTransitionSpec.offset + action.outroTransitionSpec.animationDuration
+
+            return (leftBound <= currentTime) && (currentTime < rightBound)
         }
 
         if (isIntro(currentTime, action)) {
@@ -121,6 +172,9 @@ class ActionActor() {
         if (isOutro(currentTime, action)) {
             return ActionAct.OUTRO
         }
+        if (isLingeringIntro(currentTime, action)) {
+            return ActionAct.LINGERING_INTRO
+        }
         if (isAforetime(currentTime, action)) {
             return ActionAct.REMOVE
         }
@@ -129,12 +183,36 @@ class ActionActor() {
 
     }
 
+    private fun getCurrentAct(
+        currentTime: Long,
+        action: Action.HideOverlayAction
+    ): ActionAct {
+
+        fun outroIsInCurrentTimeRange(
+            currentTime: Long,
+            hideOverlayAction: Action.HideOverlayAction
+        ): Boolean {
+            val outroOffset =
+                hideOverlayAction.offset
+
+            return (outroOffset >= currentTime) && (outroOffset < currentTime + C.ONE_SECOND_IN_MS)
+        }
+
+
+        if (outroIsInCurrentTimeRange(currentTime, action)) {
+            return ActionAct.OUTRO
+        }
+
+        return ActionAct.REMOVE
+    }
+
 
     enum class ActionAct {
 
         INTRO,
         MIDWAY,
         OUTRO,
+        LINGERING_INTRO,
         REMOVE,
         DO_NOTHING;
     }
