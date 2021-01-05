@@ -44,8 +44,8 @@ class AnnotationFactory(
     override fun build(buildPoint: BuildPoint) {
         val currentTimeInInDvrWindowDuration = TimeRangeHelper.isCurrentTimeInDvrWindowDuration(
             buildPoint.player.duration(),
-//            buildPoint.player.dvrWindowSize()
-            Long.MAX_VALUE // todo! This should be filled from Stream's dvr-window size value
+            buildPoint.player.dvrWindowSize()
+//            Long.MAX_VALUE // todo! This should be filled from Stream's dvr-window size value
         )
 
         if (currentTimeInInDvrWindowDuration) {
@@ -110,7 +110,7 @@ class AnnotationFactory(
                     if (isInDvrWindow.not() && isInGap) {
                         return@forEach
                     }
-                    showOverlayList.add(action)
+                    addShowOverlayActionIfEligible(action, showOverlayList)
                 }
                 is Action.HideOverlayAction -> {
                     if (action.isTillNowOrInRange(buildPoint.currentRelativePosition)) {
@@ -120,10 +120,10 @@ class AnnotationFactory(
                 is Action.ReshowOverlayAction -> {
                     if (action.isTillNowOrInRange(buildPoint.currentRelativePosition)) {
                         list.firstOrNull { it is Action.ShowOverlayAction && it.customId == action.customId }
-                            ?.let {
-                                val updateOffset =
-                                    it.updateOffset(action.offset)
-                                showOverlayList.add(updateOffset as Action.ShowOverlayAction)
+                            ?.let { relatedShowAction ->
+                                val updatedAction =
+                                    relatedShowAction.updateOffset(action.offset) as Action.ShowOverlayAction
+                                addShowOverlayActionIfEligible(updatedAction, showOverlayList)
                             }
                     }
                 }
@@ -272,6 +272,15 @@ class AnnotationFactory(
         variableKeeper.notifyVariables(varVariables)
 
         annotationListener.setTimelineMarkers(timelineMarkers)
+    }
+
+    private fun addShowOverlayActionIfEligible(
+        action: Action.ShowOverlayAction,
+        showOverlayList: ArrayList<Action.ShowOverlayAction>
+    ) {
+        if (action.isEligible()) {
+            showOverlayList.add(action)
+        }
     }
 
 

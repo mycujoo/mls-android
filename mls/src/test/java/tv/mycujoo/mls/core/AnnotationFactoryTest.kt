@@ -85,6 +85,97 @@ class AnnotationFactoryTest {
     /**endregion */
 
     /**region Handling Negative/-1L offset*/
+    @Test
+    fun `given ShowOverlayAction {eligible} with Negative offset, should act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+        whenever(player.isWithinValidSegment(any())).thenReturn(true)
+        val action = Action.ShowOverlayAction("id_01", -1000L, 1605609881000L, null)
+        annotationFactory.setActions(listOf(action))
+
+
+        val buildPoint = BuildPoint(2001L, -1L, player, isPlaying = true)
+        annotationFactory.build(buildPoint)
+
+
+        verify(annotationListener).addOrUpdateLingeringMidwayOverlay(
+            argThat(
+                ShowOverlayActionArgumentMatcher("id_01")
+            )
+        )
+    }
+
+    @Test
+    fun `given ShowOverlayAction {not eligible} with Negative offset, should not act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+        whenever(player.isWithinValidSegment(any())).thenReturn(true)
+        val action =
+            Action.ShowOverlayAction("id_01", -1000L, 1605609881000L, null, duration = 5000L)
+        annotationFactory.setActions(listOf(action))
+
+
+        val buildPoint = BuildPoint(2001L, -1L, player, isPlaying = true)
+        annotationFactory.build(buildPoint)
+
+
+        verify(annotationListener, never()).addOrUpdateLingeringMidwayOverlay(any())
+    }
+
+    @Test
+    fun `given ShowOverlayAction {eligible} with Negative offset from ReshowOverlayAction, should act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+        whenever(player.isWithinValidSegment(any())).thenReturn(true)
+        val action = Action.ShowOverlayAction(
+            "id_01",
+            -5000L,
+            1605609881000L,
+            null,
+            customId = "cid_00"
+        )
+        val reshowOverlayAction =
+            Action.ReshowOverlayAction("id_01", -1000L, 1605609881000L, "cid_00")
+        annotationFactory.setActions(listOf(action, reshowOverlayAction))
+
+
+        val buildPoint = BuildPoint(2001L, -1L, player, isPlaying = true)
+        annotationFactory.build(buildPoint)
+
+
+        verify(annotationListener, times(1)).addOrUpdateLingeringMidwayOverlay(argThat(
+            ShowOverlayActionArgumentMatcher("id_01")
+        ))
+    }
+
+
+    @Test
+    fun `given ShowOverlayAction {not eligible} with Negative offset from ReshowOverlayAction, should not act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+        whenever(player.isWithinValidSegment(any())).thenReturn(true)
+        val action = Action.ShowOverlayAction(
+            "id_01",
+            -1000L,
+            1605609881000L,
+            null,
+            duration = 5000L,
+            customId = "cid_00"
+        )
+        val reshowOverlayAction =
+            Action.ReshowOverlayAction("id_01", -1000L, 1605609881000L, "cid_00")
+        annotationFactory.setActions(listOf(action, reshowOverlayAction))
+
+
+        val buildPoint = BuildPoint(2001L, -1L, player, isPlaying = true)
+        annotationFactory.build(buildPoint)
+
+
+        verify(annotationListener, never()).addOrUpdateLingeringMidwayOverlay(any())
+    }
+    /**region Overlay related actions*/
+
+    /**endregion */
 
     /**region Timer related actions*/
     @Test

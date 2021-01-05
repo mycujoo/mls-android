@@ -2,6 +2,7 @@ package tv.mycujoo.domain.entity
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import kotlin.test.assertFalse
 
 class ActionTest {
 
@@ -167,5 +168,60 @@ class ActionTest {
         val invalidActionWithUpdatedTime = invalidAction.updateOffset(newOffset)
 
         assertEquals(newOffset, invalidActionWithUpdatedTime.offset)
+    }
+
+    /**region isEligible test*/
+    @Test
+    fun `ShowOverlayAction eligible test`() {
+        val showOverlayActionWithPositiveOffset =
+            Action.ShowOverlayAction(
+                "id_00",
+                0L,
+                0L,
+                duration = 5000L
+            )
+        val showOverlayActionWithNegativeOffsetWithDuration =
+            Action.ShowOverlayAction(
+                "id_00",
+                -1000L,
+                -1L,
+                duration = 5000L
+            )
+        val showOverlayActionWithNegativeOffsetWithoutDuration =
+            Action.ShowOverlayAction(
+                "id_00",
+                -1000L,
+                -1L
+            )
+
+        val outroTransitionSpec = TransitionSpec(0L, AnimationType.FADE_OUT, 1000L)
+        val showOverlayActionWithNegativeOffsetWithOutroSpec =
+            Action.ShowOverlayAction(
+                "id_00",
+                -1000L,
+                -1L,
+                outroTransitionSpec = outroTransitionSpec
+            )
+        val showOverlayActionWithNegativeOffsetWithoutOutroSpec =
+            Action.ShowOverlayAction(
+                "id_00",
+                -1000L,
+                -1L
+            )
+
+        assert(showOverlayActionWithPositiveOffset.isEligible())
+        assertFalse(showOverlayActionWithNegativeOffsetWithDuration.isEligible())
+        assert(showOverlayActionWithNegativeOffsetWithoutDuration.isEligible())
+        assertFalse(showOverlayActionWithNegativeOffsetWithOutroSpec.isEligible())
+        assert(showOverlayActionWithNegativeOffsetWithoutOutroSpec.isEligible())
+    }
+
+    @Test
+    fun `all actions except ShowOverlayAction eligible test`() {
+        val hideOverlayAction =
+            Action.HideOverlayAction("id_00", 0L, 55550000L, customId = "cid_00")
+
+        assert(hideOverlayAction.isEligible())
+
     }
 }

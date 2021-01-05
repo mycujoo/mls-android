@@ -15,6 +15,9 @@ sealed class Action {
 
     /**region Abstract functions*/
     abstract fun updateOffset(newOffset: Long): Action
+    open fun isEligible(): Boolean {
+        return true
+    }
 
     /**endregion */
 
@@ -67,6 +70,9 @@ sealed class Action {
             )
         }
 
+        override fun isEligible(): Boolean {
+            return !(offset < 0L && (duration != null || outroTransitionSpec != null))
+        }
     }
 
 
