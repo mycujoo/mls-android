@@ -6,6 +6,5 @@ data class BuildPoint(
     val currentRelativePosition: Long,
     val currentAbsolutePosition: Long,
     val player: IPlayer,
-    val isPlaying: Boolean,
-    val isInterrupted: Boolean
+    val isPlaying: Boolean
 )
