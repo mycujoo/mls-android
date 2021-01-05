@@ -199,8 +199,9 @@ class AnnotationFactory(
                         ActionActor.ActionAct.MIDWAY -> {
                             if (onScreenOverlayIds.none { it == showOverlayAction.customId }) {
                                 onScreenOverlayIds.add(showOverlayAction.customId)
-                                annotationListener.addMidwayOverlay(showOverlayAction)
+
                             }
+                            annotationListener.addOrUpdateLingeringMidwayOverlay(showOverlayAction)
                         }
                         ActionActor.ActionAct.OUTRO -> {
                             if (onScreenOverlayIds.any { it == showOverlayAction.customId }) {

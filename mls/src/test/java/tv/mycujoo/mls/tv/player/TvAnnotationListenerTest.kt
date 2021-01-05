@@ -130,11 +130,11 @@ class TvAnnotationListenerTest {
             .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
 
 
-        tvAnnotationListener.addMidwayOverlay(action)
+        tvAnnotationListener.addOrUpdateLingeringMidwayOverlay(action)
 
 
         Mockito.verify(overlayViewHelper)
-            .updateLingeringMidwayOverlay(tvOverlayContainer, action)
+            .addOrUpdateLingeringMidwayOverlay(tvOverlayContainer, action)
     }
 
 

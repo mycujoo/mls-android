@@ -647,7 +647,7 @@ class AnnotationFactoryTest {
 
         verify(annotationListener).addOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringIntroOverlay(any(), any(), any())
-        verify(annotationListener, never()).addMidwayOverlay(any())
+        verify(annotationListener, never()).addOrUpdateLingeringMidwayOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
     }
 
@@ -664,7 +664,7 @@ class AnnotationFactoryTest {
 
         verify(annotationListener, never()).addOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringIntroOverlay(any(), any(), any())
-        verify(annotationListener, never()).addMidwayOverlay(any())
+        verify(annotationListener, never()).addOrUpdateLingeringMidwayOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
     }
     /**endregion */
@@ -741,7 +741,7 @@ class AnnotationFactoryTest {
 
         verify(annotationListener).addOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringIntroOverlay(any(), any(), any())
-        verify(annotationListener, never()).addMidwayOverlay(any())
+        verify(annotationListener, never()).addOrUpdateLingeringMidwayOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
     }
 
@@ -774,7 +774,7 @@ class AnnotationFactoryTest {
             any()
         )
         verify(annotationListener, never()).addOverlay(any())
-        verify(annotationListener, never()).addMidwayOverlay(any())
+        verify(annotationListener, never()).addOrUpdateLingeringMidwayOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
         verify(annotationListener, never()).removeLingeringOverlay(any(), any())
     }
@@ -790,7 +790,7 @@ class AnnotationFactoryTest {
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).addMidwayOverlay(
+        verify(annotationListener).addOrUpdateLingeringMidwayOverlay(
             argThat(ShowOverlayActionArgumentMatcher("id_01"))
         )
         verify(annotationListener, never()).addOverlay(any())
@@ -875,7 +875,7 @@ class AnnotationFactoryTest {
             any()
         )
         verify(annotationListener, never()).addOverlay(any())
-        verify(annotationListener, never()).addMidwayOverlay(any())
+        verify(annotationListener, never()).addOrUpdateLingeringMidwayOverlay(any())
         verify(annotationListener, never()).addOrUpdateLingeringOutroOverlay(any(), any(), any())
         verify(annotationListener, never()).removeLingeringOverlay(any(), any())
     }
@@ -900,7 +900,7 @@ class AnnotationFactoryTest {
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener).addMidwayOverlay(
+        verify(annotationListener).addOrUpdateLingeringMidwayOverlay(
             argThat(ShowOverlayActionArgumentMatcher("id_01"))
         )
         verify(annotationListener, never()).addOverlay(any())

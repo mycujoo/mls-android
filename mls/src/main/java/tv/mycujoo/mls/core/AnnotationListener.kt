@@ -59,7 +59,7 @@ class AnnotationListener(
 
     override fun addOrUpdateLingeringMidwayOverlay(showOverlayAction: Action.ShowOverlayAction) {
         downloaderClient.download(showOverlayAction) { downloadedShowOverlayAction ->
-            overlayViewHelper.updateLingeringMidwayOverlay(
+            overlayViewHelper.addOrUpdateLingeringMidwayOverlay(
                 MLSPlayerView.overlayHost,
                 downloadedShowOverlayAction
             )

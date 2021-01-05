@@ -60,9 +60,9 @@ class TvAnnotationListener(
         }
     }
 
-    override fun addMidwayOverlay(showOverlayAction: Action.ShowOverlayAction) {
+    override fun addOrUpdateLingeringMidwayOverlay(showOverlayAction: Action.ShowOverlayAction) {
         downloaderClient.download(showOverlayAction) { downloadedShowOverlayAction ->
-            overlayViewHelper.updateLingeringMidwayOverlay(
+            overlayViewHelper.addOrUpdateLingeringMidwayOverlay(
                 overlayContainer,
                 downloadedShowOverlayAction
             )

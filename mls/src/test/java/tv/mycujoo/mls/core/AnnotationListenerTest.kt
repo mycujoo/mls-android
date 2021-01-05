@@ -194,7 +194,7 @@ class AnnotationListenerTest {
         annotationListener.addOrUpdateLingeringMidwayOverlay(action)
 
 
-        verify(overlayViewHelper).updateLingeringMidwayOverlay(overlayContainer, action)
+        verify(overlayViewHelper).addOrUpdateLingeringMidwayOverlay(overlayContainer, action)
     }
 
     @Test
@@ -207,7 +207,7 @@ class AnnotationListenerTest {
         annotationListener.addOrUpdateLingeringMidwayOverlay(action)
 
 
-        verify(overlayViewHelper).updateLingeringMidwayOverlay(overlayContainer, action)
+        verify(overlayViewHelper).addOrUpdateLingeringMidwayOverlay(overlayContainer, action)
     }
     /**endregion */
 

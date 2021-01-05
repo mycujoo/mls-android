@@ -530,32 +530,46 @@ class OverlayViewHelper(
 
     }
 
-    fun updateLingeringMidwayOverlay(
+    fun addOrUpdateLingeringMidwayOverlay(
         overlayHost: ConstraintLayout,
         showOverlayAction: Action.ShowOverlayAction
     ) {
-        val scaffoldView = viewHandler.getOverlayView(showOverlayAction.id) ?: return
-
-        overlayHost.post {
-            val constraintSet = ConstraintSet()
-            constraintSet.clone(overlayHost)
-            val layoutParams = ConstraintLayout.LayoutParams(
-                ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                ConstraintLayout.LayoutParams.WRAP_CONTENT
-            )
-
-            val positionGuide = showOverlayAction.viewSpec!!.positionGuide!!
-
-            applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
-
-
-            scaffoldView.layoutParams = layoutParams
-
-
-            scaffoldView.visibility = View.VISIBLE
-            constraintSet.applyTo(overlayHost)
+        if (viewHandler.overlayIsAttached(showOverlayAction.id)) {
+            val scaffoldView = viewHandler.getOverlayView(showOverlayAction.id) ?: return
+            overlayHost.post {
+                updateLingeringMidway(overlayHost, showOverlayAction, scaffoldView)
+            }
+        } else {
+            overlayHost.post {
+                addViewWithNoAnimation(
+                    overlayHost.context, overlayHost, showOverlayAction
+                )
+            }
         }
+    }
 
+    private fun updateLingeringMidway(
+        overlayHost: ConstraintLayout,
+        showOverlayAction: Action.ShowOverlayAction,
+        scaffoldView: ScaffoldView
+    ) {
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(overlayHost)
+        val layoutParams = ConstraintLayout.LayoutParams(
+            ConstraintLayout.LayoutParams.WRAP_CONTENT,
+            ConstraintLayout.LayoutParams.WRAP_CONTENT
+        )
+
+        val positionGuide = showOverlayAction.viewSpec!!.positionGuide!!
+
+        applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
+
+
+        scaffoldView.layoutParams = layoutParams
+
+
+        scaffoldView.visibility = View.VISIBLE
+        constraintSet.applyTo(overlayHost)
     }
 
 
