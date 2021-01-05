@@ -104,7 +104,7 @@ class GetActionsFromJSONUseCase {
                             "width": 25.0
                         }, 
                         "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg",
-                         "variable_positions": ["${"$"}awayScore", "${"$"}homeScore", "${"$"}scoreboardTimer"]
+                         "variables": ["${"$"}awayScore", "${"$"}homeScore", "${"$"}scoreboardTimer"]
                     }, 
                     "id": "54afag35yag", 
                     "type": "show_overlay",
@@ -122,7 +122,7 @@ class GetActionsFromJSONUseCase {
                              "width": 50.0
                          }, 
                          "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg",
-                         "variable_positions": ["${"$"}awayScore", "${"$"}homeScore", "${"$"}scoreboardTimer"]
+                         "variables": ["${"$"}awayScore", "${"$"}homeScore", "${"$"}scoreboardTimer"]
                      }, 
                      "id": "54afag35yag2", 
                      "type": "show_overlay",
@@ -145,7 +145,7 @@ class GetActionsFromJSONUseCase {
                              "width": 25.0
                          }, 
                          "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg",
-                         "variable_positions": ["${"$"}awayScore","${"$"}homeScore", "${"$"}scoreboardTimer"]
+                         "variables": ["${"$"}awayScore","${"$"}homeScore", "${"$"}scoreboardTimer"]
                      }, 
                      "id": "54afag35yag3", 
                      "type": "show_overlay",
@@ -168,7 +168,7 @@ class GetActionsFromJSONUseCase {
                              "width": 25.0
                          }, 
                          "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg", 
-                         "variable_positions": ["${"$"}awayScore", "${"$"}homeScore", "${"$"}scoreboardTimer"]
+                         "variables": ["${"$"}awayScore", "${"$"}homeScore", "${"$"}scoreboardTimer"]
                      }, 
                      "id": "54afag35yagp4", 
                      "type": "show_overlay",

@@ -21,7 +21,7 @@ class ActionSourceDataTest {
             put("position", samplePosition())
             put("animatein_type", "fade_in")
             put("animatein_duration", 3000L)
-            put("variable_positions", listOf("v1", "v2"))
+            put("variables", listOf("v1", "v2"))
         }
         val actionSourceData =
             ActionSourceData(id, ActionType.SHOW_OVERLAY.type, offset, absoluteTime, data)
@@ -45,7 +45,7 @@ class ActionSourceDataTest {
             data["animatein_duration"],
             showOverlayAction.introTransitionSpec?.animationDuration
         )
-        assertEquals(data["variable_positions"], showOverlayAction.placeHolders)
+        assertEquals(data["variables"], showOverlayAction.placeHolders)
     }
 
     @Test
@@ -59,7 +59,7 @@ class ActionSourceDataTest {
             put("duration", 50000L)
             put("animatein_type", "fade_in")
             put("animatein_duration", 3000L)
-            put("variable_positions", listOf("v1", "v2"))
+            put("variables", listOf("v1", "v2"))
         }
         val actionSourceData =
             ActionSourceData(id, ActionType.SHOW_OVERLAY.type, offset, absoluteTime, data)
@@ -83,7 +83,7 @@ class ActionSourceDataTest {
             // position is NOT provided
             put("animatein_type", "fade_in")
             put("animatein_duration", 3000L)
-            put("variable_positions", listOf("v1", "v2"))
+            put("variables", listOf("v1", "v2"))
         }
         val actionSourceData =
             ActionSourceData(id, ActionType.SHOW_OVERLAY.type, offset, absoluteTime, data)
