@@ -38,8 +38,10 @@ sealed class Action {
     ) : Action() {
         override val priority: Int = 0
 
-
         override fun updateOffset(newOffset: Long): ShowOverlayAction {
+            if (offset == -1L){
+                return this
+            }
             var newIntroTransitionSpec: TransitionSpec? = null
             var newOutroTransitionSpec: TransitionSpec? = null
 
@@ -266,6 +268,9 @@ sealed class Action {
     ) : Action() {
         override val priority: Int = 0
         override fun updateOffset(newOffset: Long): MarkTimelineAction {
+            if (offset == -1L){
+                return this
+            }
             return MarkTimelineAction(
                 id = id,
                 offset = newOffset,
@@ -303,6 +308,9 @@ sealed class Action {
     ) : Action() {
         override val priority: Int = 0
         override fun updateOffset(newOffset: Long): InvalidAction {
+            if (offset == -1L){
+                return this
+            }
             return InvalidAction(id = id, offset = newOffset, absoluteTime = absoluteTime)
         }
     }

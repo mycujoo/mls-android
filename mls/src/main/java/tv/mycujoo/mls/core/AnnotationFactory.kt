@@ -128,42 +128,42 @@ class AnnotationFactory(
                     }
                 }
                 is Action.CreateTimerAction -> {
-                    if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS >= action.offset) {
+                    if (action.isTillNowOrInRange(buildPoint.currentRelativePosition)) {
                         createTimer(action, timerVariables)
                     }
                 }
                 is Action.StartTimerAction -> {
-                    if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS >= action.offset) {
+                    if (action.isTillNowOrInRange(buildPoint.currentRelativePosition)) {
                         startTimer(action, timerVariables, buildPoint)
                     }
                 }
                 is Action.PauseTimerAction -> {
-                    if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS >= action.offset) {
+                    if (action.isTillNowOrInRange(buildPoint.currentRelativePosition)) {
                         pauseTimer(action, timerVariables, buildPoint)
                     }
                 }
                 is Action.AdjustTimerAction -> {
-                    if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS >= action.offset) {
+                    if (action.isTillNowOrInRange(buildPoint.currentRelativePosition)) {
                         adjustTimer(action, timerVariables, buildPoint)
                     }
                 }
                 is Action.SkipTimerAction -> {
-                    if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS >= action.offset) {
+                    if (action.isTillNowOrInRange(buildPoint.currentRelativePosition)) {
                         skipTimer(action, timerVariables, buildPoint)
                     }
                 }
                 is Action.CreateVariableAction -> {
-                    if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS >= action.offset) {
+                    if (action.isTillNowOrInRange(buildPoint.currentRelativePosition)) {
                         createVariable(action, buildPoint, varVariables)
                     }
                 }
                 is Action.IncrementVariableAction -> {
-                    if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS >= action.offset) {
+                    if (action.isTillNowOrInRange(buildPoint.currentRelativePosition)) {
                         incrementVariable(action, buildPoint, varVariables)
                     }
                 }
                 is Action.MarkTimelineAction -> {
-                    if (shouldMarkTimeLine(buildPoint, action)) {
+                    if (shouldMarkTimeLine(action)) {
                         timelineMarkers.add(
                             TimelineMarkerEntity(
                                 action.id,
@@ -276,7 +276,6 @@ class AnnotationFactory(
 
 
     private fun shouldMarkTimeLine(
-        buildPoint: BuildPoint,
         action: Action.MarkTimelineAction
     ): Boolean {
         if (action.offset < 0L) {
