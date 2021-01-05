@@ -5,24 +5,18 @@ import kotlin.test.assertEquals
 
 class TimeUtilsTest {
     @Test
-    fun `convert relative time to absolute time`() {
-        val actionAbsTime = 1605609890000L
+    fun `convert action absolute time to relative time based on window-start-time`() {
+        val actionInWindowAbsTime = 1605609890000L // 8000L in window
+        val actionOufOfWindowAbsTime = 1605609880000L // -2000L out of window
         val windowAbsoluteStartTime = 1605609882000L
 
         assertEquals(
             8000L,
-            TimeUtils.convertRelativeTimeToAbsolute(windowAbsoluteStartTime, actionAbsTime)
+            TimeUtils.calculateOffset(windowAbsoluteStartTime, actionInWindowAbsTime)
         )
-    }
-
-    @Test
-    fun `action before current window should return -1L`() {
-        val actionAbsTime = 1605609881000L
-        val windowAbsoluteStartTime = 1605609882000L
-
         assertEquals(
-            -1L,
-            TimeUtils.convertRelativeTimeToAbsolute(windowAbsoluteStartTime, actionAbsTime)
+            -2000L,
+            TimeUtils.calculateOffset(windowAbsoluteStartTime, actionOufOfWindowAbsTime)
         )
     }
 }

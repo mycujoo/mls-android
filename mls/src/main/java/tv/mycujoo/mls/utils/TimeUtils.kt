@@ -2,13 +2,11 @@ package tv.mycujoo.mls.utils
 
 class TimeUtils {
     companion object {
-        fun convertRelativeTimeToAbsolute(
+        fun calculateOffset(
             windowAbsoluteStartTime: Long,
             actionAbsTime: Long
         ): Long {
-            if (actionAbsTime >= windowAbsoluteStartTime) {
-                return actionAbsTime - windowAbsoluteStartTime
-            } else return -1L
+            return actionAbsTime - windowAbsoluteStartTime
         }
     }
 }

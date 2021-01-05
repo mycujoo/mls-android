@@ -62,7 +62,7 @@ class AnnotationFactory(
             adjustedActions.clear()
 
             sortedActions.forEach { action ->
-                val newOffset = TimeUtils.convertRelativeTimeToAbsolute(
+                val newOffset = TimeUtils.calculateOffset(
                     buildPoint.player.dvrWindowStartTime(),
                     action.absoluteTime
                 )
@@ -199,7 +199,6 @@ class AnnotationFactory(
                         ActionActor.ActionAct.MIDWAY -> {
                             if (onScreenOverlayIds.none { it == showOverlayAction.customId }) {
                                 onScreenOverlayIds.add(showOverlayAction.customId)
-
                             }
                             annotationListener.addOrUpdateLingeringMidwayOverlay(showOverlayAction)
                         }
