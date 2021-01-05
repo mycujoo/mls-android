@@ -23,8 +23,8 @@ class AnnotationListener(
         }
     }
 
-    override fun removeOverlay(actionId: String, outroTransitionSpec: TransitionSpec?) {
-        overlayViewHelper.removeView(MLSPlayerView.overlayHost, actionId, outroTransitionSpec)
+    override fun removeOverlay(customId: String, outroTransitionSpec: TransitionSpec?) {
+        overlayViewHelper.removeView(MLSPlayerView.overlayHost, customId, outroTransitionSpec)
     }
 
     override fun addOrUpdateLingeringIntroOverlay(
@@ -66,8 +66,8 @@ class AnnotationListener(
         }
     }
 
-    override fun removeLingeringOverlay(actionId: String, outroTransitionSpec: TransitionSpec?) {
-        overlayViewHelper.removeView(MLSPlayerView.overlayHost, actionId, outroTransitionSpec)
+    override fun removeLingeringOverlay(customId: String, outroTransitionSpec: TransitionSpec?) {
+        overlayViewHelper.removeView(MLSPlayerView.overlayHost, customId, outroTransitionSpec)
     }
 
     override fun setTimelineMarkers(timelineMarkerEntityList: List<TimelineMarkerEntity>) {

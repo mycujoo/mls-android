@@ -230,13 +230,13 @@ class OverlayViewHelper(
     /**region Remove view*/
     fun removeView(
         overlayHost: ConstraintLayout,
-        actionId: String,
+        customId: String,
         outroTransitionSpec: TransitionSpec?
     ) {
         if (outroTransitionSpec == null || outroTransitionSpec.animationType == AnimationType.NONE) {
-            removeViewWithNoAnimation(overlayHost, actionId)
+            removeViewWithNoAnimation(overlayHost, customId)
         } else {
-            removeViewWithAnimation(overlayHost, actionId, outroTransitionSpec)
+            removeViewWithAnimation(overlayHost, customId, outroTransitionSpec)
         }
     }
 
@@ -244,15 +244,15 @@ class OverlayViewHelper(
         overlayHost: ConstraintLayout,
         hideOverlayActionEntity: HideOverlayActionEntity
     ) {
-        removeViewWithNoAnimation(overlayHost, hideOverlayActionEntity.id)
+        removeViewWithNoAnimation(overlayHost, hideOverlayActionEntity.customId)
     }
 
-    private fun removeViewWithNoAnimation(overlayHost: ConstraintLayout, overlayId: String) {
-        overlayHost.children.filter { it.tag == overlayId }
+    private fun removeViewWithNoAnimation(overlayHost: ConstraintLayout, overlayTag: String) {
+        overlayHost.children.filter { it.tag == overlayTag }
             .forEach {
                 viewHandler.detachOverlayView(it as ScaffoldView)
             }
-        viewHandler.removeAnimation(overlayId)
+        viewHandler.removeAnimation(overlayTag)
     }
     /**endregion */
 
@@ -419,15 +419,15 @@ class OverlayViewHelper(
         viewHandler.incrementIdlingResource()
 
         overlayHost.post {
-            overlayHost.children.firstOrNull { it.tag == showOverlayAction.id }?.let { view ->
+            overlayHost.children.firstOrNull { it.tag == showOverlayAction.customId }?.let { view ->
 
-                viewHandler.getAnimationWithTag(showOverlayAction.id)?.let {
+                viewHandler.getAnimationWithTag(showOverlayAction.customId)?.let {
                     it.cancel()
                 }
-                viewHandler.removeAnimation(showOverlayAction.id)
+                viewHandler.removeAnimation(showOverlayAction.customId)
 
                 val scaffoldView = viewHandler.getOverlayView(
-                    showOverlayAction.id
+                    showOverlayAction.customId
                 )
                 scaffoldView?.let {
                     viewHandler.detachOverlayView(
@@ -508,13 +508,13 @@ class OverlayViewHelper(
         animationPosition: Long,
         isPlaying: Boolean
     ) {
-        val scaffoldView = viewHandler.getOverlayView(showOverlayAction.id) ?: return
+        val scaffoldView = viewHandler.getOverlayView(showOverlayAction.customId) ?: return
 
         overlayHost.post {
-            viewHandler.getAnimationWithTag(showOverlayAction.id)?.let {
+            viewHandler.getAnimationWithTag(showOverlayAction.customId)?.let {
                 it.cancel()
             }
-            viewHandler.removeAnimation(showOverlayAction.id)
+            viewHandler.removeAnimation(showOverlayAction.customId)
 
             viewHandler.detachOverlayView(
                 scaffoldView
@@ -534,8 +534,8 @@ class OverlayViewHelper(
         overlayHost: ConstraintLayout,
         showOverlayAction: Action.ShowOverlayAction
     ) {
-        if (viewHandler.overlayIsAttached(showOverlayAction.id)) {
-            val scaffoldView = viewHandler.getOverlayView(showOverlayAction.id) ?: return
+        if (viewHandler.overlayIsAttached(showOverlayAction.customId)) {
+            val scaffoldView = viewHandler.getOverlayView(showOverlayAction.customId) ?: return
             overlayHost.post {
                 updateLingeringMidway(overlayHost, showOverlayAction, scaffoldView)
             }
@@ -582,7 +582,7 @@ class OverlayViewHelper(
         animationPosition: Long,
         isPlaying: Boolean
     ) {
-        if (viewHandler.overlayIsAttached(showOverlayAction.id)) {
+        if (viewHandler.overlayIsAttached(showOverlayAction.customId)) {
             updateLingeringIntroOverlay(
                 tvOverlayContainer,
                 showOverlayAction,
@@ -607,7 +607,7 @@ class OverlayViewHelper(
         animationPosition: Long,
         isPlaying: Boolean
     ) {
-        if (viewHandler.overlayIsAttached(showOverlayAction.id)) {
+        if (viewHandler.overlayIsAttached(showOverlayAction.customId)) {
             updateLingeringOutroOverlay(
                 tvOverlayContainer,
                 showOverlayAction,
