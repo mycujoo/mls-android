@@ -89,8 +89,10 @@ class AnnotationFactoryTest {
     /**region Timer related actions*/
     @Test
     fun `given CreateTimerAction with Negative offset, should act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
         val action =
-            Action.CreateTimerAction("id_00", -123L, 123456L, "name", capValue = -1L)
+            Action.CreateTimerAction("id_00", -2000L, 1605609880000L, "name", capValue = -1L)
         annotationFactory.setActions(listOf(action))
 
         val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true)
@@ -108,8 +110,10 @@ class AnnotationFactoryTest {
 
     @Test
     fun `given CreateTimerAction with -1L offset, should act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
         val action =
-            Action.CreateTimerAction("id_00", -1L, 123456L, "name", capValue = -1L)
+            Action.CreateTimerAction("id_00", -1L, 1605609881999L, "name", capValue = -1L)
         annotationFactory.setActions(listOf(action))
 
         val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true)
@@ -127,10 +131,12 @@ class AnnotationFactoryTest {
 
     @Test
     fun `given StartTimerAction with Negative offset, should act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
         val createTimerAction =
-            Action.CreateTimerAction("id_00", -123L, 123456L, "name", capValue = -1L)
+            Action.CreateTimerAction("id_00", -2000L, 1605609880000L, "name", capValue = -1L)
         val startTimerAction =
-            Action.StartTimerAction("id_01", -123L, 123456L, "name")
+            Action.StartTimerAction("id_01", -2000L, 1605609880000L, "name")
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction))
 
         val buildPoint = BuildPoint(1000L, -1L, player, isPlaying = true)
@@ -140,7 +146,7 @@ class AnnotationFactoryTest {
             argThat(
                 TimerVariablesMapArgumentMatcher(
                     "name",
-                    "0:01"
+                    "0:03"
                 )
             )
         )
@@ -148,10 +154,12 @@ class AnnotationFactoryTest {
 
     @Test
     fun `given StartTimerAction with -1L offset, should act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
         val createTimerAction =
-            Action.CreateTimerAction("id_00", -1L, 123456L, "name", capValue = -1L)
+            Action.CreateTimerAction("id_00", -1L, 1605609881999L, "name", capValue = -1L)
         val startTimerAction =
-            Action.StartTimerAction("id_01", -1L, 123456L, "name")
+            Action.StartTimerAction("id_01", -1L, 1605609881999L, "name")
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction))
 
         val buildPoint = BuildPoint(1000L, -1L, player, isPlaying = true)
@@ -169,12 +177,14 @@ class AnnotationFactoryTest {
 
     @Test
     fun `given PauseTimerAction with Negative offset, should act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
         val createTimerAction =
-            Action.CreateTimerAction("id_00", -2000L, 123456L, "name", capValue = -1L)
+            Action.CreateTimerAction("id_00", -2000L, 1605609880000L, "name", capValue = -1L)
         val startTimerAction =
-            Action.StartTimerAction("id_01", -2000L, 123456L, "name")
+            Action.StartTimerAction("id_01", -2000L, 1605609880000L, "name")
         val pauseTimerAction =
-            Action.PauseTimerAction("id_01", -1000L, 123456L, "name")
+            Action.PauseTimerAction("id_01", -1000L, 1605609881000L, "name")
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction, pauseTimerAction))
 
         val buildPoint = BuildPoint(2000L, -1L, player, isPlaying = true)
@@ -192,12 +202,14 @@ class AnnotationFactoryTest {
 
     @Test
     fun `given PauseTimerAction with -1L offset, should act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
         val createTimerAction =
-            Action.CreateTimerAction("id_00", -2000L, 123456L, "name", capValue = -1L)
+            Action.CreateTimerAction("id_00", -1L, 1605609881999L, "name", capValue = -1L)
         val startTimerAction =
-            Action.StartTimerAction("id_01", -2000L, 123456L, "name")
+            Action.StartTimerAction("id_01", -1L, 1605609881999L, "name")
         val pauseTimerAction =
-            Action.PauseTimerAction("id_01", -1L, 123456L, "name")
+            Action.PauseTimerAction("id_01", 1000L, 1605609883000L, "name")
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction, pauseTimerAction))
 
         val buildPoint = BuildPoint(2000L, -1L, player, isPlaying = true)
@@ -212,35 +224,148 @@ class AnnotationFactoryTest {
             )
         )
     }
+
+    @Test
+    fun `given AdjustTimerAction with Negative offset, should act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+        val createTimerAction =
+            Action.CreateTimerAction("id_00", -2000L, 1605609880000L, "name", capValue = -1L)
+        val startTimerAction =
+            Action.StartTimerAction("id_01", -2000L, 1605609880000L, "name")
+        val adjustTimerAction =
+            Action.AdjustTimerAction("id_01", -1000L, 1605609881000L, "name", value = 2000L)
+        annotationFactory.setActions(listOf(createTimerAction, startTimerAction, adjustTimerAction))
+
+        val buildPoint = BuildPoint(2000L, -1L, player, isPlaying = true)
+        annotationFactory.build(buildPoint)
+
+        verify(variableKeeper).notifyTimers(
+            argThat(
+                TimerVariablesMapArgumentMatcher(
+                    "name",
+                    "0:05"
+                )
+            )
+        )
+    }
+
+
+    @Test
+    fun `given AdjustTimerAction with -1L offset, should act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+        val createTimerAction =
+            Action.CreateTimerAction("id_00", -1L, 1605609881999L, "name", capValue = -1L)
+        val startTimerAction =
+            Action.StartTimerAction("id_01", -1L, 1605609881999L, "name")
+        val adjustTimerAction =
+            Action.AdjustTimerAction("id_01", -1L, 1605609881999L, "name", value = 2000L)
+        annotationFactory.setActions(listOf(createTimerAction, startTimerAction, adjustTimerAction))
+
+        val buildPoint = BuildPoint(2000L, -1L, player, isPlaying = true)
+        annotationFactory.build(buildPoint)
+
+        verify(variableKeeper).notifyTimers(
+            argThat(
+                TimerVariablesMapArgumentMatcher(
+                    "name",
+                    "0:04"
+                )
+            )
+        )
+    }
+
+
+    @Test
+    fun `given SkipTimerAction with Negative offset, should act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+        val createTimerAction =
+            Action.CreateTimerAction("id_00", -2000L, 1605609880000L, "name", capValue = -1L)
+        val startTimerAction =
+            Action.StartTimerAction("id_01", -2000L, 1605609880000L, "name")
+        val skipTimerAction =
+            Action.SkipTimerAction("id_01", -1000L, 1605609881000L, "name", value = 2000L)
+        annotationFactory.setActions(listOf(createTimerAction, startTimerAction, skipTimerAction))
+
+        val buildPoint = BuildPoint(2000L, -1L, player, isPlaying = true)
+        annotationFactory.build(buildPoint)
+
+        verify(variableKeeper).notifyTimers(
+            argThat(
+                TimerVariablesMapArgumentMatcher(
+                    "name",
+                    "0:06"
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `given SkipTimerAction with -1L offset, should act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+        val createTimerAction =
+            Action.CreateTimerAction("id_00", -1L, 1605609881999L, "name", capValue = -1L)
+        val startTimerAction =
+            Action.StartTimerAction("id_01", -1L, 1605609881999L, "name")
+        val skipTimerAction =
+            Action.SkipTimerAction("id_01", -1L, 1605609881999L, "name", value = 2000L)
+        annotationFactory.setActions(listOf(createTimerAction, startTimerAction, skipTimerAction))
+
+        val buildPoint = BuildPoint(2000L, -1L, player, isPlaying = true)
+        annotationFactory.build(buildPoint)
+
+        verify(variableKeeper).notifyTimers(
+            argThat(
+                TimerVariablesMapArgumentMatcher(
+                    "name",
+                    "0:04"
+                )
+            )
+        )
+    }
     /**endregion */
 
     /**region Variable related actions*/
     @Test
     fun `given CreateVariableAction with Negative offset, should act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
         val action =
-            Action.CreateVariableAction("id_00", -123L, 123456L, Variable.LongVariable("name", 0L))
+            Action.CreateVariableAction("id_00", -123L, 123456L, Variable.LongVariable("name", 1L))
         annotationFactory.setActions(listOf(action))
 
         val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true)
         annotationFactory.build(buildPoint)
 
-        verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name", "0")))
+        verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name", "1")))
     }
 
     @Test
     fun `given CreateVariableAction with -1L offset, should act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
         val action =
-            Action.CreateVariableAction("id_00", -1L, 123456L, Variable.LongVariable("name", 0L))
+            Action.CreateVariableAction(
+                "id_00",
+                -1L,
+                1605609881999L,
+                Variable.LongVariable("name", 1L)
+            )
         annotationFactory.setActions(listOf(action))
 
         val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true)
         annotationFactory.build(buildPoint)
 
-        verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name", "0")))
+        verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name", "1")))
     }
 
     @Test
     fun `given IncrementVariableAction with Negative offset, should act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
         val createVariableAction =
             Action.CreateVariableAction("id_00", -123L, 123456L, Variable.LongVariable("name", 0L))
         val incrementVariableAction =
@@ -255,10 +380,17 @@ class AnnotationFactoryTest {
 
     @Test
     fun `given IncrementVariableAction with -1L offset, should act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
         val createVariableAction =
-            Action.CreateVariableAction("id_00", -1L, 123456L, Variable.LongVariable("name", 0L))
+            Action.CreateVariableAction(
+                "id_00",
+                -1L,
+                1605609881999L,
+                Variable.LongVariable("name", 0L)
+            )
         val incrementVariableAction =
-            Action.IncrementVariableAction("id_01", -1L, 123456L, "name", 2.toDouble())
+            Action.IncrementVariableAction("id_01", -1L, 1605609881999L, "name", 2.toDouble())
         annotationFactory.setActions(listOf(createVariableAction, incrementVariableAction))
 
         val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true)
@@ -271,11 +403,13 @@ class AnnotationFactoryTest {
     /**region MarkTimelineAction*/
     @Test
     fun `given MarkTimeLine with Negative offset, should not act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
         val action =
-            Action.MarkTimelineAction("id_00", -123L, 123456L, 1000L, "Goal", "#ffffff")
+            Action.MarkTimelineAction("id_00", -1000L, 1605609881000L, 1000L, "Goal", "#ffffff")
         annotationFactory.setActions(listOf(action))
 
-        val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true)
+        val buildPoint = BuildPoint(0L, 1605609882000L, player, isPlaying = true)
         annotationFactory.build(buildPoint)
 
         verify(annotationListener).setTimelineMarkers(eq(emptyList()))
@@ -283,11 +417,13 @@ class AnnotationFactoryTest {
 
     @Test
     fun `given MarkTimeLine with -1L offset, should not act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
         val action =
-            Action.MarkTimelineAction("id_00", -1L, 123456L, 1000L, "Goal", "#ffffff")
+            Action.MarkTimelineAction("id_00", -1L, 1605609881999L, 1000L, "Goal", "#ffffff")
         annotationFactory.setActions(listOf(action))
 
-        val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true)
+        val buildPoint = BuildPoint(0L, 1605609882000L, player, isPlaying = true)
         annotationFactory.build(buildPoint)
 
         verify(annotationListener).setTimelineMarkers(eq(emptyList()))
