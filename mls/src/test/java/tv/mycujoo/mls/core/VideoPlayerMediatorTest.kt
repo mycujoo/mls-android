@@ -550,7 +550,7 @@ class VideoPlayerMediatorTest {
     @Test
     fun `should load remote media, when connected to remote player`() = runBlockingTest {
         val event =
-            getSampleEventEntity(listOf(Stream("id_0", 60000000L, "http://www.google.com", null)))
+            getSampleEventEntity(listOf(Stream("id_0", 60000000L.toString(), "http://www.google.com", null)))
         whenever(dataManager.currentEvent).thenReturn(event)
 
         castListener.onConnected(castSession)
@@ -613,7 +613,7 @@ class VideoPlayerMediatorTest {
     /**region Fake data*/
     companion object {
         private fun getSampleStreamList(): List<Stream> {
-            return listOf(Stream("stream_id_0", Long.MAX_VALUE, "stream_url", null))
+            return listOf(Stream("stream_id_0", Long.MAX_VALUE.toString(), "stream_url", null))
         }
 
         fun getSampleEventEntity(
