@@ -7,7 +7,6 @@ import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.ui.TimeBar
-import com.google.android.gms.cast.MediaLoadOptions
 import com.google.android.gms.cast.MediaSeekOptions
 import com.npaw.youbora.lib6.plugin.Options
 import kotlinx.coroutines.CoroutineScope
@@ -22,14 +21,13 @@ import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.VideoPlayer
+import tv.mycujoo.mls.caster.CasterLoadRemoteMediaParams
 import tv.mycujoo.mls.caster.ICaster
 import tv.mycujoo.mls.caster.ICasterSession
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.enum.MessageLevel
-import tv.mycujoo.mls.helper.CustomDataBuilder
-import tv.mycujoo.mls.helper.MediaInfoBuilder
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mls.manager.Logger
@@ -647,16 +645,20 @@ class VideoPlayerMediator(
         val fullUrl = event.streams.first().fullUrl!!
         val widevine = event.streams.first().widevine
 
-        val customData =
-            CustomDataBuilder.build(event.id, publicKey, uuid, widevine)
-        val mediaInfo =
-            MediaInfoBuilder.build(fullUrl, event.title, event.thumbnailUrl, customData)
 
-        val mediaLoadOptions: MediaLoadOptions =
-            MediaLoadOptions.Builder().setAutoplay(player.isPlaying())
-                .setPlayPosition(player.currentPosition())
-                .build()
-        caster?.loadRemoteMedia(mediaInfo, mediaLoadOptions)
+        val params = CasterLoadRemoteMediaParams(
+            id = event.id,
+            publicKey = publicKey,
+            uuid = uuid,
+            widevine = widevine,
+            fullUrl = fullUrl,
+            title = event.title,
+            thumbnailUrl = event.thumbnailUrl,
+            isPlaying = player.isPlaying(),
+            currentPosition = player.currentPosition()
+        )
+
+        caster?.loadRemoteMedia(params)
     }
 
     private fun updatePlaybackLocation(location: PlaybackLocation) {

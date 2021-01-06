@@ -5,7 +5,6 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player.*
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
-import com.google.android.gms.cast.MediaLoadOptions
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.SessionManager
 import com.nhaarman.mockitokotlin2.*
@@ -563,7 +562,7 @@ class VideoPlayerMediatorTest {
 
         castListener.onConnected(casterSession)
 
-        verify(caster).loadRemoteMedia(any(), any<MediaLoadOptions>())
+        verify(caster).loadRemoteMedia(any())
     }
 
     @Test
@@ -571,7 +570,7 @@ class VideoPlayerMediatorTest {
         castListener.onConnected(null)
 
 
-        verify(caster, never()).loadRemoteMedia(any(), any<MediaLoadOptions>())
+        verify(caster, never()).loadRemoteMedia(any())
         verify(playerView, never()).switchMode(any())
         verify(player, never()).isPlaying()
         verify(player, never()).pause()

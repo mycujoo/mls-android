@@ -1,4 +1,4 @@
-package tv.mycujoo.mls.helper
+package tv.mycujoo.mls.caster.helper
 
 import android.net.Uri
 import com.google.android.gms.cast.MediaInfo

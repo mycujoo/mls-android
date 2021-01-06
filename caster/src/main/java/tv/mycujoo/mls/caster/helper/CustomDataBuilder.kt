@@ -1,4 +1,4 @@
-package tv.mycujoo.mls.helper
+package tv.mycujoo.mls.caster.helper
 
 import org.json.JSONObject
 import tv.mycujoo.domain.entity.Widevine

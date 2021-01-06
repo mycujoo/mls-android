@@ -4,6 +4,7 @@ import android.content.Context
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.SessionManager
+import com.google.android.gms.cast.framework.SessionManagerListener
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.verify
@@ -17,6 +18,7 @@ import kotlin.test.assertSame
 class CasterTest {
 
     private lateinit var caster: Caster
+    private lateinit var sessionManagerListener: SessionManagerListener<CastSession>
 
     @Mock
     lateinit var castProvider: ICastContextProvider
@@ -47,12 +49,53 @@ class CasterTest {
         whenever(sessionManager.currentCastSession).thenReturn(castSession)
         whenever(castSession.remoteMediaClient).thenReturn(remoteMediaClient)
 
-        caster = Caster()
-
-        caster.initialize(context, castListener)
+        caster = Caster(castProvider)
+        sessionManagerListener = caster.initialize(context, castListener)
     }
 
     @Test
+    fun `caster STARTED, must notify listener ON_CONNECTED`() {
+        sessionManagerListener.onSessionStarted(castSession, "")
+
+        verify(castListener).onConnected(any())
+    }
+
+    @Test
+    fun `caster START_FAILED, must notify listener ON_DISCONNECTED`() {
+        sessionManagerListener.onSessionStartFailed(castSession, 0)
+
+        verify(castListener).onDisconnected(any())
+    }
+
+    @Test
+    fun `caster RESUMED, must notify listener ON_CONNECTED`() {
+        sessionManagerListener.onSessionResumed(castSession, false)
+
+        verify(castListener).onConnected(any())
+    }
+
+    @Test
+    fun `caster RESUMED_FAILED, must notify listener ON_DISCONNECTED`() {
+        sessionManagerListener.onSessionResumeFailed(castSession, 0)
+
+        verify(castListener).onDisconnected(any())
+    }
+
+    @Test
+    fun `caster SESSION_ENDING, must notify listener ON_CONNECTING`() {
+        sessionManagerListener.onSessionEnding(castSession)
+
+        verify(castListener).onDisconnecting(any())
+    }
+
+    @Test
+    fun `caster SESSION_ENDED, must notify listener ON_DISCONNECTED`() {
+        sessionManagerListener.onSessionEnded(castSession, 0)
+
+        verify(castListener).onDisconnected(any())
+    }
+
+        @Test
     fun getRemoteMediaClient() {
         assertSame(remoteMediaClient, castSession.remoteMediaClient)
     }
@@ -80,9 +123,5 @@ class CasterTest {
         caster.onResume()
 
         verify(castListener).onPlaybackLocationUpdated(false)
-    }
-
-    @Test
-    fun onPause() {
     }
 }
