@@ -123,6 +123,30 @@ class AnnotationFactoryTest {
     }
 
     @Test
+    fun `given ShowOverlayAction {eligible} with Negative offset, then HideOverlayAction, should not act on it`() {
+        whenever(player.duration()).thenReturn(120000L)
+        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+        whenever(player.isWithinValidSegment(any())).thenReturn(true)
+        val action =
+            Action.ShowOverlayAction("id_01", -1000L, 1605609881000L, null, customId = "cid_00")
+        val transitionSpec = TransitionSpec(-1000L, AnimationType.NONE, 0L)
+        val hideOverlayAction =
+            Action.HideOverlayAction("id_01", -1000L, 1605609881000L, transitionSpec, customId = "cid_00")
+        annotationFactory.setActions(listOf(action, hideOverlayAction))
+
+
+        val buildPoint = BuildPoint(2001L, -1L, player, isPlaying = true)
+        annotationFactory.build(buildPoint)
+
+
+        verify(annotationListener, never()).addOrUpdateLingeringMidwayOverlay(
+            argThat(
+                ShowOverlayActionArgumentMatcher("id_01")
+            )
+        )
+    }
+
+    @Test
     fun `given ShowOverlayAction {eligible} with Negative offset from ReshowOverlayAction, should act on it`() {
         whenever(player.duration()).thenReturn(120000L)
         whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
@@ -143,9 +167,11 @@ class AnnotationFactoryTest {
         annotationFactory.build(buildPoint)
 
 
-        verify(annotationListener, times(1)).addOrUpdateLingeringMidwayOverlay(argThat(
-            ShowOverlayActionArgumentMatcher("id_01")
-        ))
+        verify(annotationListener, times(1)).addOrUpdateLingeringMidwayOverlay(
+            argThat(
+                ShowOverlayActionArgumentMatcher("id_01")
+            )
+        )
     }
 
 
@@ -469,26 +495,26 @@ class AnnotationFactoryTest {
         verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name", "2")))
     }
 
-    @Test
-    fun `given IncrementVariableAction with -1L offset, should act on it`() {
-        whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
-        val createVariableAction =
-            Action.CreateVariableAction(
-                "id_00",
-                -1L,
-                1605609881999L,
-                Variable.LongVariable("name", 0L)
-            )
-        val incrementVariableAction =
-            Action.IncrementVariableAction("id_01", -1L, 1605609881999L, "name", 2.toDouble())
-        annotationFactory.setActions(listOf(createVariableAction, incrementVariableAction))
-
-        val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
-
-        verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name", "2")))
-    }
+//    @Test
+//    fun `given IncrementVariableAction with -1L offset, should act on it`() {
+//        whenever(player.duration()).thenReturn(120000L)
+//        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+//        val createVariableAction =
+//            Action.CreateVariableAction(
+//                "id_00",
+//                -1L,
+//                1605609881999L,
+//                Variable.LongVariable("name", 0L)
+//            )
+//        val incrementVariableAction =
+//            Action.IncrementVariableAction("id_01", -1L, 1605609881999L, "name", 2.toDouble())
+//        annotationFactory.setActions(listOf(createVariableAction, incrementVariableAction))
+//
+//        val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true)
+//        annotationFactory.build(buildPoint)
+//
+//        verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name", "2")))
+//    }
     /**endregion */
 
     /**region MarkTimelineAction*/
