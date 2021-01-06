@@ -2,11 +2,9 @@ package tv.mycujoo.mls.caster
 
 import android.content.Context
 import com.google.android.gms.cast.MediaSeekOptions
-import com.google.android.gms.cast.framework.CastSession
-import com.google.android.gms.cast.framework.SessionManagerListener
 
 interface ICaster {
-    fun initialize(context: Context, castListener: ICastListener): SessionManagerListener<CastSession>
+    fun initialize(context: Context, castListener: ICastListener): ISessionManagerListener
 
     fun loadRemoteMedia(params: CasterLoadRemoteMediaParams)
     fun play()

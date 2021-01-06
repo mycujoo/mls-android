@@ -8,6 +8,7 @@ import com.google.android.gms.cast.MediaSeekOptions
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.CastState.*
+
 import com.google.android.gms.cast.framework.SessionManagerListener
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import tv.mycujoo.mls.caster.helper.CustomDataBuilder
@@ -17,8 +18,9 @@ import tv.mycujoo.mls.caster.helper.MediaInfoBuilder
 class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
     private lateinit var castContextProvider: ICastContextProvider
     private lateinit var castContext: CastContext
-    private var castSession: CastSession? = null
+
     private var casterSession = CasterSession()
+
     private lateinit var sessionManagerListener: SessionManagerListener<CastSession>
     private lateinit var castListener: ICastListener
 
@@ -43,14 +45,13 @@ class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
     override fun initialize(
         context: Context,
         castListener: ICastListener
-    ): SessionManagerListener<CastSession> {
+    ): ISessionManagerListener {
         castContext = if (this::castContextProvider.isInitialized) {
             castContextProvider.getCastContext()
         } else {
             CastContextProvider(context).getCastContext()
         }
-        castSession = castContext.sessionManager.currentCastSession
-        casterSession.castSession = castSession
+        casterSession.castSession = castContext.sessionManager.currentCastSession
 
         castContext.addCastStateListener { state ->
             when (state) {
@@ -68,15 +69,12 @@ class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
             }
         }
 
-        sessionManagerListener = initSessionManagerListener(castListener)
-        return sessionManagerListener
+        val sessionManagerWrapper = initSessionManagerWrapper(castListener)
+        sessionManagerListener = sessionManagerWrapper.listener
+        return sessionManagerWrapper.sessionManagerListener
     }
 
-    private fun initSessionManagerListener(castListener: ICastListener): SessionManagerListener<CastSession> {
-        fun setCastSession(session: CastSession?) {
-            castSession = session
-            casterSession.castSession = castSession
-        }
+    private fun initSessionManagerWrapper(castListener: ICastListener): SessionManagerWrapper {
 
         val progressListener =
             RemoteMediaClient.ProgressListener { progressMs, durationMs ->
@@ -89,56 +87,42 @@ class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
             }
 
         this.castListener = castListener
-        return object : SessionManagerListener<CastSession> {
+        val localManager = object : ISessionManagerListener {
             private val UPDATE_INTERVAL: Long = 500L
-            override fun onSessionStarting(session: CastSession?) {
-                setCastSession(session)
-            }
 
-            override fun onSessionStarted(session: CastSession?, sessionId: String?) {
-                setCastSession(session)
-
+            override fun onSessionStarted(session: ICasterSession?, sessionId: String?) {
                 castListener.onConnected(casterSession)
-                castSession?.remoteMediaClient?.addProgressListener(
+                casterSession.castSession?.remoteMediaClient?.addProgressListener(
                     progressListener,
                     UPDATE_INTERVAL
                 )
             }
 
-            override fun onSessionStartFailed(session: CastSession?, error: Int) {
-                setCastSession(session)
+            override fun onSessionStartFailed(session: ICasterSession?, error: Int) {
                 castListener.onDisconnected(casterSession)
             }
 
-            override fun onSessionResuming(session: CastSession?, sessionId: String?) {
-                setCastSession(session)
-            }
-
-            override fun onSessionResumed(session: CastSession?, wasSuspended: Boolean) {
-                setCastSession(session)
+            override fun onSessionResumed(session: ICasterSession?, wasSuspended: Boolean) {
                 castListener.onConnected(casterSession)
             }
 
-            override fun onSessionResumeFailed(session: CastSession?, error: Int) {
-                setCastSession(session)
+            override fun onSessionResumeFailed(session: ICasterSession?, error: Int) {
                 castListener.onDisconnected(casterSession)
+
             }
 
-            override fun onSessionSuspended(session: CastSession?, reason: Int) {
-                setCastSession(session)
-            }
-
-            override fun onSessionEnding(session: CastSession?) {
-                setCastSession(session)
+            override fun onSessionEnding(session: ICasterSession?) {
                 castListener.onDisconnecting(casterSession)
 
             }
 
-            override fun onSessionEnded(session: CastSession?, error: Int) {
-                setCastSession(session)
+            override fun onSessionEnded(session: ICasterSession?, error: Int) {
                 castListener.onDisconnected(casterSession)
+
             }
         }
+
+        return SessionManagerWrapper(localManager, casterSession)
     }
 
     override fun loadRemoteMedia(
@@ -197,7 +181,7 @@ class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
 
 
     private fun getRemoteMediaClient(): RemoteMediaClient? {
-        return castSession?.remoteMediaClient
+        return casterSession.castSession?.remoteMediaClient
     }
 
     override fun onResume() {
@@ -208,7 +192,7 @@ class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
             sessionManagerListener, CastSession::class.java
         )
 
-        if (castSession != null && castSession!!.isConnected) {
+        if (casterSession.castSession != null && casterSession.castSession!!.isConnected) {
             castListener.onPlaybackLocationUpdated(false)
         } else {
             castListener.onPlaybackLocationUpdated(true)
