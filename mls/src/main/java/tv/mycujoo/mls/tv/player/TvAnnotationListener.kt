@@ -26,8 +26,8 @@ class TvAnnotationListener(
         }
     }
 
-    override fun removeOverlay(actionId: String, outroTransitionSpec: TransitionSpec?) {
-        overlayViewHelper.removeView(overlayContainer, actionId, outroTransitionSpec)
+    override fun removeOverlay(customId: String, outroTransitionSpec: TransitionSpec?) {
+        overlayViewHelper.removeView(overlayContainer, customId, outroTransitionSpec)
     }
 
     override fun addOrUpdateLingeringIntroOverlay(
@@ -62,15 +62,15 @@ class TvAnnotationListener(
 
     override fun addOrUpdateLingeringMidwayOverlay(showOverlayAction: Action.ShowOverlayAction) {
         downloaderClient.download(showOverlayAction) { downloadedShowOverlayAction ->
-            overlayViewHelper.updateLingeringMidwayOverlay(
+            overlayViewHelper.addOrUpdateLingeringMidwayOverlay(
                 overlayContainer,
                 downloadedShowOverlayAction
             )
         }
     }
 
-    override fun removeLingeringOverlay(actionId: String, outroTransitionSpec: TransitionSpec?) {
-        overlayViewHelper.removeView(overlayContainer, actionId, outroTransitionSpec)
+    override fun removeLingeringOverlay(customId: String, outroTransitionSpec: TransitionSpec?) {
+        overlayViewHelper.removeView(overlayContainer, customId, outroTransitionSpec)
     }
 
     override fun setTimelineMarkers(timelineMarkerEntityList: List<TimelineMarkerEntity>) {

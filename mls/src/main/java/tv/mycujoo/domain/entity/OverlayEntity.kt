@@ -34,22 +34,6 @@ data class OverlayEntity(
         return OverlayAct.DO_NOTHING
     }
 
-    fun forceUpdate(currentTime: Long): OverlayAct {
-        if (isLingeringInIntroAnimation(currentTime)) {
-            return OverlayAct.LINGERING_INTRO
-        }
-
-        if (isLingeringInMidway(currentTime)) {
-            return OverlayAct.LINGERING_MIDWAY
-        }
-
-        if (isLingeringInOutroAnimation(currentTime) && hasOutroAnimation(outroTransitionSpec.animationType)) {
-            return OverlayAct.LINGERING_OUTRO
-        }
-
-        return OverlayAct.LINGERING_REMOVE
-    }
-
 
     private fun introIsInCurrentTimeRange(
         currentTime: Long

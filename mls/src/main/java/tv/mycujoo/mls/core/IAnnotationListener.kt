@@ -7,7 +7,7 @@ import tv.mycujoo.domain.entity.TransitionSpec
 interface IAnnotationListener {
 
     fun addOverlay(showOverlayAction: Action.ShowOverlayAction)
-    fun removeOverlay(actionId: String, outroTransitionSpec: TransitionSpec?)
+    fun removeOverlay(customId: String, outroTransitionSpec: TransitionSpec?)
 
 
     fun addOrUpdateLingeringIntroOverlay(
@@ -24,7 +24,7 @@ interface IAnnotationListener {
 
     fun addOrUpdateLingeringMidwayOverlay(showOverlayAction: Action.ShowOverlayAction)
 
-    fun removeLingeringOverlay(actionId: String, outroTransitionSpec: TransitionSpec? = null)
+    fun removeLingeringOverlay(customId: String, outroTransitionSpec: TransitionSpec? = null)
 
     fun setTimelineMarkers(timelineMarkerEntityList: List<TimelineMarkerEntity>)
 

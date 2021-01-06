@@ -485,12 +485,12 @@ class VideoPlayerMediator(
         if (stream.widevine?.fullUrl != null && stream.widevine.licenseUrl != null) {
             player.play(
                 stream.widevine.fullUrl,
-                stream.dvrWindow,
+                stream.getDvrWindowSize(),
                 stream.widevine.licenseUrl,
                 videoPlayerConfig.autoPlay
             )
         } else if (stream.fullUrl != null) {
-            player.play(stream.fullUrl, stream.dvrWindow, videoPlayerConfig.autoPlay)
+            player.play(stream.fullUrl, stream.getDvrWindowSize(), videoPlayerConfig.autoPlay)
         }
 
     }

@@ -78,8 +78,7 @@ class TvAnnotationMediator(
                             player.currentPosition(),
                             player.currentAbsoluteTime(),
                             player,
-                            player.isPlaying(),
-                            true
+                            player.isPlaying()
                         )
                     )
                 }
@@ -106,8 +105,7 @@ class TvAnnotationMediator(
                         player.currentPosition(),
                         player.currentAbsoluteTime(),
                         player,
-                        isPlaying = true,
-                        isInterrupted = false
+                        isPlaying = true
                     )
                 )
             }

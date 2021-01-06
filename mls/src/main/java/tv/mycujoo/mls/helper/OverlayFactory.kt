@@ -21,7 +21,7 @@ class OverlayFactory : IOverlayFactory {
         val size = showOverlayAction.viewSpec!!.size!!
         val scaffoldView = ScaffoldView(size.first, size.second, context)
         scaffoldView.id = View.generateViewId()
-        scaffoldView.tag = showOverlayAction.customId ?: showOverlayAction.id
+        scaffoldView.tag = showOverlayAction.customId
 
         scaffoldView.setVariablePlaceHolder(showOverlayAction.placeHolders)
 
@@ -45,20 +45,15 @@ class OverlayFactory : IOverlayFactory {
             val svg: SVG
             var rawString = showOverlayAction.svgData!!.svgString!!
             showOverlayAction.placeHolders.forEach { placeHolder ->
-                var value = variableTranslator.getValue(placeHolder)
-                if (value == null) {
-                    value = variableKeeper.getValue(placeHolder)
-                }
+                val value = variableKeeper.getValue(placeHolder)
                 rawString =
-                    rawString.replace(placeHolder, value.toString())
+                    rawString.replace(placeHolder, value)
             }
 
             svg = SVG.getFromString(rawString)
 
-            svg.setDocumentWidth("100%")
-            svg.setDocumentHeight("100%")
             scaffoldView.setSVG(svg)
-            scaffoldView.setSVGSource(showOverlayAction.svgData!!.svgString!!)
+            scaffoldView.setSVGSource(showOverlayAction.svgData.svgString!!)
 
 
         } catch (e: Exception) {

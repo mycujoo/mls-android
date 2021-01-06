@@ -14,9 +14,9 @@ class FakeViewHandler(
     var lastRemovedView: ScaffoldView? = null
     var lastAddedView: ScaffoldView? = null
 
-    override fun removeAnimation(id: String) {
-        lastRemovedAnimationId = id
-        super.removeAnimation(id)
+    override fun removeAnimation(overlayTag: String) {
+        lastRemovedAnimationId = overlayTag
+        super.removeAnimation(overlayTag)
     }
 
     override fun attachOverlayView(view: ScaffoldView) {

@@ -1,7 +1,9 @@
 package tv.mycujoo.domain.entity
 
+import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.model.ScreenTimerDirection
 import tv.mycujoo.mls.model.ScreenTimerFormat
+import java.util.*
 
 sealed class Action {
     /**region Abstract fields*/
@@ -13,7 +15,16 @@ sealed class Action {
 
     /**region Abstract functions*/
     abstract fun updateOffset(newOffset: Long): Action
+    open fun isEligible(): Boolean {
+        return true
+    }
+
     /**endregion */
+
+    fun isTillNowOrInRange(currentTime: Long): Boolean {
+        return currentTime + C.ONE_SECOND_IN_MS > offset
+    }
+
 
     /**region Overlay related*/
     data class ShowOverlayAction(
@@ -26,12 +37,14 @@ sealed class Action {
         val introTransitionSpec: TransitionSpec? = null,
         val outroTransitionSpec: TransitionSpec? = null,
         val placeHolders: List<String> = emptyList(),
-        val customId: String? = null
+        val customId: String = UUID.randomUUID().toString()
     ) : Action() {
         override val priority: Int = 0
 
-
         override fun updateOffset(newOffset: Long): ShowOverlayAction {
+            if (offset == -1L){
+                return this
+            }
             var newIntroTransitionSpec: TransitionSpec? = null
             var newOutroTransitionSpec: TransitionSpec? = null
 
@@ -57,6 +70,9 @@ sealed class Action {
             )
         }
 
+        override fun isEligible(): Boolean {
+            return !(offset < 0L && (duration != null || outroTransitionSpec != null))
+        }
     }
 
 
@@ -258,6 +274,9 @@ sealed class Action {
     ) : Action() {
         override val priority: Int = 0
         override fun updateOffset(newOffset: Long): MarkTimelineAction {
+            if (offset == -1L){
+                return this
+            }
             return MarkTimelineAction(
                 id = id,
                 offset = newOffset,
@@ -295,6 +314,9 @@ sealed class Action {
     ) : Action() {
         override val priority: Int = 0
         override fun updateOffset(newOffset: Long): InvalidAction {
+            if (offset == -1L){
+                return this
+            }
             return InvalidAction(id = id, offset = newOffset, absoluteTime = absoluteTime)
         }
     }

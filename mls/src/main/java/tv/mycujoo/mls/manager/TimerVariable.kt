@@ -52,8 +52,8 @@ class TimerVariable(
         }
     }
 
-    override fun start(statTimer: TimerEntity.StartTimer, now: Long) {
-        commands.add(statTimer)
+    override fun start(startTimer: TimerEntity.StartTimer, now: Long) {
+        commands.add(startTimer)
         recalculate(now)
     }
 
@@ -77,64 +77,54 @@ class TimerVariable(
 
     /**region Private functions*/
     private fun recalculate(now: Long) {
-        var startOffset = 0L
-        var pauseOffset = 0L
-        var adjustTimer: TimerEntity.AdjustTimer? = null
-        var skipTimer: TimerEntity.SkipTimer? = null
-        commands.forEach {
-            when (it) {
-                is TimerEntity.StartTimer -> {
-                    startOffset = it.offset
+        val sorted =
+            commands.sortedWith(compareBy<TimerEntity> { it.offset }.thenByDescending { it.priority })
+        var delta = startValue
+        var isTicking = false
+        sorted
+            .forEach { timerEntity ->
+                when (timerEntity) {
+                    is TimerEntity.StartTimer -> {
+                        if (isTicking) {
+                            return@forEach
+                        }
+                        isTicking = true
+                        if (direction == ScreenTimerDirection.UP) {
+                            delta += now - timerEntity.offset
+                        } else {
+                            delta -= now - timerEntity.offset
+                        }
+                    }
+                    is TimerEntity.PauseTimer -> {
+                        if (isTicking.not()) {
+                            return@forEach
+                        }
+                        isTicking = false
+                        if (direction == ScreenTimerDirection.UP) {
+                            delta -= now - timerEntity.offset
+                        } else {
+                            delta += now - timerEntity.offset
+                        }
+                    }
+                    is TimerEntity.AdjustTimer -> {
+                        if (direction == ScreenTimerDirection.UP) {
+                            delta = startValue + now - timerEntity.offset + timerEntity.value
+                        } else {
+                            delta = startValue - (now - timerEntity.offset + timerEntity.value)
+                        }
+                    }
+                    is TimerEntity.SkipTimer -> {
+                        if (direction == ScreenTimerDirection.UP) {
+                            delta += timerEntity.value
+                        } else {
+                            delta -= timerEntity.value
+                        }
 
-                }
-                is TimerEntity.PauseTimer -> {
-                    pauseOffset = it.offset
-                }
-                is TimerEntity.AdjustTimer -> {
-                    adjustTimer = it
+                    }
                 }
 
-                is TimerEntity.SkipTimer -> {
-                    skipTimer = it
-                }
-
-                else -> {
-                }
             }
-        }
-        when (direction) {
-            ScreenTimerDirection.UP -> {
-                currentTime = startValue + now - startOffset
-
-                if (pauseOffset != 0L) {
-                    currentTime -= now - pauseOffset
-                }
-
-                adjustTimer?.let {
-                    currentTime = startValue + now - it.offset + it.value
-                }
-
-                skipTimer?.let {
-                    currentTime += it.value
-                }
-
-            }
-            ScreenTimerDirection.DOWN -> {
-                currentTime = startValue - (now - startOffset)
-
-                if (pauseOffset != 0L) {
-                    currentTime += now - pauseOffset
-                }
-
-                adjustTimer?.let {
-                    currentTime = startValue - (now - it.offset + it.value)
-                }
-
-                skipTimer?.let {
-                    currentTime -= it.value
-                }
-            }
-        }
+        currentTime = delta
     }
 
     private fun getTimeInMinutesSecondFormat(time: Long): String {

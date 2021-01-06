@@ -134,7 +134,7 @@ class TvAnnotationListenerTest {
 
 
         Mockito.verify(overlayViewHelper)
-            .updateLingeringMidwayOverlay(tvOverlayContainer, action)
+            .addOrUpdateLingeringMidwayOverlay(tvOverlayContainer, action)
     }
 
 

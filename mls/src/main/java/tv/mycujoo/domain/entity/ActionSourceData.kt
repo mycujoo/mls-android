@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName
 import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.domain.entity.models.ActionType.*
 import tv.mycujoo.domain.mapper.DataMapper
+import java.util.*
 
 data class ActionSourceData(
     @SerializedName("id") val id: String?,
@@ -51,7 +52,7 @@ data class ActionSourceData(
                         ),
                         outroTransitionSpec = outroTransitionSpec,
                         placeHolders = relatedData.variablePlaceHolders,
-                        customId = relatedData.customId
+                        customId = relatedData.customId ?: UUID.randomUUID().toString()
                     )
                 }
             }

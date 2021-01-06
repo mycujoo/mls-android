@@ -10,8 +10,8 @@ interface IViewHandler {
     fun getOverlayHost(): ConstraintLayout
 
 
-    fun addAnimation(id: String, objectAnimator: ObjectAnimator)
-    fun removeAnimation(id: String)
+    fun addAnimation(overlayTag: String, objectAnimator: ObjectAnimator)
+    fun removeAnimation(overlayTag: String)
     fun getAnimations(): List<ObjectAnimator>
     fun getAnimationWithTag(id: String): ObjectAnimator?
 
@@ -19,8 +19,8 @@ interface IViewHandler {
     fun detachOverlayView(view: ScaffoldView?)
     fun getOverlayView(id: String): ScaffoldView?
 
-    fun overlayIsNotAttached(id: String): Boolean
-    fun overlayIsAttached(id: String): Boolean
+    fun overlayIsNotAttached(tag: String): Boolean
+    fun overlayIsAttached(tag: String): Boolean
 
     fun clearAll()
     fun incrementIdlingResource()

@@ -51,8 +51,7 @@ class AnnotationMediator(
                         currentPosition,
                         player.currentAbsoluteTime(),
                         player,
-                        player.isPlaying(),
-                        false
+                        player.isPlaying()
                     )
                 )
 
@@ -132,8 +131,7 @@ class AnnotationMediator(
                             player.currentPosition(),
                             player.currentAbsoluteTime(),
                             player,
-                            player.isPlaying(),
-                            true
+                            player.isPlaying()
                         )
                     )
                 }
@@ -160,8 +158,7 @@ class AnnotationMediator(
                 player.currentPosition(),
                 player.currentAbsoluteTime(),
                 player,
-                player.isPlaying(),
-                false
+                player.isPlaying()
             )
         )
     }

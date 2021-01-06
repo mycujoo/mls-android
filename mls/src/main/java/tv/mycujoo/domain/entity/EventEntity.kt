@@ -21,10 +21,18 @@ data class EventEntity(
 
 data class Stream(
     @SerializedName("id") val id: String,
-    @SerializedName("dvr_window") val dvrWindow: Long,
+    @SerializedName("dvr_window_size") val dvrWindowString: String,
     @SerializedName("full_url") val fullUrl: String?,
     @SerializedName("widevine") val widevine: Widevine?
-)
+) {
+    fun getDvrWindowSize(): Long {
+        return try {
+            dvrWindowString.toLong()
+        } catch (e: Exception) {
+            Long.MAX_VALUE
+        }
+    }
+}
 
 data class Widevine(
     @SerializedName("full_url") val fullUrl: String?,

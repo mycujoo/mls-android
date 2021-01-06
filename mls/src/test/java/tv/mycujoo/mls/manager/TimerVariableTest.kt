@@ -76,7 +76,7 @@ class TimerVariableTest {
 
 
         timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 4000L)
-        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 8000L)
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 4000L), 8000L)
 
 
         assertEquals("0:05", timerVariable.getTime())
@@ -94,7 +94,7 @@ class TimerVariableTest {
 
 
         timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 4000L)
-        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 8000L)
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 4000L), 8000L)
 
 
         assertEquals("0:15", timerVariable.getTime())
@@ -157,7 +157,7 @@ class TimerVariableTest {
 
         timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 7000L)
         timerVariable.pause(TimerEntity.PauseTimer("sample_name", 5000L), 7000L)
-        timerVariable.pause(TimerEntity.PauseTimer("sample_name", 5000L), 7000L)
+        timerVariable.pause(TimerEntity.PauseTimer("sample_name", 6000L), 7000L)
 
         assertEquals("0:02", timerVariable.getTime())
     }
@@ -220,5 +220,112 @@ class TimerVariableTest {
         timerVariable.skip(TimerEntity.SkipTimer("sample_name", 4000L, 20000L), 6000L)
 
         assertEquals("0:17", timerVariable.getTime())
+    }
+
+    @Test
+    fun `start-value test`() {
+        val timerVariable = TimerVariable(
+            "sample_name",
+            ScreenTimerFormat.MINUTES_SECONDS,
+            ScreenTimerDirection.UP,
+            5000L,
+            -1L
+        )
+
+
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 15000L)
+
+
+        assertEquals("0:17", timerVariable.getTime())
+    }
+
+    @Test
+    fun `start-value down test`() {
+        val timerVariable = TimerVariable(
+            "sample_name",
+            ScreenTimerFormat.MINUTES_SECONDS,
+            ScreenTimerDirection.DOWN,
+            15000L,
+            -1L
+        )
+
+
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 15000L)
+
+
+        assertEquals("0:03", timerVariable.getTime())
+    }
+
+    @Test
+    fun `cap-value test`() {
+        val timerVariable = TimerVariable(
+            "sample_name",
+            ScreenTimerFormat.MINUTES_SECONDS,
+            ScreenTimerDirection.UP,
+            0L,
+            10000L
+        )
+
+
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 15000L)
+
+
+        assertEquals("0:10", timerVariable.getTime())
+    }
+
+
+    @Test
+    fun `cap-value down test`() {
+        val timerVariable = TimerVariable(
+            "sample_name",
+            ScreenTimerFormat.MINUTES_SECONDS,
+            ScreenTimerDirection.DOWN,
+            0L,
+            -10000L
+        )
+
+
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 15000L)
+
+
+        assertEquals("0:-10", timerVariable.getTime())
+    }
+
+    @Test
+    fun `one pair of start-pause`() {
+        val timerVariable = TimerVariable(
+            "sample_name",
+            ScreenTimerFormat.MINUTES_SECONDS,
+            ScreenTimerDirection.UP,
+            0L,
+            59940000L
+        )
+
+
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 10000L)
+        timerVariable.pause(TimerEntity.PauseTimer("sample_name", 4000L), 10000L)
+
+
+        assertEquals("0:01", timerVariable.getTime())
+    }
+
+    @Test
+    fun `two pairs of start-pause`() {
+        val timerVariable = TimerVariable(
+            "sample_name",
+            ScreenTimerFormat.MINUTES_SECONDS,
+            ScreenTimerDirection.UP,
+            0L,
+            59940000L
+        )
+
+
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 2000L), 10000L)
+        timerVariable.pause(TimerEntity.PauseTimer("sample_name", 4000L), 10000L)
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 5000L), 10000L)
+        timerVariable.pause(TimerEntity.PauseTimer("sample_name", 8000L), 10000L)
+
+
+        assertEquals("0:05", timerVariable.getTime())
     }
 }

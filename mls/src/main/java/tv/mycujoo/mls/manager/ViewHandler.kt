@@ -35,14 +35,14 @@ open class ViewHandler(
 
     /**region Animation*/
     override fun addAnimation(
-        id: String,
+        overlayTag: String,
         objectAnimator: ObjectAnimator
     ) {
-        animations.add(Pair(id, objectAnimator))
+        animations.add(Pair(overlayTag, objectAnimator))
     }
 
-    override fun removeAnimation(id: String) {
-        val pair = animations.firstOrNull { it.first == id }
+    override fun removeAnimation(overlayTag: String) {
+        val pair = animations.firstOrNull { it.first == overlayTag }
         animations.remove(pair)
     }
 
@@ -93,12 +93,12 @@ open class ViewHandler(
     /**endregion */
 
     /**region Overlay objects*/
-    override fun overlayIsNotAttached(id: String): Boolean {
-        return attachedViewList.none { it.tag == id }
+    override fun overlayIsNotAttached(tag: String): Boolean {
+        return attachedViewList.none { it.tag == tag }
     }
 
-    override fun overlayIsAttached(id: String): Boolean {
-        return attachedViewList.any { it.tag == id }
+    override fun overlayIsAttached(tag: String): Boolean {
+        return attachedViewList.any { it.tag == tag }
     }
 
     /**endregion */

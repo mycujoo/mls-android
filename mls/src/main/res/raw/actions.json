@@ -71,7 +71,7 @@
           "width": 25.0
         },
         "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg",
-        "variable_positions": [
+        "variables": [
           "$awayScore",
           "$homeScore",
           "$scoreboardTimer"
@@ -94,7 +94,7 @@
           "width": 50.0
         },
         "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg",
-        "variable_positions": [
+        "variables": [
           "$awayScore",
           "$homeScore",
           "$scoreboardTimer"
@@ -121,7 +121,7 @@
           "width": 25.0
         },
         "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg",
-        "variable_positions": [
+        "variables": [
           "$awayScore",
           "$homeScore",
           "$scoreboardTimer"
@@ -148,7 +148,7 @@
           "width": 25.0
         },
         "svg_url": "https://storage.googleapis.com/mycujoo-player-app.appspot.com/scoreboard_and_timer.svg",
-        "variable_positions": [
+        "variables": [
           "$awayScore",
           "$homeScore",
           "$scoreboardTimer"
