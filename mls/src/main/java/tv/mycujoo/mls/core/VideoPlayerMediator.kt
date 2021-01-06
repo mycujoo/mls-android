@@ -9,7 +9,6 @@ import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.ui.TimeBar
 import com.google.android.gms.cast.MediaLoadOptions
 import com.google.android.gms.cast.MediaSeekOptions
-import com.google.android.gms.cast.framework.CastSession
 import com.npaw.youbora.lib6.plugin.Options
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +23,7 @@ import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.VideoPlayer
 import tv.mycujoo.mls.caster.ICaster
+import tv.mycujoo.mls.caster.ICasterSession
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.enum.C
@@ -225,8 +225,8 @@ class VideoPlayerMediator(
         }
 
         caster?.let {
-            fun onApplicationConnected(castSession: CastSession?) {
-                if (castSession == null) {
+            fun onApplicationConnected(casterSession: ICasterSession?) {
+                if (casterSession == null) {
                     return
                 }
                 updatePlaybackLocation(REMOTE)
@@ -241,12 +241,12 @@ class VideoPlayerMediator(
                 }
             }
 
-            fun onApplicationDisconnecting(session: CastSession?) {
+            fun onApplicationDisconnecting(casterSession: ICasterSession?) {
                 updatePlaybackLocation(LOCAL)
                 switchControllerMode(LOCAL)
-                session?.remoteMediaClient?.let { remoteMediaClient ->
-                    player.seekTo(remoteMediaClient.approximateStreamPosition)
-                    if (remoteMediaClient.isPlaying) {
+                casterSession?.getRemoteMediaClient()?.let { remoteMediaClient ->
+                    player.seekTo(remoteMediaClient.approximateStreamPosition())
+                    if (remoteMediaClient.isPlaying()) {
                         player.play()
                     } else {
                         player.pause()
@@ -254,7 +254,7 @@ class VideoPlayerMediator(
                 }
             }
 
-            fun onApplicationDisconnected(session: CastSession?) {
+            fun onApplicationDisconnected(casterSession: ICasterSession?) {
                 updatePlaybackLocation(LOCAL)
                 switchControllerMode(LOCAL)
             }
@@ -268,17 +268,16 @@ class VideoPlayerMediator(
                     }
                 }
 
-                override fun onConnected(session: CastSession?) {
+                override fun onConnected(session: ICasterSession?) {
                     onApplicationConnected(session)
                 }
 
-                override fun onDisconnecting(session: CastSession?) {
+                override fun onDisconnecting(session: ICasterSession?) {
                     onApplicationDisconnecting(session)
                 }
 
-                override fun onDisconnected(session: CastSession?) {
+                override fun onDisconnected(session: ICasterSession?) {
                     onApplicationDisconnected(session)
-
                 }
 
                 override fun onRemoteProgressUpdate(progressMs: Long, durationMs: Long) {

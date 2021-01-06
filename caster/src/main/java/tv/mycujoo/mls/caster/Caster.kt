@@ -16,6 +16,7 @@ import com.google.android.gms.cast.framework.media.RemoteMediaClient
 class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
     private lateinit var castContext: CastContext
     private var castSession: CastSession? = null
+    private var casterSession = CasterSession()
     private lateinit var sessionManagerListener: SessionManagerListener<CastSession>
     private lateinit var castListener: ICastListener
 
@@ -34,6 +35,7 @@ class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
     override fun initialize(context: Context?, castListener: ICastListener) {
         castContext = CastContextProvider(context!!).getCastContext()
         castSession = castContext.sessionManager.currentCastSession
+        casterSession.castSession = castSession
         sessionManagerListener = initSessionManagerListener(castListener)
 
         castContext.addCastStateListener { state ->
@@ -54,6 +56,11 @@ class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
     }
 
     private fun initSessionManagerListener(castListener: ICastListener): SessionManagerListener<CastSession> {
+        fun setCastSession(session: CastSession?) {
+            castSession = session
+            casterSession.castSession = castSession
+        }
+
         val progressListener =
             RemoteMediaClient.ProgressListener { progressMs, durationMs ->
                 castListener.onRemoteProgressUpdate(progressMs, durationMs)
@@ -68,12 +75,13 @@ class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
         return object : SessionManagerListener<CastSession> {
             private val UPDATE_INTERVAL: Long = 500L
             override fun onSessionStarting(session: CastSession?) {
-                castSession = session
+                setCastSession(session)
             }
 
             override fun onSessionStarted(session: CastSession?, sessionId: String?) {
-                castSession = session
-                castListener.onConnected(session)
+                setCastSession(session)
+
+                castListener.onConnected(casterSession)
                 castSession?.remoteMediaClient?.addProgressListener(
                     progressListener,
                     UPDATE_INTERVAL
@@ -81,37 +89,37 @@ class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
             }
 
             override fun onSessionStartFailed(session: CastSession?, error: Int) {
-                castSession = session
-                castListener.onDisconnected(session)
+                setCastSession(session)
+                castListener.onDisconnected(casterSession)
             }
 
             override fun onSessionResuming(session: CastSession?, sessionId: String?) {
-                castSession = session
+                setCastSession(session)
             }
 
             override fun onSessionResumed(session: CastSession?, wasSuspended: Boolean) {
-                castSession = session
-                castListener.onConnected(session)
+                setCastSession(session)
+                castListener.onConnected(casterSession)
             }
 
             override fun onSessionResumeFailed(session: CastSession?, error: Int) {
-                castSession = session
-                castListener.onDisconnected(session)
+                setCastSession(session)
+                castListener.onDisconnected(casterSession)
             }
 
             override fun onSessionSuspended(session: CastSession?, reason: Int) {
-                castSession = session
+                setCastSession(session)
             }
 
             override fun onSessionEnding(session: CastSession?) {
-                castSession = session
-                castListener.onDisconnecting(session)
+                setCastSession(session)
+                castListener.onDisconnecting(casterSession)
 
             }
 
             override fun onSessionEnded(session: CastSession?, error: Int) {
-                castSession = session
-                castListener.onDisconnected(session)
+                setCastSession(session)
+                castListener.onDisconnected(casterSession)
             }
         }
     }

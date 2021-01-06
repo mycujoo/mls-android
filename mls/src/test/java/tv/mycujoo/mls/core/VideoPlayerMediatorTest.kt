@@ -7,7 +7,6 @@ import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.gms.cast.MediaLoadOptions
 import com.google.android.gms.cast.framework.CastContext
-import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.SessionManager
 import com.nhaarman.mockitokotlin2.*
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
@@ -31,6 +30,7 @@ import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.MLSConfiguration
 import tv.mycujoo.mls.api.defaultVideoPlayerConfig
 import tv.mycujoo.mls.caster.ICaster
+import tv.mycujoo.mls.caster.ICasterSession
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.manager.Logger
@@ -140,7 +140,7 @@ class VideoPlayerMediatorTest {
     lateinit var sessionManager: SessionManager
 
     @Mock
-    lateinit var castSession: CastSession
+    lateinit var casterSession: ICasterSession
 
     @Mock
     lateinit var caster: ICaster
@@ -173,7 +173,6 @@ class VideoPlayerMediatorTest {
         whenever(internalBuilder.createYouboraClient(any())).thenReturn(youboraClient)
         whenever(internalBuilder.logger).thenReturn(logger)
         whenever(castContext.sessionManager).thenReturn(sessionManager)
-        whenever(sessionManager.currentCastSession).thenReturn(castSession)
 
         whenever(playerView.context).thenReturn(activity)
         whenever(playerView.getTimeBar()).thenReturn(timeBar)
@@ -550,10 +549,19 @@ class VideoPlayerMediatorTest {
     @Test
     fun `should load remote media, when connected to remote player`() = runBlockingTest {
         val event =
-            getSampleEventEntity(listOf(Stream("id_0", 60000000L.toString(), "http://www.google.com", null)))
+            getSampleEventEntity(
+                listOf(
+                    Stream(
+                        "id_0",
+                        60000000L.toString(),
+                        "http://www.google.com",
+                        null
+                    )
+                )
+            )
         whenever(dataManager.currentEvent).thenReturn(event)
 
-        castListener.onConnected(castSession)
+        castListener.onConnected(casterSession)
 
         verify(caster).loadRemoteMedia(any(), any<MediaLoadOptions>())
     }
@@ -572,7 +580,7 @@ class VideoPlayerMediatorTest {
 
     @Test
     fun `should set PlayerView mode to REMOTE, when connected to remote player`() {
-        castListener.onConnected(castSession)
+        castListener.onConnected(casterSession)
 
 
         verify(playerView).switchMode(PlayerControllerMode.REMOTE_CONTROLLER)
@@ -584,7 +592,7 @@ class VideoPlayerMediatorTest {
         whenever(player.isPlaying()).thenReturn(true)
         videoPlayerMediator.playVideo(getSampleEventEntity("id_0"))
 
-        castListener.onConnected(castSession)
+        castListener.onConnected(casterSession)
 
         verify(player).pause()
     }
@@ -594,14 +602,14 @@ class VideoPlayerMediatorTest {
         whenever(player.isPlaying()).thenReturn(false)
         videoPlayerMediator.playVideo(getSampleEventEntity("id_0"))
 
-        castListener.onConnected(castSession)
+        castListener.onConnected(casterSession)
 
         verify(player, never()).pause()
     }
 
     @Test
     fun `should set PlayerView mode to EXO_MODE, when disconnecting from remote player`() {
-        castListener.onDisconnecting(castSession)
+        castListener.onDisconnecting(casterSession)
 
 
         verify(playerView).switchMode(PlayerControllerMode.EXO_MODE)
