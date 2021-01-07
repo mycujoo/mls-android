@@ -22,7 +22,7 @@ import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.VideoPlayer
 import tv.mycujoo.mls.cast.CasterLoadRemoteMediaParams
 import tv.mycujoo.mls.cast.ICastListener
-import tv.mycujoo.mls.cast.ICaster
+import tv.mycujoo.mls.cast.ICast
 import tv.mycujoo.mls.cast.ICasterSession
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
@@ -54,7 +54,7 @@ class VideoPlayerMediator(
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     private val timelineMarkerActionEntities: List<TimelineMarkerEntity>,
-    private val caster: ICaster?,
+    private val cast: ICast?,
     logger: Logger
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
@@ -194,23 +194,23 @@ class VideoPlayerMediator(
             playerView.getRemotePlayerControllerView().listener =
                 object : RemotePlayerControllerListener {
                     override fun onPlay() {
-                        caster?.play()
+                        cast?.play()
                     }
 
                     override fun onPause() {
-                        caster?.pause()
+                        cast?.pause()
                     }
 
                     override fun onSeekTo(newPosition: Long) {
-                        caster?.seekTo(newPosition)
+                        cast?.seekTo(newPosition)
                     }
 
                     override fun onFastForward(amount: Long) {
-                        caster?.fastForward(amount)
+                        cast?.fastForward(amount)
                     }
 
                     override fun onRewind(amount: Long) {
-                        caster?.rewind(amount)
+                        cast?.rewind(amount)
                     }
                 }
         }
@@ -220,7 +220,7 @@ class VideoPlayerMediator(
             playerView.getRemotePlayerControllerView().setDuration(player.duration())
         }
 
-        caster?.let {
+        cast?.let {
             fun onApplicationConnected(casterSession: ICasterSession?) {
                 if (casterSession == null) {
                     return
@@ -350,11 +350,11 @@ class VideoPlayerMediator(
 
 
     fun onResume() {
-        caster?.onResume()
+        cast?.onResume()
     }
 
     fun onPause() {
-        caster?.onPause()
+        cast?.onPause()
     }
 
 
@@ -656,7 +656,7 @@ class VideoPlayerMediator(
             currentPosition = player.currentPosition()
         )
 
-        caster?.loadRemoteMedia(params)
+        cast?.loadRemoteMedia(params)
     }
 
     private fun updatePlaybackLocation(location: PlaybackLocation) {

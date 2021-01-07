@@ -98,7 +98,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
             internalBuilder.dispatcher,
             dataManager,
             emptyList(),
-            builder.mCaster,
+            builder.mCast,
             internalBuilder.logger
         )
 

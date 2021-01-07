@@ -19,7 +19,7 @@ import kotlin.test.assertSame
 
 class CasterTest {
 
-    private lateinit var caster: Caster
+    private lateinit var caster: Cast
     private lateinit var sessionManagerListener: ISessionManagerListener
 
     @Mock
@@ -57,7 +57,7 @@ class CasterTest {
         whenever(sessionManager.currentCastSession).thenReturn(castSession)
         whenever(castSession.remoteMediaClient).thenReturn(remoteMediaClient)
 
-        caster = Caster(castProvider)
+        caster = Cast(castProvider)
         sessionManagerListener = caster.initialize(context, castListener)
     }
 

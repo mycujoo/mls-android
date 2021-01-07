@@ -17,11 +17,11 @@ import tv.mycujoo.mls.cast.helper.CustomDataBuilder
 import tv.mycujoo.mls.cast.helper.MediaInfoBuilder
 
 
-class Caster(
+class Cast(
     miniControllerViewStub: ViewStub? = null,
     private val mediaRouteButton: MediaRouteButton? = null
 ) :
-    ICaster {
+    ICast {
     private lateinit var castContextProvider: ICastContextProvider
     private lateinit var castContext: CastContext
 

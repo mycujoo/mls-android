@@ -26,7 +26,7 @@ import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.MLSConfiguration
 import tv.mycujoo.mls.api.defaultVideoPlayerConfig
-import tv.mycujoo.mls.cast.ICaster
+import tv.mycujoo.mls.cast.ICast
 import tv.mycujoo.mls.cast.ICasterSession
 import tv.mycujoo.mls.cast.ISessionManagerListener
 import tv.mycujoo.mls.data.IDataManager
@@ -135,7 +135,7 @@ class VideoPlayerMediatorTest {
     lateinit var casterSession: ICasterSession
 
     @Mock
-    lateinit var caster: ICaster
+    lateinit var cast: ICast
 
     @Mock
     lateinit var sessionManagerListener: ISessionManagerListener
@@ -179,7 +179,7 @@ class VideoPlayerMediatorTest {
 
         whenever(player.addListener(any())).then { storeExoPlayerListener(it) }
         whenever(
-            caster.initialize(
+            cast.initialize(
                 any(),
                 any()
             )
@@ -195,7 +195,7 @@ class VideoPlayerMediatorTest {
             dispatcher,
             dataManager,
             emptyList(),
-            caster,
+            cast,
             internalBuilder.logger
         )
         videoPlayerMediator.initialize(playerView, player, MLSBuilder)
@@ -566,7 +566,7 @@ class VideoPlayerMediatorTest {
 
         castListener.onConnected(casterSession)
 
-        verify(caster).loadRemoteMedia(any())
+        verify(cast).loadRemoteMedia(any())
     }
 
     @Test
@@ -574,7 +574,7 @@ class VideoPlayerMediatorTest {
         castListener.onConnected(null)
 
 
-        verify(caster, never()).loadRemoteMedia(any())
+        verify(cast, never()).loadRemoteMedia(any())
         verify(playerView, never()).switchMode(any())
         verify(player, never()).isPlaying()
         verify(player, never()).pause()

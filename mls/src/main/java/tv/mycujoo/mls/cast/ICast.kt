@@ -2,7 +2,7 @@ package tv.mycujoo.mls.cast
 
 import android.content.Context
 
-interface ICaster {
+interface ICast {
     fun initialize(context: Context, castListener: ICastListener): ISessionManagerListener
 
     fun loadRemoteMedia(params: CasterLoadRemoteMediaParams)
