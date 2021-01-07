@@ -5,8 +5,6 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player.*
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
-import com.google.android.gms.cast.framework.CastContext
-import com.google.android.gms.cast.framework.SessionManager
 import com.nhaarman.mockitokotlin2.*
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Plugin
@@ -134,12 +132,6 @@ class VideoPlayerMediatorTest {
     lateinit var logger: Logger
 
     @Mock
-    lateinit var castContext: CastContext
-
-    @Mock
-    lateinit var sessionManager: SessionManager
-
-    @Mock
     lateinit var casterSession: ICasterSession
 
     @Mock
@@ -175,7 +167,6 @@ class VideoPlayerMediatorTest {
         whenever(internalBuilder.createExoPlayerAdapter(any())).thenReturn(exoplayer2Adapter)
         whenever(internalBuilder.createYouboraClient(any())).thenReturn(youboraClient)
         whenever(internalBuilder.logger).thenReturn(logger)
-        whenever(castContext.sessionManager).thenReturn(sessionManager)
 
         whenever(playerView.context).thenReturn(activity)
         whenever(playerView.getTimeBar()).thenReturn(timeBar)
