@@ -39,7 +39,6 @@ import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.defaultVideoPlayerConfig
 import tv.mycujoo.mls.core.VideoPlayerMediator
 import tv.mycujoo.mls.data.IDataManager
-import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.enum.LogLevel
 import tv.mycujoo.mls.helper.OverlayFactory
 import tv.mycujoo.mls.helper.OverlayViewHelper
@@ -346,68 +345,6 @@ class MLSPlayerViewTest {
 
         onView(withText("title_0")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
         onView(withText("desc_0")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
-    }
-
-    @Test
-    fun showCastButton() {
-        setupPlayer()
-
-        UiThreadStatement.runOnUiThread {
-            MLSPlayerView.config(
-                VideoPlayerConfig(
-                    primaryColor = "#FFFFFF",
-                    secondaryColor = "#000000",
-                    autoPlay = true,
-                    enableControls = true,
-                    showPlayPauseButtons = true,
-                    showBackForwardsButtons = true,
-                    showSeekBar = true,
-                    showTimers = true,
-                    showFullScreenButton = true,
-                    showLiveViewers = true,
-                    showEventInfoButton = true,
-                    showCastButton = true
-                )
-            )
-        }
-
-
-        onView(withId(R.id.controller_castImageButtonContainer)).check(
-            matches(
-                withEffectiveVisibility(Visibility.VISIBLE)
-            )
-        )
-    }
-
-    @Test
-    fun hideCastButton() {
-        setupPlayer()
-
-        UiThreadStatement.runOnUiThread {
-            MLSPlayerView.config(
-                VideoPlayerConfig(
-                    primaryColor = "#FFFFFF",
-                    secondaryColor = "#000000",
-                    autoPlay = true,
-                    enableControls = true,
-                    showPlayPauseButtons = true,
-                    showBackForwardsButtons = true,
-                    showSeekBar = true,
-                    showTimers = true,
-                    showFullScreenButton = true,
-                    showLiveViewers = true,
-                    showEventInfoButton = true,
-                    showCastButton = false
-                )
-            )
-        }
-
-
-        onView(withId(R.id.controller_castImageButtonContainer)).check(
-            matches(
-                withEffectiveVisibility(Visibility.GONE)
-            )
-        )
     }
 
     @Test

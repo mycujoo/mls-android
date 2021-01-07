@@ -12,9 +12,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.mediarouter.app.MediaRouteButton
 import com.google.android.exoplayer2.ui.TimeBar
-import com.google.android.gms.cast.framework.CastButtonFactory
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.utils.StringUtils
 import tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
@@ -40,7 +38,6 @@ class RemotePlayerControllerView @JvmOverloads constructor(
     private val durationTextView: TextView
 
     private val liveBadgeView: LiveBadgeView
-    private val mediaRouteButton: MediaRouteButton
 
     private var timeFormatBuilder = StringBuilder()
     private var timeFormatter = Formatter(timeFormatBuilder, Locale.getDefault())
@@ -66,8 +63,6 @@ class RemotePlayerControllerView @JvmOverloads constructor(
 
 
         liveBadgeView = findViewById(R.id.remoteControllerLiveBadgeView)
-        mediaRouteButton = findViewById(R.id.mediaRouteButton)
-        CastButtonFactory.setUpMediaRouteButton(context, mediaRouteButton)
     }
 
     private fun initButtonsListener() {
@@ -165,14 +160,6 @@ class RemotePlayerControllerView @JvmOverloads constructor(
 
     fun setBufferingProgressBarsColor(@ColorInt color: Int) {
         bufferingProgressBar.indeterminateTintList = ColorStateList.valueOf(color)
-    }
-
-    fun setCastButtonVisibility(showButton: Boolean) {
-        if (showButton) {
-            mediaRouteButton.visibility = View.VISIBLE
-        } else {
-            mediaRouteButton.visibility = View.GONE
-        }
     }
 
 

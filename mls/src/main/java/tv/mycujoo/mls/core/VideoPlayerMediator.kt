@@ -291,7 +291,7 @@ class VideoPlayerMediator(
                 }
 
                 override fun onCastStateUpdated(showButton: Boolean) {
-                    playerView.setCastButtonVisibility(showButton)
+                    // do nothing
                 }
             }
 

@@ -14,13 +14,11 @@ import androidx.annotation.MainThread
 import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
-import androidx.mediarouter.app.MediaRouteButton
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.PlayerView
-import com.google.android.gms.cast.framework.CastButtonFactory
 import kotlinx.android.synthetic.main.dialog_event_info_pre_event_layout.view.*
 import kotlinx.android.synthetic.main.dialog_event_info_started_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
@@ -158,9 +156,6 @@ class MLSPlayerView @JvmOverloads constructor(
         this.overlayViewHelper = overlayViewHelper
         this.viewHandler = viewHandler
         initMlsTimeBar(timelineMarkers)
-
-        val mediaRouteButton = findViewById<MediaRouteButton>(R.id.controller_mediaRouteButton)
-        CastButtonFactory.setUpMediaRouteButton(context, mediaRouteButton)
     }
 
     private fun initAttributes(attrs: AttributeSet?, context: Context) {
@@ -278,17 +273,6 @@ class MLSPlayerView @JvmOverloads constructor(
 
             }
         }
-    }
-
-    override fun setCastButtonVisibility(showButton: Boolean) {
-        if (showButton) {
-            findViewById<MediaRouteButton>(R.id.controller_mediaRouteButton).visibility =
-                View.VISIBLE
-        } else {
-            findViewById<MediaRouteButton>(R.id.controller_mediaRouteButton).visibility = View.GONE
-        }
-
-        remotePlayerControllerView.setCastButtonVisibility(showButton)
     }
 
     override fun showBuffering() {
@@ -442,13 +426,13 @@ class MLSPlayerView @JvmOverloads constructor(
     }
 
     private fun showCastButton(showCastButton: Boolean) {
-        if (showCastButton) {
-            findViewById<FrameLayout>(R.id.controller_castImageButtonContainer).visibility =
-                VISIBLE
-        } else {
-            findViewById<FrameLayout>(R.id.controller_castImageButtonContainer).visibility =
-                View.GONE
-        }
+//        if (showCastButton) {
+//            findViewById<FrameLayout>(R.id.controller_castImageButtonContainer).visibility =
+//                VISIBLE
+//        } else {
+//            findViewById<FrameLayout>(R.id.controller_castImageButtonContainer).visibility =
+//                View.GONE
+//        }
     }
 
     private fun showSeekBar(showSeekBar: Boolean) {
