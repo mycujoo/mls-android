@@ -1,7 +1,6 @@
 package tv.mycujoo.mls.caster
 
 import android.content.Context
-import com.google.android.gms.cast.MediaSeekOptions
 
 interface ICaster {
     fun initialize(context: Context, castListener: ICastListener): ISessionManagerListener
@@ -9,7 +8,7 @@ interface ICaster {
     fun loadRemoteMedia(params: CasterLoadRemoteMediaParams)
     fun play()
     fun pause()
-    fun seek(mediaSeekOptions: MediaSeekOptions?)
+    fun seekTo(position: Long)
     fun fastForward(amount: Long)
 
 

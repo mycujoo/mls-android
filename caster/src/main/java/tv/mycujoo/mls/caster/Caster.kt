@@ -157,7 +157,8 @@ class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
         getRemoteMediaClient()?.pause()
     }
 
-    override fun seek(mediaSeekOptions: MediaSeekOptions?) {
+    override fun seekTo(position: Long) {
+        val mediaSeekOptions = MediaSeekOptions.Builder().setPosition(position).build()
         getRemoteMediaClient()?.seek(mediaSeekOptions)
     }
 

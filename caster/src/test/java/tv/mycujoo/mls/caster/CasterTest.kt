@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.caster
 
 import android.content.Context
+import com.google.android.gms.cast.MediaSeekOptions
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.SessionManager
@@ -10,8 +11,10 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
 class CasterTest {
@@ -128,5 +131,16 @@ class CasterTest {
         caster.onResume()
 
         verify(castListener).onPlaybackLocationUpdated(false)
+    }
+
+    @Test
+    fun `onSeekTo calls remote-media-client with position as value`() {
+        val position = 5000L
+        caster.seekTo(position)
+
+
+        val mediaSeekOptionsCaptor = ArgumentCaptor.forClass(MediaSeekOptions::class.java)
+        verify(remoteMediaClient).seek(mediaSeekOptionsCaptor.capture())
+        assertEquals(position, mediaSeekOptionsCaptor.value.position)
     }
 }

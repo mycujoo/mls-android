@@ -30,6 +30,7 @@ import tv.mycujoo.mls.api.MLSConfiguration
 import tv.mycujoo.mls.api.defaultVideoPlayerConfig
 import tv.mycujoo.mls.caster.ICaster
 import tv.mycujoo.mls.caster.ICasterSession
+import tv.mycujoo.mls.caster.ISessionManagerListener
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.manager.Logger
@@ -143,6 +144,9 @@ class VideoPlayerMediatorTest {
 
     @Mock
     lateinit var caster: ICaster
+
+    @Mock
+    lateinit var sessionManagerListener: ISessionManagerListener
     lateinit var castListener: tv.mycujoo.mls.caster.ICastListener
 
 
@@ -183,7 +187,16 @@ class VideoPlayerMediatorTest {
 
 
         whenever(player.addListener(any())).then { storeExoPlayerListener(it) }
-        whenever(caster.initialize(any(), any())).then { storeCastListener(it) }
+        whenever(
+            caster.initialize(
+                any(),
+                any()
+            )
+        )
+            .thenAnswer {
+                storeCastListener(it)
+                return@thenAnswer sessionManagerListener
+            }
         videoPlayerMediator = VideoPlayerMediator(
             videoPlayerConfig,
             viewHandler,

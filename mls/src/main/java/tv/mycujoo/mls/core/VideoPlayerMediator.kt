@@ -7,7 +7,6 @@ import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.ui.TimeBar
-import com.google.android.gms.cast.MediaSeekOptions
 import com.npaw.youbora.lib6.plugin.Options
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +21,7 @@ import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.VideoPlayer
 import tv.mycujoo.mls.caster.CasterLoadRemoteMediaParams
+import tv.mycujoo.mls.caster.ICastListener
 import tv.mycujoo.mls.caster.ICaster
 import tv.mycujoo.mls.caster.ICasterSession
 import tv.mycujoo.mls.data.IDataManager
@@ -202,9 +202,7 @@ class VideoPlayerMediator(
                     }
 
                     override fun onSeekTo(newPosition: Long) {
-                        val mediaSeekOptions =
-                            MediaSeekOptions.Builder().setPosition(newPosition).build()
-                        caster?.seek(mediaSeekOptions)
+                        caster?.seekTo(newPosition)
                     }
 
                     override fun onFastForward(amount: Long) {
@@ -257,7 +255,7 @@ class VideoPlayerMediator(
                 switchControllerMode(LOCAL)
             }
 
-            val castListener = object : tv.mycujoo.mls.caster.ICastListener {
+            val castListener: ICastListener = object : ICastListener {
                 override fun onPlaybackLocationUpdated(isLocal: Boolean) {
                     if (isLocal) {
                         updatePlaybackLocation(LOCAL)
