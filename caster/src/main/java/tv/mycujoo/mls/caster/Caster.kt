@@ -3,8 +3,10 @@ package tv.mycujoo.mls.caster
 import android.content.Context
 import android.net.wifi.p2p.WifiP2pDevice.CONNECTED
 import android.view.ViewStub
+import androidx.mediarouter.app.MediaRouteButton
 import com.google.android.gms.cast.MediaLoadOptions
 import com.google.android.gms.cast.MediaSeekOptions
+import com.google.android.gms.cast.framework.CastButtonFactory
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.CastState.*
@@ -15,7 +17,11 @@ import tv.mycujoo.mls.caster.helper.CustomDataBuilder
 import tv.mycujoo.mls.caster.helper.MediaInfoBuilder
 
 
-class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
+class Caster(
+    miniControllerViewStub: ViewStub? = null,
+    private val mediaRouteButton: MediaRouteButton? = null
+) :
+    ICaster {
     private lateinit var castContextProvider: ICastContextProvider
     private lateinit var castContext: CastContext
 
@@ -25,20 +31,26 @@ class Caster(miniControllerViewStub: ViewStub? = null) : ICaster {
     private lateinit var castListener: ICastListener
 
     constructor(
-        castContextProvider: ICastContextProvider,
-        miniControllerViewStub: ViewStub? = null
-    ) : this(miniControllerViewStub) {
+        castContextProvider: ICastContextProvider
+    ) : this() {
         this.castContextProvider = castContextProvider
     }
 
     init {
         inflateMiniController(miniControllerViewStub)
+        initMediaRouteButton()
     }
 
     private fun inflateMiniController(miniControllerViewStub: ViewStub?) {
         miniControllerViewStub?.let {
             it.layoutResource = R.layout.view_cast_mini_controller
             it.inflate()
+        }
+    }
+
+    private fun initMediaRouteButton() {
+        mediaRouteButton?.let {
+            CastButtonFactory.setUpMediaRouteButton(it.context, it)
         }
     }
 
