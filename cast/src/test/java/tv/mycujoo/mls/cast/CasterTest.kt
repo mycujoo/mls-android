@@ -1,4 +1,4 @@
-package tv.mycujoo.mls.caster
+package tv.mycujoo.mls.cast
 
 import android.content.Context
 import com.google.android.gms.cast.MediaSeekOptions

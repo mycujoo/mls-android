@@ -1,4 +1,4 @@
-package tv.mycujoo.mls.caster
+package tv.mycujoo.mls.cast
 
 import tv.mycujoo.domain.entity.Widevine
 

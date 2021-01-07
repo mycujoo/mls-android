@@ -1,4 +1,4 @@
-package tv.mycujoo.mls.caster
+package tv.mycujoo.mls.cast
 
 interface ISessionManagerListener {
     fun onSessionStarted(session: ICasterSession?, sessionId: String?)

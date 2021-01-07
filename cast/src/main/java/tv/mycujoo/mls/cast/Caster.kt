@@ -1,4 +1,4 @@
-package tv.mycujoo.mls.caster
+package tv.mycujoo.mls.cast
 
 import android.content.Context
 import android.net.wifi.p2p.WifiP2pDevice.CONNECTED
@@ -13,8 +13,8 @@ import com.google.android.gms.cast.framework.CastState.*
 
 import com.google.android.gms.cast.framework.SessionManagerListener
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
-import tv.mycujoo.mls.caster.helper.CustomDataBuilder
-import tv.mycujoo.mls.caster.helper.MediaInfoBuilder
+import tv.mycujoo.mls.cast.helper.CustomDataBuilder
+import tv.mycujoo.mls.cast.helper.MediaInfoBuilder
 
 
 class Caster(

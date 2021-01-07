@@ -1,4 +1,4 @@
-package tv.mycujoo.mls.caster
+package tv.mycujoo.mls.cast
 
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 

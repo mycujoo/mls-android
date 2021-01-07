@@ -20,10 +20,10 @@ import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.VideoPlayer
-import tv.mycujoo.mls.caster.CasterLoadRemoteMediaParams
-import tv.mycujoo.mls.caster.ICastListener
-import tv.mycujoo.mls.caster.ICaster
-import tv.mycujoo.mls.caster.ICasterSession
+import tv.mycujoo.mls.cast.CasterLoadRemoteMediaParams
+import tv.mycujoo.mls.cast.ICastListener
+import tv.mycujoo.mls.cast.ICaster
+import tv.mycujoo.mls.cast.ICasterSession
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.enum.C

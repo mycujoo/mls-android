@@ -26,9 +26,9 @@ import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.MLSConfiguration
 import tv.mycujoo.mls.api.defaultVideoPlayerConfig
-import tv.mycujoo.mls.caster.ICaster
-import tv.mycujoo.mls.caster.ICasterSession
-import tv.mycujoo.mls.caster.ISessionManagerListener
+import tv.mycujoo.mls.cast.ICaster
+import tv.mycujoo.mls.cast.ICasterSession
+import tv.mycujoo.mls.cast.ISessionManagerListener
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.manager.Logger
@@ -139,7 +139,7 @@ class VideoPlayerMediatorTest {
 
     @Mock
     lateinit var sessionManagerListener: ISessionManagerListener
-    lateinit var castListener: tv.mycujoo.mls.caster.ICastListener
+    lateinit var castListener: tv.mycujoo.mls.cast.ICastListener
 
 
     @Before
@@ -209,8 +209,8 @@ class VideoPlayerMediatorTest {
     }
 
     private fun storeCastListener(invocationOnMock: InvocationOnMock) {
-        if (invocationOnMock.arguments[1] is tv.mycujoo.mls.caster.ICastListener) {
-            castListener = invocationOnMock.arguments[1] as tv.mycujoo.mls.caster.ICastListener
+        if (invocationOnMock.arguments[1] is tv.mycujoo.mls.cast.ICastListener) {
+            castListener = invocationOnMock.arguments[1] as tv.mycujoo.mls.cast.ICastListener
         }
     }
 

@@ -3,7 +3,7 @@ package tv.mycujoo.mls.api
 import android.app.Activity
 import android.content.Context
 import com.google.android.exoplayer2.SimpleExoPlayer
-import tv.mycujoo.mls.caster.ICaster
+import tv.mycujoo.mls.cast.ICaster
 import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
