@@ -15,4 +15,6 @@ interface ICast {
     fun rewind(amount: Long)
     fun onResume()
     fun onPause()
+    fun currentPosition(): Long?
+
 }

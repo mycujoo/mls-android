@@ -21,8 +21,8 @@ import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.VideoPlayer
 import tv.mycujoo.mls.cast.CasterLoadRemoteMediaParams
-import tv.mycujoo.mls.cast.ICastListener
 import tv.mycujoo.mls.cast.ICast
+import tv.mycujoo.mls.cast.ICastListener
 import tv.mycujoo.mls.cast.ICasterSession
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
@@ -220,15 +220,16 @@ class VideoPlayerMediator(
             playerView.getRemotePlayerControllerView().setDuration(player.duration())
         }
 
+
         cast?.let {
             fun onApplicationConnected(casterSession: ICasterSession?) {
                 if (casterSession == null) {
                     return
                 }
+                updateRemotePlayerWithLocalPlayerData()
                 updatePlaybackLocation(REMOTE)
                 switchControllerMode(REMOTE)
                 addRemotePlayerControllerListener()
-                updateRemotePlayerWithLocalPlayerData()
                 dataManager.currentEvent?.let {
                     loadRemoteMedia(it)
                 }
@@ -255,6 +256,19 @@ class VideoPlayerMediator(
                 switchControllerMode(LOCAL)
             }
 
+            fun onCastSessionResumed(casterSession: ICasterSession?) {
+                if (casterSession == null) {
+                    return
+                }
+                updatePlaybackLocation(REMOTE)
+                switchControllerMode(REMOTE)
+                addRemotePlayerControllerListener()
+                if (player.isPlaying()) {
+                    player.pause()
+                }
+
+            }
+
             val castListener: ICastListener = object : ICastListener {
                 override fun onPlaybackLocationUpdated(isLocal: Boolean) {
                     if (isLocal) {
@@ -274,6 +288,10 @@ class VideoPlayerMediator(
 
                 override fun onDisconnected(session: ICasterSession?) {
                     onApplicationDisconnected(session)
+                }
+
+                override fun onSessionResumed(session: ICasterSession?) {
+                    onCastSessionResumed(session)
                 }
 
                 override fun onRemoteProgressUpdate(progressMs: Long, durationMs: Long) {
