@@ -85,6 +85,13 @@ class Cast(
     }
 
     private fun initSessionManagerWrapper(castListener: ICastListener): SessionManagerWrapper {
+        val remoteMediaClientCallback = object : RemoteMediaClient.Callback() {
+            override fun onStatusUpdated() {
+                super.onStatusUpdated()
+                castListener.onRemoteMediaStatusUpdated(casterSession.castSession?.remoteMediaClient?.mediaInfo?.toJson())
+            }
+        }
+
 
         val progressListener =
             RemoteMediaClient.ProgressListener { progressMs, durationMs ->
@@ -118,6 +125,10 @@ class Cast(
                     progressListener,
                     UPDATE_INTERVAL
                 )
+
+                casterSession.castSession?.remoteMediaClient?.registerCallback(
+                    remoteMediaClientCallback
+                )
             }
 
             override fun onSessionResumeFailed(session: ICasterSession?, error: Int) {
@@ -132,6 +143,10 @@ class Cast(
 
             override fun onSessionEnded(session: ICasterSession?, error: Int) {
                 castListener.onSessionEnded(casterSession)
+                casterSession.castSession?.remoteMediaClient?.unregisterCallback(
+                    remoteMediaClientCallback
+                )
+
             }
         }
 

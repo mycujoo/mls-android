@@ -1,5 +1,7 @@
 package tv.mycujoo.mls.cast
 
+import org.json.JSONObject
+
 interface ICastListener {
     fun onPlaybackLocationUpdated(isLocal: Boolean)
     fun onSessionStarted(session: ICasterSession?)
@@ -13,4 +15,6 @@ interface ICastListener {
     fun onRemotePlayStatusUpdate(isPlaying: Boolean, isBuffering: Boolean)
     fun onRemoteLiveStatusUpdate(isLive: Boolean)
     fun onCastStateUpdated(showButton: Boolean)
+
+    fun onRemoteMediaStatusUpdated(json: JSONObject?)
 }

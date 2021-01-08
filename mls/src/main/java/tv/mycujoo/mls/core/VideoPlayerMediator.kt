@@ -12,6 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.Stream
@@ -222,7 +223,7 @@ class VideoPlayerMediator(
 
 
         cast?.let {
-            fun onApplicationConnected(casterSession: ICasterSession?) {
+            fun onCastSessionStarted(casterSession: ICasterSession?) {
                 if (casterSession == null) {
                     return
                 }
@@ -278,6 +279,18 @@ class VideoPlayerMediator(
                     }
                 }
 
+                override fun onSessionStarted(session: ICasterSession?) {
+                    onCastSessionStarted(session)
+                }
+
+                override fun onSessionStartFailed(session: ICasterSession?) {
+                    onApplicationDisconnected(session)
+                }
+
+                override fun onSessionResumed(session: ICasterSession?) {
+                    onCastSessionResumed(session)
+                }
+
                 override fun onSessionResumeFailed(session: ICasterSession?) {
                     onApplicationDisconnecting(session)
                 }
@@ -288,18 +301,6 @@ class VideoPlayerMediator(
 
                 override fun onSessionEnded(session: ICasterSession?) {
                     onApplicationDisconnecting(session)
-                }
-
-                override fun onSessionStarted(session: ICasterSession?) {
-                    onApplicationConnected(session)
-                }
-
-                override fun onSessionStartFailed(session: ICasterSession?) {
-                    onApplicationDisconnected(session)
-                }
-
-                override fun onSessionResumed(session: ICasterSession?) {
-                    onCastSessionResumed(session)
                 }
 
                 override fun onRemoteProgressUpdate(progressMs: Long, durationMs: Long) {
@@ -314,6 +315,10 @@ class VideoPlayerMediator(
                 override fun onRemoteLiveStatusUpdate(isLive: Boolean) {
                     playerView.getRemotePlayerControllerView()
                         .setLiveMode(if (isLive) LIVE_ON_THE_EDGE else VOD)
+                }
+
+                override fun onRemoteMediaStatusUpdated(json: JSONObject?) {
+                    json
                 }
 
                 override fun onCastStateUpdated(showButton: Boolean) {
