@@ -1,6 +1,6 @@
 apply plugin: 'com.jfrog.bintray'
 
-version = '1.0.0-alpha04' // LIBRARY VERSION
+version = '1.0.0-alpha01' // LIBRARY VERSION
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
@@ -32,10 +32,10 @@ bintray {
     pkg {
         repo = 'mls'
         userOrg = 'mycujoo'
-        name = 'tv.mycujoo.mls-caster' // PACKAGE NAME
-        desc = 'Caster module of MLS Android SDK' // LIBRARY DESCRIPTION
-        websiteUrl = 'https://github.com/mycujoo/mls-caster' // SITE
-        vcsUrl = 'https://github.com/mycujoo/mls-caster.git' // GIT REPO
+        name = 'cast' // PACKAGE NAME
+        desc = 'Cast module of MLS Android SDK' // LIBRARY DESCRIPTION
+        websiteUrl = 'https://github.com/mycujoo/mls-android' // SITE
+        vcsUrl = 'https://github.com/mycujoo/mls-android.git' // GIT REPO
         licenses = ["Apache-2.0"] // A LIST OF LICENCES
         publish = true
         publicDownloadNumbers = true
