@@ -278,15 +278,23 @@ class VideoPlayerMediator(
                     }
                 }
 
-                override fun onConnected(session: ICasterSession?) {
-                    onApplicationConnected(session)
-                }
-
-                override fun onDisconnecting(session: ICasterSession?) {
+                override fun onSessionResumeFailed(session: ICasterSession?) {
                     onApplicationDisconnecting(session)
                 }
 
-                override fun onDisconnected(session: ICasterSession?) {
+                override fun onSessionEnding(session: ICasterSession?) {
+                    onApplicationDisconnecting(session)
+                }
+
+                override fun onSessionEnded(session: ICasterSession?) {
+                    onApplicationDisconnecting(session)
+                }
+
+                override fun onSessionStarted(session: ICasterSession?) {
+                    onApplicationConnected(session)
+                }
+
+                override fun onSessionStartFailed(session: ICasterSession?) {
                     onApplicationDisconnected(session)
                 }
 

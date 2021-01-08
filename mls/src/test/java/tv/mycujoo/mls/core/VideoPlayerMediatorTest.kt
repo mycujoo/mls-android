@@ -67,14 +67,11 @@ class VideoPlayerMediatorTest {
     @Mock
     lateinit var internalBuilder: InternalBuilder
 
-
     @Mock
     lateinit var videoPlayerConfig: VideoPlayerConfig
 
-
     lateinit var reactorSocket: ReactorSocket
     private lateinit var mainWebSocketListener: MainWebSocketListener
-
 
     @Mock
     lateinit var reactorListener: ReactorListener
@@ -564,14 +561,14 @@ class VideoPlayerMediatorTest {
             )
         whenever(dataManager.currentEvent).thenReturn(event)
 
-        castListener.onConnected(casterSession)
+        castListener.onSessionStarted(casterSession)
 
         verify(cast).loadRemoteMedia(any())
     }
 
     @Test
     fun `should do nothing, when connected to remote player with null cast-session`() {
-        castListener.onConnected(null)
+        castListener.onSessionStarted(null)
 
 
         verify(cast, never()).loadRemoteMedia(any())
@@ -583,7 +580,7 @@ class VideoPlayerMediatorTest {
 
     @Test
     fun `should set PlayerView mode to REMOTE, when connected to remote player`() {
-        castListener.onConnected(casterSession)
+        castListener.onSessionStarted(casterSession)
 
 
         verify(playerView).switchMode(PlayerControllerMode.REMOTE_CONTROLLER)
@@ -595,7 +592,7 @@ class VideoPlayerMediatorTest {
         whenever(player.isPlaying()).thenReturn(true)
         videoPlayerMediator.playVideo(getSampleEventEntity("id_0"))
 
-        castListener.onConnected(casterSession)
+        castListener.onSessionStarted(casterSession)
 
         verify(player).pause()
     }
@@ -605,14 +602,14 @@ class VideoPlayerMediatorTest {
         whenever(player.isPlaying()).thenReturn(false)
         videoPlayerMediator.playVideo(getSampleEventEntity("id_0"))
 
-        castListener.onConnected(casterSession)
+        castListener.onSessionStarted(casterSession)
 
         verify(player, never()).pause()
     }
 
     @Test
     fun `should set PlayerView mode to EXO_MODE, when disconnecting from remote player`() {
-        castListener.onDisconnecting(casterSession)
+        castListener.onSessionEnding(casterSession)
 
 
         verify(playerView).switchMode(PlayerControllerMode.EXO_MODE)

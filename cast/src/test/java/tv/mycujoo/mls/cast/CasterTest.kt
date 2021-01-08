@@ -62,45 +62,45 @@ class CasterTest {
     }
 
     @Test
-    fun `caster STARTED, must notify listener ON_CONNECTED`() {
+    fun `caster STARTED, must notify listener STARTED`() {
         sessionManagerListener.onSessionStarted(casterSession, "")
 
-        verify(castListener).onConnected(any())
+        verify(castListener).onSessionStarted(any())
     }
 
     @Test
-    fun `caster START_FAILED, must notify listener ON_DISCONNECTED`() {
+    fun `caster START_FAILED, must notify listener START_FAILED`() {
         sessionManagerListener.onSessionStartFailed(casterSession, 0)
 
-        verify(castListener).onDisconnected(any())
+        verify(castListener).onSessionStartFailed(any())
     }
 
     @Test
-    fun `caster RESUMED, must notify listener ON_CONNECTED`() {
+    fun `caster RESUMED, must notify listener RESUMED`() {
         sessionManagerListener.onSessionResumed(casterSession, false)
 
-        verify(castListener).onConnected(any())
+        verify(castListener).onSessionResumed(any())
     }
 
     @Test
-    fun `caster RESUMED_FAILED, must notify listener ON_DISCONNECTED`() {
+    fun `caster RESUMED_FAILED, must notify listener RESUMED_FAILED`() {
         sessionManagerListener.onSessionResumeFailed(casterSession, 0)
 
-        verify(castListener).onDisconnected(any())
+        verify(castListener).onSessionResumeFailed(any())
     }
 
     @Test
-    fun `caster SESSION_ENDING, must notify listener ON_CONNECTING`() {
+    fun `caster SESSION_ENDING, must notify listener SESSION_ENDING`() {
         sessionManagerListener.onSessionEnding(casterSession)
 
-        verify(castListener).onDisconnecting(any())
+        verify(castListener).onSessionEnding(any())
     }
 
     @Test
-    fun `caster SESSION_ENDED, must notify listener ON_DISCONNECTED`() {
+    fun `caster SESSION_ENDED, must notify listener SESSION_ENDED`() {
         sessionManagerListener.onSessionEnded(casterSession, 0)
 
-        verify(castListener).onDisconnected(any())
+        verify(castListener).onSessionEnded(any())
     }
 
     @Test

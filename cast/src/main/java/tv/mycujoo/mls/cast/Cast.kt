@@ -1,7 +1,6 @@
 package tv.mycujoo.mls.cast
 
 import android.content.Context
-import android.net.wifi.p2p.WifiP2pDevice.CONNECTED
 import android.view.ViewStub
 import androidx.mediarouter.app.MediaRouteButton
 import com.google.android.gms.cast.MediaLoadOptions
@@ -10,7 +9,6 @@ import com.google.android.gms.cast.framework.CastButtonFactory
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.CastState.*
-
 import com.google.android.gms.cast.framework.SessionManagerListener
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import tv.mycujoo.mls.cast.helper.CustomDataBuilder
@@ -103,7 +101,7 @@ class Cast(
             private val UPDATE_INTERVAL: Long = 500L
 
             override fun onSessionStarted(session: ICasterSession?, sessionId: String?) {
-                castListener.onConnected(casterSession)
+                castListener.onSessionStarted(casterSession)
                 casterSession.castSession?.remoteMediaClient?.addProgressListener(
                     progressListener,
                     UPDATE_INTERVAL
@@ -111,26 +109,29 @@ class Cast(
             }
 
             override fun onSessionStartFailed(session: ICasterSession?, error: Int) {
-                castListener.onDisconnected(casterSession)
+                castListener.onSessionStartFailed(casterSession)
             }
 
             override fun onSessionResumed(session: ICasterSession?, wasSuspended: Boolean) {
-                castListener.onConnected(casterSession)
+                castListener.onSessionResumed(casterSession)
+                casterSession.castSession?.remoteMediaClient?.addProgressListener(
+                    progressListener,
+                    UPDATE_INTERVAL
+                )
             }
 
             override fun onSessionResumeFailed(session: ICasterSession?, error: Int) {
-                castListener.onDisconnected(casterSession)
+                castListener.onSessionResumeFailed(casterSession)
 
             }
 
             override fun onSessionEnding(session: ICasterSession?) {
-                castListener.onDisconnecting(casterSession)
+                castListener.onSessionEnding(casterSession)
 
             }
 
             override fun onSessionEnded(session: ICasterSession?, error: Int) {
-                castListener.onDisconnected(casterSession)
-
+                castListener.onSessionEnded(casterSession)
             }
         }
 
@@ -192,6 +193,9 @@ class Cast(
         }
     }
 
+    override fun currentPosition(): Long? {
+        return getRemoteMediaClient()?.approximateStreamPosition
+    }
 
     private fun getRemoteMediaClient(): RemoteMediaClient? {
         return casterSession.castSession?.remoteMediaClient
