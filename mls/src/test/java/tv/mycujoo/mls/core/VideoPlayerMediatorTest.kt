@@ -615,6 +615,22 @@ class VideoPlayerMediatorTest {
         verify(playerView).switchMode(PlayerControllerMode.EXO_MODE)
     }
 
+    @Test
+    fun `onStart and onResume of cast session, stop Youbora`() {
+        castListener.onSessionStarted(casterSession)
+        castListener.onSessionResumed(casterSession)
+
+
+        verify(youboraClient, times(2)).stop()
+    }
+
+    @Test
+    fun `onEnded of cast session, start Youbora`() {
+        castListener.onSessionEnded(casterSession)
+
+
+        verify(youboraClient).start()
+    }
 
     /**endregion */
 

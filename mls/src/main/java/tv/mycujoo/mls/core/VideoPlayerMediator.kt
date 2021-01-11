@@ -222,25 +222,10 @@ class VideoPlayerMediator(
 
 
         cast?.let {
-            fun onCastSessionStarted(casterSession: ICasterSession?) {
-                if (casterSession == null) {
-                    return
-                }
-                updateRemotePlayerWithLocalPlayerData()
-                updatePlaybackLocation(REMOTE)
-                switchControllerMode(REMOTE)
-                addRemotePlayerControllerListener()
-                dataManager.currentEvent?.let {
-                    loadRemoteMedia(it)
-                }
-                if (player.isPlaying()) {
-                    player.pause()
-                }
-            }
-
-            fun onApplicationDisconnecting(casterSession: ICasterSession?) {
+            fun onApplicationDisconnected(casterSession: ICasterSession?) {
                 updatePlaybackLocation(LOCAL)
                 switchControllerMode(LOCAL)
+                startYoubora()
                 casterSession?.getRemoteMediaClient()?.let { remoteMediaClient ->
                     player.seekTo(remoteMediaClient.approximateStreamPosition())
                     if (remoteMediaClient.isPlaying()) {
@@ -251,22 +236,34 @@ class VideoPlayerMediator(
                 }
             }
 
-            fun onApplicationDisconnected(casterSession: ICasterSession?) {
-                updatePlaybackLocation(LOCAL)
-                switchControllerMode(LOCAL)
+            fun onCastSessionStarted(casterSession: ICasterSession?) {
+                if (casterSession == null) {
+                    return
+                }
+                updateRemotePlayerWithLocalPlayerData()
+                updatePlaybackLocation(REMOTE)
+                switchControllerMode(REMOTE)
+                addRemotePlayerControllerListener()
+                stopYoubora()
+                dataManager.currentEvent?.let {
+                    loadRemoteMedia(it)
+                }
+                if (player.isPlaying()) {
+                    player.pause()
+                }
             }
 
             fun onCastSessionResumed(casterSession: ICasterSession?) {
                 if (casterSession == null) {
                     return
                 }
+                stopYoubora()
                 updatePlaybackLocation(REMOTE)
                 switchControllerMode(REMOTE)
                 addRemotePlayerControllerListener()
                 if (player.isPlaying()) {
                     player.pause()
                 }
-
             }
 
             val castListener: ICastListener = object : ICastListener {
@@ -291,15 +288,15 @@ class VideoPlayerMediator(
                 }
 
                 override fun onSessionResumeFailed(session: ICasterSession?) {
-                    onApplicationDisconnecting(session)
+                    onApplicationDisconnected(session)
                 }
 
                 override fun onSessionEnding(session: ICasterSession?) {
-                    onApplicationDisconnecting(session)
+                    onApplicationDisconnected(session)
                 }
 
                 override fun onSessionEnded(session: ICasterSession?) {
-                    onApplicationDisconnecting(session)
+                    onApplicationDisconnected(session)
                 }
 
                 override fun onRemoteProgressUpdate(progressMs: Long, durationMs: Long) {
@@ -498,7 +495,6 @@ class VideoPlayerMediator(
     }
 
     private fun play(stream: Stream) {
-
         if (stream.widevine?.fullUrl != null && stream.widevine.licenseUrl != null) {
             player.play(
                 stream.widevine.fullUrl,
@@ -509,7 +505,6 @@ class VideoPlayerMediator(
         } else if (stream.fullUrl != null) {
             player.play(stream.fullUrl, stream.getDvrWindowSize(), videoPlayerConfig.autoPlay)
         }
-
     }
     /**endregion */
 
@@ -556,6 +551,21 @@ class VideoPlayerMediator(
             }
         }
 
+    }
+
+    /**endregion */
+
+    /**region Youbora functions*/
+    private fun startYoubora() {
+        if (hasAnalytic) {
+            youboraClient.start()
+        }
+    }
+
+    private fun stopYoubora() {
+        if (hasAnalytic) {
+            youboraClient.stop()
+        }
     }
 
     /**endregion */
@@ -696,6 +706,7 @@ class VideoPlayerMediator(
         }
     }
 
+    /**endregion */
 
     private fun storeEvent(eventEntity: EventEntity) {
         dataManager.currentEvent = eventEntity
