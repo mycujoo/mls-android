@@ -227,6 +227,21 @@ class MLSPlayerViewTest {
     }
 
     @Test
+    fun displayGeoBlockedDialogTest() {
+        MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
+
+
+        MLSPlayerView.showCustomInformationDialog("This stream cannot be watched in your area.")
+
+
+        onView(withText("This stream cannot be watched in your area.")).check(
+            matches(
+                withEffectiveVisibility(Visibility.VISIBLE)
+            )
+        )
+    }
+
+    @Test
     fun displayEventInfoForPreEvent_shouldDisplayEventInfoWithData() {
         MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 

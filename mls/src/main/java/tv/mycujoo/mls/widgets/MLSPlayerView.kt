@@ -546,6 +546,24 @@ class MLSPlayerView @JvmOverloads constructor(
         eventDateTime = startTime
     }
 
+    override fun showCustomInformationDialog(message: String) {
+        post {
+            playerView.hideController()
+
+            val informationDialog =
+                LayoutInflater.from(context)
+                    .inflate(R.layout.dialog_event_info_pre_event_layout, this, false)
+            eventInfoDialogContainerLayout.addView(informationDialog)
+            informationDialog.eventInfoPreEventDialog_canvasView.visibility = View.VISIBLE
+            informationDialog.eventInfoPreEventDialog_posterView.visibility = View.GONE
+
+            informationDialog.eventInfoPreEventDialog_titleTextView.text = eventInfoTitle
+            informationDialog.informationDialog_bodyTextView.text = message
+            informationDialog.informationDialog_bodyTextView.setTextColor(Color.RED)
+            informationDialog.informationDialog_dateTimeTextView.visibility = View.GONE
+        }
+    }
+
     override fun showEventInformationForPreEvent() {
         post {
             playerView.hideController()
@@ -571,11 +589,7 @@ class MLSPlayerView @JvmOverloads constructor(
                 informationDialog.informationDialog_dateTimeTextView.text =
                     DateTimeHelper.getDateTime(eventDateTime)
             }
-
-
         }
-
-
     }
 
     override fun showEventInfoForStartedEvents() {
@@ -645,7 +659,6 @@ class MLSPlayerView @JvmOverloads constructor(
                 View.GONE
         }
     }
-
     /**endregion */
 
 
