@@ -1,11 +1,22 @@
-[ ![Download](https://api.bintray.com/packages/mycujoo/mls/tv.mycujoo.mls-caster/images/download.svg) ](https://bintray.com/mycujoo/mls/tv.mycujoo.mls-caster/_latestVersion)
-# MLS Caster module
-In order to use Google Cast support in MLS-SDK, import Caster module by adding the following to your app level build.gradle file:
+[ ![Download](https://api.bintray.com/packages/mycujoo/mls/cast/images/download.svg) ](https://bintray.com/mycujoo/mls/cast/_latestVersion)
+# MLS Cast module
+In order to use Google Cast support in MLS-SDK, import MLS-Cast module by adding the following to your app level build.gradle file:
 
-        implementation 'tv.mycujoo.mls-android:mls:MLS_CASTER_LATEST_VERSION_HERE'
-then, instantiate Caster and provide it while building MLS-component:
+        implementation 'tv.mycujoo.mls-android:cast:[MLS_CASTER_LATEST_VERSION_HERE]'
+        
+Inherit MLSCastOptionsProviderAbstract class in your app and provide it's class path in app Manifest file as below:
 
-        .setCaster(Caster(mainActivity_miniControllerPlaceHolder))
+        <meta-data
+            android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
+            android:value="[CLASS_PATH_HERE]" />
+            
+then, instantiate MLS-Cast and provide it while building MLS-component:
+
+        .setCaster(
+            Cast(
+                miniControllerViewStub, // Optional: a ViewStub to host Cast mini-controller
+                mediaRouteButton        // Optional: a MediaRouteButton component which MLS-Cast will setup. No need to call setup on user side.
+                ))
         
 For example:
 
@@ -14,26 +25,5 @@ For example:
             .setPlayerEventsListener(playerEventsListener)
             .setUIEventListener(uiEventListener)
             .setConfiguration(mlsConfiguration) // customize MLSConfiguration by providing
-            .setCaster(Caster(miniControllerPlaceHolder))
+            .setCaster(Caster(miniControllerViewStub))
             .build()
-
-In this example mainActivity_miniControllerPlaceHolder is a ViewStub where you want the Cast Mini-controller to be inflated.
-Don't forget to use 'true' for showCastButton in VideoPlayer configuration.
-
-        // Customize configuration, or use default values
-        val videoPlayerConfig = VideoPlayerConfig(
-            primaryColor = "#FFFF00",
-            secondaryColor = "#32CD32",
-            autoPlay = false,
-            enableControls = true,
-            showPlayPauseButtons = true,
-            showBackForwardsButtons = true,
-            showSeekBar = true,
-            showTimers = true,
-            showFullScreenButton = false,
-            showLiveViewers = true,
-            showEventInfoButton = true,
-            showCastButton = true // IMPORTANT!
-        )
-        val mlsConfiguration =
-            MLSConfiguration(seekTolerance = 1000L, videoPlayerConfig = videoPlayerConfig)
