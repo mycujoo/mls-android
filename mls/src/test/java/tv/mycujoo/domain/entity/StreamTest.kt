@@ -59,4 +59,26 @@ class StreamTest {
 
         assert(stream.isNoEntitlement())
     }
+
+    @Test
+    fun `regular stream should return false for hasUnknownError`() {
+        val stream = Stream("id_0", "120000", null, null)
+
+
+        assertFalse(stream.hasUnknownError())
+    }
+
+    @Test
+    fun `stream with unknown-error should return true for hasUnknownError`() {
+        val streamWithUnknownError = Stream(
+            "id_0", "120000", null, null,
+            error = tv.mycujoo.domain.entity.Error(
+                code = "ERROR_CODE_UNSPECIFIED",
+                message = null
+            )
+        )
+
+
+        assert(streamWithUnknownError.hasUnknownError())
+    }
 }
