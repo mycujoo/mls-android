@@ -49,7 +49,7 @@ open class MLSBuilder {
         this.mlsConfiguration = mlsConfiguration
     }
 
-    fun setCaster(cast: ICast) = apply {
+    fun setCast(cast: ICast) = apply {
         this.mCast = cast
     }
 
