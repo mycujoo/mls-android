@@ -7,9 +7,6 @@ import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.ui.TimeBar
-import com.google.android.gms.cast.MediaLoadOptions
-import com.google.android.gms.cast.MediaSeekOptions
-import com.google.android.gms.cast.framework.CastSession
 import com.npaw.youbora.lib6.plugin.Options
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,13 +20,14 @@ import tv.mycujoo.mls.BuildConfig
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.VideoPlayer
-import tv.mycujoo.mls.caster.ICaster
+import tv.mycujoo.mls.cast.CasterLoadRemoteMediaParams
+import tv.mycujoo.mls.cast.ICast
+import tv.mycujoo.mls.cast.ICastListener
+import tv.mycujoo.mls.cast.ICasterSession
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.enum.MessageLevel
-import tv.mycujoo.mls.helper.CustomDataBuilder
-import tv.mycujoo.mls.helper.MediaInfoBuilder
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mls.manager.Logger
@@ -56,7 +54,7 @@ class VideoPlayerMediator(
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     private val timelineMarkerActionEntities: List<TimelineMarkerEntity>,
-    private val caster: ICaster?,
+    private val cast: ICast?,
     logger: Logger
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
@@ -196,25 +194,23 @@ class VideoPlayerMediator(
             playerView.getRemotePlayerControllerView().listener =
                 object : RemotePlayerControllerListener {
                     override fun onPlay() {
-                        caster?.play()
+                        cast?.play()
                     }
 
                     override fun onPause() {
-                        caster?.pause()
+                        cast?.pause()
                     }
 
                     override fun onSeekTo(newPosition: Long) {
-                        val mediaSeekOptions =
-                            MediaSeekOptions.Builder().setPosition(newPosition).build()
-                        caster?.seek(mediaSeekOptions)
+                        cast?.seekTo(newPosition)
                     }
 
                     override fun onFastForward(amount: Long) {
-                        caster?.fastForward(amount)
+                        cast?.fastForward(amount)
                     }
 
                     override fun onRewind(amount: Long) {
-                        caster?.rewind(amount)
+                        cast?.rewind(amount)
                     }
                 }
         }
@@ -224,15 +220,31 @@ class VideoPlayerMediator(
             playerView.getRemotePlayerControllerView().setDuration(player.duration())
         }
 
-        caster?.let {
-            fun onApplicationConnected(castSession: CastSession?) {
-                if (castSession == null) {
+
+        cast?.let {
+            fun onApplicationDisconnected(casterSession: ICasterSession?) {
+                updatePlaybackLocation(LOCAL)
+                switchControllerMode(LOCAL)
+                startYoubora()
+                casterSession?.getRemoteMediaClient()?.let { remoteMediaClient ->
+                    player.seekTo(remoteMediaClient.approximateStreamPosition())
+                    if (remoteMediaClient.isPlaying()) {
+                        player.play()
+                    } else {
+                        player.pause()
+                    }
+                }
+            }
+
+            fun onCastSessionStarted(casterSession: ICasterSession?) {
+                if (casterSession == null) {
                     return
                 }
+                updateRemotePlayerWithLocalPlayerData()
                 updatePlaybackLocation(REMOTE)
                 switchControllerMode(REMOTE)
                 addRemotePlayerControllerListener()
-                updateRemotePlayerWithLocalPlayerData()
+                stopYoubora()
                 dataManager.currentEvent?.let {
                     loadRemoteMedia(it)
                 }
@@ -241,25 +253,20 @@ class VideoPlayerMediator(
                 }
             }
 
-            fun onApplicationDisconnecting(session: CastSession?) {
-                updatePlaybackLocation(LOCAL)
-                switchControllerMode(LOCAL)
-                session?.remoteMediaClient?.let { remoteMediaClient ->
-                    player.seekTo(remoteMediaClient.approximateStreamPosition)
-                    if (remoteMediaClient.isPlaying) {
-                        player.play()
-                    } else {
-                        player.pause()
-                    }
+            fun onCastSessionResumed(casterSession: ICasterSession?) {
+                if (casterSession == null) {
+                    return
+                }
+                stopYoubora()
+                updatePlaybackLocation(REMOTE)
+                switchControllerMode(REMOTE)
+                addRemotePlayerControllerListener()
+                if (player.isPlaying()) {
+                    player.pause()
                 }
             }
 
-            fun onApplicationDisconnected(session: CastSession?) {
-                updatePlaybackLocation(LOCAL)
-                switchControllerMode(LOCAL)
-            }
-
-            val castListener = object : tv.mycujoo.mls.caster.ICastListener {
+            val castListener: ICastListener = object : ICastListener {
                 override fun onPlaybackLocationUpdated(isLocal: Boolean) {
                     if (isLocal) {
                         updatePlaybackLocation(LOCAL)
@@ -268,17 +275,28 @@ class VideoPlayerMediator(
                     }
                 }
 
-                override fun onConnected(session: CastSession?) {
-                    onApplicationConnected(session)
+                override fun onSessionStarted(session: ICasterSession?) {
+                    onCastSessionStarted(session)
                 }
 
-                override fun onDisconnecting(session: CastSession?) {
-                    onApplicationDisconnecting(session)
-                }
-
-                override fun onDisconnected(session: CastSession?) {
+                override fun onSessionStartFailed(session: ICasterSession?) {
                     onApplicationDisconnected(session)
+                }
 
+                override fun onSessionResumed(session: ICasterSession?) {
+                    onCastSessionResumed(session)
+                }
+
+                override fun onSessionResumeFailed(session: ICasterSession?) {
+                    onApplicationDisconnected(session)
+                }
+
+                override fun onSessionEnding(session: ICasterSession?) {
+                    onApplicationDisconnected(session)
+                }
+
+                override fun onSessionEnded(session: ICasterSession?) {
+                    onApplicationDisconnected(session)
                 }
 
                 override fun onRemoteProgressUpdate(progressMs: Long, durationMs: Long) {
@@ -293,10 +311,6 @@ class VideoPlayerMediator(
                 override fun onRemoteLiveStatusUpdate(isLive: Boolean) {
                     playerView.getRemotePlayerControllerView()
                         .setLiveMode(if (isLive) LIVE_ON_THE_EDGE else VOD)
-                }
-
-                override fun onCastStateUpdated(showButton: Boolean) {
-                    playerView.setCastButtonVisibility(showButton)
                 }
             }
 
@@ -355,11 +369,11 @@ class VideoPlayerMediator(
 
 
     fun onResume() {
-        caster?.onResume()
+        cast?.onResume()
     }
 
     fun onPause() {
-        caster?.onPause()
+        cast?.onPause()
     }
 
 
@@ -481,7 +495,6 @@ class VideoPlayerMediator(
     }
 
     private fun play(stream: Stream) {
-
         if (stream.widevine?.fullUrl != null && stream.widevine.licenseUrl != null) {
             player.play(
                 stream.widevine.fullUrl,
@@ -492,7 +505,6 @@ class VideoPlayerMediator(
         } else if (stream.fullUrl != null) {
             player.play(stream.fullUrl, stream.getDvrWindowSize(), videoPlayerConfig.autoPlay)
         }
-
     }
     /**endregion */
 
@@ -539,6 +551,21 @@ class VideoPlayerMediator(
             }
         }
 
+    }
+
+    /**endregion */
+
+    /**region Youbora functions*/
+    private fun startYoubora() {
+        if (hasAnalytic) {
+            youboraClient.start()
+        }
+    }
+
+    private fun stopYoubora() {
+        if (hasAnalytic) {
+            youboraClient.stop()
+        }
     }
 
     /**endregion */
@@ -648,16 +675,20 @@ class VideoPlayerMediator(
         val fullUrl = event.streams.first().fullUrl!!
         val widevine = event.streams.first().widevine
 
-        val customData =
-            CustomDataBuilder.build(event.id, publicKey, uuid, widevine)
-        val mediaInfo =
-            MediaInfoBuilder.build(fullUrl, event.title, event.thumbnailUrl, customData)
 
-        val mediaLoadOptions: MediaLoadOptions =
-            MediaLoadOptions.Builder().setAutoplay(player.isPlaying())
-                .setPlayPosition(player.currentPosition())
-                .build()
-        caster?.loadRemoteMedia(mediaInfo, mediaLoadOptions)
+        val params = CasterLoadRemoteMediaParams(
+            id = event.id,
+            publicKey = publicKey,
+            uuid = uuid,
+            widevine = widevine,
+            fullUrl = fullUrl,
+            title = event.title,
+            thumbnailUrl = event.thumbnailUrl,
+            isPlaying = player.isPlaying(),
+            currentPosition = player.currentPosition()
+        )
+
+        cast?.loadRemoteMedia(params)
     }
 
     private fun updatePlaybackLocation(location: PlaybackLocation) {
@@ -675,6 +706,7 @@ class VideoPlayerMediator(
         }
     }
 
+    /**endregion */
 
     private fun storeEvent(eventEntity: EventEntity) {
         dataManager.currentEvent = eventEntity

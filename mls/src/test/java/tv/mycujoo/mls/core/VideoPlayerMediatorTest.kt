@@ -5,10 +5,6 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player.*
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
-import com.google.android.gms.cast.MediaLoadOptions
-import com.google.android.gms.cast.framework.CastContext
-import com.google.android.gms.cast.framework.CastSession
-import com.google.android.gms.cast.framework.SessionManager
 import com.nhaarman.mockitokotlin2.*
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Plugin
@@ -30,7 +26,9 @@ import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.MLSConfiguration
 import tv.mycujoo.mls.api.defaultVideoPlayerConfig
-import tv.mycujoo.mls.caster.ICaster
+import tv.mycujoo.mls.cast.ICast
+import tv.mycujoo.mls.cast.ICasterSession
+import tv.mycujoo.mls.cast.ISessionManagerListener
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.manager.Logger
@@ -69,14 +67,11 @@ class VideoPlayerMediatorTest {
     @Mock
     lateinit var internalBuilder: InternalBuilder
 
-
     @Mock
     lateinit var videoPlayerConfig: VideoPlayerConfig
 
-
     lateinit var reactorSocket: ReactorSocket
     private lateinit var mainWebSocketListener: MainWebSocketListener
-
 
     @Mock
     lateinit var reactorListener: ReactorListener
@@ -134,17 +129,14 @@ class VideoPlayerMediatorTest {
     lateinit var logger: Logger
 
     @Mock
-    lateinit var castContext: CastContext
+    lateinit var casterSession: ICasterSession
 
     @Mock
-    lateinit var sessionManager: SessionManager
+    lateinit var cast: ICast
 
     @Mock
-    lateinit var castSession: CastSession
-
-    @Mock
-    lateinit var caster: ICaster
-    lateinit var castListener: tv.mycujoo.mls.caster.ICastListener
+    lateinit var sessionManagerListener: ISessionManagerListener
+    lateinit var castListener: tv.mycujoo.mls.cast.ICastListener
 
 
     @Before
@@ -172,8 +164,6 @@ class VideoPlayerMediatorTest {
         whenever(internalBuilder.createExoPlayerAdapter(any())).thenReturn(exoplayer2Adapter)
         whenever(internalBuilder.createYouboraClient(any())).thenReturn(youboraClient)
         whenever(internalBuilder.logger).thenReturn(logger)
-        whenever(castContext.sessionManager).thenReturn(sessionManager)
-        whenever(sessionManager.currentCastSession).thenReturn(castSession)
 
         whenever(playerView.context).thenReturn(activity)
         whenever(playerView.getTimeBar()).thenReturn(timeBar)
@@ -185,7 +175,16 @@ class VideoPlayerMediatorTest {
 
 
         whenever(player.addListener(any())).then { storeExoPlayerListener(it) }
-        whenever(caster.initialize(any(), any())).then { storeCastListener(it) }
+        whenever(
+            cast.initialize(
+                any(),
+                any()
+            )
+        )
+            .thenAnswer {
+                storeCastListener(it)
+                return@thenAnswer sessionManagerListener
+            }
         videoPlayerMediator = VideoPlayerMediator(
             videoPlayerConfig,
             viewHandler,
@@ -193,7 +192,7 @@ class VideoPlayerMediatorTest {
             dispatcher,
             dataManager,
             emptyList(),
-            caster,
+            cast,
             internalBuilder.logger
         )
         videoPlayerMediator.initialize(playerView, player, MLSBuilder)
@@ -207,8 +206,8 @@ class VideoPlayerMediatorTest {
     }
 
     private fun storeCastListener(invocationOnMock: InvocationOnMock) {
-        if (invocationOnMock.arguments[1] is tv.mycujoo.mls.caster.ICastListener) {
-            castListener = invocationOnMock.arguments[1] as tv.mycujoo.mls.caster.ICastListener
+        if (invocationOnMock.arguments[1] is tv.mycujoo.mls.cast.ICastListener) {
+            castListener = invocationOnMock.arguments[1] as tv.mycujoo.mls.cast.ICastListener
         }
     }
 
@@ -550,20 +549,29 @@ class VideoPlayerMediatorTest {
     @Test
     fun `should load remote media, when connected to remote player`() = runBlockingTest {
         val event =
-            getSampleEventEntity(listOf(Stream("id_0", 60000000L.toString(), "http://www.google.com", null)))
+            getSampleEventEntity(
+                listOf(
+                    Stream(
+                        "id_0",
+                        60000000L.toString(),
+                        "http://www.google.com",
+                        null
+                    )
+                )
+            )
         whenever(dataManager.currentEvent).thenReturn(event)
 
-        castListener.onConnected(castSession)
+        castListener.onSessionStarted(casterSession)
 
-        verify(caster).loadRemoteMedia(any(), any<MediaLoadOptions>())
+        verify(cast).loadRemoteMedia(any())
     }
 
     @Test
     fun `should do nothing, when connected to remote player with null cast-session`() {
-        castListener.onConnected(null)
+        castListener.onSessionStarted(null)
 
 
-        verify(caster, never()).loadRemoteMedia(any(), any<MediaLoadOptions>())
+        verify(cast, never()).loadRemoteMedia(any())
         verify(playerView, never()).switchMode(any())
         verify(player, never()).isPlaying()
         verify(player, never()).pause()
@@ -572,7 +580,7 @@ class VideoPlayerMediatorTest {
 
     @Test
     fun `should set PlayerView mode to REMOTE, when connected to remote player`() {
-        castListener.onConnected(castSession)
+        castListener.onSessionStarted(casterSession)
 
 
         verify(playerView).switchMode(PlayerControllerMode.REMOTE_CONTROLLER)
@@ -584,7 +592,7 @@ class VideoPlayerMediatorTest {
         whenever(player.isPlaying()).thenReturn(true)
         videoPlayerMediator.playVideo(getSampleEventEntity("id_0"))
 
-        castListener.onConnected(castSession)
+        castListener.onSessionStarted(casterSession)
 
         verify(player).pause()
     }
@@ -594,19 +602,35 @@ class VideoPlayerMediatorTest {
         whenever(player.isPlaying()).thenReturn(false)
         videoPlayerMediator.playVideo(getSampleEventEntity("id_0"))
 
-        castListener.onConnected(castSession)
+        castListener.onSessionStarted(casterSession)
 
         verify(player, never()).pause()
     }
 
     @Test
     fun `should set PlayerView mode to EXO_MODE, when disconnecting from remote player`() {
-        castListener.onDisconnecting(castSession)
+        castListener.onSessionEnding(casterSession)
 
 
         verify(playerView).switchMode(PlayerControllerMode.EXO_MODE)
     }
 
+    @Test
+    fun `onStart and onResume of cast session, stop Youbora`() {
+        castListener.onSessionStarted(casterSession)
+        castListener.onSessionResumed(casterSession)
+
+
+        verify(youboraClient, times(2)).stop()
+    }
+
+    @Test
+    fun `onEnded of cast session, start Youbora`() {
+        castListener.onSessionEnded(casterSession)
+
+
+        verify(youboraClient).start()
+    }
 
     /**endregion */
 

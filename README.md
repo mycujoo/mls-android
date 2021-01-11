@@ -93,7 +93,7 @@ in order to communicate with SDK, MLS class must be instantiated. Init MLS whene
         
        
       
-#### Caster Module (Google Cast support)
-If you are intreseted to support Google Cast in MLS, import Caster module and provide it in building of MLS-component.
-[Here](https://github.com/mycujoo/mls-android/blob/master/README.md]) is the document on how to do it.
+#### Cast Module (Google Cast support)
+If you are interested to support Google Cast in MLS, import MLS-Cast module and provide it to builder of MLS-component.
+[Here](https://github.com/mycujoo/mls-android/blob/master/caster/README.md) is the document on how to do it.
 Also, [VideoActivityWithCaster](https://github.com/mycujoo/mls-android-sample-app/blob/master/app/src/main/java/tv/mycujoo/mlssampleapp/VideoActivityWithCaster.kt#L86) in [Sample-App](https://github.com/mycujoo/mls-android-sample-app) demonstrates it as an full example 

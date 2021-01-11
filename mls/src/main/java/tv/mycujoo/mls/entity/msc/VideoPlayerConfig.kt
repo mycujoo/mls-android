@@ -12,7 +12,6 @@ package tv.mycujoo.mls.entity.msc
  * @property showFullScreenButton Indicates whether the full-screen button should be shown (true) or hidden (false).
  * @property showLiveViewers Indicates whether the number of concurrent viewers on a live stream should be shown (true) or hidden (false).
  * @property showEventInfoButton Indicates whether the "info" button in the top-right corner of the video player should be shown (true) or hidden (false).
- * @property showCastButton Indicates whether the "cast" button of the video player should be shown (true) or hidden (false).
  */
 data class VideoPlayerConfig(
     val primaryColor: String,
@@ -25,6 +24,5 @@ data class VideoPlayerConfig(
     val showTimers: Boolean,
     val showFullScreenButton: Boolean,
     val showLiveViewers: Boolean,
-    val showEventInfoButton: Boolean,
-    val showCastButton: Boolean
+    val showEventInfoButton: Boolean
 )

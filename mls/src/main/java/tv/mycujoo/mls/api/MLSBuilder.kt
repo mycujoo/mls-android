@@ -3,7 +3,7 @@ package tv.mycujoo.mls.api
 import android.app.Activity
 import android.content.Context
 import com.google.android.exoplayer2.SimpleExoPlayer
-import tv.mycujoo.mls.caster.ICaster
+import tv.mycujoo.mls.cast.ICast
 import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
@@ -25,7 +25,7 @@ open class MLSBuilder {
         private set
     internal var mlsConfiguration: MLSConfiguration = MLSConfiguration()
         private set
-    internal var mCaster: ICaster? = null
+    internal var mCast: ICast? = null
         private set
     internal var hasAnalytic: Boolean = true
         private set
@@ -49,8 +49,8 @@ open class MLSBuilder {
         this.mlsConfiguration = mlsConfiguration
     }
 
-    fun setCaster(caster: ICaster) = apply {
-        this.mCaster = caster
+    fun setCast(cast: ICast) = apply {
+        this.mCast = cast
     }
 
     fun createExoPlayer(context: Context): SimpleExoPlayer? {
