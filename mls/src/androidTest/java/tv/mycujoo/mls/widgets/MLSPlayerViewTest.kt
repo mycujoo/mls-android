@@ -313,9 +313,6 @@ class MLSPlayerViewTest {
 
     @Test
     fun whileDisplayingStartedEventDialog_shouldTogglePlayerVisibilityOnClick() {
-        UiThreadStatement.runOnUiThread {
-            setupPlayer()
-        }
         MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
         setupPlayer()
         MLSPlayerView.showEventInfoForStartedEvents()
