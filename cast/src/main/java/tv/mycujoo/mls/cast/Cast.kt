@@ -8,7 +8,6 @@ import com.google.android.gms.cast.MediaSeekOptions
 import com.google.android.gms.cast.framework.CastButtonFactory
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.CastSession
-import com.google.android.gms.cast.framework.CastState.*
 import com.google.android.gms.cast.framework.SessionManagerListener
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import tv.mycujoo.mls.cast.helper.CustomDataBuilder
@@ -63,36 +62,12 @@ class Cast(
         }
         casterSession.castSession = castContext.sessionManager.currentCastSession
 
-        castContext.addCastStateListener { state ->
-            when (state) {
-                NO_DEVICES_AVAILABLE -> {
-                    castListener.onCastStateUpdated(false)
-                }
-                NOT_CONNECTED,
-                CONNECTING,
-                CONNECTED -> {
-                    castListener.onCastStateUpdated(true)
-                }
-                else -> {
-                    castListener.onCastStateUpdated(false)
-                }
-            }
-        }
-
         val sessionManagerWrapper = initSessionManagerWrapper(castListener)
         sessionManagerListener = sessionManagerWrapper.listener
         return sessionManagerWrapper.sessionManagerListener
     }
 
     private fun initSessionManagerWrapper(castListener: ICastListener): SessionManagerWrapper {
-        val remoteMediaClientCallback = object : RemoteMediaClient.Callback() {
-            override fun onStatusUpdated() {
-                super.onStatusUpdated()
-                castListener.onRemoteMediaStatusUpdated(casterSession.castSession?.remoteMediaClient?.mediaInfo?.toJson())
-            }
-        }
-
-
         val progressListener =
             RemoteMediaClient.ProgressListener { progressMs, durationMs ->
                 castListener.onRemoteProgressUpdate(progressMs, durationMs)
@@ -125,10 +100,6 @@ class Cast(
                     progressListener,
                     UPDATE_INTERVAL
                 )
-
-                casterSession.castSession?.remoteMediaClient?.registerCallback(
-                    remoteMediaClientCallback
-                )
             }
 
             override fun onSessionResumeFailed(session: ICasterSession?, error: Int) {
@@ -143,10 +114,6 @@ class Cast(
 
             override fun onSessionEnded(session: ICasterSession?, error: Int) {
                 castListener.onSessionEnded(casterSession)
-                casterSession.castSession?.remoteMediaClient?.unregisterCallback(
-                    remoteMediaClientCallback
-                )
-
             }
         }
 

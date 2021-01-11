@@ -10,11 +10,10 @@ interface ICast {
     fun pause()
     fun seekTo(position: Long)
     fun fastForward(amount: Long)
-
-
     fun rewind(amount: Long)
+    fun currentPosition(): Long?
+
     fun onResume()
     fun onPause()
-    fun currentPosition(): Long?
 
 }

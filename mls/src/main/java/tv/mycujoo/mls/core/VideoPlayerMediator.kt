@@ -12,7 +12,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.Stream
@@ -315,14 +314,6 @@ class VideoPlayerMediator(
                 override fun onRemoteLiveStatusUpdate(isLive: Boolean) {
                     playerView.getRemotePlayerControllerView()
                         .setLiveMode(if (isLive) LIVE_ON_THE_EDGE else VOD)
-                }
-
-                override fun onRemoteMediaStatusUpdated(json: JSONObject?) {
-                    json
-                }
-
-                override fun onCastStateUpdated(showButton: Boolean) {
-                    // do nothing
                 }
             }
 
