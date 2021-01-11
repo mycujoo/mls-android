@@ -2,6 +2,7 @@ package tv.mycujoo.domain.entity
 
 import com.google.gson.annotations.SerializedName
 import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_GEOBLOCKED
+import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_NO_ENTITLEMENT
 
 data class EventEntity(
     @SerializedName("id") val id: String,
@@ -40,6 +41,13 @@ data class Stream(
             if (it.code == ERROR_CODE_GEOBLOCKED) {
                 return true
             }
+        }
+        return false
+    }
+
+    fun isNoEntitlement(): Boolean {
+        if (error?.code == ERROR_CODE_NO_ENTITLEMENT) {
+            return true
         }
         return false
     }

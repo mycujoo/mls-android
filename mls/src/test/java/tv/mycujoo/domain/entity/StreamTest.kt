@@ -1,6 +1,7 @@
 package tv.mycujoo.domain.entity
 
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Test
 
 class StreamTest {
@@ -35,5 +36,27 @@ class StreamTest {
         )
 
         assert(geoBlockedStream.isGeoBlocked())
+    }
+
+    @Test
+    fun `regular stream should return false for isNoEntitlement`() {
+        val stream = Stream("id_0", "120000", null, null)
+
+
+        assertFalse(stream.isNoEntitlement())
+    }
+
+    @Test
+    fun `no-entitlement stream should return true for isNoEntitlement`() {
+        val stream = Stream(
+            id = "id_0", dvrWindowString = "120000", fullUrl = null, widevine = null,
+            error = tv.mycujoo.domain.entity.Error(
+                code = "ERROR_CODE_NO_ENTITLEMENT",
+                message = "Access to this stream is restricted"
+            )
+        )
+
+
+        assert(stream.isNoEntitlement())
     }
 }
