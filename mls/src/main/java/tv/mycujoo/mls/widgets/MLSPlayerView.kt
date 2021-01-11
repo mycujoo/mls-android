@@ -548,19 +548,12 @@ class MLSPlayerView @JvmOverloads constructor(
         post {
             playerView.hideController()
 
-            val dialog =
-                LayoutInflater.from(context)
-                    .inflate(R.layout.dialog_event_info_pre_event_layout, this, false)
-            infoDialogContainerLayout.addView(dialog)
+            val dialog = CustomInformationDialog(
+                mlsPlayerView = this,
+                uiEvent = uiEvent,
+                message = "This stream cannot be watched in your area."
+            )
             dialogs.add(dialog)
-
-            dialog.eventInfoPreEventDialog_canvasView.visibility = View.VISIBLE
-            dialog.eventInfoPreEventDialog_posterView.visibility = View.GONE
-
-            dialog.eventInfoPreEventDialog_titleTextView.text = uiEvent.title ?: ""
-            dialog.informationDialog_bodyTextView.text = message
-            dialog.informationDialog_bodyTextView.setTextColor(Color.RED)
-            dialog.informationDialog_dateTimeTextView.visibility = View.GONE
         }
     }
 
