@@ -83,7 +83,7 @@ class PlayerTest {
 
 
         UiThreadStatement.runOnUiThread {
-            mlsPlayerView.hideEventInfoDialog()
+            mlsPlayerView.hideInfoDialogs()
         }
 
 

@@ -181,7 +181,7 @@ class VideoPlayerTest {
         videoPlayer.hideEventInfoOverlay()
 
 
-        verify(MLSPlayerView).hideEventInfoDialog()
+        verify(MLSPlayerView).hideInfoDialogs()
     }
 
     @Test

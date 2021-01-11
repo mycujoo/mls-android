@@ -464,7 +464,7 @@ class VideoPlayerMediator(
 
     fun playExternalSourceVideo(videoUri: String) {
         player.play(videoUri, Long.MAX_VALUE, videoPlayerConfig.autoPlay)
-        playerView.hideEventInfoDialog()
+        playerView.hideInfoDialogs()
         if (videoPlayerConfig.showEventInfoButton) {
             playerView.showEventInfoButton()
         } else {
@@ -485,7 +485,7 @@ class VideoPlayerMediator(
             logged = false
             storeEvent(event)
             play(event.streams.first())
-            playerView.hideEventInfoDialog()
+            playerView.hideInfoDialogs()
             playerView.updateControllerVisibility(isPlaying = true)
         } else {
             // display event info

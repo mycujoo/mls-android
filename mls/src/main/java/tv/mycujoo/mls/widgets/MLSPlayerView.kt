@@ -40,6 +40,7 @@ import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterest
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterestType
 import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarkerView
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MLSPlayerView @JvmOverloads constructor(
@@ -67,6 +68,7 @@ class MLSPlayerView @JvmOverloads constructor(
 
     private lateinit var viewHandler: IViewHandler
 
+    private val dialogs = ArrayList<View>()
     private var eventPosterUrl: String? = null
     private lateinit var eventInfoTitle: String
     private lateinit var eventInfoDescription: String
@@ -550,17 +552,19 @@ class MLSPlayerView @JvmOverloads constructor(
         post {
             playerView.hideController()
 
-            val informationDialog =
+            val dialog =
                 LayoutInflater.from(context)
                     .inflate(R.layout.dialog_event_info_pre_event_layout, this, false)
-            eventInfoDialogContainerLayout.addView(informationDialog)
-            informationDialog.eventInfoPreEventDialog_canvasView.visibility = View.VISIBLE
-            informationDialog.eventInfoPreEventDialog_posterView.visibility = View.GONE
+            infoDialogContainerLayout.addView(dialog)
+            dialogs.add(dialog)
 
-            informationDialog.eventInfoPreEventDialog_titleTextView.text = eventInfoTitle
-            informationDialog.informationDialog_bodyTextView.text = message
-            informationDialog.informationDialog_bodyTextView.setTextColor(Color.RED)
-            informationDialog.informationDialog_dateTimeTextView.visibility = View.GONE
+            dialog.eventInfoPreEventDialog_canvasView.visibility = View.VISIBLE
+            dialog.eventInfoPreEventDialog_posterView.visibility = View.GONE
+
+            dialog.eventInfoPreEventDialog_titleTextView.text = eventInfoTitle
+            dialog.informationDialog_bodyTextView.text = message
+            dialog.informationDialog_bodyTextView.setTextColor(Color.RED)
+            dialog.informationDialog_dateTimeTextView.visibility = View.GONE
         }
     }
 
@@ -571,7 +575,8 @@ class MLSPlayerView @JvmOverloads constructor(
             val informationDialog =
                 LayoutInflater.from(context)
                     .inflate(R.layout.dialog_event_info_pre_event_layout, this, false)
-            eventInfoDialogContainerLayout.addView(informationDialog)
+            infoDialogContainerLayout.addView(informationDialog)
+            dialogs.add(informationDialog)
 
             if (eventPosterUrl != null && eventPosterUrl!!.isNotEmpty()) {
                 informationDialog.eventInfoPreEventDialog_posterView.visibility = View.VISIBLE
@@ -600,7 +605,9 @@ class MLSPlayerView @JvmOverloads constructor(
             val eventInfoDialog =
                 LayoutInflater.from(context)
                     .inflate(R.layout.dialog_event_info_started_layout, this, false)
-            eventInfoDialogContainerLayout.addView(eventInfoDialog)
+            infoDialogContainerLayout.addView(eventInfoDialog)
+            dialogs.add(eventInfoDialog)
+
 
             eventInfoDialog.eventInfoStartedEventDialog_titleTextView.text = eventInfoTitle
             eventInfoDialog.eventInfoStartedEventDialog_bodyTextView.text =
@@ -619,17 +626,15 @@ class MLSPlayerView @JvmOverloads constructor(
 
     }
 
-    override fun hideEventInfoDialog() {
-        if (eventInfoDialogContainerLayout == null) {
+    override fun hideInfoDialogs() {
+        if (infoDialogContainerLayout == null) {
             return
         }
         post {
-            eventInfoDialogContainerLayout.children.forEach { child ->
-                if (child.tag == "event_info_dialog") {
-                    child.visibility = GONE
-                    removeView(child)
-                }
+            dialogs.forEach { dialog ->
+                infoDialogContainerLayout.removeView(dialog)
             }
+            dialogs.clear()
         }
     }
 

@@ -107,7 +107,7 @@ class VideoPlayer(
     }
 
     override fun hideEventInfoOverlay() {
-        MLSPlayerView.hideEventInfoDialog()
+        MLSPlayerView.hideInfoDialogs()
     }
 
     override fun config(videoPlayerConfig: VideoPlayerConfig) {

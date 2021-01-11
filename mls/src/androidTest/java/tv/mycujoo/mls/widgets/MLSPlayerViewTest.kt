@@ -21,6 +21,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.internal.runner.junit4.statement.UiThreadStatement
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.ui.PlayerControlView
+import kotlinx.android.synthetic.main.player_view_wrapper.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import org.hamcrest.CoreMatchers.allOf
@@ -301,6 +302,23 @@ class MLSPlayerViewTest {
         onView(withText("desc_0")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
     }
 
+    @Test
+    fun hideInfoDialogs_removedAllInfoDialogChildren() {
+        MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
+        MLSPlayerView.showCustomInformationDialog("Message")
+        MLSPlayerView.showEventInformationForPreEvent()
+        MLSPlayerView.showEventInfoForStartedEvents()
+
+        MLSPlayerView.hideInfoDialogs()
+
+        onView(withId(MLSPlayerView.infoDialogContainerLayout.id)).check(
+            matches(
+                hasChildCount(
+                    0
+                )
+            )
+        )
+    }
 
     @Test
     fun whileDisplayingStartedEventDialog_shouldDismissDialogOnClick() {
