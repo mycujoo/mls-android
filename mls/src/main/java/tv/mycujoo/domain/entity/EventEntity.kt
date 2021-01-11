@@ -1,6 +1,7 @@
 package tv.mycujoo.domain.entity
 
 import com.google.gson.annotations.SerializedName
+import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_GEOBLOCKED
 
 data class EventEntity(
     @SerializedName("id") val id: String,
@@ -23,7 +24,8 @@ data class Stream(
     @SerializedName("id") val id: String,
     @SerializedName("dvr_window_size") val dvrWindowString: String,
     @SerializedName("full_url") val fullUrl: String?,
-    @SerializedName("widevine") val widevine: Widevine?
+    @SerializedName("widevine") val widevine: Widevine?,
+    @SerializedName("error") val error: Error? = null
 ) {
     fun getDvrWindowSize(): Long {
         return try {
@@ -32,11 +34,25 @@ data class Stream(
             Long.MAX_VALUE
         }
     }
+
+    fun isGeoBlocked(): Boolean {
+        error?.let {
+            if (it.code == ERROR_CODE_GEOBLOCKED) {
+                return true
+            }
+        }
+        return false
+    }
 }
 
 data class Widevine(
     @SerializedName("full_url") val fullUrl: String?,
     @SerializedName("license_url") val licenseUrl: String?
+)
+
+data class Error(
+    @SerializedName("code") val code: String?,
+    @SerializedName("message") val message: String?
 )
 
 data class Location(

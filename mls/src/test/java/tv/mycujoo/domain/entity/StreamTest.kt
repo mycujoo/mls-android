@@ -15,4 +15,25 @@ class StreamTest {
         assertEquals(0L, streamWith0DvrWindow.getDvrWindowSize())
         assertEquals(Long.MAX_VALUE, streamWithInvalidDvrWindow.getDvrWindowSize())
     }
+
+    @Test
+    fun `non-GEOBLOCKED stream should return false for isGeoBlocked`() {
+        val stream = Stream("id_0", "120000", null, null)
+
+
+        assertFalse(stream.isGeoBlocked())
+    }
+
+    @Test
+    fun `GEOBLOCKED stream should return true for isGeoBlocked`() {
+        val geoBlockedStream = Stream(
+            id = "id_0", dvrWindowString = "120000", fullUrl = null, widevine = null,
+            error = tv.mycujoo.domain.entity.Error(
+                code = "ERROR_CODE_GEOBLOCKED",
+                message = "This stream is Geo-blocked"
+            )
+        )
+
+        assert(geoBlockedStream.isGeoBlocked())
+    }
 }
