@@ -70,9 +70,7 @@ class MLSPlayerView @JvmOverloads constructor(
 
     private val dialogs = ArrayList<View>()
     private var eventPosterUrl: String? = null
-    private lateinit var eventInfoTitle: String
-    private lateinit var eventInfoDescription: String
-    private lateinit var eventDateTime: String
+    private var uiEvent = UiEvent()
 
     private var onSizeChangedCallback = {}
 
@@ -543,9 +541,7 @@ class MLSPlayerView @JvmOverloads constructor(
     }
 
     fun setEventInfo(title: String, description: String, startTime: String) {
-        eventInfoTitle = title
-        eventInfoDescription = description
-        eventDateTime = startTime
+        uiEvent = UiEvent(title, description, startTime)
     }
 
     override fun showCustomInformationDialog(message: String) {
@@ -561,7 +557,7 @@ class MLSPlayerView @JvmOverloads constructor(
             dialog.eventInfoPreEventDialog_canvasView.visibility = View.VISIBLE
             dialog.eventInfoPreEventDialog_posterView.visibility = View.GONE
 
-            dialog.eventInfoPreEventDialog_titleTextView.text = eventInfoTitle
+            dialog.eventInfoPreEventDialog_titleTextView.text = uiEvent.title ?: ""
             dialog.informationDialog_bodyTextView.text = message
             dialog.informationDialog_bodyTextView.setTextColor(Color.RED)
             dialog.informationDialog_dateTimeTextView.visibility = View.GONE
@@ -589,18 +585,18 @@ class MLSPlayerView @JvmOverloads constructor(
                 informationDialog.eventInfoPreEventDialog_canvasView.visibility = View.VISIBLE
                 informationDialog.eventInfoPreEventDialog_posterView.visibility = View.GONE
 
-                informationDialog.eventInfoPreEventDialog_titleTextView.text = eventInfoTitle
-                informationDialog.informationDialog_bodyTextView.text = eventInfoDescription
-                informationDialog.informationDialog_dateTimeTextView.text =
-                    DateTimeHelper.getDateTime(eventDateTime)
+                informationDialog.eventInfoPreEventDialog_titleTextView.text = uiEvent.title ?: ""
+                informationDialog.informationDialog_bodyTextView.text = uiEvent.description ?: ""
+                uiEvent.startTime?.let {
+                    informationDialog.informationDialog_dateTimeTextView.text =
+                        DateTimeHelper.getDateTime(it)
+                }
+
             }
         }
     }
 
     override fun showEventInfoForStartedEvents() {
-        if (this::eventInfoTitle.isInitialized.not() && this::eventInfoDescription.isInitialized.not()) {
-            return
-        }
         post {
             val eventInfoDialog =
                 LayoutInflater.from(context)
@@ -609,11 +605,14 @@ class MLSPlayerView @JvmOverloads constructor(
             dialogs.add(eventInfoDialog)
 
 
-            eventInfoDialog.eventInfoStartedEventDialog_titleTextView.text = eventInfoTitle
+            eventInfoDialog.eventInfoStartedEventDialog_titleTextView.text = uiEvent.title ?: ""
             eventInfoDialog.eventInfoStartedEventDialog_bodyTextView.text =
-                eventInfoDescription
-            eventInfoDialog.eventInfoStartedEventDialog_dateTimeTextView.text =
-                DateTimeHelper.getDateTime(eventDateTime)
+                uiEvent.description ?: ""
+            uiEvent.startTime?.let {
+                eventInfoDialog.eventInfoStartedEventDialog_dateTimeTextView.text =
+                    DateTimeHelper.getDateTime(it)
+            }
+
 
             eventInfoDialog.setOnClickListener {
                 if (it.parent is ViewGroup) {
