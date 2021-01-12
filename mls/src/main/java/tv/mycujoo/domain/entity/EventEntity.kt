@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName
 import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_GEOBLOCKED
 import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_NO_ENTITLEMENT
 import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_UNSPECIFIED
+import tv.mycujoo.mls.enum.StreamStatus
 
 data class EventEntity(
     @SerializedName("id") val id: String,
@@ -20,7 +21,29 @@ data class EventEntity(
     @SerializedName("timeline_ids") val timeline_ids: List<String>,
     @SerializedName("metadata") val metadata: Metadata,
     @SerializedName("is_test") val is_test: Boolean
-)
+) {
+    fun streamStatus(): StreamStatus {
+        if (streams.isEmpty()) {
+            return StreamStatus.NO_STREAM_URL
+        }
+        val stream = streams[0]
+        if (stream.hasError()) {
+            if (stream.isGeoBlocked()) {
+                return StreamStatus.GEOBLOCKED
+            }
+            if (stream.isNoEntitlement()) {
+                return StreamStatus.NO_ENTITLEMENT
+            }
+            return StreamStatus.UNKNOWN_ERROR
+        }
+
+        if (stream.isStreamPlayable()) {
+            return StreamStatus.PLAYABLE
+        }
+
+        return StreamStatus.UNKNOWN_ERROR
+    }
+}
 
 data class Stream(
     @SerializedName("id") val id: String,
@@ -35,6 +58,15 @@ data class Stream(
         } catch (e: Exception) {
             Long.MAX_VALUE
         }
+    }
+
+    fun isStreamPlayable(): Boolean {
+        return isStreamRawPlayable(this) ||
+                isStreamWidevinePlayable(this)
+    }
+
+    fun hasError(): Boolean {
+        return error?.code != null
     }
 
     fun isGeoBlocked(): Boolean {
@@ -56,6 +88,17 @@ data class Stream(
     fun hasUnknownError(): Boolean {
         if (error?.code == ERROR_CODE_UNSPECIFIED) {
             return true
+        }
+        return false
+    }
+
+    private fun isStreamRawPlayable(stream: Stream): Boolean {
+        return stream.fullUrl != null
+    }
+
+    private fun isStreamWidevinePlayable(stream: Stream): Boolean {
+        stream.widevine?.let { widevine ->
+            return widevine.licenseUrl != null && widevine.fullUrl != null
         }
         return false
     }

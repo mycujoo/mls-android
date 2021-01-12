@@ -11,7 +11,6 @@ import tv.mycujoo.mls.enum.StreamStatus
 import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.ReactorCallback
-import tv.mycujoo.mls.utils.PlayerUtils.Companion.isStreamPlayable
 
 abstract class AbstractPlayerMediator(
     private val reactorSocket: IReactorSocket,
@@ -59,11 +58,7 @@ abstract class AbstractPlayerMediator(
 
     /**region Stream status*/
     protected fun updateStreamStatus(event: EventEntity) {
-        if (isStreamPlayable(event)) {
-            streamStatus = StreamStatus.PLAYABLE
-        } else {
-            streamStatus = StreamStatus.NO_STREAM_URL
-        }
+        streamStatus = event.streamStatus()
     }
     /**endregion */
 
