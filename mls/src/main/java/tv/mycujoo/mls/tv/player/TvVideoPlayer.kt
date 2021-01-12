@@ -39,6 +39,7 @@ import tv.mycujoo.mls.core.AbstractPlayerMediator
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.enum.MessageLevel
+import tv.mycujoo.mls.enum.StreamStatus
 import tv.mycujoo.mls.helper.DateTimeHelper
 import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
@@ -194,10 +195,9 @@ class TvVideoPlayer(
             when (result) {
                 is Result.Success -> {
                     dataManager.currentEvent = result.value
-                    if (eventMayBeStreamed.not()) {
-                        playVideoOrDisplayEventInfo(result.value)
-                        startStreamUrlPullingIfNeeded(result.value)
-                    }
+                    updateStreamStatus(result.value)
+                    playVideoOrDisplayEventInfo(result.value)
+                    startStreamUrlPullingIfNeeded(result.value)
                 }
                 is Result.NetworkError -> {
                     logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
@@ -303,7 +303,8 @@ class TvVideoPlayer(
     }
 
     private fun playVideoOrDisplayEventInfo(event: EventEntity) {
-        if (mayPlayVideo(event)) {
+        if (streamStatus == StreamStatus.PLAYABLE && streaming.not()) {
+            streaming = true
             val userAgent = Util.getUserAgent(activity, "MLS-AndroidTv-SDK")
             val hlsFactory =
                 HlsMediaSource.Factory(DefaultDataSourceFactory(activity, userAgent))
@@ -312,6 +313,7 @@ class TvVideoPlayer(
                 .prepare(hlsFactory.createMediaSource(Uri.parse(event.streams.first().fullUrl)))
             eventInfoContainerLayout.visibility = View.GONE
         } else {
+            streaming = false
             displayPreEventInformationLayout(
                 event.poster_url,
                 event.title,

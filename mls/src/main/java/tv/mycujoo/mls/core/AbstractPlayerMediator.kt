@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.enum.MessageLevel
+import tv.mycujoo.mls.enum.StreamStatus
 import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.ReactorCallback
@@ -17,14 +18,16 @@ abstract class AbstractPlayerMediator(
     private val coroutineScope: CoroutineScope,
     protected val logger: Logger
 ) {
-
+    /**region Abstracts*/
     abstract fun playVideo(event: EventEntity)
     abstract fun playVideo(eventId: String)
 
     abstract fun onReactorEventUpdate(eventId: String, updateId: String)
     abstract fun onReactorCounterUpdate(counts: String)
     abstract fun onReactorTimelineUpdate(timelineId: String, updateId: String)
+    /**endregion */
 
+    /**region Initializing*/
     init {
         reactorSocket.addListener(reactorCallback = object : ReactorCallback {
             override fun onEventUpdate(eventId: String, updateId: String) {
@@ -44,24 +47,36 @@ abstract class AbstractPlayerMediator(
             }
         })
     }
+    /**endregion */
 
     /**region fields*/
-    protected var eventMayBeStreamed = false
+    protected var streaming = false
+    protected var streamStatus = StreamStatus.NO_STREAM_URL
     protected var isLive: Boolean = false
 
     private lateinit var streamUrlPullJob: Job
-
     /**endregion */
 
+    /**region Stream status*/
+    protected fun updateStreamStatus(event: EventEntity) {
+        if (isStreamPlayable(event)) {
+            streamStatus = StreamStatus.PLAYABLE
+        } else {
+            streamStatus = StreamStatus.NO_STREAM_URL
+        }
+    }
+    /**endregion */
 
+    /**region Reactor functions*/
     protected fun joinEvent(event: EventEntity) {
         reactorSocket.joinEvent(event.id)
     }
+    /**endregion */
 
-
+    /**region Stream Url-polling job*/
     protected fun startStreamUrlPullingIfNeeded(event: EventEntity) {
         cancelStreamUrlPulling()
-        if (eventMayBeStreamed) {
+        if (streamStatus == StreamStatus.PLAYABLE) {
             return
         }
         streamUrlPullJob = coroutineScope.launch {
@@ -74,12 +89,6 @@ abstract class AbstractPlayerMediator(
         if (this::streamUrlPullJob.isInitialized) {
             streamUrlPullJob.cancel()
         }
-    }
-
-    /**region Helper functions*/
-    protected fun mayPlayVideo(event: EventEntity): Boolean {
-        eventMayBeStreamed = isStreamPlayable(event)
-        return eventMayBeStreamed
     }
     /**endregion */
 

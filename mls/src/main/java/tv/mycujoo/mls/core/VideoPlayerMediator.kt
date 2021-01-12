@@ -28,6 +28,7 @@ import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.enum.MessageLevel
+import tv.mycujoo.mls.enum.StreamStatus
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mls.manager.Logger
@@ -397,10 +398,9 @@ class VideoPlayerMediator(
             when (result) {
                 is Success -> {
                     dataManager.currentEvent = result.value
-                    if (eventMayBeStreamed.not()) {
-                        playVideoOrDisplayEventInfo(result.value)
-                        startStreamUrlPullingIfNeeded(result.value)
-                    }
+                    updateStreamStatus(result.value)
+                    playVideoOrDisplayEventInfo(result.value)
+                    startStreamUrlPullingIfNeeded(result.value)
                     if (!joined) {
                         fetchActions(result.value, updateId)
                     }
@@ -447,6 +447,7 @@ class VideoPlayerMediator(
             when (result) {
                 is Success -> {
                     dataManager.currentEvent = result.value
+                    updateStreamStatus(result.value)
                     playVideoOrDisplayEventInfo(result.value)
                     joinEvent(result.value)
                     fetchActions(result.value, true)
@@ -481,7 +482,8 @@ class VideoPlayerMediator(
             playerView.hideEventInfoButton()
         }
 
-        if (mayPlayVideo(event)) {
+        if (streamStatus == StreamStatus.PLAYABLE && streaming.not()) {
+            streaming = true
             logged = false
             storeEvent(event)
             play(event.streams.first())
@@ -489,7 +491,8 @@ class VideoPlayerMediator(
             playerView.updateControllerVisibility(isPlaying = true)
         } else {
             // display event info
-            streaming = true
+            streaming = false
+            player.pause()
             playerView.showPreEventInformationDialog()
             playerView.updateControllerVisibility(isPlaying = false)
         }
