@@ -8,7 +8,6 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.LinearLayout
@@ -21,14 +20,12 @@ import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.PlayerView
-import kotlinx.android.synthetic.main.dialog_event_info_started_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
 import kotlinx.android.synthetic.main.player_view_wrapper.view.*
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
-import tv.mycujoo.mls.helper.DateTimeHelper
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.TimelineMarkerManager
 import tv.mycujoo.mls.manager.contracts.IViewHandler
@@ -109,10 +106,10 @@ class MLSPlayerView @JvmOverloads constructor(
         playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
 
         findViewById<FrameLayout>(R.id.controller_informationButtonLayout).setOnClickListener {
-            showEventInfoForStartedEvents()
+            showStartedEventInformationDialog()
         }
         findViewById<ImageButton>(R.id.controller_informationButton).setOnClickListener {
-            showEventInfoForStartedEvents()
+            showStartedEventInformationDialog()
         }
         findViewById<FrameLayout>(R.id.informationButtonLayout).setOnClickListener {
             showPreEventInformationDialog()
@@ -569,33 +566,14 @@ class MLSPlayerView @JvmOverloads constructor(
         }
     }
 
-    override fun showEventInfoForStartedEvents() {
+    override fun showStartedEventInformationDialog() {
         post {
-            val eventInfoDialog =
-                LayoutInflater.from(context)
-                    .inflate(R.layout.dialog_event_info_started_layout, this, false)
-            infoDialogContainerLayout.addView(eventInfoDialog)
-            dialogs.add(eventInfoDialog)
-
-
-            eventInfoDialog.eventInfoStartedEventDialog_titleTextView.text = uiEvent.title ?: ""
-            eventInfoDialog.eventInfoStartedEventDialog_bodyTextView.text =
-                uiEvent.description ?: ""
-            uiEvent.startTime?.let {
-                eventInfoDialog.eventInfoStartedEventDialog_dateTimeTextView.text =
-                    DateTimeHelper.getDateTime(it)
-            }
-
-
-            eventInfoDialog.setOnClickListener {
-                if (it.parent is ViewGroup) {
-                    (it.parent as ViewGroup).removeView(it)
-                }
-                playerView.showController()
-            }
+            val dialog = StartedEventInformationDialog(
+                mlsPlayerView = this,
+                uiEvent = uiEvent
+            )
+            dialogs.add(dialog)
         }
-
-
     }
 
     override fun hideInfoDialogs() {
@@ -620,13 +598,10 @@ class MLSPlayerView @JvmOverloads constructor(
     fun showEventInfoButtonInstantly() {
         findViewById<FrameLayout>(R.id.controller_informationButtonLayout).visibility =
             View.VISIBLE
-
     }
 
     override fun hideEventInfoButton() {
-        post {
-            hideEventInfoButtonInstantly()
-        }
+        post { hideEventInfoButtonInstantly() }
     }
 
     @MainThread

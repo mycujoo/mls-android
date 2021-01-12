@@ -173,7 +173,7 @@ class VideoPlayerTest {
     fun `test showEventInfoOverlay`() {
         videoPlayer.showEventInfoOverlay()
 
-        verify(MLSPlayerView).showEventInfoForStartedEvents()
+        verify(MLSPlayerView).showStartedEventInformationDialog()
     }
 
     @Test
