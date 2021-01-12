@@ -489,7 +489,8 @@ class VideoPlayerMediator(
             playerView.updateControllerVisibility(isPlaying = true)
         } else {
             // display event info
-            playerView.showEventInformationForPreEvent()
+            streaming = true
+            playerView.showPreEventInformationDialog()
             playerView.updateControllerVisibility(isPlaying = false)
         }
     }

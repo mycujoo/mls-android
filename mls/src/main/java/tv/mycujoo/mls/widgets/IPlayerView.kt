@@ -12,7 +12,7 @@ interface IPlayerView {
     fun hideViewersCounter()
 
     fun showCustomInformationDialog(message: String)
-    fun showEventInformationForPreEvent()
+    fun showPreEventInformationDialog()
     fun showEventInfoForStartedEvents()
     fun hideInfoDialogs()
 

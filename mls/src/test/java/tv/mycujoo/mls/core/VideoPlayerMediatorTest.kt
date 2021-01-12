@@ -335,7 +335,7 @@ class VideoPlayerMediatorTest {
         videoPlayerMediator.playVideo(event)
         videoPlayerMediator.cancelPulling()
 
-        verify(playerView).showEventInformationForPreEvent()
+        verify(playerView).showPreEventInformationDialog()
     }
 
 

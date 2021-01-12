@@ -247,7 +247,7 @@ class MLSPlayerViewTest {
         MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        MLSPlayerView.showEventInformationForPreEvent()
+        MLSPlayerView.showPreEventInformationDialog()
 
 
         onView(withText("title_0")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
@@ -259,7 +259,7 @@ class MLSPlayerViewTest {
         MLSPlayerView.setPosterInfo("sample_url")
 
 
-        MLSPlayerView.showEventInformationForPreEvent()
+        MLSPlayerView.showPreEventInformationDialog()
 
 
         onView(withId(R.id.eventInfoPreEventDialog_posterView)).check(
@@ -279,7 +279,7 @@ class MLSPlayerViewTest {
         MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        MLSPlayerView.showEventInformationForPreEvent()
+        MLSPlayerView.showPreEventInformationDialog()
         onView(withText("title_0")).perform(click())
 
 
@@ -306,7 +306,7 @@ class MLSPlayerViewTest {
     fun hideInfoDialogs_removedAllInfoDialogChildren() {
         MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
         MLSPlayerView.showCustomInformationDialog("Message")
-        MLSPlayerView.showEventInformationForPreEvent()
+        MLSPlayerView.showPreEventInformationDialog()
         MLSPlayerView.showEventInfoForStartedEvents()
 
         MLSPlayerView.hideInfoDialogs()

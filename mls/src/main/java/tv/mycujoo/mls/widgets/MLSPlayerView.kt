@@ -115,10 +115,10 @@ class MLSPlayerView @JvmOverloads constructor(
             showEventInfoForStartedEvents()
         }
         findViewById<FrameLayout>(R.id.informationButtonLayout).setOnClickListener {
-            showEventInformationForPreEvent()
+            showPreEventInformationDialog()
         }
         findViewById<ImageButton>(R.id.informationButton).setOnClickListener {
-            showEventInformationForPreEvent()
+            showPreEventInformationDialog()
         }
 
 
@@ -557,7 +557,7 @@ class MLSPlayerView @JvmOverloads constructor(
         }
     }
 
-    override fun showEventInformationForPreEvent() {
+    override fun showPreEventInformationDialog() {
         post {
             playerView.hideController()
 
