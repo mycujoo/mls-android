@@ -284,7 +284,6 @@ class TvVideoPlayer(
                     playVideoOrDisplayEventInfo(result.value)
                     joinEvent(result.value)
                     startStreamUrlPullingIfNeeded(result.value)
-
                 }
                 is Result.NetworkError -> {
                     logger.log(
@@ -320,6 +319,7 @@ class TvVideoPlayer(
                     player.getDirectInstance()!!
                         .prepare(hlsFactory.createMediaSource(Uri.parse(event.streams.first().fullUrl)))
                     eventInfoContainerLayout.visibility = View.GONE
+                    hideInfoDialogs()
                 }
             }
             StreamStatus.GEOBLOCKED -> {
