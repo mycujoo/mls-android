@@ -546,7 +546,7 @@ class MLSPlayerView @JvmOverloads constructor(
             playerView.hideController()
 
             val dialog = CustomInformationDialog(
-                mlsPlayerView = this,
+                container = infoDialogContainerLayout,
                 uiEvent = uiEvent,
                 message = message
             )

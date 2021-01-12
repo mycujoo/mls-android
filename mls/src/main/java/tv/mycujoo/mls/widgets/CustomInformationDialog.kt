@@ -3,9 +3,9 @@ package tv.mycujoo.mls.widgets
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.view.LayoutInflater
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import kotlinx.android.synthetic.main.dialog_event_info_pre_event_layout.view.*
-import kotlinx.android.synthetic.main.player_view_wrapper.view.*
 import tv.mycujoo.mls.R
 
 /**
@@ -14,15 +14,15 @@ import tv.mycujoo.mls.R
  */
 @SuppressLint("ViewConstructor")
 class CustomInformationDialog(
-    mlsPlayerView: MLSPlayerView,
+    container: ViewGroup,
     uiEvent: UiEvent,
     message: String
 ) :
-    FrameLayout(mlsPlayerView.context, null) {
+    FrameLayout(container.context, null) {
     init {
         LayoutInflater.from(context)
             .inflate(R.layout.dialog_event_info_pre_event_layout, this, true)
-        mlsPlayerView.infoDialogContainerLayout.addView(this)
+        container.addView(this)
 
         eventInfoPreEventDialog_canvasView.visibility = VISIBLE
         eventInfoPreEventDialog_posterView.visibility = GONE

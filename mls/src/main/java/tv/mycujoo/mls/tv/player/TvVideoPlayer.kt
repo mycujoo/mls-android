@@ -56,7 +56,9 @@ import tv.mycujoo.mls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackTransportControlGlueImpl
 import tv.mycujoo.mls.utils.StringUtils
+import tv.mycujoo.mls.widgets.CustomInformationDialog
 import tv.mycujoo.mls.widgets.MLSPlayerView
+import tv.mycujoo.mls.widgets.UiEvent
 import java.util.concurrent.Executors
 
 @OptIn(ExperimentalStdlibApi::class)
@@ -78,6 +80,7 @@ class TvVideoPlayer(
     private var glueHost: VideoSupportFragmentGlueHost
     private var mTransportControlGlue: MLSPlaybackTransportControlGlueImpl<LeanbackPlayerAdapter>
     private var eventInfoContainerLayout: FrameLayout
+    private val dialogs = ArrayList<View>()
     private var controllerAgent: ControllerAgent
 
     private var tvAnnotationMediator: TvAnnotationMediator
@@ -309,12 +312,7 @@ class TvVideoPlayer(
             StreamStatus.NO_STREAM_URL -> {
                 streaming = false
                 player.pause()
-                displayPreEventInformationLayout(
-                    event.poster_url,
-                    event.title,
-                    event.description,
-                    event.start_time
-                )
+                displayPreEventInformationLayout()
             }
             StreamStatus.PLAYABLE -> {
                 if (streaming.not()) {
@@ -341,12 +339,7 @@ class TvVideoPlayer(
             StreamStatus.UNKNOWN_ERROR -> {
                 streaming = false
                 player.pause()
-                displayPreEventInformationLayout(
-                    event.poster_url,
-                    event.title,
-                    event.description,
-                    event.start_time
-                )
+                displayPreEventInformationLayout()
             }
         }
     }
@@ -357,15 +350,28 @@ class TvVideoPlayer(
     private fun showCustomInformationDialog(message: String) {
         glueHost.hideControlsOverlay(true)
         eventInfoContainerLayout.visibility = View.VISIBLE
+
+        var uiEvent = UiEvent()
+        dataManager.currentEvent?.let {
+            uiEvent = uiEvent.copy(
+                title = it.title,
+                description = it.description,
+                startTime = it.start_time,
+                posterUrl = it.poster_url
+            )
+        }
+
+        val dialog = CustomInformationDialog(
+            container = eventInfoContainerLayout,
+            uiEvent = uiEvent,
+            message = message
+        )
+        dialogs.add(dialog)
     }
 
 
-    private fun displayPreEventInformationLayout(
-        posterUrl: String?,
-        title: String,
-        description: String,
-        startTime: String
-    ) {
+    private fun displayPreEventInformationLayout() {
+        val event = dataManager.currentEvent
         glueHost.hideControlsOverlay(true)
         eventInfoContainerLayout.visibility = View.VISIBLE
 
@@ -377,26 +383,37 @@ class TvVideoPlayer(
                     false
                 )
         eventInfoContainerLayout.addView(informationLayout)
+        dialogs.add(informationLayout)
 
 
-        if (posterUrl != null && posterUrl.isNotEmpty()) {
+        if (event?.poster_url != null && event.poster_url.isNotEmpty()) {
             val posterImageView =
                 informationLayout.findViewById<ImageView>(R.id.eventInfoPreEventDialog_posterView)
             val canvasView =
                 informationLayout.findViewById<ConstraintLayout>(R.id.eventInfoPreEventDialog_canvasView)
-            Glide.with(posterImageView).load(posterUrl)
+            Glide.with(posterImageView).load(event.poster_url)
                 .into(posterImageView)
 
             posterImageView.visibility = View.VISIBLE
             canvasView.visibility = View.GONE
         } else {
             informationLayout.findViewById<TextView>(R.id.eventInfoPreEventDialog_titleTextView).text =
-                title
+                event?.title
             informationLayout.findViewById<TextView>(R.id.informationDialog_bodyTextView).text =
-                description
-            informationLayout.findViewById<TextView>(R.id.informationDialog_dateTimeTextView).text =
-                DateTimeHelper.getDateTime(startTime)
+                event?.description
+            event?.start_time?.let {
+                informationLayout.findViewById<TextView>(R.id.informationDialog_dateTimeTextView).text =
+                    DateTimeHelper.getDateTime(it)
+            }
+
         }
+    }
+
+    private fun hideInfoDialogs() {
+        dialogs.forEach { dialog ->
+            eventInfoContainerLayout.removeView(dialog)
+        }
+        dialogs.clear()
     }
     /**endregion */
 }
