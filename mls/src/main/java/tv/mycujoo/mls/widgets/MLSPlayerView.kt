@@ -9,17 +9,18 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.ProgressBar
 import androidx.annotation.MainThread
 import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
 import androidx.test.espresso.idling.CountingIdlingResource
-import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.PlayerView
-import kotlinx.android.synthetic.main.dialog_event_info_pre_event_layout.view.*
 import kotlinx.android.synthetic.main.dialog_event_info_started_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
 import kotlinx.android.synthetic.main.player_view_wrapper.view.*
@@ -69,7 +70,6 @@ class MLSPlayerView @JvmOverloads constructor(
     private lateinit var viewHandler: IViewHandler
 
     private val dialogs = ArrayList<View>()
-    private var eventPosterUrl: String? = null
     private var uiEvent = UiEvent()
 
     private var onSizeChangedCallback = {}
@@ -537,7 +537,7 @@ class MLSPlayerView @JvmOverloads constructor(
 
     /**region Event Info related functions*/
     fun setPosterInfo(posterUrl: String?) {
-        eventPosterUrl = posterUrl
+        uiEvent = uiEvent.copy(posterUrl = posterUrl)
     }
 
     fun setEventInfo(title: String, description: String, startTime: String) {
@@ -561,31 +561,11 @@ class MLSPlayerView @JvmOverloads constructor(
         post {
             playerView.hideController()
 
-            val informationDialog =
-                LayoutInflater.from(context)
-                    .inflate(R.layout.dialog_event_info_pre_event_layout, this, false)
-            infoDialogContainerLayout.addView(informationDialog)
-            dialogs.add(informationDialog)
-
-            if (eventPosterUrl != null && eventPosterUrl!!.isNotEmpty()) {
-                informationDialog.eventInfoPreEventDialog_posterView.visibility = View.VISIBLE
-                informationDialog.eventInfoPreEventDialog_canvasView.visibility = View.GONE
-
-                Glide.with(informationDialog.eventInfoPreEventDialog_posterView)
-                    .load(eventPosterUrl)
-                    .into(informationDialog.eventInfoPreEventDialog_posterView as ImageView)
-            } else {
-                informationDialog.eventInfoPreEventDialog_canvasView.visibility = View.VISIBLE
-                informationDialog.eventInfoPreEventDialog_posterView.visibility = View.GONE
-
-                informationDialog.eventInfoPreEventDialog_titleTextView.text = uiEvent.title ?: ""
-                informationDialog.informationDialog_bodyTextView.text = uiEvent.description ?: ""
-                uiEvent.startTime?.let {
-                    informationDialog.informationDialog_dateTimeTextView.text =
-                        DateTimeHelper.getDateTime(it)
-                }
-
-            }
+            val dialog = PreEventInformationDialog(
+                mlsPlayerView = this,
+                uiEvent = uiEvent
+            )
+            dialogs.add(dialog)
         }
     }
 
