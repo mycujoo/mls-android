@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.core
 
+import android.content.res.Resources
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player.*
@@ -20,8 +21,12 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.invocation.InvocationOnMock
 import tv.mycujoo.data.entity.ActionResponse
+import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_GEOBLOCKED
+import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_NO_ENTITLEMENT
+import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_UNSPECIFIED
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.mls.CoroutineTestRule
+import tv.mycujoo.mls.R
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.MLSConfiguration
@@ -90,6 +95,9 @@ class VideoPlayerMediatorTest {
 
     @Mock
     lateinit var activity: AppCompatActivity
+
+    @Mock
+    lateinit var resources: Resources
 
     @Mock
     lateinit var player: IPlayer
@@ -166,12 +174,16 @@ class VideoPlayerMediatorTest {
         whenever(internalBuilder.logger).thenReturn(logger)
 
         whenever(playerView.context).thenReturn(activity)
+        whenever(playerView.resources).thenReturn(resources)
         whenever(playerView.getTimeBar()).thenReturn(timeBar)
         whenever(playerView.getRemotePlayerControllerView()).thenReturn(remotePlayerControllerView)
 
         whenever(dispatcher.coroutineContext).thenReturn(coroutineTestRule.testDispatcher)
 
         whenever(player.getDirectInstance()).thenReturn(exoPlayer)
+
+        whenever(resources.getString(R.string.message_geoblocked_stream)).thenReturn("This stream cannot be watched in your area.")
+        whenever(resources.getString(R.string.message_no_entitlement_stream)).thenReturn("Access to this stream is restricted.")
 
 
         whenever(player.addListener(any())).then { storeExoPlayerListener(it) }
@@ -338,6 +350,69 @@ class VideoPlayerMediatorTest {
         verify(playerView).showPreEventInformationDialog()
     }
 
+    @Test
+    fun `event with geoBlocked-stream, displays custom information dialog`() = runBlockingTest {
+        val geoBlockedStream = getSampleStream(
+            null,
+            tv.mycujoo.domain.entity.Error(ERROR_CODE_GEOBLOCKED, null)
+        )
+        val event: EventEntity = getSampleEventEntity(
+            listOf(geoBlockedStream), EventStatus.EVENT_STATUS_SCHEDULED
+        )
+        whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
+
+
+        videoPlayerMediator.playVideo(event)
+        videoPlayerMediator.cancelPulling()
+
+
+        verify(playerView).showCustomInformationDialog("This stream cannot be watched in your area.")
+        verify(player).pause()
+
+    }
+
+    @Test
+    fun `event with noEntitlement-stream, displays custom information dialog`() = runBlockingTest {
+        val noEntitlementStream = getSampleStream(
+            null,
+            tv.mycujoo.domain.entity.Error(ERROR_CODE_NO_ENTITLEMENT, null)
+        )
+        val event: EventEntity = getSampleEventEntity(
+            listOf(noEntitlementStream), EventStatus.EVENT_STATUS_SCHEDULED
+        )
+        whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
+
+
+        videoPlayerMediator.playVideo(event)
+        videoPlayerMediator.cancelPulling()
+
+
+        verify(playerView).showCustomInformationDialog("Access to this stream is restricted.")
+        verify(player).pause()
+    }
+
+
+    @Test
+    fun `event with unknownError-stream, displays pre-event information dialog`() =
+        runBlockingTest {
+            val unknownErrorStream = getSampleStream(
+                null,
+                tv.mycujoo.domain.entity.Error(ERROR_CODE_UNSPECIFIED, null)
+            )
+            val event: EventEntity = getSampleEventEntity(
+                listOf(unknownErrorStream), EventStatus.EVENT_STATUS_SCHEDULED
+            )
+            whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
+
+
+            videoPlayerMediator.playVideo(event)
+            videoPlayerMediator.cancelPulling()
+
+
+            verify(playerView).showPreEventInformationDialog()
+            verify(playerView, never()).showCustomInformationDialog(any())
+            verify(player).pause()
+        }
 
     @Test
     fun `given event without streamUrl, should pull streamUrl periodically`() = runBlockingTest {
@@ -682,6 +757,9 @@ class VideoPlayerMediatorTest {
                 false
             )
         }
+
+        fun getSampleStream(url: String?, error: Error? = null) =
+            Stream("id_0", "1200000", url, null, error)
 
         const val SAMPLE_UUID = "aa-bb-cc-dd-ee"
 
