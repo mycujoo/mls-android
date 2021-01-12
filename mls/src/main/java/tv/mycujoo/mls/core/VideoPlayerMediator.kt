@@ -17,6 +17,7 @@ import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.Stream
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mls.BuildConfig
+import tv.mycujoo.mls.R
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.VideoPlayer
@@ -28,6 +29,7 @@ import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.enum.MessageLevel
+import tv.mycujoo.mls.enum.StreamStatus.*
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mls.manager.Logger
@@ -397,10 +399,9 @@ class VideoPlayerMediator(
             when (result) {
                 is Success -> {
                     dataManager.currentEvent = result.value
-                    if (eventMayBeStreamed.not()) {
-                        playVideoOrDisplayEventInfo(result.value)
-                        startStreamUrlPullingIfNeeded(result.value)
-                    }
+                    updateStreamStatus(result.value)
+                    playVideoOrDisplayEventInfo(result.value)
+                    startStreamUrlPullingIfNeeded(result.value)
                     if (!joined) {
                         fetchActions(result.value, updateId)
                     }
@@ -447,6 +448,7 @@ class VideoPlayerMediator(
             when (result) {
                 is Success -> {
                     dataManager.currentEvent = result.value
+                    updateStreamStatus(result.value)
                     playVideoOrDisplayEventInfo(result.value)
                     joinEvent(result.value)
                     fetchActions(result.value, true)
@@ -464,7 +466,7 @@ class VideoPlayerMediator(
 
     fun playExternalSourceVideo(videoUri: String) {
         player.play(videoUri, Long.MAX_VALUE, videoPlayerConfig.autoPlay)
-        playerView.hideEventInfoDialog()
+        playerView.hideInfoDialogs()
         if (videoPlayerConfig.showEventInfoButton) {
             playerView.showEventInfoButton()
         } else {
@@ -481,16 +483,41 @@ class VideoPlayerMediator(
             playerView.hideEventInfoButton()
         }
 
-        if (mayPlayVideo(event)) {
-            logged = false
-            storeEvent(event)
-            play(event.streams.first())
-            playerView.hideEventInfoDialog()
-            playerView.updateControllerVisibility(isPlaying = true)
-        } else {
-            // display event info
-            playerView.showEventInformationForPreEvent()
-            playerView.updateControllerVisibility(isPlaying = false)
+        when (streamStatus) {
+            NO_STREAM_URL -> {
+                streaming = false
+                player.pause()
+                playerView.showPreEventInformationDialog()
+                playerView.updateControllerVisibility(isPlaying = false)
+            }
+            PLAYABLE -> {
+                if (streaming.not()) {
+                    streaming = true
+                    logged = false
+                    storeEvent(event)
+                    play(event.streams.first())
+                    playerView.hideInfoDialogs()
+                    playerView.updateControllerVisibility(isPlaying = true)
+                }
+            }
+            GEOBLOCKED -> {
+                streaming = false
+                player.pause()
+                playerView.showCustomInformationDialog(playerView.resources.getString(R.string.message_geoblocked_stream))
+                playerView.updateControllerVisibility(isPlaying = false)
+            }
+            NO_ENTITLEMENT -> {
+                streaming = false
+                player.pause()
+                playerView.showCustomInformationDialog(playerView.resources.getString(R.string.message_no_entitlement_stream))
+                playerView.updateControllerVisibility(isPlaying = false)
+            }
+            UNKNOWN_ERROR -> {
+                streaming = false
+                player.pause()
+                playerView.showPreEventInformationDialog()
+                playerView.updateControllerVisibility(isPlaying = false)
+            }
         }
     }
 

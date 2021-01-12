@@ -6,18 +6,14 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.leanback.app.VideoSupportFragment
 import androidx.leanback.app.VideoSupportFragmentGlueHost
 import androidx.leanback.media.PlaybackGlue
-import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter
@@ -39,7 +35,7 @@ import tv.mycujoo.mls.core.AbstractPlayerMediator
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.enum.MessageLevel
-import tv.mycujoo.mls.helper.DateTimeHelper
+import tv.mycujoo.mls.enum.StreamStatus
 import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mls.manager.Logger
@@ -55,7 +51,10 @@ import tv.mycujoo.mls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackTransportControlGlueImpl
 import tv.mycujoo.mls.utils.StringUtils
+import tv.mycujoo.mls.widgets.CustomInformationDialog
 import tv.mycujoo.mls.widgets.MLSPlayerView
+import tv.mycujoo.mls.widgets.PreEventInformationDialog
+import tv.mycujoo.mls.widgets.UiEvent
 import java.util.concurrent.Executors
 
 @OptIn(ExperimentalStdlibApi::class)
@@ -77,6 +76,7 @@ class TvVideoPlayer(
     private var glueHost: VideoSupportFragmentGlueHost
     private var mTransportControlGlue: MLSPlaybackTransportControlGlueImpl<LeanbackPlayerAdapter>
     private var eventInfoContainerLayout: FrameLayout
+    private val dialogs = ArrayList<View>()
     private var controllerAgent: ControllerAgent
 
     private var tvAnnotationMediator: TvAnnotationMediator
@@ -194,10 +194,9 @@ class TvVideoPlayer(
             when (result) {
                 is Result.Success -> {
                     dataManager.currentEvent = result.value
-                    if (eventMayBeStreamed.not()) {
-                        playVideoOrDisplayEventInfo(result.value)
-                        startStreamUrlPullingIfNeeded(result.value)
-                    }
+                    updateStreamStatus(result.value)
+                    playVideoOrDisplayEventInfo(result.value)
+                    startStreamUrlPullingIfNeeded(result.value)
                 }
                 is Result.NetworkError -> {
                     logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
@@ -281,10 +280,10 @@ class TvVideoPlayer(
             when (result) {
                 is Result.Success -> {
                     dataManager.currentEvent = result.value
+                    updateStreamStatus(result.value)
                     playVideoOrDisplayEventInfo(result.value)
                     joinEvent(result.value)
                     startStreamUrlPullingIfNeeded(result.value)
-
                 }
                 is Result.NetworkError -> {
                     logger.log(
@@ -303,64 +302,92 @@ class TvVideoPlayer(
     }
 
     private fun playVideoOrDisplayEventInfo(event: EventEntity) {
-        if (mayPlayVideo(event)) {
-            val userAgent = Util.getUserAgent(activity, "MLS-AndroidTv-SDK")
-            val hlsFactory =
-                HlsMediaSource.Factory(DefaultDataSourceFactory(activity, userAgent))
 
-            player.getDirectInstance()!!
-                .prepare(hlsFactory.createMediaSource(Uri.parse(event.streams.first().fullUrl)))
-            eventInfoContainerLayout.visibility = View.GONE
-        } else {
-            displayPreEventInformationLayout(
-                event.poster_url,
-                event.title,
-                event.description,
-                event.start_time
-            )
+        when (streamStatus) {
+            StreamStatus.NO_STREAM_URL -> {
+                streaming = false
+                player.pause()
+                displayPreEventInformationLayout()
+            }
+            StreamStatus.PLAYABLE -> {
+                if (streaming.not()) {
+                    streaming = true
+                    val userAgent = Util.getUserAgent(activity, "MLS-AndroidTv-SDK")
+                    val hlsFactory =
+                        HlsMediaSource.Factory(DefaultDataSourceFactory(activity, userAgent))
+
+                    player.getDirectInstance()!!
+                        .prepare(hlsFactory.createMediaSource(Uri.parse(event.streams.first().fullUrl)))
+                    eventInfoContainerLayout.visibility = View.GONE
+                    hideInfoDialogs()
+                }
+            }
+            StreamStatus.GEOBLOCKED -> {
+                streaming = false
+                player.pause()
+                showCustomInformationDialog(activity.getString(R.string.message_geoblocked_stream))
+            }
+            StreamStatus.NO_ENTITLEMENT -> {
+                streaming = false
+                player.pause()
+                showCustomInformationDialog(activity.getString(R.string.message_no_entitlement_stream))
+            }
+            StreamStatus.UNKNOWN_ERROR -> {
+                streaming = false
+                player.pause()
+                displayPreEventInformationLayout()
+            }
         }
     }
 
     /**endregion */
 
     /**region Event-information layout*/
-    private fun displayPreEventInformationLayout(
-        posterUrl: String?,
-        title: String,
-        description: String,
-        startTime: String
-    ) {
+    private fun showCustomInformationDialog(message: String) {
         glueHost.hideControlsOverlay(true)
         eventInfoContainerLayout.visibility = View.VISIBLE
 
-        val informationLayout =
-            LayoutInflater.from(eventInfoContainerLayout.context)
-                .inflate(
-                    R.layout.dialog_event_info_pre_event_layout,
-                    eventInfoContainerLayout,
-                    false
-                )
-        eventInfoContainerLayout.addView(informationLayout)
-
-
-        if (posterUrl != null) {
-            val posterImageView =
-                informationLayout.findViewById<ImageView>(R.id.eventInfoPreEventDialog_posterView)
-            val canvasView =
-                informationLayout.findViewById<ConstraintLayout>(R.id.eventInfoPreEventDialog_canvasView)
-            Glide.with(posterImageView).load(posterUrl)
-                .into(posterImageView)
-
-            posterImageView.visibility = View.VISIBLE
-            canvasView.visibility = View.GONE
-        } else {
-            informationLayout.findViewById<TextView>(R.id.eventInfoPreEventDialog_titleTextView).text =
-                title
-            informationLayout.findViewById<TextView>(R.id.informationDialog_bodyTextView).text =
-                description
-            informationLayout.findViewById<TextView>(R.id.informationDialog_dateTimeTextView).text =
-                DateTimeHelper.getDateTime(startTime)
+        var uiEvent = UiEvent()
+        dataManager.currentEvent?.let {
+            uiEvent = uiEvent.copy(
+                title = it.title,
+                description = it.description,
+                startTime = it.start_time,
+                posterUrl = it.poster_url
+            )
         }
+
+        val dialog = CustomInformationDialog(
+            container = eventInfoContainerLayout,
+            uiEvent = uiEvent,
+            message = message
+        )
+        dialogs.add(dialog)
+    }
+
+
+    private fun displayPreEventInformationLayout() {
+        glueHost.hideControlsOverlay(true)
+        eventInfoContainerLayout.visibility = View.VISIBLE
+
+        var uiEvent = UiEvent()
+        dataManager.currentEvent?.let {
+            uiEvent = uiEvent.copy(
+                title = it.title,
+                description = it.description,
+                startTime = it.start_time,
+                posterUrl = it.poster_url
+            )
+        }
+        val dialog = PreEventInformationDialog(eventInfoContainerLayout, uiEvent)
+        dialogs.add(dialog)
+    }
+
+    private fun hideInfoDialogs() {
+        dialogs.forEach { dialog ->
+            eventInfoContainerLayout.removeView(dialog)
+        }
+        dialogs.clear()
     }
     /**endregion */
 }

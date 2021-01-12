@@ -8,26 +8,24 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.*
+import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.ProgressBar
 import androidx.annotation.MainThread
 import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
 import androidx.test.espresso.idling.CountingIdlingResource
-import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.PlayerView
-import kotlinx.android.synthetic.main.dialog_event_info_pre_event_layout.view.*
-import kotlinx.android.synthetic.main.dialog_event_info_started_layout.view.*
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
 import kotlinx.android.synthetic.main.player_view_wrapper.view.*
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mls.R
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
-import tv.mycujoo.mls.helper.DateTimeHelper
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.manager.TimelineMarkerManager
 import tv.mycujoo.mls.manager.contracts.IViewHandler
@@ -40,6 +38,7 @@ import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterest
 import tv.mycujoo.mls.widgets.mlstimebar.PointOfInterestType
 import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarkerView
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MLSPlayerView @JvmOverloads constructor(
@@ -67,10 +66,8 @@ class MLSPlayerView @JvmOverloads constructor(
 
     private lateinit var viewHandler: IViewHandler
 
-    private var eventPosterUrl: String? = null
-    private lateinit var eventInfoTitle: String
-    private lateinit var eventInfoDescription: String
-    private lateinit var eventDateTime: String
+    private val dialogs = ArrayList<View>()
+    private var uiEvent = UiEvent()
 
     private var onSizeChangedCallback = {}
 
@@ -109,16 +106,16 @@ class MLSPlayerView @JvmOverloads constructor(
         playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
 
         findViewById<FrameLayout>(R.id.controller_informationButtonLayout).setOnClickListener {
-            showEventInfoForStartedEvents()
+            showStartedEventInformationDialog()
         }
         findViewById<ImageButton>(R.id.controller_informationButton).setOnClickListener {
-            showEventInfoForStartedEvents()
+            showStartedEventInformationDialog()
         }
         findViewById<FrameLayout>(R.id.informationButtonLayout).setOnClickListener {
-            showEventInformationForPreEvent()
+            showPreEventInformationDialog()
         }
         findViewById<ImageButton>(R.id.informationButton).setOnClickListener {
-            showEventInformationForPreEvent()
+            showPreEventInformationDialog()
         }
 
 
@@ -537,85 +534,57 @@ class MLSPlayerView @JvmOverloads constructor(
 
     /**region Event Info related functions*/
     fun setPosterInfo(posterUrl: String?) {
-        eventPosterUrl = posterUrl
+        uiEvent = uiEvent.copy(posterUrl = posterUrl)
     }
 
     fun setEventInfo(title: String, description: String, startTime: String) {
-        eventInfoTitle = title
-        eventInfoDescription = description
-        eventDateTime = startTime
+        uiEvent = UiEvent(title, description, startTime)
     }
 
-    override fun showEventInformationForPreEvent() {
+    override fun showCustomInformationDialog(message: String) {
         post {
             playerView.hideController()
 
-            val informationDialog =
-                LayoutInflater.from(context)
-                    .inflate(R.layout.dialog_event_info_pre_event_layout, this, false)
-            eventInfoDialogContainerLayout.addView(informationDialog)
-
-            if (eventPosterUrl != null && eventPosterUrl!!.isNotEmpty()) {
-                informationDialog.eventInfoPreEventDialog_posterView.visibility = View.VISIBLE
-                informationDialog.eventInfoPreEventDialog_canvasView.visibility = View.GONE
-
-                Glide.with(informationDialog.eventInfoPreEventDialog_posterView)
-                    .load(eventPosterUrl)
-                    .into(informationDialog.eventInfoPreEventDialog_posterView as ImageView)
-            } else {
-                informationDialog.eventInfoPreEventDialog_canvasView.visibility = View.VISIBLE
-                informationDialog.eventInfoPreEventDialog_posterView.visibility = View.GONE
-
-                informationDialog.eventInfoPreEventDialog_titleTextView.text = eventInfoTitle
-                informationDialog.informationDialog_bodyTextView.text = eventInfoDescription
-                informationDialog.informationDialog_dateTimeTextView.text =
-                    DateTimeHelper.getDateTime(eventDateTime)
-            }
-
-
+            val dialog = CustomInformationDialog(
+                container = infoDialogContainerLayout,
+                uiEvent = uiEvent,
+                message = message
+            )
+            dialogs.add(dialog)
         }
-
-
     }
 
-    override fun showEventInfoForStartedEvents() {
-        if (this::eventInfoTitle.isInitialized.not() && this::eventInfoDescription.isInitialized.not()) {
+    override fun showPreEventInformationDialog() {
+        post {
+            playerView.hideController()
+
+            val dialog = PreEventInformationDialog(
+                container = infoDialogContainerLayout,
+                uiEvent = uiEvent
+            )
+            dialogs.add(dialog)
+        }
+    }
+
+    override fun showStartedEventInformationDialog() {
+        post {
+            val dialog = StartedEventInformationDialog(
+                mlsPlayerView = this,
+                uiEvent = uiEvent
+            )
+            dialogs.add(dialog)
+        }
+    }
+
+    override fun hideInfoDialogs() {
+        if (infoDialogContainerLayout == null) {
             return
         }
         post {
-            val eventInfoDialog =
-                LayoutInflater.from(context)
-                    .inflate(R.layout.dialog_event_info_started_layout, this, false)
-            eventInfoDialogContainerLayout.addView(eventInfoDialog)
-
-            eventInfoDialog.eventInfoStartedEventDialog_titleTextView.text = eventInfoTitle
-            eventInfoDialog.eventInfoStartedEventDialog_bodyTextView.text =
-                eventInfoDescription
-            eventInfoDialog.eventInfoStartedEventDialog_dateTimeTextView.text =
-                DateTimeHelper.getDateTime(eventDateTime)
-
-            eventInfoDialog.setOnClickListener {
-                if (it.parent is ViewGroup) {
-                    (it.parent as ViewGroup).removeView(it)
-                }
-                playerView.showController()
+            dialogs.forEach { dialog ->
+                infoDialogContainerLayout.removeView(dialog)
             }
-        }
-
-
-    }
-
-    override fun hideEventInfoDialog() {
-        if (eventInfoDialogContainerLayout == null) {
-            return
-        }
-        post {
-            eventInfoDialogContainerLayout.children.forEach { child ->
-                if (child.tag == "event_info_dialog") {
-                    child.visibility = GONE
-                    removeView(child)
-                }
-            }
+            dialogs.clear()
         }
     }
 
@@ -629,13 +598,10 @@ class MLSPlayerView @JvmOverloads constructor(
     fun showEventInfoButtonInstantly() {
         findViewById<FrameLayout>(R.id.controller_informationButtonLayout).visibility =
             View.VISIBLE
-
     }
 
     override fun hideEventInfoButton() {
-        post {
-            hideEventInfoButtonInstantly()
-        }
+        post { hideEventInfoButtonInstantly() }
     }
 
     @MainThread
@@ -645,7 +611,6 @@ class MLSPlayerView @JvmOverloads constructor(
                 View.GONE
         }
     }
-
     /**endregion */
 
 

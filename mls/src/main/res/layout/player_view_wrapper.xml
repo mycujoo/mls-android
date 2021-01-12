@@ -98,7 +98,7 @@
         app:layout_constraintTop_toTopOf="@id/exoPlayerView" />
 
     <FrameLayout
-        android:id="@+id/eventInfoDialogContainerLayout"
+        android:id="@+id/infoDialogContainerLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="@id/exoPlayerView"
