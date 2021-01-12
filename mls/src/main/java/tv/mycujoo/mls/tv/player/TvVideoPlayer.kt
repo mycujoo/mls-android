@@ -6,18 +6,14 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.leanback.app.VideoSupportFragment
 import androidx.leanback.app.VideoSupportFragmentGlueHost
 import androidx.leanback.media.PlaybackGlue
-import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter
@@ -40,7 +36,6 @@ import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.enum.MessageLevel
 import tv.mycujoo.mls.enum.StreamStatus
-import tv.mycujoo.mls.helper.DateTimeHelper
 import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mls.manager.Logger
@@ -58,6 +53,7 @@ import tv.mycujoo.mls.tv.internal.transport.MLSPlaybackTransportControlGlueImpl
 import tv.mycujoo.mls.utils.StringUtils
 import tv.mycujoo.mls.widgets.CustomInformationDialog
 import tv.mycujoo.mls.widgets.MLSPlayerView
+import tv.mycujoo.mls.widgets.PreEventInformationDialog
 import tv.mycujoo.mls.widgets.UiEvent
 import java.util.concurrent.Executors
 
@@ -371,42 +367,20 @@ class TvVideoPlayer(
 
 
     private fun displayPreEventInformationLayout() {
-        val event = dataManager.currentEvent
         glueHost.hideControlsOverlay(true)
         eventInfoContainerLayout.visibility = View.VISIBLE
 
-        val informationLayout =
-            LayoutInflater.from(eventInfoContainerLayout.context)
-                .inflate(
-                    R.layout.dialog_event_info_pre_event_layout,
-                    eventInfoContainerLayout,
-                    false
-                )
-        eventInfoContainerLayout.addView(informationLayout)
-        dialogs.add(informationLayout)
-
-
-        if (event?.poster_url != null && event.poster_url.isNotEmpty()) {
-            val posterImageView =
-                informationLayout.findViewById<ImageView>(R.id.eventInfoPreEventDialog_posterView)
-            val canvasView =
-                informationLayout.findViewById<ConstraintLayout>(R.id.eventInfoPreEventDialog_canvasView)
-            Glide.with(posterImageView).load(event.poster_url)
-                .into(posterImageView)
-
-            posterImageView.visibility = View.VISIBLE
-            canvasView.visibility = View.GONE
-        } else {
-            informationLayout.findViewById<TextView>(R.id.eventInfoPreEventDialog_titleTextView).text =
-                event?.title
-            informationLayout.findViewById<TextView>(R.id.informationDialog_bodyTextView).text =
-                event?.description
-            event?.start_time?.let {
-                informationLayout.findViewById<TextView>(R.id.informationDialog_dateTimeTextView).text =
-                    DateTimeHelper.getDateTime(it)
-            }
-
+        var uiEvent = UiEvent()
+        dataManager.currentEvent?.let {
+            uiEvent = uiEvent.copy(
+                title = it.title,
+                description = it.description,
+                startTime = it.start_time,
+                posterUrl = it.poster_url
+            )
         }
+        val dialog = PreEventInformationDialog(eventInfoContainerLayout, uiEvent)
+        dialogs.add(dialog)
     }
 
     private fun hideInfoDialogs() {

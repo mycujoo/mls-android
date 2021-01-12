@@ -559,7 +559,7 @@ class MLSPlayerView @JvmOverloads constructor(
             playerView.hideController()
 
             val dialog = PreEventInformationDialog(
-                mlsPlayerView = this,
+                container = infoDialogContainerLayout,
                 uiEvent = uiEvent
             )
             dialogs.add(dialog)
