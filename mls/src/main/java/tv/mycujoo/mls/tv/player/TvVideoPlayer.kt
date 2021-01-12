@@ -281,6 +281,7 @@ class TvVideoPlayer(
             when (result) {
                 is Result.Success -> {
                     dataManager.currentEvent = result.value
+                    updateStreamStatus(result.value)
                     playVideoOrDisplayEventInfo(result.value)
                     joinEvent(result.value)
                     startStreamUrlPullingIfNeeded(result.value)
@@ -303,29 +304,62 @@ class TvVideoPlayer(
     }
 
     private fun playVideoOrDisplayEventInfo(event: EventEntity) {
-        if (streamStatus == StreamStatus.PLAYABLE && streaming.not()) {
-            streaming = true
-            val userAgent = Util.getUserAgent(activity, "MLS-AndroidTv-SDK")
-            val hlsFactory =
-                HlsMediaSource.Factory(DefaultDataSourceFactory(activity, userAgent))
 
-            player.getDirectInstance()!!
-                .prepare(hlsFactory.createMediaSource(Uri.parse(event.streams.first().fullUrl)))
-            eventInfoContainerLayout.visibility = View.GONE
-        } else {
-            streaming = false
-            displayPreEventInformationLayout(
-                event.poster_url,
-                event.title,
-                event.description,
-                event.start_time
-            )
+        when (streamStatus) {
+            StreamStatus.NO_STREAM_URL -> {
+                streaming = false
+                player.pause()
+                displayPreEventInformationLayout(
+                    event.poster_url,
+                    event.title,
+                    event.description,
+                    event.start_time
+                )
+            }
+            StreamStatus.PLAYABLE -> {
+                if (streaming.not()) {
+                    streaming = true
+                    val userAgent = Util.getUserAgent(activity, "MLS-AndroidTv-SDK")
+                    val hlsFactory =
+                        HlsMediaSource.Factory(DefaultDataSourceFactory(activity, userAgent))
+
+                    player.getDirectInstance()!!
+                        .prepare(hlsFactory.createMediaSource(Uri.parse(event.streams.first().fullUrl)))
+                    eventInfoContainerLayout.visibility = View.GONE
+                }
+            }
+            StreamStatus.GEOBLOCKED -> {
+                streaming = false
+                player.pause()
+                showCustomInformationDialog(activity.getString(R.string.message_geoblocked_stream))
+            }
+            StreamStatus.NO_ENTITLEMENT -> {
+                streaming = false
+                player.pause()
+                showCustomInformationDialog(activity.getString(R.string.message_no_entitlement_stream))
+            }
+            StreamStatus.UNKNOWN_ERROR -> {
+                streaming = false
+                player.pause()
+                displayPreEventInformationLayout(
+                    event.poster_url,
+                    event.title,
+                    event.description,
+                    event.start_time
+                )
+            }
         }
     }
 
     /**endregion */
 
     /**region Event-information layout*/
+    private fun showCustomInformationDialog(message: String) {
+        glueHost.hideControlsOverlay(true)
+        eventInfoContainerLayout.visibility = View.VISIBLE
+    }
+
+
     private fun displayPreEventInformationLayout(
         posterUrl: String?,
         title: String,
@@ -345,7 +379,7 @@ class TvVideoPlayer(
         eventInfoContainerLayout.addView(informationLayout)
 
 
-        if (posterUrl != null) {
+        if (posterUrl != null && posterUrl.isNotEmpty()) {
             val posterImageView =
                 informationLayout.findViewById<ImageView>(R.id.eventInfoPreEventDialog_posterView)
             val canvasView =
