@@ -354,7 +354,7 @@ class VideoPlayerMediatorTest {
     fun `event with geoBlocked-stream, displays custom information dialog`() = runBlockingTest {
         val geoBlockedStream = getSampleStream(
             null,
-            tv.mycujoo.domain.entity.Error(ERROR_CODE_GEOBLOCKED, null)
+            ErrorCodeAndMessage(ERROR_CODE_GEOBLOCKED, null)
         )
         val event: EventEntity = getSampleEventEntity(
             listOf(geoBlockedStream), EventStatus.EVENT_STATUS_SCHEDULED
@@ -375,7 +375,7 @@ class VideoPlayerMediatorTest {
     fun `event with noEntitlement-stream, displays custom information dialog`() = runBlockingTest {
         val noEntitlementStream = getSampleStream(
             null,
-            tv.mycujoo.domain.entity.Error(ERROR_CODE_NO_ENTITLEMENT, null)
+            ErrorCodeAndMessage(ERROR_CODE_NO_ENTITLEMENT, null)
         )
         val event: EventEntity = getSampleEventEntity(
             listOf(noEntitlementStream), EventStatus.EVENT_STATUS_SCHEDULED
@@ -397,7 +397,7 @@ class VideoPlayerMediatorTest {
         runBlockingTest {
             val unknownErrorStream = getSampleStream(
                 null,
-                tv.mycujoo.domain.entity.Error(ERROR_CODE_UNSPECIFIED, null)
+                ErrorCodeAndMessage(ERROR_CODE_UNSPECIFIED, null)
             )
             val event: EventEntity = getSampleEventEntity(
                 listOf(unknownErrorStream), EventStatus.EVENT_STATUS_SCHEDULED
@@ -758,8 +758,8 @@ class VideoPlayerMediatorTest {
             )
         }
 
-        fun getSampleStream(url: String?, error: Error? = null) =
-            Stream("id_0", "1200000", url, null, error)
+        fun getSampleStream(url: String?, errorCodeAndMessage: ErrorCodeAndMessage? = null) =
+            Stream("id_0", "1200000", url, null, errorCodeAndMessage)
 
         const val SAMPLE_UUID = "aa-bb-cc-dd-ee"
 

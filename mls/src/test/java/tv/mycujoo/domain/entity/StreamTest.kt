@@ -29,7 +29,7 @@ class StreamTest {
     fun `GEOBLOCKED stream should return true for isGeoBlocked`() {
         val geoBlockedStream = Stream(
             id = "id_0", dvrWindowString = "120000", fullUrl = null, widevine = null,
-            error = tv.mycujoo.domain.entity.Error(
+            errorCodeAndMessage = ErrorCodeAndMessage(
                 code = "ERROR_CODE_GEOBLOCKED",
                 message = "This stream is Geo-blocked"
             )
@@ -50,7 +50,7 @@ class StreamTest {
     fun `no-entitlement stream should return true for isNoEntitlement`() {
         val stream = Stream(
             id = "id_0", dvrWindowString = "120000", fullUrl = null, widevine = null,
-            error = tv.mycujoo.domain.entity.Error(
+            errorCodeAndMessage = ErrorCodeAndMessage(
                 code = "ERROR_CODE_NO_ENTITLEMENT",
                 message = "Access to this stream is restricted"
             )
@@ -72,7 +72,7 @@ class StreamTest {
     fun `stream with unknown-error should return true for hasUnknownError`() {
         val streamWithUnknownError = Stream(
             "id_0", "120000", null, null,
-            error = tv.mycujoo.domain.entity.Error(
+            errorCodeAndMessage = ErrorCodeAndMessage(
                 code = "ERROR_CODE_UNSPECIFIED",
                 message = null
             )

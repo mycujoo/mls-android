@@ -50,7 +50,7 @@ data class Stream(
     @SerializedName("dvr_window_size") val dvrWindowString: String,
     @SerializedName("full_url") val fullUrl: String?,
     @SerializedName("widevine") val widevine: Widevine?,
-    @SerializedName("error") val error: Error? = null
+    @SerializedName("error") val errorCodeAndMessage: ErrorCodeAndMessage? = null
 ) {
     fun getDvrWindowSize(): Long {
         return try {
@@ -66,11 +66,11 @@ data class Stream(
     }
 
     fun hasError(): Boolean {
-        return error?.code != null
+        return errorCodeAndMessage?.code != null
     }
 
     fun isGeoBlocked(): Boolean {
-        error?.let {
+        errorCodeAndMessage?.let {
             if (it.code == ERROR_CODE_GEOBLOCKED) {
                 return true
             }
@@ -79,14 +79,14 @@ data class Stream(
     }
 
     fun isNoEntitlement(): Boolean {
-        if (error?.code == ERROR_CODE_NO_ENTITLEMENT) {
+        if (errorCodeAndMessage?.code == ERROR_CODE_NO_ENTITLEMENT) {
             return true
         }
         return false
     }
 
     fun hasUnknownError(): Boolean {
-        if (error?.code == ERROR_CODE_UNSPECIFIED) {
+        if (errorCodeAndMessage?.code == ERROR_CODE_UNSPECIFIED) {
             return true
         }
         return false
@@ -109,7 +109,7 @@ data class Widevine(
     @SerializedName("license_url") val licenseUrl: String?
 )
 
-data class Error(
+data class ErrorCodeAndMessage(
     @SerializedName("code") val code: String?,
     @SerializedName("message") val message: String?
 )
