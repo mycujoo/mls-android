@@ -17,6 +17,7 @@ import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.Stream
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mls.BuildConfig
+import tv.mycujoo.mls.R
 import tv.mycujoo.mls.analytic.YouboraClient
 import tv.mycujoo.mls.api.MLSBuilder
 import tv.mycujoo.mls.api.VideoPlayer
@@ -28,7 +29,7 @@ import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.enum.MessageLevel
-import tv.mycujoo.mls.enum.StreamStatus
+import tv.mycujoo.mls.enum.StreamStatus.*
 import tv.mycujoo.mls.helper.OverlayViewHelper
 import tv.mycujoo.mls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mls.manager.Logger
@@ -482,19 +483,41 @@ class VideoPlayerMediator(
             playerView.hideEventInfoButton()
         }
 
-        if (streamStatus == StreamStatus.PLAYABLE && streaming.not()) {
-            streaming = true
-            logged = false
-            storeEvent(event)
-            play(event.streams.first())
-            playerView.hideInfoDialogs()
-            playerView.updateControllerVisibility(isPlaying = true)
-        } else {
-            // display event info
-            streaming = false
-            player.pause()
-            playerView.showPreEventInformationDialog()
-            playerView.updateControllerVisibility(isPlaying = false)
+        when (streamStatus) {
+            NO_STREAM_URL -> {
+                streaming = false
+                player.pause()
+                playerView.showPreEventInformationDialog()
+                playerView.updateControllerVisibility(isPlaying = false)
+            }
+            PLAYABLE -> {
+                if (streaming.not()) {
+                    streaming = true
+                    logged = false
+                    storeEvent(event)
+                    play(event.streams.first())
+                    playerView.hideInfoDialogs()
+                    playerView.updateControllerVisibility(isPlaying = true)
+                }
+            }
+            GEOBLOCKED -> {
+                streaming = false
+                player.pause()
+                playerView.showCustomInformationDialog(playerView.resources.getString(R.string.message_geoblocked_stream))
+                playerView.updateControllerVisibility(isPlaying = false)
+            }
+            NO_ENTITLEMENT -> {
+                streaming = false
+                player.pause()
+                playerView.showCustomInformationDialog(playerView.resources.getString(R.string.message_no_entitlement_stream))
+                playerView.updateControllerVisibility(isPlaying = false)
+            }
+            UNKNOWN_ERROR -> {
+                streaming = false
+                player.pause()
+                playerView.showPreEventInformationDialog()
+                playerView.updateControllerVisibility(isPlaying = false)
+            }
         }
     }
 

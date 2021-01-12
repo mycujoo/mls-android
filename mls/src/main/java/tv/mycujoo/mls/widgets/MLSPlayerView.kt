@@ -548,7 +548,7 @@ class MLSPlayerView @JvmOverloads constructor(
             val dialog = CustomInformationDialog(
                 mlsPlayerView = this,
                 uiEvent = uiEvent,
-                message = "This stream cannot be watched in your area."
+                message = message
             )
             dialogs.add(dialog)
         }
