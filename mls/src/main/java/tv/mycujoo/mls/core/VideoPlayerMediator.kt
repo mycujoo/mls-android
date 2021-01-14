@@ -467,7 +467,13 @@ class VideoPlayerMediator(
     }
 
     fun playExternalSourceVideo(videoUri: String) {
-        player.play(videoUri, Long.MAX_VALUE, videoPlayerConfig.autoPlay)
+        player.play(
+            MediaData(
+                fullUrl = videoUri,
+                dvrWindowSize = Long.MAX_VALUE,
+                autoPlay = videoPlayerConfig.autoPlay
+            )
+        )
         playerView.hideInfoDialogs()
         if (videoPlayerConfig.showEventInfoButton) {
             playerView.showEventInfoButton()
@@ -532,7 +538,14 @@ class VideoPlayerMediator(
                 videoPlayerConfig.autoPlay
             )
         } else if (stream.fullUrl != null) {
-            player.play(stream.fullUrl, stream.getDvrWindowSize(), videoPlayerConfig.autoPlay)
+            MediaData(stream.fullUrl, stream.getDvrWindowSize(), videoPlayerConfig.autoPlay)
+            player.play(
+                MediaData(
+                    fullUrl = stream.fullUrl,
+                    dvrWindowSize = stream.getDvrWindowSize(),
+                    autoPlay = videoPlayerConfig.autoPlay
+                )
+            )
         }
     }
     /**endregion */

@@ -266,7 +266,7 @@ class VideoPlayerMediatorTest {
         videoPlayerMediator.playVideo(eventEntityDetails)
 
 
-        verify(player).play(any(), any(), any())
+        verify(player).play(any())
     }
 
     @Test
@@ -472,7 +472,7 @@ class VideoPlayerMediatorTest {
         videoPlayerMediator.playExternalSourceVideo(externalVideoUri)
 
 
-        verify(player).play(any(), any(), any())
+        verify(player).play(any())
     }
 
     @Ignore("Event Status is not done on server yet")

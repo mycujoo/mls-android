@@ -128,13 +128,6 @@ class Player : IPlayer {
 
     }
 
-
-    override fun play(uriString: String, dvrWindowSize: Long, autoPlay: Boolean) {
-        this.dvrWindowSize = dvrWindowSize
-        val mediaItem = mediaFactory.createMediaItem(uriString)
-        play(mediaItem, autoPlay)
-    }
-
     override fun play(
         uriString: String,
         dvrWindowSize: Long,
@@ -152,6 +145,13 @@ class Player : IPlayer {
             .build()
 
         play(mediaItem, autoPlay)
+    }
+
+    override fun play(mediaData: MediaData) {
+        this.uri = Uri.parse(mediaData.fullUrl)
+        this.dvrWindowSize = mediaData.dvrWindowSize
+        val mediaItem = mediaFactory.createMediaItem(mediaData.fullUrl)
+        play(mediaItem, mediaData.autoPlay)
     }
 
     private fun play(mediaItem: MediaItem, autoPlay: Boolean) {
@@ -214,7 +214,13 @@ class Player : IPlayer {
             play(uri.toString(), dvrWindowSize, licenseUrl.toString(), false)
         } else {
             uri?.let {
-                play(it.toString(), dvrWindowSize, false)
+                play(
+                    MediaData(
+                        fullUrl = it.toString(),
+                        dvrWindowSize = dvrWindowSize,
+                        autoPlay = false
+                    )
+                )
             }
         }
     }

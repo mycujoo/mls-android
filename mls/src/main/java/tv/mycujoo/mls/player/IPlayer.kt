@@ -30,14 +30,14 @@ interface IPlayer {
     fun isPlaying(): Boolean
 
     fun release()
-
-    fun play(uriString: String, dvrWindowSize: Long = Long.MAX_VALUE, autoPlay: Boolean)
+    
     fun play(
         uriString: String,
         dvrWindowSize: Long = Long.MAX_VALUE,
         licenseUrl: String,
         autoPlay: Boolean
     )
+    fun play(mediaData: MediaData)
 
     fun play()
     fun pause()
