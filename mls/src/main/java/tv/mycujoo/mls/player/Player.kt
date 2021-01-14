@@ -10,10 +10,12 @@ import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import tv.mycujoo.mls.enum.C.Companion.DRM_WIDEVINE
+import tv.mycujoo.mls.ima.IIma
 
 class Player : IPlayer {
 
     private var exoPlayer: SimpleExoPlayer? = null
+    private var ima: IIma? = null
     private lateinit var mediaFactory: MediaFactory
     private lateinit var handler: Handler
     private lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
@@ -31,11 +33,13 @@ class Player : IPlayer {
     private var licenseUrl: Uri? = null
 
     override fun create(
+        ima: IIma?,
         mediaFactory: MediaFactory,
         exoPlayer: SimpleExoPlayer,
         handler: Handler,
         mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
     ) {
+        this.ima = ima
         this.mediaFactory = mediaFactory
         this.exoPlayer = exoPlayer
         this.handler = handler
@@ -169,7 +173,18 @@ class Player : IPlayer {
             exoPlayer?.let {
                 val hlsMediaSource = mediaFactory.createHlsMediaSource(mediaItem)
                 hlsMediaSource.addEventListener(handler, mediaOnLoadCompletedListener)
-                it.setMediaSource(hlsMediaSource, true)
+
+
+
+                if (ima != null){
+                    val adsMediaSource = ima!!.createMediaSource(mediaFactory.defaultMediaSourceFactory, hlsMediaSource)
+                    it.setMediaSource(adsMediaSource, true)
+
+                } else {
+                    it.setMediaSource(hlsMediaSource, true)
+                }
+
+
                 it.prepare()
                 it.playWhenReady = autoPlay
             }

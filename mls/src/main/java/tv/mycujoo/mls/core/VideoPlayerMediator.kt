@@ -323,6 +323,7 @@ class VideoPlayerMediator(
     fun reInitialize(MLSPlayerView: MLSPlayerView, builder: MLSBuilder) {
         val exoPlayer = Player.createExoPlayer(MLSPlayerView.context)
         player.create(
+            builder.ima,
             MediaFactory(
                 Player.createDefaultMediaSourceFactory(MLSPlayerView.context),
                 createMediaFactory(MLSPlayerView.context),

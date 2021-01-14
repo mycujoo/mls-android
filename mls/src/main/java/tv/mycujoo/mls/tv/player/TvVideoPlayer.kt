@@ -91,6 +91,7 @@ class TvVideoPlayer(
                 val exoplayer = createExoPlayer(activity)
                 val mediaOnLoadCompletedListener = MediaOnLoadCompletedListener(exoplayer)
                 create(
+                    null, // todo add Ima to TV
                     MediaFactory(
                         Player.createDefaultMediaSourceFactory(activity),
                         createMediaFactory(activity),

@@ -35,7 +35,7 @@ class PlayerTest {
     lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
 
     @Mock
-    lateinit var mediaItem : MediaItem
+    lateinit var mediaItem: MediaItem
 
     @Mock
     lateinit var hlsMediaSource: HlsMediaSource
@@ -48,7 +48,7 @@ class PlayerTest {
     }
 
     private fun initPlayer() {
-        player.create(mediaFactory, exoPlayer, handler, mediaOnLoadCompletedListener)
+        player.create(null, mediaFactory, exoPlayer, handler, mediaOnLoadCompletedListener)
     }
 
     @Test

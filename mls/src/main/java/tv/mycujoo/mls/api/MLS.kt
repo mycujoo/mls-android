@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import com.caverock.androidsvg.SVG
+import com.google.android.exoplayer2.source.ads.AdsLoader.AdViewProvider
 import com.google.android.exoplayer2.util.Util
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
@@ -102,6 +103,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         player = Player().apply {
             val exoPlayer = createExoPlayer(context)
             create(
+                builder.ima,
                 builder.internalBuilder.mediaFactory,
                 exoPlayer,
                 Handler(),
@@ -133,6 +135,9 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         }
         mediatorInitialized = true
 
+        builder.ima?.let {
+            it.setAdViewProvider(MLSPlayerView.playerView as AdViewProvider)
+        }
         videoPlayerMediator.initialize(MLSPlayerView, player, builder)
 
 
