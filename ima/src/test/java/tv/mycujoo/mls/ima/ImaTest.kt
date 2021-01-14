@@ -3,6 +3,7 @@ package tv.mycujoo.mls.ima
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
+import com.google.android.exoplayer2.source.ads.AdsLoader
 import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.verify
 import org.junit.Assert.assertEquals
@@ -21,6 +22,9 @@ class ImaTest {
 
     @Mock
     lateinit var defaultMediaSourceFactory: DefaultMediaSourceFactory
+
+    @Mock
+    lateinit var viewProvider: AdsLoader.AdViewProvider
 
     @Mock
     lateinit var player: Player
@@ -72,6 +76,18 @@ class ImaTest {
         assertFailsWith(IllegalStateException::class) {
             ima.setPlayer(
                 player
+            )
+        }
+    }
+
+    @Test
+    fun `trying to set ViewProvider on a non-created-adsLoader Ima throws IllegalStateException`() {
+        ima = Ima(SAMPLE_AD_TAG)
+        // Not calling createAdsLoader() !
+
+        assertFailsWith(IllegalStateException::class) {
+            ima.setAdViewProvider(
+                viewProvider
             )
         }
     }
