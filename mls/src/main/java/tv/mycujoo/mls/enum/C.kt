@@ -23,5 +23,11 @@ class C {
 
         const val DRM_WIDEVINE = "widevine"
 
+
+
+
+        // developer messages
+        const val ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE ="'Activity' should be provided before setting 'Ima'."
+
     }
 }

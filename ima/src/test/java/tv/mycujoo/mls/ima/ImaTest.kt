@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.ima
 
+import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.verify
@@ -8,10 +9,14 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import kotlin.test.assertFailsWith
 
 class ImaTest {
 
     private lateinit var ima: Ima
+
+    @Mock
+    lateinit var adsLoader: ImaAdsLoader
 
     @Mock
     lateinit var defaultMediaSourceFactory: DefaultMediaSourceFactory
@@ -20,7 +25,7 @@ class ImaTest {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         val SAMPLE_AD_TAG = "sample_ad_tag"
-        ima = Ima(SAMPLE_AD_TAG)
+        ima = Ima(adsLoader, SAMPLE_AD_TAG)
     }
 
     @Test
@@ -36,5 +41,18 @@ class ImaTest {
         ima.setAdsLoaderProvider(defaultMediaSourceFactory)
 
         verify(defaultMediaSourceFactory).setAdsLoaderProvider(anyOrNull())
+    }
+
+    @Test
+    fun `trying to set AdsLoaderProvider on a non-created Ima throws IllegalStateException`() {
+        val SAMPLE_AD_TAG = "sample_ad_tag"
+        ima = Ima(SAMPLE_AD_TAG)
+        // Not calling createAdsLoader() !
+
+        assertFailsWith(IllegalStateException::class) {
+            ima.setAdsLoaderProvider(
+                defaultMediaSourceFactory
+            )
+        }
     }
 }

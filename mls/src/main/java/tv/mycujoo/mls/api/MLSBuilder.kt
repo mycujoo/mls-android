@@ -7,6 +7,7 @@ import tv.mycujoo.mls.cast.ICast
 import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
+import tv.mycujoo.mls.enum.C.Companion.ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE
 import tv.mycujoo.mls.ima.IIma
 import tv.mycujoo.mls.network.socket.ReactorCallback
 import tv.mycujoo.mls.network.socket.ReactorListener
@@ -57,7 +58,12 @@ open class MLSBuilder {
     }
 
     fun ima(ima: IIma) = apply {
-        this.ima = ima
+        if (activity == null) {
+            throw IllegalArgumentException(ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE)
+        }
+        this.ima = ima.apply {
+            createAdsLoader(activity!!)
+        }
     }
 
     fun createExoPlayer(context: Context): SimpleExoPlayer? {
