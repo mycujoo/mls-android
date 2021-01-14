@@ -69,7 +69,7 @@ open class MLSBuilder {
     }
 
     open fun build(): MLS {
-        internalBuilder = InternalBuilder(activity!!, mlsConfiguration.logLevel)
+        internalBuilder = InternalBuilder(activity!!, ima, mlsConfiguration.logLevel)
         internalBuilder.initialize()
 
         val mls = MLS(this)
