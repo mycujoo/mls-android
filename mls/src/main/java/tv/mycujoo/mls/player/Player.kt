@@ -11,6 +11,7 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import tv.mycujoo.mls.enum.C.Companion.DRM_WIDEVINE
 import tv.mycujoo.mls.ima.IIma
+import tv.mycujoo.mls.ima.ImaCustomParams
 
 class Player : IPlayer {
 
@@ -176,8 +177,12 @@ class Player : IPlayer {
 
 
 
-                if (ima != null){
-                    val adsMediaSource = ima!!.createMediaSource(mediaFactory.defaultMediaSourceFactory, hlsMediaSource)
+                if (ima != null) {
+                    val adsMediaSource = ima!!.createMediaSource(
+                        mediaFactory.defaultMediaSourceFactory,
+                        hlsMediaSource,
+                        ImaCustomParams()
+                    )
                     it.setMediaSource(adsMediaSource, true)
 
                 } else {

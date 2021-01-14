@@ -14,7 +14,8 @@ interface IIma {
     fun setAdViewProvider(adViewProvider: AdsLoader.AdViewProvider)
     fun createMediaSource(
         defaultMediaSourceFactory: DefaultMediaSourceFactory,
-        hlsMediaSource: MediaSource
+        hlsMediaSource: MediaSource,
+        imaCustomParams: ImaCustomParams
     ): MediaSource
 
 }

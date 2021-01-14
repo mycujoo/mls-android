@@ -11,6 +11,8 @@ import com.google.android.exoplayer2.source.ads.AdsLoader
 import com.google.android.exoplayer2.source.ads.AdsMediaSource
 import com.google.android.exoplayer2.upstream.DataSpec
 import com.google.common.annotations.VisibleForTesting
+import java.net.URLEncoder
+import java.util.*
 
 class Ima(private val adUnit: String) : IIma {
 
@@ -59,11 +61,12 @@ class Ima(private val adUnit: String) : IIma {
 
     override fun createMediaSource(
         defaultMediaSourceFactory: DefaultMediaSourceFactory,
-        hlsMediaSource: MediaSource
+        hlsMediaSource: MediaSource,
+        imaCustomParams: ImaCustomParams
     ): MediaSource {
         val adsMediaSource = AdsMediaSource(
             hlsMediaSource,
-            DataSpec(getAdTagUri()),
+            DataSpec(getAdTagUri(imaCustomParams)),
             defaultMediaSourceFactory,
             adsLoader,
             adViewProvider
@@ -72,17 +75,30 @@ class Ima(private val adUnit: String) : IIma {
         return adsMediaSource
     }
 
-    private fun getAdTagUri(): Uri {
-        fun getCustomParams(): String {
-            return "&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear"
+    private fun getAdTagUri(imaCustomParams: ImaCustomParams): Uri {
+        fun getEncodedCustomParams(imaCustomParams: ImaCustomParams): String {
+            if (imaCustomParams.isEmpty()) {
+                return "deployment%3Ddevsite%26sample_ct%3Dlinear"
+            } else {
+                val stringBuilder = StringBuilder()
+                    .append("deployment=devsite&sample_ct=linear")
+                imaCustomParams.eventId?.let { eventId ->
+                    stringBuilder.append("&eventId=$eventId")
+                }
+                imaCustomParams.streamId?.let { streamId ->
+                    stringBuilder.append("&streamId=$streamId")
+                }
+                return URLEncoder.encode(stringBuilder.toString(), "utf-8")
+            }
         }
 
         val stringBuilder = StringBuilder()
             .append("https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/")
             .append(adUnit)
             .append("&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1")
-            .append(getCustomParams())
-            .append("&correlator=")
+            .append("&cust_params=".plus(getEncodedCustomParams(imaCustomParams)))
+            .append("&correlator=".plus(Date().time))
+
         return Uri.parse(stringBuilder.toString())
     }
 }
