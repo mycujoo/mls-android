@@ -8,8 +8,6 @@ class MediaFactory(
     private val hlsMediaFactory: HlsMediaSource.Factory,
     private val mediaItemBuilder: MediaItem.Builder
 ) {
-
-
     fun createHlsMediaSource(mediaItem: MediaItem): MediaSource {
         return hlsMediaFactory.createMediaSource(mediaItem)
     }

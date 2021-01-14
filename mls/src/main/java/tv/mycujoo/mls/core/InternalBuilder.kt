@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.res.AssetManager
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
 import com.npaw.youbora.lib6.YouboraLog
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Options
@@ -24,6 +25,8 @@ import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.network.socket.IReactorSocket
 import tv.mycujoo.mls.network.socket.MainWebSocketListener
 import tv.mycujoo.mls.network.socket.ReactorSocket
+import tv.mycujoo.mls.player.MediaFactory
+import tv.mycujoo.mls.player.Player
 import javax.inject.Inject
 
 open class InternalBuilder(private val activity: Activity, private val logLevel: LogLevel) {
@@ -50,6 +53,7 @@ open class InternalBuilder(private val activity: Activity, private val logLevel:
     lateinit var variableTranslator: VariableTranslator
     lateinit var variableKeeper: VariableKeeper
 
+    internal lateinit var mediaFactory: MediaFactory
 
     lateinit var reactorSocket: IReactorSocket
     private lateinit var mainWebSocketListener: MainWebSocketListener
@@ -68,7 +72,15 @@ open class InternalBuilder(private val activity: Activity, private val logLevel:
         variableTranslator = VariableTranslator(dispatcher)
         variableKeeper = VariableKeeper(dispatcher)
 
-        overlayViewHelper = OverlayViewHelper(viewHandler, OverlayFactory(), AnimationFactory(), variableTranslator, variableKeeper)
+        overlayViewHelper = OverlayViewHelper(
+            viewHandler,
+            OverlayFactory(),
+            AnimationFactory(),
+            variableTranslator,
+            variableKeeper
+        )
+
+        mediaFactory = MediaFactory(Player.createMediaFactory(activity), MediaItem.Builder())
 
         mainWebSocketListener = MainWebSocketListener()
         reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener)

@@ -56,7 +56,7 @@ open class MLSBuilder {
         this.mCast = cast
     }
 
-    fun ima(ima: IIma)= apply {
+    fun ima(ima: IIma) = apply {
         this.ima = ima
     }
 
