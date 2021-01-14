@@ -7,6 +7,7 @@ import tv.mycujoo.mls.cast.ICast
 import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
+import tv.mycujoo.mls.ima.IIma
 import tv.mycujoo.mls.network.socket.ReactorCallback
 import tv.mycujoo.mls.network.socket.ReactorListener
 
@@ -26,6 +27,8 @@ open class MLSBuilder {
     internal var mlsConfiguration: MLSConfiguration = MLSConfiguration()
         private set
     internal var mCast: ICast? = null
+        private set
+    internal var ima: IIma? = null
         private set
     internal var hasAnalytic: Boolean = true
         private set
@@ -51,6 +54,10 @@ open class MLSBuilder {
 
     fun setCast(cast: ICast) = apply {
         this.mCast = cast
+    }
+
+    fun ima(ima: IIma)= apply {
+        this.ima = ima
     }
 
     fun createExoPlayer(context: Context): SimpleExoPlayer? {
