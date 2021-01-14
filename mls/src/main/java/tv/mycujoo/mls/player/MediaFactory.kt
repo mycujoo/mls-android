@@ -1,10 +1,12 @@
 package tv.mycujoo.mls.player
 
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 
 class MediaFactory(
+    val defaultMediaSourceFactory: DefaultMediaSourceFactory,
     private val hlsMediaFactory: HlsMediaSource.Factory,
     private val mediaItemBuilder: MediaItem.Builder
 ) {

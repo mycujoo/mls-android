@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Handler
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
@@ -236,6 +237,14 @@ class Player : IPlayer {
                         "mls"
                     )
                 )
+            )
+        }
+
+        fun createDefaultMediaSourceFactory(
+            context: Context
+        ): DefaultMediaSourceFactory {
+            return DefaultMediaSourceFactory(
+                context
             )
         }
     }

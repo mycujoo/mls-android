@@ -324,6 +324,7 @@ class VideoPlayerMediator(
         val exoPlayer = Player.createExoPlayer(MLSPlayerView.context)
         player.create(
             MediaFactory(
+                Player.createDefaultMediaSourceFactory(MLSPlayerView.context),
                 createMediaFactory(MLSPlayerView.context),
                 com.google.android.exoplayer2.MediaItem.Builder()
             ),

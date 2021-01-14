@@ -91,7 +91,11 @@ class TvVideoPlayer(
                 val exoplayer = createExoPlayer(activity)
                 val mediaOnLoadCompletedListener = MediaOnLoadCompletedListener(exoplayer)
                 create(
-                    MediaFactory(createMediaFactory(activity), MediaItem.Builder()),
+                    MediaFactory(
+                        Player.createDefaultMediaSourceFactory(activity),
+                        createMediaFactory(activity),
+                        MediaItem.Builder()
+                    ),
                     exoplayer,
                     Handler(),
                     mediaOnLoadCompletedListener

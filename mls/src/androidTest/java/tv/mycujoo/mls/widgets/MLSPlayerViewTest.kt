@@ -173,7 +173,11 @@ class MLSPlayerViewTest {
             player = Player()
             val exoPlayer = createExoPlayer(MLSPlayerView.context)
             player.create(
-                MediaFactory(createMediaFactory(MLSPlayerView.context), MediaItem.Builder()),
+                MediaFactory(
+                    Player.createDefaultMediaSourceFactory(MLSPlayerView.context),
+                    createMediaFactory(MLSPlayerView.context),
+                    MediaItem.Builder()
+                ),
                 exoPlayer,
                 Handler(),
                 MediaOnLoadCompletedListener(exoPlayer)

@@ -80,7 +80,11 @@ open class InternalBuilder(private val activity: Activity, private val logLevel:
             variableKeeper
         )
 
-        mediaFactory = MediaFactory(Player.createMediaFactory(activity), MediaItem.Builder())
+        mediaFactory = MediaFactory(
+            Player.createDefaultMediaSourceFactory(activity),
+            Player.createMediaFactory(activity),
+            MediaItem.Builder()
+        )
 
         mainWebSocketListener = MainWebSocketListener()
         reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener)
