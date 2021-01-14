@@ -2,6 +2,7 @@ package tv.mycujoo.mls.ima
 
 import android.content.Context
 import com.google.ads.interactivemedia.v3.api.AdErrorEvent
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.common.annotations.VisibleForTesting
@@ -34,5 +35,12 @@ class Ima(private val adUnit: String) : IIma {
         }
         val provider = DefaultMediaSourceFactory.AdsLoaderProvider { adsLoader }
         defaultMediaSourceFactory.setAdsLoaderProvider(provider)
+    }
+
+    override fun setPlayer(player: Player) {
+        if (this::adsLoader.isInitialized.not()) {
+            throw IllegalStateException()
+        }
+        adsLoader.setPlayer(player)
     }
 }

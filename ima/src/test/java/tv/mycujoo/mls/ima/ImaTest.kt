@@ -1,5 +1,6 @@
 package tv.mycujoo.mls.ima
 
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.nhaarman.mockitokotlin2.anyOrNull
@@ -21,16 +22,17 @@ class ImaTest {
     @Mock
     lateinit var defaultMediaSourceFactory: DefaultMediaSourceFactory
 
+    @Mock
+    lateinit var player: Player
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        val SAMPLE_AD_TAG = "sample_ad_tag"
         ima = Ima(adsLoader, SAMPLE_AD_TAG)
     }
 
     @Test
     fun `ima instance returns ad-tag it was created with`() {
-        val SAMPLE_AD_TAG = "sample_ad_tag"
         val ima = Ima(SAMPLE_AD_TAG)
 
         assertEquals(SAMPLE_AD_TAG, ima.getAdUnit())
@@ -44,8 +46,7 @@ class ImaTest {
     }
 
     @Test
-    fun `trying to set AdsLoaderProvider on a non-created Ima throws IllegalStateException`() {
-        val SAMPLE_AD_TAG = "sample_ad_tag"
+    fun `trying to set AdsLoaderProvider on a non-created-adsLoader Ima throws IllegalStateException`() {
         ima = Ima(SAMPLE_AD_TAG)
         // Not calling createAdsLoader() !
 
@@ -54,5 +55,28 @@ class ImaTest {
                 defaultMediaSourceFactory
             )
         }
+    }
+
+    @Test
+    fun setPlayer() {
+        ima.setPlayer(player)
+
+        verify(adsLoader).setPlayer(player)
+    }
+
+    @Test
+    fun `trying to set player on a non-created-adsLoader Ima throws IllegalStateException`() {
+        ima = Ima(SAMPLE_AD_TAG)
+        // Not calling createAdsLoader() !
+
+        assertFailsWith(IllegalStateException::class) {
+            ima.setPlayer(
+                player
+            )
+        }
+    }
+
+    companion object {
+        private const val SAMPLE_AD_TAG = "sample_ad_tag"
     }
 }

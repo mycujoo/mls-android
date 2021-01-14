@@ -108,6 +108,12 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
                 MediaOnLoadCompletedListener(exoPlayer)
             )
         }
+        player.getDirectInstance()?.let { exoPlayer ->
+            builder.ima?.let {
+                it.setPlayer(exoPlayer)
+            }
+
+        }
 
     }
 
