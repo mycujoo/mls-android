@@ -116,7 +116,6 @@ class Player : IPlayer {
             it.release()
             exoPlayer = null
         }
-
     }
 
     override fun play(drmMediaData: MediaDatum.DRMMediaData) {
@@ -159,12 +158,15 @@ class Player : IPlayer {
                 hlsMediaSource.addEventListener(handler, mediaOnLoadCompletedListener)
 
 
-
                 if (ima != null) {
                     val adsMediaSource = ima!!.createMediaSource(
                         mediaFactory.defaultMediaSourceFactory,
                         hlsMediaSource,
-                        ImaCustomParams()
+                        ImaCustomParams(
+                            eventId = mediaData?.eventId,
+                            streamId = mediaData?.streamId,
+                            eventStatus = mediaData?.eventStatus
+                        )
                     )
                     it.setMediaSource(adsMediaSource, true)
 

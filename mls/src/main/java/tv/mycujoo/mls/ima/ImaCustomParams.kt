@@ -1,6 +1,7 @@
 package tv.mycujoo.mls.ima
 
 import tv.mycujoo.domain.entity.EventStatus
+import java.util.*
 
 data class ImaCustomParams(
     val eventId: String? = null,
@@ -9,5 +10,27 @@ data class ImaCustomParams(
 ) {
     fun isEmpty(): Boolean {
         return eventId == null && streamId == null && eventStatus == null
+    }
+
+    fun writeValues(stringBuilder: StringBuilder) {
+        eventId?.let {
+            stringBuilder.append("$AMP_EVENT_ID_EQUALS_TO$eventId")
+        }
+        streamId?.let { streamId ->
+            stringBuilder.append("$AMP_STREAM_ID_EQUALS_TO$streamId")
+        }
+        eventStatus?.let { eventStatus ->
+            val eventStatusLastPart =
+                eventStatus.name.toLowerCase(Locale.ENGLISH).substringAfter(EVENT_STATUS_FIRST_PART)
+            stringBuilder.append("$AMP_EVENT_STATUS_EQUALS_TO$eventStatusLastPart")
+        }
+    }
+
+    companion object {
+        const val AMP_EVENT_ID_EQUALS_TO = "&eventId="
+        const val AMP_STREAM_ID_EQUALS_TO = "&streamId="
+        const val AMP_EVENT_STATUS_EQUALS_TO = "&eventStatus="
+
+        const val EVENT_STATUS_FIRST_PART = "event_status_"
     }
 }
