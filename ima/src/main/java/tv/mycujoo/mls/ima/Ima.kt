@@ -82,12 +82,7 @@ class Ima(private val adUnit: String) : IIma {
             } else {
                 val stringBuilder = StringBuilder()
                     .append("deployment=devsite&sample_ct=linear")
-                imaCustomParams.eventId?.let { eventId ->
-                    stringBuilder.append("&eventId=$eventId")
-                }
-                imaCustomParams.streamId?.let { streamId ->
-                    stringBuilder.append("&streamId=$streamId")
-                }
+                imaCustomParams.writeValues(stringBuilder)
                 return URLEncoder.encode(stringBuilder.toString(), "utf-8")
             }
         }
