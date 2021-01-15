@@ -128,28 +128,24 @@ class Player : IPlayer {
 
     }
 
-    override fun play(
-        uriString: String,
-        dvrWindowSize: Long,
-        licenseUrl: String,
-        autoPlay: Boolean
-    ) {
-        this.uri = Uri.parse(uriString)
-        this.dvrWindowSize = dvrWindowSize
-        this.licenseUrl = Uri.parse(licenseUrl)
+    override fun play(drmMediaData: DRMMediaData) {
+        this.uri = Uri.parse(drmMediaData.fullUrl)
+        this.dvrWindowSize = drmMediaData.dvrWindowSize
+        this.licenseUrl = Uri.parse(drmMediaData.licenseUrl)
 
         val mediaItem = MediaItem.Builder()
             .setDrmUuid(Util.getDrmUuid(DRM_WIDEVINE))
             .setDrmLicenseUri(licenseUrl)
-            .setUri(uriString)
+            .setUri(uri)
             .build()
 
-        play(mediaItem, autoPlay)
+        play(mediaItem, drmMediaData.autoPlay)
     }
 
     override fun play(mediaData: MediaData) {
         this.uri = Uri.parse(mediaData.fullUrl)
         this.dvrWindowSize = mediaData.dvrWindowSize
+        this.licenseUrl = null
         val mediaItem = mediaFactory.createMediaItem(mediaData.fullUrl)
         play(mediaItem, mediaData.autoPlay)
     }
@@ -211,7 +207,14 @@ class Player : IPlayer {
 
     override fun loadLastVideo() {
         if (licenseUrl != null) {
-            play(uri.toString(), dvrWindowSize, licenseUrl.toString(), false)
+            play(
+                DRMMediaData(
+                    fullUrl = uri.toString(),
+                    dvrWindowSize = dvrWindowSize,
+                    licenseUrl = licenseUrl.toString(),
+                    autoPlay = false
+                )
+            )
         } else {
             uri?.let {
                 play(

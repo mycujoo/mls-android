@@ -532,10 +532,12 @@ class VideoPlayerMediator(
     private fun play(stream: Stream) {
         if (stream.widevine?.fullUrl != null && stream.widevine.licenseUrl != null) {
             player.play(
-                stream.widevine.fullUrl,
-                stream.getDvrWindowSize(),
-                stream.widevine.licenseUrl,
-                videoPlayerConfig.autoPlay
+                DRMMediaData(
+                    fullUrl = stream.widevine.fullUrl,
+                    dvrWindowSize = stream.getDvrWindowSize(),
+                    licenseUrl = stream.widevine.licenseUrl,
+                    autoPlay = videoPlayerConfig.autoPlay
+                )
             )
         } else if (stream.fullUrl != null) {
             MediaData(stream.fullUrl, stream.getDvrWindowSize(), videoPlayerConfig.autoPlay)
