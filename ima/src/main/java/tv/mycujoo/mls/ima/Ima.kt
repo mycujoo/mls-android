@@ -20,8 +20,8 @@ class Ima(private val adUnit: String) : IIma {
     private lateinit var adViewProvider: AdsLoader.AdViewProvider
 
     @VisibleForTesting
-    constructor(adsLoader: ImaAdsLoader, adUnit: String) : this(adUnit) {
-        this.adsLoader = adsLoader
+    constructor(builder: ImaAdsLoader.Builder, adUnit: String) : this(adUnit) {
+        adsLoader = createAdsLoader(builder)
     }
 
     override fun getAdUnit(): String {
@@ -29,12 +29,16 @@ class Ima(private val adUnit: String) : IIma {
     }
 
     override fun createAdsLoader(context: Context) {
-        adsLoader =
-            ImaAdsLoader.Builder(context)
-                .setAdErrorListener { adErrorEvent: AdErrorEvent? ->
-                }
-                .setDebugModeEnabled(true)
-                .build()
+        val builder = ImaAdsLoader.Builder(context)
+        adsLoader = createAdsLoader(builder)
+    }
+
+    private fun createAdsLoader(builder: ImaAdsLoader.Builder): ImaAdsLoader {
+        return builder
+            .setAdErrorListener { adErrorEvent: AdErrorEvent? ->
+            }
+            .setDebugModeEnabled(true)
+            .build()
     }
 
     override fun setAdsLoaderProvider(defaultMediaSourceFactory: DefaultMediaSourceFactory) {

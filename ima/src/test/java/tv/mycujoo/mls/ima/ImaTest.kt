@@ -4,8 +4,10 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.ads.AdsLoader
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -16,6 +18,10 @@ import kotlin.test.assertFailsWith
 class ImaTest {
 
     private lateinit var ima: Ima
+
+
+    @Mock
+    lateinit var builder: ImaAdsLoader.Builder
 
     @Mock
     lateinit var adsLoader: ImaAdsLoader
@@ -32,7 +38,10 @@ class ImaTest {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        ima = Ima(adsLoader, SAMPLE_AD_TAG)
+        whenever(builder.setAdErrorListener(any())).thenReturn(builder)
+        whenever(builder.setDebugModeEnabled(any())).thenReturn(builder)
+        whenever(builder.build()).thenReturn(adsLoader)
+        ima = Ima(builder, SAMPLE_AD_TAG)
     }
 
     @Test
