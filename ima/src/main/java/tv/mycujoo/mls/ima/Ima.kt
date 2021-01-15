@@ -2,7 +2,7 @@ package tv.mycujoo.mls.ima
 
 import android.content.Context
 import android.net.Uri
-import com.google.ads.interactivemedia.v3.api.AdErrorEvent
+import com.google.ads.interactivemedia.v3.api.AdEvent.AdEventType.*
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
@@ -14,14 +14,18 @@ import com.google.common.annotations.VisibleForTesting
 import java.net.URLEncoder
 import java.util.*
 
-class Ima(private val adUnit: String) : IIma {
+class Ima(private val adUnit: String, private val listener: ImaEventListener? = null) : IIma {
 
     private lateinit var adsLoader: ImaAdsLoader
     private lateinit var adViewProvider: AdsLoader.AdViewProvider
 
     @VisibleForTesting
-    constructor(builder: ImaAdsLoader.Builder, adUnit: String) : this(adUnit) {
-        adsLoader = createAdsLoader(builder)
+    constructor(
+        builder: ImaAdsLoader.Builder,
+        listener: ImaEventListener,
+        adUnit: String
+    ) : this(adUnit) {
+        adsLoader = createAdsLoader(builder, listener)
     }
 
     override fun getAdUnit(): String {
@@ -30,12 +34,32 @@ class Ima(private val adUnit: String) : IIma {
 
     override fun createAdsLoader(context: Context) {
         val builder = ImaAdsLoader.Builder(context)
-        adsLoader = createAdsLoader(builder)
+        adsLoader = createAdsLoader(builder, listener)
     }
 
-    private fun createAdsLoader(builder: ImaAdsLoader.Builder): ImaAdsLoader {
+    private fun createAdsLoader(
+        builder: ImaAdsLoader.Builder,
+        listener: ImaEventListener? = null
+    ): ImaAdsLoader {
         return builder
-            .setAdErrorListener { adErrorEvent: AdErrorEvent? ->
+            .setAdEventListener { adEvent ->
+                when (adEvent.type) {
+                    STARTED -> {
+                        listener?.onAdStarted()
+                    }
+                    PAUSED -> {
+                        listener?.onAdPaused()
+                    }
+                    RESUMED -> {
+                        listener?.onAdResumed()
+                    }
+                    COMPLETED -> {
+                        listener?.onAdCompleted()
+                    }
+                    else -> {
+                        // do nothing
+                    }
+                }
             }
             .setDebugModeEnabled(true)
             .build()

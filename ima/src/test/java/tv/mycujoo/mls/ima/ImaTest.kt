@@ -1,5 +1,7 @@
 package tv.mycujoo.mls.ima
 
+import com.google.ads.interactivemedia.v3.api.Ad
+import com.google.ads.interactivemedia.v3.api.AdEvent
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
@@ -19,7 +21,6 @@ class ImaTest {
 
     private lateinit var ima: Ima
 
-
     @Mock
     lateinit var builder: ImaAdsLoader.Builder
 
@@ -35,13 +36,21 @@ class ImaTest {
     @Mock
     lateinit var player: Player
 
+    @Mock
+    lateinit var listener: ImaEventListener
+    private lateinit var adEventListener: AdEvent.AdEventListener
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         whenever(builder.setAdErrorListener(any())).thenReturn(builder)
+        whenever(builder.setAdEventListener(any())).thenAnswer {
+            adEventListener = it.arguments[0] as AdEvent.AdEventListener
+            (builder)
+        }
         whenever(builder.setDebugModeEnabled(any())).thenReturn(builder)
         whenever(builder.build()).thenReturn(adsLoader)
-        ima = Ima(builder, SAMPLE_AD_TAG)
+        ima = Ima(builder, listener, SAMPLE_AD_TAG)
     }
 
     @Test
@@ -101,7 +110,59 @@ class ImaTest {
         }
     }
 
+    @Test
+    fun `started-ad calls listener's onStarted`() {
+        val started = getAdEvent(AdEvent.AdEventType.STARTED)
+        adEventListener.onAdEvent(started)
+
+
+        verify(listener).onAdStarted()
+    }
+
+    @Test
+    fun `paused-ad calls listener's onPaused`() {
+        val paused = getAdEvent(AdEvent.AdEventType.PAUSED)
+        adEventListener.onAdEvent(paused)
+
+
+        verify(listener).onAdPaused()
+    }
+
+    @Test
+    fun `resumed-ad calls listener's onResumed`() {
+        val resumed = getAdEvent(AdEvent.AdEventType.RESUMED)
+        adEventListener.onAdEvent(resumed)
+
+
+        verify(listener).onAdResumed()
+    }
+
+    @Test
+    fun `completed-ad calls listener's onAdCompleted`() {
+        val completed = getAdEvent(AdEvent.AdEventType.COMPLETED)
+        adEventListener.onAdEvent(completed)
+
+
+        verify(listener).onAdCompleted()
+    }
+
     companion object {
         private const val SAMPLE_AD_TAG = "sample_ad_tag"
+
+        private fun getAdEvent(type: AdEvent.AdEventType): AdEvent {
+            return object : AdEvent {
+                override fun getType(): AdEvent.AdEventType {
+                    return type
+                }
+
+                override fun getAd(): Ad {
+                    TODO("Not yet implemented")
+                }
+
+                override fun getAdData(): MutableMap<String, String> {
+                    TODO("Not yet implemented")
+                }
+            }
+        }
     }
 }
