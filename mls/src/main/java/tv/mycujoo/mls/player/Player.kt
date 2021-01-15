@@ -1,7 +1,6 @@
 package tv.mycujoo.mls.player
 
 import android.content.Context
-import android.net.Uri
 import android.os.Handler
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.Player
@@ -21,17 +20,13 @@ class Player : IPlayer {
     private lateinit var handler: Handler
     private lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
 
-
     private var resumePosition: Long = C.INDEX_UNSET.toLong()
     private var resumeWindow: Int = C.INDEX_UNSET
 
     private var playWhenReady: Boolean = false
     private var playbackPosition: Long = -1L
 
-    private var uri: Uri? = null
-    private var dvrWindowSize: Long = Long.MAX_VALUE
-    private var dvrWindowStartTime: Long = -1L
-    private var licenseUrl: Uri? = null
+    private var mediaData: MediaDatum? = null
 
     override fun create(
         ima: IIma?,
@@ -73,11 +68,10 @@ class Player : IPlayer {
 
     override fun currentAbsoluteTime(): Long {
         exoPlayer?.let { exoplayer ->
-            dvrWindowStartTime = mediaOnLoadCompletedListener.getWindowStartTime()
+            val dvrWindowStartTime = mediaOnLoadCompletedListener.getWindowStartTime()
             if (dvrWindowStartTime == -1L) {
                 return -1L
             }
-
             return dvrWindowStartTime + exoplayer.currentPosition
         }
 
@@ -92,16 +86,13 @@ class Player : IPlayer {
         exoPlayer?.let {
             return (it.isCurrentWindowDynamic && it.contentPosition != 0L)
         }
-
         return false
-
     }
 
     override fun isPlaying(): Boolean {
         exoPlayer?.let {
             return it.isPlaying
         }
-
         return false
     }
 
@@ -128,24 +119,20 @@ class Player : IPlayer {
 
     }
 
-    override fun play(drmMediaData: MediumData.DRMMediaData) {
-        this.uri = Uri.parse(drmMediaData.fullUrl)
-        this.dvrWindowSize = drmMediaData.dvrWindowSize
-        this.licenseUrl = Uri.parse(drmMediaData.licenseUrl)
+    override fun play(drmMediaData: MediaDatum.DRMMediaData) {
+        this.mediaData = drmMediaData
 
         val mediaItem = MediaItem.Builder()
             .setDrmUuid(Util.getDrmUuid(DRM_WIDEVINE))
-            .setDrmLicenseUri(licenseUrl)
-            .setUri(uri)
+            .setDrmLicenseUri(drmMediaData.licenseUrl)
+            .setUri(drmMediaData.fullUrl)
             .build()
 
         play(mediaItem, drmMediaData.autoPlay)
     }
 
-    override fun play(mediaData: MediumData.MediaData) {
-        this.uri = Uri.parse(mediaData.fullUrl)
-        this.dvrWindowSize = mediaData.dvrWindowSize
-        this.licenseUrl = null
+    override fun play(mediaData: MediaDatum.MediaData) {
+        this.mediaData = mediaData
         val mediaItem = mediaFactory.createMediaItem(mediaData.fullUrl)
         play(mediaItem, mediaData.autoPlay)
     }
@@ -206,24 +193,17 @@ class Player : IPlayer {
     }
 
     override fun loadLastVideo() {
-        if (licenseUrl != null) {
-            play(
-                MediumData.DRMMediaData(
-                    fullUrl = uri.toString(),
-                    dvrWindowSize = dvrWindowSize,
-                    licenseUrl = licenseUrl.toString(),
-                    autoPlay = false
-                )
-            )
-        } else {
-            uri?.let {
-                play(
-                    MediumData.MediaData(
-                        fullUrl = it.toString(),
-                        dvrWindowSize = dvrWindowSize,
-                        autoPlay = false
-                    )
-                )
+        mediaData?.let {
+            when (mediaData) {
+                is MediaDatum.MediaData -> {
+                    play(it as MediaDatum.MediaData)
+                }
+                is MediaDatum.DRMMediaData -> {
+                    play(it as MediaDatum.DRMMediaData)
+                }
+                else -> {
+                    // should not happen
+                }
             }
         }
     }
@@ -241,16 +221,15 @@ class Player : IPlayer {
 
 
     override fun dvrWindowSize(): Long {
-        return dvrWindowSize
+        return mediaData?.dvrWindowSize ?: -1L
 
     }
 
     override fun dvrWindowStartTime(): Long {
         exoPlayer?.let { _ ->
-            dvrWindowStartTime = mediaOnLoadCompletedListener.getWindowStartTime()
+            return mediaOnLoadCompletedListener.getWindowStartTime()
         }
-
-        return dvrWindowStartTime
+        return -1L
     }
 
     companion object {
