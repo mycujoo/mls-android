@@ -124,4 +124,11 @@ class Ima(private val adUnit: String, private val listener: ImaEventListener? = 
 
         return Uri.parse(stringBuilder.toString())
     }
+
+    override fun onDestroy() {
+        if (this::adsLoader.isInitialized.not()) {
+            throw IllegalStateException()
+        }
+        adsLoader.release()
+    }
 }

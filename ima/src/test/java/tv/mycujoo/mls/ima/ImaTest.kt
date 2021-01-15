@@ -146,6 +146,26 @@ class ImaTest {
         verify(listener).onAdCompleted()
     }
 
+
+    @Test
+    fun `destroying adsLoader on a non-created-adsLoader Ima throws IllegalStateException`() {
+        ima = Ima(SAMPLE_AD_TAG)
+        // Not calling createAdsLoader() !
+
+
+        assertFailsWith(IllegalStateException::class) {
+            ima.onDestroy()
+        }
+    }
+
+    @Test
+    fun `release adsLoader in onDestroy`() {
+        ima.onDestroy()
+
+
+        verify(adsLoader).release()
+    }
+
     companion object {
         private const val SAMPLE_AD_TAG = "sample_ad_tag"
 
