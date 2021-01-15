@@ -203,6 +203,11 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         }
     }
 
+    override fun onDestroy() {
+        builder.ima?.onDestroy()
+    }
+
+
     override fun getVideoPlayer(): VideoPlayer {
         return videoPlayerMediator.videoPlayer
     }

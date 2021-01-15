@@ -41,7 +41,9 @@ open class MLSBuilder {
         this.publicKey = publicKey
     }
 
-    fun withActivity(activity: Activity) = apply { this.activity = activity }
+    fun withActivity(activity: Activity) = apply {
+        this.activity = activity
+    }
 
     fun setPlayerEventsListener(playerEventsListener: tv.mycujoo.mls.api.PlayerEventsListener) =
         apply { this.playerEventsListener = PlayerEventsListener(playerEventsListener) }

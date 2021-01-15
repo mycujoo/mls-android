@@ -18,6 +18,7 @@ import tv.mycujoo.mls.api.MLSConfiguration
 import tv.mycujoo.mls.api.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.entity.msc.VideoPlayerConfig
+import tv.mycujoo.mls.ima.Ima
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import tv.mycujoo.mlsapp.R
 
@@ -125,6 +126,11 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         MLS.onStop()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        MLS.onDestroy()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

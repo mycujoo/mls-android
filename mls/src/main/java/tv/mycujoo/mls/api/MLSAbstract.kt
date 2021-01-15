@@ -10,6 +10,7 @@ abstract class MLSAbstract {
 
     abstract fun onPause()
     abstract fun onStop()
+    abstract fun onDestroy()
 
     abstract fun getVideoPlayer(): VideoPlayer
     abstract fun getDataProvider(): DataProvider
