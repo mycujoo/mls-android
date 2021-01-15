@@ -128,7 +128,7 @@ class Player : IPlayer {
 
     }
 
-    override fun play(drmMediaData: DRMMediaData) {
+    override fun play(drmMediaData: MediumData.DRMMediaData) {
         this.uri = Uri.parse(drmMediaData.fullUrl)
         this.dvrWindowSize = drmMediaData.dvrWindowSize
         this.licenseUrl = Uri.parse(drmMediaData.licenseUrl)
@@ -142,7 +142,7 @@ class Player : IPlayer {
         play(mediaItem, drmMediaData.autoPlay)
     }
 
-    override fun play(mediaData: MediaData) {
+    override fun play(mediaData: MediumData.MediaData) {
         this.uri = Uri.parse(mediaData.fullUrl)
         this.dvrWindowSize = mediaData.dvrWindowSize
         this.licenseUrl = null
@@ -208,7 +208,7 @@ class Player : IPlayer {
     override fun loadLastVideo() {
         if (licenseUrl != null) {
             play(
-                DRMMediaData(
+                MediumData.DRMMediaData(
                     fullUrl = uri.toString(),
                     dvrWindowSize = dvrWindowSize,
                     licenseUrl = licenseUrl.toString(),
@@ -218,7 +218,7 @@ class Player : IPlayer {
         } else {
             uri?.let {
                 play(
-                    MediaData(
+                    MediumData.MediaData(
                         fullUrl = it.toString(),
                         dvrWindowSize = dvrWindowSize,
                         autoPlay = false

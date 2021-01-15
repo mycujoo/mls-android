@@ -44,8 +44,8 @@ import tv.mycujoo.mls.network.socket.MainWebSocketListener
 import tv.mycujoo.mls.network.socket.ReactorListener
 import tv.mycujoo.mls.network.socket.ReactorSocket
 import tv.mycujoo.mls.player.IPlayer
-import tv.mycujoo.mls.player.MediaData
 import tv.mycujoo.mls.player.MediaFactory
+import tv.mycujoo.mls.player.MediumData
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import tv.mycujoo.mls.widgets.PlayerControllerMode
 import tv.mycujoo.mls.widgets.RemotePlayerControllerView
@@ -267,7 +267,7 @@ class VideoPlayerMediatorTest {
         videoPlayerMediator.playVideo(eventEntityDetails)
 
 
-        verify(player).play(any<MediaData>())
+        verify(player).play(any<MediumData.MediaData>())
     }
 
     @Test
@@ -473,7 +473,7 @@ class VideoPlayerMediatorTest {
         videoPlayerMediator.playExternalSourceVideo(externalVideoUri)
 
 
-        verify(player).play(any<MediaData>())
+        verify(player).play(any<MediumData.MediaData>())
     }
 
     @Ignore("Event Status is not done on server yet")

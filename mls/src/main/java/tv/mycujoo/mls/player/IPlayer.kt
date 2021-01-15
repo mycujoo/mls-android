@@ -31,8 +31,8 @@ interface IPlayer {
 
     fun release()
 
-    fun play(drmMediaData: DRMMediaData)
-    fun play(mediaData: MediaData)
+    fun play(drmMediaData: MediumData.DRMMediaData)
+    fun play(mediaData: MediumData.MediaData)
 
     fun play()
     fun pause()

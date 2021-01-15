@@ -468,7 +468,7 @@ class VideoPlayerMediator(
 
     fun playExternalSourceVideo(videoUri: String) {
         player.play(
-            MediaData(
+            MediumData.MediaData(
                 fullUrl = videoUri,
                 dvrWindowSize = Long.MAX_VALUE,
                 autoPlay = videoPlayerConfig.autoPlay
@@ -532,7 +532,7 @@ class VideoPlayerMediator(
     private fun play(stream: Stream) {
         if (stream.widevine?.fullUrl != null && stream.widevine.licenseUrl != null) {
             player.play(
-                DRMMediaData(
+                MediumData.DRMMediaData(
                     fullUrl = stream.widevine.fullUrl,
                     dvrWindowSize = stream.getDvrWindowSize(),
                     licenseUrl = stream.widevine.licenseUrl,
@@ -540,9 +540,8 @@ class VideoPlayerMediator(
                 )
             )
         } else if (stream.fullUrl != null) {
-            MediaData(stream.fullUrl, stream.getDvrWindowSize(), videoPlayerConfig.autoPlay)
             player.play(
-                MediaData(
+                MediumData.MediaData(
                     fullUrl = stream.fullUrl,
                     dvrWindowSize = stream.getDvrWindowSize(),
                     autoPlay = videoPlayerConfig.autoPlay

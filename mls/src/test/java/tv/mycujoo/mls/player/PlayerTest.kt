@@ -234,7 +234,7 @@ class PlayerTest {
         whenever(mediaFactory.createMediaItem(any())).thenReturn(mediaItem)
         whenever(mediaFactory.createHlsMediaSource(any())).thenReturn(hlsMediaSource)
 
-        player.play(MediaData(SAMPLE_URI, Long.MAX_VALUE, true))
+        player.play(MediumData.MediaData(SAMPLE_URI, Long.MAX_VALUE, true))
 
 
         val mediaSourceCaptor = argumentCaptor<MediaSource>()
@@ -256,7 +256,7 @@ class PlayerTest {
         initPlayer()
 
 
-        player.play(MediaData(SAMPLE_URI, Long.MAX_VALUE, true))
+        player.play(MediumData.MediaData(SAMPLE_URI, Long.MAX_VALUE, true))
 
 
         val mediaItemCaptor = argumentCaptor<MediaItem>()
