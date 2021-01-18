@@ -11,6 +11,7 @@ import com.google.android.exoplayer2.source.ads.AdsLoader
 import com.google.android.exoplayer2.source.ads.AdsMediaSource
 import com.google.android.exoplayer2.upstream.DataSpec
 import com.google.common.annotations.VisibleForTesting
+import tv.mycujoo.mls.enum.C
 import java.net.URLEncoder
 import java.util.*
 
@@ -30,6 +31,12 @@ class Ima(
         adUnit: String
     ) : this(adUnit, null, true) {
         adsLoader = createAdsLoader(builder, listener)
+    }
+
+    init {
+        if (adUnit[0] != '/') {
+            throw IllegalArgumentException(C.AD_UNIT_MUST_START_WITH_SLASH_IN_MLS_BUILDER_MESSAGE)
+        }
     }
 
     override fun getAdUnit(): String {
@@ -126,7 +133,7 @@ class Ima(
         }
 
         val stringBuilder = StringBuilder()
-            .append("https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/")
+            .append("https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=")
             .append(adUnit)
             .append("&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1")
             .append("&cust_params=".plus(getEncodedCustomParams(imaCustomParams)))

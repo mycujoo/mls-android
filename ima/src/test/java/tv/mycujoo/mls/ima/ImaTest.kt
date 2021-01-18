@@ -54,6 +54,13 @@ class ImaTest {
     }
 
     @Test
+    fun `creating IMA with tag which missed starting slash throws IllegalArgumentException`() {
+        assertFailsWith(IllegalArgumentException::class) {
+            Ima("wrong_tag_without_starting_slash")
+        }
+    }
+
+    @Test
     fun `ima instance returns ad-tag it was created with`() {
         val ima = Ima(SAMPLE_AD_TAG)
 
@@ -167,7 +174,7 @@ class ImaTest {
     }
 
     companion object {
-        private const val SAMPLE_AD_TAG = "sample_ad_tag"
+        private const val SAMPLE_AD_TAG = "/sample_ad_tag"
 
         private fun getAdEvent(type: AdEvent.AdEventType): AdEvent {
             return object : AdEvent {
