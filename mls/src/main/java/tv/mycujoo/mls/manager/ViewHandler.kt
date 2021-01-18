@@ -4,12 +4,10 @@ import android.animation.ObjectAnimator
 import android.util.Log
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.test.espresso.idling.CountingIdlingResource
-import kotlinx.coroutines.CoroutineScope
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.widgets.ScaffoldView
 
 open class ViewHandler(
-    dispatcher: CoroutineScope,
     val idlingResource: CountingIdlingResource
 ) : IViewHandler {
 

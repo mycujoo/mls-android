@@ -73,7 +73,7 @@ open class InternalBuilder(
 
         logger = Logger(logLevel)
 
-        viewHandler = ViewHandler(dispatcher, CountingIdlingResource("ViewIdentifierManager"))
+        viewHandler = ViewHandler(CountingIdlingResource("ViewIdentifierManager"))
         variableTranslator = VariableTranslator(dispatcher)
         variableKeeper = VariableKeeper(dispatcher)
 

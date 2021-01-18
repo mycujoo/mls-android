@@ -38,13 +38,10 @@ class ViewHandlerTest {
     @Mock
     lateinit var idlingResource: CountingIdlingResource
 
-    @Mock
-    lateinit var dispatcher: CoroutineScope
-
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        viewHandler = ViewHandler(dispatcher, idlingResource)
+        viewHandler = ViewHandler(idlingResource)
         viewHandler.setOverlayHost(overLayHost)
     }
 

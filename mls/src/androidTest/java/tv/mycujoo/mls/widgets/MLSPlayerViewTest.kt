@@ -65,7 +65,6 @@ class MLSPlayerViewTest {
 
     private lateinit var MLSPlayerView: MLSPlayerView
     private var viewHandler = ViewHandler(
-        GlobalScope,
         CountingIdlingResource("ViewIdentifierManager")
     )
     private val variableTranslator = VariableTranslator(GlobalScope)

@@ -33,7 +33,7 @@ class TvAnnotationMediator(
     private var tvAnnotationListener: TvAnnotationListener
     private val viewHandler:
             ViewHandler =
-        ViewHandler(coroutineScope, CountingIdlingResource("ViewIdentifierManager"))
+        ViewHandler(CountingIdlingResource("ViewIdentifierManager"))
     private val variableTranslator = VariableTranslator(coroutineScope)
     private val variableKeeper = VariableKeeper(coroutineScope)
 

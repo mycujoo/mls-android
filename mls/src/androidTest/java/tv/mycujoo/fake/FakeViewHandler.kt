@@ -1,14 +1,12 @@
 package tv.mycujoo.fake
 
 import androidx.test.espresso.idling.CountingIdlingResource
-import kotlinx.coroutines.CoroutineScope
 import tv.mycujoo.mls.manager.ViewHandler
 import tv.mycujoo.mls.widgets.ScaffoldView
 
 class FakeViewHandler(
-    coroutineScope: CoroutineScope,
     idlingResource: CountingIdlingResource
-) : ViewHandler(coroutineScope, idlingResource) {
+) : ViewHandler(idlingResource) {
 
     var lastRemovedAnimationId: String? = null
     var lastRemovedView: ScaffoldView? = null
