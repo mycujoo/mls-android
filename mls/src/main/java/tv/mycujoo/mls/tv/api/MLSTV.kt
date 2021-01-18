@@ -7,13 +7,17 @@ import okhttp3.OkHttpClient
 import tv.mycujoo.mls.api.DataProvider
 import tv.mycujoo.mls.api.MLSTVConfiguration
 import tv.mycujoo.mls.data.IDataManager
+import tv.mycujoo.mls.ima.IIma
 import tv.mycujoo.mls.manager.Logger
 import tv.mycujoo.mls.network.socket.IReactorSocket
+import tv.mycujoo.mls.player.MediaFactory
 import tv.mycujoo.mls.tv.player.TvVideoPlayer
 
 class MLSTV(
     val activity: Activity,
+    private val ima: IIma?,
     private val mlsTVConfiguration: MLSTVConfiguration,
+    private val mediaFactory: MediaFactory,
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
@@ -28,7 +32,9 @@ class MLSTV(
         tvVideoPlayer = TvVideoPlayer(
             activity,
             videoSupportFragment,
+            ima,
             mlsTVConfiguration,
+            mediaFactory,
             reactorSocket,
             dispatcher,
             dataManager,
