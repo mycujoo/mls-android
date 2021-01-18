@@ -138,8 +138,32 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
                 it.setAdViewProvider(MLSPlayerView.playerView as AdViewProvider)
             }
 
-            videoPlayerMediator.reInitialize(MLSPlayerView, builder)
+            val exoPlayer = createExoPlayer(context)
+            player.reInit(exoPlayer)
+            videoPlayerMediator.initialize(MLSPlayerView, player, builder)
+
+            val annotationListener =
+                AnnotationListener(
+                    MLSPlayerView,
+                    builder.internalBuilder.overlayViewHelper,
+                    DownloaderClient(okHttpClient)
+                )
+            val annotationFactory = AnnotationFactory(
+                annotationListener,
+                variableKeeper
+            )
+            annotationMediator = AnnotationMediator(
+                MLSPlayerView,
+                annotationFactory,
+                dataManager,
+                dispatcher,
+                videoPlayerMediator.getPlayer(),
+                Executors.newScheduledThreadPool(1),
+                Handler(Looper.getMainLooper()),
+                builder.internalBuilder.logger
+            )
             annotationMediator.initPlayerView(MLSPlayerView)
+            videoPlayerMediator.setAnnotationMediator(annotationMediator)
             return
         }
         mediatorInitialized = true

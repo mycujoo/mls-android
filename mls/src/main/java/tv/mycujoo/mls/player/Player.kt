@@ -42,6 +42,10 @@ class Player : IPlayer {
         this.mediaOnLoadCompletedListener = mediaOnLoadCompletedListener
     }
 
+    override fun reInit(exoPlayer: SimpleExoPlayer) {
+        this.exoPlayer = exoPlayer
+    }
+
     override fun isReady(): Boolean {
         return exoPlayer != null
     }
@@ -96,6 +100,13 @@ class Player : IPlayer {
         return false
     }
 
+    override fun isPlayingAd(): Boolean {
+        exoPlayer?.let {
+            return it.isPlayingAd
+        }
+        return false
+    }
+
     private fun updateResumePosition() {
         if (exoPlayer == null) {
             return
@@ -145,12 +156,30 @@ class Player : IPlayer {
         if (haveResumePosition) {
             exoPlayer?.let {
                 it.seekTo(resumeWindow, resumePosition)
-                it.setMediaItem(mediaItem, false)
-                it.prepare()
-                it.playWhenReady = autoPlay
-                resumePosition = C.INDEX_UNSET.toLong()
-                resumeWindow = C.INDEX_UNSET
-                it.playWhenReady = autoPlay
+
+                exoPlayer?.let {
+                    val hlsMediaSource = mediaFactory.createHlsMediaSource(mediaItem)
+                    hlsMediaSource.addEventListener(handler, mediaOnLoadCompletedListener)
+                    if (ima != null) {
+                        val adsMediaSource = ima!!.createMediaSource(
+                            mediaFactory.defaultMediaSourceFactory,
+                            hlsMediaSource,
+                            ImaCustomParams(
+                                eventId = mediaData?.eventId,
+                                streamId = mediaData?.streamId,
+                                eventStatus = mediaData?.eventStatus
+                            )
+                        )
+                        it.setMediaSource(adsMediaSource, false)
+
+                    } else {
+                        it.setMediaSource(hlsMediaSource, false)
+                    }
+                    it.prepare()
+                    it.playWhenReady = autoPlay
+                    resumePosition = C.INDEX_UNSET.toLong()
+                    resumeWindow = C.INDEX_UNSET
+                }
             }
         } else {
             exoPlayer?.let {

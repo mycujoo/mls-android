@@ -15,6 +15,7 @@ interface IPlayer {
         handler: Handler,
         mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
     )
+    fun reInit(exoPlayer: SimpleExoPlayer)
 
     // will be removed!
     fun getDirectInstance(): ExoPlayer?
@@ -28,6 +29,7 @@ interface IPlayer {
     fun duration(): Long
     fun isLive(): Boolean
     fun isPlaying(): Boolean
+    fun isPlayingAd(): Boolean
 
     fun release()
 

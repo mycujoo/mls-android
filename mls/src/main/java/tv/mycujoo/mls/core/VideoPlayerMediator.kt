@@ -1,7 +1,6 @@
 package tv.mycujoo.mls.core
 
 import android.app.Activity
-import android.os.Handler
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.Player.STATE_READY
@@ -10,7 +9,6 @@ import com.google.android.exoplayer2.ui.TimeBar
 import com.npaw.youbora.lib6.plugin.Options
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
@@ -37,10 +35,12 @@ import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.mediator.AnnotationMediator
 import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.network.socket.IReactorSocket
-import tv.mycujoo.mls.player.*
+import tv.mycujoo.mls.player.IPlayer
+import tv.mycujoo.mls.player.MediaDatum
+import tv.mycujoo.mls.player.PlaybackLocation
 import tv.mycujoo.mls.player.PlaybackLocation.LOCAL
 import tv.mycujoo.mls.player.PlaybackLocation.REMOTE
-import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
+import tv.mycujoo.mls.player.PlaybackState
 import tv.mycujoo.mls.utils.StringUtils
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import tv.mycujoo.mls.widgets.MLSPlayerView.LiveState.LIVE_ON_THE_EDGE
@@ -318,32 +318,6 @@ class VideoPlayerMediator(
         }
     }
 
-    fun reInitialize(MLSPlayerView: MLSPlayerView, builder: MLSBuilder) {
-        val exoPlayer = Player.createExoPlayer(MLSPlayerView.context)
-        player.create(
-            builder.ima,
-            builder.internalBuilder.mediaFactory,
-            exoPlayer,
-            Handler(),
-            MediaOnLoadCompletedListener(exoPlayer)
-        )
-
-        initPlayerView(MLSPlayerView, player, builder.internalBuilder.overlayViewHelper)
-        dataManager.currentEvent?.let {
-            joinEvent(it)
-        }
-    }
-
-    fun attachPlayer(playerView: MLSPlayerView) {
-        playerView.playerView.player = player.getDirectInstance()
-        playerView.playerView.hideController()
-
-        if (hasAnalytic) {
-            youboraClient.start()
-        }
-
-    }
-
     private fun initAnalytic(
         internalBuilder: InternalBuilder,
         activity: Activity,
@@ -365,6 +339,15 @@ class VideoPlayerMediator(
         youboraClient = internalBuilder.createYouboraClient(plugin)
     }
 
+    fun attachPlayer(playerView: MLSPlayerView) {
+        playerView.playerView.player = player.getDirectInstance()
+        playerView.playerView.hideController()
+
+        if (hasAnalytic) {
+            youboraClient.start()
+        }
+
+    }
 
     fun onResume() {
         cast?.onResume()
