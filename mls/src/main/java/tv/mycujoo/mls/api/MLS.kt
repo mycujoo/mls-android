@@ -158,7 +158,6 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
             )
         val annotationFactory = AnnotationFactory(
             annotationListener,
-            viewHandler,
             variableKeeper
         )
         annotationMediator = AnnotationMediator(
