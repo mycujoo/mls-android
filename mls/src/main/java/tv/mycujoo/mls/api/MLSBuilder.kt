@@ -8,6 +8,7 @@ import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.enum.C.Companion.ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE
+import tv.mycujoo.mls.enum.C.Companion.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE
 import tv.mycujoo.mls.ima.IIma
 import tv.mycujoo.mls.network.socket.ReactorCallback
 import tv.mycujoo.mls.network.socket.ReactorListener
@@ -36,7 +37,7 @@ open class MLSBuilder {
 
     fun publicKey(publicKey: String) = apply {
         if (publicKey == "YOUR_PUBLIC_KEY_HERE") {
-            throw IllegalArgumentException("Public key must be set!")
+            throw IllegalArgumentException(PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
         this.publicKey = publicKey
     }

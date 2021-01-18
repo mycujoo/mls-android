@@ -488,7 +488,6 @@ class MLSPlayerView @JvmOverloads constructor(
             return
         }
         positionTextView.text = getFormattedTime(time, timeFormatBuilder, timeFormatter)
-
         durationTextView.text = getFormattedTime(duration, timeFormatBuilder, timeFormatter)
     }
 

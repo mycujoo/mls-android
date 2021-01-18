@@ -114,7 +114,6 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
             builder.ima?.let {
                 it.setPlayer(exoPlayer)
             }
-
         }
 
     }
@@ -130,7 +129,12 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         MLSPlayerView: MLSPlayerView
     ) {
         if (mediatorInitialized) {
+            builder.ima?.let {
+                it.setAdViewProvider(MLSPlayerView.playerView as AdViewProvider)
+            }
+
             videoPlayerMediator.reInitialize(MLSPlayerView, builder)
+            annotationMediator.initPlayerView(MLSPlayerView)
             return
         }
         mediatorInitialized = true

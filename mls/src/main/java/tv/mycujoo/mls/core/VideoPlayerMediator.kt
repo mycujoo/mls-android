@@ -73,8 +73,6 @@ class VideoPlayerMediator(
 
     private var joined: Boolean = false
     private var updateId: String? = null
-    private lateinit var streamUrlPullJob: Job
-
 
     private var playbackState: PlaybackState = PlaybackState.IDLE
     private var playbackLocation: PlaybackLocation = LOCAL
