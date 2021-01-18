@@ -240,7 +240,14 @@ class TvVideoPlayer(
         fetchActions(timelineId, updateId, false)
     }
 
-    private fun fetchActions(timelineId: String, updateId: String, joinTimeline: Boolean) {
+    private fun fetchActions(event: EventEntity, joinTimeLine: Boolean) {
+        if (event.timeline_ids.isEmpty()) {
+            return
+        }
+        fetchActions(event.timeline_ids.first(), null, joinTimeLine)
+    }
+
+    private fun fetchActions(timelineId: String, updateId: String?, joinTimeline: Boolean) {
         dispatcher.launch(context = Dispatchers.Main) {
             val result = dataManager.getActions(timelineId, updateId)
             when (result) {
@@ -300,6 +307,7 @@ class TvVideoPlayer(
                     updateStreamStatus(result.value)
                     playVideoOrDisplayEventInfo(result.value)
                     joinEvent(result.value)
+                    fetchActions(result.value, true)
                     startStreamUrlPullingIfNeeded(result.value)
                 }
                 is Result.NetworkError -> {
