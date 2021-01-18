@@ -93,7 +93,13 @@ in order to communicate with SDK, MLS class must be instantiated. Init MLS whene
         
        
       
+
+### Modules
 #### Cast Module (Google Cast support)
 If you are interested to support Google Cast in MLS, import MLS-Cast module and provide it to builder of MLS-component.
-[Here](https://github.com/mycujoo/mls-android/blob/master/caster/README.md) is the document on how to do it.
-Also, [VideoActivityWithCaster](https://github.com/mycujoo/mls-android-sample-app/blob/master/app/src/main/java/tv/mycujoo/mlssampleapp/VideoActivityWithCaster.kt#L86) in [Sample-App](https://github.com/mycujoo/mls-android-sample-app) demonstrates it as an full example 
+[Here](https://github.com/mycujoo/mls-android/blob/master/cast/README.md) is the document on how to use it.
+Also, [VideoActivityWithCaster](https://github.com/mycujoo/mls-android-sample-app/blob/master/app/src/main/java/tv/mycujoo/mlssampleapp/VideoActivityWithCaster.kt#L86) in [Sample-App](https://github.com/mycujoo/mls-android-sample-app) demonstrates it as an full example.
+
+#### IMA Module (Google Interactive media ads support)
+To support Google Interactive media ads in MLS, add this module to your project dependencies and provide an Ima class to MLS builder.
+[Here](https://github.com/mycujoo/mls-android/blob/master/ima/README.md) is the document on how to use it.
