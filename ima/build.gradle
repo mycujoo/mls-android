@@ -20,6 +20,8 @@ android {
     buildTypes {
         release {
             minifyEnabled false
+            useProguard false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -30,6 +32,11 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+}
+
+tasks.withType(Javadoc).all {
+    enabled = false
+    excludes = ['**/*.kt'] // < ---- Exclude all kotlin files from javadoc file.
 }
 
 dependencies {
@@ -49,3 +56,6 @@ dependencies {
 
     implementation project(":mls")
 }
+
+apply from: 'install.gradle'
+apply from: 'bintray.gradle'
