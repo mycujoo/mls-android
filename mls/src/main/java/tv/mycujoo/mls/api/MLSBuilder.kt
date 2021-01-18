@@ -60,7 +60,7 @@ open class MLSBuilder {
         this.mCast = cast
     }
 
-    fun ima(ima: IIma) = apply {
+    fun setIma(ima: IIma) = apply {
         if (activity == null) {
             throw IllegalArgumentException(ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE)
         }

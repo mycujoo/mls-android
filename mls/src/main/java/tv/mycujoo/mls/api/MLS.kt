@@ -23,7 +23,6 @@ import tv.mycujoo.mls.helper.SVGAssetResolver
 import tv.mycujoo.mls.helper.TypeFaceFactory
 import tv.mycujoo.mls.manager.IPrefManager
 import tv.mycujoo.mls.manager.VariableKeeper
-import tv.mycujoo.mls.manager.VariableTranslator
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.mediator.AnnotationMediator
 import tv.mycujoo.mls.network.Api
@@ -60,7 +59,6 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
     private lateinit var player: Player
 
     private lateinit var viewHandler: IViewHandler
-    private lateinit var variableTranslator: VariableTranslator
     private lateinit var variableKeeper: VariableKeeper
     /**endregion */
 
@@ -125,7 +123,14 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
     }
 
 
-    private fun initializeMediators(
+    private fun initializeMediators(MLSPlayerView: MLSPlayerView) {
+        this.playerView = MLSPlayerView
+        this.viewHandler.setOverlayHost(MLSPlayerView.overlayHost)
+        initializeMediatorsIfNeeded(MLSPlayerView)
+        videoPlayerMediator.attachPlayer(MLSPlayerView)
+    }
+
+    private fun initializeMediatorsIfNeeded(
         MLSPlayerView: MLSPlayerView
     ) {
         if (mediatorInitialized) {
@@ -171,24 +176,18 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         videoPlayerMediator.setAnnotationMediator(annotationMediator)
     }
 
-    private fun initializeView(MLSPlayerView: MLSPlayerView) {
-        this.playerView = MLSPlayerView
-        this.viewHandler.setOverlayHost(MLSPlayerView.overlayHost)
-        initializeMediators(MLSPlayerView)
-        videoPlayerMediator.attachPlayer(MLSPlayerView)
-    }
     /**endregion */
 
     /**region Over-ridden Functions*/
     override fun onStart(MLSPlayerView: MLSPlayerView) {
         if (Util.SDK_INT >= Build.VERSION_CODES.N) {
-            initializeView(MLSPlayerView)
+            initializeMediators(MLSPlayerView)
         }
     }
 
     override fun onResume(MLSPlayerView: MLSPlayerView) {
         if (Util.SDK_INT < Build.VERSION_CODES.N) {
-            initializeView(MLSPlayerView)
+            initializeMediators(MLSPlayerView)
         }
         videoPlayerMediator.onResume()
     }
