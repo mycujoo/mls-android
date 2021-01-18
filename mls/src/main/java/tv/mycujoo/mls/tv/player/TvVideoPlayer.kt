@@ -337,9 +337,6 @@ class TvVideoPlayer(
             StreamStatus.PLAYABLE -> {
                 if (streaming.not()) {
                     streaming = true
-                    val userAgent = Util.getUserAgent(activity, "MLS-AndroidTv-SDK")
-                    val hlsFactory =
-                        HlsMediaSource.Factory(DefaultDataSourceFactory(activity, userAgent))
 
                     play(event.streams.first())
                     eventInfoContainerLayout.visibility = View.GONE

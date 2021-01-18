@@ -14,7 +14,11 @@ import com.google.common.annotations.VisibleForTesting
 import java.net.URLEncoder
 import java.util.*
 
-class Ima(private val adUnit: String, private val listener: ImaEventListener? = null) : IIma {
+class Ima(
+    private val adUnit: String,
+    private val listener: ImaEventListener? = null,
+    private val debugMode: Boolean = false
+) : IIma {
 
     private lateinit var adsLoader: ImaAdsLoader
     private lateinit var adViewProvider: AdsLoader.AdViewProvider
@@ -24,7 +28,7 @@ class Ima(private val adUnit: String, private val listener: ImaEventListener? = 
         builder: ImaAdsLoader.Builder,
         listener: ImaEventListener,
         adUnit: String
-    ) : this(adUnit) {
+    ) : this(adUnit, null, true) {
         adsLoader = createAdsLoader(builder, listener)
     }
 
@@ -61,7 +65,7 @@ class Ima(private val adUnit: String, private val listener: ImaEventListener? = 
                     }
                 }
             }
-            .setDebugModeEnabled(true)
+            .setDebugModeEnabled(debugMode)
             .build()
     }
 
@@ -106,10 +110,16 @@ class Ima(private val adUnit: String, private val listener: ImaEventListener? = 
     private fun getAdTagUri(imaCustomParams: ImaCustomParams): Uri {
         fun getEncodedCustomParams(imaCustomParams: ImaCustomParams): String {
             if (imaCustomParams.isEmpty()) {
-                return "deployment%3Ddevsite%26sample_ct%3Dlinear"
+                if (debugMode) {
+                    return "deployment%3Ddevsite%26sample_ct%3Dlinear"
+                } else {
+                    return ""
+                }
             } else {
                 val stringBuilder = StringBuilder()
-                    .append("deployment=devsite&sample_ct=linear")
+                if (debugMode) {
+                    stringBuilder.append("deployment=devsite&sample_ct=linear")
+                }
                 imaCustomParams.writeValues(stringBuilder)
                 return URLEncoder.encode(stringBuilder.toString(), "utf-8")
             }
