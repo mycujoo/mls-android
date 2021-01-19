@@ -34,9 +34,7 @@ class MainActivity : AppCompatActivity() {
 
         constraintMLSPlayerView(resources.configuration.orientation)
 
-
         val playerEventsListener = object : PlayerEventsListener {
-
             override fun onIsPlayingChanged(playing: Boolean) {
                 Log.i("PlayerEvents", "onIsPlayingChanged() $playing")
             }
@@ -119,18 +117,18 @@ class MainActivity : AppCompatActivity() {
 
 
     override fun onPause() {
-        super.onPause()
         MLS.onPause()
+        super.onPause()
     }
 
     override fun onStop() {
-        super.onStop()
         MLS.onStop()
+        super.onStop()
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         MLS.onDestroy()
+        super.onDestroy()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
