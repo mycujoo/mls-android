@@ -4,27 +4,24 @@ import android.content.Context
 import android.content.res.AssetManager
 import android.os.Build
 import android.os.Handler
-import android.os.Looper
 import com.caverock.androidsvg.SVG
 import com.google.android.exoplayer2.source.ads.AdsLoader
 import com.google.android.exoplayer2.util.Util
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import tv.mycujoo.domain.repository.EventsRepository
-import tv.mycujoo.mls.core.AnnotationFactory
-import tv.mycujoo.mls.core.AnnotationListener
 import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.core.VideoPlayerMediator
 import tv.mycujoo.mls.data.IDataManager
 import tv.mycujoo.mls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
 import tv.mycujoo.mls.enum.C.Companion.UUID_PREF_KEY
-import tv.mycujoo.mls.helper.DownloaderClient
 import tv.mycujoo.mls.helper.SVGAssetResolver
 import tv.mycujoo.mls.helper.TypeFaceFactory
 import tv.mycujoo.mls.manager.IPrefManager
 import tv.mycujoo.mls.manager.VariableKeeper
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.mediator.AnnotationMediator
+import tv.mycujoo.mls.mediator.AnnotationMediatorFactory
 import tv.mycujoo.mls.network.Api
 import tv.mycujoo.mls.network.RemoteApi
 import tv.mycujoo.mls.player.MediaOnLoadCompletedListener
@@ -32,7 +29,6 @@ import tv.mycujoo.mls.player.Player
 import tv.mycujoo.mls.player.Player.Companion.createExoPlayer
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import java.util.*
-import java.util.concurrent.Executors
 
 
 class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
@@ -143,27 +139,11 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
                 ima.setAdViewProvider(MLSPlayerView.playerView)
             }
 
-            val annotationListener =
-                AnnotationListener(
-                    MLSPlayerView,
-                    builder.internalBuilder.overlayViewHelper,
-                    DownloaderClient(okHttpClient)
-                )
-            val annotationFactory = AnnotationFactory(
-                annotationListener,
-                variableKeeper
-            )
-            annotationMediator = AnnotationMediator(
+            annotationMediator = AnnotationMediatorFactory.createAnnotationMediator(
                 MLSPlayerView,
-                annotationFactory,
-                dataManager,
-                dispatcher,
-                videoPlayerMediator.getPlayer(),
-                Executors.newScheduledThreadPool(1),
-                Handler(Looper.getMainLooper()),
-                builder.internalBuilder.logger
+                builder.internalBuilder,
+                videoPlayerMediator.getPlayer()
             )
-            annotationMediator.initPlayerView(MLSPlayerView)
             videoPlayerMediator.setAnnotationMediator(annotationMediator)
             return
         }
@@ -172,31 +152,13 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         builder.ima?.let {
             it.setAdViewProvider(MLSPlayerView.playerView as AdsLoader.AdViewProvider)
         }
+
         videoPlayerMediator.initialize(MLSPlayerView, player, builder)
-
-
-        val annotationListener =
-            AnnotationListener(
-                MLSPlayerView,
-                builder.internalBuilder.overlayViewHelper,
-                DownloaderClient(okHttpClient)
-            )
-        val annotationFactory = AnnotationFactory(
-            annotationListener,
-            variableKeeper
-        )
-        annotationMediator = AnnotationMediator(
+        annotationMediator = AnnotationMediatorFactory.createAnnotationMediator(
             MLSPlayerView,
-            annotationFactory,
-            dataManager,
-            dispatcher,
-            videoPlayerMediator.getPlayer(),
-            Executors.newScheduledThreadPool(1),
-            Handler(Looper.getMainLooper()),
-            builder.internalBuilder.logger
+            builder.internalBuilder,
+            videoPlayerMediator.getPlayer()
         )
-        annotationMediator.initPlayerView(MLSPlayerView)
-
         videoPlayerMediator.setAnnotationMediator(annotationMediator)
     }
 
