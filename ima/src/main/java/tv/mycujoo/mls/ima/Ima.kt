@@ -110,7 +110,6 @@ class Ima(
             adsLoader,
             adViewProvider
         )
-
         return adsMediaSource
     }
 
@@ -140,6 +139,10 @@ class Ima(
             .append("&correlator=".plus(Date().time))
 
         return Uri.parse(stringBuilder.toString())
+    }
+
+    override fun onStop() {
+        adsLoader.setPlayer(null)
     }
 
     override fun onDestroy() {

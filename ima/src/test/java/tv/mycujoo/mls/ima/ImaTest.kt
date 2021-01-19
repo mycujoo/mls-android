@@ -166,6 +166,14 @@ class ImaTest {
     }
 
     @Test
+    fun `set player to null in onStop`() {
+        ima.onStop()
+
+        
+        verify(adsLoader).setPlayer(null)
+    }
+
+    @Test
     fun `release adsLoader in onDestroy`() {
         ima.onDestroy()
 

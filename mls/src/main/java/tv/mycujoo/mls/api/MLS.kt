@@ -6,7 +6,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import com.caverock.androidsvg.SVG
-import com.google.android.exoplayer2.source.ads.AdsLoader.AdViewProvider
+import com.google.android.exoplayer2.source.ads.AdsLoader
 import com.google.android.exoplayer2.util.Util
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
@@ -134,13 +134,14 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         MLSPlayerView: MLSPlayerView
     ) {
         if (mediatorInitialized) {
-            builder.ima?.let {
-                it.setAdViewProvider(MLSPlayerView.playerView as AdViewProvider)
-            }
-
             val exoPlayer = createExoPlayer(context)
             player.reInit(exoPlayer)
             videoPlayerMediator.initialize(MLSPlayerView, player, builder)
+
+            builder.ima?.let { ima ->
+                ima.setPlayer(player.getDirectInstance()!!)
+                ima.setAdViewProvider(MLSPlayerView.playerView)
+            }
 
             val annotationListener =
                 AnnotationListener(
@@ -169,7 +170,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         mediatorInitialized = true
 
         builder.ima?.let {
-            it.setAdViewProvider(MLSPlayerView.playerView as AdViewProvider)
+            it.setAdViewProvider(MLSPlayerView.playerView as AdsLoader.AdViewProvider)
         }
         videoPlayerMediator.initialize(MLSPlayerView, player, builder)
 
@@ -245,6 +246,8 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
     /**endregion */
 
     private fun release() {
+        builder.ima?.onStop()
+        playerView.playerView.onPause()
         videoPlayerMediator.release()
         annotationMediator.release()
     }

@@ -18,5 +18,6 @@ interface IIma {
         imaCustomParams: ImaCustomParams
     ): MediaSource
 
+    fun onStop()
     fun onDestroy()
 }
