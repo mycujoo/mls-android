@@ -128,6 +128,10 @@ class VideoPlayer(
     override fun getDuration(): Long {
         return exoPlayer.duration
     }
+
+    override fun isPlayingAd(): Boolean {
+        return exoPlayer.isPlayingAd
+    }
     /**endregion */
 
 
