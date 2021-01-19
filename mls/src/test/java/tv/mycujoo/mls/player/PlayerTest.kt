@@ -259,9 +259,9 @@ class PlayerTest {
         player.play(MediaDatum.MediaData(SAMPLE_URI, Long.MAX_VALUE, true))
 
 
-        val mediaItemCaptor = argumentCaptor<MediaItem>()
+        val mediaSourceCaptor = argumentCaptor<MediaSource>()
         val resetPositionCaptor = argumentCaptor<Boolean>()
-        verify(exoPlayer).setMediaItem(mediaItemCaptor.capture(), resetPositionCaptor.capture())
+        verify(exoPlayer).setMediaSource(mediaSourceCaptor.capture(), resetPositionCaptor.capture())
         assertFalse { resetPositionCaptor.firstValue }
     }
 
