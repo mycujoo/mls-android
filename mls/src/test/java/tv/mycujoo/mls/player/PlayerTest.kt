@@ -35,7 +35,7 @@ class PlayerTest {
     lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
 
     @Mock
-    lateinit var mediaItem : MediaItem
+    lateinit var mediaItem: MediaItem
 
     @Mock
     lateinit var hlsMediaSource: HlsMediaSource
@@ -48,7 +48,7 @@ class PlayerTest {
     }
 
     private fun initPlayer() {
-        player.create(mediaFactory, exoPlayer, handler, mediaOnLoadCompletedListener)
+        player.create(null, mediaFactory, exoPlayer, handler, mediaOnLoadCompletedListener)
     }
 
     @Test
@@ -234,7 +234,7 @@ class PlayerTest {
         whenever(mediaFactory.createMediaItem(any())).thenReturn(mediaItem)
         whenever(mediaFactory.createHlsMediaSource(any())).thenReturn(hlsMediaSource)
 
-        player.play(SAMPLE_URI, Long.MAX_VALUE, true)
+        player.play(MediaDatum.MediaData(SAMPLE_URI, Long.MAX_VALUE, true))
 
 
         val mediaSourceCaptor = argumentCaptor<MediaSource>()
@@ -256,12 +256,12 @@ class PlayerTest {
         initPlayer()
 
 
-        player.play(SAMPLE_URI, Long.MAX_VALUE, true)
+        player.play(MediaDatum.MediaData(SAMPLE_URI, Long.MAX_VALUE, true))
 
 
-        val mediaItemCaptor = argumentCaptor<MediaItem>()
+        val mediaSourceCaptor = argumentCaptor<MediaSource>()
         val resetPositionCaptor = argumentCaptor<Boolean>()
-        verify(exoPlayer).setMediaItem(mediaItemCaptor.capture(), resetPositionCaptor.capture())
+        verify(exoPlayer).setMediaSource(mediaSourceCaptor.capture(), resetPositionCaptor.capture())
         assertFalse { resetPositionCaptor.firstValue }
     }
 

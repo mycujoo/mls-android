@@ -11,6 +11,7 @@ interface PlayerController {
     fun currentDuration(): Int
     fun isMuted() : Boolean
     fun mute()
+    fun isPlayingAd(): Boolean
 
     fun showEventInfoOverlay()
     fun hideEventInfoOverlay()

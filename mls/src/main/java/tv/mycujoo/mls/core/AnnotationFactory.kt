@@ -7,13 +7,11 @@ import tv.mycujoo.mls.helper.*
 import tv.mycujoo.mls.manager.IVariableKeeper
 import tv.mycujoo.mls.manager.TimerEntity
 import tv.mycujoo.mls.manager.TimerVariable
-import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.utils.TimeUtils
 import java.util.concurrent.CopyOnWriteArrayList
 
 class AnnotationFactory(
     private val annotationListener: IAnnotationListener,
-    private val viewHandler: IViewHandler,
     private val variableKeeper: IVariableKeeper
 ) :
     IAnnotationFactory {

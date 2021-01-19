@@ -9,7 +9,7 @@ import tv.mycujoo.mls.manager.ViewHandler
 import tv.mycujoo.mls.manager.contracts.IViewHandler
 
 class InternalTestBuilder(private val activity: Activity) :
-    InternalBuilder(activity, LogLevel.MINIMAL) {
+    InternalBuilder(activity, null, LogLevel.MINIMAL) {
 
     var mockViewHandler: IViewHandler = mock(ViewHandler::class.java)
 

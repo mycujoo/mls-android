@@ -78,7 +78,7 @@ class AnimationFactoryTest {
 
             val coroutineScope =
                 CoroutineScope(newSingleThreadContext(BuildConfig.LIBRARY_PACKAGE_NAME) + job)
-            viewHandler = FakeViewHandler(coroutineScope, countingIdlingResource)
+            viewHandler = FakeViewHandler(countingIdlingResource)
             viewHandler.setOverlayHost(overlayHost)
 
         }

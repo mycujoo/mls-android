@@ -52,7 +52,6 @@ class AnnotationFactoryTest {
 
         annotationFactory = AnnotationFactory(
             annotationListener,
-            viewHandler,
             variableKeeper
         )
     }

@@ -65,7 +65,6 @@ class MLSPlayerViewTest {
 
     private lateinit var MLSPlayerView: MLSPlayerView
     private var viewHandler = ViewHandler(
-        GlobalScope,
         CountingIdlingResource("ViewIdentifierManager")
     )
     private val variableTranslator = VariableTranslator(GlobalScope)
@@ -173,7 +172,12 @@ class MLSPlayerViewTest {
             player = Player()
             val exoPlayer = createExoPlayer(MLSPlayerView.context)
             player.create(
-                MediaFactory(createMediaFactory(MLSPlayerView.context), MediaItem.Builder()),
+                null,
+                MediaFactory(
+                    Player.createDefaultMediaSourceFactory(MLSPlayerView.context),
+                    createMediaFactory(MLSPlayerView.context),
+                    MediaItem.Builder()
+                ),
                 exoPlayer,
                 Handler(),
                 MediaOnLoadCompletedListener(exoPlayer)

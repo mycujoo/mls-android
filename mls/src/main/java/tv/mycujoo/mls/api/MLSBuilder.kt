@@ -7,6 +7,9 @@ import tv.mycujoo.mls.cast.ICast
 import tv.mycujoo.mls.core.InternalBuilder
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
+import tv.mycujoo.mls.enum.C.Companion.ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE
+import tv.mycujoo.mls.enum.C.Companion.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE
+import tv.mycujoo.mls.ima.IIma
 import tv.mycujoo.mls.network.socket.ReactorCallback
 import tv.mycujoo.mls.network.socket.ReactorListener
 
@@ -27,17 +30,21 @@ open class MLSBuilder {
         private set
     internal var mCast: ICast? = null
         private set
+    internal var ima: IIma? = null
+        private set
     internal var hasAnalytic: Boolean = true
         private set
 
     fun publicKey(publicKey: String) = apply {
         if (publicKey == "YOUR_PUBLIC_KEY_HERE") {
-            throw IllegalArgumentException("Public key must be set!")
+            throw IllegalArgumentException(PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
         this.publicKey = publicKey
     }
 
-    fun withActivity(activity: Activity) = apply { this.activity = activity }
+    fun withActivity(activity: Activity) = apply {
+        this.activity = activity
+    }
 
     fun setPlayerEventsListener(playerEventsListener: tv.mycujoo.mls.api.PlayerEventsListener) =
         apply { this.playerEventsListener = PlayerEventsListener(playerEventsListener) }
@@ -53,6 +60,15 @@ open class MLSBuilder {
         this.mCast = cast
     }
 
+    fun setIma(ima: IIma) = apply {
+        if (activity == null) {
+            throw IllegalArgumentException(ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE)
+        }
+        this.ima = ima.apply {
+            createAdsLoader(activity!!)
+        }
+    }
+
     fun createExoPlayer(context: Context): SimpleExoPlayer? {
         return SimpleExoPlayer.Builder(context).build()
     }
@@ -62,7 +78,7 @@ open class MLSBuilder {
     }
 
     open fun build(): MLS {
-        internalBuilder = InternalBuilder(activity!!, mlsConfiguration.logLevel)
+        internalBuilder = InternalBuilder(activity!!, ima, mlsConfiguration.logLevel)
         internalBuilder.initialize()
 
         val mls = MLS(this)

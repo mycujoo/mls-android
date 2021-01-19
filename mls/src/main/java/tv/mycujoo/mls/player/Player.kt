@@ -1,22 +1,24 @@
 package tv.mycujoo.mls.player
 
 import android.content.Context
-import android.net.Uri
 import android.os.Handler
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import tv.mycujoo.mls.enum.C.Companion.DRM_WIDEVINE
+import tv.mycujoo.mls.ima.IIma
+import tv.mycujoo.mls.ima.ImaCustomParams
 
 class Player : IPlayer {
 
     private var exoPlayer: SimpleExoPlayer? = null
+    private var ima: IIma? = null
     private lateinit var mediaFactory: MediaFactory
     private lateinit var handler: Handler
     private lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
-
 
     private var resumePosition: Long = C.INDEX_UNSET.toLong()
     private var resumeWindow: Int = C.INDEX_UNSET
@@ -24,21 +26,24 @@ class Player : IPlayer {
     private var playWhenReady: Boolean = false
     private var playbackPosition: Long = -1L
 
-    private var uri: Uri? = null
-    private var dvrWindowSize: Long = Long.MAX_VALUE
-    private var dvrWindowStartTime: Long = -1L
-    private var licenseUrl: Uri? = null
+    private var mediaData: MediaDatum? = null
 
     override fun create(
+        ima: IIma?,
         mediaFactory: MediaFactory,
         exoPlayer: SimpleExoPlayer,
         handler: Handler,
         mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
     ) {
+        this.ima = ima
         this.mediaFactory = mediaFactory
         this.exoPlayer = exoPlayer
         this.handler = handler
         this.mediaOnLoadCompletedListener = mediaOnLoadCompletedListener
+    }
+
+    override fun reInit(exoPlayer: SimpleExoPlayer) {
+        this.exoPlayer = exoPlayer
     }
 
     override fun isReady(): Boolean {
@@ -67,11 +72,10 @@ class Player : IPlayer {
 
     override fun currentAbsoluteTime(): Long {
         exoPlayer?.let { exoplayer ->
-            dvrWindowStartTime = mediaOnLoadCompletedListener.getWindowStartTime()
+            val dvrWindowStartTime = mediaOnLoadCompletedListener.getWindowStartTime()
             if (dvrWindowStartTime == -1L) {
                 return -1L
             }
-
             return dvrWindowStartTime + exoplayer.currentPosition
         }
 
@@ -86,16 +90,20 @@ class Player : IPlayer {
         exoPlayer?.let {
             return (it.isCurrentWindowDynamic && it.contentPosition != 0L)
         }
-
         return false
-
     }
 
     override fun isPlaying(): Boolean {
         exoPlayer?.let {
             return it.isPlaying
         }
+        return false
+    }
 
+    override fun isPlayingAd(): Boolean {
+        exoPlayer?.let {
+            return it.isPlayingAd
+        }
         return false
     }
 
@@ -119,33 +127,24 @@ class Player : IPlayer {
             it.release()
             exoPlayer = null
         }
-
     }
 
-
-    override fun play(uriString: String, dvrWindowSize: Long, autoPlay: Boolean) {
-        this.dvrWindowSize = dvrWindowSize
-        val mediaItem = mediaFactory.createMediaItem(uriString)
-        play(mediaItem, autoPlay)
-    }
-
-    override fun play(
-        uriString: String,
-        dvrWindowSize: Long,
-        licenseUrl: String,
-        autoPlay: Boolean
-    ) {
-        this.uri = Uri.parse(uriString)
-        this.dvrWindowSize = dvrWindowSize
-        this.licenseUrl = Uri.parse(licenseUrl)
+    override fun play(drmMediaData: MediaDatum.DRMMediaData) {
+        this.mediaData = drmMediaData
 
         val mediaItem = MediaItem.Builder()
             .setDrmUuid(Util.getDrmUuid(DRM_WIDEVINE))
-            .setDrmLicenseUri(licenseUrl)
-            .setUri(uriString)
+            .setDrmLicenseUri(drmMediaData.licenseUrl)
+            .setUri(drmMediaData.fullUrl)
             .build()
 
-        play(mediaItem, autoPlay)
+        play(mediaItem, drmMediaData.autoPlay)
+    }
+
+    override fun play(mediaData: MediaDatum.MediaData) {
+        this.mediaData = mediaData
+        val mediaItem = mediaFactory.createMediaItem(mediaData.fullUrl)
+        play(mediaItem, mediaData.autoPlay)
     }
 
     private fun play(mediaItem: MediaItem, autoPlay: Boolean) {
@@ -157,18 +156,54 @@ class Player : IPlayer {
         if (haveResumePosition) {
             exoPlayer?.let {
                 it.seekTo(resumeWindow, resumePosition)
-                it.setMediaItem(mediaItem, false)
-                it.prepare()
-                it.playWhenReady = autoPlay
-                resumePosition = C.INDEX_UNSET.toLong()
-                resumeWindow = C.INDEX_UNSET
-                it.playWhenReady = autoPlay
+
+                exoPlayer?.let {
+                    val hlsMediaSource = mediaFactory.createHlsMediaSource(mediaItem)
+                    hlsMediaSource.addEventListener(handler, mediaOnLoadCompletedListener)
+                    if (ima != null) {
+                        val adsMediaSource = ima!!.createMediaSource(
+                            mediaFactory.defaultMediaSourceFactory,
+                            hlsMediaSource,
+                            ImaCustomParams(
+                                eventId = mediaData?.eventId,
+                                streamId = mediaData?.streamId,
+                                eventStatus = mediaData?.eventStatus
+                            )
+                        )
+                        it.setMediaSource(adsMediaSource, false)
+
+                    } else {
+                        it.setMediaSource(hlsMediaSource, false)
+                    }
+                    it.prepare()
+                    it.playWhenReady = autoPlay
+                    resumePosition = C.INDEX_UNSET.toLong()
+                    resumeWindow = C.INDEX_UNSET
+                }
             }
         } else {
             exoPlayer?.let {
                 val hlsMediaSource = mediaFactory.createHlsMediaSource(mediaItem)
                 hlsMediaSource.addEventListener(handler, mediaOnLoadCompletedListener)
-                it.setMediaSource(hlsMediaSource, true)
+
+
+                if (ima != null) {
+                    val adsMediaSource = ima!!.createMediaSource(
+                        mediaFactory.defaultMediaSourceFactory,
+                        hlsMediaSource,
+                        ImaCustomParams(
+                            eventId = mediaData?.eventId,
+                            streamId = mediaData?.streamId,
+                            eventStatus = mediaData?.eventStatus
+                        )
+                    )
+                    it.setMediaSource(adsMediaSource, true)
+
+                } else {
+                    it.setMediaSource(hlsMediaSource, true)
+                }
+
+
                 it.prepare()
                 it.playWhenReady = autoPlay
             }
@@ -189,11 +224,17 @@ class Player : IPlayer {
     }
 
     override fun loadLastVideo() {
-        if (licenseUrl != null) {
-            play(uri.toString(), dvrWindowSize, licenseUrl.toString(), false)
-        } else {
-            uri?.let {
-                play(it.toString(), dvrWindowSize, false)
+        mediaData?.let {
+            when (mediaData) {
+                is MediaDatum.MediaData -> {
+                    play(it as MediaDatum.MediaData)
+                }
+                is MediaDatum.DRMMediaData -> {
+                    play(it as MediaDatum.DRMMediaData)
+                }
+                else -> {
+                    // should not happen
+                }
             }
         }
     }
@@ -211,16 +252,15 @@ class Player : IPlayer {
 
 
     override fun dvrWindowSize(): Long {
-        return dvrWindowSize
+        return mediaData?.dvrWindowSize ?: -1L
 
     }
 
     override fun dvrWindowStartTime(): Long {
         exoPlayer?.let { _ ->
-            dvrWindowStartTime = mediaOnLoadCompletedListener.getWindowStartTime()
+            return mediaOnLoadCompletedListener.getWindowStartTime()
         }
-
-        return dvrWindowStartTime
+        return -1L
     }
 
     companion object {
@@ -236,6 +276,14 @@ class Player : IPlayer {
                         "mls"
                     )
                 )
+            )
+        }
+
+        fun createDefaultMediaSourceFactory(
+            context: Context
+        ): DefaultMediaSourceFactory {
+            return DefaultMediaSourceFactory(
+                context
             )
         }
     }

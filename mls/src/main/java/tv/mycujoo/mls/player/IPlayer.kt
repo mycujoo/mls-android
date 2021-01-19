@@ -4,15 +4,18 @@ import android.os.Handler
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
+import tv.mycujoo.mls.ima.IIma
 
 interface IPlayer {
     fun isReady(): Boolean
     fun create(
+        ima: IIma?,
         mediaFactory: MediaFactory,
         exoPlayer: SimpleExoPlayer,
         handler: Handler,
         mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
     )
+    fun reInit(exoPlayer: SimpleExoPlayer)
 
     // will be removed!
     fun getDirectInstance(): ExoPlayer?
@@ -26,16 +29,12 @@ interface IPlayer {
     fun duration(): Long
     fun isLive(): Boolean
     fun isPlaying(): Boolean
+    fun isPlayingAd(): Boolean
 
     fun release()
 
-    fun play(uriString: String, dvrWindowSize: Long = Long.MAX_VALUE, autoPlay: Boolean)
-    fun play(
-        uriString: String,
-        dvrWindowSize: Long = Long.MAX_VALUE,
-        licenseUrl: String,
-        autoPlay: Boolean
-    )
+    fun play(drmMediaData: MediaDatum.DRMMediaData)
+    fun play(mediaData: MediaDatum.MediaData)
 
     fun play()
     fun pause()

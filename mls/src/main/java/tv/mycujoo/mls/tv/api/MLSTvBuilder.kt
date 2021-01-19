@@ -2,8 +2,10 @@ package tv.mycujoo.mls.tv.api
 
 import android.app.Activity
 import tv.mycujoo.mls.api.MLSTVConfiguration
+import tv.mycujoo.mls.enum.C
 import tv.mycujoo.mls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
 import tv.mycujoo.mls.enum.LogLevel
+import tv.mycujoo.mls.ima.IIma
 
 class MLSTvBuilder {
     internal var publicKey: String = ""
@@ -12,12 +14,14 @@ class MLSTvBuilder {
         private set
     internal var mlsTVConfiguration: MLSTVConfiguration = MLSTVConfiguration()
         private set
+    internal var ima: IIma? = null
+        private set
     internal var logLevel: LogLevel = LogLevel.MINIMAL
         private set
 
     fun publicKey(publicKey: String) = apply {
         if (publicKey == "YOUR_PUBLIC_KEY_HERE") {
-            throw IllegalArgumentException("Public key must be set!")
+            throw IllegalArgumentException(C.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
         this.publicKey = publicKey
     }
@@ -27,15 +31,25 @@ class MLSTvBuilder {
     fun setConfiguration(mlsTVConfiguration: MLSTVConfiguration) = apply {
         this.mlsTVConfiguration = mlsTVConfiguration
     }
+    fun ima(ima: IIma) = apply {
+        if (activity == null) {
+            throw IllegalArgumentException(C.ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE)
+        }
+        this.ima = ima.apply {
+            createAdsLoader(activity!!)
+        }
+    }
 
     fun setLogLevel(logLevel: LogLevel) = apply { this.logLevel = logLevel }
 
-    open fun build(): MLSTV {
-        val internalBuilder = MLSTvInternalBuilder(activity!!, logLevel)
+    fun build(): MLSTV {
+        val internalBuilder = MLSTvInternalBuilder(activity!!, ima, logLevel)
         internalBuilder.prefManager.persist(PUBLIC_KEY_PREF_KEY, publicKey)
         return MLSTV(
             activity!!,
+            ima,
             mlsTVConfiguration,
+            internalBuilder.mediaFactory,
             internalBuilder.reactorSocket,
             internalBuilder.dispatcher,
             internalBuilder.dataManager,

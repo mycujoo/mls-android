@@ -1,7 +1,6 @@
 package tv.mycujoo.mls.core
 
 import android.app.Activity
-import android.os.Handler
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.Player.STATE_READY
@@ -10,7 +9,6 @@ import com.google.android.exoplayer2.ui.TimeBar
 import com.npaw.youbora.lib6.plugin.Options
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
@@ -37,10 +35,12 @@ import tv.mycujoo.mls.manager.contracts.IViewHandler
 import tv.mycujoo.mls.mediator.AnnotationMediator
 import tv.mycujoo.mls.model.JoinTimelineParam
 import tv.mycujoo.mls.network.socket.IReactorSocket
-import tv.mycujoo.mls.player.*
+import tv.mycujoo.mls.player.IPlayer
+import tv.mycujoo.mls.player.MediaDatum
+import tv.mycujoo.mls.player.PlaybackLocation
 import tv.mycujoo.mls.player.PlaybackLocation.LOCAL
 import tv.mycujoo.mls.player.PlaybackLocation.REMOTE
-import tv.mycujoo.mls.player.Player.Companion.createMediaFactory
+import tv.mycujoo.mls.player.PlaybackState
 import tv.mycujoo.mls.utils.StringUtils
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import tv.mycujoo.mls.widgets.MLSPlayerView.LiveState.LIVE_ON_THE_EDGE
@@ -73,8 +73,6 @@ class VideoPlayerMediator(
 
     private var joined: Boolean = false
     private var updateId: String? = null
-    private lateinit var streamUrlPullJob: Job
-
 
     private var playbackState: PlaybackState = PlaybackState.IDLE
     private var playbackLocation: PlaybackLocation = LOCAL
@@ -320,34 +318,6 @@ class VideoPlayerMediator(
         }
     }
 
-    fun reInitialize(MLSPlayerView: MLSPlayerView, builder: MLSBuilder) {
-        val exoPlayer = Player.createExoPlayer(MLSPlayerView.context)
-        player.create(
-            MediaFactory(
-                createMediaFactory(MLSPlayerView.context),
-                com.google.android.exoplayer2.MediaItem.Builder()
-            ),
-            exoPlayer,
-            Handler(),
-            MediaOnLoadCompletedListener(exoPlayer)
-        )
-
-        initPlayerView(MLSPlayerView, player, builder.internalBuilder.overlayViewHelper)
-        dataManager.currentEvent?.let {
-            joinEvent(it)
-        }
-    }
-
-    fun attachPlayer(playerView: MLSPlayerView) {
-        playerView.playerView.player = player.getDirectInstance()
-        playerView.playerView.hideController()
-
-        if (hasAnalytic) {
-            youboraClient.start()
-        }
-
-    }
-
     private fun initAnalytic(
         internalBuilder: InternalBuilder,
         activity: Activity,
@@ -369,6 +339,15 @@ class VideoPlayerMediator(
         youboraClient = internalBuilder.createYouboraClient(plugin)
     }
 
+    fun attachPlayer(playerView: MLSPlayerView) {
+        playerView.playerView.player = player.getDirectInstance()
+        playerView.playerView.hideController()
+
+        if (hasAnalytic) {
+            youboraClient.start()
+        }
+
+    }
 
     fun onResume() {
         cast?.onResume()
@@ -465,7 +444,13 @@ class VideoPlayerMediator(
     }
 
     fun playExternalSourceVideo(videoUri: String) {
-        player.play(videoUri, Long.MAX_VALUE, videoPlayerConfig.autoPlay)
+        player.play(
+            MediaDatum.MediaData(
+                fullUrl = videoUri,
+                dvrWindowSize = Long.MAX_VALUE,
+                autoPlay = videoPlayerConfig.autoPlay
+            )
+        )
         playerView.hideInfoDialogs()
         if (videoPlayerConfig.showEventInfoButton) {
             playerView.showEventInfoButton()
@@ -524,13 +509,21 @@ class VideoPlayerMediator(
     private fun play(stream: Stream) {
         if (stream.widevine?.fullUrl != null && stream.widevine.licenseUrl != null) {
             player.play(
-                stream.widevine.fullUrl,
-                stream.getDvrWindowSize(),
-                stream.widevine.licenseUrl,
-                videoPlayerConfig.autoPlay
+                MediaDatum.DRMMediaData(
+                    fullUrl = stream.widevine.fullUrl,
+                    dvrWindowSize = stream.getDvrWindowSize(),
+                    licenseUrl = stream.widevine.licenseUrl,
+                    autoPlay = videoPlayerConfig.autoPlay
+                )
             )
         } else if (stream.fullUrl != null) {
-            player.play(stream.fullUrl, stream.getDvrWindowSize(), videoPlayerConfig.autoPlay)
+            player.play(
+                MediaDatum.MediaData(
+                    fullUrl = stream.fullUrl,
+                    dvrWindowSize = stream.getDvrWindowSize(),
+                    autoPlay = videoPlayerConfig.autoPlay
+                )
+            )
         }
     }
     /**endregion */
