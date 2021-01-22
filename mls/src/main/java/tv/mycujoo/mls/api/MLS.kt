@@ -130,6 +130,7 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         MLSPlayerView: MLSPlayerView
     ) {
         if (mediatorInitialized) {
+            MLSPlayerView.playerView.onResume()
             val exoPlayer = createExoPlayer(context)
             player.reInit(exoPlayer)
             videoPlayerMediator.initialize(MLSPlayerView, player, builder)
@@ -192,10 +193,13 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         }
     }
 
+    override fun onViewDestroy() {
+        videoPlayerMediator.destroy()
+    }
+
     override fun onDestroy() {
         builder.ima?.onDestroy()
     }
-
 
     override fun getVideoPlayer(): VideoPlayer {
         return videoPlayerMediator.videoPlayer

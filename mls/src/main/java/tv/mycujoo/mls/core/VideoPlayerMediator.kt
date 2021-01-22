@@ -671,12 +671,17 @@ class VideoPlayerMediator(
 
 
     fun release() {
+        streaming = false
         cancelPulling()
         player.release()
         if (hasAnalytic) {
             youboraClient.stop()
         }
         reactorSocket.leave(true)
+    }
+
+    fun destroy(){
+        player.destroy()
     }
 
     fun cancelPulling() {
