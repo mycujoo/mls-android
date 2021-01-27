@@ -14,13 +14,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
-import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.mls.CoroutineTestRule
 import tv.mycujoo.mls.enum.LogLevel
 import tv.mycujoo.mls.manager.Logger
-import tv.mycujoo.mls.network.MlsApi
 import kotlin.test.assertEquals
 
 @ExperimentalCoroutinesApi
@@ -42,33 +40,8 @@ class DataManagerTest {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        val mlsApi = object : MlsApi {
-            override suspend fun getEvents(
-                pageSize: Int?,
-                pageToken: String?,
-                status: List<String>?,
-                orderBy: String?
-            ): Events {
-
-                val eventEntityList = ArrayList<EventEntity>()
-
-                repeat(pageSize!!, action = { eventEntityList.add(getSampleEventEntity()) })
-
-                return Events(eventEntityList, SAMPLE_PREVIOUS_PAGE_TOKEN, SAMPLE_NEXT_PAGE_TOKEN)
-            }
-
-            override suspend fun getEventDetails(id: String, updateId: String?): EventEntity {
-                return getSampleEventEntity()
-            }
-
-            override suspend fun getActions(timelineId: String, updateId: String?): ActionResponse {
-                TODO("Not yet implemented")
-            }
-        }
-
-
         val scope = TestCoroutineScope()
-        dataManager = DataManager(scope, eventsRepository, mlsApi, Logger(LogLevel.MINIMAL))
+        dataManager = DataManager(scope, eventsRepository, Logger(LogLevel.MINIMAL))
     }
 
     @After
@@ -102,25 +75,26 @@ class DataManagerTest {
     }
 
     @Test
-    fun `given previousPageToken on response of get event, should return in callback`() = runBlocking {
-        whenever(eventsRepository.getEventsList(any())).thenReturn(
-            Result.Success(
-                getSampleEvents(SAMPLE_PREVIOUS_PAGE_TOKEN, null)
+    fun `given previousPageToken on response of get event, should return in callback`() =
+        runBlocking {
+            whenever(eventsRepository.getEventsList(any())).thenReturn(
+                Result.Success(
+                    getSampleEvents(SAMPLE_PREVIOUS_PAGE_TOKEN, null)
+                )
             )
-        )
 
 
-        var result = ""
-        dataManager.fetchEvents(
-            2,
-            null,
-            listOf(EventStatus.EVENT_STATUS_SCHEDULED, EventStatus.EVENT_STATUS_CANCELLED),
-            OrderByEventsParam.ORDER_TITLE_ASC
-        ) { eventList, previousPageToken, nextPageToken -> result = previousPageToken }
+            var result = ""
+            dataManager.fetchEvents(
+                2,
+                null,
+                listOf(EventStatus.EVENT_STATUS_SCHEDULED, EventStatus.EVENT_STATUS_CANCELLED),
+                OrderByEventsParam.ORDER_TITLE_ASC
+            ) { eventList, previousPageToken, nextPageToken -> result = previousPageToken }
 
 
-        assertEquals(SAMPLE_PREVIOUS_PAGE_TOKEN, result)
-    }
+            assertEquals(SAMPLE_PREVIOUS_PAGE_TOKEN, result)
+        }
 
     @Test
     fun `given nextPageToken on response of get event, should return in callback`() = runBlocking {
@@ -144,24 +118,26 @@ class DataManagerTest {
     }
 
     @Test
-    fun `given no event in event list on response of get event, should not add to callback`() = runBlocking {
-        val eventEntityArrayList = ArrayList<EventEntity>()
+    fun `given no event in event list on response of get event, should not add to callback`() =
+        runBlocking {
+            val eventEntityArrayList = ArrayList<EventEntity>()
 
-        dataManager.fetchEvents(
-            0,
-            null,
-            listOf(EventStatus.EVENT_STATUS_SCHEDULED, EventStatus.EVENT_STATUS_CANCELLED),
-            OrderByEventsParam.ORDER_TITLE_ASC
-        ) { eventList, previousPageToken, nextPageToken -> eventEntityArrayList.addAll(eventList) }
+            dataManager.fetchEvents(
+                0,
+                null,
+                listOf(EventStatus.EVENT_STATUS_SCHEDULED, EventStatus.EVENT_STATUS_CANCELLED),
+                OrderByEventsParam.ORDER_TITLE_ASC
+            ) { eventList, previousPageToken, nextPageToken -> eventEntityArrayList.addAll(eventList) }
 
 
-        assertEquals(0, eventEntityArrayList.size)
-    }
+            assertEquals(0, eventEntityArrayList.size)
+        }
 
     @Test
     fun `given new data, should call live data`() = runBlocking {
         whenever(eventsRepository.getEventsList(any())).then {
-            dataManager.getEventsLiveData().value = listOf(getSampleEventEntity(), getSampleEventEntity())
+            dataManager.getEventsLiveData().value =
+                listOf(getSampleEventEntity(), getSampleEventEntity())
             true
         }
 
@@ -214,7 +190,11 @@ class DataManagerTest {
     }
 
     private fun getSampleEvents(previousPageToken: String?, nextPageToken: String?): Events {
-        return Events(listOf(getSampleEventEntity(), getSampleEventEntity()), previousPageToken, nextPageToken)
+        return Events(
+            listOf(getSampleEventEntity(), getSampleEventEntity()),
+            previousPageToken,
+            nextPageToken
+        )
     }
 
 
