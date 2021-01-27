@@ -443,13 +443,21 @@ class VideoPlayerMediator(
         }
     }
 
-    fun playExternalSourceVideo(videoUri: String) {
+    override fun playExternalEvent(externalEvent: ExternalEvent) {
+        dataManager.currentEvent = null
         player.play(
             MediaDatum.MediaData(
-                fullUrl = videoUri,
+                fullUrl = externalEvent.videoUrl,
                 dvrWindowSize = Long.MAX_VALUE,
                 autoPlay = videoPlayerConfig.autoPlay
             )
+        )
+        playerView.updateControllerVisibility(videoPlayerConfig.autoPlay)
+
+        playerView.setEventInfo(
+            externalEvent.title,
+            externalEvent.description,
+            externalEvent.startTime
         )
         playerView.hideInfoDialogs()
         if (videoPlayerConfig.showEventInfoButton) {
@@ -680,7 +688,7 @@ class VideoPlayerMediator(
         reactorSocket.leave(true)
     }
 
-    fun destroy(){
+    fun destroy() {
         player.destroy()
     }
 

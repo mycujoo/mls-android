@@ -12,6 +12,7 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import tv.mycujoo.domain.entity.*
+import tv.mycujoo.mls.core.ExternalEvent
 import tv.mycujoo.mls.core.VideoPlayerMediator
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import kotlin.test.assertEquals
@@ -189,6 +190,19 @@ class VideoPlayerTest {
         videoPlayer.playVideo("42")
 
         verify(videoPlayerMediator).playVideo("42")
+    }
+
+    @Test
+    fun `given external video, should X`() {
+        val externalEvent = ExternalEvent(
+            "https://dc9jagk60w3y3mt6171f-b03c88.p5cdn.com/shervin/cke8cohm8001u0176j5ahnlo7/master.m3u8",
+            "title",
+            "desc",
+            "2020-07-11T07:32:46Z"
+        )
+        videoPlayer.playExternalSourceVideo(externalEvent)
+
+        verify(videoPlayerMediator).playExternalEvent(externalEvent)
     }
 
     @Test

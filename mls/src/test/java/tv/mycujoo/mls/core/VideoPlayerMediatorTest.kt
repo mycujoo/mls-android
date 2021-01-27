@@ -44,8 +44,8 @@ import tv.mycujoo.mls.network.socket.MainWebSocketListener
 import tv.mycujoo.mls.network.socket.ReactorListener
 import tv.mycujoo.mls.network.socket.ReactorSocket
 import tv.mycujoo.mls.player.IPlayer
-import tv.mycujoo.mls.player.MediaFactory
 import tv.mycujoo.mls.player.MediaDatum
+import tv.mycujoo.mls.player.MediaFactory
 import tv.mycujoo.mls.widgets.MLSPlayerView
 import tv.mycujoo.mls.widgets.PlayerControllerMode
 import tv.mycujoo.mls.widgets.RemotePlayerControllerView
@@ -465,15 +465,25 @@ class VideoPlayerMediatorTest {
 
     @Test
     fun `given external video uri to play, should play`() = runBlockingTest {
-        val externalVideoUri =
-            "https://dc9jagk60w3y3mt6171f-b03c88.p5cdn.com/shervin/cke8cohm8001u0176j5ahnlo7/master.m3u8"
+        val externalEvent = ExternalEvent(
+            "https://dc9jagk60w3y3mt6171f-b03c88.p5cdn.com/shervin/cke8cohm8001u0176j5ahnlo7/master.m3u8",
+            "title",
+            "desc",
+            "2020-07-11T07:32:46Z"
+        )
         whenever(mediaFactory.createMediaItem(any())).thenReturn(mediaItem)
 
 
-        videoPlayerMediator.playExternalSourceVideo(externalVideoUri)
+        videoPlayerMediator.playExternalEvent(externalEvent)
 
 
         verify(player).play(any<MediaDatum.MediaData>())
+        verify(playerView).hideInfoDialogs()
+        verify(playerView).setEventInfo(
+            externalEvent.title,
+            externalEvent.description,
+            externalEvent.startTime
+        )
     }
 
     @Ignore("Event Status is not done on server yet")
