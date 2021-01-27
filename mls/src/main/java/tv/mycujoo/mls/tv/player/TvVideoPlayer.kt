@@ -274,14 +274,14 @@ class TvVideoPlayer(
     }
 
     /**region Playback*/
-    override fun playExternalEvent(externalEvent: ExternalEvent) {
-        val userAgent = Util.getUserAgent(activity, "MLS-AndroidTv-SDK")
-        val hlsFactory =
-            HlsMediaSource.Factory(DefaultDataSourceFactory(activity, userAgent))
-
-        player.getDirectInstance()!!
-            .prepare(hlsFactory.createMediaSource(Uri.parse(externalEvent.videoUrl)))
-    }
+//    override fun playExternalEvent(externalEvent: ExternalEvent) {
+//        val userAgent = Util.getUserAgent(activity, "MLS-AndroidTv-SDK")
+//        val hlsFactory =
+//            HlsMediaSource.Factory(DefaultDataSourceFactory(activity, userAgent))
+//
+//        player.getDirectInstance()!!
+//            .prepare(hlsFactory.createMediaSource(Uri.parse(externalEvent.videoUrl)))
+//    }
 
     override fun playVideo(event: EventEntity) {
         playVideo(event.id)

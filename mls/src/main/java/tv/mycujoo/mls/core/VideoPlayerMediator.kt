@@ -415,8 +415,16 @@ class VideoPlayerMediator(
 
     /**region Playback functions*/
     override fun playVideo(event: EventEntity) {
-        playVideo(event.id)
-        storeEvent(event)
+        if (event.isNativeMLS) {
+            playVideo(event.id)
+            storeEvent(event)
+        } else {
+            playExternalEvent(event)
+            dataManager.currentEvent = event
+            cancelPulling()
+            updateStreamStatus(event)
+        }
+
     }
 
     override fun playVideo(eventId: String) {
@@ -443,11 +451,10 @@ class VideoPlayerMediator(
         }
     }
 
-    override fun playExternalEvent(externalEvent: ExternalEvent) {
-        dataManager.currentEvent = null
+    private fun playExternalEvent(event: EventEntity) {
         player.play(
             MediaDatum.MediaData(
-                fullUrl = externalEvent.videoUrl,
+                fullUrl = event.streams.first().fullUrl!!,
                 dvrWindowSize = Long.MAX_VALUE,
                 autoPlay = videoPlayerConfig.autoPlay
             )
@@ -455,9 +462,9 @@ class VideoPlayerMediator(
         playerView.updateControllerVisibility(videoPlayerConfig.autoPlay)
 
         playerView.setEventInfo(
-            externalEvent.title,
-            externalEvent.description,
-            externalEvent.startTime
+            event.title,
+            event.description,
+            event.start_time
         )
         playerView.hideInfoDialogs()
         if (videoPlayerConfig.showEventInfoButton) {
@@ -716,7 +723,7 @@ class VideoPlayerMediator(
             widevine = widevine,
             fullUrl = fullUrl,
             title = event.title,
-            thumbnailUrl = event.thumbnailUrl,
+            thumbnailUrl = event.thumbnailUrl ?: "",
             isPlaying = player.isPlaying(),
             currentPosition = player.currentPosition()
         )

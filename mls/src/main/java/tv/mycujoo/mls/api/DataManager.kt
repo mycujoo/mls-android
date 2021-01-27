@@ -94,11 +94,11 @@ class DataManager(
             when (result) {
                 is Result.Success -> {
                     events.postValue(
-                        result.value.events
+                        result.value.eventEntities
                     )
                     fetchEventCallback?.let {
                         it.invoke(
-                            result.value.events,
+                            result.value.eventEntities,
                             result.value.previousPageToken ?: "",
                             result.value.nextPageToken ?: ""
                         )

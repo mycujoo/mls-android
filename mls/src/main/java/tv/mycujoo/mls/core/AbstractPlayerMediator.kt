@@ -20,7 +20,6 @@ abstract class AbstractPlayerMediator(
     /**region Abstracts*/
     abstract fun playVideo(event: EventEntity)
     abstract fun playVideo(eventId: String)
-    abstract fun playExternalEvent(externalEvent: ExternalEvent)
 
     abstract fun onReactorEventUpdate(eventId: String, updateId: String)
     abstract fun onReactorCounterUpdate(counts: String)

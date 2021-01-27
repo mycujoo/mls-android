@@ -4,7 +4,6 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.STATE_READY
 import tv.mycujoo.domain.entity.EventEntity
-import tv.mycujoo.mls.core.ExternalEvent
 import tv.mycujoo.mls.core.PlayerEventsListener
 import tv.mycujoo.mls.core.UIEventListener
 import tv.mycujoo.mls.core.VideoPlayerMediator
@@ -46,10 +45,6 @@ class VideoPlayer(
 
     fun playVideo(eventId: String) {
         videoPlayerMediator.playVideo(eventId)
-    }
-
-    fun playExternalSourceVideo(externalEvent: ExternalEvent) {
-        videoPlayerMediator.playExternalEvent(externalEvent)
     }
     /**endregion */
 
