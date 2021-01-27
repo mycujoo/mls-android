@@ -6,9 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2] - 2020-01-19
+### Added
+- IMA module
+
 ## [1.1.1-alpha05] - 2020-12-15
 ### Added
-- Caster Module
+- Cast module
 
 ## [1.1.1-alpha03 & 1.1.1-alpha04] - 2020-12-02
 ### Fixed

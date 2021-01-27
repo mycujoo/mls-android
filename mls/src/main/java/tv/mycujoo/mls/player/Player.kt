@@ -44,6 +44,8 @@ class Player : IPlayer {
 
     override fun reInit(exoPlayer: SimpleExoPlayer) {
         this.exoPlayer = exoPlayer
+        this.mediaOnLoadCompletedListener = MediaOnLoadCompletedListener(exoPlayer)
+
     }
 
     override fun isReady(): Boolean {
@@ -127,6 +129,14 @@ class Player : IPlayer {
             it.release()
             exoPlayer = null
         }
+    }
+
+    override fun destroy() {
+        resumePosition = C.INDEX_UNSET.toLong()
+        resumeWindow = C.INDEX_UNSET
+        playWhenReady = false
+        playbackPosition = -1L
+        mediaData = null
     }
 
     override fun play(drmMediaData: MediaDatum.DRMMediaData) {

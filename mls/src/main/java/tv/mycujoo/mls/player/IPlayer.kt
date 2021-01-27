@@ -32,6 +32,7 @@ interface IPlayer {
     fun isPlayingAd(): Boolean
 
     fun release()
+    fun destroy()
 
     fun play(drmMediaData: MediaDatum.DRMMediaData)
     fun play(mediaData: MediaDatum.MediaData)

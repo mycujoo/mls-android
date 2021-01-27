@@ -323,7 +323,7 @@ class MLSPlayerView @JvmOverloads constructor(
 
 
         } catch (e: Exception) {
-            Log.e("PlayerViewWrapper", e.message)
+            Log.e("PlayerViewWrapper", e.message ?: "Error in configuring")
         }
     }
 
