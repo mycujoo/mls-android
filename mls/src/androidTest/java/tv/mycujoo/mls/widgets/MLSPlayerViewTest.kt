@@ -525,7 +525,7 @@ class MLSPlayerViewTest {
                 null,
                 location,
                 "",
-                "",
+                null,
                 EventStatus.EVENT_STATUS_UNSPECIFIED,
                 streams,
                 "",

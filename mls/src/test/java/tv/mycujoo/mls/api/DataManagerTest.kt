@@ -179,7 +179,7 @@ class DataManagerTest {
             null,
             location,
             "",
-            "",
+            null,
             EventStatus.EVENT_STATUS_UNSPECIFIED,
             emptyList(),
             "",

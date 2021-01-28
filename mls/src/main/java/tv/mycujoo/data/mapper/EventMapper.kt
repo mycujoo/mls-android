@@ -1,5 +1,6 @@
 package tv.mycujoo.data.mapper
 
+import org.joda.time.DateTime
 import tv.mycujoo.data.model.*
 import tv.mycujoo.domain.entity.*
 
@@ -7,6 +8,7 @@ class EventMapper {
     companion object {
         fun mapEventSourceDataToEventEntity(sourceData: EventSourceData): EventEntity {
             val location = mapLocationSourceDataToLocationEntity(sourceData.locationSourceData)
+            val date = DateTime.parse(sourceData.start_time)
             val eventStatus = EventStatus.fromValueOrUnspecified(sourceData.status)
 
             val streams = sourceData.streams.map { mapStreamSourceToStreamEntity(it) }
@@ -20,7 +22,7 @@ class EventMapper {
                 sourceData.poster_url,
                 location,
                 sourceData.organiser,
-                sourceData.start_time,
+                date,
                 eventStatus,
                 streams,
                 sourceData.timezone,

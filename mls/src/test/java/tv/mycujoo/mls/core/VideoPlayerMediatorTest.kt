@@ -736,7 +736,7 @@ class VideoPlayerMediatorTest {
                 null,
                 location,
                 "",
-                "",
+                null,
                 status,
                 streams,
                 "",

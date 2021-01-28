@@ -9,7 +9,6 @@ import android.widget.ImageView
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.dialog_event_info_pre_event_layout.view.*
 import tv.mycujoo.mls.R
-import tv.mycujoo.mls.helper.DateTimeHelper
 
 @SuppressLint("ViewConstructor")
 class PreEventInformationDialog(container: ViewGroup, uiEvent: UiEvent) :
@@ -33,11 +32,7 @@ class PreEventInformationDialog(container: ViewGroup, uiEvent: UiEvent) :
 
             dialog.preEventInfoDialog_titleTextView.text = uiEvent.title ?: ""
             dialog.preEventInfoDialog_bodyTextView.text = uiEvent.description ?: ""
-            uiEvent.startTime?.let {
-                dialog.preEventInfoDialog_startTimeTextView.text =
-                    DateTimeHelper.getDateTime(it)
-            }
-
+            dialog.preEventInfoDialog_startTimeTextView.text = uiEvent.startTime
         }
     }
 }

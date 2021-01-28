@@ -382,7 +382,7 @@ class TvVideoPlayer(
             uiEvent = uiEvent.copy(
                 title = it.title,
                 description = it.description,
-                startTime = it.start_time,
+                startTime = it.getFormattedStartTimeDate(),
                 posterUrl = it.poster_url
             )
         }
@@ -405,7 +405,7 @@ class TvVideoPlayer(
             uiEvent = uiEvent.copy(
                 title = it.title,
                 description = it.description,
-                startTime = it.start_time,
+                startTime = it.getFormattedStartTimeDate(),
                 posterUrl = it.poster_url
             )
         }

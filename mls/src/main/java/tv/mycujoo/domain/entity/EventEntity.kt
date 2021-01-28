@@ -1,7 +1,9 @@
 package tv.mycujoo.domain.entity
 
+import org.joda.time.DateTime
 import tv.mycujoo.data.entity.ServerConstants
 import tv.mycujoo.mls.enum.StreamStatus
+import tv.mycujoo.mls.helper.DateTimeHelper
 
 data class EventEntity(
     val id: String,
@@ -11,7 +13,7 @@ data class EventEntity(
     val poster_url: String?,
     val location: Location?,
     val organiser: String?,
-    val start_time: String,
+    val start_time: DateTime?,
     val status: EventStatus,
     val streams: List<Stream>,
     val timezone: String?,
@@ -40,6 +42,11 @@ data class EventEntity(
         }
 
         return StreamStatus.UNKNOWN_ERROR
+    }
+
+    fun getFormattedStartTimeDate(): String? {
+        start_time?.let { return DateTimeHelper.formatDatetime(it) }
+        return null
     }
 }
 
