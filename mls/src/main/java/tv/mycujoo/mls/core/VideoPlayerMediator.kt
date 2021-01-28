@@ -161,6 +161,12 @@ class VideoPlayerMediator(
 
         player.addListener(mainEventListener)
         player.loadLastVideo()
+        dataManager.currentEvent?.let {
+            MLSPlayerView.setEventInfo(it.title, it.description, it.getFormattedStartTimeDate())
+            if (it.poster_url != null){
+                MLSPlayerView.setPosterInfo(it.poster_url)
+            }
+        }
 
         MLSPlayerView.getTimeBar().addListener(object : TimeBar.OnScrubListener {
             override fun onScrubMove(timeBar: TimeBar, position: Long) {
@@ -416,13 +422,13 @@ class VideoPlayerMediator(
     /**region Playback functions*/
     override fun playVideo(event: EventEntity) {
         if (event.isNativeMLS) {
-            playVideo(event.id)
             storeEvent(event)
+            playVideo(event.id)
         } else {
-            playExternalEvent(event)
-            dataManager.currentEvent = event
+            storeEvent(event)
             cancelPulling()
             updateStreamStatus(event)
+            playExternalEvent(event)
         }
 
     }
