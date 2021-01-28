@@ -22,24 +22,22 @@ class PreEventInformationDialog(container: ViewGroup, uiEvent: UiEvent) :
 
         if (uiEvent.posterUrl != null && uiEvent.posterUrl.isNotEmpty()) {
             dialog.eventInfoPreEventDialog_posterView.visibility = View.VISIBLE
-            dialog.eventInfoPreEventDialog_canvasView.visibility = View.GONE
+            dialog.preEventInfoDialog_textualLayout.visibility = View.GONE
 
             Glide.with(dialog.eventInfoPreEventDialog_posterView)
                 .load(uiEvent.posterUrl)
                 .into(dialog.eventInfoPreEventDialog_posterView as ImageView)
         } else {
-            dialog.eventInfoPreEventDialog_canvasView.visibility = View.VISIBLE
+            dialog.preEventInfoDialog_textualLayout.visibility = View.VISIBLE
             dialog.eventInfoPreEventDialog_posterView.visibility = View.GONE
 
-            dialog.eventInfoPreEventDialog_titleTextView.text = uiEvent.title ?: ""
-            dialog.informationDialog_bodyTextView.text = uiEvent.description ?: ""
+            dialog.preEventInfoDialog_titleTextView.text = uiEvent.title ?: ""
+            dialog.preEventInfoDialog_bodyTextView.text = uiEvent.description ?: ""
             uiEvent.startTime?.let {
-                dialog.informationDialog_dateTimeTextView.text =
+                dialog.preEventInfoDialog_startTimeTextView.text =
                     DateTimeHelper.getDateTime(it)
             }
 
         }
-
-
     }
 }

@@ -18,14 +18,13 @@ class StartedEventInformationDialog(mlsPlayerView: MLSPlayerView, uiEvent: UiEve
                 .inflate(R.layout.dialog_event_info_started_layout, this, true)
         mlsPlayerView.infoDialogContainerLayout.addView(dialog)
 
-        dialog.eventInfoStartedEventDialog_titleTextView.text = uiEvent.title ?: ""
-        dialog.eventInfoStartedEventDialog_bodyTextView.text =
+        dialog.startedEventInfoDialog_titleTextView.text = uiEvent.title ?: ""
+        dialog.startedEventInfoDialog_bodyTextView.text =
             uiEvent.description ?: ""
         uiEvent.startTime?.let {
-            dialog.eventInfoStartedEventDialog_dateTimeTextView.text =
+            dialog.startedEventInfoDialog_startTimeTextView.text =
                 DateTimeHelper.getDateTime(it)
         }
-
         dialog.setOnClickListener { mlsPlayerView.hideInfoDialogs() }
     }
 }
