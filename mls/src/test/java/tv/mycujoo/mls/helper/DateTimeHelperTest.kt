@@ -31,4 +31,13 @@ class DateTimeHelperTest {
         assertEquals(32, localDateTime.minuteOfHour)
         assertEquals(46, localDateTime.secondOfMinute)
     }
+
+    @Test
+    fun `formatDatetime formats given DateTime`() {
+        val dateTime = DateTime("2020-07-11T07:32:46Z")
+        val formattedDatetime = DateTimeHelper.formatDatetime(dateTime)
+
+        assertEquals("11-07-2020 - 09:32", formattedDatetime)
+
+    }
 }

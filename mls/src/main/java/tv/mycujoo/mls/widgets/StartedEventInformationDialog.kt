@@ -6,7 +6,6 @@ import android.widget.FrameLayout
 import kotlinx.android.synthetic.main.dialog_event_info_started_layout.view.*
 import kotlinx.android.synthetic.main.player_view_wrapper.view.*
 import tv.mycujoo.mls.R
-import tv.mycujoo.mls.helper.DateTimeHelper
 
 @SuppressLint("ViewConstructor")
 class StartedEventInformationDialog(mlsPlayerView: MLSPlayerView, uiEvent: UiEvent) :
@@ -18,14 +17,10 @@ class StartedEventInformationDialog(mlsPlayerView: MLSPlayerView, uiEvent: UiEve
                 .inflate(R.layout.dialog_event_info_started_layout, this, true)
         mlsPlayerView.infoDialogContainerLayout.addView(dialog)
 
-        dialog.eventInfoStartedEventDialog_titleTextView.text = uiEvent.title ?: ""
-        dialog.eventInfoStartedEventDialog_bodyTextView.text =
+        dialog.startedEventInfoDialog_titleTextView.text = uiEvent.title ?: ""
+        dialog.startedEventInfoDialog_bodyTextView.text =
             uiEvent.description ?: ""
-        uiEvent.startTime?.let {
-            dialog.eventInfoStartedEventDialog_dateTimeTextView.text =
-                DateTimeHelper.getDateTime(it)
-        }
-
+        dialog.startedEventInfoDialog_startTimeTextView.text = uiEvent.startTime
         dialog.setOnClickListener { mlsPlayerView.hideInfoDialogs() }
     }
 }

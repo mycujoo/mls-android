@@ -46,10 +46,6 @@ class VideoPlayer(
     fun playVideo(eventId: String) {
         videoPlayerMediator.playVideo(eventId)
     }
-
-    fun playExternalSourceVideo(videoUrl: String) {
-        videoPlayerMediator.playExternalSourceVideo(videoUrl)
-    }
     /**endregion */
 
 
