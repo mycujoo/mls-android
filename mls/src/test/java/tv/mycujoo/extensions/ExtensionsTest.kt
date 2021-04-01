@@ -1,7 +1,7 @@
 package tv.mycujoo.extensions
 
 import org.junit.Test
-import tv.mycujoo.mls.extensions.length
+import tv.mycujoo.mcls.extensions.length
 import kotlin.test.assertEquals
 
 class ExtensionsTest {

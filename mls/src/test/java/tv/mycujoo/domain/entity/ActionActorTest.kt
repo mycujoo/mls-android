@@ -1,8 +1,8 @@
 package tv.mycujoo.domain.entity
 
 import org.junit.Test
-import tv.mycujoo.mls.TestData.Companion.getSampleHideOverlayAction
-import tv.mycujoo.mls.TestData.Companion.getSampleShowOverlayActionN
+import tv.mycujoo.mcls.TestData.Companion.getSampleHideOverlayAction
+import tv.mycujoo.mcls.TestData.Companion.getSampleShowOverlayActionN
 
 class ActionActorTest {
     @Test

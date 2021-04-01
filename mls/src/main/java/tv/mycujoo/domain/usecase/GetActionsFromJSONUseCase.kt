@@ -3,8 +3,8 @@ package tv.mycujoo.domain.usecase
 import android.content.res.Resources
 import com.google.gson.Gson
 import tv.mycujoo.data.entity.ActionResponse
-import tv.mycujoo.mls.R
-import tv.mycujoo.mls.utils.StringUtils.Companion.inputStreamToString
+import tv.mycujoo.mcls.R
+import tv.mycujoo.mcls.utils.StringUtils.Companion.inputStreamToString
 
 class GetActionsFromJSONUseCase {
 

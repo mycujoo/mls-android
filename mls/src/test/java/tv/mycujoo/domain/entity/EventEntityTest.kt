@@ -6,7 +6,7 @@ import org.junit.Test
 import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_GEOBLOCKED
 import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_NO_ENTITLEMENT
 import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_UNSPECIFIED
-import tv.mycujoo.mls.enum.StreamStatus
+import tv.mycujoo.mcls.enum.StreamStatus
 
 class EventEntityTest {
     @Test

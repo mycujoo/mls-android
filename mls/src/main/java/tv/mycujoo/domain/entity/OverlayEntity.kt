@@ -1,8 +1,8 @@
 package tv.mycujoo.domain.entity
 
-import tv.mycujoo.mls.enum.C.Companion.ONE_SECOND_IN_MS
-import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasIntroAnimation
-import tv.mycujoo.mls.helper.AnimationClassifierHelper.Companion.hasOutroAnimation
+import tv.mycujoo.mcls.enum.C.Companion.ONE_SECOND_IN_MS
+import tv.mycujoo.mcls.helper.AnimationClassifierHelper.Companion.hasIntroAnimation
+import tv.mycujoo.mcls.helper.AnimationClassifierHelper.Companion.hasOutroAnimation
 
 data class OverlayEntity(
     var id: String,

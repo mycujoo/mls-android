@@ -1,8 +1,8 @@
 package tv.mycujoo.domain.entity
 
-import tv.mycujoo.mls.enum.C
-import tv.mycujoo.mls.model.ScreenTimerDirection
-import tv.mycujoo.mls.model.ScreenTimerFormat
+import tv.mycujoo.mcls.enum.C
+import tv.mycujoo.mcls.model.ScreenTimerDirection
+import tv.mycujoo.mcls.model.ScreenTimerFormat
 import java.util.*
 
 sealed class Action {

@@ -1,5 +1,5 @@
 package tv.mycujoo.mlsapp
 
-import tv.mycujoo.mls.cast.MLSCastOptionsProviderAbstract
+import tv.mycujoo.mcls.cast.MLSCastOptionsProviderAbstract
 
 class CastOptionsProvider : MLSCastOptionsProviderAbstract()

@@ -1,7 +1,7 @@
 package tv.mycujoo.fake
 
-import tv.mycujoo.mls.widgets.mlstimebar.PositionedPointOfInterest
-import tv.mycujoo.mls.widgets.mlstimebar.TimelineMarkerPosition
+import tv.mycujoo.mcls.widgets.mlstimebar.PositionedPointOfInterest
+import tv.mycujoo.mcls.widgets.mlstimebar.TimelineMarkerPosition
 import java.util.*
 
 class FakeTimelineMarkerPosition : TimelineMarkerPosition {

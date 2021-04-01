@@ -71,7 +71,7 @@
                 android:gravity="bottom" />
         </LinearLayout>
 
-        <tv.mycujoo.mls.tv.widgets.MLSThumbsBar
+        <tv.mycujoo.mcls.tv.widgets.MLSThumbsBar
             android:id="@+id/thumbs_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -87,7 +87,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-    <tv.mycujoo.mls.tv.widgets.MLSPlaybackTransportRowView
+    <tv.mycujoo.mcls.tv.widgets.MLSPlaybackTransportRowView
         android:id="@+id/transport_row"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -161,7 +161,7 @@
             app:layout_constraintLeft_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvController_guidelineOf3rdQuarter">
 
-            <tv.mycujoo.mls.tv.widgets.MLSSeekBar
+            <tv.mycujoo.mcls.tv.widgets.MLSSeekBar
                 android:id="@+id/playback_progress"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/lb_playback_transport_progressbar_height"
@@ -281,7 +281,7 @@
         </LinearLayout>
 
 
-    </tv.mycujoo.mls.tv.widgets.MLSPlaybackTransportRowView>
+    </tv.mycujoo.mcls.tv.widgets.MLSPlaybackTransportRowView>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

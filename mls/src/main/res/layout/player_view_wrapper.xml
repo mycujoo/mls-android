@@ -86,7 +86,7 @@
 
     </FrameLayout>
 
-    <tv.mycujoo.mls.widgets.RemotePlayerControllerView
+    <tv.mycujoo.mcls.widgets.RemotePlayerControllerView
         android:id="@+id/remotePlayerControllerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
