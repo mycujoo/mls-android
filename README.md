@@ -18,7 +18,7 @@ Add dependency to SDK in app-level build.gradle file:
 
 In xml layout file of your activity (or fragment) add MLSPayerView. 
 
-        <tv.mycujoo.mls.widgets.MLSPlayerView
+        <tv.mycujoo.mcls.widgets.MLSPlayerView
             android:id="@+id/mlsPlayerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
