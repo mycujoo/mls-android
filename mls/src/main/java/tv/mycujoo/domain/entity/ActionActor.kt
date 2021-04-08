@@ -1,6 +1,6 @@
 package tv.mycujoo.domain.entity
 
-import tv.mycujoo.mls.enum.C
+import tv.mycujoo.mcls.enum.C
 
 class ActionActor {
     /**

@@ -1,7 +1,7 @@
 package tv.mycujoo.domain.entity.models
 
-import tv.mycujoo.mls.model.ScreenTimerDirection
-import tv.mycujoo.mls.model.ScreenTimerFormat
+import tv.mycujoo.mcls.model.ScreenTimerDirection
+import tv.mycujoo.mcls.model.ScreenTimerFormat
 
 data class ExtractedTimerRelatedData(
     val name: String,

@@ -5,9 +5,9 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.TransitionSpec
-import tv.mycujoo.mls.helper.AnimationFactory
-import tv.mycujoo.mls.manager.contracts.IViewHandler
-import tv.mycujoo.mls.widgets.ScaffoldView
+import tv.mycujoo.mcls.helper.AnimationFactory
+import tv.mycujoo.mcls.manager.contracts.IViewHandler
+import tv.mycujoo.mcls.widgets.ScaffoldView
 
 class FakeAnimationFactory : AnimationFactory() {
 

@@ -1,9 +1,13 @@
 package tv.mycujoo.domain.entity
 
+import com.google.gson.annotations.SerializedName
 import org.joda.time.DateTime
-import tv.mycujoo.data.entity.ServerConstants
-import tv.mycujoo.mls.enum.StreamStatus
-import tv.mycujoo.mls.helper.DateTimeHelper
+import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_GEOBLOCKED
+import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_NO_ENTITLEMENT
+import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_UNSPECIFIED
+import tv.mycujoo.mcls.enum.StreamStatus
+import tv.mycujoo.mcls.helper.DateTimeHelper
+
 
 data class EventEntity(
     val id: String,
@@ -79,7 +83,7 @@ data class Stream(
 
     fun isGeoBlocked(): Boolean {
         errorCodeAndMessage?.let {
-            if (it.code == ServerConstants.ERROR_CODE_GEOBLOCKED) {
+            if (it.code == ERROR_CODE_GEOBLOCKED) {
                 return true
             }
         }
@@ -87,14 +91,14 @@ data class Stream(
     }
 
     fun isNoEntitlement(): Boolean {
-        if (errorCodeAndMessage?.code == ServerConstants.ERROR_CODE_NO_ENTITLEMENT) {
+        if (errorCodeAndMessage?.code == ERROR_CODE_NO_ENTITLEMENT) {
             return true
         }
         return false
     }
 
     fun hasUnknownError(): Boolean {
-        if (errorCodeAndMessage?.code == ServerConstants.ERROR_CODE_UNSPECIFIED) {
+        if (errorCodeAndMessage?.code == ERROR_CODE_UNSPECIFIED) {
             return true
         }
         return false

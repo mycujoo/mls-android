@@ -1,8 +1,8 @@
 package tv.mycujoo
 
 import tv.mycujoo.domain.entity.*
-import tv.mycujoo.mls.enum.C
-import tv.mycujoo.mls.helper.sampleSvgString
+import tv.mycujoo.mcls.enum.C
+import tv.mycujoo.mcls.helper.sampleSvgString
 
 class TestData {
     companion object {

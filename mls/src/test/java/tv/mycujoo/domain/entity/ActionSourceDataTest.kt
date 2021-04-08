@@ -2,7 +2,7 @@ package tv.mycujoo.domain.entity
 
 import org.junit.Test
 import tv.mycujoo.domain.entity.models.ActionType
-import tv.mycujoo.mls.TestData.Companion.samplePosition
+import tv.mycujoo.mcls.TestData.Companion.samplePosition
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

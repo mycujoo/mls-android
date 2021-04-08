@@ -2,6 +2,18 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+
+ext {
+    PUBLISH_GROUP_ID = 'tv.mycujoo.mls'
+    PUBLISH_VERSION = '1.2.2'
+    PUBLISH_ARTIFACT_ID = 'mls'
+    PUBLISH_ARTIFACT_DESCRIPTION = 'Android MLS SDK'
+}
+
+apply from: "${rootDir}/script/publish-mavencentral.gradle"
 
 
 android {
@@ -127,12 +139,8 @@ dependencies {
     testImplementation 'joda-time:joda-time:2.10.6'
 
 
-
     //TV
     api "androidx.leanback:leanback-preference:1.0.0"
     api 'com.google.android.exoplayer:extension-leanback:2.11.1'
 
 }
-
-apply from: 'install.gradle'
-apply from: 'bintray.gradle'

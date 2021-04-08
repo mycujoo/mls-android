@@ -9,7 +9,7 @@ import tv.mycujoo.domain.params.EventListParams
 import tv.mycujoo.domain.params.TimelineIdPairParam
 import tv.mycujoo.domain.repository.AbstractRepository
 import tv.mycujoo.domain.repository.EventsRepository
-import tv.mycujoo.mls.network.MlsApi
+import tv.mycujoo.mcls.network.MlsApi
 
 class EventsRepository(val api: MlsApi) : AbstractRepository(),
     EventsRepository {

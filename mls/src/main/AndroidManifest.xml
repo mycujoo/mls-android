@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="tv.mycujoo.mls">
+    package="tv.mycujoo.mcls">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application>
         <activity
-            android:name=".BlankActivity"
+            android:name="tv.mycujoo.mcls.BlankActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
     </application>
 

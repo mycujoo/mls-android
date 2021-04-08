@@ -13,8 +13,8 @@ import junit.framework.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import tv.mycujoo.mls.BlankActivity
-import tv.mycujoo.mls.R
+import tv.mycujoo.mcls.BlankActivity
+import tv.mycujoo.mcls.R
 import java.util.concurrent.TimeUnit
 
 

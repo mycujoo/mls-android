@@ -6,9 +6,9 @@ import tv.mycujoo.domain.entity.Variable
 import tv.mycujoo.domain.entity.VariableType
 import tv.mycujoo.domain.entity.VariableType.*
 import tv.mycujoo.domain.entity.models.*
-import tv.mycujoo.mls.model.MutablePair
-import tv.mycujoo.mls.model.ScreenTimerDirection
-import tv.mycujoo.mls.model.ScreenTimerFormat
+import tv.mycujoo.mcls.model.MutablePair
+import tv.mycujoo.mcls.model.ScreenTimerDirection
+import tv.mycujoo.mcls.model.ScreenTimerFormat
 
 class DataMapper {
     companion object {

@@ -111,7 +111,7 @@
             android:src="@drawable/ic_10_sec_forward" />
     </FrameLayout>
 
-    <tv.mycujoo.mls.widgets.mlstimebar.MLSTimeBar
+    <tv.mycujoo.mcls.widgets.mlstimebar.MLSTimeBar
         android:id="@+id/timeBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -173,7 +173,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-        <tv.mycujoo.mls.widgets.LiveBadgeView
+        <tv.mycujoo.mcls.widgets.LiveBadgeView
             android:id="@+id/remoteControllerLiveBadgeView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
