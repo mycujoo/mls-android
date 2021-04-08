@@ -20,7 +20,6 @@ import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.model.SingleLiveEvent
-import tv.mycujoo.mcls.network.MlsApi
 
 /**
  * Serves client as Data Provider
@@ -29,7 +28,6 @@ import tv.mycujoo.mcls.network.MlsApi
 class DataManager(
     private val scope: CoroutineScope,
     private val eventsRepository: EventsRepository,
-    private var mlsApi: MlsApi,
     private val logger: Logger
 ) : IDataManager {
 
@@ -91,11 +89,11 @@ class DataManager(
             when (result) {
                 is Result.Success -> {
                     events.postValue(
-                        result.value.events
+                        result.value.eventEntities
                     )
                     fetchEventCallback?.let {
                         it.invoke(
-                            result.value.events,
+                            result.value.eventEntities,
                             result.value.previousPageToken ?: "",
                             result.value.nextPageToken ?: ""
                         )

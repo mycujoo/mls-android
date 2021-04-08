@@ -40,8 +40,8 @@ open class AppModule() {
 
     @Provides
     @Singleton
-    open fun provideDataManager(scope: CoroutineScope, repository: EventsRepository, mlsApi: MlsApi): IDataManager {
-        return DataManager(scope, repository, mlsApi, Logger(LogLevel.MINIMAL))
+    open fun provideDataManager(scope: CoroutineScope, repository: EventsRepository): IDataManager {
+        return DataManager(scope, repository, Logger(LogLevel.MINIMAL))
     }
 
 

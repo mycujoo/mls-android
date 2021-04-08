@@ -24,12 +24,12 @@ class CustomInformationDialog(
             .inflate(R.layout.dialog_event_info_pre_event_layout, this, true)
         container.addView(this)
 
-        eventInfoPreEventDialog_canvasView.visibility = VISIBLE
+        preEventInfoDialog_textualLayout.visibility = VISIBLE
         eventInfoPreEventDialog_posterView.visibility = GONE
 
-        eventInfoPreEventDialog_titleTextView.text = uiEvent.title ?: ""
-        informationDialog_bodyTextView.text = message
-        informationDialog_bodyTextView.setTextColor(Color.RED)
-        informationDialog_dateTimeTextView.visibility = GONE
+        preEventInfoDialog_titleTextView.text = uiEvent.title ?: ""
+        preEventInfoDialog_bodyTextView.text = message
+        preEventInfoDialog_bodyTextView.setTextColor(Color.RED)
+        preEventInfoDialog_startTimeTextView.visibility = GONE
     }
 }

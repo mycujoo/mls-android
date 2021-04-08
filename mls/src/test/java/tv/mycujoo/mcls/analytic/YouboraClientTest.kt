@@ -99,7 +99,7 @@ class YouboraClientTest {
                 null,
                 location,
                 "",
-                "",
+                null,
                 status,
                 streams,
                 "",

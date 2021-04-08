@@ -6,10 +6,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
-    android:background="@android:color/transparent"
+    android:background="@color/black"
     android:clickable="true"
     android:focusable="true"
     android:tag="event_info_dialog">
+
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideLine"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.7" />
 
     <ImageView
         android:id="@+id/eventInfoPreEventDialog_posterView"
@@ -21,90 +29,96 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/eventInfoPreEventDialog_canvasView"
+    <LinearLayout
+        android:id="@+id/preEventInfoDialog_textualLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@color/black"
-        android:gravity="left"
         android:orientation="vertical"
+        android:weightSum="10"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/guideLine"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <View
-            android:id="@+id/centerPoint"
-            android:layout_width="1dp"
-            android:layout_height="1dp"
-            android:layout_marginLeft="32dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/eventInfoPreEventDialog_titleTextView"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:id="@+id/titleContainer"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:gravity="left|center_vertical"
-            android:maxLines="2"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            app:autoSizeMaxTextSize="40sp"
-            app:autoSizeMinTextSize="18sp"
-            app:autoSizeStepGranularity="2sp"
-            app:autoSizeTextType="uniform"
-            app:layout_constraintBottom_toBottomOf="@id/centerPoint"
-            app:layout_constraintHeight_percent="0.15"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="@id/centerPoint"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="Super Champions League 2020" />
+            android:layout_weight="4"
+            android:orientation="vertical">
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/informationDialog_bodyTextView"
-            android:layout_width="0dp"
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/preEventInfoDialog_titleTextView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:ellipsize="end"
+                android:gravity="left|center_vertical"
+                android:maxLines="2"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                app:autoSizeMaxTextSize="18sp"
+                app:autoSizeMinTextSize="16sp"
+                app:autoSizeStepGranularity="1sp"
+                app:autoSizeTextType="uniform"
+                tools:text="Super Champions League 2020" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/bodyContainer"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:gravity="left"
-            android:maxLines="3"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            app:autoSizeMaxTextSize="36sp"
-            app:autoSizeMinTextSize="16sp"
-            app:autoSizeStepGranularity="2sp"
-            app:autoSizeTextType="uniform"
-            app:layout_constraintHeight_percent="0.25"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="@id/centerPoint"
-            app:layout_constraintTop_toBottomOf="@id/eventInfoPreEventDialog_titleTextView"
-            tools:text="The most important competition in the world will be streamed here.  Have fun!" />
+            android:layout_weight="4"
+            android:orientation="vertical">
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/informationDialog_dateTimeTextView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:gravity="left"
-            android:maxLines="1"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            app:layout_constraintHeight_percent="0.15"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="@id/centerPoint"
-            app:layout_constraintTop_toBottomOf="@id/informationDialog_bodyTextView"
-            tools:text="2020-11-07 - 17:30" />
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/preEventInfoDialog_bodyTextView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="top"
+                android:layout_marginLeft="16dp"
+                android:ellipsize="end"
+                android:gravity="left|top"
+                android:maxLines="3"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                app:autoSizeMaxTextSize="16sp"
+                app:autoSizeMinTextSize="14sp"
+                app:autoSizeStepGranularity="1sp"
+                app:autoSizeTextType="uniform"
+                tools:text="The most important competition in the world will be streamed here.  Have fun!" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/startTimeContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:orientation="vertical">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/preEventInfoDialog_startTimeTextView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="top"
+                android:layout_marginLeft="16dp"
+                android:ellipsize="end"
+                android:gravity="left|top"
+                android:maxLines="1"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                app:autoSizeMaxTextSize="14sp"
+                app:autoSizeMinTextSize="12sp"
+                app:autoSizeStepGranularity="1sp"
+                app:autoSizeTextType="uniform"
+                tools:text="2020-11-07 - 17:30" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

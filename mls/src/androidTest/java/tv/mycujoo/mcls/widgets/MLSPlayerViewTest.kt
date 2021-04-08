@@ -271,7 +271,7 @@ class MLSPlayerViewTest {
                 withEffectiveVisibility(Visibility.VISIBLE)
             )
         )
-        onView(withId(R.id.eventInfoPreEventDialog_canvasView)).check(
+        onView(withId(R.id.preEventInfoDialog_textualLayout)).check(
             matches(
                 withEffectiveVisibility(Visibility.GONE)
             )
@@ -525,7 +525,7 @@ class MLSPlayerViewTest {
                 null,
                 location,
                 "",
-                "",
+                null,
                 EventStatus.EVENT_STATUS_UNSPECIFIED,
                 streams,
                 "",

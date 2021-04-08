@@ -536,7 +536,7 @@ class MLSPlayerView @JvmOverloads constructor(
         uiEvent = uiEvent.copy(posterUrl = posterUrl)
     }
 
-    fun setEventInfo(title: String, description: String, startTime: String) {
+    fun setEventInfo(title: String, description: String?, startTime: String?) {
         uiEvent = UiEvent(title, description, startTime)
     }
 

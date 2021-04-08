@@ -16,11 +16,8 @@ import androidx.leanback.app.VideoSupportFragmentGlueHost
 import androidx.leanback.media.PlaybackGlue
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter
-import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.source.ads.AdsLoader
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
-import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import kotlinx.coroutines.CoroutineScope
@@ -276,24 +273,6 @@ class TvVideoPlayer(
     }
 
     /**region Playback*/
-    fun playExternalSourceVideo(url: String, isHls: Boolean = true) {
-        if (isHls) {
-            val userAgent = Util.getUserAgent(activity, "MLS-AndroidTv-SDK")
-            val hlsFactory =
-                HlsMediaSource.Factory(DefaultDataSourceFactory(activity, userAgent))
-
-            player.getDirectInstance()!!.prepare(hlsFactory.createMediaSource(Uri.parse(url)))
-        } else {
-            val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(
-                activity,
-                Util.getUserAgent(activity, "MLS-AndroidTv-SDK")
-            )
-            val videoSource: MediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(Uri.parse(url))
-            player.getDirectInstance()!!.prepare(videoSource)
-        }
-    }
-
     override fun playVideo(event: EventEntity) {
         playVideo(event.id)
     }
@@ -393,7 +372,7 @@ class TvVideoPlayer(
             uiEvent = uiEvent.copy(
                 title = it.title,
                 description = it.description,
-                startTime = it.start_time,
+                startTime = it.getFormattedStartTimeDate(),
                 posterUrl = it.poster_url
             )
         }
@@ -416,7 +395,7 @@ class TvVideoPlayer(
             uiEvent = uiEvent.copy(
                 title = it.title,
                 description = it.description,
-                startTime = it.start_time,
+                startTime = it.getFormattedStartTimeDate(),
                 posterUrl = it.poster_url
             )
         }

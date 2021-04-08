@@ -161,6 +161,12 @@ class VideoPlayerMediator(
 
         player.addListener(mainEventListener)
         player.loadLastVideo()
+        dataManager.currentEvent?.let {
+            MLSPlayerView.setEventInfo(it.title, it.description, it.getFormattedStartTimeDate())
+            if (it.poster_url != null){
+                MLSPlayerView.setPosterInfo(it.poster_url)
+            }
+        }
 
         MLSPlayerView.getTimeBar().addListener(object : TimeBar.OnScrubListener {
             override fun onScrubMove(timeBar: TimeBar, position: Long) {
@@ -415,8 +421,15 @@ class VideoPlayerMediator(
 
     /**region Playback functions*/
     override fun playVideo(event: EventEntity) {
-        playVideo(event.id)
-        storeEvent(event)
+        if (event.isNativeMLS) {
+            playVideo(event.id)
+            storeEvent(event)
+        } else {
+            playExternalEvent(event)
+            dataManager.currentEvent = event
+            cancelPulling()
+            updateStreamStatus(event)
+        }
     }
 
     override fun playVideo(eventId: String) {
@@ -443,13 +456,20 @@ class VideoPlayerMediator(
         }
     }
 
-    fun playExternalSourceVideo(videoUri: String) {
+    private fun playExternalEvent(event: EventEntity) {
         player.play(
             MediaDatum.MediaData(
-                fullUrl = videoUri,
+                fullUrl = event.streams.first().fullUrl!!,
                 dvrWindowSize = Long.MAX_VALUE,
                 autoPlay = videoPlayerConfig.autoPlay
             )
+        )
+        playerView.updateControllerVisibility(videoPlayerConfig.autoPlay)
+
+        playerView.setEventInfo(
+            event.title,
+            event.description,
+            event.getFormattedStartTimeDate()
         )
         playerView.hideInfoDialogs()
         if (videoPlayerConfig.showEventInfoButton) {
@@ -460,7 +480,7 @@ class VideoPlayerMediator(
     }
 
     private fun playVideoOrDisplayEventInfo(event: EventEntity) {
-        playerView.setEventInfo(event.title, event.description, event.start_time)
+        playerView.setEventInfo(event.title, event.description, event.getFormattedStartTimeDate())
         playerView.setPosterInfo(event.poster_url)
         if (videoPlayerConfig.showEventInfoButton) {
             playerView.showEventInfoButton()
@@ -680,7 +700,7 @@ class VideoPlayerMediator(
         reactorSocket.leave(true)
     }
 
-    fun destroy(){
+    fun destroy() {
         player.destroy()
     }
 
@@ -708,7 +728,7 @@ class VideoPlayerMediator(
             widevine = widevine,
             fullUrl = fullUrl,
             title = event.title,
-            thumbnailUrl = event.thumbnailUrl,
+            thumbnailUrl = event.thumbnailUrl ?: "",
             isPlaying = player.isPlaying(),
             currentPosition = player.currentPosition()
         )

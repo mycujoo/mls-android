@@ -1,26 +1,30 @@
 package tv.mycujoo.domain.entity
 
 import com.google.gson.annotations.SerializedName
+import org.joda.time.DateTime
 import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_GEOBLOCKED
 import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_NO_ENTITLEMENT
 import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_UNSPECIFIED
 import tv.mycujoo.mcls.enum.StreamStatus
+import tv.mycujoo.mcls.helper.DateTimeHelper
+
 
 data class EventEntity(
-    @SerializedName("id") val id: String,
-    @SerializedName("title") val title: String,
-    @SerializedName("description") val description: String,
-    @SerializedName("thumbnail_url") val thumbnailUrl: String,
-    @SerializedName("poster_url") val poster_url: String?,
-    @SerializedName("location") val location: Location,
-    @SerializedName("organiser") val organiser: String,
-    @SerializedName("start_time") val start_time: String,
-    @SerializedName("status") val status: EventStatus,
-    @SerializedName("streams") val streams: List<Stream>,
-    @SerializedName("timezone") val timezone: String,
-    @SerializedName("timeline_ids") val timeline_ids: List<String>,
-    @SerializedName("metadata") val metadata: Metadata,
-    @SerializedName("is_test") val is_test: Boolean
+    val id: String,
+    val title: String,
+    val description: String?,
+    val thumbnailUrl: String?,
+    val poster_url: String?,
+    val location: Location?,
+    val organiser: String?,
+    val start_time: DateTime?,
+    val status: EventStatus,
+    val streams: List<Stream>,
+    val timezone: String?,
+    val timeline_ids: List<String>,
+    val metadata: Metadata?,
+    val is_test: Boolean,
+    val isNativeMLS: Boolean = true
 ) {
     fun streamStatus(): StreamStatus {
         if (streams.isEmpty()) {
@@ -43,18 +47,26 @@ data class EventEntity(
 
         return StreamStatus.UNKNOWN_ERROR
     }
+
+    fun getFormattedStartTimeDate(): String? {
+        start_time?.let { return DateTimeHelper.formatDatetime(it) }
+        return null
+    }
 }
 
 data class Stream(
-    @SerializedName("id") val id: String,
-    @SerializedName("dvr_window_size") val dvrWindowString: String,
-    @SerializedName("full_url") val fullUrl: String?,
-    @SerializedName("widevine") val widevine: Widevine?,
-    @SerializedName("error") val errorCodeAndMessage: ErrorCodeAndMessage? = null
+    val id: String,
+    val dvrWindowString: String?,
+    val fullUrl: String?,
+    val widevine: Widevine?,
+    val errorCodeAndMessage: ErrorCodeAndMessage? = null
 ) {
     fun getDvrWindowSize(): Long {
+        if (dvrWindowString == null) {
+            Long.MAX_VALUE
+        }
         return try {
-            dvrWindowString.toLong()
+            dvrWindowString!!.toLong()
         } catch (e: Exception) {
             Long.MAX_VALUE
         }
@@ -104,32 +116,34 @@ data class Stream(
     }
 }
 
+
 data class Widevine(
-    @SerializedName("full_url") val fullUrl: String?,
-    @SerializedName("license_url") val licenseUrl: String?
+    val fullUrl: String?,
+    val licenseUrl: String?
 )
 
 data class ErrorCodeAndMessage(
-    @SerializedName("code") val code: String?,
-    @SerializedName("message") val message: String?
+    val code: String?,
+    val message: String?
 )
 
 data class Location(
-    @SerializedName("physical") val physical: Physical
+    val physical: Physical
 )
 
 class Metadata(
 )
 
 data class Physical(
-    @SerializedName("city") val city: String,
-    @SerializedName("continent_code") val continent_code: String,
-    @SerializedName("coordinates") val coordinates: Coordinates,
-    @SerializedName("country_code") val country_code: String,
-    @SerializedName("venue") val venue: String
+    val city: String,
+    val continent_code: String,
+    val coordinates: Coordinates,
+    val country_code: String,
+    val venue: String
 )
 
 data class Coordinates(
-    @SerializedName("latitude") val latitude: Double,
-    @SerializedName("longitude") val longitude: Double
+    val latitude: Double,
+    val longitude: Double
 )
+

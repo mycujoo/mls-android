@@ -5,11 +5,22 @@ import org.joda.time.DateTime
 class DateTimeHelper {
 
     companion object {
-        fun getDateTime(input: String): String {
+        private const val DATE_FORMAT = "dd-MM-yyy '-' HH:mm"
+        fun getDateTime(input: String): String? {
+            return try {
+                val localDateTime = DateTime.parse(input).toLocalDateTime()
+                localDateTime.toString(DATE_FORMAT)
+            } catch (e: Exception) {
+                null
+            }
+        }
 
-            val localDateTime = DateTime.parse(input).toLocalDateTime()
-
-            return localDateTime.toString("dd-MM-yyy '-' HH:mm")
+        fun formatDatetime(input: DateTime): String? {
+            return try {
+                input.toString(DATE_FORMAT)
+            } catch (e: Exception) {
+                null
+            }
         }
     }
 

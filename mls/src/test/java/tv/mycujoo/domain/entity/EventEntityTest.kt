@@ -1,5 +1,6 @@
 package tv.mycujoo.domain.entity
 
+import org.joda.time.DateTime
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -7,6 +8,8 @@ import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_GEOBLOCKED
 import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_NO_ENTITLEMENT
 import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_UNSPECIFIED
 import tv.mycujoo.mcls.enum.StreamStatus
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class EventEntityTest {
     @Test
@@ -52,6 +55,16 @@ class EventEntityTest {
             StreamStatus.UNKNOWN_ERROR,
             event(listOf(emptyErrorStream())).streamStatus()
         )
+    }
+
+    @Test
+    fun `event with valid date, return valid formattedStartDate`() {
+        val formattedStartTimeDate = eventWithStartDate().getFormattedStartTimeDate()
+        assertNotNull(formattedStartTimeDate)
+    }
+    @Test
+    fun `event with no date, returns null as formattedStartDate`() {
+        assertNull(event(emptyList()).getFormattedStartTimeDate())
     }
 
     companion object {
@@ -112,9 +125,31 @@ class EventEntityTest {
                 null,
                 location,
                 "",
-                "",
+                null,
                 EventStatus.EVENT_STATUS_FINISHED,
                 streams,
+                "",
+                emptyList(),
+                Metadata(),
+                false
+            )
+
+            return event
+        }
+        private fun eventWithStartDate(): EventEntity {
+            val location =
+                Location(Physical("", "", Coordinates(0.toDouble(), 0.toDouble()), "", ""))
+            val event = EventEntity(
+                "event_id_0",
+                "event_title",
+                "event_desc",
+                "",
+                null,
+                location,
+                "",
+                DateTime("2020-07-11T07:32:46Z"),
+                EventStatus.EVENT_STATUS_FINISHED,
+                emptyList(),
                 "",
                 emptyList(),
                 Metadata(),

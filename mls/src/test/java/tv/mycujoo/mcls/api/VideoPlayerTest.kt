@@ -209,7 +209,7 @@ class VideoPlayerTest {
             null,
             location,
             "",
-            "",
+            null,
             EventStatus.EVENT_STATUS_UNSPECIFIED,
             emptyList(),
             "",
