@@ -10,7 +10,9 @@ ext {
     PUBLISH_ARTIFACT_DESCRIPTION = 'Ima module of MLS SDK'
 }
 
-apply from: "${rootDir}/script/publish-mavencentral.gradle"
+apply from: "../script/publish-mavencentral.gradle"
+
+
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.2"

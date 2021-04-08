@@ -8,12 +8,12 @@ apply plugin: 'signing'
 
 ext {
     PUBLISH_GROUP_ID = 'tv.mycujoo.mls'
-    PUBLISH_VERSION = '1.2.2'
+    PUBLISH_VERSION = '1.2.3-alpha01'
     PUBLISH_ARTIFACT_ID = 'mls'
     PUBLISH_ARTIFACT_DESCRIPTION = 'Android MLS SDK'
 }
 
-apply from: "${rootDir}/script/publish-mavencentral.gradle"
+apply from: "../script/publish-mavencentral.gradle"
 
 
 android {
