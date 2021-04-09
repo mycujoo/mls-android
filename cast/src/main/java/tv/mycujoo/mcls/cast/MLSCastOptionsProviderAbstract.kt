@@ -16,11 +16,10 @@ abstract class MLSCastOptionsProviderAbstract : OptionsProvider {
         val mediaOptions = CastMediaOptions.Builder()
             .build()
 
-        val castOption = CastOptions.Builder()
+        return CastOptions.Builder()
             .setReceiverApplicationId(context.getString(R.string.mls_cast_app_id))
             .setCastMediaOptions(mediaOptions)
             .build()
-        return castOption
     }
 
     override fun getAdditionalSessionProviders(context: Context?): MutableList<SessionProvider> {
