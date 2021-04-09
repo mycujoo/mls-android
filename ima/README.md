@@ -2,7 +2,7 @@
 # MLS IMA module
 In order to use Google Interactive media ads support in MLS-SDK, import MLS-IMA module by adding the following to your app level build.gradle file:
 
-        implementation 'tv.mycujoo.mls-android:ima:[MLS_IMA_LATEST_VERSION_HERE]'
+        implementation 'tv.mycujoo.mls:ima:[MLS_IMA_LATEST_VERSION_HERE]'
             
 then, instantiate MLS-IMA and provide it to MLS-Builder to build the MLS-component:
 

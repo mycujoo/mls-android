@@ -12,7 +12,7 @@ MLS Android SDK enables apps to play videos that are hosted on MyCujoo Live Serv
 
 Add dependency to SDK in app-level build.gradle file:
 
-    implementation 'tv.mycujoo.mls-android:mls:MLS_LATEST_VERSION_HERE'
+    implementation 'tv.mycujoo.mls:mls:MLS_LATEST_VERSION_HERE'
     
 #### Add MLSPlayerView
 

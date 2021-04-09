@@ -2,7 +2,7 @@
 # MLS Cast module
 In order to use Google Cast support in MLS-SDK, import MLS-Cast module by adding the following to your app level build.gradle file:
 
-        implementation 'tv.mycujoo.mls-android:cast:[MLS_CAST_LATEST_VERSION_HERE]'
+        implementation 'tv.mycujoo.mls:cast:[MLS_CAST_LATEST_VERSION_HERE]'
         
 Inherit MLSCastOptionsProviderAbstract class in your app and provide it's class path in app Manifest file as below:
 
