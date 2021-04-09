@@ -6,12 +6,14 @@ import android.graphics.PorterDuff
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
 import com.google.android.exoplayer2.ui.TimeBar
 import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.utils.StringUtils
@@ -39,6 +41,9 @@ class RemotePlayerControllerView @JvmOverloads constructor(
 
     private val liveBadgeView: LiveBadgeView
 
+    private val topRightContainerHolder: FrameLayout
+    private val topLeftContainerHolder: FrameLayout
+
     private var timeFormatBuilder = StringBuilder()
     private var timeFormatter = Formatter(timeFormatBuilder, Locale.getDefault())
     /**endregion */
@@ -58,6 +63,8 @@ class RemotePlayerControllerView @JvmOverloads constructor(
         timeBar = findViewById(R.id.timeBar)
         currentPositionTextView = findViewById(R.id.remoteControllerCurrentPositionTextView)
         durationTextView = findViewById(R.id.remoteControllerDurationTextView)
+        topRightContainerHolder = findViewById(R.id.remoteController_topRightContainerHolder)
+        topLeftContainerHolder = findViewById(R.id.remoteController_topLeftContainerHolder)
         initButtonsListener()
         initTimeBarListener()
 
@@ -160,6 +167,30 @@ class RemotePlayerControllerView @JvmOverloads constructor(
 
     fun setBufferingProgressBarsColor(@ColorInt color: Int) {
         bufferingProgressBar.indeterminateTintList = ColorStateList.valueOf(color)
+    }
+
+    fun addViewToTopRightHolder(view: ViewGroup) {
+        topRightContainerHolder.removeAllViews()
+        topRightContainerHolder.addView(view)
+        topRightContainerHolder.isVisible = true
+    }
+
+    fun removeViewFromTopRightHolder() : View? {
+        val view = topRightContainerHolder.getChildAt(0)
+        topRightContainerHolder.removeAllViews()
+        return view
+    }
+
+    fun addViewToTopLeftHolder(view: ViewGroup) {
+        topLeftContainerHolder.removeAllViews()
+        topLeftContainerHolder.addView(view)
+        topLeftContainerHolder.isVisible = true
+    }
+
+    fun removeViewFromTopLeftHolder() : View? {
+        val view = topLeftContainerHolder.getChildAt(0)
+        topLeftContainerHolder.removeAllViews()
+        return view
     }
 
 
