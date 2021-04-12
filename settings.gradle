@@ -1,2 +1,3 @@
 include ':app', ':mls', ':cast', ':ima'
 rootProject.name = 'MLS-App'
+include ':common'
