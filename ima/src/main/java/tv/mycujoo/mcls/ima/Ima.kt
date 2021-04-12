@@ -11,12 +11,14 @@ import com.google.android.exoplayer2.source.ads.AdsLoader
 import com.google.android.exoplayer2.source.ads.AdsMediaSource
 import com.google.android.exoplayer2.upstream.DataSpec
 import com.google.common.annotations.VisibleForTesting
+import tv.mycujoo.domain.entity.EventStatus
 import tv.mycujoo.mcls.enum.C
 import java.net.URLEncoder
 import java.util.*
 
 class Ima(
     private val adUnit: String,
+    private val liveAdUnit: String? = null,
     private val paramProvider: IParamProvider? = null,
     private val listener: ImaEventListener? = null,
     private val debugMode: Boolean = false
@@ -29,8 +31,9 @@ class Ima(
     constructor(
         builder: ImaAdsLoader.Builder,
         listener: ImaEventListener,
-        adUnit: String
-    ) : this(adUnit, null, null, true) {
+        adUnit: String,
+        liveAdUnit: String
+    ) : this(adUnit, liveAdUnit, null, null, true) {
         adsLoader = createAdsLoader(builder, listener)
     }
 
@@ -115,6 +118,17 @@ class Ima(
     }
 
     private fun getAdTagUri(imaCustomParams: ImaCustomParams, params: Map<String, String>): Uri {
+        fun getAdUnitBasedOnEventStatus(eventStatus: EventStatus?): String {
+            return when (eventStatus) {
+                EventStatus.EVENT_STATUS_STARTED -> {
+                    liveAdUnit ?: adUnit
+                }
+                else -> {
+                    adUnit
+                }
+            }
+        }
+
         fun getEncodedCustomParams(imaCustomParams: ImaCustomParams): String {
             if (imaCustomParams.isEmpty()) {
                 if (debugMode) {
@@ -132,15 +146,17 @@ class Ima(
             }
         }
 
+
         val stringBuilder = StringBuilder()
             .append("https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=")
-            .append(adUnit)
+            .append(getAdUnitBasedOnEventStatus(imaCustomParams.eventStatus))
             .append("&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1")
             .append("&cust_params=".plus(getEncodedCustomParams(imaCustomParams)))
             .append("&correlator=".plus(Date().time))
 
         return Uri.parse(stringBuilder.toString())
     }
+
 
     override fun onStop() {
         adsLoader.setPlayer(null)

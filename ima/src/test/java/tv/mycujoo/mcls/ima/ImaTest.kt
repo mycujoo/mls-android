@@ -50,7 +50,7 @@ class ImaTest {
         }
         whenever(builder.setDebugModeEnabled(any())).thenReturn(builder)
         whenever(builder.build()).thenReturn(adsLoader)
-        ima = Ima(builder, listener, SAMPLE_AD_TAG)
+        ima = Ima(builder, listener, SAMPLE_AD_TAG, SAMPLE_LIVE_AD_TAG)
     }
 
     @Test
@@ -169,7 +169,7 @@ class ImaTest {
     fun `set player to null in onStop`() {
         ima.onStop()
 
-        
+
         verify(adsLoader).setPlayer(null)
     }
 
@@ -183,6 +183,7 @@ class ImaTest {
 
     companion object {
         private const val SAMPLE_AD_TAG = "/sample_ad_tag"
+        private const val SAMPLE_LIVE_AD_TAG = "/sample_live_ad_tag"
 
         private fun getAdEvent(type: AdEvent.AdEventType): AdEvent {
             return object : AdEvent {
