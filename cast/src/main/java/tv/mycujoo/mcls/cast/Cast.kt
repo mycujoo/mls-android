@@ -16,7 +16,8 @@ import tv.mycujoo.mcls.cast.helper.MediaInfoBuilder
 
 class Cast(
     miniControllerViewStub: ViewStub? = null,
-    private val mediaRouteButton: MediaRouteButton? = null
+    private val mediaRouteButton: MediaRouteButton? = null,
+    private val receiverAppId: String? = null
 ) :
     ICast {
     private lateinit var castContextProvider: ICastContextProvider
@@ -60,6 +61,12 @@ class Cast(
         } else {
             CastContextProvider(context).getCastContext()
         }
+
+        //overrides default app-id if provided
+        receiverAppId?.let {
+            castContext.setReceiverApplicationId(it)
+        }
+
         casterSession.castSession = castContext.sessionManager.currentCastSession
 
         val sessionManagerWrapper = initSessionManagerWrapper(castListener)

@@ -49,6 +49,8 @@ class MLSPlayerView @JvmOverloads constructor(
     /**region UI Fields*/
     var playerView: PlayerView
     var overlayHost: ConstraintLayout
+    private val topRightContainerHolder: FrameLayout
+    private val topLeftContainerHolder: FrameLayout
     private val topRightContainer: LinearLayout
     private val topLeftContainer: LinearLayout
 
@@ -93,6 +95,8 @@ class MLSPlayerView @JvmOverloads constructor(
         overlayHost = ConstraintLayout(context)
         playerView.findViewById<AspectRatioFrameLayout>(R.id.exo_content_frame).addView(overlayHost)
 
+        topRightContainerHolder = findViewById(R.id.controller_topRightContainerHolder)
+        topLeftContainerHolder = findViewById(R.id.controller_topLeftContainerHolder)
         topRightContainer = findViewById(R.id.controller_topRightContainer)
         topLeftContainer = findViewById(R.id.controller_topLeftContainer)
         playerView.setControllerVisibilityListener { visibility ->
@@ -263,13 +267,32 @@ class MLSPlayerView @JvmOverloads constructor(
             EXO_MODE -> {
                 playerView.visibility = View.VISIBLE
                 remotePlayerControllerView.visibility = View.GONE
+                moveUserAddedViewFromRemoteController()
+
             }
             REMOTE_CONTROLLER -> {
                 playerView.visibility = View.GONE
                 remotePlayerControllerView.visibility = View.VISIBLE
-
+                moveUserAddedViewToRemoteController()
             }
         }
+    }
+
+    private fun moveUserAddedViewFromRemoteController() {
+        remotePlayerControllerView.removeViewFromTopRightHolder()?.let { topRightContainer ->
+            topRightContainerHolder.addView(topRightContainer)
+        }
+        remotePlayerControllerView.removeViewFromTopLeftHolder()?.let { topLeftContainer ->
+            topLeftContainerHolder.addView(topLeftContainer)
+        }
+    }
+
+    private fun moveUserAddedViewToRemoteController() {
+        topRightContainerHolder.removeView(topRightContainer)
+        remotePlayerControllerView.addViewToTopRightHolder(topRightContainer)
+
+        topLeftContainerHolder.removeView(topLeftContainer)
+        remotePlayerControllerView.addViewToTopLeftHolder(topLeftContainer)
     }
 
     override fun showBuffering() {

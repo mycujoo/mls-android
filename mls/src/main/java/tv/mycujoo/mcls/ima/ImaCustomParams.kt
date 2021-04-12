@@ -12,7 +12,7 @@ data class ImaCustomParams(
         return eventId == null && streamId == null && eventStatus == null
     }
 
-    fun writeValues(stringBuilder: StringBuilder) {
+    fun writeValues(stringBuilder: StringBuilder, params: Map<String, String>) {
         eventId?.let {
             stringBuilder.append("$AMP_EVENT_ID_EQUALS_TO$eventId")
         }
@@ -23,6 +23,9 @@ data class ImaCustomParams(
             val eventStatusLastPart =
                 eventStatus.name.toLowerCase(Locale.ENGLISH).substringAfter(EVENT_STATUS_FIRST_PART)
             stringBuilder.append("$AMP_EVENT_STATUS_EQUALS_TO$eventStatusLastPart")
+        }
+        params.entries.forEach { entry ->
+            stringBuilder.append("&${entry.key}=${entry.value}")
         }
     }
 
