@@ -107,9 +107,6 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     kapt 'com.github.bumptech.glide:compiler:4.11.0'
 
-    api 'com.google.android.exoplayer:exoplayer:2.12.3'
-    api 'com.npaw.youbora.adapters:exoplayer2-adapter:6.6.4'
-
     implementation 'com.google.dagger:dagger-android:2.20'
     implementation 'com.google.dagger:dagger-android-support:2.20'
     // if you use the support libraries
@@ -142,5 +139,9 @@ dependencies {
     //TV
     api "androidx.leanback:leanback-preference:1.0.0"
     api 'com.google.android.exoplayer:extension-leanback:2.11.1'
+
+
+    implementation project(":common")
+
 
 }
