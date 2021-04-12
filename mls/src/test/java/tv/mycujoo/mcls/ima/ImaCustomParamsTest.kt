@@ -37,7 +37,7 @@ class ImaCustomParamsTest {
         val emptyImaCustomParams = ImaCustomParams()
 
 
-        emptyImaCustomParams.writeValues(stringBuilder)
+        emptyImaCustomParams.writeValues(stringBuilder, emptyMap())
 
 
         assert(stringBuilder.toString().isEmpty())
@@ -56,7 +56,7 @@ class ImaCustomParamsTest {
         )
 
 
-        imaCustomParams.writeValues(stringBuilder)
+        imaCustomParams.writeValues(stringBuilder, emptyMap())
 
 
         assertEquals(

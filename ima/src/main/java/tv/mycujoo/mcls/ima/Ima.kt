@@ -17,6 +17,7 @@ import java.util.*
 
 class Ima(
     private val adUnit: String,
+    private val paramProvider: IParamProvider? = null,
     private val listener: ImaEventListener? = null,
     private val debugMode: Boolean = false
 ) : IIma {
@@ -29,7 +30,7 @@ class Ima(
         builder: ImaAdsLoader.Builder,
         listener: ImaEventListener,
         adUnit: String
-    ) : this(adUnit, null, true) {
+    ) : this(adUnit, null, null, true) {
         adsLoader = createAdsLoader(builder, listener)
     }
 
@@ -105,7 +106,7 @@ class Ima(
     ): MediaSource {
         val adsMediaSource = AdsMediaSource(
             hlsMediaSource,
-            DataSpec(getAdTagUri(imaCustomParams)),
+            DataSpec(getAdTagUri(imaCustomParams, paramProvider?.params() ?: emptyMap())),
             defaultMediaSourceFactory,
             adsLoader,
             adViewProvider
@@ -113,7 +114,7 @@ class Ima(
         return adsMediaSource
     }
 
-    private fun getAdTagUri(imaCustomParams: ImaCustomParams): Uri {
+    private fun getAdTagUri(imaCustomParams: ImaCustomParams, params: Map<String, String>): Uri {
         fun getEncodedCustomParams(imaCustomParams: ImaCustomParams): String {
             if (imaCustomParams.isEmpty()) {
                 if (debugMode) {
@@ -126,7 +127,7 @@ class Ima(
                 if (debugMode) {
                     stringBuilder.append("deployment=devsite&sample_ct=linear")
                 }
-                imaCustomParams.writeValues(stringBuilder)
+                imaCustomParams.writeValues(stringBuilder, params)
                 return URLEncoder.encode(stringBuilder.toString(), "utf-8")
             }
         }
