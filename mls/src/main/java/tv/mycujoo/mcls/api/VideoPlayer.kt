@@ -3,6 +3,7 @@ package tv.mycujoo.mcls.api
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.STATE_READY
+import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.mcls.core.PlayerEventsListener
 import tv.mycujoo.mcls.core.UIEventListener
@@ -45,6 +46,10 @@ class VideoPlayer(
 
     fun playVideo(eventId: String) {
         videoPlayerMediator.playVideo(eventId)
+    }
+
+    fun setLocalAnnotations(annotations: List<Action>){
+        videoPlayerMediator.setLocalActions(annotations)
     }
     /**endregion */
 

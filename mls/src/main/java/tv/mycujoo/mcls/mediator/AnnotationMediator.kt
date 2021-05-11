@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tv.mycujoo.data.entity.ActionResponse
+import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.mcls.core.BuildPoint
 import tv.mycujoo.mcls.core.IAnnotationFactory
@@ -148,6 +149,10 @@ class AnnotationMediator(
     /**endregion */
 
     /**region Over-ridden Functions*/
+    override fun setLocalActions(actions: List<Action>) {
+        annotationFactory.setLocalActions(actions)
+    }
+
     override fun release() {
         scheduler.shutdown()
     }

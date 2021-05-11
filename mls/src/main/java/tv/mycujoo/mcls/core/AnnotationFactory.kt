@@ -25,6 +25,9 @@ class AnnotationFactory(
 
     private var onScreenOverlayIds =
         CopyOnWriteArrayList<String>()// on-screen overlay actions cid
+
+    private var localActions =
+        CopyOnWriteArrayList<Action>() // local Actions which will be merged with server defined actions
     /**endregion */
 
     /**region Over-ridden functions*/
@@ -38,6 +41,11 @@ class AnnotationFactory(
 
         sortedActions.clear()
         sortedActions.addAll(sortedTemp.filter { actionObject -> deleteActions.none { actionObject.id == it.id } })
+    }
+
+    override fun setLocalActions(annotations: List<Action>) {
+        localActions.clear()
+        localActions.addAll(annotations)
     }
 
     override fun build(buildPoint: BuildPoint) {

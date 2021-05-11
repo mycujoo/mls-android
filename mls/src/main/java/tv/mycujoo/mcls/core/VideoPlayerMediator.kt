@@ -10,6 +10,7 @@ import com.npaw.youbora.lib6.plugin.Options
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.Stream
@@ -548,6 +549,12 @@ class VideoPlayerMediator(
     }
     /**endregion */
 
+    /**region Local Actions*/
+    fun setLocalActions(annotations: List<Action>){
+        annotationMediator.setLocalActions(annotations)
+    }
+
+    /**endregion */
 
     /**region Reactor function*/
     private fun fetchActions(event: EventEntity, updateId: String) {
