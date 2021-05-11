@@ -28,6 +28,9 @@ class AnnotationFactory(
 
     private var localActions =
         CopyOnWriteArrayList<Action>() // local Actions which will be merged with server defined actions
+
+    private var allActions =
+        CopyOnWriteArrayList<Action>() // union of Sorted actions + Local actions
     /**endregion */
 
     /**region Over-ridden functions*/
@@ -49,6 +52,12 @@ class AnnotationFactory(
     }
 
     override fun build(buildPoint: BuildPoint) {
+        allActions.apply {
+            clear()
+            addAll(localActions)
+            addAll(sortedActions)
+        }
+
         val currentTimeInInDvrWindowDuration = TimeRangeHelper.isCurrentTimeInDvrWindowDuration(
             buildPoint.player.duration(),
 //            buildPoint.player.dvrWindowSize()
@@ -61,14 +70,14 @@ class AnnotationFactory(
             process(
                 buildPoint,
                 currentTimeInInDvrWindowDuration,
-                sortedActions
+                allActions
             )
 
         } else {
             timeSystem = TimeSystem.ABSOLUTE
             adjustedActions.clear()
 
-            sortedActions.forEach { action ->
+            allActions.forEach { action ->
                 val newOffset = TimeUtils.calculateOffset(
                     buildPoint.player.dvrWindowStartTime(),
                     action.absoluteTime
