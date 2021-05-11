@@ -1,6 +1,5 @@
 package tv.mycujoo.domain.entity
 
-import com.google.gson.annotations.SerializedName
 import org.joda.time.DateTime
 import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_GEOBLOCKED
 import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_NO_ENTITLEMENT

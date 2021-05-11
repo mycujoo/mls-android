@@ -65,4 +65,5 @@ dependencies {
     implementation 'com.google.android.exoplayer:extension-ima:2.12.3'
 
     implementation project(":mls")
+    implementation project(":common")
 }

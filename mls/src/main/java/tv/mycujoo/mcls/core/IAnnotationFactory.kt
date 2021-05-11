@@ -7,4 +7,5 @@ interface IAnnotationFactory {
     fun build(buildPoint: BuildPoint)
 
     fun getCurrentActions(): List<Action>
+    fun setLocalActions(annotations: List<Action>)
 }
