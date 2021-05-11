@@ -16,6 +16,7 @@ class AnnotationFactory(
 ) :
     IAnnotationFactory {
 
+    /**region Fields*/
     private var sortedActions =
         CopyOnWriteArrayList<Action>()// actions, sorted by offset, then by priority
     private var adjustedActions =
@@ -24,7 +25,7 @@ class AnnotationFactory(
 
     private var onScreenOverlayIds =
         CopyOnWriteArrayList<String>()// on-screen overlay actions cid
-
+    /**endregion */
 
     /**region Over-ridden functions*/
     override fun setActions(actions: List<Action>) {
