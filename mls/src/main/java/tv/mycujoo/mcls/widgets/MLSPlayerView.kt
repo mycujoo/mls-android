@@ -49,7 +49,7 @@ class MLSPlayerView @JvmOverloads constructor(
     /**region UI Fields*/
     var playerView: PlayerView
     var overlayHost: ConstraintLayout
-    private val topRightContainerHolder: FrameLayout
+    private val topRightContainerHolder: LinearLayout
     private val topLeftContainerHolder: FrameLayout
     private val topRightContainer: LinearLayout
     private val topLeftContainer: LinearLayout
@@ -100,8 +100,8 @@ class MLSPlayerView @JvmOverloads constructor(
         topRightContainer = findViewById(R.id.controller_topRightContainer)
         topLeftContainer = findViewById(R.id.controller_topLeftContainer)
         playerView.setControllerVisibilityListener { visibility ->
-            topRightContainer.visibility = visibility
-            topLeftContainer.visibility = visibility
+            topRightContainerHolder.visibility = visibility
+            topLeftContainerHolder.visibility = visibility
         }
 
         externalInformationButtonLayout = findViewById(R.id.informationButtonLayout)
@@ -109,7 +109,7 @@ class MLSPlayerView @JvmOverloads constructor(
         bufferingProgressBar = findViewById(R.id.controller_buffering)
         playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
 
-        findViewById<FrameLayout>(R.id.controller_informationButtonLayout).setOnClickListener {
+        findViewById<LinearLayout>(R.id.controller_informationButtonLayout).setOnClickListener {
             showStartedEventInformationDialog()
         }
         findViewById<ImageButton>(R.id.controller_informationButton).setOnClickListener {
@@ -618,7 +618,7 @@ class MLSPlayerView @JvmOverloads constructor(
 
     @MainThread
     fun showEventInfoButtonInstantly() {
-        findViewById<FrameLayout>(R.id.controller_informationButtonLayout).visibility =
+        findViewById<LinearLayout>(R.id.controller_informationButtonLayout).visibility =
             View.VISIBLE
     }
 
@@ -629,7 +629,7 @@ class MLSPlayerView @JvmOverloads constructor(
     @MainThread
     fun hideEventInfoButtonInstantly() {
         post {
-            findViewById<FrameLayout>(R.id.controller_informationButtonLayout).visibility =
+            findViewById<LinearLayout>(R.id.controller_informationButtonLayout).visibility =
                 View.GONE
         }
     }
