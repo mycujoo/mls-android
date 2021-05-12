@@ -106,10 +106,10 @@ class VideoPlayerMediator(
 
             builder.playerEventsListener?.let { playerEventsListener ->
                 it.addListener(playerEventsListener)
-                videoPlayer.playerEventsListener = playerEventsListener
+                videoPlayer.setPlayerEventsListener(playerEventsListener)
             }
             builder.uiEventListener?.let { uiEventCallback ->
-                videoPlayer.uiEventListener = uiEventCallback
+                videoPlayer.setUIEventListener(uiEventCallback)
                 MLSPlayerView.uiEventListener = uiEventCallback
 
             }

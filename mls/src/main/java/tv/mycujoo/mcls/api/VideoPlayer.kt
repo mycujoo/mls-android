@@ -16,15 +16,11 @@ class VideoPlayer(
     private val exoPlayer: ExoPlayer,
     private val videoPlayerMediator: VideoPlayerMediator,
     private val MLSPlayerView: MLSPlayerView
-) : PlayerController, PlayerStatus {
+) : PlayerController, PlayerStatus, VideoPlayerContract {
 
-    var playerEventsListener: PlayerEventsListener? = null
-        set(value) {
-            field = value
-            value?.let { exoPlayer.addListener(it) }
-        }
+    private var playerEventsListener: PlayerEventsListener? = null
 
-    lateinit var uiEventListener: UIEventListener
+    private lateinit var uiEventListener: UIEventListener
     private var optimisticSeekingPosition = -1
 
     init {
@@ -39,18 +35,28 @@ class VideoPlayer(
     }
 
 
-    /**region Player Higher level control*/
-    fun playVideo(event: EventEntity) {
+    /**region VideoPlayerContract: Player Higher level control*/
+    override fun playVideo(event: EventEntity) {
         videoPlayerMediator.playVideo(event)
     }
 
-    fun playVideo(eventId: String) {
+    override fun playVideo(eventId: String) {
         videoPlayerMediator.playVideo(eventId)
     }
 
-    fun setLocalAnnotations(annotations: List<Action>){
+    override fun setLocalAnnotations(annotations: List<Action>) {
         videoPlayerMediator.setLocalActions(annotations)
     }
+
+    override fun setPlayerEventsListener(listener: PlayerEventsListener) {
+        playerEventsListener = listener
+        exoPlayer.addListener(listener)
+    }
+
+    override fun setUIEventListener(listener: UIEventListener) {
+        uiEventListener = listener
+    }
+
     /**endregion */
 
 
