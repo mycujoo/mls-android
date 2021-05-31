@@ -32,6 +32,7 @@ import java.util.*
 
 /**
  * main component of MLS(MCLS) SDK.
+ * Hosts both VideoPlayerMediator and AnnotationMediator as two main component of SDK.
  * @constructor takes MLSBuilder and returns implementation of MLSAbstract
  * @see MLSAbstract
  */
@@ -64,12 +65,17 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
     /**region Initializing*/
     init {
-        checkNotNull(builder.activity)
+        checkNotNull(builder.activity, { "given activity can't be null" })
         this.context = builder.activity!!
 
         api = RemoteApi()
     }
 
+    /**
+     * initialize component which are prepared by Internal builder in this class
+     * for easier access from MLS
+     * @param internalBuilder ready to use instance of InternalBuilder
+     */
     fun initializeComponent(internalBuilder: InternalBuilder) {
         this.eventsRepository = internalBuilder.eventsRepository
         this.dispatcher = internalBuilder.dispatcher
@@ -116,13 +122,23 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
     }
 
+    /**
+     * Init SVGRendering library by providing AssetManager
+     * Custom font is used by registering an external fire resolver. Font are used in rendering SVG into view.
+     * @param assetManager type of AssetManager that will be used to read fonts
+     * @see SVGAssetResolver
+     */
     private fun initSvgRenderingLibrary(assetManager: AssetManager) {
         SVG.registerExternalFileResolver(
             SVGAssetResolver(TypeFaceFactory(assetManager))
         )
     }
 
-
+    /**
+     * Init video player mediator
+     * which mediate video related component and their events, i.e. view-handler to handle view transition & references.
+     * @param MLSPlayerView
+     */
     private fun initializeMediators(MLSPlayerView: MLSPlayerView) {
         this.playerView = MLSPlayerView
         this.viewHandler.setOverlayHost(MLSPlayerView.overlayHost)
@@ -170,12 +186,22 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
     /**endregion */
 
     /**region Over-ridden Functions*/
+    /**
+     * Attach player to MLSPlayerView.
+     * Must be called on the onStart of host component.
+     * @param MLSPlayerView
+     */
     override fun onStart(MLSPlayerView: MLSPlayerView) {
         if (Util.SDK_INT >= Build.VERSION_CODES.N) {
             initializeMediators(MLSPlayerView)
         }
     }
 
+    /**
+     * Attach player to MLSPlayerView.
+     * Must be called on the onResume of host component.
+     * @param MLSPlayerView
+     */
     override fun onResume(MLSPlayerView: MLSPlayerView) {
         if (Util.SDK_INT < Build.VERSION_CODES.N) {
             initializeMediators(MLSPlayerView)
@@ -183,6 +209,10 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         videoPlayerMediator.onResume()
     }
 
+    /**
+     * Detach player from MLSPlayerView and release resources to avoid memory leaks.
+     * Must be called on the onPause of host component.
+     */
     override fun onPause() {
         videoPlayerMediator.onPause()
 
@@ -191,16 +221,28 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
         }
     }
 
+    /**
+     * Detach player from MLSPlayerView and release resources to avoid memory leaks.
+     * Must be called on the onStop of host component.
+     */
     override fun onStop() {
         if (Util.SDK_INT >= Build.VERSION_CODES.N) {
             release()
         }
     }
 
+    /**
+     * Destroy all view-related components.
+     * Must be called on the onViewDestroy of host component if applicable.
+     */
     override fun onViewDestroy() {
         videoPlayerMediator.destroy()
     }
 
+    /**
+     * Destroy all non-lifecycle aware configs.
+     * Must be called on the onDestroy of host component.
+     */
     override fun onDestroy() {
         builder.ima?.onDestroy()
     }
@@ -215,6 +257,9 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
     /**endregion */
 
+    /**
+     * internal use: release resources
+     */
     private fun release() {
         builder.ima?.onStop()
         playerView.playerView.onPause()
@@ -223,10 +268,18 @@ class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
     }
 
     /**region msc Functions*/
+    /**
+     * store public key in shared-pref
+     * @param publicKey user's public key
+     */
     private fun persistPublicKey(publicKey: String) {
         prefManager.persist(PUBLIC_KEY_PREF_KEY, publicKey)
     }
 
+    /**
+     * store UUID in shared pref, if it's NOT already stored
+     * @param uuid user's unique identifier
+     */
     private fun persistUUIDIfNotStoredAlready(uuid: String) {
         val storedUUID = prefManager.get(UUID_PREF_KEY)
         if (storedUUID == null) {
