@@ -30,12 +30,16 @@ import tv.mycujoo.mcls.player.MediaFactory
 import tv.mycujoo.mcls.player.Player
 import javax.inject.Inject
 
+/**
+ * Internal builder which builds & prepares lower level components for MLS
+ */
 open class InternalBuilder(
     private val activity: Activity,
     private val ima: IIma?,
     private val logLevel: LogLevel
 ) {
 
+    /**region Fields*/
     lateinit var logger: Logger
 
     @Inject
@@ -64,8 +68,12 @@ open class InternalBuilder(
     private lateinit var mainWebSocketListener: MainWebSocketListener
 
     var uuid: String? = null
+    /**endregion */
 
 
+    /**
+     * initialize internal builder and prepare it for usage by MLS
+     */
     open fun initialize() {
         val dependencyGraph =
             DaggerMlsComponent.builder().networkModule(NetworkModule(activity)).build()
@@ -100,8 +108,16 @@ open class InternalBuilder(
 
     }
 
+    /**
+     * internal use: AssetManager of provided activity
+     * @return AssetManager
+     */
     fun getAssetManager(): AssetManager = activity.assets
 
+    /**
+     * internal use: create YouboraClient
+     * @see YouboraClient
+     */
     fun createYouboraClient(plugin: Plugin): YouboraClient {
         val youboraClient = YouboraClient(uuid!!, plugin)
         when (logLevel) {
@@ -119,10 +135,19 @@ open class InternalBuilder(
         return youboraClient
     }
 
+    /**
+     * internal use: create Youbora Plugin
+     * this plugin and Youbora Client will work together to send video related analytics
+     * @see Plugin
+     */
     fun createYouboraPlugin(youboraOptions: Options, activity: Activity): Plugin {
         return Plugin(youboraOptions, activity)
     }
 
+    /**
+     * create Exoplayer2Adapter which will act as core player
+     * @return Exoplayer2Adapter
+     */
     fun createExoPlayerAdapter(exoPlayer: ExoPlayer): Exoplayer2Adapter {
         return Exoplayer2Adapter(exoPlayer)
     }

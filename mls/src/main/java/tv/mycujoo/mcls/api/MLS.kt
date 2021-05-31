@@ -30,7 +30,11 @@ import tv.mycujoo.mcls.player.Player.Companion.createExoPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import java.util.*
 
-
+/**
+ * main component of MLS(MCLS) SDK.
+ * @constructor takes MLSBuilder and returns implementation of MLSAbstract
+ * @see MLSAbstract
+ */
 class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
 
