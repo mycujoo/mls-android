@@ -4,8 +4,16 @@ import android.util.Log
 import com.npaw.youbora.lib6.plugin.Plugin
 import tv.mycujoo.domain.entity.EventEntity
 
+/**
+ * Integration with Youbora, the analytical tool.
+ * @param uuid to identify user.
+ * @param plugin Youbora plugin
+ */
 class YouboraClient(private val uuid: String, private val plugin: Plugin) {
 
+    /**
+     * log an Event to Youbora.
+     */
     fun logEvent(event: EventEntity?, live: Boolean) {
         if (event == null) {
             Log.e("YouboraClient", "event is null")
@@ -23,6 +31,24 @@ class YouboraClient(private val uuid: String, private val plugin: Plugin) {
         plugin.options.contentCustomDimension15 = event.streams.firstOrNull()?.id
     }
 
+    /**
+     * activate analytical plugin
+     */
+    fun start() {
+        if (plugin.adapter != null) {
+            plugin.adapter.fireResume()
+        }
+    }
+
+
+    /**
+     * deactivate analytical plugin
+     */
+    fun stop() {
+        plugin.fireStop()
+    }
+
+    /**region Internal*/
     private fun getVideoSource(event: EventEntity): String {
         return if (event.isNativeMLS) {
             MLS_SOURCE
@@ -30,16 +56,7 @@ class YouboraClient(private val uuid: String, private val plugin: Plugin) {
             NONE_NATIVE_SOURCE
         }
     }
-
-    fun stop() {
-        plugin.fireStop()
-    }
-
-    fun start() {
-        if (plugin.adapter != null) {
-            plugin.adapter.fireResume()
-        }
-    }
+    /**endregion */
 
     companion object {
         const val MLS_SOURCE = "MLS"
