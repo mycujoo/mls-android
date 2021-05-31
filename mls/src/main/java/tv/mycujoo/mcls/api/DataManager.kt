@@ -22,8 +22,11 @@ import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.model.SingleLiveEvent
 
 /**
- * Serves client as Data Provider
- * Serves internal use as Internal Data Provider
+ * Serves client as 'Data Provider'
+ * Serves internal usage as 'Internal Data Provider'
+ * @param scope CoroutineScope which calls will made on it's context
+ * @param eventsRepository actual implementation of EventsRepository, used to call Use-Cases
+ * @param logger log info, error & warning based on required level of logging
  */
 class DataManager(
     private val scope: CoroutineScope,
@@ -33,8 +36,20 @@ class DataManager(
 
 
     /**region Fields*/
+    /**
+     * observable holder for Events.
+     */
     private val events = SingleLiveEvent<List<EventEntity>>()
+
+    /**
+     * holds current active EventEntity.
+     * for easier access
+     */
     override var currentEvent: EventEntity? = null
+
+    /**
+     * callback for paginating through received Events
+     */
     private var fetchEventCallback: ((eventList: List<EventEntity>, previousPageToken: String, nextPageToken: String) -> Unit)? =
         null
 
@@ -43,6 +58,9 @@ class DataManager(
 
     /**region InternalDataProvider*/
 
+    /**
+     * fetch Event with details
+     */
     override suspend fun getEventDetails(
         eventId: String,
         updateId: String?
@@ -50,15 +68,30 @@ class DataManager(
         return GetEventDetailUseCase(eventsRepository).execute(EventIdPairParam(eventId, updateId))
     }
 
+    /**
+     * set @param log level of Logger
+     * @see LogLevel
+     */
     override fun setLogLevel(logLevel: LogLevel) {
         logger.setLogLevel(logLevel)
     }
 
+    /**
+     * get Annotation Actions
+     * @param timelineId timeLineId of Event
+     * @param updateId nullable update of Event
+     * @return list of Actions or Exception
+     */
     override suspend fun getActions(
         timelineId: String,
         updateId: String?
     ): Result<Exception, ActionResponse> {
-        return GetActionsUseCase(eventsRepository).execute(TimelineIdPairParam(timelineId, updateId))
+        return GetActionsUseCase(eventsRepository).execute(
+            TimelineIdPairParam(
+                timelineId,
+                updateId
+            )
+        )
     }
 
     /**endregion */
@@ -68,6 +101,14 @@ class DataManager(
         return events
     }
 
+    /**
+     * fetch Events with given specification
+     * @param pageSize nullable size of page
+     * @param pageToken nullable token of page
+     * @param eventStatus nullable statuses of returned Events
+     * @param orderBy nullable order of returned Events
+     * @param fetchEventCallback nullable callback which will may be used to navigate through paginated data
+     */
     override fun fetchEvents(
         pageSize: Int?,
         pageToken: String?,
