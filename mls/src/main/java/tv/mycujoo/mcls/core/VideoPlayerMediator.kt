@@ -49,7 +49,15 @@ import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.VOD
 import tv.mycujoo.mcls.widgets.PlayerControllerMode
 import tv.mycujoo.mcls.widgets.RemotePlayerControllerListener
 
-
+/**
+ * Manages video-player related components.
+ * @param videoPlayerConfig configuration for video-player behaviour and visuals
+ * @param viewHandler handler for add/remove of view (used for Annotations Actions)
+ * @param reactorSocket interface for interacting with Reactor service.
+ * @param dispatcher coroutine scope context used in I/O bound calls
+ * @param dataManager data manager which holds current data(event) loaded
+ * @param cast optional: Cast module used for Google Cast
+ */
 class VideoPlayerMediator(
     private var videoPlayerConfig: VideoPlayerConfig,
     private val viewHandler: IViewHandler,
@@ -75,9 +83,31 @@ class VideoPlayerMediator(
     private var joined: Boolean = false
     private var updateId: String? = null
 
+    /**
+     * Current playback state.
+     * Defaults to idle
+     * @see PlaybackState
+     */
     private var playbackState: PlaybackState = PlaybackState.IDLE
+
+    /**
+     * Current playback location, indicating if SDK is 'Casting' or not
+     * Defaults to local.
+     * @see PlaybackLocation
+     */
     private var playbackLocation: PlaybackLocation = LOCAL
+
+    /**
+     * Non-nullable MLS public key of client
+     * Defaults to user input.
+     */
     private var publicKey: String = ""
+
+    /**
+     * Unique identifier to identify user. Youbora Client is an example where this is used.
+     * Defaults to randomly generated UUID if it's users first launch visit to MLS,
+     * otherwise it is restored from shared-pref
+     */
     private var uuid: String? = ""
 
     /**endregion */
@@ -164,7 +194,7 @@ class VideoPlayerMediator(
         player.loadLastVideo()
         dataManager.currentEvent?.let {
             MLSPlayerView.setEventInfo(it.title, it.description, it.getFormattedStartTimeDate())
-            if (it.poster_url != null){
+            if (it.poster_url != null) {
                 MLSPlayerView.setPosterInfo(it.poster_url)
             }
         }
@@ -332,9 +362,9 @@ class VideoPlayerMediator(
     ) {
         val youboraOptions = Options()
         youboraOptions.accountCode = if (BuildConfig.DEBUG) {
-            "mycujoodev"
+            MYCUJOO_DEV_YOUBORA_ACCOUNT_NAME
         } else {
-            "mycujoo"
+            MYCUJOO_PRODUCTION_YOUBORA_ACCOUNT_NAME
         }
         youboraOptions.isAutoDetectBackground = true
 
@@ -377,6 +407,12 @@ class VideoPlayerMediator(
     /**endregion */
 
     /**region Over-ridden functions*/
+    /**
+     * called when there is an update in the joined room from Reactor service
+     * @param eventId eventId that this update belongs to
+     * @param updateId id of this update
+     * Both are used to fetch the Event details and Annotation Actions.
+     */
     override fun onReactorEventUpdate(eventId: String, updateId: String) {
         this.updateId = updateId
         cancelStreamUrlPulling()
@@ -405,6 +441,13 @@ class VideoPlayerMediator(
         }
     }
 
+    /**
+     * Called where an update to viewer counter is raised from Reactor service
+     * @param counts number of viewers watching current event
+     * Viewer counter must be updated if only the event is Live, configured to display viewers counts,
+     * and finally, the count itself is considered as a valid counter.
+     * @see ViewersCounterHelper
+     */
     override fun onReactorCounterUpdate(counts: String) {
         if (videoPlayerConfig.showLiveViewers && isLive && isViewersCountValid(counts)) {
             playerView.updateViewersCounter(StringUtils.getNumberOfViewers(counts))
@@ -413,6 +456,13 @@ class VideoPlayerMediator(
         }
     }
 
+    /**
+     * Called with update on Timeline
+     * @param timelineId timelineId of current Event
+     * @param updateId latest updateId of current Event
+     * Indicates new Annotation Actions has been added to given Timeline.
+     * Need to (re)fetch Annotation Actions when this callback is called
+     */
     override fun onReactorTimelineUpdate(timelineId: String, updateId: String) {
         this.updateId = updateId
         fetchActions(timelineId, updateId, false)
@@ -421,6 +471,12 @@ class VideoPlayerMediator(
     /**endregion */
 
     /**region Playback functions*/
+    /**
+     * play video & join Reactor if applicable
+     * @param event event which should be played
+     * Will call the overloaded method with event's ID, which in turn will call API to receive stream-url.
+     * So it does not matter the stream url exist in the given param. Always the response from server will be used.
+     */
     override fun playVideo(event: EventEntity) {
         if (event.isNativeMLS) {
             playVideo(event.id)
@@ -433,6 +489,10 @@ class VideoPlayerMediator(
         }
     }
 
+    /**
+     * call API to receive event details and then start playing video,
+     * Or display Pre-event screen, if the event has not started yet.
+     */
     override fun playVideo(eventId: String) {
         isLive = false
 
@@ -550,7 +610,7 @@ class VideoPlayerMediator(
     /**endregion */
 
     /**region Local Actions*/
-    fun setLocalActions(annotations: List<Action>){
+    fun setLocalActions(annotations: List<Action>) {
         annotationMediator.setLocalActions(annotations)
     }
 
@@ -617,6 +677,7 @@ class VideoPlayerMediator(
 
     /**endregion */
 
+    /**region Internal*/
     private fun handleLiveModeState() {
         if (player.isLive()) {
             isLive = true
@@ -696,6 +757,10 @@ class VideoPlayerMediator(
         }
     }
 
+    private fun storeEvent(eventEntity: EventEntity) {
+        dataManager.currentEvent = eventEntity
+    }
+    /**endregion */
 
     fun release() {
         streaming = false
@@ -760,10 +825,11 @@ class VideoPlayerMediator(
 
     /**endregion */
 
-    private fun storeEvent(eventEntity: EventEntity) {
-        dataManager.currentEvent = eventEntity
+    /**region Internal class*/
+    companion object {
+        const val MYCUJOO_DEV_YOUBORA_ACCOUNT_NAME = "mycujoodev"
+        const val MYCUJOO_PRODUCTION_YOUBORA_ACCOUNT_NAME = "mycujoo"
     }
-
     /**endregion */
 
 }
