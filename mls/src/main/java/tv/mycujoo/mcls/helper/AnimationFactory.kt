@@ -10,6 +10,22 @@ import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.widgets.ScaffoldView
 
+/**
+ * Creates Android animation object 'ObjectAnimator' with given parameters.
+ * Parameter used in creating animation,
+ * Each animation needs a combination of these to be created:
+ *
+ * @param overlayHost host view which animation will happen in
+ * @param scaffoldView the view that should be animated
+ * @param animationType animation type to create
+ * @param animationDuration duration of animation to create
+ * @param transitionSpec specification of Transition (wrapper of Animation type + duration)
+ * @param viewHandler handler which will have reference to animations to clear/pause them
+ *
+ * @see ScaffoldView
+ * @see AnimationType
+ * @see TransitionSpec
+ */
 open class AnimationFactory {
     open fun createAddViewStaticAnimation(
         scaffoldView: ScaffoldView,

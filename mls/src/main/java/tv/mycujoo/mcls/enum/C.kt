@@ -1,5 +1,8 @@
 package tv.mycujoo.mcls.enum
 
+/**
+ * Define constants that are going to be used across SDK
+ */
 class C {
     companion object {
 

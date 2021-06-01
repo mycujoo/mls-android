@@ -7,8 +7,19 @@ import tv.mycujoo.domain.entity.SvgData
 import java.io.IOException
 import java.util.*
 
+/**
+ * Implementation of IDownloaderClient which downloads & returns SVG Data
+ * @constructor takes okHttpClient which will have a Cache layer to skip downloading repeated SVGs
+ * @see IDownloaderClient
+ * @see SvgData
+ */
 class DownloaderClient(val okHttpClient: OkHttpClient) : IDownloaderClient {
 
+    /**
+     * download SVG & call with ready-to-parse SVGData
+     * @param showOverlayAction the action which SVG url will be downloaded from
+     * @param callback higher order function callback to call after download of SVG
+     */
     override fun download(
         showOverlayAction: Action.ShowOverlayAction,
         callback: (Action.ShowOverlayAction) -> Unit
