@@ -2,6 +2,10 @@ package tv.mycujoo.mcls.helper
 
 class ViewersCounterHelper {
     companion object {
+        /**
+         * Validates a viewer count number.
+         * @return true if value is valid, false other wise.
+         */
         fun isViewersCountValid(count: String?): Boolean {
             if (count.isNullOrEmpty()) {
                 return false

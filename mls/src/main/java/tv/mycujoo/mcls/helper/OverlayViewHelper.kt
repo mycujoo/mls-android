@@ -19,6 +19,10 @@ import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.widgets.ProportionalImageView
 import tv.mycujoo.mcls.widgets.ScaffoldView
 
+/**
+ * Helps with View related operations. i.e. Add/Remove overlay view to/from screen.
+ *
+ */
 class OverlayViewHelper(
     private val viewHandler: IViewHandler,
     private val overlayFactory: IOverlayFactory,
@@ -28,6 +32,14 @@ class OverlayViewHelper(
 ) {
 
     /**region Add view*/
+    /**
+     * Add overlay view to host view with specified animation. If there is a specified animation, it will be add with amimation,
+     * otherwise no animation will be created.
+     * This is the only method that should be used for 'Adding' overlay. All other methods are private and considered internal service.
+     * @param context to create view with
+     * @param overlayHost to host to overlay view
+     * @param showOverlayAction data needed for type of animation and overlay
+     */
     fun addView(
         context: Context,
         overlayHost: ConstraintLayout,
@@ -50,7 +62,7 @@ class OverlayViewHelper(
     /**endregion */
 
     /**region Add view with animation*/
-    fun addViewWithAnimation(
+    private fun addViewWithAnimation(
         context: Context,
         overlayHost: ConstraintLayout,
         showOverlayAction: Action.ShowOverlayAction
@@ -170,7 +182,7 @@ class OverlayViewHelper(
 
 
     /**region Add view with NO animation*/
-    fun addViewWithNoAnimation(
+    private fun addViewWithNoAnimation(
         context: Context,
         overlayHost: ConstraintLayout,
         showOverlayAction: Action.ShowOverlayAction
@@ -228,6 +240,12 @@ class OverlayViewHelper(
     /**endregion */
 
     /**region Remove view*/
+    /**
+     * Remove overlay view from host view with specified animation.
+     * @param overlayHost the host that overlay view is displayed in currently
+     * @param customId overlay identifier (view tag)
+     * @param outroTransitionSpec transition specification needed for outro animation type and duration
+     */
     fun removeView(
         overlayHost: ConstraintLayout,
         customId: String,
@@ -240,6 +258,11 @@ class OverlayViewHelper(
         }
     }
 
+    /**
+     * Remove overlay view from host view with specified animation.
+     * @param overlayHost the host that overlay view is displayed in currently
+     * @param hideOverlayActionEntity hide overlay Action which provides customId for removing overlay view with same identifier as 'Tag'
+     */
     fun removeView(
         overlayHost: ConstraintLayout,
         hideOverlayActionEntity: HideOverlayActionEntity
@@ -258,7 +281,7 @@ class OverlayViewHelper(
 
 
     /**region Remove view with animation*/
-    fun removeViewWithAnimation(
+    private fun removeViewWithAnimation(
         overlayHost: ConstraintLayout,
         actionId: String,
         outroTransitionSpec: TransitionSpec
@@ -344,7 +367,7 @@ class OverlayViewHelper(
 
 
     /**region Add lingering view with animation*/
-    fun addLingeringIntroViewWithAnimation(
+    private fun addLingeringIntroViewWithAnimation(
         overlayHost: ConstraintLayout,
         showOverlayAction: Action.ShowOverlayAction,
         animationPosition: Long,
@@ -410,7 +433,7 @@ class OverlayViewHelper(
 
     }
 
-    fun updateLingeringIntroOverlay(
+    private fun updateLingeringIntroOverlay(
         overlayHost: ConstraintLayout,
         showOverlayAction: Action.ShowOverlayAction,
         animationPosition: Long,
@@ -449,7 +472,7 @@ class OverlayViewHelper(
     }
 
 
-    fun addLingeringOutroViewWithAnimation(
+    private fun addLingeringOutroViewWithAnimation(
         overlayHost: ConstraintLayout,
         showOverlayAction: Action.ShowOverlayAction,
         animationPosition: Long,
@@ -502,7 +525,7 @@ class OverlayViewHelper(
 
     }
 
-    fun updateLingeringOutroOverlay(
+    private fun updateLingeringOutroOverlay(
         overlayHost: ConstraintLayout,
         showOverlayAction: Action.ShowOverlayAction,
         animationPosition: Long,
@@ -626,6 +649,17 @@ class OverlayViewHelper(
     /**endregion */
 
     /**region Positioning Functions*/
+    /**
+     * This region provides methods to position a view (overlay view in this case) in a host view,
+     * based on Position Guide provided.
+     *
+     * @param positionGuide guides how a view should be positioned on screen.
+     * i.e. distance to left/right/top/bottom axis of screen in percentage.
+     *
+     * @param constraintSet current constraint set of host view. which should be preserved, but can be over-written.
+     * @param layoutParams layout params needed for positioning the view
+     * @param scaffoldView the overlay view itself which is going to be positioned
+     */
     private fun applyPositionGuide(
         positionGuide: PositionGuide,
         constraintSet: ConstraintSet,

@@ -1,5 +1,8 @@
 package tv.mycujoo.mcls.helper
 
+/**
+ * This file includes mock-data used in various part of SDK
+ */
 
 val sampleSvgString = """
 <?xml version="1.0" encoding="UTF-8"?>

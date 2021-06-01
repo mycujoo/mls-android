@@ -6,6 +6,9 @@ import tv.mycujoo.mcls.manager.IVariableKeeper
 import tv.mycujoo.mcls.manager.VariableTranslator
 import tv.mycujoo.mcls.widgets.ScaffoldView
 
+/**
+ * Contract for creating ready-to-be-displayed ScaffoldView
+ */
 interface IOverlayFactory {
     fun createScaffoldView(
         context: Context,

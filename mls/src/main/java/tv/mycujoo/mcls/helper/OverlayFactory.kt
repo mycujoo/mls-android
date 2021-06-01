@@ -9,6 +9,14 @@ import tv.mycujoo.mcls.manager.IVariableKeeper
 import tv.mycujoo.mcls.manager.VariableTranslator
 import tv.mycujoo.mcls.widgets.ScaffoldView
 
+/**
+ * Create overlay, which is the view used for displaying Annotation Action on screen.
+ *
+ *
+ * @param context context to create View from
+ * @param showOverlayAction Action which provides data of to be created view
+ * @param variableKeeper provides observables to for variables defined/used in Overlay
+ */
 class OverlayFactory : IOverlayFactory {
 
     override fun createScaffoldView(
