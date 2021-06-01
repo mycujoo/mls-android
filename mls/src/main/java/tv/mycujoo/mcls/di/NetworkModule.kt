@@ -18,6 +18,10 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Named
 import javax.inject.Singleton
 
+/**
+ * Provides 'Network' related dependencies
+ * API and Network clients are provided to dependency graph by this module
+ */
 @Module
 open class NetworkModule(val context: Context) {
 

@@ -15,9 +15,12 @@ import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.PrefManager
-import tv.mycujoo.mcls.network.MlsApi
 import javax.inject.Singleton
 
+/**
+ * Provides 'App' related dependencies
+ * Coroutines scope, Data manager & Pref manager are provided to dependency graph by this module
+ */
 @Module
 open class AppModule() {
 

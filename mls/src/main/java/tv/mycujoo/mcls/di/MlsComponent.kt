@@ -7,6 +7,9 @@ import tv.mycujoo.mcls.core.InternalBuilder
 import tv.mycujoo.mcls.tv.api.MLSTvInternalBuilder
 import javax.inject.Singleton
 
+/**
+ * MLS dependency graph component
+ */
 @Component(modules = [AppModule::class, NetworkModule::class, RepositoryModule::class])
 @Singleton
 interface MlsComponent {

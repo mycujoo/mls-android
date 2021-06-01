@@ -6,6 +6,11 @@ import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.mcls.network.MlsApi
 import javax.inject.Singleton
 
+/**
+ * Provides Repositories to be used with DI.
+ * EventsRepository is provided by this module
+ * @see EventsRepository
+ */
 @Module
 open class RepositoryModule {
 
