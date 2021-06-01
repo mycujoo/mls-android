@@ -517,6 +517,11 @@ class VideoPlayerMediator(
         }
     }
 
+    /**
+     * internal use: play event which is NOT native to MLS,
+     * in other words, user has provided parameter to make a streamable event.
+     * @param event the externally defined event which is about to play
+     */
     private fun playExternalEvent(event: EventEntity) {
         player.play(
             MediaDatum.MediaData(
@@ -540,6 +545,13 @@ class VideoPlayerMediator(
         }
     }
 
+    /**
+     * internal use: either play video, or display event info dialog.
+     * This is decided based on status of stream url of event,
+     * if it is playable, video player will start to stream.
+     * @param event the event which is about to stream/display info
+     * @see StreamStatus
+     */
     private fun playVideoOrDisplayEventInfo(event: EventEntity) {
         playerView.setEventInfo(event.title, event.description, event.getFormattedStartTimeDate())
         playerView.setPosterInfo(event.poster_url)
@@ -587,6 +599,11 @@ class VideoPlayerMediator(
         }
     }
 
+    /**
+     * start playing the given Stream
+     * @param stream information needed to play an event. including stream url, encoded type, etc
+     * @see Stream
+     */
     private fun play(stream: Stream) {
         if (stream.widevine?.fullUrl != null && stream.widevine.licenseUrl != null) {
             player.play(
@@ -610,6 +627,9 @@ class VideoPlayerMediator(
     /**endregion */
 
     /**region Local Actions*/
+    /**
+     * set local (defined by user, not provided from server) Annotation Action list.
+     */
     fun setLocalActions(annotations: List<Action>) {
         annotationMediator.setLocalActions(annotations)
     }
@@ -663,12 +683,18 @@ class VideoPlayerMediator(
     /**endregion */
 
     /**region Youbora functions*/
+    /**
+     * Start Youbora to send analytical info, if only SDK is configured to have analytics enabled
+     */
     private fun startYoubora() {
         if (hasAnalytic) {
             youboraClient.start()
         }
     }
 
+    /**
+     * Stop Youbora from send analytical info, this needs to happen if only SDK is configured to have analytics enabled
+     */
     private fun stopYoubora() {
         if (hasAnalytic) {
             youboraClient.stop()
@@ -678,6 +704,9 @@ class VideoPlayerMediator(
     /**endregion */
 
     /**region Internal*/
+    /**
+     * Display "live" badge on screen based on position of video
+     */
     private fun handleLiveModeState() {
         if (player.isLive()) {
             isLive = true
@@ -694,6 +723,10 @@ class VideoPlayerMediator(
 
     }
 
+    /**
+     * Manages active & running animations based on play status
+     * @param isPlaying video player state: true if playing, false otherwise
+     */
     private fun handlePlayStatusOfOverlayAnimationsOnPlayPause(isPlaying: Boolean) {
         if (isPlaying) {
             playerView.continueOverlayAnimations()
@@ -702,6 +735,13 @@ class VideoPlayerMediator(
         }
     }
 
+    /**
+     * Manages active & running animations based on playback &
+     * autoplay status while exoplayer is still buffering the video
+     * @param playbackState video player playback state: exoplayer player state
+     * @param playWhenReady should start playing after loading is complete
+     * @see PlaybackState
+     */
     private fun handlePlayStatusOfOverlayAnimationsWhileBuffering(
         playbackState: Int,
         playWhenReady: Boolean
@@ -715,6 +755,12 @@ class VideoPlayerMediator(
         }
     }
 
+    /**
+     * Manages buffering circular progress bar based on playback & autoplay status
+     * @param playbackState video player playback state: exoplayer player state
+     * @param playWhenReady should start playing after loading is complete
+     * @see PlaybackState
+     */
     private fun handleBufferingProgressBarVisibility(
         playbackState: Int,
         playWhenReady: Boolean
@@ -726,6 +772,12 @@ class VideoPlayerMediator(
         }
     }
 
+    /**
+     * set local current playback state based on exoplayer playback & autoplay status
+     * @param playWhenReady should start playing after loading is complete
+     * @param playbackState video player playback state: exoplayer player state
+     * @see PlaybackState
+     */
     private fun handlePlaybackStatus(playWhenReady: Boolean, playbackState: Int) {
         if (playWhenReady) {
             if (playbackState == 3) {
@@ -736,6 +788,10 @@ class VideoPlayerMediator(
         }
     }
 
+    /**
+     * set local current playback state based on exoplayer playback & autoplay status
+     * @param isPlaying should start playing after loading is complete
+     */
     private fun handlePlaybackStatus(isPlaying: Boolean) {
         if (isPlaying) {
             this.playbackState = PlaybackState.PLAYING
@@ -744,6 +800,10 @@ class VideoPlayerMediator(
         }
     }
 
+    /**
+     * Log event through Youbora client.
+     * Log should take place if only analytics is enabled in configuration and should only happen once per stream
+     */
     private fun logEventIfNeeded(playbackState: Int) {
         if (!hasAnalytic) {
             return
@@ -757,11 +817,19 @@ class VideoPlayerMediator(
         }
     }
 
+    /**
+     * store event in data manager for later use
+     * @param eventEntity new event to be stored
+     */
     private fun storeEvent(eventEntity: EventEntity) {
         dataManager.currentEvent = eventEntity
     }
+
     /**endregion */
 
+    /**
+     * Release resources & leave Reactor service
+     */
     fun release() {
         streaming = false
         cancelPulling()
@@ -772,19 +840,35 @@ class VideoPlayerMediator(
         reactorSocket.leave(true)
     }
 
+    /**
+     * Dispatch destroy event to Player
+     * @see IPlayer
+     */
     fun destroy() {
         player.destroy()
     }
 
+    /**
+     * Cancel pulling of stream url
+     */
     fun cancelPulling() {
         cancelStreamUrlPulling()
     }
 
+    /**
+     * @return video player
+     * @see IPlayer
+     */
     fun getPlayer(): IPlayer {
         return player
     }
 
     /**region Cast*/
+    /**
+     * Load event to cast using Google Cast
+     * @param event to be streamed Event
+     * Cast module must be integrated by user and configured
+     */
     private fun loadRemoteMedia(event: EventEntity) {
         if (event.streams.isEmpty() || event.streams.first().fullUrl == null) {
             return
@@ -808,10 +892,20 @@ class VideoPlayerMediator(
         cast?.loadRemoteMedia(params)
     }
 
+    /**
+     * Set location of playback
+     * @param location local vs remote
+     */
     private fun updatePlaybackLocation(location: PlaybackLocation) {
         playbackLocation = location
     }
 
+    /**
+     * Switch between local & remote player controller
+     * @param playbackLocation
+     * When user is casting through MLS, another view which is Identical to local controller,
+     * will be displayed which is called Remote controller
+     */
     private fun switchControllerMode(playbackLocation: PlaybackLocation) {
         when (playbackLocation) {
             LOCAL -> {
