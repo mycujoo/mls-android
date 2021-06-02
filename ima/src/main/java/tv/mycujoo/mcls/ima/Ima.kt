@@ -16,6 +16,13 @@ import tv.mycujoo.mcls.enum.C
 import java.net.URLEncoder
 import java.util.*
 
+/**
+ * MLS IMA integration to use Google IMA
+ * @param adUnit adUnit which is provided by Google IMA panel
+ * @param liveAdUnit adUnit for live events, provided by Google IMA panel
+ * @param paramProvider custom parameter to log through IMA
+ * @param debugMode debug/release mode the SDK is running. Caused to use debug adUnit
+ */
 class Ima(
     private val adUnit: String,
     private val liveAdUnit: String? = null,
@@ -43,15 +50,28 @@ class Ima(
         }
     }
 
+    /**
+     * AdUnit to feed Google IMA
+     */
     override fun getAdUnit(): String {
         return adUnit
     }
 
+    /**
+     * Create ImaAdsLoader
+     * @param context app/activity context
+     */
     override fun createAdsLoader(context: Context) {
         val builder = ImaAdsLoader.Builder(context)
         adsLoader = createAdsLoader(builder, listener)
     }
 
+    /**
+     * Internal use: create ImaAdsLoader
+     * @param builder builder with access to Context
+     * @param listener callback for ad lifecycle
+     * @see ImaEventListener
+     */
     private fun createAdsLoader(
         builder: ImaAdsLoader.Builder,
         listener: ImaEventListener? = null
@@ -80,6 +100,10 @@ class Ima(
             .build()
     }
 
+    /**
+     * Set Ima AdsLoaderProvider to MediaSourceFactory
+     * @param defaultMediaSourceFactory MediaSourceFactory to create media item for exo-player
+     */
     override fun setAdsLoaderProvider(defaultMediaSourceFactory: DefaultMediaSourceFactory) {
         if (this::adsLoader.isInitialized.not()) {
             throw IllegalStateException()
@@ -88,6 +112,12 @@ class Ima(
         defaultMediaSourceFactory.setAdsLoaderProvider(provider)
     }
 
+    /**
+     * Set player to AdsLoader.
+     * Must happen before using the IMA, and after AdsLoader is initialized
+     * @param player exoplayer mediaplyer interface
+     * @see Player
+     */
     override fun setPlayer(player: Player) {
         if (this::adsLoader.isInitialized.not()) {
             throw IllegalStateException()
@@ -95,6 +125,9 @@ class Ima(
         adsLoader.setPlayer(player)
     }
 
+    /**
+     *
+     */
     override fun setAdViewProvider(adViewProvider: AdsLoader.AdViewProvider) {
         if (this::adsLoader.isInitialized.not()) {
             throw IllegalStateException()
@@ -102,6 +135,15 @@ class Ima(
         this.adViewProvider = adViewProvider
     }
 
+    /**
+     * Create Media Source when IMA is active.
+     * Must be used when IMA integration is active.
+     * Exoplayer uses MediaSource to load content.
+     * @param defaultMediaSourceFactory default factory for creating MediaSource
+     * @param hlsMediaSource source for defining MediaSource
+     * @param imaCustomParams MLS custom parameter for event
+     * @return MediaSource
+     */
     override fun createMediaSource(
         defaultMediaSourceFactory: DefaultMediaSourceFactory,
         hlsMediaSource: MediaSource,
@@ -117,6 +159,11 @@ class Ima(
         return adsMediaSource
     }
 
+    /**
+     * Create Uri for Ad including given parameters
+     * @param imaCustomParams Event related parameters
+     * @param params user defined parameters
+     */
     private fun getAdTagUri(imaCustomParams: ImaCustomParams, params: Map<String, String>): Uri {
         fun getAdUnitBasedOnEventStatus(eventStatus: EventStatus?): String {
             return when (eventStatus) {
@@ -158,10 +205,18 @@ class Ima(
     }
 
 
+    /**
+     * Remove exoplayer from AdsLoader
+     * Must be called when hosting app is going to background
+     */
     override fun onStop() {
         adsLoader.setPlayer(null)
     }
 
+    /**
+     * Destroy AdsLoader
+     * Must be called on app/SDK destroy to release resources
+     */
     override fun onDestroy() {
         if (this::adsLoader.isInitialized.not()) {
             throw IllegalStateException()

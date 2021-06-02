@@ -6,6 +6,9 @@ import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ads.AdsLoader
 
+/**
+ * Contract for Google IMA integration
+ */
 interface IIma {
     fun getAdUnit(): String
     fun createAdsLoader(context: Context)
