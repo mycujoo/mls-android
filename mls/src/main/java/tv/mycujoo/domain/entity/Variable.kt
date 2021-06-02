@@ -4,12 +4,18 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.*
 
+/**
+ * Variable are used in overlays, i.e. team scores
+ */
 sealed class Variable {
     abstract val name: String
     abstract fun printValue(): String
     abstract fun increment(amount: Any)
     abstract fun copy(): Variable
 
+    /**
+     * A variable  which holds a value of type Long
+     */
     data class LongVariable(override val name: String, var value: Long) : Variable() {
         override fun printValue(): String {
             return value.toString()
@@ -35,6 +41,9 @@ sealed class Variable {
 
     }
 
+    /**
+     * A variable which holds a value of type Double
+     */
     data class DoubleVariable(
         override val name: String,
         var value: Double,
@@ -76,6 +85,9 @@ sealed class Variable {
         }
     }
 
+    /**
+     * A variable which holds a value of type Double
+     */
     data class StringVariable(override val name: String, var value: String) : Variable() {
         override fun printValue(): String {
             return value
@@ -97,6 +109,9 @@ sealed class Variable {
         }
     }
 
+    /**
+     * Invalid variables which can be categories in other Variables, are defined as InvalidVariable.
+     */
     data class InvalidVariable(override val name: String = "") : Variable() {
         override fun printValue(): String {
             return ""
