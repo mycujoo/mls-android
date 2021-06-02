@@ -3,6 +3,11 @@ package tv.mycujoo.mcls.cast
 import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.SessionManagerListener
 
+/**
+ * Wrapper around session manager listener
+ * @property sessionManagerListener listener to be dispatch cast event
+ * @property casterSession active caster session
+ */
 class SessionManagerWrapper(
     val sessionManagerListener: ISessionManagerListener,
     val casterSession: CasterSession

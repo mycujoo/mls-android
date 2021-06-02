@@ -10,6 +10,11 @@ class MediaInfoBuilder {
     companion object {
         private const val M3U8_MIME_TYPE = "application/x-mpegURL"
 
+        /**
+         * Builds given info into MediaInfo,
+         * May be used for sending info to remote media client
+         * @see MediaInfo
+         */
         @JvmStatic
         fun build(
             url: String,

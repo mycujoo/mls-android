@@ -11,6 +11,10 @@ import tv.mycujoo.mcls.enum.C.Companion.DRM_WIDEVINE
 
 class CustomDataBuilder {
     companion object {
+        /**
+         * Builds given info into JSONObject,
+         * May be used for sending info to remote media client
+         */
         fun build(id: String, publicKey: String, uuid: String?, widevine: Widevine?): JSONObject {
             val customData = JSONObject()
                 .put(CAST_EVENT_ID_KEY, id)
