@@ -5,5 +5,4 @@ data class EventListParams(
     val pageToken: String? = null,
     val status: List<String>? = null,
     val orderBy: String? = null
-) {
-}
+)

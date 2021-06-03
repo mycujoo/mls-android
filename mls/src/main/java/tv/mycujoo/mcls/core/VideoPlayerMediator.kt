@@ -71,16 +71,49 @@ class VideoPlayerMediator(
 
 
     /**region Fields*/
+    /**
+     * MLS video-player
+     */
     private lateinit var player: IPlayer
+
+    /**
+     * SDK exposing video-player
+     */
     internal lateinit var videoPlayer: VideoPlayer
+
+    /**
+     * MLSPlayerView which exoplayer will integrate with
+     */
     private lateinit var playerView: MLSPlayerView
+
+    /**
+     * Annotation Mediator to handle Annotation Actions acts
+     */
     private lateinit var annotationMediator: AnnotationMediator
 
+    /**
+     * Indicates if SDK user desires to have analytics enabled
+     */
     private var hasAnalytic = false
+
+    /**
+     * Youbora client instance to log analytics through
+     */
     private lateinit var youboraClient: YouboraClient
+
+    /**
+     * Indicates if current video session is logged or not, for analytical purposes
+     */
     private var logged = false
 
+    /**
+     * Indicates if Reactor service is active and joined
+     */
     private var joined: Boolean = false
+
+    /**
+     * Latest updateId received from Reactor service, or null if not joined at all
+     */
     private var updateId: String? = null
 
     /**
@@ -386,15 +419,23 @@ class VideoPlayerMediator(
 
     }
 
+    /**
+     * Must be called onResume of host activity/fragment to resume Cast, if integrated with Cast module
+     */
     fun onResume() {
         cast?.onResume()
     }
 
+    /**
+     * Must be called onPause of host activity/fragment to pause Cast, if integrated with Cast module
+     */
     fun onPause() {
         cast?.onPause()
     }
 
-
+    /**
+     * Config PlayerView appearance and behaviour based on user preferences
+     */
     fun config(videoPlayerConfig: VideoPlayerConfig) {
         if (this::playerView.isInitialized.not()) {
             return

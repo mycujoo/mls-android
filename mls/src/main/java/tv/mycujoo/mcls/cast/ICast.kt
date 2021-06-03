@@ -3,7 +3,7 @@ package tv.mycujoo.mcls.cast
 import android.content.Context
 
 /**
- * Contract for integrating Google Cast in to MLS SDK
+ * Contract for integrating Google Cast into MLS SDK
  */
 interface ICast {
     fun initialize(context: Context, castListener: ICastListener): ISessionManagerListener
