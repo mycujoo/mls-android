@@ -2,6 +2,9 @@ package tv.mycujoo.domain.entity
 
 import tv.mycujoo.mcls.enum.C
 
+/**
+ * Actor for Annotation Actions
+ */
 class ActionActor {
     /**
      * Actions should be provided sorted based on their offset
