@@ -146,12 +146,12 @@ dependencies {
     implementation 'joda-time:joda-time:2.10.6'
     testImplementation 'joda-time:joda-time:2.10.6'
 
+    // Exoplayer
+    api 'com.google.android.exoplayer:exoplayer:2.12.3'
+    api 'com.npaw.youbora.adapters:exoplayer2-adapter:6.6.4'
+
 
     //TV
     api "androidx.leanback:leanback-preference:1.0.0"
     api 'com.google.android.exoplayer:extension-leanback:2.11.1'
-
-    // common module
-    implementation project(":common")
-
 }
