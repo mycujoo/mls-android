@@ -8,7 +8,7 @@ apply plugin: 'signing'
 // publish information on Maven
 ext {
     PUBLISH_GROUP_ID = 'tv.mycujoo.mls'
-    PUBLISH_VERSION = '1.2.3-alpha01'
+    PUBLISH_VERSION = '1.2.3-alpha02'
     PUBLISH_ARTIFACT_ID = 'mls'
     PUBLISH_ARTIFACT_DESCRIPTION = 'Android MLS SDK'
 }
