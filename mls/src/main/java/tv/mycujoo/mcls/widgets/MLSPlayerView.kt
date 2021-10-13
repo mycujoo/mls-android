@@ -307,60 +307,59 @@ class MLSPlayerView @JvmOverloads constructor(
     override fun config(config: VideoPlayerConfig) {
         try {
             val primaryColor = Color.parseColor(config.primaryColor)
-            val secondaryColor = Color.parseColor(config.secondaryColor)
+            //val secondaryColor = Color.parseColor(config.secondaryColor) //Todo secondary color not used
 
             setTimeBarsColor(primaryColor)
             setTimelineMarkerColor(config)
-
             setBufferingProgressBarsColor(primaryColor)
             setPlayerMainButtonsColor(primaryColor)
 
-            playerView.player?.playWhenReady = config.autoPlay
-
-            showPlayPauseButtons(config.showPlayPauseButtons)
-            showBackForwardsButtons(config.showBackForwardsButtons)
-            showSeekBar(config.showSeekBar)
-            showFullScreenButton(config.showFullScreenButton)
-            showTimers(config.showTimers)
-
-
-            if (config.showEventInfoButton) {
-                showEventInfoButton()
-            } else {
-                hideEventInfoButton()
-            }
-
             // enableControls has the highest priority
             enableControls = config.enableControls
+
             if (!enableControls) {
-                playerView.controllerAutoShow = false
-                playerView.hideController()
                 showPlayPauseButtons(false)
                 showBackForwardsButtons(false)
                 showSeekBar(false)
                 showFullScreenButton(false)
                 showTimers(false)
                 hideEventInfoButton()
-                showControlsContainer(false)
-            }
+                controllerVisibility(false)
+            }else{
 
+                playerView.player?.playWhenReady = config.autoPlay
+                showPlayPauseButtons(config.showPlayPauseButtons)
+                showBackForwardsButtons(config.showBackForwardsButtons)
+                showSeekBar(config.showSeekBar)
+                showFullScreenButton(config.showFullScreenButton)
+                showTimers(config.showTimers)
+
+                if (config.showEventInfoButton) {
+                    showEventInfoButton()
+                } else {
+                    hideEventInfoButton()
+                }
+                controllerVisibility(true)
+            }
 
         } catch (e: Exception) {
             Log.e("PlayerViewWrapper", e.message ?: "Error in configuring")
         }
     }
 
+    private fun controllerVisibility(isVisible : Boolean){
+        showControlsContainer(isVisible)
+        playerView.controllerAutoShow = isVisible
+        playerView.useController = isVisible
+    }
+
     override fun updateControllerVisibility(isPlaying: Boolean) {
         if (enableControls && isPlaying) {
-            showControlsContainer(true)
-            playerView.controllerAutoShow = true
-            playerView.useController = true
+            controllerVisibility(isPlaying)
             playerView.showController()
         } else {
-            showControlsContainer(false)
+            controllerVisibility(isPlaying)
             playerView.hideController()
-            playerView.controllerAutoShow = false
-            playerView.useController = false
         }
     }
 
