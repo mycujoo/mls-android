@@ -1,11 +1,11 @@
 package tv.mycujoo.mcls.helper
 
 import android.graphics.Typeface
-import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.whenever
 import tv.mycujoo.mcls.helper.SVGAssetResolver.Companion.ROBOTO_MONO_BOLD
 import tv.mycujoo.mcls.helper.SVGAssetResolver.Companion.ROBOTO_MONO_BOLD_FILE_NAME
 import tv.mycujoo.mcls.helper.SVGAssetResolver.Companion.ROBOTO_MONO_REGULAR

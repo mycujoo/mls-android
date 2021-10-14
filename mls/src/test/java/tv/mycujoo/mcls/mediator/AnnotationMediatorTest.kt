@@ -2,13 +2,13 @@ package tv.mycujoo.mcls.mediator
 
 import android.os.Handler
 import com.google.android.exoplayer2.Player
-import com.nhaarman.mockitokotlin2.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.*
 import tv.mycujoo.mcls.core.IAnnotationFactory
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C.Companion.ONE_SECOND_IN_MS

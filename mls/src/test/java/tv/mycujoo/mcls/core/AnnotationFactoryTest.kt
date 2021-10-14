@@ -1,11 +1,11 @@
 package tv.mycujoo.mcls.core
 
-import com.nhaarman.mockitokotlin2.*
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.*
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.TransitionSpec

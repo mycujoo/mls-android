@@ -2,13 +2,13 @@ package tv.mycujoo.mcls.tv.player
 
 import android.content.Context
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.OverlayEntity
 import tv.mycujoo.mcls.TestData.Companion.getSampleHideOverlayAction

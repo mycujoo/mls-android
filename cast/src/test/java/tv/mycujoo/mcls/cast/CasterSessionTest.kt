@@ -2,13 +2,13 @@ package tv.mycujoo.mcls.cast
 
 import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
-import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.whenever
 
 class CasterSessionTest {
     @Mock

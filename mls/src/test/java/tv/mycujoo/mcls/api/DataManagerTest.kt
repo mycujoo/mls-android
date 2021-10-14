@@ -1,8 +1,6 @@
 package tv.mycujoo.mcls.api
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -14,6 +12,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.mcls.CoroutineTestRule

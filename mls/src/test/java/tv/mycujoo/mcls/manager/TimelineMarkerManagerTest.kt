@@ -1,11 +1,11 @@
 package tv.mycujoo.mcls.manager
 
-import com.nhaarman.mockitokotlin2.*
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.*
 import tv.mycujoo.mcls.widgets.mlstimebar.*
 
 class TimelineMarkerManagerTest {

@@ -1,9 +1,6 @@
 package tv.mycujoo.mcls.analytic
 
 import com.google.android.exoplayer2.ExoPlayer
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import com.npaw.youbora.lib6.adapter.PlayerAdapter
 import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
@@ -11,6 +8,9 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import tv.mycujoo.domain.entity.*
 import kotlin.test.assertEquals
 
