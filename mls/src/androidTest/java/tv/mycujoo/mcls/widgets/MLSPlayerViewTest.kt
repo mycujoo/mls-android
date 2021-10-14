@@ -37,9 +37,9 @@ import tv.mycujoo.matchers.TypeMatcher
 import tv.mycujoo.mcls.BlankActivity
 import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.api.MLSBuilder
-import tv.mycujoo.mcls.api.defaultVideoPlayerConfig
 import tv.mycujoo.mcls.core.VideoPlayerMediator
 import tv.mycujoo.mcls.data.IDataManager
+import tv.mycujoo.mcls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.helper.OverlayFactory
 import tv.mycujoo.mcls.helper.OverlayViewHelper
@@ -184,7 +184,7 @@ class MLSPlayerViewTest {
             )
 
             videoPlayerMediator = VideoPlayerMediator(
-                defaultVideoPlayerConfig(),
+                VideoPlayerConfig.default(),
                 viewHandler,
                 reactorSocket,
                 GlobalScope,
