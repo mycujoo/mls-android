@@ -57,8 +57,8 @@ data class VideoPlayerConfig(
         showFullScreenButton: Boolean? = null,
         showLiveViewers: Boolean? = null,
         showEventInfoButton: Boolean? = null
-    ): VideoPlayerConfig =
-        VideoPlayerConfig(
+    ): VideoPlayerConfig {
+        return VideoPlayerConfig(
             primaryColor ?: this.primaryColor,
             secondaryColor ?: this.secondaryColor,
             autoPlay ?: this.autoPlay,
@@ -71,4 +71,5 @@ data class VideoPlayerConfig(
             showLiveViewers ?: this.showLiveViewers,
             showEventInfoButton ?: this.showEventInfoButton
         )
+    }
 }
