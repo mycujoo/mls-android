@@ -25,4 +25,64 @@ data class VideoPlayerConfig(
     val showFullScreenButton: Boolean,
     val showLiveViewers: Boolean,
     val showEventInfoButton: Boolean
-)
+) {
+
+    companion object{
+        fun default(): VideoPlayerConfig {
+            return VideoPlayerConfig(
+                primaryColor = "#FFFFFF",
+                secondaryColor = "#000000",
+                autoPlay = true,
+                enableControls = true,
+                showPlayPauseButtons = true,
+                showBackForwardsButtons = true,
+                showSeekBar = true,
+                showTimers = true,
+                showFullScreenButton = false,
+                showLiveViewers = true,
+                showEventInfoButton = true
+            )
+        }
+    }
+
+    fun copy(
+        primaryColor: String? = null,
+        secondaryColor: String? = null,
+        autoPlay: Boolean? = null,
+        enableControls: Boolean? = null,
+        showPlayPauseButtons: Boolean? = null,
+        showBackForwardsButtons: Boolean? = null,
+        showSeekBar: Boolean? = null,
+        showTimers: Boolean? = null,
+        showFullScreenButton: Boolean? = null,
+        showLiveViewers: Boolean? = null,
+        showEventInfoButton: Boolean? = null
+    ): VideoPlayerConfig {
+
+        val primaryColorOverwritten = primaryColor ?: this.primaryColor
+        val secondaryColorOverwritten = secondaryColor ?: this.secondaryColor
+        val autoPlayOverwritten = autoPlay ?: this.autoPlay
+        val enableControlsOverwritten = enableControls ?: this.enableControls
+        val showPlayPauseButtonsOverwritten = showPlayPauseButtons ?: this.showPlayPauseButtons
+        val showBackForwardsButtonsOverwritten = showBackForwardsButtons ?: this.showBackForwardsButtons
+        val showSeekBarOverwritten = showSeekBar ?: this.showSeekBar
+        val showTimersOverwritten = showTimers ?: this.showTimers
+        val showFullScreenButtonOverwritten = showFullScreenButton ?: this.showFullScreenButton
+        val showLiveViewersOverwritten = showLiveViewers ?: this.showLiveViewers
+        val showEventInfoButtonOverwritten = showEventInfoButton ?: this.showEventInfoButton
+
+        return VideoPlayerConfig(
+            primaryColorOverwritten,
+            secondaryColorOverwritten,
+            autoPlayOverwritten,
+            enableControlsOverwritten,
+            showPlayPauseButtonsOverwritten,
+            showBackForwardsButtonsOverwritten,
+            showSeekBarOverwritten,
+            showTimersOverwritten,
+            showFullScreenButtonOverwritten,
+            showLiveViewersOverwritten,
+            showEventInfoButtonOverwritten
+        )
+    }
+}
