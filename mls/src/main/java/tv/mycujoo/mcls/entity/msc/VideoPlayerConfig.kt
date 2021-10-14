@@ -27,7 +27,7 @@ data class VideoPlayerConfig(
     val showEventInfoButton: Boolean
 ) {
 
-    companion object{
+    companion object {
         fun default(): VideoPlayerConfig {
             return VideoPlayerConfig(
                 primaryColor = "#FFFFFF",
@@ -57,32 +57,18 @@ data class VideoPlayerConfig(
         showFullScreenButton: Boolean? = null,
         showLiveViewers: Boolean? = null,
         showEventInfoButton: Boolean? = null
-    ): VideoPlayerConfig {
-
-        val primaryColorOverwritten = primaryColor ?: this.primaryColor
-        val secondaryColorOverwritten = secondaryColor ?: this.secondaryColor
-        val autoPlayOverwritten = autoPlay ?: this.autoPlay
-        val enableControlsOverwritten = enableControls ?: this.enableControls
-        val showPlayPauseButtonsOverwritten = showPlayPauseButtons ?: this.showPlayPauseButtons
-        val showBackForwardsButtonsOverwritten = showBackForwardsButtons ?: this.showBackForwardsButtons
-        val showSeekBarOverwritten = showSeekBar ?: this.showSeekBar
-        val showTimersOverwritten = showTimers ?: this.showTimers
-        val showFullScreenButtonOverwritten = showFullScreenButton ?: this.showFullScreenButton
-        val showLiveViewersOverwritten = showLiveViewers ?: this.showLiveViewers
-        val showEventInfoButtonOverwritten = showEventInfoButton ?: this.showEventInfoButton
-
-        return VideoPlayerConfig(
-            primaryColorOverwritten,
-            secondaryColorOverwritten,
-            autoPlayOverwritten,
-            enableControlsOverwritten,
-            showPlayPauseButtonsOverwritten,
-            showBackForwardsButtonsOverwritten,
-            showSeekBarOverwritten,
-            showTimersOverwritten,
-            showFullScreenButtonOverwritten,
-            showLiveViewersOverwritten,
-            showEventInfoButtonOverwritten
+    ): VideoPlayerConfig =
+        VideoPlayerConfig(
+            primaryColor ?: this.primaryColor,
+            secondaryColor ?: this.secondaryColor,
+            autoPlay ?: this.autoPlay,
+            enableControls ?: this.enableControls,
+            showPlayPauseButtons ?: this.showPlayPauseButtons,
+            showBackForwardsButtons ?: this.showBackForwardsButtons,
+            showSeekBar ?: this.showSeekBar,
+            showTimers ?: this.showTimers,
+            showFullScreenButton ?: this.showFullScreenButton,
+            showLiveViewers ?: this.showLiveViewers,
+            showEventInfoButton ?: this.showEventInfoButton
         )
-    }
 }

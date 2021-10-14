@@ -325,15 +325,13 @@ class MLSPlayerView @JvmOverloads constructor(
                 showTimers(false)
                 hideEventInfoButton()
                 controllerVisibility(false)
-            }else{
-
+            } else {
                 playerView.player?.playWhenReady = config.autoPlay
                 showPlayPauseButtons(config.showPlayPauseButtons)
                 showBackForwardsButtons(config.showBackForwardsButtons)
                 showSeekBar(config.showSeekBar)
                 showFullScreenButton(config.showFullScreenButton)
                 showTimers(config.showTimers)
-
                 if (config.showEventInfoButton) {
                     showEventInfoButton()
                 } else {
@@ -347,7 +345,7 @@ class MLSPlayerView @JvmOverloads constructor(
         }
     }
 
-    private fun controllerVisibility(isVisible : Boolean){
+    private fun controllerVisibility(isVisible: Boolean) {
         showControlsContainer(isVisible)
         playerView.controllerAutoShow = isVisible
         playerView.useController = isVisible
