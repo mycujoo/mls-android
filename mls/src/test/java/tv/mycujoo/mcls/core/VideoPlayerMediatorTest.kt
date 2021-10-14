@@ -6,7 +6,6 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player.*
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
-import com.nhaarman.mockitokotlin2.*
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Plugin
 import kotlinx.coroutines.CoroutineScope
@@ -20,6 +19,7 @@ import org.junit.*
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.invocation.InvocationOnMock
+import org.mockito.kotlin.*
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_GEOBLOCKED
 import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_NO_ENTITLEMENT

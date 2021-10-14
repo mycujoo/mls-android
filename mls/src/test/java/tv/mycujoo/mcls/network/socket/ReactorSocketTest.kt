@@ -1,12 +1,12 @@
 package tv.mycujoo.mcls.network.socket
 
-import com.nhaarman.mockitokotlin2.*
 import okhttp3.OkHttpClient
 import okhttp3.WebSocket
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.*
 import tv.mycujoo.mcls.model.JoinTimelineParam
 import kotlin.test.assertFailsWith
 
