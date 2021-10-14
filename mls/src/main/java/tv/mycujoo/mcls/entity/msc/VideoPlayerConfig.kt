@@ -25,4 +25,51 @@ data class VideoPlayerConfig(
     val showFullScreenButton: Boolean,
     val showLiveViewers: Boolean,
     val showEventInfoButton: Boolean
-)
+) {
+
+    companion object {
+        fun default(): VideoPlayerConfig {
+            return VideoPlayerConfig(
+                primaryColor = "#FFFFFF",
+                secondaryColor = "#000000",
+                autoPlay = true,
+                enableControls = true,
+                showPlayPauseButtons = true,
+                showBackForwardsButtons = true,
+                showSeekBar = true,
+                showTimers = true,
+                showFullScreenButton = false,
+                showLiveViewers = true,
+                showEventInfoButton = true
+            )
+        }
+    }
+
+    fun copy(
+        primaryColor: String? = null,
+        secondaryColor: String? = null,
+        autoPlay: Boolean? = null,
+        enableControls: Boolean? = null,
+        showPlayPauseButtons: Boolean? = null,
+        showBackForwardsButtons: Boolean? = null,
+        showSeekBar: Boolean? = null,
+        showTimers: Boolean? = null,
+        showFullScreenButton: Boolean? = null,
+        showLiveViewers: Boolean? = null,
+        showEventInfoButton: Boolean? = null
+    ): VideoPlayerConfig {
+        return VideoPlayerConfig(
+            primaryColor ?: this.primaryColor,
+            secondaryColor ?: this.secondaryColor,
+            autoPlay ?: this.autoPlay,
+            enableControls ?: this.enableControls,
+            showPlayPauseButtons ?: this.showPlayPauseButtons,
+            showBackForwardsButtons ?: this.showBackForwardsButtons,
+            showSeekBar ?: this.showSeekBar,
+            showTimers ?: this.showTimers,
+            showFullScreenButton ?: this.showFullScreenButton,
+            showLiveViewers ?: this.showLiveViewers,
+            showEventInfoButton ?: this.showEventInfoButton
+        )
+    }
+}

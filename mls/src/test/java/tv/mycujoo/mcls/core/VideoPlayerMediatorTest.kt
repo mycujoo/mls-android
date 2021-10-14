@@ -30,7 +30,6 @@ import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.api.MLSBuilder
 import tv.mycujoo.mcls.api.MLSConfiguration
-import tv.mycujoo.mcls.api.defaultVideoPlayerConfig
 import tv.mycujoo.mcls.cast.ICast
 import tv.mycujoo.mcls.cast.ICasterSession
 import tv.mycujoo.mcls.cast.ISessionManagerListener
@@ -555,7 +554,7 @@ class VideoPlayerMediatorTest {
     fun `update viewers counter in LIVE stream, should update player view`() = runBlockingTest {
         val event = getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_SCHEDULED)
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
-        videoPlayerMediator.config(defaultVideoPlayerConfig())
+        videoPlayerMediator.config(VideoPlayerConfig.default())
         whenever(player.isLive()).thenReturn(true)
 
 
