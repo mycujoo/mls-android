@@ -18,7 +18,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
 
@@ -29,7 +29,6 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            useProguard false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -51,12 +50,12 @@ tasks.withType(Javadoc).all {
 dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.3.2'
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    testImplementation 'junit:junit:4.13.1'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    implementation 'androidx.core:core-ktx:1.6.0'
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testImplementation "org.mockito:mockito-core:4.0.0"
     testImplementation "org.mockito.kotlin:mockito-kotlin:4.0.0"
@@ -67,8 +66,8 @@ dependencies {
     implementation 'com.google.android.exoplayer:exoplayer:2.12.3'
     implementation 'com.npaw.youbora.adapters:exoplayer2-adapter:6.6.4'
 
-    api 'androidx.mediarouter:mediarouter:1.2.0'
-    api 'com.google.android.gms:play-services-cast-framework:19.0.0'
+    api 'androidx.mediarouter:mediarouter:1.2.5'
+    api 'com.google.android.gms:play-services-cast-framework:20.0.0'
 
     implementation project(":mls")
 }
