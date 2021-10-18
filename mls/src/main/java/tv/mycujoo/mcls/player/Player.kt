@@ -3,13 +3,16 @@ package tv.mycujoo.mcls.player
 import android.content.Context
 import android.os.Handler
 import com.google.android.exoplayer2.*
+import com.google.android.exoplayer2.MediaItem.AdsConfiguration
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
+import com.google.common.collect.ImmutableList
 import tv.mycujoo.mcls.enum.C.Companion.DRM_WIDEVINE
 import tv.mycujoo.mcls.ima.IIma
+import tv.mycujoo.mcls.ima.ImaAdsIds
 import tv.mycujoo.mcls.ima.ImaCustomParams
 
 /**
@@ -425,7 +428,10 @@ class Player : IPlayer {
 
     companion object {
         fun createExoPlayer(context: Context): SimpleExoPlayer {
-            return SimpleExoPlayer.Builder(context).build()
+            return SimpleExoPlayer.Builder(context)
+                .setSeekBackIncrementMs(10000)
+                .setSeekForwardIncrementMs(10000)
+                .build()
         }
 
         fun createMediaFactory(context: Context): HlsMediaSource.Factory {
