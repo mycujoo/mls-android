@@ -307,9 +307,9 @@ class MLSPlayerView @JvmOverloads constructor(
     override fun config(config: VideoPlayerConfig) {
         try {
             val primaryColor = Color.parseColor(config.primaryColor)
-            //val secondaryColor = Color.parseColor(config.secondaryColor) //Todo secondary color not used
+            val secondaryColor = Color.parseColor(config.secondaryColor)
 
-            setTimeBarsColor(primaryColor)
+            setTimeBarsColor(secondaryColor)
             setTimelineMarkerColor(config)
             setBufferingProgressBarsColor(primaryColor)
             setPlayerMainButtonsColor(primaryColor)
@@ -326,7 +326,6 @@ class MLSPlayerView @JvmOverloads constructor(
                 hideEventInfoButton()
                 controllerVisibility(false)
             } else {
-                playerView.player?.playWhenReady = config.autoPlay
                 showPlayPauseButtons(config.showPlayPauseButtons)
                 showBackForwardsButtons(config.showBackForwardsButtons)
                 showSeekBar(config.showSeekBar)
@@ -338,6 +337,8 @@ class MLSPlayerView @JvmOverloads constructor(
                     hideEventInfoButton()
                 }
                 controllerVisibility(true)
+                playerView.player?.playWhenReady = config.autoPlay
+                playerView.showController()
             }
 
         } catch (e: Exception) {
@@ -349,14 +350,15 @@ class MLSPlayerView @JvmOverloads constructor(
         showControlsContainer(isVisible)
         playerView.controllerAutoShow = isVisible
         playerView.useController = isVisible
+
     }
 
     override fun updateControllerVisibility(isPlaying: Boolean) {
         if (enableControls && isPlaying) {
-            controllerVisibility(isPlaying)
+            controllerVisibility(true)
             playerView.showController()
         } else {
-            controllerVisibility(isPlaying)
+            controllerVisibility(false)
             playerView.hideController()
         }
     }
