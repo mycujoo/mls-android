@@ -1,9 +1,10 @@
-name: iOS Deploy
+name: Android Lib Test
 
 on:
   push:
     branches:
-      - 'trunk'
+      # Suspending this for now, due to JVM related error
+      - 'null'
 
 jobs:
   deploy:
