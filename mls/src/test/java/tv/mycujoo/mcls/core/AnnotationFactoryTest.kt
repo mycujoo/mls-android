@@ -46,7 +46,7 @@ class AnnotationFactoryTest {
     /**region Setup*/
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        MockitoAnnotations.openMocks(this)
 
         whenever(player.dvrWindowSize()).thenReturn(60000)
 

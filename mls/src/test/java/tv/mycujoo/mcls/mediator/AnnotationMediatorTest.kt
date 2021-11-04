@@ -76,7 +76,7 @@ class AnnotationMediatorTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        MockitoAnnotations.openMocks(this)
         testCoroutineScope = TestCoroutineScope()
 
         whenever(

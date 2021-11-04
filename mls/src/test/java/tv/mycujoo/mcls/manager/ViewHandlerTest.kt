@@ -39,7 +39,7 @@ class ViewHandlerTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        MockitoAnnotations.openMocks(this)
         viewHandler = ViewHandler(idlingResource)
         viewHandler.setOverlayHost(overLayHost)
     }

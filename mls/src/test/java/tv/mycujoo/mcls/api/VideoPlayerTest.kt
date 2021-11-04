@@ -37,7 +37,7 @@ class VideoPlayerTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        MockitoAnnotations.openMocks(this)
         whenever(exoPlayer.addListener(any<Player.EventListener>())).then { i ->
             eventListener = i.getArgument<Player.EventListener>(0)
             eventListener

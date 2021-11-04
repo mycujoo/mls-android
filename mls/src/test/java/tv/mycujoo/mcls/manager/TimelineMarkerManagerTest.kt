@@ -28,7 +28,7 @@ class TimelineMarkerManagerTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        MockitoAnnotations.openMocks(this)
         whenever(timeBar.setTimelineMarkerPositionListener(any())).then {
             timeLineMarkerPositionListener = it.getArgument(0)
             true

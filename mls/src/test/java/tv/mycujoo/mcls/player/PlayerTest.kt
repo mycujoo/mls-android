@@ -43,7 +43,7 @@ class PlayerTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        MockitoAnnotations.openMocks(this)
         player = Player()
     }
 

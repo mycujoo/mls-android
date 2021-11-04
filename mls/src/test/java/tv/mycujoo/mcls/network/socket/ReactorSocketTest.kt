@@ -26,7 +26,7 @@ class ReactorSocketTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        MockitoAnnotations.openMocks(this)
 
         whenever(okHttpClient.newWebSocket(any(), any())).thenReturn(webSocket)
 
