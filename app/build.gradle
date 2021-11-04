@@ -9,9 +9,6 @@ android {
     compileSdkVersion 30
     buildToolsVersion '30.0.3'
 
-    // Keys
-    // buildConfigField("String", "MCLS_KEY", "\"" + System.getenv("MCLS_KEY") + "\"")
-
     defaultConfig {
         applicationId "tv.mycujoo.mlsapp"
         minSdkVersion 21

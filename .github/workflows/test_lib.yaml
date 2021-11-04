@@ -1,0 +1,24 @@
+name: iOS Deploy
+
+on:
+  push:
+    branches:
+      - 'trunk'
+
+jobs:
+  deploy:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: "12.x"
+
+      - name: Bundle install
+        run: bundle update --bundler && bundle install
+
+      - name: Run JUnit tests
+        run: bundle exec fastlane tests
+
