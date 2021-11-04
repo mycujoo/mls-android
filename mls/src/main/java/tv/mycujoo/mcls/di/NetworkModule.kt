@@ -9,7 +9,7 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okio.Buffer
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.network.MlsApi
@@ -77,7 +77,7 @@ open class NetworkModule(val context: Context) {
     @Singleton
     open fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder().baseUrl(publicBaseUrl)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create())
             .client(okHttpClient)
             .build()
     }
@@ -87,7 +87,7 @@ open class NetworkModule(val context: Context) {
     @Singleton
     open fun provideMlsApiRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder().baseUrl(mlsApiBaseUrl)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create())
             .client(okHttpClient)
             .build()
     }

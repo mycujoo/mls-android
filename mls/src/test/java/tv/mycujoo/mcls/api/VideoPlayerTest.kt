@@ -1,5 +1,6 @@
 package tv.mycujoo.mcls.api
 
+import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.Player.STATE_READY
@@ -26,7 +27,7 @@ class VideoPlayerTest {
     lateinit var exoPlayer: SimpleExoPlayer
 
     @Mock
-    lateinit var audioComponent: Player.AudioComponent
+    lateinit var audioComponent: ExoPlayer.AudioComponent
 
     @Mock
     lateinit var videoPlayerMediator: VideoPlayerMediator
