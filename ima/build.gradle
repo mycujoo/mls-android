@@ -5,7 +5,7 @@ plugins {
 
 ext {
     PUBLISH_GROUP_ID = 'tv.mycujoo.mls'
-    PUBLISH_VERSION = '1.0.0-alpha03'
+    PUBLISH_VERSION = '1.3.0-alpha02'
     PUBLISH_ARTIFACT_ID = 'ima'
     PUBLISH_ARTIFACT_DESCRIPTION = 'Ima module of MLS SDK'
 }
@@ -30,7 +30,6 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            useProguard false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -42,6 +41,9 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    packagingOptions {
+        resources.excludes.add("META-INF/*")
+    }
 }
 
 tasks.withType(Javadoc).all {
@@ -52,12 +54,12 @@ tasks.withType(Javadoc).all {
 dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.3.2'
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'com.google.android.material:material:1.2.1'
-    testImplementation 'junit:junit:4.13.1'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    implementation 'androidx.core:core-ktx:1.6.0'
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'com.google.android.material:material:1.4.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testImplementation "org.mockito:mockito-core:4.0.0"
     testImplementation "org.mockito.kotlin:mockito-kotlin:4.0.0"
@@ -65,10 +67,9 @@ dependencies {
     androidTestImplementation "org.mockito.kotlin:mockito-kotlin:4.0.0"
 
     // Exoplayer
-    implementation 'com.google.android.exoplayer:exoplayer:2.12.3'
-    implementation 'com.npaw.youbora.adapters:exoplayer2-adapter:6.6.4'
+    implementation 'com.google.android.exoplayer:exoplayer:2.15.1'
+    implementation 'com.nicepeopleatwork:exoplayer-adapter:6.7.27'
 
-    implementation 'com.google.android.exoplayer:extension-ima:2.12.3'
-
+    implementation 'com.google.android.exoplayer:extension-ima:2.15.1'
     implementation project(":mls")
 }

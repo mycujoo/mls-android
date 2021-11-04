@@ -425,7 +425,10 @@ class Player : IPlayer {
 
     companion object {
         fun createExoPlayer(context: Context): SimpleExoPlayer {
-            return SimpleExoPlayer.Builder(context).build()
+            return SimpleExoPlayer.Builder(context)
+                .setSeekBackIncrementMs(10000)
+                .setSeekForwardIncrementMs(10000)
+                .build()
         }
 
         fun createMediaFactory(context: Context): HlsMediaSource.Factory {

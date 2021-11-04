@@ -6,6 +6,7 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.ads.AdsLoader
+import com.google.android.exoplayer2.ui.AdViewProvider
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -31,7 +32,7 @@ class ImaTest {
     lateinit var defaultMediaSourceFactory: DefaultMediaSourceFactory
 
     @Mock
-    lateinit var viewProvider: AdsLoader.AdViewProvider
+    lateinit var viewProvider: AdViewProvider
 
     @Mock
     lateinit var player: Player

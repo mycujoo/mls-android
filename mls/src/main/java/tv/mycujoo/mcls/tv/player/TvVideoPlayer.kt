@@ -2,7 +2,6 @@ package tv.mycujoo.mcls.tv.player
 
 import android.app.Activity
 import android.graphics.Color
-import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
@@ -16,10 +15,7 @@ import androidx.leanback.app.VideoSupportFragmentGlueHost
 import androidx.leanback.media.PlaybackGlue
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter
-import com.google.android.exoplayer2.source.ads.AdsLoader
-import com.google.android.exoplayer2.source.hls.HlsMediaSource
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.util.Util
+import com.google.android.exoplayer2.ui.AdViewProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -98,9 +94,7 @@ class TvVideoPlayer(
                 )
             }
         player.getDirectInstance()?.let { exoPlayer ->
-            ima?.let {
-                it.setPlayer(exoPlayer)
-            }
+            ima?.setPlayer(exoPlayer)
         }
 
         player.getDirectInstance()!!.playWhenReady = mlsTVConfiguration.videoPlayerConfig.autoPlay
@@ -193,11 +187,11 @@ class TvVideoPlayer(
         }
     }
 
-    private fun addAdViewProvider(fragmentView: View?): AdsLoader.AdViewProvider {
+    private fun addAdViewProvider(fragmentView: View?): AdViewProvider {
         val view = (fragmentView as FrameLayout)
         val frameLayout = FrameLayout(view.context)
         view.addView(frameLayout, 0)
-        return AdsLoader.AdViewProvider { frameLayout }
+        return AdViewProvider { frameLayout }
     }
 
     /**endregion */
@@ -246,8 +240,7 @@ class TvVideoPlayer(
 
     private fun fetchActions(timelineId: String, updateId: String?, joinTimeline: Boolean) {
         dispatcher.launch(context = Dispatchers.Main) {
-            val result = dataManager.getActions(timelineId, updateId)
-            when (result) {
+            when (val result = dataManager.getActions(timelineId, updateId)) {
                 is Result.Success -> {
 
                     tvAnnotationMediator.feed(result.value.data.map { it.toAction() })

@@ -7,10 +7,11 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.source.ads.AdsLoader
 import com.google.android.exoplayer2.source.ads.AdsMediaSource
+import com.google.android.exoplayer2.ui.AdViewProvider
 import com.google.android.exoplayer2.upstream.DataSpec
 import com.google.common.annotations.VisibleForTesting
+import com.google.common.collect.ImmutableList
 import tv.mycujoo.domain.entity.EventStatus
 import tv.mycujoo.mcls.enum.C
 import java.net.URLEncoder
@@ -32,7 +33,7 @@ class Ima(
 ) : IIma {
 
     private lateinit var adsLoader: ImaAdsLoader
-    private lateinit var adViewProvider: AdsLoader.AdViewProvider
+    private lateinit var adViewProvider: AdViewProvider
 
     @VisibleForTesting
     constructor(
@@ -128,7 +129,7 @@ class Ima(
     /**
      *
      */
-    override fun setAdViewProvider(adViewProvider: AdsLoader.AdViewProvider) {
+    override fun setAdViewProvider(adViewProvider: AdViewProvider) {
         if (this::adsLoader.isInitialized.not()) {
             throw IllegalStateException()
         }
@@ -149,14 +150,14 @@ class Ima(
         hlsMediaSource: MediaSource,
         imaCustomParams: ImaCustomParams
     ): MediaSource {
-        val adsMediaSource = AdsMediaSource(
+        return AdsMediaSource(
             hlsMediaSource,
             DataSpec(getAdTagUri(imaCustomParams, paramProvider?.params() ?: emptyMap())),
+            listOf(this.adUnit, this.liveAdUnit),
             defaultMediaSourceFactory,
             adsLoader,
             adViewProvider
         )
-        return adsMediaSource
     }
 
     /**
@@ -177,11 +178,11 @@ class Ima(
         }
 
         fun getEncodedCustomParams(imaCustomParams: ImaCustomParams): String {
-            if (imaCustomParams.isEmpty()) {
+            return if (imaCustomParams.isEmpty()) {
                 if (debugMode) {
-                    return "deployment%3Ddevsite%26sample_ct%3Dlinear"
+                    "deployment%3Ddevsite%26sample_ct%3Dlinear"
                 } else {
-                    return ""
+                    ""
                 }
             } else {
                 val stringBuilder = StringBuilder()
@@ -189,7 +190,7 @@ class Ima(
                     stringBuilder.append("deployment=devsite&sample_ct=linear")
                 }
                 imaCustomParams.writeValues(stringBuilder, params)
-                return URLEncoder.encode(stringBuilder.toString(), "utf-8")
+                URLEncoder.encode(stringBuilder.toString(), "utf-8")
             }
         }
 
