@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity() {
 
 
         mainActivityPlayButton.setOnClickListener {
-            MLS.getVideoPlayer().playVideo("EVENT_ID_HERE")
+            MLS.getVideoPlayer().playVideo("20PSsAyXpRbHdvpQ0XkBYSSh1rP")
         }
         mainActivityPlayButton2.setOnClickListener {
             MLS.getDataProvider().fetchEvents(

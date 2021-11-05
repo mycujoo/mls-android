@@ -2,6 +2,7 @@ package tv.mycujoo.mcls.di
 
 import android.content.Context
 import android.util.Log
+import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import okhttp3.Cache
@@ -10,6 +11,7 @@ import okhttp3.OkHttpClient
 import okio.Buffer
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import tv.mycujoo.data.jsonadapter.JodaJsonAdapter
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.network.MlsApi
@@ -76,8 +78,12 @@ open class NetworkModule(val context: Context) {
     @Named("PUBLIC-API")
     @Singleton
     open fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        val moshi : Moshi = Moshi.Builder()
+            .add(JodaJsonAdapter())
+            .build()
+
         return Retrofit.Builder().baseUrl(publicBaseUrl)
-            .addConverterFactory(MoshiConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
             .client(okHttpClient)
             .build()
     }
