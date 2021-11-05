@@ -20,6 +20,7 @@ import tv.mycujoo.mcls.core.UIEventListener
 import tv.mycujoo.mcls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mlsapp.BuildConfig.MCLS_KEY
+import tv.mycujoo.mlsapp.BuildConfig.MCLS_TEST_EVENT_ID
 import tv.mycujoo.mlsapp.R
 
 
@@ -84,7 +85,7 @@ class MainActivity : AppCompatActivity() {
 
 
         mainActivityPlayButton.setOnClickListener {
-            MLS.getVideoPlayer().playVideo("20PSsAyXpRbHdvpQ0XkBYSSh1rP")
+            MLS.getVideoPlayer().playVideo(MCLS_TEST_EVENT_ID)
         }
         mainActivityPlayButton2.setOnClickListener {
             MLS.getDataProvider().fetchEvents(

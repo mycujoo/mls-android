@@ -32,11 +32,12 @@ android {
         }
 
         debug {
-            // Grab the Key from the CI environment, if not set provide a value that would cause an error
+            // Grab the Key from the CI/Developer environment, if not set provide a value that would cause an error
             if (System.getenv("MCLS_KEY") != null) {
                 buildConfigField("String", "MCLS_KEY", "\"" + System.getenv("MCLS_KEY") + "\"")
-            } else {
-                buildConfigField("String", "MCLS_KEY", "\"YOUR_PUBLIC_KEY_HERE\"")
+            }
+            if (System.getenv("MCLS_TEST_EVENT_ID") != null) {
+                buildConfigField("String", "MCLS_TEST_EVENT_ID", "\"" + System.getenv("MCLS_TEST_EVENT_ID") + "\"")
             }
             minifyEnabled false
             shrinkResources false
