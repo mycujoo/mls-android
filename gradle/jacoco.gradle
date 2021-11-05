@@ -9,7 +9,7 @@ configure(coveredProject) { prj ->
 
     // Set Jacoco version
     jacoco {
-        toolVersion = "0.8.5"
+        toolVersion = "0.8.7"
     }
 
     tasks.withType(Test) {
@@ -22,9 +22,9 @@ configure(coveredProject) { prj ->
     task jacocoReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'connectedDebugAndroidTest']) {
 
         reports {
-            csv.enabled = false
-            xml.enabled = false
-            html.enabled = true
+            csv.required = false
+            xml.required = false
+            html.required = true
         }
 
         // Setup the .class, source, and execution directories
