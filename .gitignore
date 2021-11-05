@@ -16,3 +16,6 @@
 .idea/
 .idea/gradle.xml
 .idea/runConfigurations.xml
+
+fastlane/report.xml
+fastlane/README.md
