@@ -18,7 +18,7 @@ class CasterSessionTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        MockitoAnnotations.openMocks(this)
         whenever(castSession.remoteMediaClient).thenReturn(remoteMediaClient)
     }
 

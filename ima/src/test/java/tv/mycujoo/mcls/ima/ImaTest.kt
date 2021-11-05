@@ -43,7 +43,7 @@ class ImaTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        MockitoAnnotations.openMocks(this)
         whenever(builder.setAdErrorListener(any())).thenReturn(builder)
         whenever(builder.setAdEventListener(any())).thenAnswer {
             adEventListener = it.arguments[0] as AdEvent.AdEventListener
