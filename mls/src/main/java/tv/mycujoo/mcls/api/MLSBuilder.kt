@@ -6,11 +6,16 @@ import com.google.android.exoplayer2.SimpleExoPlayer
 import dagger.hilt.EntryPoint
 import dagger.hilt.EntryPoints
 import dagger.hilt.InstallIn
+import dagger.hilt.android.internal.modules.ApplicationContextModule
 import dagger.hilt.components.SingletonComponent
+import tv.mycujoo.DaggerMLSApplication_HiltComponents_SingletonC
 import tv.mycujoo.mcls.cast.ICast
 import tv.mycujoo.mcls.core.InternalBuilder
 import tv.mycujoo.mcls.core.PlayerEventsListener
 import tv.mycujoo.mcls.core.UIEventListener
+import tv.mycujoo.mcls.di.AppModule
+import tv.mycujoo.mcls.di.NetworkModule
+import tv.mycujoo.mcls.di.RepositoryModule
 import tv.mycujoo.mcls.enum.C.Companion.ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE
 import tv.mycujoo.mcls.ima.IIma
@@ -21,7 +26,7 @@ import javax.inject.Inject
 /**
  * builder of MLS(MCLS) main component
  */
-open class MLSBuilder @Inject constructor(){
+open class MLSBuilder @Inject constructor() {
 
 
     lateinit var internalBuilder: InternalBuilder
@@ -127,9 +132,15 @@ open class MLSBuilder @Inject constructor(){
      * @return MLS
      */
     open fun build(context: Context): MLS {
-        val builderProvider = EntryPoints.get(context, BuilderProvider::class.java)
+        val graph = DaggerMLSApplication_HiltComponents_SingletonC.builder()
+            .applicationContextModule(ApplicationContextModule(context))
+            .networkModule(NetworkModule())
+            .appModule(AppModule())
+            .repositoryModule(RepositoryModule())
+            .build()
 
-        internalBuilder = builderProvider.provideInternalBuilder()
+
+        internalBuilder = graph.provideInternalBuilder()
         internalBuilder.initialize()
 
         val mls = MLS(this)

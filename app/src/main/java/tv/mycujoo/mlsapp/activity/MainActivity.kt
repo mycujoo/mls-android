@@ -12,7 +12,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.EventStatus
 import tv.mycujoo.domain.entity.OrderByEventsParam
-import tv.mycujoo.mcls.MLSActivity
 import tv.mycujoo.mcls.api.MLS
 import tv.mycujoo.mcls.api.MLSBuilder
 import tv.mycujoo.mcls.api.MLSConfiguration
@@ -25,7 +24,7 @@ import tv.mycujoo.mlsapp.BuildConfig.MCLS_TEST_EVENT_ID
 import tv.mycujoo.mlsapp.R
 
 
-class MainActivity : MLSActivity() {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var MLS: MLS
     var isFullScreen = false
@@ -59,7 +58,7 @@ class MainActivity : MLSActivity() {
         }
 
         MLS =
-            MLSBuilder
+            MLSBuilder()
                 .publicKey(MCLS_KEY)
                 .withActivity(this)
                 .setPlayerEventsListener(playerEventsListener)
