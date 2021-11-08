@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity() {
                         )
                     )
                 )
-                .build(applicationContext)
+                .build()
 
 
 

@@ -131,9 +131,9 @@ open class MLSBuilder @Inject constructor() {
      * Initializes InternalBuilder and MLS
      * @return MLS
      */
-    open fun build(context: Context): MLS {
+    open fun build(): MLS {
         val graph = DaggerMLSApplication_HiltComponents_SingletonC.builder()
-            .applicationContextModule(ApplicationContextModule(context))
+            .applicationContextModule(ApplicationContextModule(activity))
             .networkModule(NetworkModule())
             .appModule(AppModule())
             .repositoryModule(RepositoryModule())
