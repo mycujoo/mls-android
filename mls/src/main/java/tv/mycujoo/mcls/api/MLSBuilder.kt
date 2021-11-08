@@ -3,6 +3,10 @@ package tv.mycujoo.mcls.api
 import android.app.Activity
 import android.content.Context
 import com.google.android.exoplayer2.SimpleExoPlayer
+import dagger.hilt.EntryPoint
+import dagger.hilt.EntryPoints
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import tv.mycujoo.mcls.cast.ICast
 import tv.mycujoo.mcls.core.InternalBuilder
 import tv.mycujoo.mcls.core.PlayerEventsListener
@@ -12,11 +16,12 @@ import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_ME
 import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.mcls.network.socket.ReactorCallback
 import tv.mycujoo.mcls.network.socket.ReactorListener
+import javax.inject.Inject
 
 /**
  * builder of MLS(MCLS) main component
  */
-open class MLSBuilder {
+open class MLSBuilder @Inject constructor(){
 
 
     lateinit var internalBuilder: InternalBuilder
@@ -121,8 +126,10 @@ open class MLSBuilder {
      * Initializes InternalBuilder and MLS
      * @return MLS
      */
-    open fun build(): MLS {
-        internalBuilder = InternalBuilder(activity!!, ima, mlsConfiguration.logLevel)
+    open fun build(context: Context): MLS {
+        val builderProvider = EntryPoints.get(context, BuilderProvider::class.java)
+
+        internalBuilder = builderProvider.provideInternalBuilder()
         internalBuilder.initialize()
 
         val mls = MLS(this)
@@ -130,4 +137,9 @@ open class MLSBuilder {
         return mls
     }
 
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface BuilderProvider {
+        fun provideInternalBuilder(): InternalBuilder
+    }
 }

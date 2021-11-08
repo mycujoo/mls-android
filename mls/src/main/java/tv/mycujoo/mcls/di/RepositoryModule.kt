@@ -2,6 +2,8 @@ package tv.mycujoo.mcls.di
 
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.mcls.network.MlsApi
 import javax.inject.Singleton
@@ -12,6 +14,7 @@ import javax.inject.Singleton
  * @see EventsRepository
  */
 @Module
+@InstallIn(SingletonComponent::class)
 open class RepositoryModule {
 
     @Provides

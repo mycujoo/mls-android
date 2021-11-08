@@ -3,6 +3,9 @@ package tv.mycujoo.mcls.di
 import android.content.Context
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -22,12 +25,12 @@ import javax.inject.Singleton
  * Coroutines scope, Data manager & Pref manager are provided to dependency graph by this module
  */
 @Module
-open class AppModule() {
-
+@InstallIn(SingletonComponent::class)
+open class AppModule {
 
     @Provides
     @Singleton
-    open fun providePrefManager(context: Context): IPrefManager {
+    open fun providePrefManager(@ApplicationContext context: Context): IPrefManager {
         return PrefManager(context.getSharedPreferences("MLS", Context.MODE_PRIVATE))
     }
 
@@ -46,6 +49,4 @@ open class AppModule() {
     open fun provideDataManager(scope: CoroutineScope, repository: EventsRepository): IDataManager {
         return DataManager(scope, repository, Logger(LogLevel.MINIMAL))
     }
-
-
 }
