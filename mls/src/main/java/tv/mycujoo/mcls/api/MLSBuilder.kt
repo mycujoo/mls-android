@@ -26,7 +26,7 @@ import javax.inject.Inject
 /**
  * builder of MLS(MCLS) main component
  */
-open class MLSBuilder @Inject constructor() {
+open class MLSBuilder {
 
 
     lateinit var internalBuilder: InternalBuilder
