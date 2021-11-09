@@ -52,22 +52,28 @@ class MLSTimeBarTest {
     @Test
     fun scrubbingShouldCallPOIListener() {
         // Time-bar bounds on screen -> Rect(0, 1293 - 1440, 1371)
-        mlsTimeBar.setDuration(120000)
-        val motionEventStart =
-            MotionEventBuilder.newBuilder().setAction(MotionEvent.ACTION_DOWN).setPointer(1F, 1400F)
-                .build()
-        val motionEventEnd =
-            MotionEventBuilder.newBuilder().setAction(MotionEvent.ACTION_MOVE)
-                .setPointer(50F, 1400F).build()
 
+        activityScenarioRule.scenario.onActivity {
+            mlsTimeBar.setDuration(120000)
+            val frameHeight = it.findViewById<FrameLayout>(R.id.blankActivity_rootView).height
 
-        UiThreadStatement.runOnUiThread {
+            val motionEventStart =
+                MotionEventBuilder.newBuilder().setAction(MotionEvent.ACTION_DOWN)
+                    .setPointer(1F, (frameHeight / 2).toFloat())
+                    .build()
+
+            val motionEventEnd =
+                MotionEventBuilder.newBuilder().setAction(MotionEvent.ACTION_MOVE)
+                    .setPointer(50F, (frameHeight / 2).toFloat())
+                    .build()
+
             mlsTimeBar.onTouchEvent(motionEventStart)
             mlsTimeBar.onTouchEvent(motionEventEnd)
 
-        }
+            Thread.sleep(5000)
 
-        assertEquals(123L, timeLineMarkerPosition.position)
+            assertEquals(50L, timeLineMarkerPosition.position)
+        }
     }
 
 

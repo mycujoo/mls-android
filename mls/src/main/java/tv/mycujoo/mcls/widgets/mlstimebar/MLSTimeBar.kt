@@ -6,6 +6,7 @@ import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.AttributeSet
+import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
@@ -234,11 +235,12 @@ class MLSTimeBar @JvmOverloads constructor(
         if (!isEnabled || duration <= 0) {
             return false
         }
+
         val touchPosition = resolveRelativeTouchPosition(event)
         val x = touchPosition.x
         val y = touchPosition.y
         when (event.action) {
-            MotionEvent.ACTION_DOWN -> if (isInSeekBar(x.toFloat(), y.toFloat())) {
+            MotionEvent.ACTION_DOWN -> if (isInSeekBar(event.x, event.y)) {
                 positionScrubber(x.toFloat())
                 startScrubbing(scrubberPosition)
                 update()
