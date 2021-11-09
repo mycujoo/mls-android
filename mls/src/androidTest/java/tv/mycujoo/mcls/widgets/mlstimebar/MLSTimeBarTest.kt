@@ -51,7 +51,7 @@ class MLSTimeBarTest {
 
     @Test
     fun scrubbingShouldCallPOIListener() {
-        // Time-bar bounds on screen -> Rect(0, 1293 - 1440, 1371)
+        // Time-bar is in the center of the screen height
 
         activityScenarioRule.scenario.onActivity {
             mlsTimeBar.setDuration(120000)
