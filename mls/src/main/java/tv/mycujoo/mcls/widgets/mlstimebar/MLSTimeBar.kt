@@ -1,5 +1,6 @@
 package tv.mycujoo.mcls.widgets.mlstimebar
 
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.content.Context
 import android.graphics.*
@@ -82,7 +83,7 @@ class MLSTimeBar @JvmOverloads constructor(
      */
     fun setPlayedColor(@ColorInt playedColor: Int) {
         playedPaint.color = playedColor
-        invalidate(seekBounds)
+        invalidate()
     }
 
     /**
@@ -92,7 +93,7 @@ class MLSTimeBar @JvmOverloads constructor(
      */
     fun setScrubberColor(@ColorInt scrubberColor: Int) {
         scrubberPaint.color = scrubberColor
-        invalidate(seekBounds)
+        invalidate()
     }
 
     /**
@@ -104,7 +105,7 @@ class MLSTimeBar @JvmOverloads constructor(
      */
     fun setBufferedColor(@ColorInt bufferedColor: Int) {
         bufferedPaint.color = bufferedColor
-        invalidate(seekBounds)
+        invalidate()
     }
 
     /**
@@ -115,7 +116,7 @@ class MLSTimeBar @JvmOverloads constructor(
      */
     fun setUnplayedColor(@ColorInt unplayedColor: Int) {
         unplayedPaint.color = unplayedColor
-        invalidate(seekBounds)
+        invalidate()
     }
 
     /**
@@ -125,7 +126,7 @@ class MLSTimeBar @JvmOverloads constructor(
      */
     fun setAdMarkerColor(@ColorInt adMarkerColor: Int) {
         adMarkerPaint.color = adMarkerColor
-        invalidate(seekBounds)
+        invalidate()
     }
 
     /**
@@ -135,7 +136,7 @@ class MLSTimeBar @JvmOverloads constructor(
      */
     fun setPlayedAdMarkerColor(@ColorInt playedAdMarkerColor: Int) {
         playedAdMarkerPaint.color = playedAdMarkerColor
-        invalidate(seekBounds)
+        invalidate()
     }
 
     fun setTimelineMarkerPositionListener(listener: TimelineMarkerPosition) {
@@ -231,6 +232,7 @@ class MLSTimeBar @JvmOverloads constructor(
         canvas.restore()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (!isEnabled || duration <= 0) {
             return false
@@ -329,10 +331,11 @@ class MLSTimeBar @JvmOverloads constructor(
         val heightMode = MeasureSpec.getMode(heightMeasureSpec)
         val heightSize = MeasureSpec.getSize(heightMeasureSpec)
         val height =
-            if (heightMode == MeasureSpec.UNSPECIFIED) touchTargetHeight else if (heightMode == MeasureSpec.EXACTLY) heightSize else Math.min(
-                touchTargetHeight,
-                heightSize
-            )
+            when (heightMode) {
+                MeasureSpec.UNSPECIFIED -> touchTargetHeight
+                MeasureSpec.EXACTLY -> heightSize
+                else -> touchTargetHeight.coerceAtMost(heightSize)
+            }
         setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), height)
         updateDrawableState()
     }
@@ -500,16 +503,16 @@ class MLSTimeBar @JvmOverloads constructor(
             val bufferedPixelWidth =
                 (progressBar.width() * bufferedPosition / duration).toInt()
             bufferedBar.right =
-                Math.min(progressBar.left + bufferedPixelWidth, progressBar.right)
+                (progressBar.left + bufferedPixelWidth).coerceAtMost(progressBar.right)
             val scrubberPixelPosition =
                 (progressBar.width() * newScrubberTime / duration).toInt()
             scrubberBar.right =
-                Math.min(progressBar.left + scrubberPixelPosition, progressBar.right)
+                (progressBar.left + scrubberPixelPosition).coerceAtMost(progressBar.right)
         } else {
             bufferedBar.right = progressBar.left
             scrubberBar.right = progressBar.left
         }
-        invalidate(seekBounds)
+        invalidate()
     }
 
     private fun positionScrubber(xPosition: Float) {
@@ -528,7 +531,7 @@ class MLSTimeBar @JvmOverloads constructor(
     }
 
     private val scrubberPosition: Long
-        private get() = if (progressBar.width() <= 0 || duration == C.TIME_UNSET) {
+        get() = if (progressBar.width() <= 0 || duration == C.TIME_UNSET) {
             0
         } else scrubberBar.width() * duration / progressBar.width()
 
@@ -552,10 +555,8 @@ class MLSTimeBar @JvmOverloads constructor(
         }
         var bufferedLeft = bufferedBar.left
         val bufferedRight = bufferedBar.right
-        val progressLeft = Math.max(
-            Math.max(progressBar.left, bufferedRight),
-            scrubberBar.right
-        )
+        val progressLeft =
+            progressBar.left.coerceAtLeast(bufferedRight).coerceAtLeast(scrubberBar.right)
         if (progressLeft < progressBar.right) {
             canvas.drawRect(
                 progressLeft.toFloat(),
@@ -565,7 +566,7 @@ class MLSTimeBar @JvmOverloads constructor(
                 unplayedPaint
             )
         }
-        bufferedLeft = Math.max(bufferedLeft, scrubberBar.right)
+        bufferedLeft = bufferedLeft.coerceAtLeast(scrubberBar.right)
         if (bufferedRight > bufferedLeft) {
             canvas.drawRect(
                 bufferedLeft.toFloat(),
@@ -611,9 +612,10 @@ class MLSTimeBar @JvmOverloads constructor(
             val markerPositionOffset: Int =
                 (progressBar.width() * poiTimeMs / duration).toInt() - timelineMarkerWidth
 
-            val markerLeft = progressBar.left + Math.min(
-                progressBar.width() - adMarkerWidth,
-                Math.max(0, markerPositionOffset)
+            val markerLeft = progressBar.left + (progressBar.width() - adMarkerWidth).coerceAtMost(
+                0.coerceAtLeast(
+                    markerPositionOffset
+                )
             )
             val markerRight = markerLeft + adMarkerWidth.toFloat()
 
@@ -644,18 +646,19 @@ class MLSTimeBar @JvmOverloads constructor(
             )
             val markerPositionOffset =
                 (progressBar.width() * adGroupTimeMs / duration).toInt() - adMarkerOffset
-            val markerLeft = progressBar.left + Math.min(
-                progressBar.width() - adMarkerWidth,
-                Math.max(0, markerPositionOffset)
+            val markerLeft = progressBar.left + (progressBar.width() - adMarkerWidth).coerceAtMost(
+                0.coerceAtLeast(
+                    markerPositionOffset
+                )
             )
-            val paint =
+            val playedPaint =
                 if (playedAdGroups[i]) playedAdMarkerPaint else adMarkerPaint
             canvas.drawRect(
                 markerLeft.toFloat(),
                 barTop.toFloat(),
                 markerLeft + adMarkerWidth.toFloat(),
                 barBottom.toFloat(),
-                paint
+                playedPaint
             )
         }
 
@@ -718,14 +721,14 @@ class MLSTimeBar @JvmOverloads constructor(
     }
 
     private val progressText: String
-        private get() = Util.getStringForTime(
+        get() = Util.getStringForTime(
             formatBuilder,
             formatter,
             position
         )
 
     private val positionIncrement: Long
-        private get() = if (keyTimeIncrement == C.TIME_UNSET) if (duration == C.TIME_UNSET) 0 else duration / keyCountIncrement else keyTimeIncrement
+        get() = if (keyTimeIncrement == C.TIME_UNSET) if (duration == C.TIME_UNSET) 0 else duration / keyCountIncrement else keyTimeIncrement
 
     private fun setDrawableLayoutDirection(drawable: Drawable): Boolean {
         return Util.SDK_INT >= 23 && setDrawableLayoutDirection(
@@ -899,10 +902,8 @@ class MLSTimeBar @JvmOverloads constructor(
                 scrubberDrawable = a.getDrawable(R.styleable.DefaultTimeBar_scrubber_drawable)
                 scrubberDrawable?.let {
                     setDrawableLayoutDirection(it)
-                    defaultTouchTargetHeight = Math.max(
-                        it.minimumHeight,
-                        defaultTouchTargetHeight
-                    )
+                    defaultTouchTargetHeight =
+                        it.minimumHeight.coerceAtLeast(defaultTouchTargetHeight)
                 }
                 barHeight = a.getDimensionPixelSize(
                     R.styleable.DefaultTimeBar_bar_height,
@@ -985,9 +986,10 @@ class MLSTimeBar @JvmOverloads constructor(
         scrubberPadding = if (scrubberDrawable != null) {
             (scrubberDrawable!!.minimumWidth + 1) / 2
         } else {
-            ((Math.max(
-                scrubberDisabledSize,
-                Math.max(scrubberEnabledSize, scrubberDraggedSize)
+            ((scrubberDisabledSize.coerceAtLeast(
+                scrubberEnabledSize.coerceAtLeast(
+                    scrubberDraggedSize
+                )
             ) + 1)
                     / 2)
         }
