@@ -70,8 +70,6 @@ class MLSTimeBarTest {
             mlsTimeBar.onTouchEvent(motionEventStart)
             mlsTimeBar.onTouchEvent(motionEventEnd)
 
-            Thread.sleep(5000)
-
             assertEquals(50L, timeLineMarkerPosition.position)
         }
     }
