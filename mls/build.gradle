@@ -21,13 +21,13 @@ apply from: "../script/publish-mavencentral.gradle"
 
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 30
     buildToolsVersion '30.0.3'
 
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion 30
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
@@ -84,7 +84,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.3.1'
-    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.core:core-ktx:1.6.0'
 
     // Test related
     testImplementation 'junit:junit:4.13.2'
@@ -120,6 +120,8 @@ dependencies {
     // Hilt
     implementation "com.google.dagger:hilt-android:2.38.1"
     kapt "com.google.dagger:hilt-compiler:2.38.1"
+    kaptTest 'com.google.dagger:hilt-android-compiler:2.38.1'
+    testImplementation 'com.google.dagger:hilt-android-testing:2.38.1'
 
     // Dagger For non-hilt apps
     implementation 'com.google.dagger:dagger:2.39.1'

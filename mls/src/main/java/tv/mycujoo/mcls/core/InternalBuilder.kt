@@ -1,6 +1,5 @@
 package tv.mycujoo.mcls.core
 
-import android.app.Activity
 import android.content.Context
 import android.content.res.AssetManager
 import androidx.test.espresso.idling.CountingIdlingResource

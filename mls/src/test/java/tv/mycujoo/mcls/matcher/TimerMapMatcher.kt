@@ -11,6 +11,7 @@ class TimerMapMatcher(private val hashMap: HashMap<String, TimerVariable>) :
     override fun matches(argument: HashMap<String, TimerVariable>?): Boolean {
         this.argument = argument!!
         return argument.keys.all { key ->
+            // TODO: Fix Ignored equality here
             argument[key]!!.name == hashMap[key]!!.name
             argument[key]!!.getTime() == hashMap[key]!!.getTime()
         }
