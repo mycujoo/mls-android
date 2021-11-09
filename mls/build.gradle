@@ -156,4 +156,7 @@ dependencies {
     //TV
     api "androidx.leanback:leanback-preference:1.0.0"
     api 'com.google.android.exoplayer:extension-leanback:2.15.1'
+
+    // Android Test Rules
+    androidTestImplementation "androidx.test.ext:junit-ktx:1.1.3"
 }
