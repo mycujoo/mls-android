@@ -38,7 +38,7 @@ class DataManagerTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        MockitoAnnotations.openMocks(this)
 
         val scope = TestCoroutineScope()
         dataManager = DataManager(scope, eventsRepository, Logger(LogLevel.MINIMAL))

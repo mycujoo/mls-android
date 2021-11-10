@@ -21,7 +21,7 @@ class ReactorListenerTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        MockitoAnnotations.openMocks(this)
         reactorListener = ReactorListener(reactorCallback)
     }
 

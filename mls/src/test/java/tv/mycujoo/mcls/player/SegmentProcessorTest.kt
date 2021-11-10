@@ -31,7 +31,8 @@ class SegmentProcessorTest {
             null,
             0L,
             -1L,
-            false
+            false,
+            emptyList()
         )
 
     var discontinuitySegmentWithZeroDuration =
@@ -47,7 +48,8 @@ class SegmentProcessorTest {
             null,
             0L,
             -1L,
-            false
+            false,
+            emptyList()
         )
 
 
@@ -121,7 +123,8 @@ class SegmentProcessorTest {
             null,
             0L,
             -1L,
-            false
+            false,
+            emptyList()
         )
     }
 

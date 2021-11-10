@@ -19,6 +19,8 @@ import tv.mycujoo.mcls.api.PlayerEventsListener
 import tv.mycujoo.mcls.core.UIEventListener
 import tv.mycujoo.mcls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mcls.widgets.MLSPlayerView
+import tv.mycujoo.mlsapp.BuildConfig.MCLS_KEY
+import tv.mycujoo.mlsapp.BuildConfig.MCLS_TEST_EVENT_ID
 import tv.mycujoo.mlsapp.R
 
 
@@ -57,7 +59,7 @@ class MainActivity : AppCompatActivity() {
 
         MLS =
             MLSBuilder()
-                .publicKey("YOUR_PUBLIC_KEY_HERE")
+                .publicKey(MCLS_KEY)
                 .withActivity(this)
                 .setPlayerEventsListener(playerEventsListener)
                 .setUIEventListener(uiEventListener)
@@ -83,7 +85,7 @@ class MainActivity : AppCompatActivity() {
 
 
         mainActivityPlayButton.setOnClickListener {
-            MLS.getVideoPlayer().playVideo("EVENT_ID_HERE")
+            MLS.getVideoPlayer().playVideo(MCLS_TEST_EVENT_ID)
         }
         mainActivityPlayButton2.setOnClickListener {
             MLS.getDataProvider().fetchEvents(

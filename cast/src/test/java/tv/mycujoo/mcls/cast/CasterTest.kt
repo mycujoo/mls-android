@@ -51,7 +51,7 @@ class CasterTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        MockitoAnnotations.openMocks(this)
         whenever(castProvider.getCastContext()).thenReturn(castContext)
         whenever(castContext.sessionManager).thenReturn(sessionManager)
         whenever(sessionManager.currentCastSession).thenReturn(castSession)

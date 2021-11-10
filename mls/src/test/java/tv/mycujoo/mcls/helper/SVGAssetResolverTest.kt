@@ -28,7 +28,7 @@ class SVGAssetResolverTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        MockitoAnnotations.openMocks(this)
 
         whenever(typeFaceFactory.createFromAsset(ROBOTO_MONO_BOLD_FILE_NAME)).thenReturn(
             robotoMonoBoldTypeface

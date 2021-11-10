@@ -1,58 +1,57 @@
 package tv.mycujoo.data.model
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 
 data class EventSourceData(
-    @SerializedName("id") val id: String,
-    @SerializedName("title") val title: String,
-    @SerializedName("description") val description: String,
-    @SerializedName("thumbnail_url") val thumbnailUrl: String,
-    @SerializedName("poster_url") val poster_url: String?,
-    @SerializedName("location") val locationSourceData: LocationSourceData,
-    @SerializedName("organiser") val organiser: String,
-    @SerializedName("start_time") val start_time: String,
-    @SerializedName("status") val status: String,
-    @SerializedName("streams") val streams: List<StreamSourceData>,
-    @SerializedName("timezone") val timezone: String,
-    @SerializedName("timeline_ids") val timeline_ids: List<String>,
-    @SerializedName("metadata") val metadata: MetadataSourceData,
-    @SerializedName("is_test") val is_test: Boolean
+    @field:Json(name = "id") val id: String,
+    @field:Json(name = "title") val title: String,
+    @field:Json(name = "description") val description: String,
+    @field:Json(name = "thumbnail_url") val thumbnailUrl: String,
+    @field:Json(name = "poster_url") val poster_url: String?,
+    @field:Json(name = "location") val locationSourceData: LocationSourceData,
+    @field:Json(name = "organiser") val organiser: String,
+    @field:Json(name = "start_time") val start_time: String,
+    @field:Json(name = "status") val status: String,
+    @field:Json(name = "streams") val streams: List<StreamSourceData>,
+    @field:Json(name = "timezone") val timezone: String,
+    @field:Json(name = "timeline_ids") val timeline_ids: List<String>,
+    @field:Json(name = "metadata") val metadata: MetadataSourceData,
+    @field:Json(name = "is_test") val is_test: Boolean
 )
 
 data class StreamSourceData(
-    @SerializedName("id") val id: String,
-    @SerializedName("dvr_window_size") val dvrWindowString: String,
-    @SerializedName("full_url") val fullUrl: String?,
-    @SerializedName("widevine") val widevine: WidevineSourceData?,
-    @SerializedName("error") val errorCodeAndMessage: ErrorCodeAndMessageSourceData? = null
+    @field:Json(name = "id") val id: String,
+    @field:Json(name = "dvr_window_size") val dvrWindowString: String,
+    @field:Json(name = "full_url") val fullUrl: String?,
+    @field:Json(name = "widevine") val widevine: WidevineSourceData?,
+    @field:Json(name = "error") val errorCodeAndMessage: ErrorCodeAndMessageSourceData? = null
 )
 
 data class WidevineSourceData(
-    @SerializedName("full_url") val fullUrl: String?,
-    @SerializedName("license_url") val licenseUrl: String?
+    @field:Json(name = "full_url") val fullUrl: String?,
+    @field:Json(name = "license_url") val licenseUrl: String?
 )
 
 data class ErrorCodeAndMessageSourceData(
-    @SerializedName("code") val code: String?,
-    @SerializedName("message") val message: String?
+    @field:Json(name = "code") val code: String?,
+    @field:Json(name = "message") val message: String?
 )
 
 data class LocationSourceData(
-    @SerializedName("physical") val physicalSourceData: PhysicalSourceData
+    @field:Json(name = "physical") val physicalSourceData: PhysicalSourceData
 )
 
-class MetadataSourceData(
-)
+class MetadataSourceData
 
 data class PhysicalSourceData(
-    @SerializedName("city") val city: String,
-    @SerializedName("continent_code") val continent_code: String,
-    @SerializedName("coordinates") val coordinates: CoordinatesSourceData,
-    @SerializedName("country_code") val country_code: String,
-    @SerializedName("venue") val venue: String
+    @field:Json(name = "city") val city: String,
+    @field:Json(name = "continent_code") val continent_code: String,
+    @field:Json(name = "coordinates") val coordinates: CoordinatesSourceData,
+    @field:Json(name = "country_code") val country_code: String,
+    @field:Json(name = "venue") val venue: String
 )
 
 data class CoordinatesSourceData(
-    @SerializedName("latitude") val latitude: Double,
-    @SerializedName("longitude") val longitude: Double
+    @field:Json(name = "latitude") val latitude: Double,
+    @field:Json(name = "longitude") val longitude: Double
 )

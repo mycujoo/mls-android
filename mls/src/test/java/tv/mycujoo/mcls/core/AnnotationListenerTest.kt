@@ -44,7 +44,7 @@ class AnnotationListenerTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        MockitoAnnotations.openMocks(this)
         annotationListener = AnnotationListener(playerView, overlayViewHelper, downloaderClient)
         whenever(playerView.overlayHost).thenReturn(overlayContainer)
         whenever(playerView.context).thenReturn(context)

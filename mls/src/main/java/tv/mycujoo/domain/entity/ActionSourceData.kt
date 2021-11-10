@@ -1,17 +1,17 @@
 package tv.mycujoo.domain.entity
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.domain.entity.models.ActionType.*
 import tv.mycujoo.domain.mapper.DataMapper
 import java.util.*
 
 data class ActionSourceData(
-    @SerializedName("id") val id: String?,
-    @SerializedName("type") val type: String?,
-    @SerializedName("offset") val offset: Long?,
-    @SerializedName("absoluteTime") val absoluteTime: Long?,
-    @SerializedName("data") val data: Map<String, Any>?
+    @field:Json(name = "id") val id: String?,
+    @field:Json(name = "type") val type: String?,
+    @field:Json(name = "offset") val offset: Long?,
+    @field:Json(name = "absoluteTime") val absoluteTime: Long?,
+    @field:Json(name = "data") val data: Map<String, Any>?
 ) {
     fun toAction(): Action {
         val newId = id.orEmpty()

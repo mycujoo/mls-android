@@ -5,7 +5,6 @@ import com.google.android.exoplayer2.MediaItem
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import tv.mycujoo.mcls.data.IDataManager
-import tv.mycujoo.mcls.di.DaggerMlsComponent
 import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.ima.IIma
@@ -47,9 +46,6 @@ class MLSTvInternalBuilder(activity: Activity, ima: IIma?, logLevel: LogLevel) {
 
 
     init {
-        val dependencyGraph =
-            DaggerMlsComponent.builder().networkModule(NetworkModule(activity)).build()
-        dependencyGraph.inject(this)
 
         logger = Logger(logLevel)
 

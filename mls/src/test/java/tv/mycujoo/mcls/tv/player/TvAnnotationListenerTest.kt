@@ -36,7 +36,7 @@ class TvAnnotationListenerTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        MockitoAnnotations.openMocks(this)
         tvAnnotationListener = TvAnnotationListener(
             tvOverlayContainer,
             overlayViewHelper,

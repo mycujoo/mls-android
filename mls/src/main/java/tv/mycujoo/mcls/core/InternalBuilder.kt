@@ -1,6 +1,7 @@
 package tv.mycujoo.mcls.core
 
 import android.app.Activity
+import android.content.Context
 import android.content.res.AssetManager
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.ExoPlayer
@@ -9,12 +10,12 @@ import com.npaw.youbora.lib6.YouboraLog
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import tv.mycujoo.mcls.analytic.YouboraClient
+import tv.mycujoo.mcls.api.MLSConfiguration
 import tv.mycujoo.mcls.data.IDataManager
-import tv.mycujoo.mcls.di.DaggerMlsComponent
-import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.enum.LogLevel.*
 import tv.mycujoo.mcls.helper.AnimationFactory
@@ -33,11 +34,12 @@ import javax.inject.Inject
 /**
  * Internal builder which builds & prepares lower level components for MLS
  */
-open class InternalBuilder(
-    private val activity: Activity,
-    private val ima: IIma?,
-    private val logLevel: LogLevel
+open class InternalBuilder @Inject constructor(
+    @ApplicationContext private val context: Context,
 ) {
+
+    private var ima: IIma? = null
+    private var logLevel: LogLevel = MLSConfiguration().logLevel
 
     /**region Fields*/
     lateinit var logger: Logger
@@ -75,9 +77,6 @@ open class InternalBuilder(
      * initialize internal builder and prepare it for usage by MLS
      */
     open fun initialize() {
-        val dependencyGraph =
-            DaggerMlsComponent.builder().networkModule(NetworkModule(activity)).build()
-        dependencyGraph.inject(this)
 
         logger = Logger(logLevel)
 
@@ -94,8 +93,8 @@ open class InternalBuilder(
         )
 
         mediaFactory = MediaFactory(
-            Player.createDefaultMediaSourceFactory(activity),
-            Player.createMediaFactory(activity),
+            Player.createDefaultMediaSourceFactory(context),
+            Player.createMediaFactory(context),
             MediaItem.Builder()
         )
 
@@ -112,7 +111,7 @@ open class InternalBuilder(
      * internal use: AssetManager of provided activity
      * @return AssetManager
      */
-    fun getAssetManager(): AssetManager = activity.assets
+    fun getAssetManager(): AssetManager = context.assets
 
     /**
      * internal use: create YouboraClient
@@ -140,8 +139,8 @@ open class InternalBuilder(
      * this plugin and Youbora Client will work together to send video related analytics
      * @see Plugin
      */
-    fun createYouboraPlugin(youboraOptions: Options, activity: Activity): Plugin {
-        return Plugin(youboraOptions, activity)
+    fun createYouboraPlugin(youboraOptions: Options, context: Context): Plugin {
+        return Plugin(youboraOptions, context)
     }
 
     /**

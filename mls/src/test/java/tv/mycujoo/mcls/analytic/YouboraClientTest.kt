@@ -28,7 +28,7 @@ class YouboraClientTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        MockitoAnnotations.openMocks(this)
         whenever(plugin.options).thenReturn(options)
         whenever(plugin.adapter).thenReturn(playerAdapter)
 

@@ -149,7 +149,7 @@ class VideoPlayerMediatorTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        MockitoAnnotations.openMocks(this)
 
         internalBuilder.initialize()
 

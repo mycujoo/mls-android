@@ -6,12 +6,13 @@ plugins{
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     buildToolsVersion '30.0.3'
+
     defaultConfig {
         applicationId "tv.mycujoo.mlsapp"
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -31,6 +32,13 @@ android {
         }
 
         debug {
+            // Grab the Key from the CI/Developer environment, if not set provide a value that would cause an error
+            if (System.getenv("MCLS_KEY") != null) {
+                buildConfigField("String", "MCLS_KEY", "\"" + System.getenv("MCLS_KEY") + "\"")
+            }
+            if (System.getenv("MCLS_TEST_EVENT_ID") != null) {
+                buildConfigField("String", "MCLS_TEST_EVENT_ID", "\"" + System.getenv("MCLS_TEST_EVENT_ID") + "\"")
+            }
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'

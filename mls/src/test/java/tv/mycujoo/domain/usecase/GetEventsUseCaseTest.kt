@@ -1,6 +1,7 @@
 package tv.mycujoo.domain.usecase
 
-import com.google.gson.Gson
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -13,7 +14,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
+import tv.mycujoo.data.jsonadapter.JodaJsonAdapter
 import tv.mycujoo.data.repository.EventsRepository
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
@@ -46,7 +48,7 @@ class GetEventsUseCaseTest {
 
         api = Retrofit.Builder()
             .baseUrl(server.url("/"))
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create())
             .client(okHttpClient)
             .build()
             .create(MlsApi::class.java)
@@ -62,9 +64,15 @@ class GetEventsUseCaseTest {
     @Test
     fun `given generic error, should return error`() = runBlocking<Unit> {
         val arrayList = ArrayList<EventEntity>(0)
-        val toJson = Gson().toJson(arrayList)
+
+        val moshi: Moshi = Moshi.Builder()
+            .add(JodaJsonAdapter())
+            .build()
+        val listMyData = Types.newParameterizedType(List::class.java, EventEntity::class.java)
+        val jsonAdapter = moshi.adapter<List<EventEntity>>(listMyData)
+
         val response = MockResponse()
-            .setBody(toJson)
+            .setBody(jsonAdapter.toJson(arrayList))
 
         val errorCode = HttpURLConnection.HTTP_UNAUTHORIZED
         setResponseCodeAndStatus(response, errorCode)

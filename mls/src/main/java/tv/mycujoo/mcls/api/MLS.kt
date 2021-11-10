@@ -29,6 +29,7 @@ import tv.mycujoo.mcls.player.Player
 import tv.mycujoo.mcls.player.Player.Companion.createExoPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import java.util.*
+import javax.inject.Inject
 
 /**
  * main component of MLS(MCLS) SDK.
@@ -36,7 +37,7 @@ import java.util.*
  * @constructor takes MLSBuilder and returns implementation of MLSAbstract
  * @see MLSAbstract
  */
-class MLS constructor(private val builder: MLSBuilder) : MLSAbstract() {
+class MLS @Inject constructor(private val builder: MLSBuilder) : MLSAbstract() {
 
 
     /**region Fields*/
