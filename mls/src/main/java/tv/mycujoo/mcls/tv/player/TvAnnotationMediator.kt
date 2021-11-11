@@ -19,8 +19,9 @@ import tv.mycujoo.mcls.manager.ViewHandler
 import tv.mycujoo.mcls.player.IPlayer
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-class TvAnnotationMediator(
+class TvAnnotationMediator @Inject constructor(
     player: IPlayer,
     overlayContainer: ConstraintLayout,
     scheduler: ScheduledExecutorService,
@@ -62,7 +63,7 @@ class TvAnnotationMediator(
         annotationFactory =
             AnnotationFactory(tvAnnotationListener, variableKeeper)
 
-        player.addListener(object : Player.EventListener {
+        player.addListener(object : Player.Listener {
             override fun onPositionDiscontinuity(reason: Int) {
                 if (reason == Player.DISCONTINUITY_REASON_SEEK) {
                     hasPendingSeek = true

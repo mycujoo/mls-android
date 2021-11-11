@@ -4,8 +4,9 @@ import android.util.Log
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.enum.LogLevel.*
 import tv.mycujoo.mcls.enum.MessageLevel
+import javax.inject.Inject
 
-class Logger(private var logLevel: LogLevel) {
+class Logger @Inject constructor(private var logLevel: LogLevel) {
 
     fun setLogLevel(logLevel: LogLevel) {
         this.logLevel = logLevel

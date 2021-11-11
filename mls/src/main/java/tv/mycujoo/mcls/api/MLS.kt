@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.AssetManager
 import android.os.Build
 import android.os.Handler
+import android.os.Looper
 import com.caverock.androidsvg.SVG
 import com.google.android.exoplayer2.ui.AdViewProvider
 import com.google.android.exoplayer2.util.Util
@@ -37,7 +38,9 @@ import javax.inject.Inject
  * @constructor takes MLSBuilder and returns implementation of MLSAbstract
  * @see MLSAbstract
  */
-class MLS @Inject constructor(private val builder: MLSBuilder) : MLSAbstract() {
+class MLS @Inject constructor(
+    private val builder: MLSBuilder,
+) : MLSAbstract() {
 
 
     /**region Fields*/
@@ -111,7 +114,7 @@ class MLS @Inject constructor(private val builder: MLSBuilder) : MLSAbstract() {
                 builder.ima,
                 builder.internalBuilder.mediaFactory,
                 exoPlayer,
-                Handler(),
+                Handler(Looper.myLooper()!!),
                 MediaOnLoadCompletedListener(exoPlayer)
             )
         }

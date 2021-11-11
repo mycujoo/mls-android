@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import com.google.android.exoplayer2.SimpleExoPlayer
 import dagger.hilt.EntryPoint
-import dagger.hilt.EntryPoints
 import dagger.hilt.InstallIn
 import dagger.hilt.android.internal.modules.ApplicationContextModule
 import dagger.hilt.components.SingletonComponent
@@ -21,7 +20,6 @@ import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_ME
 import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.mcls.network.socket.ReactorCallback
 import tv.mycujoo.mcls.network.socket.ReactorListener
-import javax.inject.Inject
 
 /**
  * builder of MLS(MCLS) main component
@@ -113,7 +111,7 @@ open class MLSBuilder {
     /**
      * internal use: create instance of Exoplayer
      */
-    fun createExoPlayer(context: Context): SimpleExoPlayer? {
+    fun createExoPlayer(context: Context): SimpleExoPlayer {
         return SimpleExoPlayer.Builder(context).build()
     }
 

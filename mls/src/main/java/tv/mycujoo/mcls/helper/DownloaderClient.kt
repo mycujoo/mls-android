@@ -6,6 +6,7 @@ import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.SvgData
 import java.io.IOException
 import java.util.*
+import javax.inject.Inject
 
 /**
  * Implementation of IDownloaderClient which downloads & returns SVG Data
@@ -13,7 +14,9 @@ import java.util.*
  * @see IDownloaderClient
  * @see SvgData
  */
-class DownloaderClient(val okHttpClient: OkHttpClient) : IDownloaderClient {
+class DownloaderClient @Inject constructor(
+    val okHttpClient: OkHttpClient
+) : IDownloaderClient {
 
     /**
      * download SVG & call with ready-to-parse SVGData

@@ -1,6 +1,7 @@
 package tv.mycujoo.mcls.di
 
 import android.content.Context
+import androidx.test.espresso.idling.CountingIdlingResource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,14 +31,14 @@ open class AppModule {
 
     @Provides
     @Singleton
-    open fun providePrefManager(@ApplicationContext context: Context): IPrefManager {
+    fun providePrefManager(@ApplicationContext context: Context): IPrefManager {
         return PrefManager(context.getSharedPreferences("MLS", Context.MODE_PRIVATE))
     }
 
     @ObsoleteCoroutinesApi
     @Provides
     @Singleton
-    open fun provideCoroutineScope(): CoroutineScope {
+    fun provideCoroutineScope(): CoroutineScope {
 
         val job = SupervisorJob()
 
@@ -46,7 +47,24 @@ open class AppModule {
 
     @Provides
     @Singleton
-    open fun provideDataManager(scope: CoroutineScope, repository: EventsRepository): IDataManager {
-        return DataManager(scope, repository, Logger(LogLevel.MINIMAL))
+    fun provideDataManager(
+        scope: CoroutineScope,
+        repository: EventsRepository,
+        logger: Logger
+    ): IDataManager {
+        return DataManager(scope, repository, logger)
+    }
+
+    @Provides
+    @Singleton
+    fun provideLogger(): Logger {
+        return Logger(LogLevel.MINIMAL)
+    }
+
+    @CountingIdlingResourceViewIdentifierManager
+    @Provides
+    @Singleton
+    fun provideViewIdentifierManagerCountingIdlingResources(): CountingIdlingResource {
+        return CountingIdlingResource("ViewIdentifierManager")
     }
 }

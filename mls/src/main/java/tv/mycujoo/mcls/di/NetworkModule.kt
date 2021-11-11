@@ -32,8 +32,16 @@ import javax.inject.Singleton
 open class NetworkModule {
 
     private val maxAgeInSecond: Int = 60 * 5
-    private val publicBaseUrl: String = "https://mls.mycujoo.tv"
-    private val mlsApiBaseUrl: String = "https://mls-api.mycujoo.tv"
+
+    @PublicBaseUrl
+    @Provides
+    @Singleton
+    fun publicBaseUrl(): String = "https://mls.mycujoo.tv"
+
+    @ApiBaseUrl
+    @Provides
+    @Singleton
+    fun mlsApiBaseUrl(): String = "https://mls-api.mycujoo.tv"
 
     @Provides
     @Singleton
@@ -75,24 +83,32 @@ open class NetworkModule {
     }
 
     @Provides
-    @Named("PUBLIC-API")
+    @PublicApi
     @Singleton
-    open fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+    open fun provideRetrofit(
+        okHttpClient: OkHttpClient,
+        @PublicBaseUrl publicBaseUrl: String
+    ): Retrofit {
         val moshi : Moshi = Moshi.Builder()
             .add(JodaJsonAdapter())
             .build()
 
-        return Retrofit.Builder().baseUrl(publicBaseUrl)
+        return Retrofit.Builder()
+            .baseUrl(publicBaseUrl)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .client(okHttpClient)
             .build()
     }
 
     @Provides
-    @Named("MLS-API")
+    @MLSAPI
     @Singleton
-    open fun provideMlsApiRetrofit(okHttpClient: OkHttpClient): Retrofit {
-        return Retrofit.Builder().baseUrl(mlsApiBaseUrl)
+    open fun provideMlsApiRetrofit(
+        okHttpClient: OkHttpClient,
+        @ApiBaseUrl baseUrl: String
+    ): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(baseUrl)
             .addConverterFactory(MoshiConverterFactory.create())
             .client(okHttpClient)
             .build()
@@ -100,8 +116,7 @@ open class NetworkModule {
 
     @Provides
     @Singleton
-    open fun provideMlsApi(@Named("MLS-API") retrofit: Retrofit): MlsApi {
+    open fun provideMlsApi(@MLSAPI retrofit: Retrofit): MlsApi {
         return retrofit.create(MlsApi::class.java)
     }
-
 }

@@ -2,7 +2,6 @@ package tv.mycujoo.mcls.core
 
 import android.content.Context
 import android.content.res.AssetManager
-import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.npaw.youbora.lib6.YouboraLog
@@ -21,7 +20,10 @@ import tv.mycujoo.mcls.helper.AnimationFactory
 import tv.mycujoo.mcls.helper.OverlayFactory
 import tv.mycujoo.mcls.helper.OverlayViewHelper
 import tv.mycujoo.mcls.ima.IIma
-import tv.mycujoo.mcls.manager.*
+import tv.mycujoo.mcls.manager.IPrefManager
+import tv.mycujoo.mcls.manager.Logger
+import tv.mycujoo.mcls.manager.VariableKeeper
+import tv.mycujoo.mcls.manager.VariableTranslator
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.network.socket.MainWebSocketListener
@@ -35,13 +37,15 @@ import javax.inject.Inject
  */
 open class InternalBuilder @Inject constructor(
     @ApplicationContext private val context: Context,
+    val logger: Logger,
+    val viewHandler: IViewHandler,
+    val mediaFactory: MediaFactory
 ) {
 
     private var ima: IIma? = null
     private var logLevel: LogLevel = MLSConfiguration().logLevel
 
     /**region Fields*/
-    lateinit var logger: Logger
 
     @Inject
     lateinit var eventsRepository: tv.mycujoo.domain.repository.EventsRepository
@@ -58,12 +62,11 @@ open class InternalBuilder @Inject constructor(
     @Inject
     lateinit var prefManager: IPrefManager
 
-    lateinit var viewHandler: IViewHandler
     lateinit var overlayViewHelper: OverlayViewHelper
     lateinit var variableTranslator: VariableTranslator
     lateinit var variableKeeper: VariableKeeper
 
-    internal lateinit var mediaFactory: MediaFactory
+//    internal lateinit var mediaFactory: MediaFactory
 
     lateinit var reactorSocket: IReactorSocket
     private lateinit var mainWebSocketListener: MainWebSocketListener
@@ -77,9 +80,8 @@ open class InternalBuilder @Inject constructor(
      */
     open fun initialize() {
 
-        logger = Logger(logLevel)
+        logger.setLogLevel(logLevel)
 
-        viewHandler = ViewHandler(CountingIdlingResource("ViewIdentifierManager"))
         variableTranslator = VariableTranslator(dispatcher)
         variableKeeper = VariableKeeper(dispatcher)
 
@@ -91,15 +93,7 @@ open class InternalBuilder @Inject constructor(
             variableKeeper
         )
 
-        mediaFactory = MediaFactory(
-            Player.createDefaultMediaSourceFactory(context),
-            Player.createMediaFactory(context),
-            MediaItem.Builder()
-        )
-
-        ima?.let {
-            it.setAdsLoaderProvider(mediaFactory.defaultMediaSourceFactory)
-        }
+        ima?.setAdsLoaderProvider(mediaFactory.defaultMediaSourceFactory)
 
         mainWebSocketListener = MainWebSocketListener()
         reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener)
