@@ -4,6 +4,8 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import tv.mycujoo.mcls.manager.IVariableKeeper
+import tv.mycujoo.mcls.manager.VariableKeeper
 import tv.mycujoo.mcls.manager.ViewHandler
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import javax.inject.Singleton
@@ -14,4 +16,8 @@ interface ManagerModule {
     @Binds
     @Singleton
     fun bindViewHandler(viewHandler: ViewHandler): IViewHandler
+
+    @Binds
+    @Singleton
+    fun bindIVariableKeeper(variableKeeper: VariableKeeper): IVariableKeeper
 }

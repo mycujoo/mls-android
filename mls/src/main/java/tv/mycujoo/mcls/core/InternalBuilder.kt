@@ -20,10 +20,7 @@ import tv.mycujoo.mcls.helper.AnimationFactory
 import tv.mycujoo.mcls.helper.OverlayFactory
 import tv.mycujoo.mcls.helper.OverlayViewHelper
 import tv.mycujoo.mcls.ima.IIma
-import tv.mycujoo.mcls.manager.IPrefManager
-import tv.mycujoo.mcls.manager.Logger
-import tv.mycujoo.mcls.manager.VariableKeeper
-import tv.mycujoo.mcls.manager.VariableTranslator
+import tv.mycujoo.mcls.manager.*
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.player.MediaFactory
@@ -60,11 +57,16 @@ open class InternalBuilder @Inject constructor(
     @Inject
     lateinit var prefManager: IPrefManager
 
+    @Inject
     lateinit var overlayViewHelper: OverlayViewHelper
-    lateinit var variableTranslator: VariableTranslator
-    lateinit var variableKeeper: VariableKeeper
 
-    var uuid: String? = null
+    @Inject
+    lateinit var variableTranslator: VariableTranslator
+
+    @Inject
+    lateinit var variableKeeper: IVariableKeeper
+
+    var uuid: String = "null"
     /**endregion */
 
 
@@ -77,14 +79,6 @@ open class InternalBuilder @Inject constructor(
 
         variableTranslator = VariableTranslator(dispatcher)
         variableKeeper = VariableKeeper(dispatcher)
-
-        overlayViewHelper = OverlayViewHelper(
-            viewHandler,
-            OverlayFactory(),
-            AnimationFactory(),
-            variableTranslator,
-            variableKeeper
-        )
 
         ima?.setAdsLoaderProvider(mediaFactory.defaultMediaSourceFactory)
     }

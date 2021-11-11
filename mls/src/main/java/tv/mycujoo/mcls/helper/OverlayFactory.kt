@@ -8,6 +8,7 @@ import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.mcls.manager.IVariableKeeper
 import tv.mycujoo.mcls.manager.VariableTranslator
 import tv.mycujoo.mcls.widgets.ScaffoldView
+import javax.inject.Inject
 
 /**
  * Create overlay, which is the view used for displaying Annotation Action on screen.
@@ -17,7 +18,7 @@ import tv.mycujoo.mcls.widgets.ScaffoldView
  * @param showOverlayAction Action which provides data of to be created view
  * @param variableKeeper provides observables to for variables defined/used in Overlay
  */
-class OverlayFactory : IOverlayFactory {
+class OverlayFactory @Inject constructor() : IOverlayFactory {
 
     override fun createScaffoldView(
         context: Context,

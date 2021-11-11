@@ -18,12 +18,13 @@ import tv.mycujoo.mcls.manager.VariableTranslator
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.widgets.ProportionalImageView
 import tv.mycujoo.mcls.widgets.ScaffoldView
+import javax.inject.Inject
 
 /**
  * Helps with View related operations. i.e. Add/Remove overlay view to/from screen.
  *
  */
-class OverlayViewHelper(
+class OverlayViewHelper @Inject constructor(
     private val viewHandler: IViewHandler,
     private val overlayFactory: IOverlayFactory,
     private val animationFactory: AnimationFactory,

@@ -62,7 +62,8 @@ class VideoPlayerMediator @Inject constructor(
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
-    logger: Logger
+    logger: Logger,
+    private val internalBuilder: InternalBuilder
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
     private var cast: ICast? = null
@@ -154,7 +155,7 @@ class VideoPlayerMediator @Inject constructor(
         this.playerView = MLSPlayerView
         this.player = player
         publicKey = builder.publicKey
-        uuid = builder.internalBuilder.uuid
+        uuid = internalBuilder.uuid
 
         player.getDirectInstance()?.let {
             videoPlayer = VideoPlayer(it, this, MLSPlayerView)
@@ -183,13 +184,13 @@ class VideoPlayerMediator @Inject constructor(
 
             hasAnalytic = builder.hasAnalytic
             if (builder.hasAnalytic) {
-                initAnalytic(builder.internalBuilder, builder.activity!!, it)
+                initAnalytic(builder.activity!!, it)
             }
 
             initPlayerView(
                 MLSPlayerView,
                 player,
-                builder.internalBuilder.overlayViewHelper,
+                internalBuilder.overlayViewHelper,
                 timelineMarkerActionEntities
             )
 
@@ -404,7 +405,6 @@ class VideoPlayerMediator @Inject constructor(
     }
 
     private fun initAnalytic(
-        internalBuilder: InternalBuilder,
         activity: Activity,
         exoPlayer: ExoPlayer
     ) {

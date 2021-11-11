@@ -4,9 +4,10 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.*
+import javax.inject.Inject
 import kotlin.collections.ArrayList
 
-class VariableTranslator(private val dispatcher: CoroutineScope) {
+class VariableTranslator @Inject constructor(private val dispatcher: CoroutineScope) {
     private val variableTripleList = ArrayList<VariableTriple>()
 
     fun createVariableTripleIfNotExisted(variableName: String) {

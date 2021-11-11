@@ -8,6 +8,7 @@ import android.os.Looper
 import com.caverock.androidsvg.SVG
 import com.google.android.exoplayer2.ui.AdViewProvider
 import com.google.android.exoplayer2.util.Util
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import tv.mycujoo.domain.repository.IEventsRepository
@@ -20,9 +21,11 @@ import tv.mycujoo.mcls.helper.SVGAssetResolver
 import tv.mycujoo.mcls.helper.TypeFaceFactory
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.VariableKeeper
+import tv.mycujoo.mcls.manager.ViewHandler
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.mediator.AnnotationMediator
 import tv.mycujoo.mcls.mediator.AnnotationMediatorFactory
+import tv.mycujoo.mcls.mediator.IAnnotationMediator
 import tv.mycujoo.mcls.network.Api
 import tv.mycujoo.mcls.network.RemoteApi
 import tv.mycujoo.mcls.player.MediaOnLoadCompletedListener
@@ -39,57 +42,34 @@ import javax.inject.Inject
  * @see MLSAbstract
  */
 class MLS @Inject constructor(
-    private val builder: MLSBuilder,
-    private val videoPlayerMediator: VideoPlayerMediator
+    @ApplicationContext private val context: Context,
+    private val videoPlayerMediator: VideoPlayerMediator,
+    private val dataManager: IDataManager,
+    private val viewHandler: IViewHandler,
+    private val prefManager: IPrefManager,
+    private val internalBuilder: InternalBuilder
 ) : MLSAbstract() {
 
-
     /**region Fields*/
-    private lateinit var eventsRepository: IEventsRepository
-
-    private lateinit var dispatcher: CoroutineScope
-    private lateinit var okHttpClient: OkHttpClient
-
-    private lateinit var dataManager: IDataManager
-
-    private lateinit var prefManager: IPrefManager
-    private var context: Context
-
-    private var api: Api
-
     private lateinit var playerView: MLSPlayerView
 
     private var mediatorInitialized = false
 
     private lateinit var annotationMediator: AnnotationMediator
+
     private lateinit var player: Player
 
-    private lateinit var viewHandler: IViewHandler
-    private lateinit var variableKeeper: VariableKeeper
+    private lateinit var builder: MLSBuilder
     /**endregion */
-
-    /**region Initializing*/
-    init {
-        checkNotNull(builder.activity, { "given activity can't be null" })
-        this.context = builder.activity!!
-
-        api = RemoteApi()
-    }
 
     /**
      * initialize component which are prepared by Internal builder in this class
      * for easier access from MLS
      * @param internalBuilder ready to use instance of InternalBuilder
      */
-    fun initializeComponent(internalBuilder: InternalBuilder) {
-        this.eventsRepository = internalBuilder.eventsRepository
-        this.dispatcher = internalBuilder.dispatcher
-        this.okHttpClient = internalBuilder.okHttpClient
-        this.dataManager = internalBuilder.dataManager
-        this.prefManager = internalBuilder.prefManager
-        this.viewHandler = internalBuilder.viewHandler
-        this.variableKeeper = internalBuilder.variableKeeper
-
+    fun initializeComponent(builder: MLSBuilder) {
+        this.builder = builder
+        internalBuilder.initialize()
         videoPlayerMediator.videoPlayerConfig = builder.mlsConfiguration.videoPlayerConfig
 
         persistPublicKey(this.builder.publicKey)
@@ -104,7 +84,7 @@ class MLS @Inject constructor(
             val exoPlayer = createExoPlayer(context)
             create(
                 builder.ima,
-                builder.internalBuilder.mediaFactory,
+                internalBuilder.mediaFactory,
                 exoPlayer,
                 Handler(Looper.myLooper()!!),
                 MediaOnLoadCompletedListener(exoPlayer)
@@ -156,7 +136,7 @@ class MLS @Inject constructor(
 
             annotationMediator = AnnotationMediatorFactory.createAnnotationMediator(
                 MLSPlayerView,
-                builder.internalBuilder,
+                internalBuilder,
                 videoPlayerMediator.getPlayer()
             )
             videoPlayerMediator.setAnnotationMediator(annotationMediator)
@@ -177,7 +157,7 @@ class MLS @Inject constructor(
 
         annotationMediator = AnnotationMediatorFactory.createAnnotationMediator(
             MLSPlayerView,
-            builder.internalBuilder,
+            internalBuilder,
             videoPlayerMediator.getPlayer()
         )
         videoPlayerMediator.setAnnotationMediator(annotationMediator)

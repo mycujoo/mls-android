@@ -111,21 +111,15 @@ open class ViewHandler @Inject constructor(
     }
 
     override fun incrementIdlingResource() {
-        Log.d(TAG, "incrementIdlingResource: Incrementing")
         idlingResource.increment()
     }
 
 
     override fun decrementIdlingResource() {
-        Log.d(TAG, "decrementIdlingResource: ")
         if (idlingResource.isIdleNow.not()) {
             idlingResource.decrement()
         }
     }
     /**endregion */
-
-    companion object {
-        private const val TAG = "ViewHandler"
-    }
 
 }

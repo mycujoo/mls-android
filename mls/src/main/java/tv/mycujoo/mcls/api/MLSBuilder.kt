@@ -27,8 +27,6 @@ import tv.mycujoo.mcls.network.socket.ReactorListener
 open class MLSBuilder {
 
 
-    lateinit var internalBuilder: InternalBuilder
-        private set
     internal var publicKey: String = ""
         private set
     internal var activity: Activity? = null
@@ -136,11 +134,8 @@ open class MLSBuilder {
             .appModule(AppModule())
             .build()
 
-        internalBuilder = graph.provideInternalBuilder()
-        internalBuilder.initialize()
-
-        val mls = MLS(this, graph.provideVideoPlayerMediator())
-        mls.initializeComponent(internalBuilder)
+        val mls = graph.provideMLS()
+        mls.initializeComponent(this)
 
         return mls
     }
@@ -148,8 +143,6 @@ open class MLSBuilder {
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     interface BuilderProvider {
-        fun provideInternalBuilder(): InternalBuilder
-
-        fun provideVideoPlayerMediator(): VideoPlayerMediator
+        fun provideMLS(): MLS
     }
 }
