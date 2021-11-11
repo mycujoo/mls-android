@@ -55,7 +55,6 @@ class AnnotationListenerTest {
     /**region addOverlay() tests*/
     @Test
     fun `given overlay with intro animation to add, should add it with animation`() {
-        val introTransitionSpec = TransitionSpec(15000L, AnimationType.FADE_IN, 2000L)
         val action = getSampleShowOverlayAction()
 
         annotationListener.addOverlay(action)
