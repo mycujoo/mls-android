@@ -198,8 +198,7 @@ class TvVideoPlayer(
     override fun onReactorEventUpdate(eventId: String, updateId: String) {
         cancelStreamUrlPulling()
         dispatcher.launch(context = Dispatchers.Main) {
-            val result = dataManager.getEventDetails(eventId, updateId)
-            when (result) {
+            when (val result = dataManager.getEventDetails(eventId, updateId)) {
                 is Result.Success -> {
                     dataManager.currentEvent = result.value
                     updateStreamStatus(result.value)
@@ -272,8 +271,7 @@ class TvVideoPlayer(
 
     override fun playVideo(eventId: String) {
         dispatcher.launch(context = Dispatchers.Main) {
-            val result = dataManager.getEventDetails(eventId)
-            when (result) {
+            when (val result = dataManager.getEventDetails(eventId)) {
                 is Result.Success -> {
                     dataManager.currentEvent = result.value
                     updateStreamStatus(result.value)

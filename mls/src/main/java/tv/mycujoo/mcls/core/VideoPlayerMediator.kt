@@ -331,8 +331,8 @@ class VideoPlayerMediator @Inject constructor(
                 switchControllerMode(REMOTE)
                 addRemotePlayerControllerListener()
                 stopYoubora()
-                dataManager.currentEvent?.let {
-                    loadRemoteMedia(it)
+                dataManager.currentEvent?.let { event ->
+                    loadRemoteMedia(event)
                 }
                 if (player.isPlaying()) {
                     player.pause()
@@ -473,8 +473,7 @@ class VideoPlayerMediator @Inject constructor(
         this.updateId = updateId
         cancelStreamUrlPulling()
         dispatcher.launch(context = Dispatchers.Main) {
-            val result = dataManager.getEventDetails(eventId, updateId)
-            when (result) {
+            when (val result = dataManager.getEventDetails(eventId, updateId)) {
                 is Success -> {
                     dataManager.currentEvent = result.value
                     updateStreamStatus(result.value)
@@ -553,8 +552,7 @@ class VideoPlayerMediator @Inject constructor(
         isLive = false
 
         dispatcher.launch(context = Dispatchers.Main) {
-            val result = dataManager.getEventDetails(eventId, updateId)
-            when (result) {
+            when (val result = dataManager.getEventDetails(eventId, updateId)) {
                 is Success -> {
                     dataManager.currentEvent = result.value
                     updateStreamStatus(result.value)

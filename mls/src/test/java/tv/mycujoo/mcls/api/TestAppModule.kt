@@ -17,8 +17,8 @@ import tv.mycujoo.mcls.manager.IPrefManager
 )
 class TestAppModule {
 
-    var mockPrefManager: IPrefManager = mock(IPrefManager::class.java)
-    var mockCoroutineScope: CoroutineScope = mock(CoroutineScope::class.java)
+    private var mockPrefManager: IPrefManager = mock(IPrefManager::class.java)
+    private var mockCoroutineScope: CoroutineScope = mock(CoroutineScope::class.java)
 
     fun providePrefManager(context: Context): IPrefManager {
         return mockPrefManager

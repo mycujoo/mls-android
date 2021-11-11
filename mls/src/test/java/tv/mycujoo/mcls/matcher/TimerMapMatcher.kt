@@ -6,7 +6,7 @@ import tv.mycujoo.mcls.manager.TimerVariable
 class TimerMapMatcher(private val hashMap: HashMap<String, TimerVariable>) :
     ArgumentMatcher<HashMap<String, TimerVariable>> {
 
-    lateinit var argument: HashMap<String, TimerVariable>
+    private lateinit var argument: HashMap<String, TimerVariable>
 
     override fun matches(argument: HashMap<String, TimerVariable>?): Boolean {
         this.argument = argument!!

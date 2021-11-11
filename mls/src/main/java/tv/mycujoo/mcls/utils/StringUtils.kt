@@ -98,10 +98,10 @@ class StringUtils {
         fun getSegmentTimeStamp(name: String): Long {
             val keyword = "segment_"
             val rightBound = "_"
-            if (name.contains(keyword, true) && name.contains(rightBound, true)) {
+            return if (name.contains(keyword, true) && name.contains(rightBound, true)) {
                 val timeString = name.substringAfter(keyword).substringBefore(rightBound)
 
-                return try {
+                try {
                     timeString.toLong()
                 } catch (e: Exception) {
                     println(e)
@@ -109,7 +109,7 @@ class StringUtils {
                 }
 
             } else
-                return -1
+                -1
         }
     }
 }

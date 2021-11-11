@@ -21,7 +21,7 @@ class YouboraClientTest {
     @Mock
     lateinit var plugin: Plugin
 
-    var options = Options()
+    private var options = Options()
 
     @Mock
     lateinit var playerAdapter: PlayerAdapter<ExoPlayer>

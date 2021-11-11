@@ -15,8 +15,7 @@ class MLSTvBuilder @Inject constructor(
         private set
     internal var activity: Activity? = null
         private set
-    internal var mlsTVConfiguration: MLSTVConfiguration = MLSTVConfiguration()
-        private set
+    private var mlsTVConfiguration: MLSTVConfiguration = MLSTVConfiguration()
     internal var ima: IIma? = null
         private set
     internal var logLevel: LogLevel = LogLevel.MINIMAL

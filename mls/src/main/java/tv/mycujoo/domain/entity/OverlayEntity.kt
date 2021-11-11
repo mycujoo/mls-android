@@ -13,8 +13,8 @@ data class OverlayEntity(
     val variablePlaceHolders: List<String>
 ) {
 
-    var isDownloading = false
-    var isOnScreen = false
+    private var isDownloading = false
+    private var isOnScreen = false
 
     fun update(currentTime: Long): OverlayAct {
         if (isDownloading) {

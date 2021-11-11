@@ -37,8 +37,7 @@ open class MLSBuilder {
         private set
     internal var mlsConfiguration: MLSConfiguration = MLSConfiguration()
         private set
-    internal var mCast: ICast? = null
-        private set
+    private var mCast: ICast? = null
     internal var ima: IIma? = null
         private set
     internal var hasAnalytic: Boolean = true

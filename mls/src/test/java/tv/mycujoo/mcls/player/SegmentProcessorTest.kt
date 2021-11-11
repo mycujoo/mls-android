@@ -10,7 +10,7 @@ class SegmentProcessorTest {
 
     private lateinit var segmentProcessor: SegmentProcessor
 
-    var contentSegment = HlsMediaPlaylist.Segment(
+    private var contentSegment = HlsMediaPlaylist.Segment(
         "https://dc9jagk60w3y3mt6171f-0428f4.p5cdn.com/amir/ckhkdu7u801zw010167b2moe5/1080p/1080_segment_1605693445000_0000.ts",
         0L,
         0L,
@@ -18,7 +18,7 @@ class SegmentProcessorTest {
         null
     )
 
-    var discontinuitySegment =
+    private var discontinuitySegment =
         HlsMediaPlaylist.Segment(
             "https://dc9jagk60w3y3mt6171f-0428f4.p5cdn.com/amir/ckhkdu7u801zw010167b2moe5/1080p/1080_segment_1605693445000_0000.ts",
             null,
@@ -35,7 +35,7 @@ class SegmentProcessorTest {
             emptyList()
         )
 
-    var discontinuitySegmentWithZeroDuration =
+    private var discontinuitySegmentWithZeroDuration =
         HlsMediaPlaylist.Segment(
             "https://dc9jagk60w3y3mt6171f-0428f4.p5cdn.com/amir/ckhkdu7u801zw010167b2moe5/1080p/1080_segment_1605693445000_0000.ts",
             null,

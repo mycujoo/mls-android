@@ -30,16 +30,16 @@ class MLSTimeBar @JvmOverloads constructor(
     defStyleAttr: Int = 0,
     timebarAttrs: AttributeSet? = attrs
 ) : View(context, attrs, defStyleAttr), TimeBar {
-    private val seekBounds: Rect
-    private val progressBar: Rect
-    private val bufferedBar: Rect
-    private val scrubberBar: Rect
-    private val playedPaint: Paint
-    private val bufferedPaint: Paint
-    private val unplayedPaint: Paint
-    private val adMarkerPaint: Paint
-    private val playedAdMarkerPaint: Paint
-    private val scrubberPaint: Paint
+    private val seekBounds: Rect = Rect()
+    private val progressBar: Rect = Rect()
+    private val bufferedBar: Rect = Rect()
+    private val scrubberBar: Rect = Rect()
+    private val playedPaint: Paint = Paint()
+    private val bufferedPaint: Paint = Paint()
+    private val unplayedPaint: Paint = Paint()
+    private val adMarkerPaint: Paint = Paint()
+    private val playedAdMarkerPaint: Paint = Paint()
+    private val scrubberPaint: Paint = Paint()
     private var scrubberDrawable: Drawable? = null
     private var barHeight = 0
     private var touchTargetHeight = 0
@@ -841,16 +841,6 @@ class MLSTimeBar @JvmOverloads constructor(
     // Suppress warnings due to usage of View methods in the constructor.
     // the constructor does not initialize fields: adGroupTimesMs, playedAdGroups
     init {
-        seekBounds = Rect()
-        progressBar = Rect()
-        bufferedBar = Rect()
-        scrubberBar = Rect()
-        playedPaint = Paint()
-        bufferedPaint = Paint()
-        unplayedPaint = Paint()
-        adMarkerPaint = Paint()
-        playedAdMarkerPaint = Paint()
-        scrubberPaint = Paint()
         scrubberPaint.isAntiAlias = true
         listeners = CopyOnWriteArraySet()
         locationOnScreen = IntArray(2)

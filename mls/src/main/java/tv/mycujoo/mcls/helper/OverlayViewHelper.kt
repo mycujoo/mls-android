@@ -509,10 +509,8 @@ class OverlayViewHelper @Inject constructor(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT
             )
             val positionGuide = showOverlayAction.viewSpec?.positionGuide
-            if (positionGuide == null) {
-                // should not happen
+                ?: // should not happen
                 return@post
-            }
 
             applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
 

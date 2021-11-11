@@ -11,7 +11,7 @@ import tv.mycujoo.mcls.widgets.ScaffoldView
 
 class FakeAnimationFactory : AnimationFactory() {
 
-    var animationRecipe: AnimationRecipe? = null
+    private var animationRecipe: AnimationRecipe? = null
 
 
     override fun createAddViewStaticAnimation(

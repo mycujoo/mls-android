@@ -40,7 +40,7 @@ class MLSSeekBar(context: Context, attrs: AttributeSet?) : View(context, attrs) 
     /**
      * Get secondary progress within 0 and [.getMax]
      */
-    var secondProgress = 0
+    private var secondProgress = 0
         private set
     private var mMax = 0
     private var mKnobx = 0
@@ -134,10 +134,8 @@ class MLSSeekBar(context: Context, attrs: AttributeSet?) : View(context, attrs) 
             val markerPositionOffset: Int =
                 (width * poiOffsetAdjusted / totalTime).toInt()
 
-            val markerLeft = mProgressRect.left + Math.min(
-                mBackgroundRect.width().toInt() - 4,
-                Math.max(0, markerPositionOffset)
-            ).toFloat()
+            val markerLeft = mProgressRect.left + (mBackgroundRect.width()
+                .toInt() - 4).coerceAtMost(0.coerceAtLeast(markerPositionOffset)).toFloat()
             val markerRight = markerLeft + 4
 
             canvas.drawRect(

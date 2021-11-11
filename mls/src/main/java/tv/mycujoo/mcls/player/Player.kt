@@ -32,7 +32,7 @@ class Player : IPlayer {
     private var ima: IIma? = null
 
     /**
-     * Mediafactory used to create playable item to feed ExoPlayer
+     * MediaFactory used to create playable item to feed ExoPlayer
      */
     private lateinit var mediaFactory: MediaFactory
 
@@ -103,7 +103,6 @@ class Player : IPlayer {
     /**
      * re-initialize Player by setting those properties that are life-cycle bound
      * @param exoPlayer exoplayer used for playing video
-     * @param mediaOnLoadCompletedListener callback for sending data after media item is loaded by exoplayer
      */
     override fun reInit(exoPlayer: SimpleExoPlayer) {
         this.exoPlayer = exoPlayer
@@ -223,10 +222,11 @@ class Player : IPlayer {
             return
         }
         resumeWindow = exoPlayer!!.currentWindowIndex
-        resumePosition = if (exoPlayer!!.isCurrentWindowSeekable) Math.max(
-            0,
-            exoPlayer!!.currentPosition
-        ) else C.POSITION_UNSET.toLong()
+        resumePosition = if (exoPlayer!!.isCurrentWindowSeekable) {
+            0L.coerceAtLeast(exoPlayer!!.currentPosition)
+        } else {
+            C.POSITION_UNSET.toLong()
+        }
     }
 
     /**
@@ -293,8 +293,8 @@ class Player : IPlayer {
 
         val haveResumePosition = resumeWindow != C.INDEX_UNSET
         if (haveResumePosition) {
-            exoPlayer?.let {
-                it.seekTo(resumeWindow, resumePosition)
+            exoPlayer?.let { simplePlayer ->
+                simplePlayer.seekTo(resumeWindow, resumePosition)
 
                 exoPlayer?.let {
                     val hlsMediaSource = mediaFactory.createHlsMediaSource(mediaItem)
@@ -309,13 +309,13 @@ class Player : IPlayer {
                                 eventStatus = mediaData?.eventStatus
                             )
                         )
-                        it.setMediaSource(adsMediaSource, false)
+                        simplePlayer.setMediaSource(adsMediaSource, false)
 
                     } else {
-                        it.setMediaSource(hlsMediaSource, false)
+                        simplePlayer.setMediaSource(hlsMediaSource, false)
                     }
-                    it.prepare()
-                    it.playWhenReady = autoPlay
+                    simplePlayer.prepare()
+                    simplePlayer.playWhenReady = autoPlay
                     resumePosition = C.INDEX_UNSET.toLong()
                     resumeWindow = C.INDEX_UNSET
                 }
@@ -433,6 +433,7 @@ class Player : IPlayer {
 
         fun createMediaFactory(context: Context): HlsMediaSource.Factory {
             return HlsMediaSource.Factory(
+                // TODO: Removing this mess up the Annotation Timings, Investigate :)
                 DefaultHttpDataSourceFactory(
                     Util.getUserAgent(
                         context,

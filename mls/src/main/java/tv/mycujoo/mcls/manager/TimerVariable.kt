@@ -107,10 +107,10 @@ class TimerVariable(
                         }
                     }
                     is TimerEntity.AdjustTimer -> {
-                        if (direction == ScreenTimerDirection.UP) {
-                            delta = startValue + now - timerEntity.offset + timerEntity.value
+                        delta = if (direction == ScreenTimerDirection.UP) {
+                            startValue + now - timerEntity.offset + timerEntity.value
                         } else {
-                            delta = startValue - (now - timerEntity.offset + timerEntity.value)
+                            startValue - (now - timerEntity.offset + timerEntity.value)
                         }
                     }
                     is TimerEntity.SkipTimer -> {

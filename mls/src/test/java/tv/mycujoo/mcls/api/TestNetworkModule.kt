@@ -20,9 +20,9 @@ import tv.mycujoo.mcls.network.MlsApi
 class TestNetworkModule {
 
     var mockContext: Context = mock(Context::class.java)
-    var mockOkHttpClient: OkHttpClient = mock(OkHttpClient::class.java)
-    var mockRetrofit: Retrofit = mock(Retrofit::class.java)
-    var mockMlsApi: MlsApi = mock(MlsApi::class.java)
+    private var mockOkHttpClient: OkHttpClient = mock(OkHttpClient::class.java)
+    private var mockRetrofit: Retrofit = mock(Retrofit::class.java)
+    private var mockMlsApi: MlsApi = mock(MlsApi::class.java)
 
     fun provideOkHttp(prefManager: IPrefManager): OkHttpClient {
         return mockOkHttpClient

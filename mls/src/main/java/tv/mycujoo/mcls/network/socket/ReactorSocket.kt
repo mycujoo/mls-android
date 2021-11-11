@@ -119,7 +119,7 @@ class ReactorSocket @Inject constructor(
     }
 
 
-    fun leaveTimeline() {
+    private fun leaveTimeline() {
         if (this::timelineId.isInitialized && joinedTimeline) {
             webSocket.send("$LEAVE_TIMELINE$timelineId")
             joinedTimeline = false

@@ -15,12 +15,11 @@ class HorizontalBiasMatcher(private val expectedVerticalBias: Float) : TypeSafeM
         item?.let { view ->
             val screenWidth = (view.parent as ViewGroup).width
 
-            val target = (screenWidth * expectedVerticalBias).toInt()
-            when (target) {
+            return when ((screenWidth * expectedVerticalBias).toInt()) {
                 in view.left..view.right -> {
-                    return true
+                    true
                 }
-                else -> return false
+                else -> false
             }
         }
 

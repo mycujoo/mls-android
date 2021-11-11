@@ -66,7 +66,7 @@ open class InternalBuilder @Inject constructor(
     @Inject
     lateinit var variableKeeper: IVariableKeeper
 
-    var uuid: String = "null"
+    var uuid: String? = null
     /**endregion */
 
 
