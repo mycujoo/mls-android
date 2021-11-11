@@ -61,7 +61,6 @@ class MLS @Inject constructor(
 
     private var mediatorInitialized = false
 
-    //    private lateinit var videoPlayerMediator: VideoPlayerMediator
     private lateinit var annotationMediator: AnnotationMediator
     private lateinit var player: Player
 
@@ -91,6 +90,8 @@ class MLS @Inject constructor(
         this.viewHandler = internalBuilder.viewHandler
         this.variableKeeper = internalBuilder.variableKeeper
 
+        videoPlayerMediator.videoPlayerConfig = builder.mlsConfiguration.videoPlayerConfig
+
         persistPublicKey(this.builder.publicKey)
 
         internalBuilder.uuid = prefManager.get(UUID_PREF_KEY) ?: UUID.randomUUID().toString()
@@ -98,17 +99,6 @@ class MLS @Inject constructor(
         internalBuilder.reactorSocket.setUUID(internalBuilder.uuid!!)
 
         initSvgRenderingLibrary(internalBuilder.getAssetManager())
-
-//        videoPlayerMediator = VideoPlayerMediator(
-//            builder.mlsConfiguration.videoPlayerConfig,
-//            viewHandler,
-//            internalBuilder.reactorSocket,
-//            internalBuilder.dispatcher,
-//            dataManager,
-//            emptyList(),
-//            builder.mCast,
-//            internalBuilder.logger
-//        )
 
         player = Player().apply {
             val exoPlayer = createExoPlayer(context)

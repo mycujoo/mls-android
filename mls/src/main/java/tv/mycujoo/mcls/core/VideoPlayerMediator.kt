@@ -66,7 +66,7 @@ class VideoPlayerMediator @Inject constructor(
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
     private var cast: ICast? = null
-    private var videoPlayerConfig: VideoPlayerConfig = VideoPlayerConfig.default()
+    var videoPlayerConfig: VideoPlayerConfig = VideoPlayerConfig.default()
 
     /**region Fields*/
     /**

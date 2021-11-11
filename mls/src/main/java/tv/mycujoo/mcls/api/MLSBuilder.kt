@@ -136,12 +136,12 @@ open class MLSBuilder {
             .appModule(AppModule())
             .build()
 
-
         internalBuilder = graph.provideInternalBuilder()
         internalBuilder.initialize()
 
         val mls = MLS(this, graph.provideVideoPlayerMediator())
         mls.initializeComponent(internalBuilder)
+
         return mls
     }
 
