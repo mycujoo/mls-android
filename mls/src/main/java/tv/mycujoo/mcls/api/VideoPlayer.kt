@@ -24,9 +24,9 @@ class VideoPlayer(
     private var optimisticSeekingPosition = -1
 
     init {
-        exoPlayer.addListener(object : Player.EventListener {
+        exoPlayer.addListener(object : Player.Listener {
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                super.onPlayerStateChanged(playWhenReady, playbackState)
+                super.onPlayWhenReadyChanged(playWhenReady, playbackState)
                 if (playbackState == STATE_READY) {
                     optimisticSeekingPosition = -1
                 }

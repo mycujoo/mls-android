@@ -21,7 +21,7 @@ class VideoPlayerTest {
 
     private lateinit var videoPlayer: VideoPlayer
 
-    private lateinit var eventListener: Player.EventListener
+    private lateinit var eventListener: Player.Listener
 
     @Mock
     lateinit var exoPlayer: SimpleExoPlayer
@@ -38,8 +38,8 @@ class VideoPlayerTest {
     @Before
     fun setUp() {
         MockitoAnnotations.openMocks(this)
-        whenever(exoPlayer.addListener(any<Player.EventListener>())).then { i ->
-            eventListener = i.getArgument<Player.EventListener>(0)
+        whenever(exoPlayer.addListener(any())).then { i ->
+            eventListener = i.getArgument(0)
             eventListener
         }
         videoPlayer = VideoPlayer(exoPlayer, videoPlayerMediator, MLSPlayerView)
@@ -101,7 +101,7 @@ class VideoPlayerTest {
     fun `test optimisticCurrentTime with prior seekTo, before loading content`() {
         whenever(exoPlayer.currentPosition).thenReturn(42L)
         videoPlayer.seekTo(15)
-        eventListener.onPlayerStateChanged(true, STATE_BUFFERING)
+        eventListener.onPlayWhenReadyChanged(true, STATE_BUFFERING)
 
         assertEquals(15, videoPlayer.optimisticCurrentTime())
     }
