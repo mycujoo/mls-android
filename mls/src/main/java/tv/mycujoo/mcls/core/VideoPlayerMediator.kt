@@ -135,13 +135,6 @@ class VideoPlayerMediator @Inject constructor(
      */
     private var publicKey: String = ""
 
-    /**
-     * Unique identifier to identify user. Youbora Client is an example where this is used.
-     * Defaults to randomly generated UUID if it's users first launch visit to MLS,
-     * otherwise it is restored from shared-pref
-     */
-    private var uuid: String? = ""
-
     /**endregion */
 
     /**region Initialization*/
@@ -155,7 +148,6 @@ class VideoPlayerMediator @Inject constructor(
         this.playerView = MLSPlayerView
         this.player = player
         publicKey = builder.publicKey
-        uuid = internalBuilder.uuid
 
         player.getDirectInstance()?.let {
             videoPlayer = VideoPlayer(it, this, MLSPlayerView)
@@ -934,7 +926,7 @@ class VideoPlayerMediator @Inject constructor(
         val params = CasterLoadRemoteMediaParams(
             id = event.id,
             publicKey = publicKey,
-            uuid = uuid,
+            uuid = internalBuilder.uuid,
             widevine = widevine,
             fullUrl = fullUrl,
             title = event.title,

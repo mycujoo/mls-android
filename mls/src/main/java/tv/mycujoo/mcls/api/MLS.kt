@@ -9,9 +9,6 @@ import com.caverock.androidsvg.SVG
 import com.google.android.exoplayer2.ui.AdViewProvider
 import com.google.android.exoplayer2.util.Util
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
-import okhttp3.OkHttpClient
-import tv.mycujoo.domain.repository.IEventsRepository
 import tv.mycujoo.mcls.core.InternalBuilder
 import tv.mycujoo.mcls.core.VideoPlayerMediator
 import tv.mycujoo.mcls.data.IDataManager
@@ -20,14 +17,9 @@ import tv.mycujoo.mcls.enum.C.Companion.UUID_PREF_KEY
 import tv.mycujoo.mcls.helper.SVGAssetResolver
 import tv.mycujoo.mcls.helper.TypeFaceFactory
 import tv.mycujoo.mcls.manager.IPrefManager
-import tv.mycujoo.mcls.manager.VariableKeeper
-import tv.mycujoo.mcls.manager.ViewHandler
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.mediator.AnnotationMediator
 import tv.mycujoo.mcls.mediator.AnnotationMediatorFactory
-import tv.mycujoo.mcls.mediator.IAnnotationMediator
-import tv.mycujoo.mcls.network.Api
-import tv.mycujoo.mcls.network.RemoteApi
 import tv.mycujoo.mcls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mcls.player.Player
 import tv.mycujoo.mcls.player.Player.Companion.createExoPlayer
@@ -65,17 +57,14 @@ class MLS @Inject constructor(
     /**
      * initialize component which are prepared by Internal builder in this class
      * for easier access from MLS
-     * @param internalBuilder ready to use instance of InternalBuilder
+     * @param builder ready to use instance of InternalBuilder
      */
     fun initializeComponent(builder: MLSBuilder) {
         this.builder = builder
         internalBuilder.initialize()
         videoPlayerMediator.videoPlayerConfig = builder.mlsConfiguration.videoPlayerConfig
-
         persistPublicKey(this.builder.publicKey)
 
-        internalBuilder.uuid = prefManager.get(UUID_PREF_KEY) ?: UUID.randomUUID().toString()
-        persistUUIDIfNotStoredAlready(internalBuilder.uuid!!)
         internalBuilder.reactorSocket.setUUID(internalBuilder.uuid!!)
 
         initSvgRenderingLibrary(internalBuilder.getAssetManager())
@@ -256,15 +245,5 @@ class MLS @Inject constructor(
         prefManager.persist(PUBLIC_KEY_PREF_KEY, publicKey)
     }
 
-    /**
-     * store UUID in shared pref, if it's NOT already stored
-     * @param uuid user's unique identifier
-     */
-    private fun persistUUIDIfNotStoredAlready(uuid: String) {
-        val storedUUID = prefManager.get(UUID_PREF_KEY)
-        if (storedUUID == null) {
-            prefManager.persist(UUID_PREF_KEY, uuid)
-        }
-    }
     /**endregion */
 }
