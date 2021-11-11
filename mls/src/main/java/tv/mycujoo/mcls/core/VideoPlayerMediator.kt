@@ -52,24 +52,21 @@ import javax.inject.Inject
 
 /**
  * Manages video-player related components.
- * @param videoPlayerConfig configuration for video-player behaviour and visuals
  * @param viewHandler handler for add/remove of view (used for Annotations Actions)
  * @param reactorSocket interface for interacting with Reactor service.
  * @param dispatcher coroutine scope context used in I/O bound calls
  * @param dataManager data manager which holds current data(event) loaded
- * @param cast optional: Cast module used for Google Cast
  */
 class VideoPlayerMediator @Inject constructor(
-    private var videoPlayerConfig: VideoPlayerConfig,
     private val viewHandler: IViewHandler,
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
-    private val timelineMarkerActionEntities: List<TimelineMarkerEntity>,
-    private val cast: ICast?,
     logger: Logger
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
+    private var cast: ICast? = null
+    private var videoPlayerConfig: VideoPlayerConfig = VideoPlayerConfig.default()
 
     /**region Fields*/
     /**
@@ -147,7 +144,13 @@ class VideoPlayerMediator @Inject constructor(
     /**endregion */
 
     /**region Initialization*/
-    fun initialize(MLSPlayerView: MLSPlayerView, player: IPlayer, builder: MLSBuilder) {
+    fun initialize(
+        MLSPlayerView: MLSPlayerView,
+        player: IPlayer,
+        builder: MLSBuilder,
+        timelineMarkerActionEntities: List<TimelineMarkerEntity> = listOf(),
+        cast: ICast? = null
+    ) {
         this.playerView = MLSPlayerView
         this.player = player
         publicKey = builder.publicKey
@@ -183,8 +186,16 @@ class VideoPlayerMediator @Inject constructor(
                 initAnalytic(builder.internalBuilder, builder.activity!!, it)
             }
 
-            initPlayerView(MLSPlayerView, player, builder.internalBuilder.overlayViewHelper)
-            initCaster(player, MLSPlayerView)
+            initPlayerView(
+                MLSPlayerView,
+                player,
+                builder.internalBuilder.overlayViewHelper,
+                timelineMarkerActionEntities
+            )
+
+            if (cast != null) {
+                initCaster(cast, player, MLSPlayerView)
+            }
         }
     }
 
@@ -195,7 +206,8 @@ class VideoPlayerMediator @Inject constructor(
     private fun initPlayerView(
         MLSPlayerView: MLSPlayerView,
         player: IPlayer,
-        overlayViewHelper: OverlayViewHelper
+        overlayViewHelper: OverlayViewHelper,
+        timelineMarkerActionEntities: List<TimelineMarkerEntity>
     ) {
         MLSPlayerView.prepare(
             overlayViewHelper,
@@ -205,7 +217,7 @@ class VideoPlayerMediator @Inject constructor(
 
         val mainEventListener = object : MainEventListener {
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                super.onPlayerStateChanged(playWhenReady, playbackState)
+                super.onPlayWhenReadyChanged(playWhenReady, playbackState)
 
                 handlePlaybackStatus(playWhenReady, playbackState)
                 handleBufferingProgressBarVisibility(playbackState, playWhenReady)
@@ -258,30 +270,32 @@ class VideoPlayerMediator @Inject constructor(
     }
 
     private fun initCaster(
+        cast: ICast,
         player: IPlayer,
         MLSPlayerView: MLSPlayerView
     ) {
+        this.cast = cast
         fun addRemotePlayerControllerListener() {
             playerView.getRemotePlayerControllerView().listener =
                 object : RemotePlayerControllerListener {
                     override fun onPlay() {
-                        cast?.play()
+                        cast.play()
                     }
 
                     override fun onPause() {
-                        cast?.pause()
+                        cast.pause()
                     }
 
                     override fun onSeekTo(newPosition: Long) {
-                        cast?.seekTo(newPosition)
+                        cast.seekTo(newPosition)
                     }
 
                     override fun onFastForward(amount: Long) {
-                        cast?.fastForward(amount)
+                        cast.fastForward(amount)
                     }
 
                     override fun onRewind(amount: Long) {
-                        cast?.rewind(amount)
+                        cast.rewind(amount)
                     }
                 }
         }
@@ -292,7 +306,7 @@ class VideoPlayerMediator @Inject constructor(
         }
 
 
-        cast?.let {
+        cast.let {
             fun onApplicationDisconnected(casterSession: ICasterSession?) {
                 updatePlaybackLocation(LOCAL)
                 switchControllerMode(LOCAL)

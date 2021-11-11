@@ -12,6 +12,7 @@ import tv.mycujoo.mcls.cast.ICast
 import tv.mycujoo.mcls.core.InternalBuilder
 import tv.mycujoo.mcls.core.PlayerEventsListener
 import tv.mycujoo.mcls.core.UIEventListener
+import tv.mycujoo.mcls.core.VideoPlayerMediator
 import tv.mycujoo.mcls.di.AppModule
 import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.enum.C.Companion.ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE
@@ -139,7 +140,7 @@ open class MLSBuilder {
         internalBuilder = graph.provideInternalBuilder()
         internalBuilder.initialize()
 
-        val mls = MLS(this)
+        val mls = MLS(this, graph.provideVideoPlayerMediator())
         mls.initializeComponent(internalBuilder)
         return mls
     }
@@ -148,5 +149,7 @@ open class MLSBuilder {
     @InstallIn(SingletonComponent::class)
     interface BuilderProvider {
         fun provideInternalBuilder(): InternalBuilder
+
+        fun provideVideoPlayerMediator(): VideoPlayerMediator
     }
 }

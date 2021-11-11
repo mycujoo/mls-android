@@ -128,141 +128,6 @@ class TimelineMarkerManagerTest {
         verify(timelineMarkerView, never()).setMarkerTexts(titlesList, position.toInt())
     }
 
-    @Ignore("This should be tested through MLSTimeBar")
-    @Test
-    fun `given currentTime less than left range + positive seekOffset of timeline marker, should not set it to view`() {
-        val pointOfInterest = PointOfInterest(
-            10000L,
-            3000L,
-            "Goal",
-            PointOfInterestType()
-        )
-        timelineMarkerManager.addTimeLineHighlight(
-            pointOfInterest
-        )
-        val titlesList = listOf("Goal")
-
-
-        val poiPositionsOnScreen =
-            ArrayList<PositionedPointOfInterest>().apply {
-                add(
-                    PositionedPointOfInterest(
-                        511,
-                        pointOfInterest
-                    )
-                )
-            }
-//        timeLineMarkerPositionListener.onScrubMove(7999L, 60000L, poiPositionsOnScreen)
-
-
-//        verify(timelineMarkerView, never()).setMarkerTexts(titlesList, position.toInt())
-    }
-
-    @Ignore("This should be tested through MLSTimeBar")
-    @Test
-    fun `given currentTime greater than right range + positive seekOffset of timeline marker, should not set it to view`() {
-        timelineMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                10000L,
-                3000L,
-                "Goal",
-                PointOfInterestType()
-            )
-        )
-        val titlesList = "Goal"
-
-
-        val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
-//        timeLineMarkerPositionListener.onScrubMove(18001L, 60000L, poiPositionsOnScreen)
-
-
-//        verify(timelineMarkerView, never()).setMarkerTexts(titlesList, position.toInt())
-    }
-
-    @Ignore("This should be tested through MLSTimeBar")
-    @Test
-    fun `given currentTime less than left range + negative seekOffset of timeline marker, should not set it to view`() {
-        timelineMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                10000L,
-                -3000L,
-                "Goal",
-                PointOfInterestType()
-            )
-        )
-        val titlesList = "Goal"
-
-
-        val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
-//        timeLineMarkerPositionListener.onScrubMove(1999L, 60000L, poiPositionsOnScreen)
-
-
-//        verify(timelineMarkerView, never()).setMarkerTexts(titlesList, position.toInt())
-    }
-
-    @Ignore("This should be tested through MLSTimeBar")
-    @Test
-    fun `given currentTime equal to left range + negative seekOffset of timeline marker, should set it to view`() {
-        timelineMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                10000L,
-                -3000L,
-                "Goal",
-                PointOfInterestType()
-            )
-        )
-        val titlesList = "Goal"
-
-
-        val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
-//        timeLineMarkerPositionListener.onScrubMove(2000L, 60000L, poiPositionsOnScreen)
-
-
-//        verify(timelineMarkerView).setMarkerTexts(titlesList, position.toInt())
-    }
-
-    @Ignore("This should be tested through MLSTimeBar")
-    @Test
-    fun `given currentTime greater than right range + negative seekOffset of timeline marker, should not set it to view`() {
-        timelineMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                10000L,
-                -3000L,
-                "Goal",
-                PointOfInterestType()
-            )
-        )
-        val titlesList = "Goal"
-
-
-        val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
-//        timeLineMarkerPositionListener.onScrubMove(12001L, 60000L, poiPositionsOnScreen)
-
-
-//        verify(timelineMarkerView, never()).setMarkerTexts(titlesList, position.toInt())
-    }
-
-    @Ignore("This should be tested through MLSTimeBar")
-    @Test
-    fun `given currentTime equal to right range + negative seekOffset of timeline marker, should set it to view`() {
-        timelineMarkerManager.addTimeLineHighlight(
-            PointOfInterest(
-                10000L,
-                -3000L,
-                "Goal",
-                PointOfInterestType()
-            )
-        )
-        val titlesList = "Goal"
-
-
-        val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
-//        timeLineMarkerPositionListener.onScrubMove(12000L, 60000L, poiPositionsOnScreen)
-
-
-//        verify(timelineMarkerView).setMarkerTexts(titlesList, position.toInt())
-    }
-
 
     @Test
     fun `set timeline marker, should clear previous timeline markers`() {
@@ -345,7 +210,7 @@ class TimelineMarkerManagerTest {
         timelineMarkerManager.addTimeLineHighlight(
             pointOfInterest1
         )
-        val markerTitleList = listOf("Goal", "Assist")
+//        val markerTitleList = listOf("Goal", "Assist")
 
 
         val poiPositionsOnScreen =
@@ -495,5 +360,143 @@ class TimelineMarkerManagerTest {
         }
     }
 
+    /** region Unused Tests
+    @Ignore("This should be tested through MLSTimeBar")
+    @Test
+    fun `given currentTime less than left range + positive seekOffset of timeline marker, should not set it to view`() {
+        val pointOfInterest = PointOfInterest(
+            10000L,
+            3000L,
+            "Goal",
+            PointOfInterestType()
+        )
+        timelineMarkerManager.addTimeLineHighlight(
+            pointOfInterest
+        )
+        val titlesList = listOf("Goal")
+
+
+        val poiPositionsOnScreen =
+            ArrayList<PositionedPointOfInterest>().apply {
+                add(
+                    PositionedPointOfInterest(
+                        511,
+                        pointOfInterest
+                    )
+                )
+            }
+//        timeLineMarkerPositionListener.onScrubMove(7999L, 60000L, poiPositionsOnScreen)
+
+
+//        verify(timelineMarkerView, never()).setMarkerTexts(titlesList, position.toInt())
+    }
+
+    @Ignore("This should be tested through MLSTimeBar")
+    @Test
+    fun `given currentTime greater than right range + positive seekOffset of timeline marker, should not set it to view`() {
+        timelineMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                10000L,
+                3000L,
+                "Goal",
+                PointOfInterestType()
+            )
+        )
+        val titlesList = "Goal"
+
+
+        val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
+//        timeLineMarkerPositionListener.onScrubMove(18001L, 60000L, poiPositionsOnScreen)
+
+
+//        verify(timelineMarkerView, never()).setMarkerTexts(titlesList, position.toInt())
+    }
+
+    @Ignore("This should be tested through MLSTimeBar")
+    @Test
+    fun `given currentTime less than left range + negative seekOffset of timeline marker, should not set it to view`() {
+        timelineMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                10000L,
+                -3000L,
+                "Goal",
+                PointOfInterestType()
+            )
+        )
+        val titlesList = "Goal"
+
+
+        val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
+//        timeLineMarkerPositionListener.onScrubMove(1999L, 60000L, poiPositionsOnScreen)
+
+
+//        verify(timelineMarkerView, never()).setMarkerTexts(titlesList, position.toInt())
+    }
+
+    @Ignore("This should be tested through MLSTimeBar")
+    @Test
+    fun `given currentTime equal to left range + negative seekOffset of timeline marker, should set it to view`() {
+        timelineMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                10000L,
+                -3000L,
+                "Goal",
+                PointOfInterestType()
+            )
+        )
+        val titlesList = "Goal"
+
+
+        val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
+//        timeLineMarkerPositionListener.onScrubMove(2000L, 60000L, poiPositionsOnScreen)
+
+
+//        verify(timelineMarkerView).setMarkerTexts(titlesList, position.toInt())
+    }
+
+    @Ignore("This should be tested through MLSTimeBar")
+    @Test
+    fun `given currentTime greater than right range + negative seekOffset of timeline marker, should not set it to view`() {
+        timelineMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                10000L,
+                -3000L,
+                "Goal",
+                PointOfInterestType()
+            )
+        )
+        val titlesList = "Goal"
+
+
+        val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
+//        timeLineMarkerPositionListener.onScrubMove(12001L, 60000L, poiPositionsOnScreen)
+
+
+//        verify(timelineMarkerView, never()).setMarkerTexts(titlesList, position.toInt())
+    }
+
+    @Ignore("This should be tested through MLSTimeBar")
+    @Test
+    fun `given currentTime equal to right range + negative seekOffset of timeline marker, should set it to view`() {
+        timelineMarkerManager.addTimeLineHighlight(
+            PointOfInterest(
+                10000L,
+                -3000L,
+                "Goal",
+                PointOfInterestType()
+            )
+        )
+        val titlesList = "Goal"
+
+
+        val poiPositionsOnScreen = ArrayList<Int>().apply { add(333) }
+//        timeLineMarkerPositionListener.onScrubMove(12000L, 60000L, poiPositionsOnScreen)
+
+
+//        verify(timelineMarkerView).setMarkerTexts(titlesList, position.toInt())
+    }
+
+
+    */
 
 }

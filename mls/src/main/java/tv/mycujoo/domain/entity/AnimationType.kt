@@ -38,6 +38,6 @@ enum class AnimationType(val type: String) {
 
     companion object {
         fun fromValueOrNone(value: String) =
-            values().firstOrNull { it.name.toLowerCase() == value } ?: NONE
+            values().firstOrNull { it.name.lowercase() == value } ?: NONE
     }
 }

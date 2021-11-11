@@ -40,6 +40,7 @@ import javax.inject.Inject
  */
 class MLS @Inject constructor(
     private val builder: MLSBuilder,
+    private val videoPlayerMediator: VideoPlayerMediator
 ) : MLSAbstract() {
 
 
@@ -59,7 +60,8 @@ class MLS @Inject constructor(
     private lateinit var playerView: MLSPlayerView
 
     private var mediatorInitialized = false
-    private lateinit var videoPlayerMediator: VideoPlayerMediator
+
+    //    private lateinit var videoPlayerMediator: VideoPlayerMediator
     private lateinit var annotationMediator: AnnotationMediator
     private lateinit var player: Player
 
@@ -97,16 +99,16 @@ class MLS @Inject constructor(
 
         initSvgRenderingLibrary(internalBuilder.getAssetManager())
 
-        videoPlayerMediator = VideoPlayerMediator(
-            builder.mlsConfiguration.videoPlayerConfig,
-            viewHandler,
-            internalBuilder.reactorSocket,
-            internalBuilder.dispatcher,
-            dataManager,
-            emptyList(),
-            builder.mCast,
-            internalBuilder.logger
-        )
+//        videoPlayerMediator = VideoPlayerMediator(
+//            builder.mlsConfiguration.videoPlayerConfig,
+//            viewHandler,
+//            internalBuilder.reactorSocket,
+//            internalBuilder.dispatcher,
+//            dataManager,
+//            emptyList(),
+//            builder.mCast,
+//            internalBuilder.logger
+//        )
 
         player = Player().apply {
             val exoPlayer = createExoPlayer(context)
@@ -174,7 +176,15 @@ class MLS @Inject constructor(
 
         builder.ima?.setAdViewProvider(MLSPlayerView.playerView as AdViewProvider)
 
-        videoPlayerMediator.initialize(MLSPlayerView, player, builder)
+        videoPlayerMediator.initialize(
+            MLSPlayerView,
+            player,
+            builder,
+            emptyList(),
+            null
+        )
+
+
         annotationMediator = AnnotationMediatorFactory.createAnnotationMediator(
             MLSPlayerView,
             builder.internalBuilder,

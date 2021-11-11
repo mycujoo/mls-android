@@ -15,7 +15,7 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import tv.mycujoo.domain.entity.*
-import tv.mycujoo.domain.repository.EventsRepository
+import tv.mycujoo.domain.repository.IEventsRepository
 import tv.mycujoo.mcls.CoroutineTestRule
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.manager.Logger
@@ -33,7 +33,7 @@ class DataManagerTest {
     val rule = InstantTaskExecutorRule()
 
     @Mock
-    lateinit var eventsRepository: EventsRepository
+    lateinit var eventsRepository: IEventsRepository
 
 
     @Before
@@ -68,7 +68,7 @@ class DataManagerTest {
             null,
             listOf(EventStatus.EVENT_STATUS_SCHEDULED, EventStatus.EVENT_STATUS_CANCELLED),
             OrderByEventsParam.ORDER_TITLE_ASC
-        ) { eventList, previousPageToken, nextPageToken -> eventEntityArrayList.addAll(eventList) }
+        ) { eventList, _, _ -> eventEntityArrayList.addAll(eventList) }
 
 
         assertEquals(2, eventEntityArrayList.size)
@@ -90,7 +90,7 @@ class DataManagerTest {
                 null,
                 listOf(EventStatus.EVENT_STATUS_SCHEDULED, EventStatus.EVENT_STATUS_CANCELLED),
                 OrderByEventsParam.ORDER_TITLE_ASC
-            ) { eventList, previousPageToken, nextPageToken -> result = previousPageToken }
+            ) { _, previousPageToken, _ -> result = previousPageToken }
 
 
             assertEquals(SAMPLE_PREVIOUS_PAGE_TOKEN, result)
@@ -111,7 +111,7 @@ class DataManagerTest {
             null,
             listOf(EventStatus.EVENT_STATUS_SCHEDULED, EventStatus.EVENT_STATUS_CANCELLED),
             OrderByEventsParam.ORDER_TITLE_ASC
-        ) { eventList, previousPageToken, nextPageToken -> result = nextPageToken }
+        ) { _, _, nextPageToken -> result = nextPageToken }
 
 
         assertEquals(SAMPLE_NEXT_PAGE_TOKEN, result)
@@ -127,7 +127,7 @@ class DataManagerTest {
                 null,
                 listOf(EventStatus.EVENT_STATUS_SCHEDULED, EventStatus.EVENT_STATUS_CANCELLED),
                 OrderByEventsParam.ORDER_TITLE_ASC
-            ) { eventList, previousPageToken, nextPageToken -> eventEntityArrayList.addAll(eventList) }
+            ) { eventList, _, _ -> eventEntityArrayList.addAll(eventList) }
 
 
             assertEquals(0, eventEntityArrayList.size)

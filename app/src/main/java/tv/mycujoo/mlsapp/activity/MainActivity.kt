@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
                     EventStatus.EVENT_STATUS_CANCELLED
                 ),
                 orderBy = OrderByEventsParam.ORDER_TITLE_ASC,
-                fetchEventCallback = { eventList: List<EventEntity>, previousPageToken: String, nextPageToken: String ->
+                fetchEventCallback = { eventList: List<EventEntity>, _: String, _: String ->
                     MLS.getVideoPlayer().playVideo(eventList.first())
                 }
             )

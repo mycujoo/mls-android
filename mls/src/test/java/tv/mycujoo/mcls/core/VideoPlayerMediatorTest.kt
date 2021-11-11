@@ -31,6 +31,7 @@ import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.api.MLSBuilder
 import tv.mycujoo.mcls.api.MLSConfiguration
 import tv.mycujoo.mcls.cast.ICast
+import tv.mycujoo.mcls.cast.ICastListener
 import tv.mycujoo.mcls.cast.ICasterSession
 import tv.mycujoo.mcls.cast.ISessionManagerListener
 import tv.mycujoo.mcls.data.IDataManager
@@ -58,8 +59,7 @@ class VideoPlayerMediatorTest {
     @get:Rule
     var coroutineTestRule = CoroutineTestRule()
 
-    private lateinit var videoPlayerMediator: VideoPlayerMediator
-
+    /** region Mocks */
     @Mock
     private lateinit var playerView: MLSPlayerView
 
@@ -67,16 +67,10 @@ class VideoPlayerMediatorTest {
     private lateinit var remotePlayerControllerView: RemotePlayerControllerView
 
     @Mock
-    lateinit var MLSBuilder: MLSBuilder
+    lateinit var mMLSBuilder: MLSBuilder
 
     @Mock
     lateinit var internalBuilder: InternalBuilder
-
-    @Mock
-    lateinit var videoPlayerConfig: VideoPlayerConfig
-
-    lateinit var reactorSocket: ReactorSocket
-    private lateinit var mainWebSocketListener: MainWebSocketListener
 
     @Mock
     lateinit var reactorListener: ReactorListener
@@ -104,7 +98,6 @@ class VideoPlayerMediatorTest {
 
     @Mock
     lateinit var exoPlayer: SimpleExoPlayer
-    private lateinit var exoPlayerMainEventListener: MainEventListener
 
     @Mock
     lateinit var mediaFactory: MediaFactory
@@ -144,8 +137,15 @@ class VideoPlayerMediatorTest {
 
     @Mock
     lateinit var sessionManagerListener: ISessionManagerListener
-    lateinit var castListener: tv.mycujoo.mcls.cast.ICastListener
+    /** endregion */
 
+    /** region fields */
+    private lateinit var castListener: ICastListener
+    private lateinit var reactorSocket: ReactorSocket
+    private lateinit var mainWebSocketListener: MainWebSocketListener
+    private lateinit var exoPlayerMainEventListener: MainEventListener
+    private lateinit var videoPlayerMediator: VideoPlayerMediator
+    /** endregion */
 
     @Before
     fun setUp() {
@@ -158,16 +158,16 @@ class VideoPlayerMediatorTest {
         reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener)
         reactorSocket.setUUID("SAMPLE_UUID")
 
-        whenever(MLSBuilder.activity).thenReturn(activity)
-        whenever(MLSBuilder.createExoPlayer(any())).thenReturn(exoPlayer)
+        whenever(mMLSBuilder.activity).thenReturn(activity)
+        whenever(mMLSBuilder.createExoPlayer(any())).thenReturn(exoPlayer)
         whenever(mediaFactory.createHlsMediaSource(any())).thenReturn(hlsMediaSource)
 
-        whenever(MLSBuilder.createReactorListener(any())).thenReturn(reactorListener)
-        whenever(MLSBuilder.mlsConfiguration).thenReturn(MLSConfiguration())
-        whenever(MLSBuilder.hasAnalytic).thenReturn(true)
+        whenever(mMLSBuilder.createReactorListener(any())).thenReturn(reactorListener)
+        whenever(mMLSBuilder.mlsConfiguration).thenReturn(MLSConfiguration())
+        whenever(mMLSBuilder.hasAnalytic).thenReturn(true)
 
-        whenever(MLSBuilder.publicKey).thenReturn("SAMPLE_PUBLIC_KEY")
-        whenever(MLSBuilder.internalBuilder).thenReturn(internalBuilder)
+        whenever(mMLSBuilder.publicKey).thenReturn("SAMPLE_PUBLIC_KEY")
+        whenever(mMLSBuilder.internalBuilder).thenReturn(internalBuilder)
         whenever(internalBuilder.createYouboraPlugin(any(), any())).thenReturn(youboraPlugin)
         whenever(internalBuilder.createExoPlayerAdapter(any())).thenReturn(exoplayer2Adapter)
         whenever(internalBuilder.createYouboraClient(any())).thenReturn(youboraClient)
@@ -198,16 +198,14 @@ class VideoPlayerMediatorTest {
                 return@thenAnswer sessionManagerListener
             }
         videoPlayerMediator = VideoPlayerMediator(
-            videoPlayerConfig,
+//            videoPlayerConfig,
             viewHandler,
             reactorSocket,
             dispatcher,
             dataManager,
-            emptyList(),
-            cast,
             internalBuilder.logger
         )
-        videoPlayerMediator.initialize(playerView, player, MLSBuilder)
+        videoPlayerMediator.initialize(playerView, player, mMLSBuilder, listOf(), cast)
         videoPlayerMediator.setAnnotationMediator(annotationMediator)
     }
 
@@ -218,8 +216,8 @@ class VideoPlayerMediatorTest {
     }
 
     private fun storeCastListener(invocationOnMock: InvocationOnMock) {
-        if (invocationOnMock.arguments[1] is tv.mycujoo.mcls.cast.ICastListener) {
-            castListener = invocationOnMock.arguments[1] as tv.mycujoo.mcls.cast.ICastListener
+        if (invocationOnMock.arguments[1] is ICastListener) {
+            castListener = invocationOnMock.arguments[1] as ICastListener
         }
     }
 
@@ -230,7 +228,7 @@ class VideoPlayerMediatorTest {
 
     @Test
     fun `ensure seek_tolerance is applied`() {
-        verify(exoPlayer).setSeekParameters(argThat(SeekParameterArgumentMatcher(MLSBuilder.mlsConfiguration.seekTolerance)))
+        verify(exoPlayer).setSeekParameters(argThat(SeekParameterArgumentMatcher(mMLSBuilder.mlsConfiguration.seekTolerance)))
     }
 
     @Test
@@ -289,7 +287,7 @@ class VideoPlayerMediatorTest {
     fun `given event without streamUrl, should not play video`() = runBlockingTest {
         val event: EventEntity = getSampleEventEntity(emptyList())
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
-        whenever(mediaFactory.createHlsMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
+        whenever(mediaFactory.createHlsMediaSource(any())).thenReturn(hlsMediaSource)
 
 
         videoPlayerMediator.playVideo(event)
@@ -474,7 +472,7 @@ class VideoPlayerMediatorTest {
 
 
             videoPlayerMediator.playVideo(event)
-            exoPlayerMainEventListener.onPlayerStateChanged(true, 0)
+            exoPlayerMainEventListener.onPlayWhenReadyChanged(true, 0)
             mainWebSocketListener.onMessage(webSocket, "eventTotal;ck2343whlc43k0g90i92grc0u;17")
 
 
@@ -490,7 +488,7 @@ class VideoPlayerMediatorTest {
 
 
         videoPlayerMediator.playVideo(event)
-        exoPlayerMainEventListener.onPlayerStateChanged(true, 0)
+        exoPlayerMainEventListener.onPlayWhenReadyChanged(true, 0)
         mainWebSocketListener.onMessage(webSocket, "eventTotal;ck2343whlc43k0g90i92grc0u;17")
 
 
@@ -503,7 +501,7 @@ class VideoPlayerMediatorTest {
         whenever(dataManager.currentEvent).thenReturn(event)
 
 
-        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_READY)
+        exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_READY)
 
 
         verify(youboraClient).logEvent(event, false)
@@ -515,9 +513,9 @@ class VideoPlayerMediatorTest {
         whenever(dataManager.currentEvent).thenReturn(event)
 
 
-        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_READY)
-        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_READY)
-        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_READY)
+        exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_READY)
+        exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_READY)
+        exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_READY)
 
 
         verify(youboraClient, times(1)).logEvent(event, false)
@@ -529,9 +527,9 @@ class VideoPlayerMediatorTest {
         whenever(dataManager.currentEvent).thenReturn(event)
 
 
-        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_IDLE)
-        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_BUFFERING)
-        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_ENDED)
+        exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_IDLE)
+        exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_BUFFERING)
+        exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_ENDED)
 
 
         verify(youboraClient, never()).logEvent(any(), any())
