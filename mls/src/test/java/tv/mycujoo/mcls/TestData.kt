@@ -31,10 +31,7 @@ class TestData {
             )
         }
 
-        fun getSampleShowOverlayAction(
-            offset: Long,
-            absoluteTime: Long
-        ): Action.ShowOverlayAction {
+        fun getSampleShowOverlayAction(): Action.ShowOverlayAction {
             val viewSpec = ViewSpec(null, null)
             val introTransitionSpec =
                 TransitionSpec(0L, AnimationType.NONE, 0L)
