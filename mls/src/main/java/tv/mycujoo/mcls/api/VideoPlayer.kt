@@ -31,6 +31,13 @@ class VideoPlayer(
                     optimisticSeekingPosition = -1
                 }
             }
+
+            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                super.onPlayWhenReadyChanged(playWhenReady, reason)
+                if (reason == STATE_READY) {
+                    optimisticSeekingPosition = -1
+                }
+            }
         })
     }
 

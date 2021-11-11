@@ -112,7 +112,7 @@ class VideoPlayerTest {
         videoPlayer.seekTo(15)
 
         // TODO: Figure out Why changing this doesn't work, and what is the expected behaviour?
-        eventListener.onPlayerStateChanged(true, STATE_READY)
+        eventListener.onPlayWhenReadyChanged(true, STATE_READY)
 
 
         assertEquals(0, videoPlayer.optimisticCurrentTime())

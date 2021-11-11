@@ -136,7 +136,7 @@ class TvVideoPlayer(
             })
         }
 
-        player.addListener(object : com.google.android.exoplayer2.Player.EventListener {
+        player.addListener(object : com.google.android.exoplayer2.Player.Listener {
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 if (playbackState == ExoPlayer.STATE_READY) {
                     mTransportControlGlue.seekProvider?.let {

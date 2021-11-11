@@ -35,7 +35,7 @@ class AnnotationMediator(
 ) : IAnnotationMediator {
 
     /**region Fields*/
-    private lateinit var eventListener: Player.EventListener
+    private lateinit var eventListener: Player.Listener
     private var hasPendingSeek: Boolean = false
     /**endregion */
 
@@ -104,7 +104,7 @@ class AnnotationMediator(
     }
 
     private fun initEventListener(player: IPlayer) {
-        eventListener = object : Player.EventListener {
+        eventListener = object : Player.Listener {
 
             override fun onPositionDiscontinuity(reason: Int) {
                 super.onPositionDiscontinuity(reason)
@@ -117,8 +117,8 @@ class AnnotationMediator(
                 playerView.updateTime(time, player.duration())
             }
 
-            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                super.onPlayerStateChanged(playWhenReady, playbackState)
+            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, playbackState: Int) {
+                super.onPlayWhenReadyChanged(playWhenReady, playbackState)
 
                 if (playbackState == STATE_READY) {
                     playerView.updateTime(player.currentPosition(), player.duration())
@@ -137,7 +137,6 @@ class AnnotationMediator(
                     )
                 }
             }
-
         }
         player.addListener(eventListener)
     }

@@ -37,7 +37,7 @@ class AnnotationMediatorTest {
     private lateinit var testCoroutineScope: TestCoroutineScope
     private lateinit var heartBeatOuterRunnable: Runnable
     private lateinit var heartBeatInnerRunnable: Runnable
-    private lateinit var eventListener: Player.EventListener
+    private lateinit var eventListener: Player.Listener
 
     @Mock
     lateinit var playerView: MLSPlayerView
@@ -97,7 +97,7 @@ class AnnotationMediatorTest {
         }
 
         whenever(player.addListener(any())).then {
-            eventListener = it.getArgument(0) as Player.EventListener
+            eventListener = it.getArgument(0) as Player.Listener
             true
         }
 
@@ -204,7 +204,7 @@ class AnnotationMediatorTest {
         whenever(player.duration()).thenReturn(400L)
 
 
-        eventListener.onPlayerStateChanged(true, Player.STATE_READY)
+        eventListener.onPlayWhenReadyChanged(true, Player.STATE_READY)
 
 
         verify(playerView).updateTime(123L, 400L)
@@ -217,7 +217,7 @@ class AnnotationMediatorTest {
         eventListener.onPositionDiscontinuity(Player.DISCONTINUITY_REASON_SEEK) // make seek = true
 
 
-        eventListener.onPlayerStateChanged(true, Player.STATE_READY)
+        eventListener.onPlayWhenReadyChanged(true, Player.STATE_READY)
 
 
 //        annotationFactory.processTimers()
@@ -234,7 +234,7 @@ class AnnotationMediatorTest {
         // seek = false // default
 
 
-        eventListener.onPlayerStateChanged(true, Player.STATE_READY)
+        eventListener.onPlayWhenReadyChanged(true, Player.STATE_READY)
 
 
 //        annotationFactory.processTimers()

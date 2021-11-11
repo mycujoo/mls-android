@@ -74,7 +74,7 @@ class PlayerTest {
     @Test
     fun `given listener, should attach it to exo player`() {
         initPlayer()
-        val listener = object : com.google.android.exoplayer2.Player.EventListener {}
+        val listener = object : com.google.android.exoplayer2.Player.Listener {}
 
 
         player.addListener(listener)

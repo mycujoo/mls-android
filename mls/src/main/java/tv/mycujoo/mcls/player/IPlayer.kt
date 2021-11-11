@@ -21,7 +21,7 @@ interface IPlayer {
     fun getDirectInstance(): ExoPlayer?
     fun getPlayer(): Player?
 
-    fun addListener(eventListener: Player.EventListener)
+    fun addListener(eventListener: Player.Listener)
 
     fun seekTo(offset: Long)
     fun currentPosition(): Long

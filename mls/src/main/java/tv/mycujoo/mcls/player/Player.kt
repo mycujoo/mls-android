@@ -137,7 +137,7 @@ class Player : IPlayer {
      * Add listener to Exoplayer
      * @param eventListener implementation of EventListener
      */
-    override fun addListener(eventListener: Player.EventListener) {
+    override fun addListener(eventListener: Player.Listener) {
         exoPlayer?.addListener(eventListener)
     }
 
