@@ -33,7 +33,7 @@ class VideoPlayerTest {
     lateinit var videoPlayerMediator: VideoPlayerMediator
 
     @Mock
-    lateinit var MLSPlayerView: MLSPlayerView
+    lateinit var mMLSPlayerView: MLSPlayerView
 
     @Before
     fun setUp() {
@@ -42,7 +42,7 @@ class VideoPlayerTest {
             eventListener = i.getArgument(0)
             eventListener
         }
-        videoPlayer = VideoPlayer(exoPlayer, videoPlayerMediator, MLSPlayerView)
+        videoPlayer = VideoPlayer(exoPlayer, videoPlayerMediator, mMLSPlayerView)
         whenever(exoPlayer.audioComponent).thenReturn(audioComponent)
     }
 
@@ -110,6 +110,8 @@ class VideoPlayerTest {
     fun `test optimisticCurrentTime with prior seekTo, after loading content`() {
         whenever(exoPlayer.currentPosition).thenReturn(42L)
         videoPlayer.seekTo(15)
+
+        // TODO: Figure out Why changing this doesn't work, and what is the expected behaviour?
         eventListener.onPlayerStateChanged(true, STATE_READY)
 
 
@@ -174,7 +176,7 @@ class VideoPlayerTest {
     fun `test showEventInfoOverlay`() {
         videoPlayer.showEventInfoOverlay()
 
-        verify(MLSPlayerView).showStartedEventInformationDialog()
+        verify(mMLSPlayerView).showStartedEventInformationDialog()
     }
 
     @Test
@@ -182,7 +184,7 @@ class VideoPlayerTest {
         videoPlayer.hideEventInfoOverlay()
 
 
-        verify(MLSPlayerView).hideInfoDialogs()
+        verify(mMLSPlayerView).hideInfoDialogs()
     }
 
     @Test
