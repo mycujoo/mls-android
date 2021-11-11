@@ -14,7 +14,6 @@ import tv.mycujoo.mcls.core.PlayerEventsListener
 import tv.mycujoo.mcls.core.UIEventListener
 import tv.mycujoo.mcls.di.AppModule
 import tv.mycujoo.mcls.di.NetworkModule
-import tv.mycujoo.mcls.di.RepositoryModule
 import tv.mycujoo.mcls.enum.C.Companion.ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE
 import tv.mycujoo.mcls.ima.IIma
@@ -28,7 +27,7 @@ open class MLSBuilder {
 
 
     lateinit var internalBuilder: InternalBuilder
-
+        private set
     internal var publicKey: String = ""
         private set
     internal var activity: Activity? = null
@@ -134,7 +133,6 @@ open class MLSBuilder {
             .applicationContextModule(ApplicationContextModule(activity))
             .networkModule(NetworkModule())
             .appModule(AppModule())
-            .repositoryModule(RepositoryModule())
             .build()
 
 

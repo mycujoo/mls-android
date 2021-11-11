@@ -48,6 +48,7 @@ import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.LIVE_ON_THE_EDGE
 import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.VOD
 import tv.mycujoo.mcls.widgets.PlayerControllerMode
 import tv.mycujoo.mcls.widgets.RemotePlayerControllerListener
+import javax.inject.Inject
 
 /**
  * Manages video-player related components.
@@ -58,7 +59,7 @@ import tv.mycujoo.mcls.widgets.RemotePlayerControllerListener
  * @param dataManager data manager which holds current data(event) loaded
  * @param cast optional: Cast module used for Google Cast
  */
-class VideoPlayerMediator(
+class VideoPlayerMediator @Inject constructor(
     private var videoPlayerConfig: VideoPlayerConfig,
     private val viewHandler: IViewHandler,
     private val reactorSocket: IReactorSocket,
@@ -155,7 +156,7 @@ class VideoPlayerMediator(
         player.getDirectInstance()?.let {
             videoPlayer = VideoPlayer(it, this, MLSPlayerView)
 
-            builder.mlsConfiguration.seekTolerance?.let { accuracy ->
+            builder.mlsConfiguration.seekTolerance.let { accuracy ->
                 if (accuracy > 0) {
                     it.setSeekParameters(
                         SeekParameters(

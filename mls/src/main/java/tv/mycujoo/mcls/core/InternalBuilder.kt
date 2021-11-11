@@ -10,6 +10,7 @@ import com.npaw.youbora.lib6.plugin.Plugin
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
+import tv.mycujoo.data.repository.EventsRepository
 import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.api.MLSConfiguration
 import tv.mycujoo.mcls.data.IDataManager
@@ -45,7 +46,7 @@ open class InternalBuilder @Inject constructor(
     /**region Fields*/
 
     @Inject
-    lateinit var eventsRepository: tv.mycujoo.domain.repository.EventsRepository
+    lateinit var eventsRepository: EventsRepository
 
     @Inject
     lateinit var dispatcher: CoroutineScope

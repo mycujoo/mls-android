@@ -11,7 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.newSingleThreadContext
-import tv.mycujoo.domain.repository.EventsRepository
+import tv.mycujoo.domain.repository.IEventsRepository
 import tv.mycujoo.mcls.BuildConfig
 import tv.mycujoo.mcls.api.DataManager
 import tv.mycujoo.mcls.data.IDataManager
@@ -49,7 +49,7 @@ open class AppModule {
     @Singleton
     fun provideDataManager(
         scope: CoroutineScope,
-        repository: EventsRepository,
+        repository: IEventsRepository,
         logger: Logger
     ): IDataManager {
         return DataManager(scope, repository, logger)

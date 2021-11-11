@@ -10,7 +10,7 @@ import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.params.EventIdPairParam
 import tv.mycujoo.domain.params.EventListParams
 import tv.mycujoo.domain.params.TimelineIdPairParam
-import tv.mycujoo.domain.repository.EventsRepository
+import tv.mycujoo.domain.repository.IEventsRepository
 import tv.mycujoo.domain.usecase.GetActionsUseCase
 import tv.mycujoo.domain.usecase.GetEventDetailUseCase
 import tv.mycujoo.domain.usecase.GetEventsUseCase
@@ -20,6 +20,7 @@ import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.model.SingleLiveEvent
+import javax.inject.Inject
 
 /**
  * Serves client as 'Data Provider'
@@ -28,9 +29,9 @@ import tv.mycujoo.mcls.model.SingleLiveEvent
  * @param eventsRepository actual implementation of EventsRepository, used to call Use-Cases
  * @param logger log info, error & warning based on required level of logging
  */
-class DataManager(
+class DataManager @Inject constructor(
     private val scope: CoroutineScope,
-    private val eventsRepository: EventsRepository,
+    private val eventsRepository: IEventsRepository,
     private val logger: Logger
 ) : IDataManager {
 
@@ -132,13 +133,11 @@ class DataManager(
                     events.postValue(
                         result.value.eventEntities
                     )
-                    fetchEventCallback?.let {
-                        it.invoke(
-                            result.value.eventEntities,
-                            result.value.previousPageToken ?: "",
-                            result.value.nextPageToken ?: ""
-                        )
-                    }
+                    fetchEventCallback?.invoke(
+                        result.value.eventEntities,
+                        result.value.previousPageToken ?: "",
+                        result.value.nextPageToken ?: ""
+                    )
                 }
                 is Result.NetworkError -> {
                     logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus(" ${result.error}"))

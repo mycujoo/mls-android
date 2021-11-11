@@ -10,7 +10,7 @@ import com.google.android.exoplayer2.ui.AdViewProvider
 import com.google.android.exoplayer2.util.Util
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
-import tv.mycujoo.domain.repository.EventsRepository
+import tv.mycujoo.domain.repository.IEventsRepository
 import tv.mycujoo.mcls.core.InternalBuilder
 import tv.mycujoo.mcls.core.VideoPlayerMediator
 import tv.mycujoo.mcls.data.IDataManager
@@ -44,7 +44,7 @@ class MLS @Inject constructor(
 
 
     /**region Fields*/
-    private lateinit var eventsRepository: EventsRepository
+    private lateinit var eventsRepository: IEventsRepository
 
     private lateinit var dispatcher: CoroutineScope
     private lateinit var okHttpClient: OkHttpClient
