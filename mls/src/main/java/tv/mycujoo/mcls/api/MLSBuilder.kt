@@ -26,6 +26,9 @@ import tv.mycujoo.mcls.network.socket.ReactorListener
  */
 open class MLSBuilder {
 
+
+    lateinit var internalBuilder: InternalBuilder
+
     internal var publicKey: String = ""
         private set
     internal var activity: Activity? = null
@@ -135,7 +138,7 @@ open class MLSBuilder {
             .build()
 
 
-        val internalBuilder = graph.provideInternalBuilder()
+        internalBuilder = graph.provideInternalBuilder()
         internalBuilder.initialize()
 
         val mls = MLS(this)
