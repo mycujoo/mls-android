@@ -3,7 +3,6 @@ package tv.mycujoo.mcls.core
 import android.content.Context
 import android.content.res.AssetManager
 import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
 import com.npaw.youbora.lib6.YouboraLog
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Options
@@ -26,10 +25,7 @@ import tv.mycujoo.mcls.manager.VariableKeeper
 import tv.mycujoo.mcls.manager.VariableTranslator
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.network.socket.IReactorSocket
-import tv.mycujoo.mcls.network.socket.MainWebSocketListener
-import tv.mycujoo.mcls.network.socket.ReactorSocket
 import tv.mycujoo.mcls.player.MediaFactory
-import tv.mycujoo.mcls.player.Player
 import javax.inject.Inject
 
 /**
@@ -39,7 +35,8 @@ open class InternalBuilder @Inject constructor(
     @ApplicationContext private val context: Context,
     val logger: Logger,
     val viewHandler: IViewHandler,
-    val mediaFactory: MediaFactory
+    val mediaFactory: MediaFactory,
+    val reactorSocket: IReactorSocket
 ) {
 
     private var ima: IIma? = null
@@ -66,11 +63,6 @@ open class InternalBuilder @Inject constructor(
     lateinit var variableTranslator: VariableTranslator
     lateinit var variableKeeper: VariableKeeper
 
-//    internal lateinit var mediaFactory: MediaFactory
-
-    lateinit var reactorSocket: IReactorSocket
-    private lateinit var mainWebSocketListener: MainWebSocketListener
-
     var uuid: String? = null
     /**endregion */
 
@@ -94,10 +86,6 @@ open class InternalBuilder @Inject constructor(
         )
 
         ima?.setAdsLoaderProvider(mediaFactory.defaultMediaSourceFactory)
-
-        mainWebSocketListener = MainWebSocketListener()
-        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener)
-
     }
 
     /**

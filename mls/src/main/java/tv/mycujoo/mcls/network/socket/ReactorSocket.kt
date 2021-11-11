@@ -5,12 +5,12 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
 import tv.mycujoo.mcls.model.JoinTimelineParam
+import javax.inject.Inject
 
-class ReactorSocket(
+class ReactorSocket @Inject constructor(
     private val okHttpClient: OkHttpClient,
     private val mainSocketListener: MainWebSocketListener
-) :
-    IReactorSocket {
+) : IReactorSocket {
 
 
     private lateinit var webSocket: WebSocket

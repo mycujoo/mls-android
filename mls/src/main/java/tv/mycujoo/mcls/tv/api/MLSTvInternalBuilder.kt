@@ -1,15 +1,17 @@
 package tv.mycujoo.mcls.tv.api
 
-import android.app.Activity
+import android.content.Context
 import com.google.android.exoplayer2.MediaItem
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
+import tv.mycujoo.mcls.api.MLSConfiguration
 import tv.mycujoo.mcls.data.IDataManager
-import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.Logger
+import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.network.socket.MainWebSocketListener
 import tv.mycujoo.mcls.network.socket.ReactorSocket
@@ -18,9 +20,17 @@ import tv.mycujoo.mcls.player.Player
 import java.util.*
 import javax.inject.Inject
 
-class MLSTvInternalBuilder(activity: Activity, ima: IIma?, logLevel: LogLevel) {
+class MLSTvInternalBuilder @Inject constructor(
+    @ApplicationContext private val context: Context,
+    val logger: Logger,
+    val viewHandler: IViewHandler,
+    val mediaFactory: MediaFactory,
+    val reactorSocket: IReactorSocket
+) {
 
-    var logger: Logger
+    val ima: IIma? = null
+
+    val logLevel: LogLevel = MLSConfiguration().logLevel
 
     @Inject
     lateinit var eventsRepository: tv.mycujoo.domain.repository.EventsRepository
@@ -37,35 +47,19 @@ class MLSTvInternalBuilder(activity: Activity, ima: IIma?, logLevel: LogLevel) {
     @Inject
     lateinit var prefManager: IPrefManager
 
-    internal var mediaFactory: MediaFactory
-
-    var reactorSocket: IReactorSocket
-    private var mainWebSocketListener: MainWebSocketListener
-
     var uuid: String? = null
 
 
     init {
-
-        logger = Logger(logLevel)
+        logger.setLogLevel(logLevel)
 
         uuid = prefManager.get("UUID") ?: UUID.randomUUID().toString()
         persistUUIDIfNotStoredAlready(uuid!!)
 
-        mediaFactory = MediaFactory(
-            Player.createDefaultMediaSourceFactory(activity),
-            Player.createMediaFactory(activity),
-            MediaItem.Builder()
+        ima?.setAdsLoaderProvider(
+            mediaFactory.defaultMediaSourceFactory
         )
 
-        ima?.let {
-            it.setAdsLoaderProvider(
-                mediaFactory.defaultMediaSourceFactory
-            )
-        }
-
-        mainWebSocketListener = MainWebSocketListener()
-        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener)
         reactorSocket.setUUID(uuid!!)
     }
 

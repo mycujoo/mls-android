@@ -2,8 +2,9 @@ package tv.mycujoo.mcls.network.socket
 
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
+import javax.inject.Inject
 
-class MainWebSocketListener : WebSocketListener() {
+class MainWebSocketListener @Inject constructor() : WebSocketListener() {
 
 
     private var socketListeners = mutableListOf<WebSocketListener>()

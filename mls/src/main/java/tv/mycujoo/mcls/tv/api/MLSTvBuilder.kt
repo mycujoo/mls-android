@@ -6,8 +6,11 @@ import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.ima.IIma
+import javax.inject.Inject
 
-class MLSTvBuilder {
+class MLSTvBuilder @Inject constructor(
+    val internalBuilder: MLSTvInternalBuilder
+) {
     internal var publicKey: String = ""
         private set
     internal var activity: Activity? = null
@@ -43,7 +46,6 @@ class MLSTvBuilder {
     fun setLogLevel(logLevel: LogLevel) = apply { this.logLevel = logLevel }
 
     fun build(): MLSTV {
-        val internalBuilder = MLSTvInternalBuilder(activity!!, ima, logLevel)
         internalBuilder.prefManager.persist(PUBLIC_KEY_PREF_KEY, publicKey)
         return MLSTV(
             activity!!,

@@ -3,6 +3,7 @@ package tv.mycujoo.mcls.di
 import android.content.Context
 import android.util.Log
 import com.squareup.moshi.Moshi
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -103,7 +104,7 @@ open class NetworkModule {
     @Provides
     @MLSAPI
     @Singleton
-    open fun provideMlsApiRetrofit(
+     fun provideMlsApiRetrofit(
         okHttpClient: OkHttpClient,
         @ApiBaseUrl baseUrl: String
     ): Retrofit {
@@ -116,7 +117,7 @@ open class NetworkModule {
 
     @Provides
     @Singleton
-    open fun provideMlsApi(@MLSAPI retrofit: Retrofit): MlsApi {
+     fun provideMlsApi(@MLSAPI retrofit: Retrofit): MlsApi {
         return retrofit.create(MlsApi::class.java)
     }
 }
