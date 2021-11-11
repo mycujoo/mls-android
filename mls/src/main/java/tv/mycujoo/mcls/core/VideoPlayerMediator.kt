@@ -217,7 +217,7 @@ class VideoPlayerMediator @Inject constructor(
         )
 
         val mainEventListener = object : MainEventListener {
-            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, playbackState: Int) {
                 super.onPlayWhenReadyChanged(playWhenReady, playbackState)
 
                 handlePlaybackStatus(playWhenReady, playbackState)

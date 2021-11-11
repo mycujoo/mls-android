@@ -7,4 +7,4 @@ import com.google.android.exoplayer2.Player
  * VideoPlayerMediator
  * @see VideoPlayerMediator
  */
-interface MainEventListener : Player.EventListener
+interface MainEventListener : Player.Listener

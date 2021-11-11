@@ -167,7 +167,6 @@ class VideoPlayerMediatorTest {
         whenever(mMLSBuilder.hasAnalytic).thenReturn(true)
 
         whenever(mMLSBuilder.publicKey).thenReturn("SAMPLE_PUBLIC_KEY")
-        whenever(mMLSBuilder.internalBuilder).thenReturn(internalBuilder)
         whenever(internalBuilder.createYouboraPlugin(any(), any())).thenReturn(youboraPlugin)
         whenever(internalBuilder.createExoPlayerAdapter(any())).thenReturn(exoplayer2Adapter)
         whenever(internalBuilder.createYouboraClient(any())).thenReturn(youboraClient)
@@ -203,7 +202,8 @@ class VideoPlayerMediatorTest {
             reactorSocket,
             dispatcher,
             dataManager,
-            internalBuilder.logger
+            internalBuilder.logger,
+            internalBuilder
         )
         videoPlayerMediator.initialize(playerView, player, mMLSBuilder, listOf(), cast)
         videoPlayerMediator.setAnnotationMediator(annotationMediator)
