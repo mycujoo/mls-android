@@ -8,13 +8,14 @@ import tv.mycujoo.mcls.manager.IVariableKeeper
 import tv.mycujoo.mcls.manager.TimerEntity
 import tv.mycujoo.mcls.manager.TimerVariable
 import tv.mycujoo.mcls.utils.TimeUtils
+import tv.mycujoo.mcls.widgets.MLSPlayerView
 import java.util.concurrent.CopyOnWriteArrayList
+import javax.inject.Inject
 
-class AnnotationFactory(
+class AnnotationFactory @Inject constructor(
     private val annotationListener: IAnnotationListener,
     private val variableKeeper: IVariableKeeper
-) :
-    IAnnotationFactory {
+) : IAnnotationFactory {
 
     /**region Fields*/
     private var sortedActions =
@@ -51,12 +52,14 @@ class AnnotationFactory(
         localActions.addAll(annotations)
     }
 
-    override fun build(buildPoint: BuildPoint) {
+    override fun build(buildPoint: BuildPoint, player: MLSPlayerView) {
         allActions.apply {
             clear()
             addAll(localActions)
             addAll(sortedActions)
         }
+
+        annotationListener.attachPlayer(player)
 
         val currentTimeInInDvrWindowDuration = TimeRangeHelper.isCurrentTimeInDvrWindowDuration(
             buildPoint.player.duration(),

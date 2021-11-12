@@ -1,6 +1,7 @@
 package tv.mycujoo.mcls.mediator
 
 import android.os.Handler
+import android.os.Looper
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.DISCONTINUITY_REASON_SEEK
 import com.google.android.exoplayer2.Player.STATE_READY
@@ -21,18 +22,20 @@ import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 
-class AnnotationMediator(
-    private var playerView: MLSPlayerView,
-    private val annotationFactory: IAnnotationFactory,
+class AnnotationMediator @Inject constructor(
+    val annotationFactory: IAnnotationFactory,
     val dataManager: IDataManager,
     val dispatcher: CoroutineScope,
-    player: IPlayer,
-    private val scheduler: ScheduledExecutorService,
-    handler: Handler,
-    private val logger: Logger
+    val scheduler: ScheduledExecutorService,
+    val logger: Logger
 ) : IAnnotationMediator {
+
+    // TODO: Hook this up :)
+    private lateinit var playerView: MLSPlayerView
+    private lateinit var player: IPlayer
 
     /**region Fields*/
     private lateinit var eventListener: Player.Listener
@@ -40,7 +43,9 @@ class AnnotationMediator(
     /**endregion */
 
     /**region Initialization*/
-    init {
+    fun initialize(player: IPlayer, handler: Handler) {
+        this.player = player
+
         initEventListener(player)
 
         val exoRunnable = Runnable {
@@ -53,7 +58,8 @@ class AnnotationMediator(
                         player.currentAbsoluteTime(),
                         player,
                         player.isPlaying()
-                    )
+                    ),
+                    playerView
                 )
 
                 playerView.updateTime(currentPosition, player.duration())
@@ -69,9 +75,7 @@ class AnnotationMediator(
             ONE_SECOND_IN_MS,
             TimeUnit.MILLISECONDS
         )
-
     }
-
 
     override fun fetchActions(
         timelineId: String,
@@ -133,7 +137,8 @@ class AnnotationMediator(
                             player.currentAbsoluteTime(),
                             player,
                             player.isPlaying()
-                        )
+                        ),
+                        playerView
                     )
                 }
             }
@@ -163,7 +168,8 @@ class AnnotationMediator(
                 player.currentAbsoluteTime(),
                 player,
                 player.isPlaying()
-            )
+            ),
+            playerView
         )
     }
 

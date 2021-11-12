@@ -101,17 +101,15 @@ class AnnotationMediatorTest {
             true
         }
 
-        annotationMediator =
-            AnnotationMediator(
-                playerView,
-                annotationFactory,
-                dataManager,
-                testCoroutineScope,
-                player,
-                scheduledExecutorService,
-                handler,
-                Logger(LogLevel.MINIMAL)
-            )
+        annotationMediator = AnnotationMediator(
+            annotationFactory,
+            dataManager,
+            testCoroutineScope,
+            scheduledExecutorService,
+            Logger(LogLevel.MINIMAL)
+        )
+        annotationMediator.initialize(player, handler)
+        annotationMediator.initPlayerView(playerView)
 
         heartBeatOuterRunnable.run()
     }

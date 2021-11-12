@@ -12,35 +12,16 @@ import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.player.MediaFactory
 import tv.mycujoo.mcls.tv.player.TvVideoPlayer
+import javax.inject.Inject
 
-class MLSTV(
-    val activity: Activity,
-    private val ima: IIma?,
-    private val mlsTVConfiguration: MLSTVConfiguration,
-    private val mediaFactory: MediaFactory,
-    private val reactorSocket: IReactorSocket,
-    private val dispatcher: CoroutineScope,
+class MLSTV @Inject constructor(
     private val dataManager: IDataManager,
-    private val okHttpClient: OkHttpClient,
-    private val logger: Logger
+    private val tvVideoPlayer: TvVideoPlayer,
 ) {
-
-    private lateinit var tvVideoPlayer: TvVideoPlayer
 
 
     fun preparePlayer(videoSupportFragment: VideoSupportFragment) {
-        tvVideoPlayer = TvVideoPlayer(
-            activity,
-            videoSupportFragment,
-            ima,
-            mlsTVConfiguration,
-            mediaFactory,
-            reactorSocket,
-            dispatcher,
-            dataManager,
-            okHttpClient,
-            logger
-        )
+
     }
 
 

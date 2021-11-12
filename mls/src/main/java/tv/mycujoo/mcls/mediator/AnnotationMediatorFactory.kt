@@ -10,39 +10,37 @@ import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import java.util.concurrent.Executors
 
-class AnnotationMediatorFactory {
-    companion object {
-        fun createAnnotationMediator(
-            MLSPlayerView: MLSPlayerView,
-            internalBuilder: InternalBuilder,
-            player: IPlayer
-        ): AnnotationMediator {
-            val annotationListener =
-                AnnotationListener(
-                    MLSPlayerView,
-                    internalBuilder.overlayViewHelper,
-                    DownloaderClient(internalBuilder.okHttpClient)
-                )
-
-            val annotationFactory = AnnotationFactory(
-                annotationListener,
-                internalBuilder.variableKeeper
-            )
-
-            val annotationMediator = AnnotationMediator(
-                MLSPlayerView,
-                annotationFactory,
-                internalBuilder.dataManager,
-                internalBuilder.dispatcher,
-                player,
-                Executors.newScheduledThreadPool(1),
-                Handler(Looper.getMainLooper()),
-                internalBuilder.logger
-            )
-
-            annotationMediator.initPlayerView(MLSPlayerView)
-
-            return annotationMediator
-        }
-    }
-}
+//class AnnotationMediatorFactory {
+//    companion object {
+////        fun createAnnotationMediator(
+////            MLSPlayerView: MLSPlayerView,
+////            internalBuilder: InternalBuilder,
+////            player: IPlayer
+////        ): AnnotationMediator {
+////            val annotationListener = AnnotationListener(
+////                MLSPlayerView,
+////                internalBuilder.overlayViewHelper,
+////                DownloaderClient(internalBuilder.okHttpClient)
+////            )
+////
+////            val annotationFactory = AnnotationFactory(
+////                annotationListener,
+////                internalBuilder.variableKeeper
+////            )
+////
+////            val annotationMediator = AnnotationMediator(
+////                annotationFactory,
+////                internalBuilder.dataManager,
+////                internalBuilder.dispatcher,
+////                player,
+////                Executors.newScheduledThreadPool(1),
+////                Handler(Looper.getMainLooper()),
+////                internalBuilder.logger
+////            )
+////
+////            annotationMediator.initPlayerView(MLSPlayerView)
+////
+////            return annotationMediator
+////        }
+//    }
+//}

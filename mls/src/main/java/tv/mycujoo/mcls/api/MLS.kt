@@ -13,18 +13,15 @@ import tv.mycujoo.mcls.core.InternalBuilder
 import tv.mycujoo.mcls.core.VideoPlayerMediator
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
-import tv.mycujoo.mcls.enum.C.Companion.UUID_PREF_KEY
 import tv.mycujoo.mcls.helper.SVGAssetResolver
 import tv.mycujoo.mcls.helper.TypeFaceFactory
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.mediator.AnnotationMediator
-import tv.mycujoo.mcls.mediator.AnnotationMediatorFactory
 import tv.mycujoo.mcls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mcls.player.Player
 import tv.mycujoo.mcls.player.Player.Companion.createExoPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
-import java.util.*
 import javax.inject.Inject
 
 /**
@@ -39,15 +36,14 @@ class MLS @Inject constructor(
     private val dataManager: IDataManager,
     private val viewHandler: IViewHandler,
     private val prefManager: IPrefManager,
-    private val internalBuilder: InternalBuilder
+    private val internalBuilder: InternalBuilder,
+    private val annotationMediator: AnnotationMediator
 ) : MLSAbstract() {
 
     /**region Fields*/
     private lateinit var playerView: MLSPlayerView
 
     private var mediatorInitialized = false
-
-    private lateinit var annotationMediator: AnnotationMediator
 
     private lateinit var player: Player
 
@@ -69,20 +65,22 @@ class MLS @Inject constructor(
 
         initSvgRenderingLibrary(internalBuilder.getAssetManager())
 
+        val handler = Handler(Looper.myLooper()!!)
+
         player = Player().apply {
             val exoPlayer = createExoPlayer(context)
             create(
                 builder.ima,
                 internalBuilder.mediaFactory,
                 exoPlayer,
-                Handler(Looper.myLooper()!!),
+                handler,
                 MediaOnLoadCompletedListener(exoPlayer)
             )
         }
+        annotationMediator.initialize(player, handler)
         player.getDirectInstance()?.let { exoPlayer ->
             builder.ima?.setPlayer(exoPlayer)
         }
-
     }
 
     /**
@@ -123,11 +121,12 @@ class MLS @Inject constructor(
                 ima.setAdViewProvider(MLSPlayerView.playerView)
             }
 
-            annotationMediator = AnnotationMediatorFactory.createAnnotationMediator(
-                MLSPlayerView,
-                internalBuilder,
-                videoPlayerMediator.getPlayer()
-            )
+            annotationMediator.initPlayerView(playerView)
+//            annotationMediator = AnnotationMediatorFactory.createAnnotationMediator(
+//                MLSPlayerView,
+//                internalBuilder,
+//                videoPlayerMediator.getPlayer()
+//            )
             videoPlayerMediator.setAnnotationMediator(annotationMediator)
             return
         }
@@ -143,12 +142,12 @@ class MLS @Inject constructor(
             null
         )
 
-
-        annotationMediator = AnnotationMediatorFactory.createAnnotationMediator(
-            MLSPlayerView,
-            internalBuilder,
-            videoPlayerMediator.getPlayer()
-        )
+        annotationMediator.initPlayerView(playerView)
+//        annotationMediator = AnnotationMediatorFactory.createAnnotationMediator(
+//            MLSPlayerView,
+//            internalBuilder,
+//            videoPlayerMediator.getPlayer()
+//        )
         videoPlayerMediator.setAnnotationMediator(annotationMediator)
     }
 

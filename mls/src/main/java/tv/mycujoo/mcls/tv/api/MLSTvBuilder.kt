@@ -1,7 +1,15 @@
 package tv.mycujoo.mcls.tv.api
 
 import android.app.Activity
+import android.content.Context
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.internal.modules.ApplicationContextModule
+import dagger.hilt.components.SingletonComponent
+import tv.mycujoo.DaggerMLSApplication_HiltComponents_SingletonC
 import tv.mycujoo.mcls.api.MLSTVConfiguration
+import tv.mycujoo.mcls.di.AppModule
+import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
 import tv.mycujoo.mcls.enum.LogLevel
@@ -46,16 +54,20 @@ class MLSTvBuilder @Inject constructor(
 
     fun build(): MLSTV {
         internalBuilder.prefManager.persist(PUBLIC_KEY_PREF_KEY, publicKey)
-        return MLSTV(
-            activity!!,
-            ima,
-            mlsTVConfiguration,
-            internalBuilder.mediaFactory,
-            internalBuilder.reactorSocket,
-            internalBuilder.dispatcher,
-            internalBuilder.dataManager,
-            internalBuilder.okHttpClient,
-            internalBuilder.logger
-        )
+
+        val graph = DaggerMLSApplication_HiltComponents_SingletonC.builder()
+            .applicationContextModule(ApplicationContextModule(activity!!.applicationContext))
+            .networkModule(NetworkModule())
+            .appModule(AppModule())
+            .build()
+
+
+        return graph.provideMLSTV()
+    }
+
+    @InstallIn(SingletonComponent::class)
+    @EntryPoint
+    interface TvEntries {
+        fun provideMLSTV(): MLSTV
     }
 }

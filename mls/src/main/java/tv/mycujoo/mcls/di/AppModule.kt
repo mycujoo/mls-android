@@ -1,6 +1,7 @@
 package tv.mycujoo.mcls.di
 
 import android.content.Context
+import android.os.Looper
 import androidx.test.espresso.idling.CountingIdlingResource
 import dagger.Module
 import dagger.Provides
@@ -19,6 +20,9 @@ import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.PrefManager
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.logging.Handler
 import javax.inject.Singleton
 
 /**
@@ -66,5 +70,11 @@ open class AppModule {
     @Singleton
     fun provideViewIdentifierManagerCountingIdlingResources(): CountingIdlingResource {
         return CountingIdlingResource("ViewIdentifierManager")
+    }
+
+    @Provides
+    @Singleton
+    fun provideScheduledExecutorService(): ScheduledExecutorService {
+        return Executors.newScheduledThreadPool(1)
     }
 }

@@ -6,13 +6,19 @@ import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.mcls.helper.IDownloaderClient
 import tv.mycujoo.mcls.helper.OverlayViewHelper
 import tv.mycujoo.mcls.widgets.MLSPlayerView
+import javax.inject.Inject
 
-class AnnotationListener(
-    private val MLSPlayerView: MLSPlayerView,
+class AnnotationListener @Inject constructor(
     private val overlayViewHelper: OverlayViewHelper,
     private val downloaderClient: IDownloaderClient
-) :
-    IAnnotationListener {
+) : IAnnotationListener {
+
+    private lateinit var MLSPlayerView: MLSPlayerView
+
+    override fun attachPlayer(player: MLSPlayerView) {
+        this.MLSPlayerView = player
+    }
+
     override fun addOverlay(showOverlayAction: Action.ShowOverlayAction) {
         downloaderClient.download(showOverlayAction) { downloadedShowOverlayAction ->
             overlayViewHelper.addView(

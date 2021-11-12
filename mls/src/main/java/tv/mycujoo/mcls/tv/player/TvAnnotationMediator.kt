@@ -5,63 +5,82 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.Player
 import kotlinx.coroutines.CoroutineScope
+import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.Action
+import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.mcls.core.AnnotationFactory
 import tv.mycujoo.mcls.core.BuildPoint
+import tv.mycujoo.mcls.core.IAnnotationFactory
+import tv.mycujoo.mcls.core.IAnnotationListener
+import tv.mycujoo.mcls.data.IDataManager
+import tv.mycujoo.mcls.di.TV
 import tv.mycujoo.mcls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mcls.helper.AnimationFactory
 import tv.mycujoo.mcls.helper.DownloaderClient
 import tv.mycujoo.mcls.helper.OverlayFactory
 import tv.mycujoo.mcls.helper.OverlayViewHelper
+import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.VariableKeeper
 import tv.mycujoo.mcls.manager.VariableTranslator
 import tv.mycujoo.mcls.manager.ViewHandler
+import tv.mycujoo.mcls.mediator.IAnnotationMediator
 import tv.mycujoo.mcls.player.IPlayer
+import tv.mycujoo.mcls.widgets.MLSPlayerView
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class TvAnnotationMediator @Inject constructor(
-    player: IPlayer,
-    overlayContainer: ConstraintLayout,
-    scheduler: ScheduledExecutorService,
-    handler: Handler,
-    coroutineScope: CoroutineScope,
-    downloaderClient: DownloaderClient
-) {
+    val tvAnnotationListener: IAnnotationFactory,
+    val dataManager: IDataManager,
+    val dispatcher: CoroutineScope,
+    val scheduler: ScheduledExecutorService,
+    val logger: Logger,
+    val coroutineScope: CoroutineScope,
+) : IAnnotationMediator {
 
-    private var annotationFactory: AnnotationFactory
-    private var tvAnnotationListener: TvAnnotationListener
-    private val viewHandler:
-            ViewHandler =
-        ViewHandler(CountingIdlingResource("ViewIdentifierManager"))
+    // TODO: Hook this up :)
+    private lateinit var playerView: MLSPlayerView
+    private lateinit var player: IPlayer
+
+
     private val variableTranslator = VariableTranslator(coroutineScope)
     private val variableKeeper = VariableKeeper(coroutineScope)
 
     private var hasPendingSeek: Boolean = false
 
-    init {
-        viewHandler.setOverlayHost(overlayContainer)
 
-        val overlayViewHelper =
-            OverlayViewHelper(
-                viewHandler,
-                OverlayFactory(),
-                AnimationFactory(),
-                variableTranslator,
-                variableKeeper
-            )
+    override fun initPlayerView(playerView: MLSPlayerView) {
+        this.playerView = playerView
+        playerView.setOnSizeChangedCallback(onSizeChangedCallback)
+    }
 
-        tvAnnotationListener =
-            TvAnnotationListener(
-                overlayContainer,
-                overlayViewHelper,
-                downloaderClient
-            )
+    override fun release() {
+        TODO("Not yet implemented")
+    }
 
+    override var onSizeChangedCallback: () -> Unit
+        get() = TODO("Not yet implemented")
+        set(value) {}
 
-        annotationFactory =
-            AnnotationFactory(tvAnnotationListener, variableKeeper)
+    override fun fetchActions(
+        timelineId: String,
+        updateId: String?,
+        resultCallback: ((result: Result<Exception, ActionResponse>) -> Unit)?
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun feed(actionResponse: ActionResponse) {
+        TODO("Not yet implemented")
+    }
+
+    override fun setLocalActions(actions: List<Action>) {
+        TODO("Not yet implemented")
+    }
+
+    fun initialize(player: IPlayer, handler: Handler) {
+        this.player = player
 
         player.addListener(object : Player.Listener {
             override fun onPositionDiscontinuity(reason: Int) {
@@ -74,24 +93,25 @@ class TvAnnotationMediator @Inject constructor(
                 if (playbackState == Player.STATE_READY && hasPendingSeek) {
                     hasPendingSeek = false
 
-                    annotationFactory.build(
+                    tvAnnotationListener.build(
                         BuildPoint(
                             player.currentPosition(),
                             player.currentAbsoluteTime(),
                             player,
                             player.isPlaying()
-                        )
+                        ),
+                        playerView
                     )
                 }
 
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                if (isPlaying) {
-                    viewHandler.getAnimations().forEach { it.resume() }
-                } else {
-                    viewHandler.getAnimations().forEach { it.pause() }
-                }
+//                if (isPlaying) {
+//                    viewHandler.getAnimations().forEach { it.resume() }
+//                } else {
+//                    viewHandler.getAnimations().forEach { it.pause() }
+//                }
             }
 
             override fun onPlaybackStateChanged(state: Int) {
@@ -101,13 +121,14 @@ class TvAnnotationMediator @Inject constructor(
 
         val exoRunnable = Runnable {
             if (player.isPlaying()) {
-                annotationFactory.build(
+                tvAnnotationListener.build(
                     BuildPoint(
                         player.currentPosition(),
                         player.currentAbsoluteTime(),
                         player,
                         isPlaying = true
-                    )
+                    ),
+                    playerView
                 )
             }
         }
@@ -125,6 +146,6 @@ class TvAnnotationMediator @Inject constructor(
     }
 
     fun feed(actionsList: List<Action>) {
-        annotationFactory.setActions(actionsList)
+        tvAnnotationListener.setActions(actionsList)
     }
 }
