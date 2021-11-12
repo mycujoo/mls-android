@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
-import kotlinx.android.synthetic.main.activity_main.*
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.EventStatus
 import tv.mycujoo.domain.entity.OrderByEventsParam
@@ -21,17 +20,20 @@ import tv.mycujoo.mcls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mlsapp.BuildConfig.MCLS_KEY
 import tv.mycujoo.mlsapp.BuildConfig.MCLS_TEST_EVENT_ID
-import tv.mycujoo.mlsapp.R
+import tv.mycujoo.mlsapp.databinding.ActivityMainBinding
 
 
 class MainActivity : AppCompatActivity() {
+
+    lateinit var activityMainBindings: ActivityMainBinding
 
     private lateinit var MLS: MLS
     var isFullScreen = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        activityMainBindings = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(activityMainBindings.root)
 
         constraintMLSPlayerView(resources.configuration.orientation)
 
@@ -84,10 +86,10 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        mainActivityPlayButton.setOnClickListener {
+        activityMainBindings.mainActivityPlayButton.setOnClickListener {
             MLS.getVideoPlayer().playVideo(MCLS_TEST_EVENT_ID)
         }
-        mainActivityPlayButton2.setOnClickListener {
+        activityMainBindings.mainActivityPlayButton2.setOnClickListener {
             MLS.getDataProvider().fetchEvents(
                 pageSize = 10,
                 pageToken = null,
@@ -106,12 +108,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        MLS.onStart(mlsPlayerView)
+        MLS.onStart(activityMainBindings.mlsPlayerView)
     }
 
     override fun onResume() {
         super.onResume()
-        MLS.onResume(mlsPlayerView)
+        MLS.onResume(activityMainBindings.mlsPlayerView)
     }
 
 
@@ -133,33 +135,37 @@ class MainActivity : AppCompatActivity() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         constraintMLSPlayerView(newConfig.orientation)
-
     }
 
     private fun constraintMLSPlayerView(orientation: Int) {
         if (orientation == ORIENTATION_LANDSCAPE) {
             val constraintSet = ConstraintSet()
-            constraintSet.clone(mainActivityRootLayout)
-            constraintSet.constrainWidth(mlsPlayerView.id, ConstraintSet.MATCH_CONSTRAINT_SPREAD)
-            constraintSet.constrainHeight(mlsPlayerView.id, 800)
+            constraintSet.clone(activityMainBindings.mainActivityRootLayout)
+            constraintSet.constrainWidth(
+                activityMainBindings.mlsPlayerView.id,
+                ConstraintSet.MATCH_CONSTRAINT_SPREAD
+            )
+            constraintSet.constrainHeight(activityMainBindings.mlsPlayerView.id, 800)
 
-            constraintSet.applyTo(mainActivityRootLayout)
+            constraintSet.applyTo(activityMainBindings.mainActivityRootLayout)
 
 
-            mlsPlayerView.setScreenResizeMode(resizeMode = MLSPlayerView.ResizeMode.RESIZE_MODE_FIXED_HEIGHT)
-            mlsPlayerView.setFullscreen(isFullscreen = true)
+            activityMainBindings.mlsPlayerView.setScreenResizeMode(resizeMode = MLSPlayerView.ResizeMode.RESIZE_MODE_FIXED_HEIGHT)
+            activityMainBindings.mlsPlayerView.setFullscreen(isFullscreen = true)
         } else if (orientation == ORIENTATION_PORTRAIT) {
             val constraintSet = ConstraintSet()
-            constraintSet.clone(mainActivityRootLayout)
-            constraintSet.constrainWidth(mlsPlayerView.id, ConstraintSet.MATCH_CONSTRAINT_SPREAD)
-            constraintSet.constrainHeight(mlsPlayerView.id, 800)
+            constraintSet.clone(activityMainBindings.mainActivityRootLayout)
+            constraintSet.constrainWidth(
+                activityMainBindings.mlsPlayerView.id,
+                ConstraintSet.MATCH_CONSTRAINT_SPREAD
+            )
+            constraintSet.constrainHeight(activityMainBindings.mlsPlayerView.id, 800)
 
-            constraintSet.applyTo(mainActivityRootLayout)
+            constraintSet.applyTo(activityMainBindings.mainActivityRootLayout)
 
 
-            mlsPlayerView.setScreenResizeMode(resizeMode = MLSPlayerView.ResizeMode.RESIZE_MODE_FIT)
-            mlsPlayerView.setFullscreen(isFullscreen = false)
+            activityMainBindings.mlsPlayerView.setScreenResizeMode(resizeMode = MLSPlayerView.ResizeMode.RESIZE_MODE_FIT)
+            activityMainBindings.mlsPlayerView.setFullscreen(isFullscreen = false)
         }
     }
-
 }
