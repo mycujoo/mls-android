@@ -37,7 +37,8 @@ open class InternalBuilder @Inject constructor(
     val logger: Logger,
     val viewHandler: IViewHandler,
     val mediaFactory: MediaFactory,
-    val reactorSocket: IReactorSocket
+    val reactorSocket: IReactorSocket,
+    val plugin: Plugin
 ) {
 
     private var ima: IIma? = null
@@ -100,7 +101,7 @@ open class InternalBuilder @Inject constructor(
      * internal use: create YouboraClient
      * @see YouboraClient
      */
-    fun createYouboraClient(plugin: Plugin): YouboraClient {
+    fun createYouboraClient(): YouboraClient {
         // Reassign if lost due to scoping
         if (uuid == null) {
             uuid = prefManager.get(C.UUID_PREF_KEY)
@@ -126,15 +127,6 @@ open class InternalBuilder @Inject constructor(
     }
 
     /**
-     * internal use: create Youbora Plugin
-     * this plugin and Youbora Client will work together to send video related analytics
-     * @see Plugin
-     */
-    fun createYouboraPlugin(youboraOptions: Options, context: Context): Plugin {
-        return Plugin(youboraOptions, context)
-    }
-
-    /**
      * create Exoplayer2Adapter which will act as core player
      * @return Exoplayer2Adapter
      */
@@ -151,9 +143,5 @@ open class InternalBuilder @Inject constructor(
         if (storedUUID == null) {
             prefManager.persist(C.UUID_PREF_KEY, uuid)
         }
-    }
-
-    companion object {
-        private const val TAG = "InternalBuilder"
     }
 }

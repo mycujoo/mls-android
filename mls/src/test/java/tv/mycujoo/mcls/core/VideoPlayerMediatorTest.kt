@@ -136,6 +136,9 @@ class VideoPlayerMediatorTest {
     lateinit var cast: ICast
 
     @Mock
+    lateinit var plugin: Plugin
+
+    @Mock
     lateinit var sessionManagerListener: ISessionManagerListener
     /** endregion */
 
@@ -145,6 +148,7 @@ class VideoPlayerMediatorTest {
     private lateinit var mainWebSocketListener: MainWebSocketListener
     private lateinit var exoPlayerMainEventListener: MainEventListener
     private lateinit var videoPlayerMediator: VideoPlayerMediator
+
     /** endregion */
 
     @Before
@@ -167,9 +171,8 @@ class VideoPlayerMediatorTest {
         whenever(mMLSBuilder.hasAnalytic).thenReturn(true)
 
         whenever(mMLSBuilder.publicKey).thenReturn("SAMPLE_PUBLIC_KEY")
-        whenever(internalBuilder.createYouboraPlugin(any(), any())).thenReturn(youboraPlugin)
         whenever(internalBuilder.createExoPlayerAdapter(any())).thenReturn(exoplayer2Adapter)
-        whenever(internalBuilder.createYouboraClient(any())).thenReturn(youboraClient)
+        whenever(internalBuilder.createYouboraClient()).thenReturn(youboraClient)
         whenever(internalBuilder.logger).thenReturn(logger)
 
         whenever(playerView.context).thenReturn(activity)
@@ -197,13 +200,13 @@ class VideoPlayerMediatorTest {
                 return@thenAnswer sessionManagerListener
             }
         videoPlayerMediator = VideoPlayerMediator(
-//            videoPlayerConfig,
             viewHandler,
             reactorSocket,
             dispatcher,
             dataManager,
             internalBuilder.logger,
-            internalBuilder
+            internalBuilder,
+            plugin
         )
         videoPlayerMediator.initialize(playerView, player, mMLSBuilder, listOf(), cast)
         videoPlayerMediator.setAnnotationMediator(annotationMediator)

@@ -41,7 +41,6 @@ class VideoPlayer(
         })
     }
 
-
     /**region VideoPlayerContract: Player Higher level control*/
     override fun playVideo(event: EventEntity) {
         videoPlayerMediator.playVideo(event)
@@ -65,7 +64,6 @@ class VideoPlayer(
     }
 
     /**endregion */
-
 
     /**region PlayerController*/
     fun getPlayerController(): PlayerController {
@@ -147,6 +145,4 @@ class VideoPlayer(
         return exoPlayer.isPlayingAd
     }
     /**endregion */
-
-
 }

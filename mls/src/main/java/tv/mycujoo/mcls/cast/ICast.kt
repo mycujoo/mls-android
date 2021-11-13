@@ -18,5 +18,4 @@ interface ICast {
 
     fun onResume()
     fun onPause()
-
 }

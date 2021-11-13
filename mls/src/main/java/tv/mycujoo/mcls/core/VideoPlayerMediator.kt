@@ -406,7 +406,7 @@ class VideoPlayerMediator @Inject constructor(
         plugin.activity = activity
         plugin.adapter = internalBuilder.createExoPlayerAdapter(exoPlayer)
 
-        youboraClient = internalBuilder.createYouboraClient(plugin)
+        youboraClient = internalBuilder.createYouboraClient()
     }
 
     fun attachPlayer(playerView: MLSPlayerView) {

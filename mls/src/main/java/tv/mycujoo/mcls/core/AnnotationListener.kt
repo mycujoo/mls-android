@@ -13,24 +13,24 @@ class AnnotationListener @Inject constructor(
     private val downloaderClient: IDownloaderClient
 ) : IAnnotationListener {
 
-    private lateinit var MLSPlayerView: MLSPlayerView
+    private lateinit var mMLSPlayerView: MLSPlayerView
 
     override fun attachPlayer(player: MLSPlayerView) {
-        this.MLSPlayerView = player
+        this.mMLSPlayerView = player
     }
 
     override fun addOverlay(showOverlayAction: Action.ShowOverlayAction) {
         downloaderClient.download(showOverlayAction) { downloadedShowOverlayAction ->
             overlayViewHelper.addView(
-                MLSPlayerView.context,
-                MLSPlayerView.overlayHost,
+                mMLSPlayerView.context,
+                mMLSPlayerView.overlayHost,
                 downloadedShowOverlayAction
             )
         }
     }
 
     override fun removeOverlay(customId: String, outroTransitionSpec: TransitionSpec?) {
-        overlayViewHelper.removeView(MLSPlayerView.overlayHost, customId, outroTransitionSpec)
+        overlayViewHelper.removeView(mMLSPlayerView.overlayHost, customId, outroTransitionSpec)
     }
 
     override fun addOrUpdateLingeringIntroOverlay(
@@ -40,7 +40,7 @@ class AnnotationListener @Inject constructor(
     ) {
         downloaderClient.download(showOverlayAction) {
             overlayViewHelper.addOrUpdateLingeringIntroOverlay(
-                MLSPlayerView.overlayHost,
+                mMLSPlayerView.overlayHost,
                 it,
                 animationPosition,
                 isPlaying
@@ -55,7 +55,7 @@ class AnnotationListener @Inject constructor(
     ) {
         downloaderClient.download(showOverlayAction) { downloadedShowOverlayAction ->
             overlayViewHelper.addOrUpdateLingeringOutroOverlay(
-                MLSPlayerView.overlayHost,
+                mMLSPlayerView.overlayHost,
                 downloadedShowOverlayAction,
                 animationPosition,
                 isPlaying
@@ -66,21 +66,21 @@ class AnnotationListener @Inject constructor(
     override fun addOrUpdateLingeringMidwayOverlay(showOverlayAction: Action.ShowOverlayAction) {
         downloaderClient.download(showOverlayAction) { downloadedShowOverlayAction ->
             overlayViewHelper.addOrUpdateLingeringMidwayOverlay(
-                MLSPlayerView.overlayHost,
+                mMLSPlayerView.overlayHost,
                 downloadedShowOverlayAction
             )
         }
     }
 
     override fun removeLingeringOverlay(customId: String, outroTransitionSpec: TransitionSpec?) {
-        overlayViewHelper.removeView(MLSPlayerView.overlayHost, customId, outroTransitionSpec)
+        overlayViewHelper.removeView(mMLSPlayerView.overlayHost, customId, outroTransitionSpec)
     }
 
     override fun setTimelineMarkers(timelineMarkerEntityList: List<TimelineMarkerEntity>) {
-        MLSPlayerView.setTimelineMarker(timelineMarkerEntityList)
+        mMLSPlayerView.setTimelineMarker(timelineMarkerEntityList)
     }
 
     override fun clearScreen(idList: List<String>) {
-        MLSPlayerView.clearScreen(idList)
+        mMLSPlayerView.clearScreen(idList)
     }
 }

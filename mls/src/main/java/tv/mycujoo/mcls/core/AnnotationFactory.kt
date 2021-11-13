@@ -36,15 +36,18 @@ class AnnotationFactory @Inject constructor(
 
     /**region Over-ridden functions*/
     override fun setActions(actions: List<Action>) {
-        val sortedTemp =
-            actions
-                .sortedWith(compareBy<Action> { it.offset }.thenByDescending { it.priority })
+        val sortedTemp = actions
+            .sortedWith(compareBy<Action> { it.offset }.thenByDescending { it.priority })
 
         val deleteActions = ArrayList<Action>()
         deleteActions.addAll(sortedTemp.filterIsInstance<Action.DeleteAction>())
 
         sortedActions.clear()
-        sortedActions.addAll(sortedTemp.filter { actionObject -> deleteActions.none { actionObject.id == it.id } })
+        sortedActions.addAll(sortedTemp.filter { actionObject ->
+            deleteActions.none {
+                actionObject.id == it.id
+            }
+        })
     }
 
     override fun setLocalActions(annotations: List<Action>) {
@@ -282,8 +285,6 @@ class AnnotationFactory @Inject constructor(
                     // should not happen
                 }
             }
-
-
         }
 
 
@@ -394,12 +395,8 @@ class AnnotationFactory @Inject constructor(
         varVariables: HashMap<String, VariableEntity>
     ) {
         if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS > action.offset) {
-            varVariables[action.name]?.let { variableEntity ->
-                variableEntity.variable.increment(action.amount)
-            }
+            varVariables[action.name]?.variable?.increment(action.amount)
         }
     }
-
-
     /**endregion */
 }
