@@ -19,7 +19,7 @@ class StringUtils {
             timeMs: Long,
             stringBuilder: StringBuilder,
             timeFormatter: Formatter
-        ): String? {
+        ): String {
             var timeMs = timeMs
             if (timeMs == C.TIME_UNSET) {
                 timeMs = 0
