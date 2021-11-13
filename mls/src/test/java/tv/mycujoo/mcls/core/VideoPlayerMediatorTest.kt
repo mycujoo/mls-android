@@ -206,9 +206,10 @@ class VideoPlayerMediatorTest {
             dataManager,
             internalBuilder.logger,
             internalBuilder,
-            plugin
+            plugin,
+            player
         )
-        videoPlayerMediator.initialize(playerView, player, mMLSBuilder, listOf(), cast)
+        videoPlayerMediator.initialize(playerView, mMLSBuilder, listOf(), cast)
         videoPlayerMediator.setAnnotationMediator(annotationMediator)
     }
 
