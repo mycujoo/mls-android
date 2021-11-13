@@ -6,7 +6,7 @@ import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.google.android.exoplayer2.util.Util
 import tv.mycujoo.mcls.enum.C.Companion.DRM_WIDEVINE
 import tv.mycujoo.mcls.ima.IIma
@@ -431,15 +431,10 @@ class Player : IPlayer {
                 .build()
         }
 
-        fun createMediaFactory(context: Context): HlsMediaSource.Factory {
+        fun createMediaFactory(): HlsMediaSource.Factory {
             return HlsMediaSource.Factory(
                 // TODO: Removing this mess up the Annotation Timings, Investigate :)
-                DefaultHttpDataSourceFactory(
-                    Util.getUserAgent(
-                        context,
-                        "mls"
-                    )
-                )
+                DefaultHttpDataSource.Factory()
             )
         }
 
