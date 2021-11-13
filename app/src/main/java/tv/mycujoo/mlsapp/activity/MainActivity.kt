@@ -1,6 +1,7 @@
 package tv.mycujoo.mlsapp.activity
 
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
@@ -61,7 +62,6 @@ class MainActivity : AppCompatActivity() {
 
         MLS =
             MLSBuilder()
-                .publicKey(MCLS_KEY)
                 .withActivity(this)
                 .setPlayerEventsListener(playerEventsListener)
                 .setUIEventListener(uiEventListener)
@@ -167,5 +167,9 @@ class MainActivity : AppCompatActivity() {
             activityMainBindings.mlsPlayerView.setScreenResizeMode(resizeMode = MLSPlayerView.ResizeMode.RESIZE_MODE_FIT)
             activityMainBindings.mlsPlayerView.setFullscreen(isFullscreen = false)
         }
+    }
+
+    companion object {
+        private const val TAG = "MainActivity"
     }
 }

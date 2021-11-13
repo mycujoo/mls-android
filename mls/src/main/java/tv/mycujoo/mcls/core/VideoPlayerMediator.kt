@@ -145,7 +145,7 @@ class VideoPlayerMediator @Inject constructor(
         cast: ICast? = null
     ) {
         this.playerView = MLSPlayerView
-        publicKey = builder.publicKey
+        publicKey = builder.getSafePublicKey()
 
         player.getDirectInstance()?.let {
             videoPlayer = VideoPlayer(it, this, MLSPlayerView)

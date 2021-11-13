@@ -2,17 +2,17 @@ package tv.mycujoo.mcls.api
 
 import android.app.Activity
 import android.content.Context
+import android.content.pm.PackageManager
 import com.google.android.exoplayer2.SimpleExoPlayer
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.internal.modules.ApplicationContextModule
 import dagger.hilt.components.SingletonComponent
 import tv.mycujoo.DaggerMLSApplication_HiltComponents_SingletonC
+import tv.mycujoo.mcls.MissingKeyException
 import tv.mycujoo.mcls.cast.ICast
-import tv.mycujoo.mcls.core.InternalBuilder
 import tv.mycujoo.mcls.core.PlayerEventsListener
 import tv.mycujoo.mcls.core.UIEventListener
-import tv.mycujoo.mcls.core.VideoPlayerMediator
 import tv.mycujoo.mcls.di.AppModule
 import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.enum.C.Companion.ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE
@@ -27,7 +27,7 @@ import tv.mycujoo.mcls.network.socket.ReactorListener
 open class MLSBuilder {
 
 
-    internal var publicKey: String = ""
+    internal var publicKey: String? = ""
         private set
     internal var activity: Activity? = null
         private set
@@ -45,7 +45,7 @@ open class MLSBuilder {
 
     /**
      * public-key of user.
-     * mandatory for initializing MLS.
+     * optional for initializing MLS.
      * @throws IllegalArgumentException if it is NOT set on build
      */
     fun publicKey(publicKey: String) = apply {
@@ -113,6 +113,20 @@ open class MLSBuilder {
     }
 
     /**
+     * internal use: get public key from either of (In That Order):
+     *      1. public key set manually
+     *      2. public ket set in AndroidManifest
+     *  @throws IllegalArgumentException
+     */
+    fun getSafePublicKey(): String {
+        return if (publicKey != null) {
+            "$publicKey"
+        } else {
+            getPublicKeyFromManifest()
+        }
+    }
+
+    /**
      * internal use: create listener for Reactor service
      * @see ReactorCallback
      * @see ReactorListener
@@ -139,9 +153,30 @@ open class MLSBuilder {
         return mls
     }
 
+    /**
+     * Gets the Public Key from the Manifest.
+     * @throws MissingKeyException
+     */
+    private fun getPublicKeyFromManifest(): String {
+        activity?.applicationContext.let {
+            val app = activity?.packageManager?.getApplicationInfo(
+                it!!.packageName,
+                PackageManager.GET_META_DATA
+            )
+            val bundle = app!!.metaData
+
+            return bundle.getString("tv.mycujoo.MLS_PUBLIC_KEY") ?: throw MissingKeyException()
+        }
+    }
+
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     interface BuilderProvider {
         fun provideMLS(): MLS
+    }
+
+
+    companion object {
+        private const val TAG = "MLSBuilder"
     }
 }

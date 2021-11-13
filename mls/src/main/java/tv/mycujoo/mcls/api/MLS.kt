@@ -58,7 +58,7 @@ class MLS @Inject constructor(
         this.builder = builder
         internalBuilder.initialize()
         videoPlayerMediator.videoPlayerConfig = builder.mlsConfiguration.videoPlayerConfig
-        persistPublicKey(this.builder.publicKey)
+        persistPublicKey(this.builder.getSafePublicKey())
 
         internalBuilder.reactorSocket.setUUID(internalBuilder.uuid!!)
 
@@ -106,18 +106,16 @@ class MLS @Inject constructor(
         videoPlayerMediator.attachPlayer(MLSPlayerView)
     }
 
-    private fun initializeMediatorsIfNeeded(
-        MLSPlayerView: MLSPlayerView
-    ) {
+    private fun initializeMediatorsIfNeeded(mMLSPlayerView: MLSPlayerView) {
         if (mediatorInitialized) {
-            MLSPlayerView.playerView.onResume()
+            mMLSPlayerView.playerView.onResume()
             val exoPlayer = createExoPlayer(context)
             player.reInit(exoPlayer)
-            videoPlayerMediator.initialize(MLSPlayerView, builder)
+            videoPlayerMediator.initialize(mMLSPlayerView, builder)
 
             builder.ima?.let { ima ->
                 ima.setPlayer(player.getDirectInstance()!!)
-                ima.setAdViewProvider(MLSPlayerView.playerView)
+                ima.setAdViewProvider(mMLSPlayerView.playerView)
             }
 
             annotationMediator.initPlayerView(playerView)
@@ -126,21 +124,16 @@ class MLS @Inject constructor(
         }
         mediatorInitialized = true
 
-        builder.ima?.setAdViewProvider(MLSPlayerView.playerView as AdViewProvider)
+        builder.ima?.setAdViewProvider(mMLSPlayerView.playerView as AdViewProvider)
 
         videoPlayerMediator.initialize(
-            MLSPlayerView,
+            mMLSPlayerView,
             builder,
             emptyList(),
             null
         )
 
         annotationMediator.initPlayerView(playerView)
-//        annotationMediator = AnnotationMediatorFactory.createAnnotationMediator(
-//            MLSPlayerView,
-//            internalBuilder,
-//            videoPlayerMediator.getPlayer()
-//        )
         videoPlayerMediator.setAnnotationMediator(annotationMediator)
     }
 
