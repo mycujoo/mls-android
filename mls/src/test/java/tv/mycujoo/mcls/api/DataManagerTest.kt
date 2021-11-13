@@ -16,6 +16,9 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.repository.IEventsRepository
+import tv.mycujoo.domain.usecase.GetActionsUseCase
+import tv.mycujoo.domain.usecase.GetEventDetailUseCase
+import tv.mycujoo.domain.usecase.GetEventsUseCase
 import tv.mycujoo.mcls.CoroutineTestRule
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.manager.Logger
@@ -35,13 +38,28 @@ class DataManagerTest {
     @Mock
     lateinit var eventsRepository: IEventsRepository
 
+    @Mock
+    lateinit var getEventDetailUseCase: GetEventDetailUseCase
+
+    @Mock
+    lateinit var getActionsUseCase: GetActionsUseCase
+
+    @Mock
+    lateinit var getEventsUseCase: GetEventsUseCase
+
 
     @Before
     fun setUp() {
         MockitoAnnotations.openMocks(this)
 
         val scope = TestCoroutineScope()
-        dataManager = DataManager(scope, eventsRepository, Logger(LogLevel.MINIMAL))
+        dataManager = DataManager(
+            scope,
+            Logger(LogLevel.MINIMAL),
+            getEventDetailUseCase,
+            getActionsUseCase,
+            getEventsUseCase
+        )
     }
 
     @After
@@ -52,7 +70,7 @@ class DataManagerTest {
 
     @Test
     fun `given event list on response of get event, should return in callback`() = runBlocking {
-        whenever(eventsRepository.getEventsList(any())).thenReturn(
+        whenever(getEventsUseCase.execute(any())).thenReturn(
             Result.Success(
                 getSampleEvents(
                     null,
@@ -77,7 +95,7 @@ class DataManagerTest {
     @Test
     fun `given previousPageToken on response of get event, should return in callback`() =
         runBlocking {
-            whenever(eventsRepository.getEventsList(any())).thenReturn(
+            whenever(getEventsUseCase.execute(any())).thenReturn(
                 Result.Success(
                     getSampleEvents(SAMPLE_PREVIOUS_PAGE_TOKEN, null)
                 )
@@ -98,7 +116,7 @@ class DataManagerTest {
 
     @Test
     fun `given nextPageToken on response of get event, should return in callback`() = runBlocking {
-        whenever(eventsRepository.getEventsList(any())).thenReturn(
+        whenever(getEventsUseCase.execute(any())).thenReturn(
             Result.Success(
                 getSampleEvents(null, SAMPLE_NEXT_PAGE_TOKEN)
             )
@@ -135,7 +153,7 @@ class DataManagerTest {
 
     @Test
     fun `given new data, should call live data`() = runBlocking {
-        whenever(eventsRepository.getEventsList(any())).then {
+        whenever(getEventsUseCase.execute(any())).then {
             dataManager.getEventsLiveData().value =
                 listOf(getSampleEventEntity(), getSampleEventEntity())
             true
@@ -154,7 +172,7 @@ class DataManagerTest {
 
     @Test
     fun `calling fetch event details, should call on repository`() = runBlocking {
-        whenever(eventsRepository.getEventDetails(getSampleEventEntity().id)).thenReturn(
+        whenever(getEventDetailUseCase.execute(any())).thenReturn(
             Result.Success(
                 getSampleEventEntity()
             )
