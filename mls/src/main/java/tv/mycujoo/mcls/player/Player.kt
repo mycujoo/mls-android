@@ -11,13 +11,14 @@ import com.google.android.exoplayer2.util.Util
 import tv.mycujoo.mcls.enum.C.Companion.DRM_WIDEVINE
 import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.mcls.ima.ImaCustomParams
+import javax.inject.Inject
 
 /**
  * MLS video player, implementing IPlayer contract.
  * All video playing related functionality is done by this class
  * @see IPlayer
  */
-class Player : IPlayer {
+class Player @Inject constructor() : IPlayer {
 
     /**region Fields*/
     /**

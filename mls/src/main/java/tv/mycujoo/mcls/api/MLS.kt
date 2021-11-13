@@ -18,8 +18,8 @@ import tv.mycujoo.mcls.helper.TypeFaceFactory
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.mediator.AnnotationMediator
+import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaOnLoadCompletedListener
-import tv.mycujoo.mcls.player.Player
 import tv.mycujoo.mcls.player.Player.Companion.createExoPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import javax.inject.Inject
@@ -37,15 +37,14 @@ class MLS @Inject constructor(
     private val viewHandler: IViewHandler,
     private val prefManager: IPrefManager,
     private val internalBuilder: InternalBuilder,
-    private val annotationMediator: AnnotationMediator
+    private val annotationMediator: AnnotationMediator,
+    private val player: IPlayer
 ) : MLSAbstract() {
 
     /**region Fields*/
     private lateinit var playerView: MLSPlayerView
 
     private var mediatorInitialized = false
-
-    private lateinit var player: Player
 
     private lateinit var builder: MLSBuilder
     /**endregion */
@@ -67,7 +66,7 @@ class MLS @Inject constructor(
 
         val handler = Handler(Looper.myLooper()!!)
 
-        player = Player().apply {
+        player.apply {
             val exoPlayer = createExoPlayer(context)
             create(
                 builder.ima,
