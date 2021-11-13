@@ -66,17 +66,14 @@ class VideoPlayerMediator @Inject constructor(
     private val dataManager: IDataManager,
     logger: Logger,
     private val internalBuilder: InternalBuilder,
-    private val plugin: Plugin
+    private val plugin: Plugin,
+    private val player: IPlayer
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
     private var cast: ICast? = null
     var videoPlayerConfig: VideoPlayerConfig = VideoPlayerConfig.default()
 
     /**region Fields*/
-    /**
-     * MLS video-player
-     */
-    private lateinit var player: IPlayer
 
     /**
      * SDK exposing video-player
@@ -143,13 +140,11 @@ class VideoPlayerMediator @Inject constructor(
     /**region Initialization*/
     fun initialize(
         MLSPlayerView: MLSPlayerView,
-        player: IPlayer,
         builder: MLSBuilder,
         timelineMarkerActionEntities: List<TimelineMarkerEntity> = listOf(),
         cast: ICast? = null
     ) {
         this.playerView = MLSPlayerView
-        this.player = player
         publicKey = builder.publicKey
 
         player.getDirectInstance()?.let {

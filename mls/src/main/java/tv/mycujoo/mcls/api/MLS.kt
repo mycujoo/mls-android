@@ -113,7 +113,7 @@ class MLS @Inject constructor(
             MLSPlayerView.playerView.onResume()
             val exoPlayer = createExoPlayer(context)
             player.reInit(exoPlayer)
-            videoPlayerMediator.initialize(MLSPlayerView, player, builder)
+            videoPlayerMediator.initialize(MLSPlayerView, builder)
 
             builder.ima?.let { ima ->
                 ima.setPlayer(player.getDirectInstance()!!)
@@ -121,11 +121,6 @@ class MLS @Inject constructor(
             }
 
             annotationMediator.initPlayerView(playerView)
-//            annotationMediator = AnnotationMediatorFactory.createAnnotationMediator(
-//                MLSPlayerView,
-//                internalBuilder,
-//                videoPlayerMediator.getPlayer()
-//            )
             videoPlayerMediator.setAnnotationMediator(annotationMediator)
             return
         }
@@ -135,7 +130,6 @@ class MLS @Inject constructor(
 
         videoPlayerMediator.initialize(
             MLSPlayerView,
-            player,
             builder,
             emptyList(),
             null
