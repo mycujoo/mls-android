@@ -7,6 +7,7 @@ import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.ui.TimeBar
 import com.npaw.youbora.lib6.plugin.Options
+import com.npaw.youbora.lib6.plugin.Plugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,6 +17,7 @@ import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.Stream
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mcls.BuildConfig
+import tv.mycujoo.mcls.BuildConfig.MYCUJOO_YOUBORA_ACCOUNT_NAME
 import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.api.MLSBuilder
@@ -63,7 +65,8 @@ class VideoPlayerMediator @Inject constructor(
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     logger: Logger,
-    private val internalBuilder: InternalBuilder
+    private val internalBuilder: InternalBuilder,
+    private val plugin: Plugin
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
     private var cast: ICast? = null
@@ -400,16 +403,6 @@ class VideoPlayerMediator @Inject constructor(
         activity: Activity,
         exoPlayer: ExoPlayer
     ) {
-        val youboraOptions = Options()
-        youboraOptions.accountCode = if (BuildConfig.DEBUG) {
-            MYCUJOO_DEV_YOUBORA_ACCOUNT_NAME
-        } else {
-            MYCUJOO_PRODUCTION_YOUBORA_ACCOUNT_NAME
-        }
-        youboraOptions.isAutoDetectBackground = true
-
-        val plugin = internalBuilder.createYouboraPlugin(youboraOptions, activity)
-
         plugin.activity = activity
         plugin.adapter = internalBuilder.createExoPlayerAdapter(exoPlayer)
 
@@ -963,13 +956,6 @@ class VideoPlayerMediator @Inject constructor(
         }
     }
 
-    /**endregion */
-
-    /**region Internal class*/
-    companion object {
-        const val MYCUJOO_DEV_YOUBORA_ACCOUNT_NAME = "mycujoodev"
-        const val MYCUJOO_PRODUCTION_YOUBORA_ACCOUNT_NAME = "mycujoo"
-    }
     /**endregion */
 
 }

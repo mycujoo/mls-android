@@ -26,13 +26,14 @@ import javax.inject.Inject
  * Serves client as 'Data Provider'
  * Serves internal usage as 'Internal Data Provider'
  * @param scope CoroutineScope which calls will made on it's context
- * @param eventsRepository actual implementation of EventsRepository, used to call Use-Cases
  * @param logger log info, error & warning based on required level of logging
  */
 class DataManager @Inject constructor(
     private val scope: CoroutineScope,
-    private val eventsRepository: IEventsRepository,
-    private val logger: Logger
+    private val logger: Logger,
+    private val getEventDetailUseCase: GetEventDetailUseCase,
+    private val getActionsUseCase: GetActionsUseCase,
+    private val getEventsUseCase: GetEventsUseCase
 ) : IDataManager {
 
 
@@ -66,7 +67,7 @@ class DataManager @Inject constructor(
         eventId: String,
         updateId: String?
     ): Result<Exception, EventEntity> {
-        return GetEventDetailUseCase(eventsRepository).execute(EventIdPairParam(eventId, updateId))
+        return getEventDetailUseCase.execute(EventIdPairParam(eventId, updateId))
     }
 
     /**
@@ -87,7 +88,7 @@ class DataManager @Inject constructor(
         timelineId: String,
         updateId: String?
     ): Result<Exception, ActionResponse> {
-        return GetActionsUseCase(eventsRepository).execute(
+        return getActionsUseCase.execute(
             TimelineIdPairParam(
                 timelineId,
                 updateId
@@ -120,7 +121,7 @@ class DataManager @Inject constructor(
         this.fetchEventCallback = fetchEventCallback
         scope.launch {
 
-            val result = GetEventsUseCase(eventsRepository).execute(
+            val result = getEventsUseCase.execute(
                 EventListParams(
                     pageSize,
                     pageToken,

@@ -51,16 +51,6 @@ open class AppModule {
 
     @Provides
     @Singleton
-    fun provideDataManager(
-        scope: CoroutineScope,
-        repository: IEventsRepository,
-        logger: Logger
-    ): IDataManager {
-        return DataManager(scope, repository, logger)
-    }
-
-    @Provides
-    @Singleton
     fun provideLogger(): Logger {
         return Logger(LogLevel.MINIMAL)
     }
