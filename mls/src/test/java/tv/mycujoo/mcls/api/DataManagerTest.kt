@@ -36,9 +36,6 @@ class DataManagerTest {
     val rule = InstantTaskExecutorRule()
 
     @Mock
-    lateinit var eventsRepository: IEventsRepository
-
-    @Mock
     lateinit var getEventDetailUseCase: GetEventDetailUseCase
 
     @Mock
