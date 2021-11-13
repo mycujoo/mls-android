@@ -443,7 +443,7 @@ class OverlayViewHelper @Inject constructor(
         viewHandler.incrementIdlingResource()
 
         overlayHost.post {
-            overlayHost.children.firstOrNull { it.tag == showOverlayAction.customId }?.let { view ->
+            overlayHost.children.firstOrNull { it.tag == showOverlayAction.customId }?.let { _ ->
 
                 viewHandler.getAnimationWithTag(showOverlayAction.customId)?.let {
                     it.cancel()

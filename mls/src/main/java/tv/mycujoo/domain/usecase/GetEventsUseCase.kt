@@ -13,7 +13,7 @@ import javax.inject.Inject
  */
 class GetEventsUseCase @Inject constructor(private val repository: IEventsRepository) :
     AbstractParameterizedUseCase<EventListParams, Result<Exception, Events>>() {
-    override suspend fun build(eventListParams: EventListParams): Result<Exception, Events> {
-        return repository.getEventsList(eventListParams)
+    override suspend fun build(param: EventListParams): Result<Exception, Events> {
+        return repository.getEventsList(param)
     }
 }

@@ -57,6 +57,4 @@ class VariableTranslator @Inject constructor(private val dispatcher: CoroutineSc
 
         }
     }
-
-
 }

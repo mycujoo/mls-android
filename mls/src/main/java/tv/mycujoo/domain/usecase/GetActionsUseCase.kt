@@ -12,7 +12,7 @@ import javax.inject.Inject
  */
 class GetActionsUseCase @Inject constructor(private val repository: IEventsRepository) :
     AbstractParameterizedUseCase<TimelineIdPairParam, Result<Exception, ActionResponse>>() {
-    override suspend fun build(timelineIdPairParam: TimelineIdPairParam): Result<Exception, ActionResponse> {
-        return repository.getActions(timelineIdPairParam)
+    override suspend fun build(param: TimelineIdPairParam): Result<Exception, ActionResponse> {
+        return repository.getActions(param)
     }
 }
