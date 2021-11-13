@@ -20,7 +20,7 @@ class PlayerModule {
     fun provideMediaFactory(@ApplicationContext context: Context): MediaFactory {
         return MediaFactory(
             Player.createDefaultMediaSourceFactory(context),
-            Player.createMediaFactory(context),
+            Player.createMediaFactory(),
             MediaItem.Builder()
         )
     }

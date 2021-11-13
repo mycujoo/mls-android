@@ -1,7 +1,6 @@
 package tv.mycujoo.mcls.mediator
 
 import android.os.Handler
-import android.os.Looper
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.DISCONTINUITY_REASON_SEEK
 import com.google.android.exoplayer2.Player.STATE_READY
@@ -26,11 +25,11 @@ import javax.inject.Inject
 
 
 class AnnotationMediator @Inject constructor(
-    val annotationFactory: IAnnotationFactory,
-    val dataManager: IDataManager,
-    val dispatcher: CoroutineScope,
-    val scheduler: ScheduledExecutorService,
-    val logger: Logger
+    private val annotationFactory: IAnnotationFactory,
+    private val dataManager: IDataManager,
+    private val dispatcher: CoroutineScope,
+    private val scheduler: ScheduledExecutorService,
+    private val logger: Logger
 ) : IAnnotationMediator {
 
     // TODO: Hook this up :)
