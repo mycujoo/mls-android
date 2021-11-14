@@ -125,6 +125,7 @@ open class MLSBuilder {
      * build MLS with given specification
      * Initializes InternalBuilder and MLS
      * @return MLS
+     * @throws IllegalArgumentException if public key was not provided via the Manifest AND not set manually
      */
     open fun build(): MLS {
         // grab public key from Manifest if not set manually,
