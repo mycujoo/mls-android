@@ -58,7 +58,7 @@ class MLS @Inject constructor(
         this.builder = builder
         internalBuilder.initialize()
         videoPlayerMediator.videoPlayerConfig = builder.mlsConfiguration.videoPlayerConfig
-        persistPublicKey(this.builder.getSafePublicKey())
+        persistPublicKey(this.builder.publicKey)
 
         internalBuilder.reactorSocket.setUUID(internalBuilder.uuid!!)
 

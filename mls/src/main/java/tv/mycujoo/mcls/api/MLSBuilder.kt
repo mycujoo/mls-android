@@ -27,7 +27,7 @@ import tv.mycujoo.mcls.network.socket.ReactorListener
 open class MLSBuilder {
 
 
-    internal var publicKey: String? = ""
+    internal var publicKey: String = ""
         private set
     internal var activity: Activity? = null
         private set
@@ -113,20 +113,6 @@ open class MLSBuilder {
     }
 
     /**
-     * internal use: get public key from either of (In That Order):
-     *      1. public key set manually
-     *      2. public ket set in AndroidManifest
-     *  @throws IllegalArgumentException
-     */
-    fun getSafePublicKey(): String {
-        return if (publicKey != null) {
-            "$publicKey"
-        } else {
-            getPublicKeyFromManifest()
-        }
-    }
-
-    /**
      * internal use: create listener for Reactor service
      * @see ReactorCallback
      * @see ReactorListener
@@ -141,6 +127,22 @@ open class MLSBuilder {
      * @return MLS
      */
     open fun build(): MLS {
+        // grab public key from Manifest if not set manually,
+        if (publicKey.isEmpty()) {
+            activity?.applicationContext.let {
+                val app = activity?.packageManager?.getApplicationInfo(
+                    "${it?.packageName}",
+                    PackageManager.GET_META_DATA
+                )
+                publicKey = app?.metaData?.getString("tv.mycujoo.MLS_PUBLIC_KEY") ?: ""
+            }
+        }
+
+        // Check if grabbed successfully
+        if (publicKey.isEmpty()) {
+            throw IllegalArgumentException(PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
+        }
+
         val graph = DaggerMLSApplication_HiltComponents_SingletonC.builder()
             .applicationContextModule(ApplicationContextModule(activity))
             .networkModule(NetworkModule())
@@ -151,22 +153,6 @@ open class MLSBuilder {
         mls.initializeComponent(this)
 
         return mls
-    }
-
-    /**
-     * Gets the Public Key from the Manifest.
-     * @throws MissingKeyException
-     */
-    private fun getPublicKeyFromManifest(): String {
-        activity?.applicationContext.let {
-            val app = activity?.packageManager?.getApplicationInfo(
-                it!!.packageName,
-                PackageManager.GET_META_DATA
-            )
-            val bundle = app!!.metaData
-
-            return bundle.getString("tv.mycujoo.MLS_PUBLIC_KEY") ?: throw MissingKeyException()
-        }
     }
 
     @EntryPoint
