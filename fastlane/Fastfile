@@ -6,3 +6,11 @@ platform :android do
     gradle(task: "mls:test")
   end
 end
+
+
+platform :android do
+    desc: "Publish the Release"
+    late :publish do
+        gradle(task: "mls:publish")
+    end
+end

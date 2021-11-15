@@ -3,7 +3,7 @@ name: Android Lib Test
 on:
   push:
     branches:
-      - 'trunk'
+      - 'null'
 
 jobs:
   deploy:
@@ -24,4 +24,7 @@ jobs:
 
       - name: Run JUnit tests
         run: bundle exec fastlane tests
+
+      - name: Release the Library to Maven
+        run: nudle exec fastlane publish
 
