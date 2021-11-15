@@ -54,6 +54,16 @@ in order to communicate with SDK, MLS class must be instantiated. Init MLS whene
             .build()
       
 
+Note: You Can provide the public key from the AndroidManifest using this meta tag:
+
+    <application 
+        ...>
+        ...
+        <meta-data
+                android:name="tv.mycujoo.MLS_PUBLIC_KEY"
+                android:value="YOUR_PUBLIC_KEY_HERE" />
+    </application>
+
 #### Attach & detach PlayerView
 
         override fun onStart() {
