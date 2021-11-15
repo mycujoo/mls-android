@@ -122,12 +122,9 @@ open class MLSBuilder {
     }
 
     /**
-     * build MLS with given specification
-     * Initializes InternalBuilder and MLS
-     * @return MLS
-     * @throws IllegalArgumentException if public key was not provided via the Manifest AND not set manually
+     * init public key if not present
      */
-    open fun build(): MLS {
+    private fun initPublicKeyIfNeeded() {
         // grab public key from Manifest if not set manually,
         if (publicKey.isEmpty()) {
             activity?.applicationContext.let {
@@ -138,8 +135,18 @@ open class MLSBuilder {
                 publicKey = app?.metaData?.getString("tv.mycujoo.MLS_PUBLIC_KEY") ?: ""
             }
         }
+    }
 
+
+    /**
+     * build MLS with given specification
+     * Initializes InternalBuilder and MLS
+     * @return MLS
+     * @throws IllegalArgumentException if public key was not provided via the Manifest AND not set manually
+     */
+    open fun build(): MLS {
         // Check if grabbed successfully
+        initPublicKeyIfNeeded()
         if (publicKey.isEmpty()) {
             throw IllegalArgumentException(PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
