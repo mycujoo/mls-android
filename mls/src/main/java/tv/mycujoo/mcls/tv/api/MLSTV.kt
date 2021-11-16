@@ -19,9 +19,6 @@ class MLSTV @Inject constructor(
         persistPublicKey(builder.publicKey)
 
         tvVideoPlayer.initialize(videoSupportFragment)
-    }
-
-    fun preparePlayer(videoSupportFragment: VideoSupportFragment) {
         tvVideoPlayer.videoSupportFragment = videoSupportFragment
     }
 

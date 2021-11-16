@@ -22,7 +22,6 @@ class PlaybackFragment : VideoSupportFragment() {
         mlstv = MLSTvBuilder()
             .withVideoFragment(this)
             .build()
-        mlstv.preparePlayer(this)
         mlstv.getVideoPlayer().playVideo(BuildConfig.MCLS_TEST_EVENT_ID)
     }
 }
