@@ -61,7 +61,7 @@ class VideoPlayerMediator @Inject constructor(
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
-    logger: Logger,
+    private val logger: Logger,
     private val internalBuilder: InternalBuilder,
     private val plugin: Plugin,
     private val player: IPlayer,

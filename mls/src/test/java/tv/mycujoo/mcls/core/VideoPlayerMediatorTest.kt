@@ -16,9 +16,11 @@ import kotlinx.coroutines.test.runBlockingTest
 import okhttp3.OkHttpClient
 import okhttp3.WebSocket
 import org.junit.*
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.invocation.InvocationOnMock
+import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.*
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_GEOBLOCKED
@@ -36,6 +38,8 @@ import tv.mycujoo.mcls.cast.ICasterSession
 import tv.mycujoo.mcls.cast.ISessionManagerListener
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.entity.msc.VideoPlayerConfig
+import tv.mycujoo.mcls.helper.OverlayViewHelper
+import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.ViewHandler
 import tv.mycujoo.mcls.matcher.SeekParameterArgumentMatcher
@@ -53,6 +57,7 @@ import tv.mycujoo.mcls.widgets.mlstimebar.MLSTimeBar
 
 
 @ExperimentalCoroutinesApi
+@RunWith(MockitoJUnitRunner::class)
 class VideoPlayerMediatorTest {
 
 
@@ -140,6 +145,12 @@ class VideoPlayerMediatorTest {
 
     @Mock
     lateinit var sessionManagerListener: ISessionManagerListener
+
+    @Mock
+    lateinit var prefManager: IPrefManager
+
+    @Mock
+    lateinit var overlayViewHelper: OverlayViewHelper
     /** endregion */
 
     /** region fields */
@@ -153,20 +164,14 @@ class VideoPlayerMediatorTest {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.openMocks(this)
-
-        internalBuilder.initialize()
 
         whenever(okHttpClient.newWebSocket(any(), any())).thenReturn(webSocket)
         mainWebSocketListener = MainWebSocketListener()
-        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener)
+        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener, prefManager)
         reactorSocket.setUUID("SAMPLE_UUID")
 
         whenever(mMLSBuilder.activity).thenReturn(activity)
-        whenever(mMLSBuilder.createExoPlayer(any())).thenReturn(exoPlayer)
-        whenever(mediaFactory.createHlsMediaSource(any())).thenReturn(hlsMediaSource)
 
-        whenever(mMLSBuilder.createReactorListener(any())).thenReturn(reactorListener)
         whenever(mMLSBuilder.mlsConfiguration).thenReturn(MLSConfiguration())
         whenever(mMLSBuilder.hasAnalytic).thenReturn(true)
 
@@ -207,7 +212,8 @@ class VideoPlayerMediatorTest {
             internalBuilder.logger,
             internalBuilder,
             plugin,
-            player
+            player,
+            overlayViewHelper
         )
         videoPlayerMediator.initialize(playerView, mMLSBuilder, listOf(), cast)
         videoPlayerMediator.setAnnotationMediator(annotationMediator)
@@ -261,8 +267,6 @@ class VideoPlayerMediatorTest {
                 eventEntityDetails
             )
         )
-        whenever(mediaFactory.createMediaItem(any())).thenReturn(mediaItem)
-        whenever(mediaFactory.createHlsMediaSource(any())).thenReturn(hlsMediaSource)
 
 
         videoPlayerMediator.playVideo(eventEntityDetails)
@@ -291,7 +295,6 @@ class VideoPlayerMediatorTest {
     fun `given event without streamUrl, should not play video`() = runBlockingTest {
         val event: EventEntity = getSampleEventEntity(emptyList())
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
-        whenever(mediaFactory.createHlsMediaSource(any())).thenReturn(hlsMediaSource)
 
 
         videoPlayerMediator.playVideo(event)
@@ -472,9 +475,6 @@ class VideoPlayerMediatorTest {
             whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
 
 
-            whenever(exoPlayer.isCurrentWindowDynamic).thenReturn(false)
-
-
             videoPlayerMediator.playVideo(event)
             exoPlayerMainEventListener.onPlayWhenReadyChanged(true, 0)
             mainWebSocketListener.onMessage(webSocket, "eventTotal;ck2343whlc43k0g90i92grc0u;17")
@@ -528,7 +528,6 @@ class VideoPlayerMediatorTest {
     @Test
     fun `given player with any state other than ready, should not log event`() {
         val event = getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_STARTED)
-        whenever(dataManager.currentEvent).thenReturn(event)
 
 
         exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_IDLE)

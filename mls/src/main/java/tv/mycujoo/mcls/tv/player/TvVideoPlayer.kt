@@ -24,11 +24,8 @@ import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.entity.Stream
-import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mcls.R
-import tv.mycujoo.mcls.api.MLSBuilder
 import tv.mycujoo.mcls.api.MLSTVConfiguration
-import tv.mycujoo.mcls.cast.ICast
 import tv.mycujoo.mcls.core.AbstractPlayerMediator
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
@@ -39,7 +36,10 @@ import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.model.JoinTimelineParam
 import tv.mycujoo.mcls.network.socket.IReactorSocket
-import tv.mycujoo.mcls.player.*
+import tv.mycujoo.mcls.player.IPlayer
+import tv.mycujoo.mcls.player.MediaDatum
+import tv.mycujoo.mcls.player.MediaFactory
+import tv.mycujoo.mcls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mcls.player.Player.Companion.createExoPlayer
 import tv.mycujoo.mcls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackSeekDataProvider
@@ -57,8 +57,9 @@ class TvVideoPlayer @Inject constructor(
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
-    logger: Logger,
+    private val logger: Logger,
     private val player: IPlayer,
+    private val tvAnnotationMediator: TvAnnotationMediator
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
     lateinit var videoSupportFragment: VideoSupportFragment
@@ -137,7 +138,7 @@ class TvVideoPlayer @Inject constructor(
                     if (glue?.isPrepared == true) {
                         glue.removePlayerCallback(this)
                         val transportControlGlue =
-                            glue as MLSPlaybackTransportControlGlueImpl<LeanbackPlayerAdapter>
+                            glue as MLSPlaybackTransportControlGlueImpl<*>
                         transportControlGlue.seekProvider = MLSPlaybackSeekDataProvider(5000L)
                     }
 
@@ -204,6 +205,7 @@ class TvVideoPlayer @Inject constructor(
                     updateStreamStatus(result.value)
                     playVideoOrDisplayEventInfo(result.value)
                     startStreamUrlPullingIfNeeded(result.value)
+                    fetchActions(result.value, true)
                 }
                 is Result.NetworkError -> {
                     logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
@@ -242,8 +244,7 @@ class TvVideoPlayer @Inject constructor(
             when (val result = dataManager.getActions(timelineId, updateId)) {
                 is Result.Success -> {
 
-                    // TODO: Check this out
-//                    tvAnnotationMediator.feed(result.value.data.map { it.toAction() })
+                    tvAnnotationMediator.feed(result.value)
 
                     if (joinTimeline) {
                         val joinTimelineParam = JoinTimelineParam(timelineId, result.value.updateId)
@@ -403,8 +404,4 @@ class TvVideoPlayer @Inject constructor(
     }
 
     /**endregion */
-
-    companion object {
-        private const val TAG = "TvVideoPlayer"
-    }
 }

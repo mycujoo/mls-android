@@ -1,27 +1,20 @@
 package tv.mycujoo.mcls.tv.player
 
 import android.os.Handler
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.Player
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.Result
-import tv.mycujoo.mcls.core.AnnotationFactory
 import tv.mycujoo.mcls.core.BuildPoint
 import tv.mycujoo.mcls.core.IAnnotationFactory
-import tv.mycujoo.mcls.core.IAnnotationListener
 import tv.mycujoo.mcls.data.IDataManager
-import tv.mycujoo.mcls.di.TV
+import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.C.Companion.ONE_SECOND_IN_MS
-import tv.mycujoo.mcls.helper.AnimationFactory
-import tv.mycujoo.mcls.helper.DownloaderClient
-import tv.mycujoo.mcls.helper.OverlayFactory
-import tv.mycujoo.mcls.helper.OverlayViewHelper
+import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.manager.Logger
-import tv.mycujoo.mcls.manager.VariableKeeper
-import tv.mycujoo.mcls.manager.VariableTranslator
 import tv.mycujoo.mcls.manager.ViewHandler
 import tv.mycujoo.mcls.mediator.IAnnotationMediator
 import tv.mycujoo.mcls.player.IPlayer
@@ -31,52 +24,67 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class TvAnnotationMediator @Inject constructor(
-    val tvAnnotationListener: IAnnotationFactory,
-    val dataManager: IDataManager,
-    val dispatcher: CoroutineScope,
-    val scheduler: ScheduledExecutorService,
-    val logger: Logger,
-    val coroutineScope: CoroutineScope,
-    val player: IPlayer
+    private val tvAnnotationFactory: IAnnotationFactory,
+    private val scheduler: ScheduledExecutorService,
+    private val player: IPlayer,
+    private val dispatcher: CoroutineScope,
+    private val dataManager: IDataManager,
+    private val logger: Logger,
+    private val viewHandler: ViewHandler
 ) : IAnnotationMediator {
 
-    // TODO: Hook this up :)
-    private lateinit var playerView: MLSPlayerView
-
-
-    private val variableTranslator = VariableTranslator(coroutineScope)
-    private val variableKeeper = VariableKeeper(coroutineScope)
 
     private var hasPendingSeek: Boolean = false
-
-
     override fun initPlayerView(playerView: MLSPlayerView) {
-        this.playerView = playerView
-        playerView.setOnSizeChangedCallback(onSizeChangedCallback)
+        TODO("Not yet implemented")
     }
 
     override fun release() {
         TODO("Not yet implemented")
     }
 
-    override var onSizeChangedCallback: () -> Unit
-        get() = TODO("Not yet implemented")
-        set(value) {}
+    override var onSizeChangedCallback = {
+        tvAnnotationFactory.build(
+            BuildPoint(
+                player.currentPosition(),
+                player.currentAbsoluteTime(),
+                player,
+                player.isPlaying()
+            )
+        )
+    }
 
     override fun fetchActions(
         timelineId: String,
         updateId: String?,
         resultCallback: ((result: Result<Exception, ActionResponse>) -> Unit)?
     ) {
-        TODO("Not yet implemented")
+        dispatcher.launch(context = Dispatchers.Main) {
+            val result = dataManager.getActions(timelineId, updateId)
+            resultCallback?.invoke(result)
+            when (result) {
+                is Result.Success -> {
+                    feed(result.value)
+                }
+                is Result.NetworkError -> {
+                    logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
+                }
+                is Result.GenericError -> {
+                    logger.log(
+                        MessageLevel.DEBUG,
+                        C.INTERNAL_ERROR_MESSAGE.plus(" ${result.errorMessage} ${result.errorCode}")
+                    )
+                }
+            }
+        }
     }
 
     override fun feed(actionResponse: ActionResponse) {
-        TODO("Not yet implemented")
+        tvAnnotationFactory.setActions(actionResponse.data.map { it.toAction() })
     }
 
     override fun setLocalActions(actions: List<Action>) {
-        TODO("Not yet implemented")
+        tvAnnotationFactory.setLocalActions(actions)
     }
 
     fun initialize(handler: Handler) {
@@ -92,7 +100,7 @@ class TvAnnotationMediator @Inject constructor(
                 if (playbackState == Player.STATE_READY && hasPendingSeek) {
                     hasPendingSeek = false
 
-                    tvAnnotationListener.build(
+                    tvAnnotationFactory.build(
                         BuildPoint(
                             player.currentPosition(),
                             player.currentAbsoluteTime(),
@@ -105,11 +113,11 @@ class TvAnnotationMediator @Inject constructor(
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-//                if (isPlaying) {
-//                    viewHandler.getAnimations().forEach { it.resume() }
-//                } else {
-//                    viewHandler.getAnimations().forEach { it.pause() }
-//                }
+                if (isPlaying) {
+                    viewHandler.getAnimations().forEach { it.resume() }
+                } else {
+                    viewHandler.getAnimations().forEach { it.pause() }
+                }
             }
 
             override fun onPlaybackStateChanged(state: Int) {
@@ -119,7 +127,7 @@ class TvAnnotationMediator @Inject constructor(
 
         val exoRunnable = Runnable {
             if (player.isPlaying()) {
-                tvAnnotationListener.build(
+                tvAnnotationFactory.build(
                     BuildPoint(
                         player.currentPosition(),
                         player.currentAbsoluteTime(),
@@ -140,9 +148,5 @@ class TvAnnotationMediator @Inject constructor(
             ONE_SECOND_IN_MS,
             TimeUnit.MILLISECONDS
         )
-    }
-
-    fun feed(actionsList: List<Action>) {
-        tvAnnotationListener.setActions(actionsList)
     }
 }

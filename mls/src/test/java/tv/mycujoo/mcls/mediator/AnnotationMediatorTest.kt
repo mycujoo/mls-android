@@ -106,9 +106,10 @@ class AnnotationMediatorTest {
             dataManager,
             testCoroutineScope,
             scheduledExecutorService,
-            Logger(LogLevel.MINIMAL)
+            Logger(LogLevel.MINIMAL),
+            player
         )
-        annotationMediator.initialize(player, handler)
+        annotationMediator.initialize(handler)
         annotationMediator.initPlayerView(playerView)
 
         heartBeatOuterRunnable.run()

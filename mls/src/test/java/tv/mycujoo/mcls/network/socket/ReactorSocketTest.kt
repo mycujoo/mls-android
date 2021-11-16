@@ -7,6 +7,7 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.*
+import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.model.JoinTimelineParam
 import kotlin.test.assertFailsWith
 
@@ -14,6 +15,9 @@ class ReactorSocketTest {
 
     private lateinit var reactorSocket: ReactorSocket
     private lateinit var mainWebSocketListener: MainWebSocketListener
+
+    @Mock
+    lateinit var prefManager: IPrefManager
 
     @Mock
     lateinit var okHttpClient: OkHttpClient
@@ -31,7 +35,7 @@ class ReactorSocketTest {
         whenever(okHttpClient.newWebSocket(any(), any())).thenReturn(webSocket)
 
         mainWebSocketListener = MainWebSocketListener()
-        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener)
+        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener, prefManager)
         reactorSocket.addListener(reactorCallback)
     }
 
