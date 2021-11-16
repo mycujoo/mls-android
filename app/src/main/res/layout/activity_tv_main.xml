@@ -7,9 +7,9 @@
     tools:context=".activity.TvMainActivity">
 
     <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/fragment"
-        android:tag="playback tag"
+        android:id="@+id/playback_fragment"
+        android:tag="playback_tag"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="tv.mycujoo.mlsapp.activity.PlaybackFragment" />
+        android:name="tv.mycujoo.ui.PlaybackFragment" />
 </androidx.constraintlayout.widget.ConstraintLayout>
