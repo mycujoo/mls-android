@@ -20,7 +20,8 @@ class MLSTvBuilder {
 
     internal var publicKey: String = ""
         private set
-    private var mlsTVConfiguration: MLSTVConfiguration = MLSTVConfiguration()
+    internal var mlsTVConfiguration: MLSTVConfiguration = MLSTVConfiguration()
+        private set
     internal var ima: IIma? = null
         private set
     internal var logLevel: LogLevel = LogLevel.MINIMAL

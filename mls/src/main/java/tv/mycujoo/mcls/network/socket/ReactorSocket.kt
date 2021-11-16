@@ -4,12 +4,15 @@ import android.util.Log
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
+import tv.mycujoo.mcls.enum.C
+import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.model.JoinTimelineParam
 import javax.inject.Inject
 
 class ReactorSocket @Inject constructor(
     private val okHttpClient: OkHttpClient,
-    private val mainSocketListener: MainWebSocketListener
+    private val mainSocketListener: MainWebSocketListener,
+    prefManager: IPrefManager
 ) : IReactorSocket {
 
     companion object {
@@ -30,6 +33,10 @@ class ReactorSocket @Inject constructor(
         mainSocketListener.addListener(ReactorListener(reactorCallback))
     }
 
+
+    init {
+        uuid = prefManager.get(C.UUID_PREF_KEY)
+    }
 
     /**
      * Must be called before any usage!

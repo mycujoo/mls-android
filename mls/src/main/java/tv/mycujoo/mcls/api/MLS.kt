@@ -58,11 +58,10 @@ class MLS @Inject constructor(
      */
     fun initializeComponent(builder: MLSBuilder) {
         this.builder = builder
-        internalBuilder.initialize()
         videoPlayerMediator.videoPlayerConfig = builder.mlsConfiguration.videoPlayerConfig
         persistPublicKey(this.builder.publicKey)
 
-        reactorSocket.setUUID(internalBuilder.uuid!!)
+        reactorSocket.setUUID(InternalBuilder.uuid!!)
 
         initSvgRenderingLibrary(internalBuilder.getAssetManager())
 

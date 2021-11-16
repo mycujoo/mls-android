@@ -31,7 +31,11 @@ class MLSTvInternalBuilder @Inject constructor(
 
     val ima: IIma? = null
 
-    var uuid: String? = null
+    companion object {
+        @JvmStatic
+        private var uuid: String? = null
+    }
+
 
 
     init {

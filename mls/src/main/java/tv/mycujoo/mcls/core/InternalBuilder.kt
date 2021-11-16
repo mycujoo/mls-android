@@ -35,8 +35,11 @@ open class InternalBuilder @Inject constructor(
 
     /**region Fields*/
 
-    var uuid: String? = null
-        private set
+    companion object {
+        @JvmStatic
+        var uuid: String? = null
+            private set
+    }
 
     /**endregion */
 
@@ -44,7 +47,7 @@ open class InternalBuilder @Inject constructor(
     /**
      * initialize internal builder and prepare it for usage by MLS
      */
-    open fun initialize() {
+    init {
         uuid = prefManager.get(C.UUID_PREF_KEY) ?: UUID.randomUUID().toString()
         persistUUIDIfNotStoredAlready(uuid!!)
 

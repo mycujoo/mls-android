@@ -10,13 +10,14 @@ import javax.inject.Inject
 
 class MLSTV @Inject constructor(
     private val dataManager: IDataManager,
-    private val internalBuilder: MLSTvInternalBuilder,
     private val prefManager: IPrefManager,
     private val tvVideoPlayer: TvVideoPlayer
 ) {
 
     fun initialize(builder: MLSTvBuilder, videoSupportFragment: VideoSupportFragment) {
         persistPublicKey(builder.publicKey)
+
+        tvVideoPlayer.mlsTVConfiguration = builder.mlsTVConfiguration
 
         tvVideoPlayer.initialize(videoSupportFragment)
         tvVideoPlayer.videoSupportFragment = videoSupportFragment
