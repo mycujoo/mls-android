@@ -1,8 +1,8 @@
 package tv.mycujoo.mcls.player
 
 import android.os.Handler
+import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import org.junit.Before
@@ -23,7 +23,7 @@ class PlayerTest {
     lateinit var player: Player
 
     @Mock
-    lateinit var exoPlayer: SimpleExoPlayer
+    lateinit var exoPlayer: ExoPlayer
 
     @Mock
     lateinit var mediaFactory: MediaFactory

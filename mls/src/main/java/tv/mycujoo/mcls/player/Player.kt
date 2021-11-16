@@ -26,7 +26,7 @@ class Player @Inject constructor(
     /**
      * Exoplayer instance
      */
-    private var exoPlayer: SimpleExoPlayer? = null
+    private var exoPlayer: ExoPlayer? = null
 
     /**
      * IIma integration
@@ -87,7 +87,7 @@ class Player @Inject constructor(
     override fun create(
         ima: IIma?,
         mediaFactory: MediaFactory,
-        exoPlayer: SimpleExoPlayer,
+        exoPlayer: ExoPlayer,
         handler: Handler,
         mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
     ) {
@@ -101,7 +101,7 @@ class Player @Inject constructor(
      * re-initialize Player by setting those properties that are life-cycle bound
      * @param exoPlayer exoplayer used for playing video
      */
-    override fun reInit(exoPlayer: SimpleExoPlayer) {
+    override fun reInit(exoPlayer: ExoPlayer) {
         this.exoPlayer = exoPlayer
         this.mediaOnLoadCompletedListener = MediaOnLoadCompletedListener(exoPlayer)
 
@@ -421,8 +421,8 @@ class Player @Inject constructor(
     }
 
     companion object {
-        fun createExoPlayer(context: Context): SimpleExoPlayer {
-            return SimpleExoPlayer.Builder(context)
+        fun createExoPlayer(context: Context): ExoPlayer {
+            return ExoPlayer.Builder(context)
                 .setSeekBackIncrementMs(10000)
                 .setSeekForwardIncrementMs(10000)
                 .build()

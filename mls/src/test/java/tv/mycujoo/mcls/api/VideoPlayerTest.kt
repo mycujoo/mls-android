@@ -4,7 +4,6 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.Player.STATE_READY
-import com.google.android.exoplayer2.SimpleExoPlayer
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -24,7 +23,7 @@ class VideoPlayerTest {
     private lateinit var eventListener: Player.Listener
 
     @Mock
-    lateinit var exoPlayer: SimpleExoPlayer
+    lateinit var exoPlayer: ExoPlayer
 
     @Mock
     lateinit var audioComponent: ExoPlayer.AudioComponent

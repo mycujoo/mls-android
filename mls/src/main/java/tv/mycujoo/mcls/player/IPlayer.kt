@@ -3,7 +3,6 @@ package tv.mycujoo.mcls.player
 import android.os.Handler
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.SimpleExoPlayer
 import tv.mycujoo.mcls.ima.IIma
 
 interface IPlayer {
@@ -11,11 +10,11 @@ interface IPlayer {
     fun create(
         ima: IIma?,
         mediaFactory: MediaFactory,
-        exoPlayer: SimpleExoPlayer,
+        exoPlayer: ExoPlayer,
         handler: Handler,
         mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
     )
-    fun reInit(exoPlayer: SimpleExoPlayer)
+    fun reInit(exoPlayer: ExoPlayer)
 
     // will be removed!
     fun getDirectInstance(): ExoPlayer?

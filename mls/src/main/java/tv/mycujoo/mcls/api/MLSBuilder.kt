@@ -3,13 +3,12 @@ package tv.mycujoo.mcls.api
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
-import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.ExoPlayer
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.internal.modules.ApplicationContextModule
 import dagger.hilt.components.SingletonComponent
 import tv.mycujoo.DaggerMLSApplication_HiltComponents_SingletonC
-import tv.mycujoo.mcls.MissingKeyException
 import tv.mycujoo.mcls.cast.ICast
 import tv.mycujoo.mcls.core.PlayerEventsListener
 import tv.mycujoo.mcls.core.UIEventListener
@@ -108,8 +107,8 @@ open class MLSBuilder {
     /**
      * internal use: create instance of Exoplayer
      */
-    fun createExoPlayer(context: Context): SimpleExoPlayer {
-        return SimpleExoPlayer.Builder(context).build()
+    fun createExoPlayer(context: Context): ExoPlayer {
+        return ExoPlayer.Builder(context).build()
     }
 
     /**

@@ -2,9 +2,9 @@ package tv.mycujoo.mcls.core
 
 import android.content.res.Resources
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player.*
-import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Plugin
@@ -97,7 +97,7 @@ class VideoPlayerMediatorTest {
     lateinit var player: IPlayer
 
     @Mock
-    lateinit var exoPlayer: SimpleExoPlayer
+    lateinit var exoPlayer: ExoPlayer
 
     @Mock
     lateinit var mediaFactory: MediaFactory
