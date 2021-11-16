@@ -77,7 +77,7 @@ class MLS @Inject constructor(
                 MediaOnLoadCompletedListener(exoPlayer)
             )
         }
-        annotationMediator.initialize(player, handler)
+        annotationMediator.initialize(handler)
         player.getDirectInstance()?.let { exoPlayer ->
             builder.ima?.setPlayer(exoPlayer)
         }

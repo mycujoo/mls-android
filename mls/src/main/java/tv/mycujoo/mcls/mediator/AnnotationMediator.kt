@@ -29,12 +29,12 @@ class AnnotationMediator @Inject constructor(
     private val dataManager: IDataManager,
     private val dispatcher: CoroutineScope,
     private val scheduler: ScheduledExecutorService,
-    private val logger: Logger
+    private val logger: Logger,
+    private val player: IPlayer
 ) : IAnnotationMediator {
 
     // TODO: Hook this up :)
     private lateinit var playerView: MLSPlayerView
-    private lateinit var player: IPlayer
 
     /**region Fields*/
     private lateinit var eventListener: Player.Listener
@@ -42,23 +42,21 @@ class AnnotationMediator @Inject constructor(
     /**endregion */
 
     /**region Initialization*/
-    fun initialize(player: IPlayer, handler: Handler) {
-        this.player = player
+    fun initialize(handler: Handler) {
 
         initEventListener(player)
 
         val exoRunnable = Runnable {
             if (player.isPlaying()) {
                 val currentPosition = player.currentPosition()
-
+                annotationFactory.attachPlayerView(playerView)
                 annotationFactory.build(
                     BuildPoint(
                         currentPosition,
                         player.currentAbsoluteTime(),
                         player,
                         player.isPlaying()
-                    ),
-                    playerView
+                    )
                 )
 
                 playerView.updateTime(currentPosition, player.duration())
@@ -136,8 +134,7 @@ class AnnotationMediator @Inject constructor(
                             player.currentAbsoluteTime(),
                             player,
                             player.isPlaying()
-                        ),
-                        playerView
+                        )
                     )
                 }
             }
@@ -167,8 +164,7 @@ class AnnotationMediator @Inject constructor(
                 player.currentAbsoluteTime(),
                 player,
                 player.isPlaying()
-            ),
-            playerView
+            )
         )
     }
 

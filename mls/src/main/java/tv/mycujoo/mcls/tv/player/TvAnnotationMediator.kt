@@ -37,11 +37,11 @@ class TvAnnotationMediator @Inject constructor(
     val scheduler: ScheduledExecutorService,
     val logger: Logger,
     val coroutineScope: CoroutineScope,
+    val player: IPlayer
 ) : IAnnotationMediator {
 
     // TODO: Hook this up :)
     private lateinit var playerView: MLSPlayerView
-    private lateinit var player: IPlayer
 
 
     private val variableTranslator = VariableTranslator(coroutineScope)
@@ -79,8 +79,7 @@ class TvAnnotationMediator @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    fun initialize(player: IPlayer, handler: Handler) {
-        this.player = player
+    fun initialize(handler: Handler) {
 
         player.addListener(object : Player.Listener {
             override fun onPositionDiscontinuity(reason: Int) {
@@ -99,8 +98,7 @@ class TvAnnotationMediator @Inject constructor(
                             player.currentAbsoluteTime(),
                             player,
                             player.isPlaying()
-                        ),
-                        playerView
+                        )
                     )
                 }
 
@@ -127,8 +125,7 @@ class TvAnnotationMediator @Inject constructor(
                         player.currentAbsoluteTime(),
                         player,
                         isPlaying = true
-                    ),
-                    playerView
+                    )
                 )
             }
         }

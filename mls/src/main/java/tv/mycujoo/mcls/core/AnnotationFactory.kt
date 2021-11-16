@@ -34,7 +34,10 @@ class AnnotationFactory @Inject constructor(
         CopyOnWriteArrayList<Action>() // union of Sorted actions + Local actions
     /**endregion */
 
-    /**region Over-ridden functions*/
+    override fun attachPlayerView(playerView: MLSPlayerView) {
+        annotationListener.attachPlayer(playerView)
+    }
+
     override fun setActions(actions: List<Action>) {
         val sortedTemp = actions
             .sortedWith(compareBy<Action> { it.offset }.thenByDescending { it.priority })
@@ -55,14 +58,12 @@ class AnnotationFactory @Inject constructor(
         localActions.addAll(annotations)
     }
 
-    override fun build(buildPoint: BuildPoint, player: MLSPlayerView) {
+    override fun build(buildPoint: BuildPoint) {
         allActions.apply {
             clear()
             addAll(localActions)
             addAll(sortedActions)
         }
-
-        annotationListener.attachPlayer(player)
 
         val currentTimeInInDvrWindowDuration = TimeRangeHelper.isCurrentTimeInDvrWindowDuration(
             buildPoint.player.duration(),

@@ -5,7 +5,8 @@ import tv.mycujoo.mcls.widgets.MLSPlayerView
 
 interface IAnnotationFactory {
     fun setActions(actions: List<Action>)
-    fun build(buildPoint: BuildPoint, player: MLSPlayerView)
+    fun attachPlayerView(playerView: MLSPlayerView)
+    fun build(buildPoint: BuildPoint)
 
     fun getCurrentActions(): List<Action>
     fun setLocalActions(annotations: List<Action>)
