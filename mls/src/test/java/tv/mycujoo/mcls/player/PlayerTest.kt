@@ -20,7 +20,7 @@ import kotlin.test.assertTrue
 
 class PlayerTest {
 
-    private lateinit var player: Player
+    lateinit var player: Player
 
     @Mock
     lateinit var exoPlayer: SimpleExoPlayer
@@ -44,7 +44,8 @@ class PlayerTest {
     @Before
     fun setUp() {
         MockitoAnnotations.openMocks(this)
-        player = Player()
+
+        player = Player(mediaFactory)
     }
 
     private fun initPlayer() {
