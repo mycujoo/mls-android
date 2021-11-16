@@ -64,7 +64,8 @@ class VideoPlayerMediator @Inject constructor(
     logger: Logger,
     private val internalBuilder: InternalBuilder,
     private val plugin: Plugin,
-    private val player: IPlayer
+    private val player: IPlayer,
+    private val overlayViewHelper: OverlayViewHelper
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
     private var cast: ICast? = null
@@ -176,8 +177,6 @@ class VideoPlayerMediator @Inject constructor(
 
             initPlayerView(
                 MLSPlayerView,
-                player,
-                internalBuilder.overlayViewHelper,
                 timelineMarkerActionEntities
             )
 
@@ -193,8 +192,6 @@ class VideoPlayerMediator @Inject constructor(
 
     private fun initPlayerView(
         MLSPlayerView: MLSPlayerView,
-        player: IPlayer,
-        overlayViewHelper: OverlayViewHelper,
         timelineMarkerActionEntities: List<TimelineMarkerEntity>
     ) {
         MLSPlayerView.prepare(

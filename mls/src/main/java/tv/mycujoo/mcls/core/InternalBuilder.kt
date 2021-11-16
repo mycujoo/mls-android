@@ -2,29 +2,19 @@ package tv.mycujoo.mcls.core
 
 import android.content.Context
 import android.content.res.AssetManager
-import android.util.Log
 import com.google.android.exoplayer2.ExoPlayer
 import com.npaw.youbora.lib6.YouboraLog
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
-import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
-import okhttp3.OkHttpClient
-import tv.mycujoo.data.repository.EventsRepository
 import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.api.MLSConfiguration
-import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.enum.LogLevel.*
-import tv.mycujoo.mcls.helper.AnimationFactory
-import tv.mycujoo.mcls.helper.OverlayFactory
-import tv.mycujoo.mcls.helper.OverlayViewHelper
 import tv.mycujoo.mcls.ima.IIma
-import tv.mycujoo.mcls.manager.*
-import tv.mycujoo.mcls.manager.contracts.IViewHandler
-import tv.mycujoo.mcls.network.socket.IReactorSocket
+import tv.mycujoo.mcls.manager.IPrefManager
+import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.player.MediaFactory
 import java.util.*
 import javax.inject.Inject
@@ -35,17 +25,9 @@ import javax.inject.Inject
 open class InternalBuilder @Inject constructor(
     @ApplicationContext private val context: Context,
     val logger: Logger,
-    val viewHandler: IViewHandler,
     val mediaFactory: MediaFactory,
-    val reactorSocket: IReactorSocket,
     val plugin: Plugin,
-    val dispatcher: CoroutineScope,
-    val okHttpClient: OkHttpClient,
-    val dataManager: IDataManager,
     val prefManager: IPrefManager,
-    val overlayViewHelper: OverlayViewHelper,
-    val variableTranslator: VariableTranslator,
-    val variableKeeper: IVariableKeeper
 ) {
 
     private var ima: IIma? = null

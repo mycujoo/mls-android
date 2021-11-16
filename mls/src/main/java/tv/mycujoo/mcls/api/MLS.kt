@@ -18,6 +18,7 @@ import tv.mycujoo.mcls.helper.TypeFaceFactory
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.mediator.AnnotationMediator
+import tv.mycujoo.mcls.network.socket.ReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mcls.player.Player.Companion.createExoPlayer
@@ -38,7 +39,8 @@ class MLS @Inject constructor(
     private val prefManager: IPrefManager,
     private val internalBuilder: InternalBuilder,
     private val annotationMediator: AnnotationMediator,
-    private val player: IPlayer
+    private val player: IPlayer,
+    private val reactorSocket: ReactorSocket
 ) : MLSAbstract() {
 
     /**region Fields*/
@@ -60,7 +62,7 @@ class MLS @Inject constructor(
         videoPlayerMediator.videoPlayerConfig = builder.mlsConfiguration.videoPlayerConfig
         persistPublicKey(this.builder.publicKey)
 
-        internalBuilder.reactorSocket.setUUID(internalBuilder.uuid!!)
+        reactorSocket.setUUID(internalBuilder.uuid!!)
 
         initSvgRenderingLibrary(internalBuilder.getAssetManager())
 

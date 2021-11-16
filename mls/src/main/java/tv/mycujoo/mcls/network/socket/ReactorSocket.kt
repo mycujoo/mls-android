@@ -12,10 +12,12 @@ class ReactorSocket @Inject constructor(
     private val mainSocketListener: MainWebSocketListener
 ) : IReactorSocket {
 
+    companion object {
+        @JvmStatic
+        private var uuid: String? = null
+    }
 
     private lateinit var webSocket: WebSocket
-
-    private lateinit var uuid: String
 
     private var created = false
     private var connected = false
@@ -23,7 +25,6 @@ class ReactorSocket @Inject constructor(
     private lateinit var eventId: String
     private lateinit var timelineId: String
     private lateinit var updateId: String
-
 
     override fun addListener(reactorCallback: ReactorCallback) {
         mainSocketListener.addListener(ReactorListener(reactorCallback))
@@ -35,7 +36,7 @@ class ReactorSocket @Inject constructor(
      * @param uuid must be persisted on phones storage to be unique
      */
     override fun setUUID(uuid: String) {
-        this.uuid = uuid
+        ReactorSocket.uuid = uuid
     }
 
     /**
@@ -47,7 +48,7 @@ class ReactorSocket @Inject constructor(
      *  @param eventId
      */
     override fun joinEvent(eventId: String) {
-        if (this::uuid.isInitialized.not()) {
+        if (uuid == null) {
             throw UninitializedPropertyAccessException("uuid must be initialized")
         }
         if (connected) {
