@@ -15,11 +15,7 @@ class ReactorSocket @Inject constructor(
     prefManager: IPrefManager
 ) : IReactorSocket {
 
-    companion object {
-        @JvmStatic
-        private var uuid: String? = null
-    }
-
+    private var uuid: String? = null
     private lateinit var webSocket: WebSocket
 
     private var created = false
@@ -43,7 +39,7 @@ class ReactorSocket @Inject constructor(
      * @param uuid must be persisted on phones storage to be unique
      */
     override fun setUUID(uuid: String) {
-        ReactorSocket.uuid = uuid
+        this.uuid = uuid
     }
 
     /**
