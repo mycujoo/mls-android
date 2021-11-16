@@ -158,6 +158,7 @@ class AnnotationMediator @Inject constructor(
     }
 
     override var onSizeChangedCallback = {
+        annotationFactory.attachPlayerView(playerView)
         annotationFactory.build(
             BuildPoint(
                 player.currentPosition(),
