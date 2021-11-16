@@ -12,6 +12,7 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import okio.Buffer
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -62,11 +63,11 @@ open class NetworkModule {
                     .removeHeader("Cache-Control")
                     .addHeader("Cache-Control", "public, max-age=$maxAgeInSecond")
                     .build()
-                val requestBody = chain.request().body()
+                val requestBody = chain.request().body
                 if (requestBody != null) {
                     Log.d(
                         "NetworkModule",
-                        "intercept: " + chain.request().method() + " " + chain.request().url()
+                        "intercept: " + chain.request().method + " " + chain.request().url
                     )
                     val buffer = Buffer()
                     requestBody.writeTo(buffer)
@@ -78,6 +79,7 @@ open class NetworkModule {
                 }
                 chain.proceed(newRequest)
             }
+            .addInterceptor(HttpLoggingInterceptor())
             .cache(cache)
 
         return okHttpBuilder.build()
@@ -121,3 +123,5 @@ open class NetworkModule {
         return retrofit.create(MlsApi::class.java)
     }
 }
+
+private const val TAG = "NetworkModule"

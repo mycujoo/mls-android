@@ -18,7 +18,9 @@ import javax.inject.Inject
  * All video playing related functionality is done by this class
  * @see IPlayer
  */
-class Player @Inject constructor() : IPlayer {
+class Player @Inject constructor(
+    val mediaFactory: MediaFactory
+) : IPlayer {
 
     /**region Fields*/
     /**
@@ -31,11 +33,6 @@ class Player @Inject constructor() : IPlayer {
      * can be null, if IMA module is not used
      */
     private var ima: IIma? = null
-
-    /**
-     * MediaFactory used to create playable item to feed ExoPlayer
-     */
-    private lateinit var mediaFactory: MediaFactory
 
     /**
      * Handler to offload process from main thread to avoid UI blockage
@@ -95,7 +92,6 @@ class Player @Inject constructor() : IPlayer {
         mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
     ) {
         this.ima = ima
-        this.mediaFactory = mediaFactory
         this.exoPlayer = exoPlayer
         this.handler = handler
         this.mediaOnLoadCompletedListener = mediaOnLoadCompletedListener

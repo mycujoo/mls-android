@@ -9,7 +9,6 @@ import tv.mycujoo.domain.params.EventListParams
 import tv.mycujoo.domain.params.TimelineIdPairParam
 import tv.mycujoo.domain.repository.AbstractRepository
 import tv.mycujoo.domain.repository.IEventsRepository
-import tv.mycujoo.mcls.di.MLSAPI
 import tv.mycujoo.mcls.network.MlsApi
 import javax.inject.Inject
 

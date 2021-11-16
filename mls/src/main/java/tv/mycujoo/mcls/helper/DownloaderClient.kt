@@ -38,11 +38,11 @@ class DownloaderClient @Inject constructor(
 
             override fun onResponse(call: Call, response: Response) {
 
-                if (response.isSuccessful && response.body() != null) {
+                if (response.isSuccessful && response.body != null) {
 
                     val stringBuilder = StringBuilder()
 
-                    val scanner = Scanner(response.body()!!.byteStream())
+                    val scanner = Scanner(response.body!!.byteStream())
                     while (scanner.hasNext()) {
                         stringBuilder.append(scanner.nextLine())
                     }

@@ -1,10 +1,10 @@
 package tv.mycujoo.mcls.tv.player
 
-import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -21,7 +21,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.entity.Stream
@@ -32,15 +31,12 @@ import tv.mycujoo.mcls.api.MLSTVConfiguration
 import tv.mycujoo.mcls.cast.ICast
 import tv.mycujoo.mcls.core.AbstractPlayerMediator
 import tv.mycujoo.mcls.data.IDataManager
-import tv.mycujoo.mcls.di.TV
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.enum.StreamStatus
-import tv.mycujoo.mcls.helper.DownloaderClient
 import tv.mycujoo.mcls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.mcls.manager.Logger
-import tv.mycujoo.mcls.mediator.IAnnotationMediator
 import tv.mycujoo.mcls.model.JoinTimelineParam
 import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.player.*
@@ -53,7 +49,6 @@ import tv.mycujoo.mcls.widgets.CustomInformationDialog
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mcls.widgets.PreEventInformationDialog
 import tv.mycujoo.mcls.widgets.UiEvent
-import java.util.concurrent.Executors
 import javax.inject.Inject
 
 class TvVideoPlayer @Inject constructor(
@@ -62,9 +57,8 @@ class TvVideoPlayer @Inject constructor(
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
-    private val okHttpClient: OkHttpClient,
-    @TV private val tvAnnotationMediator: IAnnotationMediator,
-    logger: Logger
+    logger: Logger,
+    private val player: IPlayer,
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
     lateinit var videoSupportFragment: VideoSupportFragment
@@ -72,7 +66,6 @@ class TvVideoPlayer @Inject constructor(
     var mlsTVConfiguration: MLSTVConfiguration = MLSTVConfiguration()
 
     /**region Fields*/
-    lateinit var player: IPlayer
     private lateinit var leanbackAdapter: LeanbackPlayerAdapter
     private lateinit var glueHost: VideoSupportFragmentGlueHost
     private lateinit var mTransportControlGlue: MLSPlaybackTransportControlGlueImpl<LeanbackPlayerAdapter>
@@ -83,35 +76,38 @@ class TvVideoPlayer @Inject constructor(
     private lateinit var overlayContainer: ConstraintLayout
     /**endregion */
 
+    /**
+     * Latest updateId received from Reactor service, or null if not joined at all
+     */
+    private var updateId: String? = null
+
     /**region Initializing*/
-    fun initialize(
-        mLSPlayerView: MLSPlayerView,
-        player: IPlayer,
-        builder: MLSBuilder,
-        timelineMarkerActionEntities: List<TimelineMarkerEntity> = listOf(),
-        cast: ICast? = null
-    ) {
+    fun initialize(videoSupportFragment: VideoSupportFragment) {
+        this.videoSupportFragment = videoSupportFragment
+
         val adViewProvider = addAdViewProvider(videoSupportFragment.view)
         ima?.setAdViewProvider(adViewProvider)
+        
+        val handler = Handler(Looper.getMainLooper())
 
-        this.player = Player()
-            .apply {
-                val exoplayer = createExoPlayer(context)
-                val mediaOnLoadCompletedListener = MediaOnLoadCompletedListener(exoplayer)
-                create(
-                    ima,
-                    mediaFactory,
-                    exoplayer,
-                    Handler(),
-                    mediaOnLoadCompletedListener
-                )
-            }
+        player.apply {
+            val exoplayer = createExoPlayer(context)
+            val mediaOnLoadCompletedListener = MediaOnLoadCompletedListener(exoplayer)
+            create(
+                ima,
+                mediaFactory,
+                exoplayer,
+                handler,
+                mediaOnLoadCompletedListener
+            )
+        }
 
         this.player.getDirectInstance()?.let { exoPlayer ->
             ima?.setPlayer(exoPlayer)
         }
 
-        this.player.getDirectInstance()!!.playWhenReady = mlsTVConfiguration.videoPlayerConfig.autoPlay
+        this.player.getDirectInstance()!!.playWhenReady =
+            mlsTVConfiguration.videoPlayerConfig.autoPlay
         leanbackAdapter = LeanbackPlayerAdapter(context, this.player.getDirectInstance()!!, 1000)
         glueHost = VideoSupportFragmentGlueHost(videoSupportFragment)
 
@@ -276,7 +272,7 @@ class TvVideoPlayer @Inject constructor(
 
     override fun playVideo(eventId: String) {
         dispatcher.launch(context = Dispatchers.Main) {
-            when (val result = dataManager.getEventDetails(eventId)) {
+            when (val result = dataManager.getEventDetails(eventId, updateId)) {
                 is Result.Success -> {
                     dataManager.currentEvent = result.value
                     updateStreamStatus(result.value)
@@ -293,7 +289,7 @@ class TvVideoPlayer @Inject constructor(
                 }
                 is Result.GenericError -> {
                     logger.log(
-                        MessageLevel.DEBUG,
+                        MessageLevel.ERROR,
                         C.INTERNAL_ERROR_MESSAGE.plus(" ${result.errorMessage} ${result.errorCode}")
                     )
                 }
@@ -405,5 +401,10 @@ class TvVideoPlayer @Inject constructor(
         }
         dialogs.clear()
     }
+
     /**endregion */
+
+    companion object {
+        private const val TAG = "TvVideoPlayer"
+    }
 }

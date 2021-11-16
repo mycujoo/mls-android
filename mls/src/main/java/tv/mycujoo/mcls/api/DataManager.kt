@@ -1,5 +1,6 @@
 package tv.mycujoo.mcls.api
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import tv.mycujoo.data.entity.ActionResponse
@@ -144,6 +145,7 @@ class DataManager @Inject constructor(
                     logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus(" ${result.error}"))
                 }
                 is Result.GenericError -> {
+                    Log.d(TAG, "fetchEvents: Error ${result.errorCode}")
                     logger.log(
                         MessageLevel.DEBUG,
                         C.INTERNAL_ERROR_MESSAGE.plus(" ${result.errorMessage} ${result.errorCode}")
@@ -154,4 +156,8 @@ class DataManager @Inject constructor(
         }
     }
     /**endregion */
+
+    companion object {
+        private const val TAG = "DataManager"
+    }
 }

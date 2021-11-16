@@ -30,6 +30,12 @@ open class AppModule {
 
     @Provides
     @Singleton
+    fun provideLogger(): Logger {
+        return Logger(LogLevel.INFO)
+    }
+
+    @Provides
+    @Singleton
     fun providePrefManager(@ApplicationContext context: Context): IPrefManager {
         return PrefManager(context.getSharedPreferences("MLS", Context.MODE_PRIVATE))
     }
@@ -40,12 +46,6 @@ open class AppModule {
     fun provideCoroutineScope(): CoroutineScope {
         val job = SupervisorJob()
         return CoroutineScope(newSingleThreadContext(BuildConfig.LIBRARY_PACKAGE_NAME) + job)
-    }
-
-    @Provides
-    @Singleton
-    fun provideLogger(): Logger {
-        return Logger(LogLevel.MINIMAL)
     }
 
     @CountingIdlingResourceViewIdentifierManager
