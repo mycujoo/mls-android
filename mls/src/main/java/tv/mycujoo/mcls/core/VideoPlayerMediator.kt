@@ -6,7 +6,6 @@ import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.ui.TimeBar
-import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,8 +15,6 @@ import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.Stream
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
-import tv.mycujoo.mcls.BuildConfig
-import tv.mycujoo.mcls.BuildConfig.MYCUJOO_YOUBORA_ACCOUNT_NAME
 import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.api.MLSBuilder

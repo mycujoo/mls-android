@@ -38,37 +38,20 @@ open class InternalBuilder @Inject constructor(
     val viewHandler: IViewHandler,
     val mediaFactory: MediaFactory,
     val reactorSocket: IReactorSocket,
-    val plugin: Plugin
+    val plugin: Plugin,
+    val dispatcher: CoroutineScope,
+    val okHttpClient: OkHttpClient,
+    val dataManager: IDataManager,
+    val prefManager: IPrefManager,
+    val overlayViewHelper: OverlayViewHelper,
+    val variableTranslator: VariableTranslator,
+    val variableKeeper: IVariableKeeper
 ) {
 
     private var ima: IIma? = null
     private var logLevel: LogLevel = MLSConfiguration().logLevel
 
     /**region Fields*/
-
-    @Inject
-    lateinit var eventsRepository: EventsRepository
-
-    @Inject
-    lateinit var dispatcher: CoroutineScope
-
-    @Inject
-    lateinit var okHttpClient: OkHttpClient
-
-    @Inject
-    lateinit var dataManager: IDataManager
-
-    @Inject
-    lateinit var prefManager: IPrefManager
-
-    @Inject
-    lateinit var overlayViewHelper: OverlayViewHelper
-
-    @Inject
-    lateinit var variableTranslator: VariableTranslator
-
-    @Inject
-    lateinit var variableKeeper: IVariableKeeper
 
     var uuid: String? = null
         private set
@@ -84,9 +67,6 @@ open class InternalBuilder @Inject constructor(
         persistUUIDIfNotStoredAlready(uuid!!)
 
         logger.setLogLevel(logLevel)
-
-        variableTranslator = VariableTranslator(dispatcher)
-        variableKeeper = VariableKeeper(dispatcher)
 
         ima?.setAdsLoaderProvider(mediaFactory.defaultMediaSourceFactory)
     }
