@@ -107,11 +107,11 @@ class VideoPlayer(
     }
 
     override fun isMuted(): Boolean {
-        return exoPlayer.audioComponent?.volume == 0F
+        return exoPlayer.volume == 0F
     }
 
     override fun mute() {
-        exoPlayer.audioComponent?.volume = 0F
+        exoPlayer.volume = 0F
     }
 
     override fun showEventInfoOverlay() {
