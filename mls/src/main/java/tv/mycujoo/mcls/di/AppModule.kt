@@ -103,6 +103,12 @@ open class AppModule {
 
     @Provides
     @Singleton
+    fun provideHandler(): Handler {
+        return Handler(Looper.myLooper() ?: Looper.getMainLooper())
+    }
+
+    @Provides
+    @Singleton
     fun provideExoPlayer(@ApplicationContext context: Context): ExoPlayer {
         return ExoPlayer.Builder(context)
             .setSeekBackIncrementMs(10000)
@@ -126,12 +132,6 @@ open class AppModule {
         return DefaultMediaSourceFactory(
             context
         )
-    }
-
-    @Singleton
-    @Provides
-    fun provideHandler(): Handler {
-        return Handler(Looper.getMainLooper())
     }
 
     @Singleton

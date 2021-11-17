@@ -101,7 +101,15 @@ class MainActivity : AppCompatActivity() {
                     organiser = null,
                     start_time = DateTime.parse("2021-11-14T14:30:00.000+01:00"),
                     status = EventStatus.EVENT_STATUS_FINISHED,
-                    streams = listOf(),
+                    streams = listOf(
+                        Stream(
+                            id = "ckvwbcerfqyub0hbqwbkyrvk1",
+                            dvrWindowString = null,
+                            fullUrl = "https://playlists.mycujoo.football/eu/ckvwbajqyr3hu0gbljp9k4t9w/master.m3u8",
+                            widevine = null,
+                            errorCodeAndMessage = null
+                        )
+                    ),
                     timezone = null,
                     timeline_ids = listOf(),
                     metadata = null,

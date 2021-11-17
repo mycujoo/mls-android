@@ -3,9 +3,7 @@ package tv.mycujoo.mcls.core
 import android.content.res.Resources
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player.*
-import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Plugin
 import kotlinx.coroutines.CoroutineScope
@@ -18,7 +16,6 @@ import okhttp3.WebSocket
 import org.junit.*
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.*
@@ -45,10 +42,8 @@ import tv.mycujoo.mcls.manager.ViewHandler
 import tv.mycujoo.mcls.matcher.SeekParameterArgumentMatcher
 import tv.mycujoo.mcls.mediator.AnnotationMediator
 import tv.mycujoo.mcls.network.socket.MainWebSocketListener
-import tv.mycujoo.mcls.network.socket.ReactorListener
 import tv.mycujoo.mcls.network.socket.ReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
-import tv.mycujoo.mcls.player.MediaFactory
 import tv.mycujoo.mcls.player.MediaDatum
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mcls.widgets.PlayerControllerMode
@@ -78,9 +73,6 @@ class VideoPlayerMediatorTest {
     lateinit var internalBuilder: InternalBuilder
 
     @Mock
-    lateinit var reactorListener: ReactorListener
-
-    @Mock
     lateinit var webSocket: WebSocket
 
     @Mock
@@ -105,15 +97,6 @@ class VideoPlayerMediatorTest {
     lateinit var exoPlayer: ExoPlayer
 
     @Mock
-    lateinit var mediaFactory: MediaFactory
-
-    @Mock
-    lateinit var hlsMediaSource: HlsMediaSource
-
-    @Mock
-    lateinit var mediaItem: MediaItem
-
-    @Mock
     lateinit var timeBar: MLSTimeBar
 
     @Mock
@@ -121,9 +104,6 @@ class VideoPlayerMediatorTest {
 
     @Mock
     lateinit var youboraClient: YouboraClient
-
-    @Mock
-    lateinit var youboraPlugin: Plugin
 
     @Mock
     lateinit var exoplayer2Adapter: Exoplayer2Adapter
@@ -252,11 +232,21 @@ class VideoPlayerMediatorTest {
     @Test
     fun `given eventEntity to play, should fetch event details`() =
         runBlockingTest {
-            val event: EventEntity = getSampleEventEntity(emptyList())
-            videoPlayerMediator.playVideo(event)
+            val event: EventEntity = getSampleEventEntity(getSampleStreamList())
+            videoPlayerMediator.playVideo(event.id)
 
 
             verify(dataManager).getEventDetails(event.id)
+        }
+
+    @Test
+    fun `given eventEntity to play, should not fetch event details`() =
+        runBlockingTest {
+            val event: EventEntity = getSampleEventEntity(getSampleStreamList())
+            videoPlayerMediator.playVideo(event)
+
+
+            verify(dataManager, never()).getEventDetails(event.id)
         }
 
     @Test
@@ -288,7 +278,7 @@ class VideoPlayerMediatorTest {
         coroutineTestRule.testDispatcher.advanceTimeBy(61000L)
         videoPlayerMediator.cancelPulling()
 
-        verify(dataManager, times(1)).getEventDetails(eventEntityDetails.id, null)
+        verify(dataManager, never()).getEventDetails(eventEntityDetails.id, null)
     }
 
     @Test
@@ -428,7 +418,7 @@ class VideoPlayerMediatorTest {
         coroutineTestRule.testDispatcher.advanceTimeBy(61000L)
         videoPlayerMediator.cancelPulling()
 
-        verify(dataManager, times(3)).getEventDetails(event.id, null)
+        verify(dataManager, times(2)).getEventDetails(event.id, null)
     }
 
     @Test
@@ -527,9 +517,6 @@ class VideoPlayerMediatorTest {
 
     @Test
     fun `given player with any state other than ready, should not log event`() {
-        val event = getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_STARTED)
-
-
         exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_IDLE)
         exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_BUFFERING)
         exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_ENDED)
@@ -584,17 +571,17 @@ class VideoPlayerMediatorTest {
     @Test
     fun `should pause local player, when connected to remote player`() {
         whenever(player.isPlaying()).thenReturn(true)
-        videoPlayerMediator.playVideo(getSampleEventEntity("id_0"))
+        videoPlayerMediator.playVideo(getSampleEventEntity(getSampleStreamList()))
 
         castListener.onSessionStarted(casterSession)
 
-        verify(player).pause()
+        verify(player, times(1)).pause()
     }
 
     @Test
     fun `should not pause local player if it's not playing, when connected to remote player`() {
         whenever(player.isPlaying()).thenReturn(false)
-        videoPlayerMediator.playVideo(getSampleEventEntity("id_0"))
+        videoPlayerMediator.playVideo(getSampleEventEntity(getSampleStreamList()))
 
         castListener.onSessionStarted(casterSession)
 
@@ -679,8 +666,6 @@ class VideoPlayerMediatorTest {
 
         fun getSampleStream(url: String?, errorCodeAndMessage: ErrorCodeAndMessage? = null) =
             Stream("id_0", "1200000", url, null, errorCodeAndMessage)
-
-        const val SAMPLE_UUID = "aa-bb-cc-dd-ee"
 
     }
 

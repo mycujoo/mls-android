@@ -31,7 +31,7 @@ class AnnotationMediator @Inject constructor(
     private val scheduler: ScheduledExecutorService,
     private val logger: Logger,
     private val player: IPlayer,
-    private val handler: Handler
+    var handler: Handler
 ) : IAnnotationMediator {
 
 

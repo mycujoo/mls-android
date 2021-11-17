@@ -1,6 +1,7 @@
 package tv.mycujoo.mcls.player
 
 import android.os.Handler
+import android.util.Log
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
@@ -19,8 +20,8 @@ import javax.inject.Inject
 class Player @Inject constructor(
     val mediaFactory: MediaFactory,
     var exoPlayer: ExoPlayer,
-    val handler: Handler,
-    var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
+    var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener,
+    val handler: Handler
 ) : IPlayer {
 
     /**region Fields*/
@@ -115,7 +116,11 @@ class Player @Inject constructor(
      * @return current position if a media item has been loaded, or invalid otherwise
      */
     override fun currentPosition(): Long {
-        return exoPlayer.currentPosition
+        return if (exoPlayer.currentMediaItemIndex >= 0) {
+            exoPlayer.currentPosition
+        } else {
+            -1
+        }
     }
 
     /**
@@ -227,6 +232,7 @@ class Player @Inject constructor(
      * @param mediaData
      */
     override fun play(mediaData: MediaDatum.MediaData) {
+        Log.d(TAG, "play: mediaData")
         this.mediaData = mediaData
         val mediaItem = mediaFactory.createMediaItem(mediaData.fullUrl)
         play(mediaItem, mediaData.autoPlay)
@@ -238,6 +244,7 @@ class Player @Inject constructor(
      * @param autoPlay
      */
     private fun play(mediaItem: MediaItem, autoPlay: Boolean) {
+        Log.d(TAG, "play: mediaData")
         if (playbackPosition != -1L) {
             exoPlayer.seekTo(playbackPosition)
         }
@@ -362,5 +369,9 @@ class Player @Inject constructor(
      */
     override fun dvrWindowStartTime(): Long {
         return mediaOnLoadCompletedListener.getWindowStartTime()
+    }
+
+    companion object {
+        private const val TAG = "Player"
     }
 }

@@ -1,14 +1,11 @@
 package tv.mycujoo.mcls.widgets
 
-import android.content.Intent
+import android.content.Context
 import android.os.Handler
-import android.os.Looper
 import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
-import androidx.test.core.app.ApplicationProvider
-import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.UiController
@@ -20,8 +17,9 @@ import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.internal.runner.junit4.statement.UiThreadStatement
-import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ui.PlayerControlView
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.android.synthetic.main.player_view_wrapper.view.*
@@ -48,10 +46,7 @@ import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaFactory
 import tv.mycujoo.mcls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mcls.player.Player
-import tv.mycujoo.mcls.player.Player.Companion.createExoPlayer
-import tv.mycujoo.mcls.player.Player.Companion.createMediaFactory
 import javax.inject.Inject
-
 
 @ExperimentalCoroutinesApi
 @HiltAndroidTest
@@ -66,6 +61,10 @@ class MLSPlayerViewTest {
 
     /** region Injects */
     @Inject
+    @ApplicationContext
+    lateinit var applicationContext: Context
+
+    @Inject
     lateinit var viewHandler: ViewHandler
 
     @Inject
@@ -76,6 +75,18 @@ class MLSPlayerViewTest {
 
     @Inject
     lateinit var videoPlayerMediator: VideoPlayerMediator
+
+    @Inject
+    lateinit var exoPlayer: ExoPlayer
+
+    @Inject
+    lateinit var mediaFactory: MediaFactory
+
+    @Inject
+    lateinit var handler: Handler
+
+    @Inject
+    lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
     /** endregion */
 
     private lateinit var mMLSPlayerView: MLSPlayerView
@@ -121,22 +132,15 @@ class MLSPlayerViewTest {
 
     private fun setupPlayer() {
         UiThreadStatement.runOnUiThread {
-            player = Player()
-            val exoPlayer = createExoPlayer(mMLSPlayerView.context)
-            player.create(
-                null,
-                MediaFactory(
-                    Player.createDefaultMediaSourceFactory(mMLSPlayerView.context),
-                    createMediaFactory(mMLSPlayerView.context),
-                    MediaItem.Builder()
-                ),
+            player = Player(
+                mediaFactory,
                 exoPlayer,
-                Handler(Looper.myLooper()!!),
-                MediaOnLoadCompletedListener(exoPlayer)
+                mediaOnLoadCompletedListener,
+                handler
             )
+            player.create(null)
             videoPlayerMediator.initialize(
                 mMLSPlayerView,
-                player,
                 mMLSBuilder
             )
 
@@ -177,10 +181,12 @@ class MLSPlayerViewTest {
         mMLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        mMLSPlayerView.showCustomInformationDialog("This stream cannot be watched in your area.")
+        mMLSPlayerView.showCustomInformationDialog(applicationContext.getString(R.string.message_geoblocked_stream))
 
 
-        onView(withText("This stream cannot be watched in your area.")).check(
+        Thread.sleep(5000)
+
+        onView(withText(applicationContext.getString(R.string.message_geoblocked_stream))).check(
             matches(
                 withEffectiveVisibility(Visibility.VISIBLE)
             )

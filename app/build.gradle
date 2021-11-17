@@ -69,4 +69,6 @@ dependencies {
     implementation project(':cast')
     implementation project(":ima")
     implementation "androidx.recyclerview:recyclerview:1.2.1"
+
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
 }

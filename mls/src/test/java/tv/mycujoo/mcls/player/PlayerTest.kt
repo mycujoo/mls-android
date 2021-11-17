@@ -45,7 +45,7 @@ class PlayerTest {
     fun setUp() {
         MockitoAnnotations.openMocks(this)
 
-        player = Player(mediaFactory, exoPlayer, handler, mediaOnLoadCompletedListener)
+        player = Player(mediaFactory, exoPlayer, mediaOnLoadCompletedListener, handler)
     }
 
     private fun initPlayer() {
@@ -96,21 +96,21 @@ class PlayerTest {
     }
 
     @Test
-    fun `given uninitialized state, should return -1 as current position`() {
+    fun `given uninitialized state, should return 0 as current position`() {
         //not initialized
 
-        assertEquals(-1L, player.currentPosition())
+        assertEquals(0, player.currentPosition())
     }
 
     @Test
-    fun `given destroyed state, should return -1 as current position`() {
+    fun `given destroyed state, should return 0 as current position`() {
         initPlayer()
 
 
         player.release()
 
 
-        assertEquals(-1L, player.currentPosition())
+        assertEquals(0, player.currentPosition())
     }
 
 
@@ -167,21 +167,21 @@ class PlayerTest {
     }
 
     @Test
-    fun `given uninitialized state, should return -1 as duration`() {
+    fun `given uninitialized state, should return 0 as duration`() {
         //not initialized
 
-        assertEquals(-1L, player.duration())
+        assertEquals(0, player.duration())
     }
 
     @Test
-    fun `given destroyed state, should return -1 as duration`() {
+    fun `given destroyed state, should return 0 as duration`() {
         initPlayer()
 
 
         player.release()
 
 
-        assertEquals(-1L, player.duration())
+        assertEquals(0, player.duration())
     }
 
 
@@ -250,8 +250,8 @@ class PlayerTest {
         initPlayer()
         whenever(mediaFactory.createMediaItem(any())).thenReturn(mediaItem)
         whenever(mediaFactory.createHlsMediaSource(any())).thenReturn(hlsMediaSource)
-        whenever(exoPlayer.currentWindowIndex).thenReturn(0)
-        whenever(exoPlayer.isCurrentWindowSeekable).thenReturn(true)
+        whenever(exoPlayer.currentMediaItemIndex).thenReturn(0)
+        whenever(exoPlayer.isCurrentMediaItemSeekable).thenReturn(true)
         whenever(exoPlayer.currentPosition).thenReturn(42L)
         player.release()
         initPlayer()

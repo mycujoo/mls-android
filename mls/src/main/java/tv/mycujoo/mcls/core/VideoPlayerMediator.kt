@@ -507,17 +507,15 @@ class VideoPlayerMediator @Inject constructor(
      * So it does not matter the stream url exist in the given param. Always the response from server will be used.
      */
     override fun playVideo(event: EventEntity) {
-        if (event.streamStatus() == PLAYABLE) {
+        dataManager.currentEvent = event
+        updateStreamStatus(event)
+        playVideoOrDisplayEventInfo(event)
+        joinEvent(event)
+        fetchActions(event, true)
 
-            if (event.isNativeMLS) {
-                playVideo(event.id)
-                storeEvent(event)
-            } else {
-                playExternalEvent(event)
-                dataManager.currentEvent = event
-                cancelPulling()
-                updateStreamStatus(event)
-            }
+        // If the event is constructed manually and not a native MLS, it should not be replaced with any other version
+        if (event.isNativeMLS) {
+            startStreamUrlPullingIfNeeded(event)
         }
     }
 
@@ -531,12 +529,7 @@ class VideoPlayerMediator @Inject constructor(
         dispatcher.launch(context = Dispatchers.Main) {
             when (val result = dataManager.getEventDetails(eventId, updateId)) {
                 is Success -> {
-                    dataManager.currentEvent = result.value
-                    updateStreamStatus(result.value)
-                    playVideoOrDisplayEventInfo(result.value)
-                    joinEvent(result.value)
-                    fetchActions(result.value, true)
-                    startStreamUrlPullingIfNeeded(result.value)
+                    playVideo(result.value)
                 }
                 is NetworkError -> {
                     logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
@@ -558,7 +551,7 @@ class VideoPlayerMediator @Inject constructor(
 
             player.play(
                 MediaDatum.MediaData(
-                    fullUrl = event.streams.first().fullUrl!!,
+                    fullUrl = event.streams.first().fullUrl.toString(),
                     dvrWindowSize = Long.MAX_VALUE,
                     autoPlay = videoPlayerConfig.autoPlay
                 )
@@ -907,7 +900,7 @@ class VideoPlayerMediator @Inject constructor(
         if (event.streams.isEmpty() || event.streams.first().fullUrl == null) {
             return
         }
-        val fullUrl = event.streams.first().fullUrl!!
+        val fullUrl = event.streams.first().fullUrl.toString()
         val widevine = event.streams.first().widevine
 
 

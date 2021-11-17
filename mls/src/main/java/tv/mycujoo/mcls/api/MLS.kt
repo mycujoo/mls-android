@@ -1,13 +1,14 @@
 package tv.mycujoo.mcls.api
 
+import android.content.Context
 import android.content.res.AssetManager
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
+import android.util.Log
 import com.caverock.androidsvg.SVG
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ui.AdViewProvider
 import com.google.android.exoplayer2.util.Util
+import dagger.hilt.android.qualifiers.ApplicationContext
 import tv.mycujoo.mcls.core.InternalBuilder
 import tv.mycujoo.mcls.core.VideoPlayerMediator
 import tv.mycujoo.mcls.data.IDataManager
@@ -19,7 +20,6 @@ import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.mediator.AnnotationMediator
 import tv.mycujoo.mcls.network.socket.ReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
-import tv.mycujoo.mcls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import javax.inject.Inject
 
@@ -30,11 +30,11 @@ import javax.inject.Inject
  * @see MLSAbstract
  */
 class MLS @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val videoPlayerMediator: VideoPlayerMediator,
     private val dataManager: IDataManager,
     private val viewHandler: IViewHandler,
     private val prefManager: IPrefManager,
-    private val internalBuilder: InternalBuilder,
     private val annotationMediator: AnnotationMediator,
     private val player: IPlayer,
     private val reactorSocket: ReactorSocket,
@@ -56,6 +56,7 @@ class MLS @Inject constructor(
      * @param builder ready to use instance of InternalBuilder
      */
     fun initializeComponent(builder: MLSBuilder) {
+        Log.d("TAG", "initializeComponent: $exoPlayer")
         this.builder = builder
         videoPlayerMediator.videoPlayerConfig = builder.mlsConfiguration.videoPlayerConfig
         persistPublicKey(this.builder.publicKey)
@@ -102,7 +103,10 @@ class MLS @Inject constructor(
     private fun initializeMediatorsIfNeeded(mMLSPlayerView: MLSPlayerView) {
         if (mediatorInitialized) {
             mMLSPlayerView.playerView.onResume()
-            player.reInit(exoPlayer)
+            player.reInit(ExoPlayer.Builder(context)
+                .setSeekBackIncrementMs(10000)
+                .setSeekForwardIncrementMs(10000)
+                .build())
             videoPlayerMediator.initialize(mMLSPlayerView, builder)
 
             builder.ima?.let { ima ->
@@ -150,7 +154,7 @@ class MLS @Inject constructor(
      */
     override fun onResume(MLSPlayerView: MLSPlayerView) {
         if (Util.SDK_INT < Build.VERSION_CODES.N) {
-            initializeMediators(MLSPlayerView)
+            initializeMediatorsIfNeeded(MLSPlayerView)
         }
         videoPlayerMediator.onResume()
     }
