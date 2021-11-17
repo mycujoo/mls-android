@@ -1,18 +1,12 @@
 package tv.mycujoo.mcls.player
 
-import android.os.Handler
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import tv.mycujoo.mcls.ima.IIma
 
 interface IPlayer {
-    fun isReady(): Boolean
     fun create(
         ima: IIma?,
-        mediaFactory: MediaFactory,
-        exoPlayer: ExoPlayer,
-        handler: Handler,
-        mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
     )
     fun reInit(exoPlayer: ExoPlayer)
 

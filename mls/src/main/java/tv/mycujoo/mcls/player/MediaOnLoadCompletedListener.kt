@@ -8,8 +8,9 @@ import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.MediaSourceEventListener
 import com.google.android.exoplayer2.source.hls.HlsManifest
 import java.util.concurrent.CopyOnWriteArrayList
+import javax.inject.Inject
 
-class MediaOnLoadCompletedListener(private var exoPlayer: ExoPlayer) :
+class MediaOnLoadCompletedListener @Inject constructor(private var exoPlayer: ExoPlayer) :
     MediaSourceEventListener {
 
     private val segmentProcessor = SegmentProcessor()

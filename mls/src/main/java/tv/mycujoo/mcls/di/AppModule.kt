@@ -1,8 +1,14 @@
 package tv.mycujoo.mcls.di
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import androidx.test.espresso.idling.CountingIdlingResource
+import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
+import com.google.android.exoplayer2.source.hls.HlsMediaSource
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
 import dagger.Module
@@ -84,11 +90,47 @@ open class AppModule {
 
     @Provides
     @Singleton
-    fun provideMediaFactory(@ApplicationContext context: Context): MediaFactory {
+    fun provideMediaFactory(
+        mediaSourceFactory: DefaultMediaSourceFactory,
+        hlsMediaSource: HlsMediaSource.Factory
+    ): MediaFactory {
         return MediaFactory(
-            Player.createDefaultMediaSourceFactory(context),
-            Player.createMediaFactory(),
+            mediaSourceFactory,
+            hlsMediaSource,
             MediaItem.Builder()
         )
+    }
+
+    @Provides
+    @Singleton
+    fun provideExoPlayer(@ApplicationContext context: Context): ExoPlayer {
+        return ExoPlayer.Builder(context)
+            .setSeekBackIncrementMs(10000)
+            .setSeekForwardIncrementMs(10000)
+            .build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideHlsMediaSource(): HlsMediaSource.Factory {
+        return HlsMediaSource.Factory(
+            DefaultHttpDataSource.Factory()
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun provideDefaultMediaSourceFactory(
+        @ApplicationContext context: Context
+    ): DefaultMediaSourceFactory {
+        return DefaultMediaSourceFactory(
+            context
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun provideHandler(): Handler {
+        return Handler(Looper.getMainLooper())
     }
 }

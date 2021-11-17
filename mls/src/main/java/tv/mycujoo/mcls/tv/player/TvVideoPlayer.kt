@@ -40,7 +40,6 @@ import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaDatum
 import tv.mycujoo.mcls.player.MediaFactory
 import tv.mycujoo.mcls.player.MediaOnLoadCompletedListener
-import tv.mycujoo.mcls.player.Player.Companion.createExoPlayer
 import tv.mycujoo.mcls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackTransportControlGlueImpl
@@ -59,7 +58,8 @@ class TvVideoPlayer @Inject constructor(
     private val dataManager: IDataManager,
     private val logger: Logger,
     private val player: IPlayer,
-    private val tvAnnotationMediator: TvAnnotationMediator
+    private val tvAnnotationMediator: TvAnnotationMediator,
+    private val exoPlayer: ExoPlayer
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
     lateinit var videoSupportFragment: VideoSupportFragment
@@ -88,18 +88,10 @@ class TvVideoPlayer @Inject constructor(
 
         val adViewProvider = addAdViewProvider(videoSupportFragment.view)
         ima?.setAdViewProvider(adViewProvider)
-        
-        val handler = Handler(Looper.getMainLooper())
 
         player.apply {
-            val exoplayer = createExoPlayer(context)
-            val mediaOnLoadCompletedListener = MediaOnLoadCompletedListener(exoplayer)
             create(
                 ima,
-                mediaFactory,
-                exoplayer,
-                handler,
-                mediaOnLoadCompletedListener
             )
         }
 

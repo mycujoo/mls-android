@@ -1,14 +1,13 @@
 package tv.mycujoo.mcls.api
 
-import android.content.Context
 import android.content.res.AssetManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import com.caverock.androidsvg.SVG
+import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ui.AdViewProvider
 import com.google.android.exoplayer2.util.Util
-import dagger.hilt.android.qualifiers.ApplicationContext
 import tv.mycujoo.mcls.core.InternalBuilder
 import tv.mycujoo.mcls.core.VideoPlayerMediator
 import tv.mycujoo.mcls.data.IDataManager
@@ -21,7 +20,6 @@ import tv.mycujoo.mcls.mediator.AnnotationMediator
 import tv.mycujoo.mcls.network.socket.ReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaOnLoadCompletedListener
-import tv.mycujoo.mcls.player.Player.Companion.createExoPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import javax.inject.Inject
 
@@ -32,7 +30,6 @@ import javax.inject.Inject
  * @see MLSAbstract
  */
 class MLS @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val videoPlayerMediator: VideoPlayerMediator,
     private val dataManager: IDataManager,
     private val viewHandler: IViewHandler,
@@ -40,7 +37,8 @@ class MLS @Inject constructor(
     private val internalBuilder: InternalBuilder,
     private val annotationMediator: AnnotationMediator,
     private val player: IPlayer,
-    private val reactorSocket: ReactorSocket
+    private val reactorSocket: ReactorSocket,
+    private val exoPlayer: ExoPlayer
 ) : MLSAbstract() {
 
     /**region Fields*/
@@ -68,13 +66,8 @@ class MLS @Inject constructor(
         val handler = Handler(Looper.myLooper()!!)
 
         player.apply {
-            val exoPlayer = createExoPlayer(context)
             create(
                 builder.ima,
-                internalBuilder.mediaFactory,
-                exoPlayer,
-                handler,
-                MediaOnLoadCompletedListener(exoPlayer)
             )
         }
         annotationMediator.initialize(handler)
@@ -110,7 +103,6 @@ class MLS @Inject constructor(
     private fun initializeMediatorsIfNeeded(mMLSPlayerView: MLSPlayerView) {
         if (mediatorInitialized) {
             mMLSPlayerView.playerView.onResume()
-            val exoPlayer = createExoPlayer(context)
             player.reInit(exoPlayer)
             videoPlayerMediator.initialize(mMLSPlayerView, builder)
 

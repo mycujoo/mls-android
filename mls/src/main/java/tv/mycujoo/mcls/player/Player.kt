@@ -1,12 +1,10 @@
 package tv.mycujoo.mcls.player
 
-import android.content.Context
 import android.os.Handler
-import com.google.android.exoplayer2.*
+import com.google.android.exoplayer2.C
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
-import com.google.android.exoplayer2.source.hls.HlsMediaSource
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.google.android.exoplayer2.util.Util
 import tv.mycujoo.mcls.enum.C.Companion.DRM_WIDEVINE
 import tv.mycujoo.mcls.ima.IIma
@@ -19,31 +17,19 @@ import javax.inject.Inject
  * @see IPlayer
  */
 class Player @Inject constructor(
-    val mediaFactory: MediaFactory
+    val mediaFactory: MediaFactory,
+    var exoPlayer: ExoPlayer,
+    val handler: Handler,
+    var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
 ) : IPlayer {
 
     /**region Fields*/
-    /**
-     * Exoplayer instance
-     */
-    private var exoPlayer: ExoPlayer? = null
 
     /**
      * IIma integration
      * can be null, if IMA module is not used
      */
     private var ima: IIma? = null
-
-    /**
-     * Handler to offload process from main thread to avoid UI blockage
-     */
-    private lateinit var handler: Handler
-
-    /**
-     * Callback for processing media items after they are loaded by Exoplayer,
-     * meaning their tags are ready to be parsed.
-     */
-    private lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
 
     /**
      * Latest resume position at playing, if video player is playing.
@@ -79,22 +65,9 @@ class Player @Inject constructor(
     /**
      * Create a ready-to-use Player by setting all the given properties
      * @param ima IMA integration, if Ima module is used
-     * @param mediaFactory factory for creating media items
-     * @param exoPlayer exoplayer used for playing video
-     * @param handler handler for running jobs on other thread than Main thread
-     * @param mediaOnLoadCompletedListener callback for sending data after media item is loaded by exoplayer
      */
-    override fun create(
-        ima: IIma?,
-        mediaFactory: MediaFactory,
-        exoPlayer: ExoPlayer,
-        handler: Handler,
-        mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
-    ) {
+    override fun create(ima: IIma?) {
         this.ima = ima
-        this.exoPlayer = exoPlayer
-        this.handler = handler
-        this.mediaOnLoadCompletedListener = mediaOnLoadCompletedListener
     }
 
     /**
@@ -104,28 +77,20 @@ class Player @Inject constructor(
     override fun reInit(exoPlayer: ExoPlayer) {
         this.exoPlayer = exoPlayer
         this.mediaOnLoadCompletedListener = MediaOnLoadCompletedListener(exoPlayer)
-
-    }
-
-    /**
-     * @return true if player is ready to play, false otherwise
-     */
-    override fun isReady(): Boolean {
-        return exoPlayer != null
     }
 
     /**
      * @return Exoplayer
      * Should be removed
      */
-    override fun getDirectInstance(): ExoPlayer? {
+    override fun getDirectInstance(): ExoPlayer {
         return exoPlayer
     }
 
     /**
      * @return Exoplayer
      */
-    override fun getPlayer(): Player? {
+    override fun getPlayer(): Player {
         return exoPlayer
     }
 
@@ -134,7 +99,7 @@ class Player @Inject constructor(
      * @param eventListener implementation of EventListener
      */
     override fun addListener(eventListener: Player.Listener) {
-        exoPlayer?.addListener(eventListener)
+        exoPlayer.addListener(eventListener)
     }
 
     /**
@@ -142,7 +107,7 @@ class Player @Inject constructor(
      * @param offset
      */
     override fun seekTo(offset: Long) {
-        exoPlayer?.seekTo(offset)
+        exoPlayer.seekTo(offset)
     }
 
     /**
@@ -150,7 +115,7 @@ class Player @Inject constructor(
      * @return current position if a media item has been loaded, or invalid otherwise
      */
     override fun currentPosition(): Long {
-        return exoPlayer?.currentPosition ?: -1L
+        return exoPlayer.currentPosition
     }
 
     /**
@@ -158,15 +123,13 @@ class Player @Inject constructor(
      * @return current absolute time if a media item has been loaded, or invalid otherwise
      */
     override fun currentAbsoluteTime(): Long {
-        exoPlayer?.let { exoplayer ->
+        exoPlayer.let { exoplayer ->
             val dvrWindowStartTime = mediaOnLoadCompletedListener.getWindowStartTime()
             if (dvrWindowStartTime == -1L) {
                 return -1L
             }
             return dvrWindowStartTime + exoplayer.currentPosition
         }
-
-        return -1L
     }
 
     /**
@@ -174,7 +137,7 @@ class Player @Inject constructor(
      * @return duration of current media item, or invalid otherwise
      */
     override fun duration(): Long {
-        return exoPlayer?.duration ?: -1L
+        return exoPlayer.duration
     }
 
     /**
@@ -182,10 +145,7 @@ class Player @Inject constructor(
      * @return true of it is live, or false otherwise
      */
     override fun isLive(): Boolean {
-        exoPlayer?.let {
-            return (it.isCurrentWindowDynamic && it.contentPosition != 0L)
-        }
-        return false
+        return exoPlayer.isCurrentMediaItemDynamic && exoPlayer.contentPosition != 0L
     }
 
     /**
@@ -193,10 +153,7 @@ class Player @Inject constructor(
      * @return true of it is playing media item, or false otherwise
      */
     override fun isPlaying(): Boolean {
-        exoPlayer?.let {
-            return it.isPlaying
-        }
-        return false
+        return exoPlayer.isPlaying
     }
 
     /**
@@ -204,10 +161,7 @@ class Player @Inject constructor(
      * @return true of it is playing an Ad item, or false otherwise
      */
     override fun isPlayingAd(): Boolean {
-        exoPlayer?.let {
-            return it.isPlayingAd
-        }
-        return false
+        return exoPlayer.isPlayingAd
     }
 
     /**
@@ -215,12 +169,9 @@ class Player @Inject constructor(
      * Ensures latest position is retrievable after recreation
      */
     private fun updateResumePosition() {
-        if (exoPlayer == null) {
-            return
-        }
-        resumeWindow = exoPlayer!!.currentWindowIndex
-        resumePosition = if (exoPlayer!!.isCurrentWindowSeekable) {
-            0L.coerceAtLeast(exoPlayer!!.currentPosition)
+        resumeWindow = exoPlayer.currentMediaItemIndex
+        resumePosition = if (exoPlayer.isCurrentMediaItemSeekable) {
+            0L.coerceAtLeast(exoPlayer.currentPosition)
         } else {
             C.POSITION_UNSET.toLong()
         }
@@ -230,13 +181,12 @@ class Player @Inject constructor(
      * Release resources
      */
     override fun release() {
-        exoPlayer?.let {
+        exoPlayer.let {
             updateResumePosition()
             playWhenReady = it.playWhenReady
             playbackPosition = it.currentPosition
 
             it.release()
-            exoPlayer = null
         }
     }
 
@@ -259,9 +209,13 @@ class Player @Inject constructor(
     override fun play(drmMediaData: MediaDatum.DRMMediaData) {
         this.mediaData = drmMediaData
 
+        val config = MediaItem.DrmConfiguration
+            .Builder(Util.getDrmUuid(DRM_WIDEVINE)!!)
+            .setLicenseUri(drmMediaData.licenseUrl)
+            .build()
+
         val mediaItem = MediaItem.Builder()
-            .setDrmUuid(Util.getDrmUuid(DRM_WIDEVINE))
-            .setDrmLicenseUri(drmMediaData.licenseUrl)
+            .setDrmConfiguration(config)
             .setUri(drmMediaData.fullUrl)
             .build()
 
@@ -285,15 +239,15 @@ class Player @Inject constructor(
      */
     private fun play(mediaItem: MediaItem, autoPlay: Boolean) {
         if (playbackPosition != -1L) {
-            exoPlayer!!.seekTo(playbackPosition)
+            exoPlayer.seekTo(playbackPosition)
         }
 
         val haveResumePosition = resumeWindow != C.INDEX_UNSET
         if (haveResumePosition) {
-            exoPlayer?.let { simplePlayer ->
+            exoPlayer.let { simplePlayer ->
                 simplePlayer.seekTo(resumeWindow, resumePosition)
 
-                exoPlayer?.let {
+                exoPlayer.let {
                     val hlsMediaSource = mediaFactory.createHlsMediaSource(mediaItem)
                     hlsMediaSource.addEventListener(handler, mediaOnLoadCompletedListener)
                     if (ima != null) {
@@ -318,7 +272,7 @@ class Player @Inject constructor(
                 }
             }
         } else {
-            exoPlayer?.let {
+            exoPlayer.let {
                 val hlsMediaSource = mediaFactory.createHlsMediaSource(mediaItem)
                 hlsMediaSource.addEventListener(handler, mediaOnLoadCompletedListener)
 
@@ -351,18 +305,14 @@ class Player @Inject constructor(
      * Play current media item
      */
     override fun play() {
-        exoPlayer?.let {
-            it.playWhenReady = true
-        }
+        exoPlayer.playWhenReady = true
     }
 
     /**
      * Pause current media item
      */
     override fun pause() {
-        exoPlayer?.let {
-            it.playWhenReady = false
-        }
+        exoPlayer.playWhenReady = false
     }
 
     /**
@@ -389,9 +339,6 @@ class Player @Inject constructor(
      * @param targetAbsoluteTime any time in absolute time system
      */
     override fun isWithinValidSegment(targetAbsoluteTime: Long): Boolean? {
-        if (exoPlayer == null) {
-            return null
-        }
         if (targetAbsoluteTime == -1L) {
             return null
         }
@@ -414,35 +361,6 @@ class Player @Inject constructor(
      * @return dvr-window start time of current media item, if it is loaded. Invalid otherwise
      */
     override fun dvrWindowStartTime(): Long {
-        exoPlayer?.let { _ ->
-            return mediaOnLoadCompletedListener.getWindowStartTime()
-        }
-        return -1L
+        return mediaOnLoadCompletedListener.getWindowStartTime()
     }
-
-    companion object {
-        fun createExoPlayer(context: Context): ExoPlayer {
-            return ExoPlayer.Builder(context)
-                .setSeekBackIncrementMs(10000)
-                .setSeekForwardIncrementMs(10000)
-                .build()
-        }
-
-        fun createMediaFactory(): HlsMediaSource.Factory {
-            return HlsMediaSource.Factory(
-                // TODO: Removing this mess up the Annotation Timings, Investigate :)
-                DefaultHttpDataSource.Factory()
-            )
-        }
-
-        fun createDefaultMediaSourceFactory(
-            context: Context
-        ): DefaultMediaSourceFactory {
-            return DefaultMediaSourceFactory(
-                context
-            )
-        }
-    }
-
-
 }
