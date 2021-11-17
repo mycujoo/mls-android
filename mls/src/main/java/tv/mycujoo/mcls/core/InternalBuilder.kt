@@ -1,12 +1,9 @@
 package tv.mycujoo.mcls.core
 
-import android.content.Context
-import android.content.res.AssetManager
 import com.google.android.exoplayer2.ExoPlayer
 import com.npaw.youbora.lib6.YouboraLog
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Plugin
-import dagger.hilt.android.qualifiers.ApplicationContext
 import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.api.MLSConfiguration
 import tv.mycujoo.mcls.enum.C
@@ -23,7 +20,6 @@ import javax.inject.Inject
  * Internal builder which builds & prepares lower level components for MLS
  */
 open class InternalBuilder @Inject constructor(
-    @ApplicationContext private val context: Context,
     val logger: Logger,
     val mediaFactory: MediaFactory,
     val plugin: Plugin,
@@ -55,12 +51,6 @@ open class InternalBuilder @Inject constructor(
 
         ima?.setAdsLoaderProvider(mediaFactory.defaultMediaSourceFactory)
     }
-
-    /**
-     * internal use: AssetManager of provided activity
-     * @return AssetManager
-     */
-    fun getAssetManager(): AssetManager = context.assets
 
     /**
      * internal use: create YouboraClient

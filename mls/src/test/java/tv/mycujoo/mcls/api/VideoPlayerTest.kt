@@ -26,9 +26,6 @@ class VideoPlayerTest {
     lateinit var exoPlayer: ExoPlayer
 
     @Mock
-    lateinit var audioComponent: ExoPlayer.AudioComponent
-
-    @Mock
     lateinit var videoPlayerMediator: VideoPlayerMediator
 
     @Mock
@@ -42,7 +39,6 @@ class VideoPlayerTest {
             eventListener
         }
         videoPlayer = VideoPlayer(exoPlayer, videoPlayerMediator, mMLSPlayerView)
-        whenever(exoPlayer.audioComponent).thenReturn(audioComponent)
     }
 
     @Test
@@ -152,14 +148,14 @@ class VideoPlayerTest {
 
     @Test
     fun `test isMuted true`() {
-        whenever(audioComponent.volume).thenReturn(0F)
+        whenever(exoPlayer.volume).thenReturn(0F)
 
         assertEquals(true, videoPlayer.isMuted())
     }
 
     @Test
     fun `test isMuted false`() {
-        whenever(audioComponent.volume).thenReturn(1F)
+        whenever(exoPlayer.volume).thenReturn(1F)
 
         assertEquals(false, videoPlayer.isMuted())
     }
@@ -168,7 +164,7 @@ class VideoPlayerTest {
     fun `test muting audio`() {
         videoPlayer.mute()
 
-        verify(audioComponent).volume = 0F
+        verify(exoPlayer).volume = 0F
     }
 
     @Test

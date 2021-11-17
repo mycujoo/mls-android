@@ -1,6 +1,7 @@
 package tv.mycujoo.mcls.di
 
 import android.content.Context
+import android.content.res.AssetManager
 import android.os.Handler
 import android.os.Looper
 import androidx.test.espresso.idling.CountingIdlingResource
@@ -26,7 +27,6 @@ import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.PrefManager
 import tv.mycujoo.mcls.player.MediaFactory
-import tv.mycujoo.mcls.player.Player
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import javax.inject.Singleton
@@ -132,5 +132,11 @@ open class AppModule {
     @Provides
     fun provideHandler(): Handler {
         return Handler(Looper.getMainLooper())
+    }
+
+    @Singleton
+    @Provides
+    fun provideAssetManager(@ApplicationContext context: Context): AssetManager {
+        return context.assets
     }
 }

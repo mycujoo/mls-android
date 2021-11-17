@@ -43,15 +43,6 @@ class AnnotationMediatorTest {
     lateinit var playerView: MLSPlayerView
 
     @Mock
-    lateinit var viewHandler: IViewHandler
-
-    @Mock
-    lateinit var variableKeeper: VariableKeeper
-
-    @Mock
-    lateinit var variableTranslator: VariableTranslator
-
-    @Mock
     lateinit var dataManager: IDataManager
 
     @Mock
@@ -71,6 +62,9 @@ class AnnotationMediatorTest {
 
     @Mock
     lateinit var annotationFactory: IAnnotationFactory
+
+    @Mock
+    lateinit var position: Player.PositionInfo
 
     /**endregion */
 
@@ -107,9 +101,9 @@ class AnnotationMediatorTest {
             testCoroutineScope,
             scheduledExecutorService,
             Logger(LogLevel.MINIMAL),
-            player
+            player,
+            handler
         )
-        annotationMediator.initialize(handler)
         annotationMediator.initPlayerView(playerView)
 
         heartBeatOuterRunnable.run()
@@ -190,7 +184,11 @@ class AnnotationMediatorTest {
         whenever(player.duration()).thenReturn(400L)
 
 
-        eventListener.onPositionDiscontinuity(Player.DISCONTINUITY_REASON_SEEK)
+        eventListener.onPositionDiscontinuity(
+            position,
+            position,
+            Player.DISCONTINUITY_REASON_SEEK
+        )
 
 
 //        verify(annotationFactory).setCurrentTime(123L, true)
@@ -213,7 +211,7 @@ class AnnotationMediatorTest {
     fun `given ready in onPlayerStateChanged of player, with pending seek, should build lingering overlays`() {
         whenever(player.currentPosition()).thenReturn(123L)
         whenever(player.duration()).thenReturn(400L)
-        eventListener.onPositionDiscontinuity(Player.DISCONTINUITY_REASON_SEEK) // make seek = true
+        eventListener.onPositionDiscontinuity(position, position, Player.DISCONTINUITY_REASON_SEEK) // make seek = true
 
 
         eventListener.onPlayWhenReadyChanged(true, Player.STATE_READY)

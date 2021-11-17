@@ -30,10 +30,11 @@ class AnnotationMediator @Inject constructor(
     private val dispatcher: CoroutineScope,
     private val scheduler: ScheduledExecutorService,
     private val logger: Logger,
-    private val player: IPlayer
+    private val player: IPlayer,
+    private val handler: Handler
 ) : IAnnotationMediator {
 
-    // TODO: Hook this up :)
+
     private lateinit var playerView: MLSPlayerView
 
     /**region Fields*/
@@ -42,7 +43,7 @@ class AnnotationMediator @Inject constructor(
     /**endregion */
 
     /**region Initialization*/
-    fun initialize(handler: Handler) {
+    init {
 
         initEventListener(player)
 
@@ -107,8 +108,13 @@ class AnnotationMediator @Inject constructor(
     private fun initEventListener(player: IPlayer) {
         eventListener = object : Player.Listener {
 
-            override fun onPositionDiscontinuity(reason: Int) {
-                super.onPositionDiscontinuity(reason)
+            override fun onPositionDiscontinuity(
+                oldPosition: Player.PositionInfo,
+                newPosition: Player.PositionInfo,
+                reason: Int
+            ) {
+                super.onPositionDiscontinuity(oldPosition, newPosition, reason)
+
                 val time = player.currentPosition()
 
                 if (reason == DISCONTINUITY_REASON_SEEK) {

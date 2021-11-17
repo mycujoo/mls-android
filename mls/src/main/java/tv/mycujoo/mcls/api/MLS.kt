@@ -38,7 +38,8 @@ class MLS @Inject constructor(
     private val annotationMediator: AnnotationMediator,
     private val player: IPlayer,
     private val reactorSocket: ReactorSocket,
-    private val exoPlayer: ExoPlayer
+    private val exoPlayer: ExoPlayer,
+    private val assetManager: AssetManager
 ) : MLSAbstract() {
 
     /**region Fields*/
@@ -61,16 +62,14 @@ class MLS @Inject constructor(
 
         reactorSocket.setUUID(InternalBuilder.uuid!!)
 
-        initSvgRenderingLibrary(internalBuilder.getAssetManager())
-
-        val handler = Handler(Looper.myLooper()!!)
+        initSvgRenderingLibrary(assetManager)
 
         player.apply {
             create(
                 builder.ima,
             )
         }
-        annotationMediator.initialize(handler)
+
         player.getDirectInstance()?.let { exoPlayer ->
             builder.ima?.setPlayer(exoPlayer)
         }
