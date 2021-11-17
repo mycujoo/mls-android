@@ -507,14 +507,17 @@ class VideoPlayerMediator @Inject constructor(
      * So it does not matter the stream url exist in the given param. Always the response from server will be used.
      */
     override fun playVideo(event: EventEntity) {
-        if (event.isNativeMLS) {
-            playVideo(event.id)
-            storeEvent(event)
-        } else {
-            playExternalEvent(event)
-            dataManager.currentEvent = event
-            cancelPulling()
-            updateStreamStatus(event)
+        if (event.streamStatus() == PLAYABLE) {
+
+            if (event.isNativeMLS) {
+                playVideo(event.id)
+                storeEvent(event)
+            } else {
+                playExternalEvent(event)
+                dataManager.currentEvent = event
+                cancelPulling()
+                updateStreamStatus(event)
+            }
         }
     }
 
@@ -551,25 +554,28 @@ class VideoPlayerMediator @Inject constructor(
      * @param event the externally defined event which is about to play
      */
     private fun playExternalEvent(event: EventEntity) {
-        player.play(
-            MediaDatum.MediaData(
-                fullUrl = event.streams.first().fullUrl!!,
-                dvrWindowSize = Long.MAX_VALUE,
-                autoPlay = videoPlayerConfig.autoPlay
-            )
-        )
-        playerView.updateControllerVisibility(videoPlayerConfig.autoPlay)
+        event.streams.firstOrNull()?.let {
 
-        playerView.setEventInfo(
-            event.title,
-            event.description,
-            event.getFormattedStartTimeDate()
-        )
-        playerView.hideInfoDialogs()
-        if (videoPlayerConfig.showEventInfoButton) {
-            playerView.showEventInfoButton()
-        } else {
-            playerView.hideEventInfoButton()
+            player.play(
+                MediaDatum.MediaData(
+                    fullUrl = event.streams.first().fullUrl!!,
+                    dvrWindowSize = Long.MAX_VALUE,
+                    autoPlay = videoPlayerConfig.autoPlay
+                )
+            )
+            playerView.updateControllerVisibility(videoPlayerConfig.autoPlay)
+
+            playerView.setEventInfo(
+                event.title,
+                event.description,
+                event.getFormattedStartTimeDate()
+            )
+            playerView.hideInfoDialogs()
+            if (videoPlayerConfig.showEventInfoButton) {
+                playerView.showEventInfoButton()
+            } else {
+                playerView.hideEventInfoButton()
+            }
         }
     }
 
