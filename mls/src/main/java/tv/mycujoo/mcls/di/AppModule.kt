@@ -2,6 +2,9 @@ package tv.mycujoo.mcls.di
 
 import android.content.Context
 import androidx.test.espresso.idling.CountingIdlingResource
+import com.google.android.exoplayer2.MediaItem
+import com.npaw.youbora.lib6.plugin.Options
+import com.npaw.youbora.lib6.plugin.Plugin
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,6 +19,8 @@ import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.PrefManager
+import tv.mycujoo.mcls.player.MediaFactory
+import tv.mycujoo.mcls.player.Player
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import javax.inject.Singleton
@@ -59,5 +64,31 @@ open class AppModule {
     @Singleton
     fun provideScheduledExecutorService(): ScheduledExecutorService {
         return Executors.newScheduledThreadPool(1)
+    }
+
+    @Provides
+    @Singleton
+    fun provideYouboraConfig(): Options {
+        val youboraOptions = Options()
+        youboraOptions.accountCode = BuildConfig.MYCUJOO_YOUBORA_ACCOUNT_NAME
+        youboraOptions.isAutoDetectBackground = true
+
+        return youboraOptions
+    }
+
+    @Provides
+    @Singleton
+    fun provideYouboraPlugin(options: Options, @ApplicationContext context: Context): Plugin {
+        return Plugin(options, context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMediaFactory(@ApplicationContext context: Context): MediaFactory {
+        return MediaFactory(
+            Player.createDefaultMediaSourceFactory(context),
+            Player.createMediaFactory(),
+            MediaItem.Builder()
+        )
     }
 }
