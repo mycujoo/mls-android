@@ -1,7 +1,6 @@
 package tv.mycujoo.mlsapp.activity
 
 import android.content.pm.ActivityInfo
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
@@ -19,7 +18,6 @@ import tv.mycujoo.mcls.api.PlayerEventsListener
 import tv.mycujoo.mcls.core.UIEventListener
 import tv.mycujoo.mcls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mcls.widgets.MLSPlayerView
-import tv.mycujoo.mlsapp.BuildConfig.MCLS_KEY
 import tv.mycujoo.mlsapp.BuildConfig.MCLS_TEST_EVENT_ID
 import tv.mycujoo.mlsapp.databinding.ActivityMainBinding
 
@@ -28,7 +26,7 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var activityMainBindings: ActivityMainBinding
 
-    private lateinit var MLS: MLS
+    private lateinit var mMLS: MLS
     var isFullScreen = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,7 +58,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        MLS =
+        mMLS =
             MLSBuilder()
                 .withActivity(this)
                 .setPlayerEventsListener(playerEventsListener)
@@ -87,10 +85,10 @@ class MainActivity : AppCompatActivity() {
 
 
         activityMainBindings.mainActivityPlayButton.setOnClickListener {
-            MLS.getVideoPlayer().playVideo(MCLS_TEST_EVENT_ID)
+            mMLS.getVideoPlayer().playVideo(MCLS_TEST_EVENT_ID)
         }
         activityMainBindings.mainActivityPlayButton2.setOnClickListener {
-            MLS.getDataProvider().fetchEvents(
+            mMLS.getDataProvider().fetchEvents(
                 pageSize = 10,
                 pageToken = null,
                 eventStatus = listOf(
@@ -99,7 +97,7 @@ class MainActivity : AppCompatActivity() {
                 ),
                 orderBy = OrderByEventsParam.ORDER_TITLE_ASC,
                 fetchEventCallback = { eventList: List<EventEntity>, _: String, _: String ->
-                    MLS.getVideoPlayer().playVideo(eventList.first())
+                    mMLS.getVideoPlayer().playVideo(eventList.first())
                 }
             )
         }
@@ -108,27 +106,27 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        MLS.onStart(activityMainBindings.mlsPlayerView)
+        mMLS.onStart(activityMainBindings.mlsPlayerView)
     }
 
     override fun onResume() {
         super.onResume()
-        MLS.onResume(activityMainBindings.mlsPlayerView)
+        mMLS.onResume(activityMainBindings.mlsPlayerView)
     }
 
 
     override fun onPause() {
-        MLS.onPause()
+        mMLS.onPause()
         super.onPause()
     }
 
     override fun onStop() {
-        MLS.onStop()
+        mMLS.onStop()
         super.onStop()
     }
 
     override fun onDestroy() {
-        MLS.onDestroy()
+        mMLS.onDestroy()
         super.onDestroy()
     }
 
@@ -167,9 +165,5 @@ class MainActivity : AppCompatActivity() {
             activityMainBindings.mlsPlayerView.setScreenResizeMode(resizeMode = MLSPlayerView.ResizeMode.RESIZE_MODE_FIT)
             activityMainBindings.mlsPlayerView.setFullscreen(isFullscreen = false)
         }
-    }
-
-    companion object {
-        private const val TAG = "MainActivity"
     }
 }
