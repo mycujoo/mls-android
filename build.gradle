@@ -5,7 +5,8 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        maven { url  "https://npaw.jfrog.io/artifactory/youbora/" }
+        maven { url "https://npaw.jfrog.io/artifactory/youbora/" }
+        maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.3'
@@ -17,6 +18,7 @@ buildscript {
         classpath 'com.google.dagger:hilt-android-gradle-plugin:2.38.1'
 
         classpath "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.0"
+//        classpath "gradle.plugin.dev.arunkumar:scabbard-gradle-plugin:0.5.0"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -28,7 +30,16 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        maven { url  "https://npaw.jfrog.io/artifactory/youbora/" }
+        maven { url "https://npaw.jfrog.io/artifactory/youbora/" }
+    }
+
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "com.github.kittinunf.result" && requested.name == "result" && requested.version == "3.0.0") {
+                useVersion("3.0.1")
+                because("Transitive dependency of Scabbard, currently not available on mavenCentral()")
+            }
+        }
     }
 }
 
