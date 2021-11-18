@@ -9,10 +9,8 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import org.joda.time.DateTime
-import tv.mycujoo.domain.entity.EventEntity
-import tv.mycujoo.domain.entity.EventStatus
-import tv.mycujoo.domain.entity.OrderByEventsParam
-import tv.mycujoo.domain.entity.Stream
+import tv.mycujoo.data.entity.ServerConstants
+import tv.mycujoo.domain.entity.*
 import tv.mycujoo.mcls.api.MLS
 import tv.mycujoo.mcls.api.MLSBuilder
 import tv.mycujoo.mcls.api.MLSConfiguration
@@ -107,7 +105,7 @@ class MainActivity : AppCompatActivity() {
                             dvrWindowString = null,
                             fullUrl = "https://playlists.mycujoo.football/eu/ckvwbajqyr3hu0gbljp9k4t9w/master.m3u8",
                             widevine = null,
-                            errorCodeAndMessage = null
+                            errorCodeAndMessage = ErrorCodeAndMessage(ServerConstants.ERROR_CODE_GEOBLOCKED, "GEO Blocked")
                         )
                     ),
                     timezone = null,
