@@ -147,8 +147,7 @@ class VideoPlayerMediatorTest {
 
         whenever(okHttpClient.newWebSocket(any(), any())).thenReturn(webSocket)
         mainWebSocketListener = MainWebSocketListener()
-        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener, prefManager)
-        reactorSocket.setUUID("SAMPLE_UUID")
+        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener, internalBuilder)
 
         whenever(mMLSBuilder.activity).thenReturn(activity)
 

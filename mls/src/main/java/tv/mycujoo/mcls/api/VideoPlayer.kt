@@ -25,12 +25,12 @@ class VideoPlayer(
 
     init {
         exoPlayer.addListener(object : Player.Listener {
-            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                super.onPlayWhenReadyChanged(playWhenReady, playbackState)
-                if (playbackState == STATE_READY) {
-                    optimisticSeekingPosition = -1
-                }
-            }
+//            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+//                super.onPlayWhenReadyChanged(playWhenReady, playbackState)
+//                if (playbackState == STATE_READY) {
+//                    optimisticSeekingPosition = -1
+//                }
+//            }
 
             override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
                 super.onPlayWhenReadyChanged(playWhenReady, reason)

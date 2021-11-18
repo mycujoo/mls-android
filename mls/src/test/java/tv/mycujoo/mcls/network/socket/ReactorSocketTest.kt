@@ -7,9 +7,8 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.*
-import tv.mycujoo.mcls.manager.IPrefManager
+import tv.mycujoo.mcls.core.InternalBuilder
 import tv.mycujoo.mcls.model.JoinTimelineParam
-import kotlin.test.assertFailsWith
 
 class ReactorSocketTest {
 
@@ -17,7 +16,7 @@ class ReactorSocketTest {
     private lateinit var mainWebSocketListener: MainWebSocketListener
 
     @Mock
-    lateinit var prefManager: IPrefManager
+    lateinit var internalBuilder: InternalBuilder
 
     @Mock
     lateinit var okHttpClient: OkHttpClient
@@ -35,20 +34,12 @@ class ReactorSocketTest {
         whenever(okHttpClient.newWebSocket(any(), any())).thenReturn(webSocket)
 
         mainWebSocketListener = MainWebSocketListener()
-        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener, prefManager)
+        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener, internalBuilder)
         reactorSocket.addListener(reactorCallback)
     }
 
     @Test
-    fun `given join command before setting UUID, should throw UninitializedPropertyAccessException`() {
-        assertFailsWith<UninitializedPropertyAccessException> { reactorSocket.joinEvent(EVENT_ID) }
-    }
-
-    @Test
     fun `given join command after setting UUID, should join`() {
-        reactorSocket.setUUID("SAMPLE_UUID")
-
-
         reactorSocket.joinEvent(EVENT_ID)
 
 
@@ -57,7 +48,7 @@ class ReactorSocketTest {
 
     @Test
     fun `given joinTimelineIfNeeded command when socket is connected, should join timeline-id with no actionId`() {
-        reactorSocket.setUUID("SAMPLE_UUID")
+        
         reactorSocket.joinEvent(EVENT_ID)
 
 
@@ -68,7 +59,7 @@ class ReactorSocketTest {
     }
     @Test
     fun `given joinTimelineIfNeeded command when socket is connected, should join timeline-id with actionId`() {
-        reactorSocket.setUUID("SAMPLE_UUID")
+        
         reactorSocket.joinEvent(EVENT_ID)
 
 
@@ -94,7 +85,7 @@ class ReactorSocketTest {
 
     @Test
     fun `given leave command without destroy after, should disconnect from webSocket but not destroy client`() {
-        reactorSocket.setUUID("SAMPLE_UUID")
+        
         reactorSocket.joinEvent(EVENT_ID)
 
 
@@ -107,7 +98,7 @@ class ReactorSocketTest {
 
     @Test
     fun `given leave command with destroy after, should disconnect from webSocket & destroy socket client`() {
-        reactorSocket.setUUID("SAMPLE_UUID")
+        
         reactorSocket.joinEvent(EVENT_ID)
 
 
@@ -120,7 +111,7 @@ class ReactorSocketTest {
 
     @Test
     fun `given leave command when not initialized through connect, should do nothing`() {
-        reactorSocket.setUUID("SAMPLE_UUID")
+        
         reactorSocket.leave(false)
 
 
@@ -130,7 +121,7 @@ class ReactorSocketTest {
 
     @Test
     fun `given join command when active connection exist, should leave from active connection`() {
-        reactorSocket.setUUID("SAMPLE_UUID")
+        
         reactorSocket.joinEvent(EVENT_ID)
 
 
@@ -142,7 +133,7 @@ class ReactorSocketTest {
 
     @Test
     fun `given join command after leave, should not leave again`() {
-        reactorSocket.setUUID("SAMPLE_UUID")
+        
         reactorSocket.joinEvent(EVENT_ID)
         reactorSocket.leave(false)
 
@@ -190,7 +181,6 @@ class ReactorSocketTest {
     }
 
     companion object {
-        const val SAMPLE_UUID = "aa-bb-cc-dd-ee"
         const val EVENT_ID = "ck2343whlc43k0g90i92grc0u"
         const val EVENT_ID_NEW = "kjlhuwhlcjui90i92gretyu"
     }
