@@ -55,7 +55,7 @@ open class InternalBuilder @Inject constructor(
      */
     init {
         uuid = prefManager.get(C.UUID_PREF_KEY) ?: UUID.randomUUID().toString()
-        persistUUIDIfNotStoredAlready(uuid!!)
+        persistUUIDIfNotStoredAlready(getUuid())
 
         logger.setLogLevel(logLevel)
 
@@ -67,15 +67,8 @@ open class InternalBuilder @Inject constructor(
      * @see YouboraClient
      */
     fun createYouboraClient(): YouboraClient {
-        // Reassign if lost due to scoping
-        if (uuid == null) {
-            uuid = prefManager.get(C.UUID_PREF_KEY)
-        }
 
-        assert(uuid != null) {
-            "UUID is Null!!"
-        }
-        val youboraClient = YouboraClient(uuid!!, plugin)
+        val youboraClient = YouboraClient(getUuid(), plugin)
         when (logLevel) {
             MINIMAL -> {
                 YouboraLog.setDebugLevel(YouboraLog.Level.SILENT)
