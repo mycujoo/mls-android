@@ -4,18 +4,16 @@ import android.util.Log
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
-import tv.mycujoo.mcls.enum.C
-import tv.mycujoo.mcls.manager.IPrefManager
+import tv.mycujoo.mcls.core.InternalBuilder
 import tv.mycujoo.mcls.model.JoinTimelineParam
 import javax.inject.Inject
 
 class ReactorSocket @Inject constructor(
     private val okHttpClient: OkHttpClient,
     private val mainSocketListener: MainWebSocketListener,
-    prefManager: IPrefManager
+    private val internalBuilder: InternalBuilder
 ) : IReactorSocket {
 
-    private var uuid: String? = null
     private lateinit var webSocket: WebSocket
 
     private var created = false
@@ -29,19 +27,6 @@ class ReactorSocket @Inject constructor(
         mainSocketListener.addListener(ReactorListener(reactorCallback))
     }
 
-
-    init {
-        uuid = prefManager.get(C.UUID_PREF_KEY)
-    }
-
-    /**
-     * Must be called before any usage!
-     * @param uuid must be persisted on phones storage to be unique
-     */
-    override fun setUUID(uuid: String) {
-        this.uuid = uuid
-    }
-
     /**
      * Joins to an Event with eventId by sending JOIN command.
      * before doing so, it checks if active connection is already established,
@@ -51,9 +36,6 @@ class ReactorSocket @Inject constructor(
      *  @param eventId
      */
     override fun joinEvent(eventId: String) {
-        if (uuid == null) {
-            throw UninitializedPropertyAccessException("uuid must be initialized")
-        }
         if (connected) {
             leave(false)
         }
@@ -135,7 +117,7 @@ class ReactorSocket @Inject constructor(
         webSocket = okHttpClient.newWebSocket(request, mainSocketListener)
         created = true
 
-        webSocket.send("$SESSION_ID$uuid")
+        webSocket.send("$SESSION_ID${internalBuilder.getUuid()}")
     }
 
 

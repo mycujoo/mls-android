@@ -29,8 +29,6 @@ class MLSTvInternalBuilder @Inject constructor(
         ima?.setAdsLoaderProvider(
             mediaFactory.defaultMediaSourceFactory
         )
-
-        reactorSocket.setUUID(uuid!!)
     }
 
     private fun persistUUIDIfNotStoredAlready(uuid: String) {

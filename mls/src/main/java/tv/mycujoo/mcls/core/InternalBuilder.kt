@@ -33,10 +33,20 @@ open class InternalBuilder @Inject constructor(
 
     companion object {
         @JvmStatic
-        var uuid: String? = null
-            private set
+        private var uuid: String? = null
     }
 
+    /**
+     * Fail Safe way to grab a Uuid.
+     */
+    fun getUuid(): String {
+        var uuid = InternalBuilder.uuid
+        if (uuid == null) {
+            uuid = prefManager.get(C.UUID_PREF_KEY) ?: UUID.randomUUID().toString()
+            persistUUIDIfNotStoredAlready(uuid)
+        }
+        return uuid
+    }
     /**endregion */
 
 

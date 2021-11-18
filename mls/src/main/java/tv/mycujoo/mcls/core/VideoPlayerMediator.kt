@@ -907,7 +907,7 @@ class VideoPlayerMediator @Inject constructor(
         val params = CasterLoadRemoteMediaParams(
             id = event.id,
             publicKey = publicKey,
-            uuid = InternalBuilder.uuid,
+            uuid = internalBuilder.getUuid(),
             widevine = widevine,
             fullUrl = fullUrl,
             title = event.title,

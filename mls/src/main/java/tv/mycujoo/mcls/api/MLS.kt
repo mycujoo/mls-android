@@ -3,13 +3,11 @@ package tv.mycujoo.mcls.api
 import android.content.Context
 import android.content.res.AssetManager
 import android.os.Build
-import android.util.Log
 import com.caverock.androidsvg.SVG
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ui.AdViewProvider
 import com.google.android.exoplayer2.util.Util
 import dagger.hilt.android.qualifiers.ApplicationContext
-import tv.mycujoo.mcls.core.InternalBuilder
 import tv.mycujoo.mcls.core.VideoPlayerMediator
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
@@ -18,7 +16,6 @@ import tv.mycujoo.mcls.helper.TypeFaceFactory
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.mediator.AnnotationMediator
-import tv.mycujoo.mcls.network.socket.ReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import javax.inject.Inject
@@ -37,9 +34,7 @@ class MLS @Inject constructor(
     private val prefManager: IPrefManager,
     private val annotationMediator: AnnotationMediator,
     private val player: IPlayer,
-    private val reactorSocket: ReactorSocket,
-    private val exoPlayer: ExoPlayer,
-    private val assetManager: AssetManager
+    private val assetManager: AssetManager,
 ) : MLSAbstract() {
 
     /**region Fields*/
@@ -59,8 +54,6 @@ class MLS @Inject constructor(
         this.builder = builder
         videoPlayerMediator.videoPlayerConfig = builder.mlsConfiguration.videoPlayerConfig
         persistPublicKey(this.builder.publicKey)
-
-        reactorSocket.setUUID(InternalBuilder.uuid!!)
 
         initSvgRenderingLibrary(assetManager)
 
