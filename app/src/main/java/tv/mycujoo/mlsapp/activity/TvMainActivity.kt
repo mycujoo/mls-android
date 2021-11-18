@@ -16,7 +16,7 @@ class TvMainActivity : FragmentActivity() {
 
 
         (supportFragmentManager.findFragmentByTag("playback_tag") as PlaybackFragment).playEvent(
-            BuildConfig.MCLS_TEST_EVENT_ID
+            "EVENT_ID_HERE"
         )
     }
 }

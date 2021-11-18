@@ -56,7 +56,6 @@ class MLS @Inject constructor(
      * @param builder ready to use instance of InternalBuilder
      */
     fun initializeComponent(builder: MLSBuilder) {
-        Log.d("TAG", "initializeComponent: $exoPlayer")
         this.builder = builder
         videoPlayerMediator.videoPlayerConfig = builder.mlsConfiguration.videoPlayerConfig
         persistPublicKey(this.builder.publicKey)

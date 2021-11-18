@@ -8,9 +8,9 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
-import org.joda.time.DateTime
-import tv.mycujoo.data.entity.ServerConstants
-import tv.mycujoo.domain.entity.*
+import tv.mycujoo.domain.entity.EventEntity
+import tv.mycujoo.domain.entity.EventStatus
+import tv.mycujoo.domain.entity.OrderByEventsParam
 import tv.mycujoo.mcls.api.MLS
 import tv.mycujoo.mcls.api.MLSBuilder
 import tv.mycujoo.mcls.api.MLSConfiguration
@@ -18,7 +18,6 @@ import tv.mycujoo.mcls.api.PlayerEventsListener
 import tv.mycujoo.mcls.core.UIEventListener
 import tv.mycujoo.mcls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mcls.widgets.MLSPlayerView
-import tv.mycujoo.mlsapp.BuildConfig.MCLS_TEST_EVENT_ID
 import tv.mycujoo.mlsapp.databinding.ActivityMainBinding
 
 
@@ -60,6 +59,7 @@ class MainActivity : AppCompatActivity() {
 
         mMLS =
             MLSBuilder()
+                .publicKey("PUBLIC_KEY_HERE")
                 .withActivity(this)
                 .setPlayerEventsListener(playerEventsListener)
                 .setUIEventListener(uiEventListener)
@@ -84,37 +84,7 @@ class MainActivity : AppCompatActivity() {
 
 
         activityMainBindings.mainActivityPlayButton.setOnClickListener {
-            mMLS.getVideoPlayer().playVideo(MCLS_TEST_EVENT_ID)
-        }
-
-        activityMainBindings.mainActivityPlayEventButton.setOnClickListener {
-            mMLS.getVideoPlayer().playVideo(
-                EventEntity(
-                    id = "ckvwbcerfqyub0hbqwbkyrvk1",
-                    title = "Brescia Calcio Femminile vs Pro Sesto Femminile",
-                    description = "Brescia Calcio Femminile vs Pro Sesto Femminile - Serie B Femminile",
-                    thumbnailUrl = "https://m-tv.imgix.net/07d68ec5a2469a64ef15e3a9c381bd1ff89b8d08b0ea0271fe3067361c6743df.jpg",
-                    poster_url = null,
-                    location = null,
-                    organiser = null,
-                    start_time = DateTime.parse("2021-11-14T14:30:00.000+01:00"),
-                    status = EventStatus.EVENT_STATUS_FINISHED,
-                    streams = listOf(
-                        Stream(
-                            id = "ckvwbcerfqyub0hbqwbkyrvk1",
-                            dvrWindowString = null,
-                            fullUrl = "https://playlists.mycujoo.football/eu/ckvwbajqyr3hu0gbljp9k4t9w/master.m3u8",
-                            widevine = null,
-                            errorCodeAndMessage = ErrorCodeAndMessage(ServerConstants.ERROR_CODE_GEOBLOCKED, "GEO Blocked")
-                        )
-                    ),
-                    timezone = null,
-                    timeline_ids = listOf(),
-                    metadata = null,
-                    is_test = false,
-                    isNativeMLS = false
-                )
-            )
+            mMLS.getVideoPlayer().playVideo("MCLS_TEST_EVENT_ID")
         }
 
 
