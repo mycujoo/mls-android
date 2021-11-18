@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
 
         mMLS =
             MLSBuilder()
-                .publicKey("PUBLIC_KEY_HERE")
+                .publicKey("YOUR_PUBLIC_KEY_HERE")
                 .withActivity(this)
                 .setPlayerEventsListener(playerEventsListener)
                 .setUIEventListener(uiEventListener)
@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity() {
 
 
         activityMainBindings.mainActivityPlayButton.setOnClickListener {
-            mMLS.getVideoPlayer().playVideo("MCLS_TEST_EVENT_ID")
+            mMLS.getVideoPlayer().playVideo("EVENT_ID")
         }
 
 
