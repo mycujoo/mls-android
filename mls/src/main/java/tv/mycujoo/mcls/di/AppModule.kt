@@ -42,7 +42,7 @@ open class AppModule {
     @Provides
     @Singleton
     fun provideLogger(): Logger {
-        return Logger(LogLevel.INFO)
+        return Logger(LogLevel.MINIMAL)
     }
 
     @Provides
