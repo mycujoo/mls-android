@@ -7,7 +7,6 @@ import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.AttributeSet
-import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
@@ -16,11 +15,11 @@ import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.ColorInt
 import androidx.annotation.RequiresApi
 import com.google.android.exoplayer2.C
+import com.google.android.exoplayer2.ui.R
 import com.google.android.exoplayer2.ui.TimeBar
 import com.google.android.exoplayer2.ui.TimeBar.OnScrubListener
 import com.google.android.exoplayer2.util.Assertions
 import com.google.android.exoplayer2.util.Util
-import tv.mycujoo.mcls.R
 import java.util.*
 import java.util.concurrent.CopyOnWriteArraySet
 
