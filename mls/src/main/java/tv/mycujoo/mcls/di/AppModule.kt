@@ -65,12 +65,12 @@ open class AppModule {
     fun provideViewIdentifierManagerCountingIdlingResources(): CountingIdlingResource {
         return CountingIdlingResource("ViewIdentifierManager")
     }
-
-    @Provides
-    @Singleton
-    fun provideScheduledExecutorService(): ScheduledExecutorService {
-        return Executors.newScheduledThreadPool(1)
-    }
+//
+//    @Provides
+//    @Singleton
+//    fun provideScheduledExecutorService(): ScheduledExecutorService {
+//        return Executors.newScheduledThreadPool(1)
+//    }
 
     @Provides
     @Singleton

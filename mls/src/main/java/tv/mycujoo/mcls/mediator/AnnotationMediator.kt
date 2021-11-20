@@ -19,6 +19,7 @@ import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
+import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -28,7 +29,6 @@ class AnnotationMediator @Inject constructor(
     private val annotationFactory: IAnnotationFactory,
     private val dataManager: IDataManager,
     private val dispatcher: CoroutineScope,
-    private val scheduler: ScheduledExecutorService,
     private val logger: Logger,
     private val player: IPlayer,
     var handler: Handler
@@ -38,6 +38,9 @@ class AnnotationMediator @Inject constructor(
     private lateinit var playerView: MLSPlayerView
 
     /**region Fields*/
+    private var scheduler: ScheduledExecutorService
+    private val scheduledRunnable: Runnable
+
     private lateinit var eventListener: Player.Listener
     private var hasPendingSeek: Boolean = false
     /**endregion */
@@ -64,9 +67,11 @@ class AnnotationMediator @Inject constructor(
             }
         }
 
-        val scheduledRunnable = Runnable {
+        scheduledRunnable = Runnable {
             handler.post(exoRunnable)
         }
+        scheduler = Executors.newScheduledThreadPool(1)
+
         scheduler.scheduleAtFixedRate(
             scheduledRunnable,
             ONE_SECOND_IN_MS,
@@ -149,6 +154,7 @@ class AnnotationMediator @Inject constructor(
     }
 
     override fun initPlayerView(playerView: MLSPlayerView) {
+        scheduler = Executors.newScheduledThreadPool(1)
         this.playerView = playerView
         playerView.setOnSizeChangedCallback(onSizeChangedCallback)
     }

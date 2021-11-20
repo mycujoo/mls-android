@@ -19,13 +19,13 @@ import tv.mycujoo.mcls.manager.ViewHandler
 import tv.mycujoo.mcls.mediator.IAnnotationMediator
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
+import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class TvAnnotationMediator @Inject constructor(
     private val tvAnnotationFactory: IAnnotationFactory,
-    private val scheduler: ScheduledExecutorService,
     private val player: IPlayer,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
@@ -33,6 +33,8 @@ class TvAnnotationMediator @Inject constructor(
     private val viewHandler: ViewHandler
 ) : IAnnotationMediator {
 
+
+    private val scheduler: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
 
     private var hasPendingSeek: Boolean = false
     override fun initPlayerView(playerView: MLSPlayerView) {
