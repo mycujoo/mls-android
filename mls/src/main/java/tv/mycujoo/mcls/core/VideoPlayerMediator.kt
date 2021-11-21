@@ -236,7 +236,7 @@ class VideoPlayerMediator @Inject constructor(
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 super.onIsPlayingChanged(isPlaying)
-
+                streaming = isPlaying
                 handlePlaybackStatus(isPlaying)
                 handlePlayStatusOfOverlayAnimationsOnPlayPause(isPlaying)
             }
