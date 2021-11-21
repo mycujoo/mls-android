@@ -129,8 +129,33 @@ class AnnotationMediator @Inject constructor(
                 playerView.updateTime(time, player.duration())
             }
 
+            /**
+             * This Functions on testing, only emits STATE_IDLE. I fixed it by adding onPlaybackStateChanged
+             * Which updates every playback state change correctly.
+             */
             override fun onPlayWhenReadyChanged(playWhenReady: Boolean, playbackState: Int) {
                 super.onPlayWhenReadyChanged(playWhenReady, playbackState)
+
+                if (playbackState == STATE_READY) {
+                    playerView.updateTime(player.currentPosition(), player.duration())
+                }
+
+                if (playbackState == STATE_READY && hasPendingSeek) {
+                    hasPendingSeek = false
+
+                    annotationFactory.build(
+                        BuildPoint(
+                            player.currentPosition(),
+                            player.currentAbsoluteTime(),
+                            player,
+                            player.isPlaying()
+                        )
+                    )
+                }
+            }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                super.onPlaybackStateChanged(playbackState)
 
                 if (playbackState == STATE_READY) {
                     playerView.updateTime(player.currentPosition(), player.duration())

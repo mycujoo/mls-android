@@ -72,6 +72,7 @@ class VideoPlayerMediator @Inject constructor(
     var videoPlayerConfig: VideoPlayerConfig = VideoPlayerConfig.default()
 
     /**region Fields*/
+    var playWhenReadyState = false
 
     /**
      * SDK exposing video-player
@@ -201,13 +202,34 @@ class VideoPlayerMediator @Inject constructor(
         )
 
         val mainEventListener = object : MainEventListener {
+            /**
+             * To Fix the deprecation of onPlayerStateChanged, I replaced it with these 2 functions.
+             * onPlayWhenReadyChanged handles the first change of onPlayerStateChanged. which is
+             * PlayWhenReady.
+             * The Second handles the playback state. This is becuase onPlayWhenReadyChanged emits
+             * only 1 of 2 functions. Idle, and NotReady
+             */
+
+
             override fun onPlayWhenReadyChanged(playWhenReady: Boolean, playbackState: Int) {
                 super.onPlayWhenReadyChanged(playWhenReady, playbackState)
 
+                playWhenReadyState = playWhenReady
                 handlePlaybackStatus(playWhenReady, playbackState)
                 handleBufferingProgressBarVisibility(playbackState, playWhenReady)
                 handleLiveModeState()
                 handlePlayStatusOfOverlayAnimationsWhileBuffering(playbackState, playWhenReady)
+
+                logEventIfNeeded(playbackState)
+            }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                super.onPlaybackStateChanged(playbackState)
+
+                handlePlaybackStatus(playWhenReadyState, playbackState)
+                handleBufferingProgressBarVisibility(playbackState, playWhenReadyState)
+                handleLiveModeState()
+                handlePlayStatusOfOverlayAnimationsWhileBuffering(playbackState, playWhenReadyState)
 
                 logEventIfNeeded(playbackState)
             }

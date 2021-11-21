@@ -31,6 +31,14 @@ class VideoPlayer(
                     optimisticSeekingPosition = -1
                 }
             }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                super.onPlaybackStateChanged(playbackState)
+
+                if (playbackState == STATE_READY) {
+                    optimisticSeekingPosition = -1
+                }
+            }
         })
     }
 
