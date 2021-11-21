@@ -118,7 +118,7 @@ class MLS @Inject constructor(
             mMLSPlayerView,
             builder,
             emptyList(),
-            null
+            cast = this.builder.cast
         )
 
         annotationMediator.initPlayerView(playerView)

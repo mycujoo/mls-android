@@ -36,7 +36,8 @@ open class MLSBuilder {
         private set
     internal var mlsConfiguration: MLSConfiguration = MLSConfiguration()
         private set
-    private var mCast: ICast? = null
+    var cast: ICast? = null
+        private set
     internal var ima: IIma? = null
         private set
     internal var hasAnalytic: Boolean = true
@@ -88,7 +89,7 @@ open class MLSBuilder {
      * in order to provide such a dependency, Cast module must be used
      */
     fun setCast(cast: ICast) = apply {
-        this.mCast = cast
+        this.cast = cast
     }
 
     /**
