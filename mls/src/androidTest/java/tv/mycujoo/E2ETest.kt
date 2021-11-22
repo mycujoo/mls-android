@@ -14,6 +14,7 @@ import tv.mycujoo.mcls.api.MLSBuilder
 import tv.mycujoo.mcls.api.MLSConfiguration
 import tv.mycujoo.mcls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mcls.widgets.MLSPlayerView
+import javax.inject.Inject
 
 abstract class E2ETest {
 
@@ -22,6 +23,9 @@ abstract class E2ETest {
 
     @get:Rule(order = 1)
     var scenarioRule = activityScenarioRule<TestActivity>()
+
+    @Inject
+    lateinit var mlsTestBuilder: MLSTestBuilder
 
     protected lateinit var mMLSPlayerView: MLSPlayerView
     protected lateinit var mMLS: MLS
@@ -35,7 +39,7 @@ abstract class E2ETest {
             mMLSPlayerView = activity.findViewById(R.id.testMlsPlayerView)
 
             constraintMLSPlayerView(activity.resources.configuration.orientation, activity)
-            mMLS = MLSBuilder()
+            mMLS = mlsTestBuilder
                 .publicKey("ss")
                 .withActivity(activity)
                 .setConfiguration(
@@ -43,7 +47,7 @@ abstract class E2ETest {
                         1000L,
                         VideoPlayerConfig(
                             primaryColor = "#0000ff", secondaryColor = "#fff000",
-                            autoPlay = false,
+                            autoPlay = true,
                             enableControls = true,
                             showPlayPauseButtons = true,
                             showBackForwardsButtons = true,

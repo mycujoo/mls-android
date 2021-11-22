@@ -124,7 +124,7 @@ open class MLSBuilder {
     /**
      * init public key if not present
      */
-    private fun initPublicKeyIfNeeded() {
+    protected fun initPublicKeyIfNeeded() {
         // grab public key from Manifest if not set manually,
         if (publicKey.isEmpty()) {
             activity?.applicationContext.let {
