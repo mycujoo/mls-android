@@ -532,10 +532,10 @@ class VideoPlayerMediator @Inject constructor(
         dataManager.currentEvent = event
         updateStreamStatus(event)
         playVideoOrDisplayEventInfo(event)
-        joinEvent(event)
 
         // If the event is constructed manually and not a native MLS, it should not be replaced with any other version
         if (event.isNativeMLS) {
+            joinEvent(event)
             startStreamUrlPullingIfNeeded(event)
             fetchActions(event, true)
         }
