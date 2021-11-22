@@ -6,6 +6,8 @@ import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
+import androidx.lifecycle.Lifecycle
+import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.UiController
@@ -31,6 +33,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import tv.mycujoo.TestActivity
 import tv.mycujoo.fake.FakeAnimationFactory
 import tv.mycujoo.matchers.TypeMatcher
 import tv.mycujoo.mcls.BlankActivity
