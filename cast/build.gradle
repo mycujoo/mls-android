@@ -63,11 +63,11 @@ dependencies {
     androidTestImplementation "org.mockito.kotlin:mockito-kotlin:4.0.0"
 
     // Exoplayer
-    implementation 'com.google.android.exoplayer:exoplayer:2.15.1'
+    implementation 'com.google.android.exoplayer:exoplayer:2.16.1'
     implementation 'com.nicepeopleatwork:exoplayer-adapter:6.7.27'
 
     api 'androidx.mediarouter:mediarouter:1.2.5'
-    api 'com.google.android.gms:play-services-cast-framework:20.0.0'
+    api 'com.google.android.gms:play-services-cast-framework:20.1.0'
 
     implementation project(":mls")
 }
