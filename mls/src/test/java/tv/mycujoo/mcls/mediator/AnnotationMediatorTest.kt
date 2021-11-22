@@ -13,11 +13,7 @@ import tv.mycujoo.mcls.core.IAnnotationFactory
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mcls.enum.LogLevel
-import tv.mycujoo.mcls.helper.IDownloaderClient
 import tv.mycujoo.mcls.manager.Logger
-import tv.mycujoo.mcls.manager.VariableKeeper
-import tv.mycujoo.mcls.manager.VariableTranslator
-import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import java.util.concurrent.ScheduledExecutorService
@@ -58,9 +54,6 @@ class AnnotationMediatorTest {
     lateinit var handler: Handler
 
     @Mock
-    lateinit var downloaderClient: IDownloaderClient
-
-    @Mock
     lateinit var annotationFactory: IAnnotationFactory
 
     @Mock
@@ -99,10 +92,10 @@ class AnnotationMediatorTest {
             annotationFactory,
             dataManager,
             testCoroutineScope,
-            scheduledExecutorService,
             Logger(LogLevel.MINIMAL),
             player,
-            handler
+            handler,
+            scheduledExecutorService,
         )
         annotationMediator.initPlayerView(playerView)
 
@@ -276,10 +269,20 @@ class AnnotationMediatorTest {
     }
 
     @Test
-    fun `should shutdown scheduler on relase`() {
+    fun `should shutdown scheduler on release`() {
+        val annotationMediator = AnnotationMediator(
+            annotationFactory,
+            dataManager,
+            testCoroutineScope,
+            Logger(LogLevel.MINIMAL),
+            player,
+            handler,
+            scheduledExecutorService,
+        )
+
         annotationMediator.release()
 
-        verify(scheduledExecutorService).shutdown()
+        verify(scheduledExecutorService, times(1)).shutdown()
     }
 
     /**endregion */

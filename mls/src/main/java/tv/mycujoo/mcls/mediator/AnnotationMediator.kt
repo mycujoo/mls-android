@@ -7,6 +7,7 @@ import com.google.android.exoplayer2.Player.STATE_READY
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.jetbrains.annotations.TestOnly
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.Result
@@ -31,14 +32,14 @@ class AnnotationMediator @Inject constructor(
     private val dispatcher: CoroutineScope,
     private val logger: Logger,
     private val player: IPlayer,
-    var handler: Handler
+    var handler: Handler,
+    var scheduler: ScheduledExecutorService
 ) : IAnnotationMediator {
 
 
     private lateinit var playerView: MLSPlayerView
 
     /**region Fields*/
-    private var scheduler: ScheduledExecutorService
     private val scheduledRunnable: Runnable
 
     private lateinit var eventListener: Player.Listener
@@ -70,7 +71,6 @@ class AnnotationMediator @Inject constructor(
         scheduledRunnable = Runnable {
             handler.post(exoRunnable)
         }
-        scheduler = Executors.newScheduledThreadPool(1)
 
         scheduler.scheduleAtFixedRate(
             scheduledRunnable,
