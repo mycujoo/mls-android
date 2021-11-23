@@ -4,11 +4,14 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import com.google.android.exoplayer2.ExoPlayer
+import com.npaw.youbora.lib6.plugin.Options
+import com.npaw.youbora.lib6.plugin.Plugin
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.internal.modules.ApplicationContextModule
 import dagger.hilt.components.SingletonComponent
 import tv.mycujoo.DaggerMLSApplication_HiltComponents_SingletonC
+import tv.mycujoo.mcls.BuildConfig
 import tv.mycujoo.mcls.cast.ICast
 import tv.mycujoo.mcls.core.PlayerEventsListener
 import tv.mycujoo.mcls.core.UIEventListener
@@ -27,6 +30,9 @@ open class MLSBuilder {
 
 
     internal var publicKey: String = ""
+        private set
+    private var youboraAccountCode = BuildConfig.MYCUJOO_YOUBORA_ACCOUNT_NAME
+    internal lateinit var youboraPlugin: Plugin
         private set
     internal var activity: Activity? = null
         private set
@@ -60,6 +66,13 @@ open class MLSBuilder {
      */
     fun withActivity(activity: Activity) = apply {
         this.activity = activity
+    }
+
+    /**
+     * Set Youbora Account Name
+     */
+    fun setYouboraAccount(accountCode: String) = apply {
+        this.youboraAccountCode = accountCode
     }
 
     /**
@@ -122,6 +135,17 @@ open class MLSBuilder {
     }
 
     /**
+     * create Youbora Plugin
+     */
+    private fun initYouboraPlugin() {
+        val youboraOptions = Options()
+        youboraOptions.accountCode = youboraAccountCode
+        youboraOptions.isAutoDetectBackground = true
+
+        youboraPlugin = Plugin(youboraOptions, activity!!.baseContext)
+    }
+
+    /**
      * init public key if not present
      */
     protected fun initPublicKeyIfNeeded() {
@@ -150,6 +174,8 @@ open class MLSBuilder {
         if (publicKey.isEmpty()) {
             throw IllegalArgumentException(PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
+
+        initYouboraPlugin()
 
         val graph = DaggerMLSApplication_HiltComponents_SingletonC.builder()
             .applicationContextModule(ApplicationContextModule(activity))

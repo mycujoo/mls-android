@@ -74,22 +74,6 @@ open class AppModule {
 
     @Provides
     @Singleton
-    fun provideYouboraConfig(): Options {
-        val youboraOptions = Options()
-        youboraOptions.accountCode = BuildConfig.MYCUJOO_YOUBORA_ACCOUNT_NAME
-        youboraOptions.isAutoDetectBackground = true
-
-        return youboraOptions
-    }
-
-    @Provides
-    @Singleton
-    fun provideYouboraPlugin(options: Options, @ApplicationContext context: Context): Plugin {
-        return Plugin(options, context)
-    }
-
-    @Provides
-    @Singleton
     fun provideMediaFactory(
         mediaSourceFactory: DefaultMediaSourceFactory,
         hlsMediaSource: HlsMediaSource.Factory
