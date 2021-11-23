@@ -529,6 +529,9 @@ class VideoPlayerMediator @Inject constructor(
      * So it does not matter the stream url exist in the given param. Always the response from server will be used.
      */
     override fun playVideo(event: EventEntity) {
+        if(event.id != dataManager.currentEvent?.id) {
+            if (streaming) streaming = false
+        }
         dataManager.currentEvent = event
         updateStreamStatus(event)
         playVideoOrDisplayEventInfo(event)
