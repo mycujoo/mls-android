@@ -4,6 +4,7 @@ import tv.mycujoo.mcls.api.DataProvider
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.manager.IPrefManager
+import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.tv.player.TvAnnotationMediator
 import tv.mycujoo.mcls.tv.player.TvVideoPlayer
 import tv.mycujoo.ui.MLSTVFragment
@@ -13,7 +14,8 @@ class MLSTV @Inject constructor(
     private val dataManager: IDataManager,
     private val prefManager: IPrefManager,
     private val tvVideoPlayer: TvVideoPlayer,
-    private val annotationMediator: TvAnnotationMediator
+    private val annotationMediator: TvAnnotationMediator,
+    private val viewHandler: IViewHandler,
 ) {
 
     fun initialize(builder: MLSTvBuilder, mlsTvFragment: MLSTVFragment) {
@@ -21,6 +23,7 @@ class MLSTV @Inject constructor(
 
         tvVideoPlayer.mlsTVConfiguration = builder.mlsTVConfiguration
 
+        viewHandler.setOverlayHost(mlsTvFragment.overlayHost)
         annotationMediator.initialize(mlsTvFragment)
         tvVideoPlayer.initialize(mlsTvFragment)
     }

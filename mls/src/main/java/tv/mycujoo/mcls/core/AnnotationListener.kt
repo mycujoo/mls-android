@@ -79,7 +79,8 @@ class AnnotationListener @Inject constructor(
     }
 
     override fun setTimelineMarkers(timelineMarkerEntityList: List<TimelineMarkerEntity>) {
-        mMLSPlayerView.setTimelineMarker(timelineMarkerEntityList)
+        val player = mMLSPlayerView
+        if (player is MLSPlayerView) player.setTimelineMarker(timelineMarkerEntityList)
     }
 
     override fun clearScreen(idList: List<String>) {

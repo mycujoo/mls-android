@@ -65,7 +65,10 @@ class AnnotationMediator @Inject constructor(
                     )
                 )
 
-                playerViewContract.updateTime(currentPosition, player.duration())
+                val playerView = playerViewContract
+                if (playerView is MLSPlayerView) {
+                    playerView.updateTime(currentPosition, player.duration())
+                }
             }
         }
 
@@ -127,7 +130,10 @@ class AnnotationMediator @Inject constructor(
                     hasPendingSeek = true
                 }
 
-                playerViewContract.updateTime(time, player.duration())
+                val playerView = playerViewContract
+                if (playerView is MLSPlayerView) {
+                    playerView.updateTime(time, player.duration())
+                }
             }
 
             /**
@@ -138,7 +144,10 @@ class AnnotationMediator @Inject constructor(
                 super.onPlayWhenReadyChanged(playWhenReady, playbackState)
 
                 if (playbackState == STATE_READY) {
-                    playerViewContract.updateTime(player.currentPosition(), player.duration())
+                    val playerView = playerViewContract
+                    if (playerView is MLSPlayerView) {
+                        playerView.updateTime(player.currentPosition(), player.duration())
+                    }
                 }
 
                 if (playbackState == STATE_READY && hasPendingSeek) {
@@ -159,7 +168,10 @@ class AnnotationMediator @Inject constructor(
                 super.onPlaybackStateChanged(playbackState)
 
                 if (playbackState == STATE_READY) {
-                    playerViewContract.updateTime(player.currentPosition(), player.duration())
+                    val playerView = playerViewContract
+                    if (playerView is MLSPlayerView) {
+                        playerView.updateTime(player.currentPosition(), player.duration())
+                    }
                 }
 
                 if (playbackState == STATE_READY && hasPendingSeek) {
@@ -182,7 +194,11 @@ class AnnotationMediator @Inject constructor(
     override fun initPlayerView(playerView: PlayerViewContract) {
         scheduler = Executors.newScheduledThreadPool(1)
         this.playerViewContract = playerView
-        playerView.setOnSizeChangedCallback(onSizeChangedCallback)
+
+        val contract = playerViewContract
+        if (contract is MLSPlayerView) {
+            contract.setOnSizeChangedCallback(onSizeChangedCallback)
+        }
     }
     /**endregion */
 

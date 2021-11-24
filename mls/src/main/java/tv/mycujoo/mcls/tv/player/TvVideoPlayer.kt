@@ -23,6 +23,8 @@ import tv.mycujoo.domain.entity.Stream
 import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.api.MLSTVConfiguration
 import tv.mycujoo.mcls.core.AbstractPlayerMediator
+import tv.mycujoo.mcls.core.AnnotationFactory
+import tv.mycujoo.mcls.core.IAnnotationFactory
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.MessageLevel
@@ -55,7 +57,8 @@ class TvVideoPlayer @Inject constructor(
     private val logger: Logger,
     private val player: IPlayer,
     private val tvAnnotationMediator: TvAnnotationMediator,
-    private val exoPlayer: ExoPlayer
+    private val exoPlayer: ExoPlayer,
+    private val annotationFactory: IAnnotationFactory
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
     lateinit var mMlsTvFragment: MLSTVFragment
@@ -80,6 +83,7 @@ class TvVideoPlayer @Inject constructor(
 
     /**region Initializing*/
     fun initialize(mlsTvFragment: MLSTVFragment) {
+        annotationFactory.attachPlayerView(mlsTvFragment)
         this.mMlsTvFragment = mlsTvFragment
 
         val adViewProvider = addAdViewProvider(mMlsTvFragment.uiBinding.fragmentRoot)
