@@ -19,6 +19,7 @@ import tv.mycujoo.mcls.manager.ViewHandler
 import tv.mycujoo.mcls.mediator.IAnnotationMediator
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
+import tv.mycujoo.ui.MLSTVFragment
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -30,7 +31,8 @@ class TvAnnotationMediator @Inject constructor(
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     private val logger: Logger,
-    private val viewHandler: ViewHandler
+    private val viewHandler: ViewHandler,
+    private val handler: Handler,
 ) {
 
 
@@ -82,7 +84,7 @@ class TvAnnotationMediator @Inject constructor(
         tvAnnotationFactory.setLocalActions(actions)
     }
 
-    fun initialize(handler: Handler) {
+    fun initialize(mlsTvFragment: MLSTVFragment) {
 
         player.addListener(object : Player.Listener {
             override fun onPositionDiscontinuity(reason: Int) {

@@ -20,6 +20,7 @@ import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
+import tv.mycujoo.ui.PlayerViewContract
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -37,7 +38,7 @@ class AnnotationMediator @Inject constructor(
 ) : IAnnotationMediator {
 
 
-    private lateinit var playerView: MLSPlayerView
+    private lateinit var playerViewContract: PlayerViewContract
 
     /**region Fields*/
     private val scheduledRunnable: Runnable
@@ -54,7 +55,7 @@ class AnnotationMediator @Inject constructor(
         val exoRunnable = Runnable {
             if (player.isPlaying()) {
                 val currentPosition = player.currentPosition()
-                annotationFactory.attachPlayerView(playerView)
+                annotationFactory.attachPlayerView(playerViewContract)
                 annotationFactory.build(
                     BuildPoint(
                         currentPosition,
@@ -64,7 +65,7 @@ class AnnotationMediator @Inject constructor(
                     )
                 )
 
-                playerView.updateTime(currentPosition, player.duration())
+                playerViewContract.updateTime(currentPosition, player.duration())
             }
         }
 
@@ -126,7 +127,7 @@ class AnnotationMediator @Inject constructor(
                     hasPendingSeek = true
                 }
 
-                playerView.updateTime(time, player.duration())
+                playerViewContract.updateTime(time, player.duration())
             }
 
             /**
@@ -137,7 +138,7 @@ class AnnotationMediator @Inject constructor(
                 super.onPlayWhenReadyChanged(playWhenReady, playbackState)
 
                 if (playbackState == STATE_READY) {
-                    playerView.updateTime(player.currentPosition(), player.duration())
+                    playerViewContract.updateTime(player.currentPosition(), player.duration())
                 }
 
                 if (playbackState == STATE_READY && hasPendingSeek) {
@@ -158,7 +159,7 @@ class AnnotationMediator @Inject constructor(
                 super.onPlaybackStateChanged(playbackState)
 
                 if (playbackState == STATE_READY) {
-                    playerView.updateTime(player.currentPosition(), player.duration())
+                    playerViewContract.updateTime(player.currentPosition(), player.duration())
                 }
 
                 if (playbackState == STATE_READY && hasPendingSeek) {
@@ -178,9 +179,9 @@ class AnnotationMediator @Inject constructor(
         player.addListener(eventListener)
     }
 
-    override fun initPlayerView(playerView: MLSPlayerView) {
+    override fun initPlayerView(playerView: PlayerViewContract) {
         scheduler = Executors.newScheduledThreadPool(1)
-        this.playerView = playerView
+        this.playerViewContract = playerView
         playerView.setOnSizeChangedCallback(onSizeChangedCallback)
     }
     /**endregion */
@@ -195,7 +196,7 @@ class AnnotationMediator @Inject constructor(
     }
 
     override var onSizeChangedCallback = {
-        annotationFactory.attachPlayerView(playerView)
+        annotationFactory.attachPlayerView(playerViewContract)
         annotationFactory.build(
             BuildPoint(
                 player.currentPosition(),
