@@ -5,27 +5,27 @@ import tv.mycujoo.mcls.api.DataProvider
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.manager.IPrefManager
-import tv.mycujoo.mcls.tv.player.TvPlayerMediator
+import tv.mycujoo.mcls.tv.player.TvVideoPlayer
 import javax.inject.Inject
 
 class MLSTV @Inject constructor(
     private val dataManager: IDataManager,
     private val prefManager: IPrefManager,
-    private val tvPlayerMediator: TvPlayerMediator
+    private val tvVideoPlayer: TvVideoPlayer
 ) {
 
     fun initialize(builder: MLSTvBuilder, videoSupportFragment: VideoSupportFragment) {
         persistPublicKey(builder.publicKey)
 
-        tvPlayerMediator.mlsTVConfiguration = builder.mlsTVConfiguration
+        tvVideoPlayer.mlsTVConfiguration = builder.mlsTVConfiguration
 
-        tvPlayerMediator.initialize(videoSupportFragment)
-        tvPlayerMediator.videoSupportFragment = videoSupportFragment
+        tvVideoPlayer.initialize(videoSupportFragment)
+        tvVideoPlayer.videoSupportFragment = videoSupportFragment
     }
 
 
-    fun getVideoPlayer(): TvPlayerMediator {
-        return tvPlayerMediator
+    fun getVideoPlayer(): TvVideoPlayer {
+        return tvVideoPlayer
     }
 
     fun getDataProvider(): DataProvider {

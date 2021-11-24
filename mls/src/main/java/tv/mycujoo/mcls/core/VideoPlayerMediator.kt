@@ -63,8 +63,9 @@ class VideoPlayerMediator @Inject constructor(
     private val dataManager: IDataManager,
     private val logger: Logger,
     private val internalBuilder: InternalBuilder,
+    private val plugin: Plugin,
     private val player: IPlayer,
-    private val overlayViewHelper: OverlayViewHelper,
+    private val overlayViewHelper: OverlayViewHelper
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
     private var cast: ICast? = null
@@ -172,7 +173,7 @@ class VideoPlayerMediator @Inject constructor(
 
             hasAnalytic = builder.hasAnalytic
             if (builder.hasAnalytic) {
-                initAnalytic(builder.activity!!, it, builder.youboraPlugin)
+                initAnalytic(builder.activity!!, it)
             }
 
             initPlayerView(
@@ -411,13 +412,12 @@ class VideoPlayerMediator @Inject constructor(
 
     private fun initAnalytic(
         activity: Activity,
-        exoPlayer: ExoPlayer,
-        plugin: Plugin
+        exoPlayer: ExoPlayer
     ) {
         plugin.activity = activity
         plugin.adapter = internalBuilder.createExoPlayerAdapter(exoPlayer)
 
-        youboraClient = internalBuilder.createYouboraClient(plugin)
+        youboraClient = internalBuilder.createYouboraClient()
     }
 
     fun attachPlayer(playerView: MLSPlayerView) {
@@ -529,7 +529,7 @@ class VideoPlayerMediator @Inject constructor(
      * So it does not matter the stream url exist in the given param. Always the response from server will be used.
      */
     override fun playVideo(event: EventEntity) {
-        if (event.id != dataManager.currentEvent?.id) {
+        if(event.id != dataManager.currentEvent?.id) {
             if (streaming) streaming = false
         }
         dataManager.currentEvent = event

@@ -50,7 +50,7 @@ import tv.mycujoo.mcls.widgets.PreEventInformationDialog
 import tv.mycujoo.mcls.widgets.UiEvent
 import javax.inject.Inject
 
-class TvPlayerMediator @Inject constructor(
+class TvVideoPlayer @Inject constructor(
     @ApplicationContext val context: Context,
     private val mediaFactory: MediaFactory,
     private val reactorSocket: IReactorSocket,
