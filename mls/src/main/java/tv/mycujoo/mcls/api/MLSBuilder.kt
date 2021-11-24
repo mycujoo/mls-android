@@ -1,14 +1,15 @@
 package tv.mycujoo.mcls.api
 
 import android.app.Activity
-import android.content.Context
 import android.content.pm.PackageManager
-import com.google.android.exoplayer2.ExoPlayer
+import com.npaw.youbora.lib6.plugin.Options
+import com.npaw.youbora.lib6.plugin.Plugin
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.internal.modules.ApplicationContextModule
 import dagger.hilt.components.SingletonComponent
 import tv.mycujoo.DaggerMLSApplication_HiltComponents_SingletonC
+import tv.mycujoo.mcls.BuildConfig
 import tv.mycujoo.mcls.cast.ICast
 import tv.mycujoo.mcls.core.PlayerEventsListener
 import tv.mycujoo.mcls.core.UIEventListener
@@ -17,16 +18,17 @@ import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.enum.C.Companion.ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE
 import tv.mycujoo.mcls.ima.IIma
-import tv.mycujoo.mcls.network.socket.ReactorCallback
-import tv.mycujoo.mcls.network.socket.ReactorListener
 
 /**
  * builder of MLS(MCLS) main component
  */
 open class MLSBuilder {
 
+    private var youboraAccountCode: String = ""
 
     internal var publicKey: String = ""
+        private set
+    internal lateinit var youboraPlugin: Plugin
         private set
     internal var activity: Activity? = null
         private set
@@ -60,6 +62,13 @@ open class MLSBuilder {
      */
     fun withActivity(activity: Activity) = apply {
         this.activity = activity
+    }
+
+    /**
+     * Set Youbora Account Name
+     */
+    fun setYouboraAccount(accountCode: String) = apply {
+        this.youboraAccountCode = accountCode
     }
 
     /**
@@ -106,19 +115,54 @@ open class MLSBuilder {
     }
 
     /**
-     * internal use: create instance of Exoplayer
+     * create Youbora Plugin.
+     * To Initiate the Library, the lib searches for they key in 3 different places
+     *
+     *  1. If Youbora Code was Provided with setYouboraAccount(String),
+     *     Then use it
+     *
+     *  2. If Above Fails,
+     *      Then use Code Provided by the Android Manifest via tag:
+     *
+     *          <meta-data
+     *              android:name="tv.mycujoo.MLS_YOUBORA_ACCOUNT"
+     *              android:value="MLS_YOUBORA_ACCOUNT_CODE_HERE" />
+     *
+     *  3. else,
+     *      Then use MyCujoo Default Account Name
      */
-    fun createExoPlayer(context: Context): ExoPlayer {
-        return ExoPlayer.Builder(context).build()
+    private fun initYouboraPlugin() {
+        // Provided via the Builder
+        var code = youboraAccountCode
+
+        // Provided from the Manifest
+        if (code.isEmpty()) {
+            code = grabYouboraKeyFromManifest()
+        }
+
+        // MyCujoo Account Code
+        if (code.isEmpty()) {
+            code = BuildConfig.MYCUJOO_YOUBORA_ACCOUNT_NAME
+        }
+
+        val youboraOptions = Options()
+        youboraOptions.accountCode = code
+        youboraOptions.isAutoDetectBackground = true
+
+        youboraPlugin = Plugin(youboraOptions, activity!!.baseContext)
     }
 
     /**
-     * internal use: create listener for Reactor service
-     * @see ReactorCallback
-     * @see ReactorListener
+     *  gets the Youbora Account Name From the AndroidManifest.xml
      */
-    fun createReactorListener(reactorCallback: ReactorCallback): ReactorListener {
-        return ReactorListener(reactorCallback)
+    private fun grabYouboraKeyFromManifest(): String {
+        activity?.applicationContext.let {
+            val app = activity?.packageManager?.getApplicationInfo(
+                "${it?.packageName}",
+                PackageManager.GET_META_DATA
+            )
+            return app?.metaData?.getString("tv.mycujoo.MLS_YOUBORA_ACCOUNT") ?: ""
+        }
     }
 
     /**
@@ -150,6 +194,8 @@ open class MLSBuilder {
         if (publicKey.isEmpty()) {
             throw IllegalArgumentException(PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
+
+        initYouboraPlugin()
 
         val graph = DaggerMLSApplication_HiltComponents_SingletonC.builder()
             .applicationContextModule(ApplicationContextModule(activity))

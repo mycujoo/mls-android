@@ -1,5 +1,6 @@
 package tv.mycujoo.mcls.core
 
+import android.content.Context
 import android.content.res.Resources
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.exoplayer2.ExoPlayer
@@ -127,10 +128,10 @@ class VideoPlayerMediatorTest {
     lateinit var sessionManagerListener: ISessionManagerListener
 
     @Mock
-    lateinit var prefManager: IPrefManager
+    lateinit var overlayViewHelper: OverlayViewHelper
 
     @Mock
-    lateinit var overlayViewHelper: OverlayViewHelper
+    lateinit var context: Context
     /** endregion */
 
     /** region fields */
@@ -155,8 +156,9 @@ class VideoPlayerMediatorTest {
         whenever(mMLSBuilder.hasAnalytic).thenReturn(true)
 
         whenever(mMLSBuilder.publicKey).thenReturn("SAMPLE_PUBLIC_KEY")
+        whenever(mMLSBuilder.youboraPlugin).thenReturn(plugin)
         whenever(internalBuilder.createExoPlayerAdapter(any())).thenReturn(exoplayer2Adapter)
-        whenever(internalBuilder.createYouboraClient()).thenReturn(youboraClient)
+        whenever(internalBuilder.createYouboraClient(any())).thenReturn(youboraClient)
         whenever(internalBuilder.logger).thenReturn(logger)
 
         whenever(playerView.context).thenReturn(activity)
@@ -173,12 +175,7 @@ class VideoPlayerMediatorTest {
 
 
         whenever(player.addListener(any())).then { storeExoPlayerListener(it) }
-        whenever(
-            cast.initialize(
-                any(),
-                any()
-            )
-        )
+        whenever(cast.initialize(any(), any()))
             .thenAnswer {
                 storeCastListener(it)
                 return@thenAnswer sessionManagerListener
@@ -190,7 +187,6 @@ class VideoPlayerMediatorTest {
             dataManager,
             internalBuilder.logger,
             internalBuilder,
-            plugin,
             player,
             overlayViewHelper
         )

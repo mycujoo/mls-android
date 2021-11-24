@@ -63,9 +63,8 @@ class VideoPlayerMediator @Inject constructor(
     private val dataManager: IDataManager,
     private val logger: Logger,
     private val internalBuilder: InternalBuilder,
-    private val plugin: Plugin,
     private val player: IPlayer,
-    private val overlayViewHelper: OverlayViewHelper
+    private val overlayViewHelper: OverlayViewHelper,
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
     private var cast: ICast? = null
@@ -173,7 +172,7 @@ class VideoPlayerMediator @Inject constructor(
 
             hasAnalytic = builder.hasAnalytic
             if (builder.hasAnalytic) {
-                initAnalytic(builder.activity!!, it)
+                initAnalytic(builder.activity!!, it, builder.youboraPlugin)
             }
 
             initPlayerView(
@@ -412,12 +411,13 @@ class VideoPlayerMediator @Inject constructor(
 
     private fun initAnalytic(
         activity: Activity,
-        exoPlayer: ExoPlayer
+        exoPlayer: ExoPlayer,
+        plugin: Plugin
     ) {
         plugin.activity = activity
         plugin.adapter = internalBuilder.createExoPlayerAdapter(exoPlayer)
 
-        youboraClient = internalBuilder.createYouboraClient()
+        youboraClient = internalBuilder.createYouboraClient(plugin)
     }
 
     fun attachPlayer(playerView: MLSPlayerView) {

@@ -48,21 +48,34 @@ in order to communicate with SDK, MLS class must be instantiated. Init MLS whene
         // create MLS component
         MLS = MLSBuilder().publicKey("YOUR_PUBLIC_KEY_HERE")
             .withActivity(this)
+            .setYouboraAccount("YOUBORA_ACCOUNT_CODE") // Or You can add it via the Manifest
             .setPlayerEventsListener(playerEventsListener)
             .setUIEventListener(uiEventListener)
             .setConfiguration(MLSConfiguration())
             .build()
 
 
-Note: You Can provide the public key from the AndroidManifest using this meta tag:
+##### Notes: 
 
-    <application 
-        ...>
-        ...
-        <meta-data
-                android:name="tv.mycujoo.MLS_PUBLIC_KEY"
-                android:value="YOUR_PUBLIC_KEY_HERE" />
-    </application>
+You Can provide the public key from the AndroidManifest using this meta tag:
+
+       <application 
+           ...>
+           ...
+           <meta-data
+                   android:name="tv.mycujoo.MLS_PUBLIC_KEY"
+                   android:value="YOUR_PUBLIC_KEY_HERE" />
+       </application>
+
+And You can set your Youbora Account via the manifest
+
+      <application
+         ...>
+         ...
+         <meta-data
+                  android:name="tv.mycujoo.MLS_YOUBORA_ACCOUNT"
+                  android:value="YOUBORA_ACCOUNT_CODE_HERE" />
+      </application>
 
 #### Attach & detach PlayerView
 
