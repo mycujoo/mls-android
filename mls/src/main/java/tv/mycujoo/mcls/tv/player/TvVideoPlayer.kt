@@ -2,16 +2,12 @@ package tv.mycujoo.mcls.tv.player
 
 import android.content.Context
 import android.graphics.Color
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.leanback.app.VideoSupportFragment
 import androidx.leanback.app.VideoSupportFragmentGlueHost
 import androidx.leanback.media.PlaybackGlue
 import com.google.android.exoplayer2.ExoPlayer
@@ -39,7 +35,6 @@ import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaDatum
 import tv.mycujoo.mcls.player.MediaFactory
-import tv.mycujoo.mcls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mcls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackTransportControlGlueImpl
@@ -110,7 +105,7 @@ class TvVideoPlayer @Inject constructor(
         val layoutParams = FrameLayout.LayoutParams(120, 120)
         layoutParams.gravity = Gravity.CENTER
         progressBar.visibility = View.GONE
-        (mMlsTvFragment.requireView() as FrameLayout).addView(progressBar, layoutParams)
+        mMlsTvFragment.uiBinding.fragmentRoot.addView(progressBar, layoutParams)
         controllerAgent = ControllerAgent(player.getPlayer()!!)
         controllerAgent.setBufferProgressBar(progressBar)
         mTransportControlGlue = MLSPlaybackTransportControlGlueImpl(
@@ -181,10 +176,9 @@ class TvVideoPlayer @Inject constructor(
         }
     }
 
-    private fun addAdViewProvider(fragmentView: View?): AdViewProvider {
-        val view = (fragmentView as FrameLayout)
-        val frameLayout = FrameLayout(view.context)
-        view.addView(frameLayout, 0)
+    private fun addAdViewProvider(fragmentView: FrameLayout): AdViewProvider {
+        val frameLayout = FrameLayout(fragmentView.context)
+        fragmentView.addView(frameLayout, 0)
         return AdViewProvider { frameLayout }
     }
 
