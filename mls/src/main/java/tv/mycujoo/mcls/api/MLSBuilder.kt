@@ -125,8 +125,8 @@ open class MLSBuilder {
      *      Then use Code Provided by the Android Manifest via tag:
      *
      *          <meta-data
-     *              android:name="tv.mycujoo.MLS_YOUBORA_ACCOUNT"
-     *              android:value="MLS_YOUBORA_ACCOUNT_CODE_HERE" />
+     *              android:name="tv.mycujoo.MLS_ANALYTICS_ACCOUNT"
+     *              android:value="MLS_ACCOUNT_CODE_HERE" />
      *
      *  3. else,
      *      Then use MyCujoo Default Account Name
@@ -161,7 +161,7 @@ open class MLSBuilder {
                 "${it?.packageName}",
                 PackageManager.GET_META_DATA
             )
-            return app?.metaData?.getString("tv.mycujoo.MLS_YOUBORA_ACCOUNT") ?: ""
+            return app?.metaData?.getString("tv.mycujoo.MLS_ANALYTICS_ACCOUNT") ?: ""
         }
     }
 

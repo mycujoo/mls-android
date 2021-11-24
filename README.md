@@ -73,8 +73,8 @@ And You can set your Youbora Account via the manifest
          ...>
          ...
          <meta-data
-                  android:name="tv.mycujoo.MLS_YOUBORA_ACCOUNT"
-                  android:value="YOUBORA_ACCOUNT_CODE_HERE" />
+                  android:name="tv.mycujoo.MLS_ANALYTICS_ACCOUNT"
+                  android:value="ACCOUNT_CODE_HERE" />
       </application>
 
 #### Attach & detach PlayerView
