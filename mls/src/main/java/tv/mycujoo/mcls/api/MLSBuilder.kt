@@ -137,7 +137,7 @@ open class MLSBuilder {
 
         // Provided from the Manifest
         if (code.isEmpty()) {
-            code = grabYouboraKeyFromManifest()
+            code = grabAnalyticsKeyFromManifest()
         }
 
         // MyCujoo Account Code
@@ -155,7 +155,7 @@ open class MLSBuilder {
     /**
      *  gets the Youbora Account Name From the AndroidManifest.xml
      */
-    private fun grabYouboraKeyFromManifest(): String {
+    private fun grabAnalyticsKeyFromManifest(): String {
         activity?.applicationContext.let {
             val app = activity?.packageManager?.getApplicationInfo(
                 "${it?.packageName}",
