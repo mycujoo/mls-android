@@ -4,10 +4,11 @@ import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.mcls.widgets.MLSPlayerView
+import tv.mycujoo.ui.PlayerViewContract
 
 interface IAnnotationListener {
 
-    fun attachPlayer(player: MLSPlayerView)
+    fun attachPlayer(player: PlayerViewContract)
 
     fun addOverlay(showOverlayAction: Action.ShowOverlayAction)
     fun removeOverlay(customId: String, outroTransitionSpec: TransitionSpec?)

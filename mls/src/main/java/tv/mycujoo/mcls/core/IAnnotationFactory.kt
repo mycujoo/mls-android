@@ -2,10 +2,11 @@ package tv.mycujoo.mcls.core
 
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.mcls.widgets.MLSPlayerView
+import tv.mycujoo.ui.PlayerViewContract
 
 interface IAnnotationFactory {
     fun setActions(actions: List<Action>)
-    fun attachPlayerView(playerView: MLSPlayerView)
+    fun attachPlayerView(playerView: PlayerViewContract)
     fun build(buildPoint: BuildPoint)
 
     fun getCurrentActions(): List<Action>
