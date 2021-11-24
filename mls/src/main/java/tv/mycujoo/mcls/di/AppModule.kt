@@ -10,8 +10,6 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
-import com.npaw.youbora.lib6.plugin.Options
-import com.npaw.youbora.lib6.plugin.Plugin
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -70,22 +68,6 @@ open class AppModule {
     @Singleton
     fun provideScheduledExecutorService(): ScheduledExecutorService {
         return Executors.newScheduledThreadPool(1)
-    }
-
-    @Provides
-    @Singleton
-    fun provideYouboraConfig(): Options {
-        val youboraOptions = Options()
-        youboraOptions.accountCode = BuildConfig.MYCUJOO_YOUBORA_ACCOUNT_NAME
-        youboraOptions.isAutoDetectBackground = true
-
-        return youboraOptions
-    }
-
-    @Provides
-    @Singleton
-    fun provideYouboraPlugin(options: Options, @ApplicationContext context: Context): Plugin {
-        return Plugin(options, context)
     }
 
     @Provides
