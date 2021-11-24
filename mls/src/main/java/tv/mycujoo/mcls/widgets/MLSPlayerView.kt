@@ -203,7 +203,7 @@ class MLSPlayerView @JvmOverloads constructor(
 
     override fun overlayHost(): ConstraintLayout = overlayHost
 
-    override fun setTimelineMarker(list: List<TimelineMarkerEntity>) {
+    fun setTimelineMarker(list: List<TimelineMarkerEntity>) {
         list.map {
             PointOfInterest(
                 it.offset,
@@ -238,7 +238,7 @@ class MLSPlayerView @JvmOverloads constructor(
     }
 
     // internal use only
-    override fun setOnSizeChangedCallback(onSizeChangedCallback: () -> Unit) {
+    fun setOnSizeChangedCallback(onSizeChangedCallback: () -> Unit) {
         this.onSizeChangedCallback = onSizeChangedCallback
     }
 
@@ -510,7 +510,7 @@ class MLSPlayerView @JvmOverloads constructor(
         return findViewById(R.id.exo_progress)
     }
 
-    override fun updateTime(time: Long, duration: Long) {
+    fun updateTime(time: Long, duration: Long) {
         if (isScrubbing) {
             return
         }
