@@ -48,7 +48,7 @@ in order to communicate with SDK, MLS class must be instantiated. Init MLS whene
         // create MLS component
         MLS = MLSBuilder().publicKey("YOUR_PUBLIC_KEY_HERE")
             .withActivity(this)
-            .setYouboraAccount("YOUBORA_ACCOUNT_CODE") // Or You can add it via the Manifest
+            .setAnalyticsAccount("ANALYTICS_ACCOUNT_CODE") // Or You can add it via the Manifest
             .setPlayerEventsListener(playerEventsListener)
             .setUIEventListener(uiEventListener)
             .setConfiguration(MLSConfiguration())

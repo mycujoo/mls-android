@@ -24,7 +24,7 @@ import tv.mycujoo.mcls.ima.IIma
  */
 open class MLSBuilder {
 
-    private var youboraAccountCode: String = ""
+    private var analyticsAccount: String = ""
 
     internal var publicKey: String = ""
         private set
@@ -67,8 +67,8 @@ open class MLSBuilder {
     /**
      * Set Youbora Account Name
      */
-    fun setYouboraAccount(accountCode: String) = apply {
-        this.youboraAccountCode = accountCode
+    fun setAnalyticsAccount(accountCode: String) = apply {
+        this.analyticsAccount = accountCode
     }
 
     /**
@@ -118,7 +118,7 @@ open class MLSBuilder {
      * create Youbora Plugin.
      * To Initiate the Library, the lib searches for they key in 3 different places
      *
-     *  1. If Youbora Code was Provided with setYouboraAccount(String),
+     *  1. If Youbora Code was Provided with analyticsAccount(String),
      *     Then use it
      *
      *  2. If Above Fails,
@@ -133,7 +133,7 @@ open class MLSBuilder {
      */
     private fun initYouboraPlugin() {
         // Provided via the Builder
-        var code = youboraAccountCode
+        var code = analyticsAccount
 
         // Provided from the Manifest
         if (code.isEmpty()) {
