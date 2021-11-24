@@ -1,10 +1,10 @@
 package tv.mycujoo.mcls.tv.api
 
-import androidx.leanback.app.VideoSupportFragment
 import tv.mycujoo.mcls.api.DataProvider
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.manager.IPrefManager
+import tv.mycujoo.mcls.tv.player.TvAnnotationMediator
 import tv.mycujoo.mcls.tv.player.TvVideoPlayer
 import tv.mycujoo.ui.MLSTVFragment
 import javax.inject.Inject
@@ -12,7 +12,8 @@ import javax.inject.Inject
 class MLSTV @Inject constructor(
     private val dataManager: IDataManager,
     private val prefManager: IPrefManager,
-    private val tvVideoPlayer: TvVideoPlayer
+    private val tvVideoPlayer: TvVideoPlayer,
+    private val annotationMediator: TvAnnotationMediator
 ) {
 
     fun initialize(builder: MLSTvBuilder, videoSupportFragment: MLSTVFragment) {

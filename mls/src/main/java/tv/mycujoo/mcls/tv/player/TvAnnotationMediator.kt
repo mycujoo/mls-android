@@ -31,21 +31,14 @@ class TvAnnotationMediator @Inject constructor(
     private val dataManager: IDataManager,
     private val logger: Logger,
     private val viewHandler: ViewHandler
-) : IAnnotationMediator {
+) {
 
 
     private val scheduler: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
 
     private var hasPendingSeek: Boolean = false
-    override fun initPlayerView(playerView: MLSPlayerView) {
-        TODO("Not yet implemented")
-    }
 
-    override fun release() {
-        TODO("Not yet implemented")
-    }
-
-    override var onSizeChangedCallback = {
+    var onSizeChangedCallback = {
         tvAnnotationFactory.build(
             BuildPoint(
                 player.currentPosition(),
@@ -56,7 +49,7 @@ class TvAnnotationMediator @Inject constructor(
         )
     }
 
-    override fun fetchActions(
+    fun fetchActions(
         timelineId: String,
         updateId: String?,
         resultCallback: ((result: Result<Exception, ActionResponse>) -> Unit)?
@@ -81,11 +74,11 @@ class TvAnnotationMediator @Inject constructor(
         }
     }
 
-    override fun feed(actionResponse: ActionResponse) {
+    fun feed(actionResponse: ActionResponse) {
         tvAnnotationFactory.setActions(actionResponse.data.map { it.toAction() })
     }
 
-    override fun setLocalActions(actions: List<Action>) {
+    fun setLocalActions(actions: List<Action>) {
         tvAnnotationFactory.setLocalActions(actions)
     }
 
