@@ -13,11 +13,12 @@ import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.ima.IIma
+import tv.mycujoo.ui.MLSTVFragment
 import java.util.*
 
 class MLSTvBuilder {
 
-    private lateinit var videoSupportFragment: VideoSupportFragment
+    private lateinit var mlsTvFragment: MLSTVFragment
 
     internal var publicKey: String = ""
         private set
@@ -35,19 +36,19 @@ class MLSTvBuilder {
         this.publicKey = publicKey
     }
 
-    fun withVideoFragment(videoSupportFragment: VideoSupportFragment) =
-        apply { this.videoSupportFragment = videoSupportFragment }
+    fun withVideoFragment(mlsTvFragment: MLSTVFragment) =
+        apply { this.mlsTvFragment = mlsTvFragment }
 
     fun setConfiguration(mlsTVConfiguration: MLSTVConfiguration) = apply {
         this.mlsTVConfiguration = mlsTVConfiguration
     }
 
     fun ima(ima: IIma) = apply {
-        if (videoSupportFragment.activity == null) {
+        if (mlsTvFragment.activity == null) {
             throw IllegalArgumentException(C.ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE)
         }
         this.ima = ima.apply {
-            createAdsLoader(videoSupportFragment.requireActivity())
+            createAdsLoader(mlsTvFragment.requireActivity())
         }
     }
 
@@ -57,7 +58,7 @@ class MLSTvBuilder {
     private fun initPublicKeyIfNeeded() {
         // grab public key from Manifest if not set manually,
         if (publicKey.isEmpty()) {
-            videoSupportFragment.requireActivity().applicationContext.let {
+            mlsTvFragment.requireActivity().applicationContext.let {
                 val app = it?.packageManager?.getApplicationInfo(
                     it.packageName,
                     PackageManager.GET_META_DATA
@@ -75,7 +76,7 @@ class MLSTvBuilder {
         val graph = DaggerMLSApplication_HiltComponents_SingletonC.builder()
             .applicationContextModule(
                 ApplicationContextModule(
-                    videoSupportFragment.requireActivity().applicationContext
+                    mlsTvFragment.requireActivity().applicationContext
                 )
             )
             .networkModule(NetworkModule())
@@ -83,7 +84,7 @@ class MLSTvBuilder {
             .build()
 
         val mlsTv = graph.provideMLSTV()
-        mlsTv.initialize(this, videoSupportFragment)
+        mlsTv.initialize(this, mlsTvFragment)
 
         return mlsTv
     }

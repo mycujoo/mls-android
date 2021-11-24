@@ -6,6 +6,7 @@ import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.tv.player.TvVideoPlayer
+import tv.mycujoo.ui.MLSTVFragment
 import javax.inject.Inject
 
 class MLSTV @Inject constructor(
@@ -14,13 +15,12 @@ class MLSTV @Inject constructor(
     private val tvVideoPlayer: TvVideoPlayer
 ) {
 
-    fun initialize(builder: MLSTvBuilder, videoSupportFragment: VideoSupportFragment) {
+    fun initialize(builder: MLSTvBuilder, videoSupportFragment: MLSTVFragment) {
         persistPublicKey(builder.publicKey)
 
         tvVideoPlayer.mlsTVConfiguration = builder.mlsTVConfiguration
 
         tvVideoPlayer.initialize(videoSupportFragment)
-        tvVideoPlayer.videoSupportFragment = videoSupportFragment
     }
 
 
