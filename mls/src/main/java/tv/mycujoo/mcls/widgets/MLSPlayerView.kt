@@ -238,7 +238,7 @@ class MLSPlayerView @JvmOverloads constructor(
     }
 
     // internal use only
-    fun setOnSizeChangedCallback(onSizeChangedCallback: () -> Unit) {
+    override fun setOnSizeChangedCallback(onSizeChangedCallback: () -> Unit) {
         this.onSizeChangedCallback = onSizeChangedCallback
     }
 
@@ -510,7 +510,7 @@ class MLSPlayerView @JvmOverloads constructor(
         return findViewById(R.id.exo_progress)
     }
 
-    fun updateTime(time: Long, duration: Long) {
+    override fun updateTime(time: Long, duration: Long) {
         if (isScrubbing) {
             return
         }

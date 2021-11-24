@@ -16,12 +16,13 @@ class MLSTV @Inject constructor(
     private val annotationMediator: TvAnnotationMediator
 ) {
 
-    fun initialize(builder: MLSTvBuilder, videoSupportFragment: MLSTVFragment) {
+    fun initialize(builder: MLSTvBuilder, mlsTvFragment: MLSTVFragment) {
         persistPublicKey(builder.publicKey)
 
         tvVideoPlayer.mlsTVConfiguration = builder.mlsTVConfiguration
 
-        tvVideoPlayer.initialize(videoSupportFragment)
+        annotationMediator.initialize(mlsTvFragment)
+        tvVideoPlayer.initialize(mlsTvFragment)
     }
 
 

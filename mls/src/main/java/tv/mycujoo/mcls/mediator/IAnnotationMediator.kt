@@ -4,9 +4,9 @@ import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.mcls.widgets.MLSPlayerView
+import tv.mycujoo.ui.PlayerViewContract
 
 interface IAnnotationMediator {
-    fun initPlayerView(playerView: MLSPlayerView)
     fun release()
 
     var onSizeChangedCallback: () -> Unit
@@ -19,4 +19,5 @@ interface IAnnotationMediator {
 
     fun feed(actionResponse: ActionResponse)
     fun setLocalActions(actions: List<Action>)
+    fun initPlayerView(playerView: PlayerViewContract)
 }

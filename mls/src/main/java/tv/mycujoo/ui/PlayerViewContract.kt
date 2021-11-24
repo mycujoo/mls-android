@@ -9,4 +9,6 @@ interface PlayerViewContract {
     fun overlayHost(): ConstraintLayout
     fun setTimelineMarker(timelineMarkerEntityList: List<TimelineMarkerEntity>)
     fun clearScreen(idList: List<String>)
+    fun updateTime(currentPosition: Long, duration: Long)
+    fun setOnSizeChangedCallback(onSizeChangedCallback: () -> Unit)
 }
