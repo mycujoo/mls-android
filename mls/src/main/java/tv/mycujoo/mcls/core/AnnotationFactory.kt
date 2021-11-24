@@ -9,6 +9,7 @@ import tv.mycujoo.mcls.manager.TimerEntity
 import tv.mycujoo.mcls.manager.TimerVariable
 import tv.mycujoo.mcls.utils.TimeUtils
 import tv.mycujoo.mcls.widgets.MLSPlayerView
+import tv.mycujoo.ui.PlayerViewContract
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
 
@@ -34,7 +35,7 @@ class AnnotationFactory @Inject constructor(
         CopyOnWriteArrayList<Action>() // union of Sorted actions + Local actions
     /**endregion */
 
-    override fun attachPlayerView(playerView: MLSPlayerView) {
+    override fun attachPlayerView(playerView: PlayerViewContract) {
         annotationListener.attachPlayer(playerView)
     }
 
