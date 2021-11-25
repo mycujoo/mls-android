@@ -1,7 +1,6 @@
 package tv.mycujoo.mcls.tv.api
 
 import android.content.pm.PackageManager
-import androidx.leanback.app.VideoSupportFragment
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.internal.modules.ApplicationContextModule
@@ -14,7 +13,6 @@ import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.ui.MLSTVFragment
-import java.util.*
 
 class MLSTvBuilder {
 
@@ -36,7 +34,7 @@ class MLSTvBuilder {
         this.publicKey = publicKey
     }
 
-    fun withVideoFragment(mlsTvFragment: MLSTVFragment) =
+    fun withMLSTvFragment(mlsTvFragment: MLSTVFragment) =
         apply { this.mlsTvFragment = mlsTvFragment }
 
     fun setConfiguration(mlsTVConfiguration: MLSTVConfiguration) = apply {
