@@ -13,6 +13,7 @@ import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.ui.MLSTVFragment
+import java.lang.IllegalStateException
 
 class MLSTvBuilder {
 
@@ -69,7 +70,14 @@ class MLSTvBuilder {
     fun setLogLevel(logLevel: LogLevel) = apply { this.logLevel = logLevel }
 
     fun build(): MLSTV {
+        if (!mlsTvFragment.isResumed) {
+            throw IllegalStateException(C.FRAGMENT_MUST_BE_INFLATED_WHEN_BUILDING)
+        }
+
         initPublicKeyIfNeeded()
+        if (publicKey.isEmpty()) {
+            throw IllegalArgumentException(C.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
+        }
 
         val graph = DaggerMLSApplication_HiltComponents_SingletonC.builder()
             .applicationContextModule(
