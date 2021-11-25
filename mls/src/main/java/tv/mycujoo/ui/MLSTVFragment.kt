@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.leanback.app.VideoSupportFragment
 import tv.mycujoo.mcls.databinding.FragmentMlsTvBinding
 
-class MLSTVFragment : Fragment(), PlayerViewContract{
+class MLSTVFragment : Fragment(), PlayerViewContract {
 
     lateinit var uiBinding: FragmentMlsTvBinding
 
@@ -38,8 +38,4 @@ class MLSTVFragment : Fragment(), PlayerViewContract{
 
     override fun context(): Context = requireContext()
     override fun overlayHost(): ConstraintLayout = uiBinding.overlayHost
-
-    override fun clearScreen(idList: List<String>) {
-        Log.d("TAG", "clearScreen: ")
-    }
 }

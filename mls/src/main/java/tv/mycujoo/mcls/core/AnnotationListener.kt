@@ -84,6 +84,9 @@ class AnnotationListener @Inject constructor(
     }
 
     override fun clearScreen(idList: List<String>) {
-        mMLSPlayerView.clearScreen(idList)
+        val playerContract = mMLSPlayerView
+        if (playerContract is MLSPlayerView) {
+            playerContract.clearScreen(idList)
+        }
     }
 }
