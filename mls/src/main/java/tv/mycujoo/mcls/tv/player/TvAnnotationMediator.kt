@@ -33,23 +33,69 @@ class TvAnnotationMediator @Inject constructor(
     private val logger: Logger,
     private val viewHandler: ViewHandler,
     private val handler: Handler,
+    scheduler: ScheduledExecutorService
 ) {
 
+    init {
 
-    private val scheduler: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
+        player.addListener(object : Player.Listener {
+            override fun onPositionDiscontinuity(reason: Int) {
+                if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+                    hasPendingSeek = true
+                }
+            }
 
-    private var hasPendingSeek: Boolean = false
+            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+                if (playbackState == Player.STATE_READY && hasPendingSeek) {
+                    hasPendingSeek = false
 
-    var onSizeChangedCallback = {
-        tvAnnotationFactory.build(
-            BuildPoint(
-                player.currentPosition(),
-                player.currentAbsoluteTime(),
-                player,
-                player.isPlaying()
-            )
+                    tvAnnotationFactory.build(
+                        BuildPoint(
+                            player.currentPosition(),
+                            player.currentAbsoluteTime(),
+                            player,
+                            player.isPlaying()
+                        )
+                    )
+                }
+
+            }
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if (isPlaying) {
+                    viewHandler.getAnimations().forEach { it.resume() }
+                } else {
+                    viewHandler.getAnimations().forEach { it.pause() }
+                }
+            }
+        })
+
+        val exoRunnable = Runnable {
+            if (player.isPlaying()) {
+                tvAnnotationFactory.build(
+                    BuildPoint(
+                        player.currentPosition(),
+                        player.currentAbsoluteTime(),
+                        player,
+                        isPlaying = true
+                    )
+                )
+            }
+        }
+
+        val scheduledRunnable = Runnable {
+            handler.post(exoRunnable)
+        }
+
+        scheduler.scheduleAtFixedRate(
+            scheduledRunnable,
+            ONE_SECOND_IN_MS,
+            ONE_SECOND_IN_MS,
+            TimeUnit.MILLISECONDS
         )
     }
+
+    private var hasPendingSeek: Boolean = false
 
     fun fetchActions(
         timelineId: String,
@@ -84,66 +130,5 @@ class TvAnnotationMediator @Inject constructor(
         tvAnnotationFactory.setLocalActions(actions)
     }
 
-    fun initialize(mlsTvFragment: MLSTVFragment) {
 
-        player.addListener(object : Player.Listener {
-            override fun onPositionDiscontinuity(reason: Int) {
-                if (reason == Player.DISCONTINUITY_REASON_SEEK) {
-                    hasPendingSeek = true
-                }
-            }
-
-            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                if (playbackState == Player.STATE_READY && hasPendingSeek) {
-                    hasPendingSeek = false
-
-                    tvAnnotationFactory.build(
-                        BuildPoint(
-                            player.currentPosition(),
-                            player.currentAbsoluteTime(),
-                            player,
-                            player.isPlaying()
-                        )
-                    )
-                }
-
-            }
-
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                if (isPlaying) {
-                    viewHandler.getAnimations().forEach { it.resume() }
-                } else {
-                    viewHandler.getAnimations().forEach { it.pause() }
-                }
-            }
-
-            override fun onPlaybackStateChanged(state: Int) {
-
-            }
-        })
-
-        val exoRunnable = Runnable {
-            if (player.isPlaying()) {
-                tvAnnotationFactory.build(
-                    BuildPoint(
-                        player.currentPosition(),
-                        player.currentAbsoluteTime(),
-                        player,
-                        isPlaying = true
-                    )
-                )
-            }
-        }
-
-        val scheduledRunnable = Runnable {
-            handler.post(exoRunnable)
-        }
-
-        scheduler.scheduleAtFixedRate(
-            scheduledRunnable,
-            ONE_SECOND_IN_MS,
-            ONE_SECOND_IN_MS,
-            TimeUnit.MILLISECONDS
-        )
-    }
 }
