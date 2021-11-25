@@ -47,8 +47,8 @@ class AnnotationListenerTest {
         MockitoAnnotations.openMocks(this)
         annotationListener = AnnotationListener(overlayViewHelper, downloaderClient)
         annotationListener.attachPlayer(playerView)
-        whenever(playerView.overlayHost).thenReturn(overlayContainer)
-        whenever(playerView.context).thenReturn(context)
+        whenever(playerView.overlayHost()).thenReturn(overlayContainer)
+        whenever(playerView.context()).thenReturn(context)
         Mockito.`when`(downloaderClient.download(any(), any()))
             .then { i -> ((i.getArgument(1)) as (OverlayEntity) -> Unit).invoke(i.getArgument(0)) }
     }
