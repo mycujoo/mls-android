@@ -543,7 +543,7 @@ class MLSPlayerView @JvmOverloads constructor(
         viewHandler.getAnimations().forEach { it.pause() }
     }
 
-    override fun clearScreen(idList: List<String>) {
+    fun clearScreen(idList: List<String>) {
         overlayHost.children
             .forEach {
                 if (idList.contains(it.tag)) {
