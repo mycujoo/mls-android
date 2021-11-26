@@ -7,7 +7,6 @@ import com.google.android.exoplayer2.Player.STATE_READY
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.jetbrains.annotations.TestOnly
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.Result
@@ -20,7 +19,7 @@ import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
-import tv.mycujoo.ui.PlayerViewContract
+import tv.mycujoo.mcls.api.PlayerViewContract
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit

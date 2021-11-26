@@ -8,8 +8,7 @@ import tv.mycujoo.mcls.manager.IVariableKeeper
 import tv.mycujoo.mcls.manager.TimerEntity
 import tv.mycujoo.mcls.manager.TimerVariable
 import tv.mycujoo.mcls.utils.TimeUtils
-import tv.mycujoo.mcls.widgets.MLSPlayerView
-import tv.mycujoo.ui.PlayerViewContract
+import tv.mycujoo.mcls.api.PlayerViewContract
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
 
