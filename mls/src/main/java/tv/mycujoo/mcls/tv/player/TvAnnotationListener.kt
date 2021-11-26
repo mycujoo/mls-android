@@ -7,9 +7,7 @@ import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.mcls.core.IAnnotationListener
 import tv.mycujoo.mcls.helper.DownloaderClient
 import tv.mycujoo.mcls.helper.OverlayViewHelper
-import tv.mycujoo.mcls.player.IPlayer
-import tv.mycujoo.mcls.widgets.MLSPlayerView
-import tv.mycujoo.ui.PlayerViewContract
+import tv.mycujoo.mcls.api.PlayerViewContract
 import javax.inject.Inject
 
 class TvAnnotationListener @Inject constructor(

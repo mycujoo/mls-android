@@ -1,4 +1,4 @@
-package tv.mycujoo.ui
+package tv.mycujoo.mcls.api
 
 import android.content.Context
 import androidx.constraintlayout.widget.ConstraintLayout

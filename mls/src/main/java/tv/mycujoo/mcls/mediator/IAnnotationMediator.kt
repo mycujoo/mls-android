@@ -3,8 +3,7 @@ package tv.mycujoo.mcls.mediator
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.Result
-import tv.mycujoo.mcls.widgets.MLSPlayerView
-import tv.mycujoo.ui.PlayerViewContract
+import tv.mycujoo.mcls.api.PlayerViewContract
 
 interface IAnnotationMediator {
     fun release()

@@ -1,8 +1,7 @@
 package tv.mycujoo.mcls.core
 
 import tv.mycujoo.domain.entity.Action
-import tv.mycujoo.mcls.widgets.MLSPlayerView
-import tv.mycujoo.ui.PlayerViewContract
+import tv.mycujoo.mcls.api.PlayerViewContract
 
 interface IAnnotationFactory {
     fun setActions(actions: List<Action>)

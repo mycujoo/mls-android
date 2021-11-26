@@ -5,9 +5,8 @@ import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.mcls.helper.IDownloaderClient
 import tv.mycujoo.mcls.helper.OverlayViewHelper
-import tv.mycujoo.mcls.widgets.IPlayerView
 import tv.mycujoo.mcls.widgets.MLSPlayerView
-import tv.mycujoo.ui.PlayerViewContract
+import tv.mycujoo.mcls.api.PlayerViewContract
 import javax.inject.Inject
 
 class AnnotationListener @Inject constructor(

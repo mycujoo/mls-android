@@ -37,7 +37,7 @@ import tv.mycujoo.mcls.widgets.mlstimebar.MLSTimeBar
 import tv.mycujoo.mcls.widgets.mlstimebar.PointOfInterest
 import tv.mycujoo.mcls.widgets.mlstimebar.PointOfInterestType
 import tv.mycujoo.mcls.widgets.mlstimebar.TimelineMarkerView
-import tv.mycujoo.ui.PlayerViewContract
+import tv.mycujoo.mcls.api.PlayerViewContract
 import java.util.*
 import kotlin.collections.ArrayList
 
