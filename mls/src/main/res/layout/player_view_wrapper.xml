@@ -32,8 +32,7 @@
             android:layout_height="wrap_content"
             android:minWidth="1dp"
             android:minHeight="1dp"
-            android:orientation="horizontal"
-            android:visibility="gone">
+            android:orientation="horizontal">
 
         </LinearLayout>
 
@@ -70,8 +69,7 @@
             android:layout_height="wrap_content"
             android:minWidth="1dp"
             android:minHeight="1dp"
-            android:orientation="horizontal"
-            android:visibility="gone" />
+            android:orientation="horizontal" />
 
     </FrameLayout>
 
