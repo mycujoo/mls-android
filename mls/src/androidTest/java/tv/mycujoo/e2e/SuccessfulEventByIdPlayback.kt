@@ -11,6 +11,7 @@ import dagger.hilt.android.testing.UninstallModules
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import org.joda.time.DateTime
+import org.junit.Ignore
 import org.junit.Test
 import tv.mycujoo.E2ETest
 import tv.mycujoo.data.entity.ActionResponse
@@ -23,6 +24,7 @@ import javax.inject.Singleton
 @UninstallModules(NetworkModule::class)
 class SuccessfulEventByIdPlayback : E2ETest() {
 
+    @Ignore("Work Under Progress")
     @Test
     fun testInitialStartup() {
         Espresso.onView(ViewMatchers.withId(mMLSPlayerView.id)).check(
