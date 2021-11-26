@@ -131,7 +131,7 @@ open class MLSBuilder {
      *  3. else,
      *      Then use MyCujoo Default Account Name
      */
-    private fun initYouboraPlugin() {
+    protected fun initYouboraPlugin() {
         // Provided via the Builder
         var code = analyticsAccount
 

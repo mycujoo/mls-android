@@ -24,7 +24,6 @@ import javax.inject.Singleton
 @UninstallModules(NetworkModule::class)
 class SuccessfulEventByIdPlayback : E2ETest() {
 
-    @Ignore("Work Under Progress")
     @Test
     fun testInitialStartup() {
         Espresso.onView(ViewMatchers.withId(mMLSPlayerView.id)).check(
