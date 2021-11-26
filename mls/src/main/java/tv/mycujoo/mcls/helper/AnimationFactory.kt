@@ -9,6 +9,7 @@ import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.widgets.ScaffoldView
+import javax.inject.Inject
 
 /**
  * Creates Android animation object 'ObjectAnimator' with given parameters.
@@ -26,7 +27,7 @@ import tv.mycujoo.mcls.widgets.ScaffoldView
  * @see AnimationType
  * @see TransitionSpec
  */
-open class AnimationFactory {
+open class AnimationFactory @Inject constructor() {
     open fun createAddViewStaticAnimation(
         scaffoldView: ScaffoldView,
         animationType: AnimationType,

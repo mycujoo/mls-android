@@ -7,6 +7,7 @@ import com.google.android.exoplayer2.Player.STATE_READY
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.jetbrains.annotations.TestOnly
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.Result
@@ -19,34 +20,41 @@ import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
+import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 
-class AnnotationMediator(
-    private var playerView: MLSPlayerView,
+class AnnotationMediator @Inject constructor(
     private val annotationFactory: IAnnotationFactory,
-    val dataManager: IDataManager,
-    val dispatcher: CoroutineScope,
-    player: IPlayer,
-    private val scheduler: ScheduledExecutorService,
-    handler: Handler,
-    private val logger: Logger
+    private val dataManager: IDataManager,
+    private val dispatcher: CoroutineScope,
+    private val logger: Logger,
+    private val player: IPlayer,
+    var handler: Handler,
+    var scheduler: ScheduledExecutorService
 ) : IAnnotationMediator {
 
+
+    private lateinit var playerView: MLSPlayerView
+
     /**region Fields*/
-    private lateinit var eventListener: Player.EventListener
+    private val scheduledRunnable: Runnable
+
+    private lateinit var eventListener: Player.Listener
     private var hasPendingSeek: Boolean = false
     /**endregion */
 
     /**region Initialization*/
     init {
+
         initEventListener(player)
 
         val exoRunnable = Runnable {
             if (player.isPlaying()) {
                 val currentPosition = player.currentPosition()
-
+                annotationFactory.attachPlayerView(playerView)
                 annotationFactory.build(
                     BuildPoint(
                         currentPosition,
@@ -60,18 +68,17 @@ class AnnotationMediator(
             }
         }
 
-        val scheduledRunnable = Runnable {
+        scheduledRunnable = Runnable {
             handler.post(exoRunnable)
         }
+
         scheduler.scheduleAtFixedRate(
             scheduledRunnable,
             ONE_SECOND_IN_MS,
             ONE_SECOND_IN_MS,
             TimeUnit.MILLISECONDS
         )
-
     }
-
 
     override fun fetchActions(
         timelineId: String,
@@ -104,10 +111,15 @@ class AnnotationMediator(
     }
 
     private fun initEventListener(player: IPlayer) {
-        eventListener = object : Player.EventListener {
+        eventListener = object : Player.Listener {
 
-            override fun onPositionDiscontinuity(reason: Int) {
-                super.onPositionDiscontinuity(reason)
+            override fun onPositionDiscontinuity(
+                oldPosition: Player.PositionInfo,
+                newPosition: Player.PositionInfo,
+                reason: Int
+            ) {
+                super.onPositionDiscontinuity(oldPosition, newPosition, reason)
+
                 val time = player.currentPosition()
 
                 if (reason == DISCONTINUITY_REASON_SEEK) {
@@ -117,8 +129,12 @@ class AnnotationMediator(
                 playerView.updateTime(time, player.duration())
             }
 
-            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                super.onPlayerStateChanged(playWhenReady, playbackState)
+            /**
+             * This Functions on testing, only emits STATE_IDLE. I fixed it by adding onPlaybackStateChanged
+             * Which updates every playback state change correctly.
+             */
+            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, playbackState: Int) {
+                super.onPlayWhenReadyChanged(playWhenReady, playbackState)
 
                 if (playbackState == STATE_READY) {
                     playerView.updateTime(player.currentPosition(), player.duration())
@@ -138,11 +154,32 @@ class AnnotationMediator(
                 }
             }
 
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                super.onPlaybackStateChanged(playbackState)
+
+                if (playbackState == STATE_READY) {
+                    playerView.updateTime(player.currentPosition(), player.duration())
+                }
+
+                if (playbackState == STATE_READY && hasPendingSeek) {
+                    hasPendingSeek = false
+
+                    annotationFactory.build(
+                        BuildPoint(
+                            player.currentPosition(),
+                            player.currentAbsoluteTime(),
+                            player,
+                            player.isPlaying()
+                        )
+                    )
+                }
+            }
         }
         player.addListener(eventListener)
     }
 
     override fun initPlayerView(playerView: MLSPlayerView) {
+        scheduler = Executors.newScheduledThreadPool(1)
         this.playerView = playerView
         playerView.setOnSizeChangedCallback(onSizeChangedCallback)
     }
@@ -158,6 +195,7 @@ class AnnotationMediator(
     }
 
     override var onSizeChangedCallback = {
+        annotationFactory.attachPlayerView(playerView)
         annotationFactory.build(
             BuildPoint(
                 player.currentPosition(),

@@ -6,7 +6,7 @@ import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.ui.TimeBar
-import com.npaw.youbora.lib6.plugin.Options
+import com.npaw.youbora.lib6.plugin.Plugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -15,7 +15,6 @@ import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.Stream
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
-import tv.mycujoo.mcls.BuildConfig
 import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.api.MLSBuilder
@@ -48,33 +47,31 @@ import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.LIVE_ON_THE_EDGE
 import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.VOD
 import tv.mycujoo.mcls.widgets.PlayerControllerMode
 import tv.mycujoo.mcls.widgets.RemotePlayerControllerListener
+import javax.inject.Inject
 
 /**
  * Manages video-player related components.
- * @param videoPlayerConfig configuration for video-player behaviour and visuals
  * @param viewHandler handler for add/remove of view (used for Annotations Actions)
  * @param reactorSocket interface for interacting with Reactor service.
  * @param dispatcher coroutine scope context used in I/O bound calls
  * @param dataManager data manager which holds current data(event) loaded
- * @param cast optional: Cast module used for Google Cast
  */
-class VideoPlayerMediator(
-    private var videoPlayerConfig: VideoPlayerConfig,
+class VideoPlayerMediator @Inject constructor(
     private val viewHandler: IViewHandler,
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
-    private val timelineMarkerActionEntities: List<TimelineMarkerEntity>,
-    private val cast: ICast?,
-    logger: Logger
+    private val logger: Logger,
+    private val internalBuilder: InternalBuilder,
+    private val player: IPlayer,
+    private val overlayViewHelper: OverlayViewHelper,
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
+    private var cast: ICast? = null
+    var videoPlayerConfig: VideoPlayerConfig = VideoPlayerConfig.default()
 
     /**region Fields*/
-    /**
-     * MLS video-player
-     */
-    private lateinit var player: IPlayer
+    var playWhenReadyState = false
 
     /**
      * SDK exposing video-player
@@ -136,26 +133,22 @@ class VideoPlayerMediator(
      */
     private var publicKey: String = ""
 
-    /**
-     * Unique identifier to identify user. Youbora Client is an example where this is used.
-     * Defaults to randomly generated UUID if it's users first launch visit to MLS,
-     * otherwise it is restored from shared-pref
-     */
-    private var uuid: String? = ""
-
     /**endregion */
 
     /**region Initialization*/
-    fun initialize(MLSPlayerView: MLSPlayerView, player: IPlayer, builder: MLSBuilder) {
+    fun initialize(
+        MLSPlayerView: MLSPlayerView,
+        builder: MLSBuilder,
+        timelineMarkerActionEntities: List<TimelineMarkerEntity> = listOf(),
+        cast: ICast? = null
+    ) {
         this.playerView = MLSPlayerView
-        this.player = player
         publicKey = builder.publicKey
-        uuid = builder.internalBuilder.uuid
 
         player.getDirectInstance()?.let {
             videoPlayer = VideoPlayer(it, this, MLSPlayerView)
 
-            builder.mlsConfiguration.seekTolerance?.let { accuracy ->
+            builder.mlsConfiguration.seekTolerance.let { accuracy ->
                 if (accuracy > 0) {
                     it.setSeekParameters(
                         SeekParameters(
@@ -179,11 +172,17 @@ class VideoPlayerMediator(
 
             hasAnalytic = builder.hasAnalytic
             if (builder.hasAnalytic) {
-                initAnalytic(builder.internalBuilder, builder.activity!!, it)
+                initAnalytic(builder.activity!!, it, builder.youboraPlugin)
             }
 
-            initPlayerView(MLSPlayerView, player, builder.internalBuilder.overlayViewHelper)
-            initCaster(player, MLSPlayerView)
+            initPlayerView(
+                MLSPlayerView,
+                timelineMarkerActionEntities
+            )
+
+            if (cast != null) {
+                initCaster(cast, player, MLSPlayerView)
+            }
         }
     }
 
@@ -193,8 +192,7 @@ class VideoPlayerMediator(
 
     private fun initPlayerView(
         MLSPlayerView: MLSPlayerView,
-        player: IPlayer,
-        overlayViewHelper: OverlayViewHelper
+        timelineMarkerActionEntities: List<TimelineMarkerEntity>
     ) {
         MLSPlayerView.prepare(
             overlayViewHelper,
@@ -203,9 +201,19 @@ class VideoPlayerMediator(
         )
 
         val mainEventListener = object : MainEventListener {
-            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                super.onPlayerStateChanged(playWhenReady, playbackState)
+            /**
+             * To Fix the deprecation of onPlayerStateChanged, I replaced it with these 2 functions.
+             * onPlayWhenReadyChanged handles the first change of onPlayerStateChanged. which is
+             * PlayWhenReady.
+             * The Second handles the playback state. This is becuase onPlayWhenReadyChanged emits
+             * only 1 of 2 functions. Idle, and NotReady
+             */
 
+
+            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, playbackState: Int) {
+                super.onPlayWhenReadyChanged(playWhenReady, playbackState)
+
+                playWhenReadyState = playWhenReady
                 handlePlaybackStatus(playWhenReady, playbackState)
                 handleBufferingProgressBarVisibility(playbackState, playWhenReady)
                 handleLiveModeState()
@@ -214,9 +222,20 @@ class VideoPlayerMediator(
                 logEventIfNeeded(playbackState)
             }
 
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                super.onPlaybackStateChanged(playbackState)
+
+                handlePlaybackStatus(playWhenReadyState, playbackState)
+                handleBufferingProgressBarVisibility(playbackState, playWhenReadyState)
+                handleLiveModeState()
+                handlePlayStatusOfOverlayAnimationsWhileBuffering(playbackState, playWhenReadyState)
+
+                logEventIfNeeded(playbackState)
+            }
+
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 super.onIsPlayingChanged(isPlaying)
-
+                streaming = isPlaying
                 handlePlaybackStatus(isPlaying)
                 handlePlayStatusOfOverlayAnimationsOnPlayPause(isPlaying)
             }
@@ -257,30 +276,32 @@ class VideoPlayerMediator(
     }
 
     private fun initCaster(
+        cast: ICast,
         player: IPlayer,
         MLSPlayerView: MLSPlayerView
     ) {
+        this.cast = cast
         fun addRemotePlayerControllerListener() {
             playerView.getRemotePlayerControllerView().listener =
                 object : RemotePlayerControllerListener {
                     override fun onPlay() {
-                        cast?.play()
+                        cast.play()
                     }
 
                     override fun onPause() {
-                        cast?.pause()
+                        cast.pause()
                     }
 
                     override fun onSeekTo(newPosition: Long) {
-                        cast?.seekTo(newPosition)
+                        cast.seekTo(newPosition)
                     }
 
                     override fun onFastForward(amount: Long) {
-                        cast?.fastForward(amount)
+                        cast.fastForward(amount)
                     }
 
                     override fun onRewind(amount: Long) {
-                        cast?.rewind(amount)
+                        cast.rewind(amount)
                     }
                 }
         }
@@ -291,7 +312,7 @@ class VideoPlayerMediator(
         }
 
 
-        cast?.let {
+        cast.let {
             fun onApplicationDisconnected(casterSession: ICasterSession?) {
                 updatePlaybackLocation(LOCAL)
                 switchControllerMode(LOCAL)
@@ -315,8 +336,8 @@ class VideoPlayerMediator(
                 switchControllerMode(REMOTE)
                 addRemotePlayerControllerListener()
                 stopYoubora()
-                dataManager.currentEvent?.let {
-                    loadRemoteMedia(it)
+                dataManager.currentEvent?.let { event ->
+                    loadRemoteMedia(event)
                 }
                 if (player.isPlaying()) {
                     player.pause()
@@ -389,20 +410,10 @@ class VideoPlayerMediator(
     }
 
     private fun initAnalytic(
-        internalBuilder: InternalBuilder,
         activity: Activity,
-        exoPlayer: ExoPlayer
+        exoPlayer: ExoPlayer,
+        plugin: Plugin
     ) {
-        val youboraOptions = Options()
-        youboraOptions.accountCode = if (BuildConfig.DEBUG) {
-            MYCUJOO_DEV_YOUBORA_ACCOUNT_NAME
-        } else {
-            MYCUJOO_PRODUCTION_YOUBORA_ACCOUNT_NAME
-        }
-        youboraOptions.isAutoDetectBackground = true
-
-        val plugin = internalBuilder.createYouboraPlugin(youboraOptions, activity)
-
         plugin.activity = activity
         plugin.adapter = internalBuilder.createExoPlayerAdapter(exoPlayer)
 
@@ -458,8 +469,7 @@ class VideoPlayerMediator(
         this.updateId = updateId
         cancelStreamUrlPulling()
         dispatcher.launch(context = Dispatchers.Main) {
-            val result = dataManager.getEventDetails(eventId, updateId)
-            when (result) {
+            when (val result = dataManager.getEventDetails(eventId, updateId)) {
                 is Success -> {
                     dataManager.currentEvent = result.value
                     updateStreamStatus(result.value)
@@ -519,14 +529,18 @@ class VideoPlayerMediator(
      * So it does not matter the stream url exist in the given param. Always the response from server will be used.
      */
     override fun playVideo(event: EventEntity) {
+        if(event.id != dataManager.currentEvent?.id) {
+            if (streaming) streaming = false
+        }
+        dataManager.currentEvent = event
+        updateStreamStatus(event)
+        playVideoOrDisplayEventInfo(event)
+
+        // If the event is constructed manually and not a native MLS, it should not be replaced with any other version
         if (event.isNativeMLS) {
-            playVideo(event.id)
-            storeEvent(event)
-        } else {
-            playExternalEvent(event)
-            dataManager.currentEvent = event
-            cancelPulling()
-            updateStreamStatus(event)
+            joinEvent(event)
+            startStreamUrlPullingIfNeeded(event)
+            fetchActions(event, true)
         }
     }
 
@@ -538,15 +552,9 @@ class VideoPlayerMediator(
         isLive = false
 
         dispatcher.launch(context = Dispatchers.Main) {
-            val result = dataManager.getEventDetails(eventId, updateId)
-            when (result) {
+            when (val result = dataManager.getEventDetails(eventId, updateId)) {
                 is Success -> {
-                    dataManager.currentEvent = result.value
-                    updateStreamStatus(result.value)
-                    playVideoOrDisplayEventInfo(result.value)
-                    joinEvent(result.value)
-                    fetchActions(result.value, true)
-                    startStreamUrlPullingIfNeeded(result.value)
+                    playVideo(result.value)
                 }
                 is NetworkError -> {
                     logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
@@ -564,25 +572,28 @@ class VideoPlayerMediator(
      * @param event the externally defined event which is about to play
      */
     private fun playExternalEvent(event: EventEntity) {
-        player.play(
-            MediaDatum.MediaData(
-                fullUrl = event.streams.first().fullUrl!!,
-                dvrWindowSize = Long.MAX_VALUE,
-                autoPlay = videoPlayerConfig.autoPlay
-            )
-        )
-        playerView.updateControllerVisibility(videoPlayerConfig.autoPlay)
+        event.streams.firstOrNull()?.let {
 
-        playerView.setEventInfo(
-            event.title,
-            event.description,
-            event.getFormattedStartTimeDate()
-        )
-        playerView.hideInfoDialogs()
-        if (videoPlayerConfig.showEventInfoButton) {
-            playerView.showEventInfoButton()
-        } else {
-            playerView.hideEventInfoButton()
+            player.play(
+                MediaDatum.MediaData(
+                    fullUrl = event.streams.first().fullUrl.toString(),
+                    dvrWindowSize = Long.MAX_VALUE,
+                    autoPlay = videoPlayerConfig.autoPlay
+                )
+            )
+            playerView.updateControllerVisibility(videoPlayerConfig.autoPlay)
+
+            playerView.setEventInfo(
+                event.title,
+                event.description,
+                event.getFormattedStartTimeDate()
+            )
+            playerView.hideInfoDialogs()
+            if (videoPlayerConfig.showEventInfoButton) {
+                playerView.showEventInfoButton()
+            } else {
+                playerView.hideEventInfoButton()
+            }
         }
     }
 
@@ -914,14 +925,14 @@ class VideoPlayerMediator(
         if (event.streams.isEmpty() || event.streams.first().fullUrl == null) {
             return
         }
-        val fullUrl = event.streams.first().fullUrl!!
+        val fullUrl = event.streams.first().fullUrl.toString()
         val widevine = event.streams.first().widevine
 
 
         val params = CasterLoadRemoteMediaParams(
             id = event.id,
             publicKey = publicKey,
-            uuid = uuid,
+            uuid = internalBuilder.getUuid(),
             widevine = widevine,
             fullUrl = fullUrl,
             title = event.title,
@@ -958,13 +969,6 @@ class VideoPlayerMediator(
         }
     }
 
-    /**endregion */
-
-    /**region Internal class*/
-    companion object {
-        const val MYCUJOO_DEV_YOUBORA_ACCOUNT_NAME = "mycujoodev"
-        const val MYCUJOO_PRODUCTION_YOUBORA_ACCOUNT_NAME = "mycujoo"
-    }
     /**endregion */
 
 }

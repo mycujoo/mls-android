@@ -3,9 +3,10 @@ package tv.mycujoo.mcls.widgets
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import kotlinx.android.synthetic.main.dialog_event_info_pre_event_layout.view.*
+import android.widget.TextView
 import tv.mycujoo.mcls.R
 
 /**
@@ -22,14 +23,15 @@ class CustomInformationDialog(
     init {
         LayoutInflater.from(context)
             .inflate(R.layout.dialog_event_info_pre_event_layout, this, true)
+
         container.addView(this)
 
-        preEventInfoDialog_textualLayout.visibility = VISIBLE
-        eventInfoPreEventDialog_posterView.visibility = GONE
+        this.findViewById<View>(R.id.preEventInfoDialog_textualLayout).visibility = VISIBLE
+        this.findViewById<View>(R.id.eventInfoPreEventDialog_posterView).visibility = GONE
 
-        preEventInfoDialog_titleTextView.text = uiEvent.title ?: ""
-        preEventInfoDialog_bodyTextView.text = message
-        preEventInfoDialog_bodyTextView.setTextColor(Color.RED)
-        preEventInfoDialog_startTimeTextView.visibility = GONE
+        this.findViewById<TextView>(R.id.preEventInfoDialog_titleTextView).text = uiEvent.title ?: ""
+        this.findViewById<TextView>(R.id.preEventInfoDialog_bodyTextView).text = message
+        this.findViewById<TextView>(R.id.preEventInfoDialog_bodyTextView).setTextColor(Color.RED)
+        this.findViewById<TextView>(R.id.preEventInfoDialog_startTimeTextView).visibility = GONE
     }
 }

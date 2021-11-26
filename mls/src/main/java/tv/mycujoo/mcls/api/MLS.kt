@@ -3,32 +3,21 @@ package tv.mycujoo.mcls.api
 import android.content.Context
 import android.content.res.AssetManager
 import android.os.Build
-import android.os.Handler
 import com.caverock.androidsvg.SVG
+import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ui.AdViewProvider
 import com.google.android.exoplayer2.util.Util
-import kotlinx.coroutines.CoroutineScope
-import okhttp3.OkHttpClient
-import tv.mycujoo.domain.repository.EventsRepository
-import tv.mycujoo.mcls.core.InternalBuilder
+import dagger.hilt.android.qualifiers.ApplicationContext
 import tv.mycujoo.mcls.core.VideoPlayerMediator
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
-import tv.mycujoo.mcls.enum.C.Companion.UUID_PREF_KEY
 import tv.mycujoo.mcls.helper.SVGAssetResolver
 import tv.mycujoo.mcls.helper.TypeFaceFactory
 import tv.mycujoo.mcls.manager.IPrefManager
-import tv.mycujoo.mcls.manager.VariableKeeper
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.mediator.AnnotationMediator
-import tv.mycujoo.mcls.mediator.AnnotationMediatorFactory
-import tv.mycujoo.mcls.network.Api
-import tv.mycujoo.mcls.network.RemoteApi
-import tv.mycujoo.mcls.player.MediaOnLoadCompletedListener
-import tv.mycujoo.mcls.player.Player
-import tv.mycujoo.mcls.player.Player.Companion.createExoPlayer
+import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
-import java.util.*
 import javax.inject.Inject
 
 /**
@@ -37,88 +26,46 @@ import javax.inject.Inject
  * @constructor takes MLSBuilder and returns implementation of MLSAbstract
  * @see MLSAbstract
  */
-class MLS @Inject constructor(private val builder: MLSBuilder) : MLSAbstract() {
-
+class MLS @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val videoPlayerMediator: VideoPlayerMediator,
+    private val dataManager: IDataManager,
+    private val viewHandler: IViewHandler,
+    private val prefManager: IPrefManager,
+    private val annotationMediator: AnnotationMediator,
+    private val player: IPlayer,
+    private val assetManager: AssetManager,
+) : MLSAbstract() {
 
     /**region Fields*/
-    private lateinit var eventsRepository: EventsRepository
-
-    private lateinit var dispatcher: CoroutineScope
-    private lateinit var okHttpClient: OkHttpClient
-
-    private lateinit var dataManager: IDataManager
-
-    private lateinit var prefManager: IPrefManager
-    private var context: Context
-
-    private var api: Api
-
     private lateinit var playerView: MLSPlayerView
 
     private var mediatorInitialized = false
-    private lateinit var videoPlayerMediator: VideoPlayerMediator
-    private lateinit var annotationMediator: AnnotationMediator
-    private lateinit var player: Player
 
-    private lateinit var viewHandler: IViewHandler
-    private lateinit var variableKeeper: VariableKeeper
+    private lateinit var builder: MLSBuilder
     /**endregion */
-
-    /**region Initializing*/
-    init {
-        checkNotNull(builder.activity, { "given activity can't be null" })
-        this.context = builder.activity!!
-
-        api = RemoteApi()
-    }
 
     /**
      * initialize component which are prepared by Internal builder in this class
      * for easier access from MLS
-     * @param internalBuilder ready to use instance of InternalBuilder
+     * @param builder ready to use instance of InternalBuilder
      */
-    fun initializeComponent(internalBuilder: InternalBuilder) {
-        this.eventsRepository = internalBuilder.eventsRepository
-        this.dispatcher = internalBuilder.dispatcher
-        this.okHttpClient = internalBuilder.okHttpClient
-        this.dataManager = internalBuilder.dataManager
-        this.prefManager = internalBuilder.prefManager
-        this.viewHandler = internalBuilder.viewHandler
-        this.variableKeeper = internalBuilder.variableKeeper
-
+    fun initializeComponent(builder: MLSBuilder) {
+        this.builder = builder
+        videoPlayerMediator.videoPlayerConfig = builder.mlsConfiguration.videoPlayerConfig
         persistPublicKey(this.builder.publicKey)
 
-        internalBuilder.uuid = prefManager.get(UUID_PREF_KEY) ?: UUID.randomUUID().toString()
-        persistUUIDIfNotStoredAlready(internalBuilder.uuid!!)
-        internalBuilder.reactorSocket.setUUID(internalBuilder.uuid!!)
+        initSvgRenderingLibrary(assetManager)
 
-        initSvgRenderingLibrary(internalBuilder.getAssetManager())
-
-        videoPlayerMediator = VideoPlayerMediator(
-            builder.mlsConfiguration.videoPlayerConfig,
-            viewHandler,
-            internalBuilder.reactorSocket,
-            internalBuilder.dispatcher,
-            dataManager,
-            emptyList(),
-            builder.mCast,
-            internalBuilder.logger
-        )
-
-        player = Player().apply {
-            val exoPlayer = createExoPlayer(context)
+        player.apply {
             create(
                 builder.ima,
-                builder.internalBuilder.mediaFactory,
-                exoPlayer,
-                Handler(),
-                MediaOnLoadCompletedListener(exoPlayer)
             )
         }
+
         player.getDirectInstance()?.let { exoPlayer ->
             builder.ima?.setPlayer(exoPlayer)
         }
-
     }
 
     /**
@@ -145,38 +92,36 @@ class MLS @Inject constructor(private val builder: MLSBuilder) : MLSAbstract() {
         videoPlayerMediator.attachPlayer(MLSPlayerView)
     }
 
-    private fun initializeMediatorsIfNeeded(
-        MLSPlayerView: MLSPlayerView
-    ) {
+    private fun initializeMediatorsIfNeeded(mMLSPlayerView: MLSPlayerView) {
         if (mediatorInitialized) {
-            MLSPlayerView.playerView.onResume()
-            val exoPlayer = createExoPlayer(context)
-            player.reInit(exoPlayer)
-            videoPlayerMediator.initialize(MLSPlayerView, player, builder)
+            mMLSPlayerView.playerView.onResume()
+            player.reInit(ExoPlayer.Builder(context)
+                .setSeekBackIncrementMs(10000)
+                .setSeekForwardIncrementMs(10000)
+                .build())
+            videoPlayerMediator.initialize(mMLSPlayerView, builder)
 
             builder.ima?.let { ima ->
                 ima.setPlayer(player.getDirectInstance()!!)
-                ima.setAdViewProvider(MLSPlayerView.playerView)
+                ima.setAdViewProvider(mMLSPlayerView.playerView)
             }
 
-            annotationMediator = AnnotationMediatorFactory.createAnnotationMediator(
-                MLSPlayerView,
-                builder.internalBuilder,
-                videoPlayerMediator.getPlayer()
-            )
+            annotationMediator.initPlayerView(playerView)
             videoPlayerMediator.setAnnotationMediator(annotationMediator)
             return
         }
         mediatorInitialized = true
 
-        builder.ima?.setAdViewProvider(MLSPlayerView.playerView as AdViewProvider)
+        builder.ima?.setAdViewProvider(mMLSPlayerView.playerView as AdViewProvider)
 
-        videoPlayerMediator.initialize(MLSPlayerView, player, builder)
-        annotationMediator = AnnotationMediatorFactory.createAnnotationMediator(
-            MLSPlayerView,
-            builder.internalBuilder,
-            videoPlayerMediator.getPlayer()
+        videoPlayerMediator.initialize(
+            mMLSPlayerView,
+            builder,
+            emptyList(),
+            cast = this.builder.cast
         )
+
+        annotationMediator.initPlayerView(playerView)
         videoPlayerMediator.setAnnotationMediator(annotationMediator)
     }
 
@@ -201,7 +146,7 @@ class MLS @Inject constructor(private val builder: MLSBuilder) : MLSAbstract() {
      */
     override fun onResume(MLSPlayerView: MLSPlayerView) {
         if (Util.SDK_INT < Build.VERSION_CODES.N) {
-            initializeMediators(MLSPlayerView)
+            initializeMediatorsIfNeeded(MLSPlayerView)
         }
         videoPlayerMediator.onResume()
     }
@@ -273,15 +218,5 @@ class MLS @Inject constructor(private val builder: MLSBuilder) : MLSAbstract() {
         prefManager.persist(PUBLIC_KEY_PREF_KEY, publicKey)
     }
 
-    /**
-     * store UUID in shared pref, if it's NOT already stored
-     * @param uuid user's unique identifier
-     */
-    private fun persistUUIDIfNotStoredAlready(uuid: String) {
-        val storedUUID = prefManager.get(UUID_PREF_KEY)
-        if (storedUUID == null) {
-            prefManager.persist(UUID_PREF_KEY, uuid)
-        }
-    }
     /**endregion */
 }

@@ -17,7 +17,7 @@ enum class EventStatus {
     companion object {
         fun fromValueOrUnspecified(value: String) =
             values()
-                .firstOrNull { it.name.toLowerCase(Locale.ENGLISH) == value }
+                .firstOrNull { it.name.lowercase(Locale.ENGLISH) == value }
                 ?: EVENT_STATUS_UNSPECIFIED
     }
 }

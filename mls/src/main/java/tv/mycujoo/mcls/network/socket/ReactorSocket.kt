@@ -4,18 +4,17 @@ import android.util.Log
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
+import tv.mycujoo.mcls.core.InternalBuilder
 import tv.mycujoo.mcls.model.JoinTimelineParam
+import javax.inject.Inject
 
-class ReactorSocket(
+class ReactorSocket @Inject constructor(
     private val okHttpClient: OkHttpClient,
-    private val mainSocketListener: MainWebSocketListener
-) :
-    IReactorSocket {
-
+    private val mainSocketListener: MainWebSocketListener,
+    private val internalBuilder: InternalBuilder
+) : IReactorSocket {
 
     private lateinit var webSocket: WebSocket
-
-    private lateinit var uuid: String
 
     private var created = false
     private var connected = false
@@ -24,18 +23,8 @@ class ReactorSocket(
     private lateinit var timelineId: String
     private lateinit var updateId: String
 
-
     override fun addListener(reactorCallback: ReactorCallback) {
         mainSocketListener.addListener(ReactorListener(reactorCallback))
-    }
-
-
-    /**
-     * Must be called before any usage!
-     * @param uuid must be persisted on phones storage to be unique
-     */
-    override fun setUUID(uuid: String) {
-        this.uuid = uuid
     }
 
     /**
@@ -47,9 +36,6 @@ class ReactorSocket(
      *  @param eventId
      */
     override fun joinEvent(eventId: String) {
-        if (this::uuid.isInitialized.not()) {
-            throw UninitializedPropertyAccessException("uuid must be initialized")
-        }
         if (connected) {
             leave(false)
         }
@@ -119,7 +105,7 @@ class ReactorSocket(
     }
 
 
-    fun leaveTimeline() {
+    private fun leaveTimeline() {
         if (this::timelineId.isInitialized && joinedTimeline) {
             webSocket.send("$LEAVE_TIMELINE$timelineId")
             joinedTimeline = false
@@ -131,7 +117,7 @@ class ReactorSocket(
         webSocket = okHttpClient.newWebSocket(request, mainSocketListener)
         created = true
 
-        webSocket.send("$SESSION_ID$uuid")
+        webSocket.send("$SESSION_ID${internalBuilder.getUuid()}")
     }
 
 

@@ -3,8 +3,7 @@ name: Android Lib Test
 on:
   push:
     branches:
-      # Suspending this for now, due to JVM related error
-      - 'null'
+      - 'trunk'
 
 jobs:
   deploy:
@@ -15,10 +14,13 @@ jobs:
       - name: Setup JDK
         uses: actions/setup-java@v1
         with:
-          java-version: "12.x"
+          java-version: "17.x"
 
       - name: Bundle install
         run: bundle update --bundler && bundle install
+
+      - name: Init Local Properties for Gradle Config
+        run: touch local.properties
 
       - name: Run JUnit tests
         run: bundle exec fastlane tests

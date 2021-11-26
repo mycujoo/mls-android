@@ -19,3 +19,19 @@
 
 fastlane/report.xml
 fastlane/README.md
+app_test/
+
+/app/.classpath
+/cast/.classpath
+/ima/.classpath
+/mls/.classpath
+/app/.project
+/cast/.project
+/ima/.project
+/mls/.project
+/.project
+/.settings/org.eclipse.buildship.core.prefs
+/app/.settings/org.eclipse.buildship.core.prefs
+/cast/.settings/org.eclipse.buildship.core.prefs
+/ima/.settings/org.eclipse.buildship.core.prefs
+/mls/.settings/org.eclipse.buildship.core.prefs

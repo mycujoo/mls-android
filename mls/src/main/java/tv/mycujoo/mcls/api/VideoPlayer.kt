@@ -24,16 +24,23 @@ class VideoPlayer(
     private var optimisticSeekingPosition = -1
 
     init {
-        exoPlayer.addListener(object : Player.EventListener {
-            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                super.onPlayerStateChanged(playWhenReady, playbackState)
+        exoPlayer.addListener(object : Player.Listener {
+            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                super.onPlayWhenReadyChanged(playWhenReady, reason)
+                if (reason == STATE_READY) {
+                    optimisticSeekingPosition = -1
+                }
+            }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                super.onPlaybackStateChanged(playbackState)
+
                 if (playbackState == STATE_READY) {
                     optimisticSeekingPosition = -1
                 }
             }
         })
     }
-
 
     /**region VideoPlayerContract: Player Higher level control*/
     override fun playVideo(event: EventEntity) {
@@ -58,7 +65,6 @@ class VideoPlayer(
     }
 
     /**endregion */
-
 
     /**region PlayerController*/
     fun getPlayerController(): PlayerController {
@@ -102,11 +108,11 @@ class VideoPlayer(
     }
 
     override fun isMuted(): Boolean {
-        return exoPlayer.audioComponent?.volume == 0F
+        return exoPlayer.volume == 0F
     }
 
     override fun mute() {
-        exoPlayer.audioComponent?.volume = 0F
+        exoPlayer.volume = 0F
     }
 
     override fun showEventInfoOverlay() {
@@ -140,6 +146,4 @@ class VideoPlayer(
         return exoPlayer.isPlayingAd
     }
     /**endregion */
-
-
 }

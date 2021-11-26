@@ -1,5 +1,6 @@
 package tv.mycujoo.mcls.api
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import tv.mycujoo.data.entity.ActionResponse
@@ -10,7 +11,7 @@ import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.params.EventIdPairParam
 import tv.mycujoo.domain.params.EventListParams
 import tv.mycujoo.domain.params.TimelineIdPairParam
-import tv.mycujoo.domain.repository.EventsRepository
+import tv.mycujoo.domain.repository.IEventsRepository
 import tv.mycujoo.domain.usecase.GetActionsUseCase
 import tv.mycujoo.domain.usecase.GetEventDetailUseCase
 import tv.mycujoo.domain.usecase.GetEventsUseCase
@@ -20,18 +21,20 @@ import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.model.SingleLiveEvent
+import javax.inject.Inject
 
 /**
  * Serves client as 'Data Provider'
  * Serves internal usage as 'Internal Data Provider'
  * @param scope CoroutineScope which calls will made on it's context
- * @param eventsRepository actual implementation of EventsRepository, used to call Use-Cases
  * @param logger log info, error & warning based on required level of logging
  */
-class DataManager(
+class DataManager @Inject constructor(
     private val scope: CoroutineScope,
-    private val eventsRepository: EventsRepository,
-    private val logger: Logger
+    private val logger: Logger,
+    private val getEventDetailUseCase: GetEventDetailUseCase,
+    private val getActionsUseCase: GetActionsUseCase,
+    private val getEventsUseCase: GetEventsUseCase
 ) : IDataManager {
 
 
@@ -65,7 +68,7 @@ class DataManager(
         eventId: String,
         updateId: String?
     ): Result<Exception, EventEntity> {
-        return GetEventDetailUseCase(eventsRepository).execute(EventIdPairParam(eventId, updateId))
+        return getEventDetailUseCase.execute(EventIdPairParam(eventId, updateId))
     }
 
     /**
@@ -86,7 +89,7 @@ class DataManager(
         timelineId: String,
         updateId: String?
     ): Result<Exception, ActionResponse> {
-        return GetActionsUseCase(eventsRepository).execute(
+        return getActionsUseCase.execute(
             TimelineIdPairParam(
                 timelineId,
                 updateId
@@ -119,7 +122,7 @@ class DataManager(
         this.fetchEventCallback = fetchEventCallback
         scope.launch {
 
-            val result = GetEventsUseCase(eventsRepository).execute(
+            val result = getEventsUseCase.execute(
                 EventListParams(
                     pageSize,
                     pageToken,
@@ -132,18 +135,17 @@ class DataManager(
                     events.postValue(
                         result.value.eventEntities
                     )
-                    fetchEventCallback?.let {
-                        it.invoke(
-                            result.value.eventEntities,
-                            result.value.previousPageToken ?: "",
-                            result.value.nextPageToken ?: ""
-                        )
-                    }
+                    fetchEventCallback?.invoke(
+                        result.value.eventEntities,
+                        result.value.previousPageToken ?: "",
+                        result.value.nextPageToken ?: ""
+                    )
                 }
                 is Result.NetworkError -> {
                     logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus(" ${result.error}"))
                 }
                 is Result.GenericError -> {
+                    Log.d(TAG, "fetchEvents: Error ${result.errorCode}")
                     logger.log(
                         MessageLevel.DEBUG,
                         C.INTERNAL_ERROR_MESSAGE.plus(" ${result.errorMessage} ${result.errorCode}")
@@ -154,4 +156,8 @@ class DataManager(
         }
     }
     /**endregion */
+
+    companion object {
+        private const val TAG = "DataManager"
+    }
 }

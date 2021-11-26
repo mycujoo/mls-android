@@ -1,9 +1,10 @@
 package tv.mycujoo.mcls.tv.player
 
-import android.app.Activity
+import android.content.Context
 import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -16,10 +17,10 @@ import androidx.leanback.media.PlaybackGlue
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter
 import com.google.android.exoplayer2.ui.AdViewProvider
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.entity.Stream
@@ -30,14 +31,15 @@ import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.enum.StreamStatus
-import tv.mycujoo.mcls.helper.DownloaderClient
 import tv.mycujoo.mcls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.model.JoinTimelineParam
 import tv.mycujoo.mcls.network.socket.IReactorSocket
-import tv.mycujoo.mcls.player.*
-import tv.mycujoo.mcls.player.Player.Companion.createExoPlayer
+import tv.mycujoo.mcls.player.IPlayer
+import tv.mycujoo.mcls.player.MediaDatum
+import tv.mycujoo.mcls.player.MediaFactory
+import tv.mycujoo.mcls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mcls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackTransportControlGlueImpl
@@ -46,62 +48,63 @@ import tv.mycujoo.mcls.widgets.CustomInformationDialog
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mcls.widgets.PreEventInformationDialog
 import tv.mycujoo.mcls.widgets.UiEvent
-import java.util.concurrent.Executors
+import javax.inject.Inject
 
-@OptIn(ExperimentalStdlibApi::class)
-class TvVideoPlayer(
-    private val activity: Activity,
-    videoSupportFragment: VideoSupportFragment,
-    private val ima: IIma?,
-    mlsTVConfiguration: MLSTVConfiguration,
+class TvVideoPlayer @Inject constructor(
+    @ApplicationContext val context: Context,
     private val mediaFactory: MediaFactory,
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
-    okHttpClient: OkHttpClient,
-    logger: Logger
+    private val logger: Logger,
+    private val player: IPlayer,
+    private val tvAnnotationMediator: TvAnnotationMediator,
+    private val exoPlayer: ExoPlayer
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
+    lateinit var videoSupportFragment: VideoSupportFragment
+    var ima: IIma? = null
+    var mlsTVConfiguration: MLSTVConfiguration = MLSTVConfiguration()
 
     /**region Fields*/
-    var player: IPlayer
-    private var leanbackAdapter: LeanbackPlayerAdapter
-    private var glueHost: VideoSupportFragmentGlueHost
-    private var mTransportControlGlue: MLSPlaybackTransportControlGlueImpl<LeanbackPlayerAdapter>
-    private var eventInfoContainerLayout: FrameLayout
+    private lateinit var leanbackAdapter: LeanbackPlayerAdapter
+    private lateinit var glueHost: VideoSupportFragmentGlueHost
+    private lateinit var mTransportControlGlue: MLSPlaybackTransportControlGlueImpl<LeanbackPlayerAdapter>
+    private lateinit var eventInfoContainerLayout: FrameLayout
     private val dialogs = ArrayList<View>()
-    private var controllerAgent: ControllerAgent
+    private lateinit var controllerAgent: ControllerAgent
 
-    private var tvAnnotationMediator: TvAnnotationMediator
-    private var overlayContainer: ConstraintLayout
+    private lateinit var overlayContainer: ConstraintLayout
     /**endregion */
 
+    /**
+     * Latest updateId received from Reactor service, or null if not joined at all
+     */
+    private var updateId: String? = null
+
     /**region Initializing*/
-    init {
+    fun initialize(videoSupportFragment: VideoSupportFragment) {
+        this.videoSupportFragment = videoSupportFragment
+
         val adViewProvider = addAdViewProvider(videoSupportFragment.view)
         ima?.setAdViewProvider(adViewProvider)
 
-        player = Player()
-            .apply {
-                val exoplayer = createExoPlayer(activity)
-                val mediaOnLoadCompletedListener = MediaOnLoadCompletedListener(exoplayer)
-                create(
-                    ima,
-                    mediaFactory,
-                    exoplayer,
-                    Handler(),
-                    mediaOnLoadCompletedListener
-                )
-            }
-        player.getDirectInstance()?.let { exoPlayer ->
+        player.apply {
+            create(
+                ima,
+            )
+        }
+
+        this.player.getDirectInstance()?.let { exoPlayer ->
             ima?.setPlayer(exoPlayer)
         }
 
-        player.getDirectInstance()!!.playWhenReady = mlsTVConfiguration.videoPlayerConfig.autoPlay
-        leanbackAdapter = LeanbackPlayerAdapter(activity, player.getDirectInstance()!!, 1000)
+        this.player.getDirectInstance()!!.playWhenReady =
+            mlsTVConfiguration.videoPlayerConfig.autoPlay
+        leanbackAdapter = LeanbackPlayerAdapter(context, this.player.getDirectInstance()!!, 1000)
         glueHost = VideoSupportFragmentGlueHost(videoSupportFragment)
 
-        val progressBar = ProgressBar(activity)
+        val progressBar = ProgressBar(context)
         progressBar.indeterminateDrawable.setTint(Color.parseColor(mlsTVConfiguration.videoPlayerConfig.primaryColor))
         val layoutParams = FrameLayout.LayoutParams(120, 120)
         layoutParams.gravity = Gravity.CENTER
@@ -109,13 +112,12 @@ class TvVideoPlayer(
         (videoSupportFragment.requireView() as FrameLayout).addView(progressBar, layoutParams)
         controllerAgent = ControllerAgent(player.getPlayer()!!)
         controllerAgent.setBufferProgressBar(progressBar)
-        mTransportControlGlue =
-            MLSPlaybackTransportControlGlueImpl(
-                activity,
-                leanbackAdapter,
-                mlsTVConfiguration,
-                controllerAgent
-            )
+        mTransportControlGlue = MLSPlaybackTransportControlGlueImpl(
+            context,
+            leanbackAdapter,
+            mlsTVConfiguration,
+            controllerAgent
+        )
         mTransportControlGlue.host = glueHost
         mTransportControlGlue.playWhenPrepared()
 
@@ -128,7 +130,7 @@ class TvVideoPlayer(
                     if (glue?.isPrepared == true) {
                         glue.removePlayerCallback(this)
                         val transportControlGlue =
-                            glue as MLSPlaybackTransportControlGlueImpl<LeanbackPlayerAdapter>
+                            glue as MLSPlaybackTransportControlGlueImpl<*>
                         transportControlGlue.seekProvider = MLSPlaybackSeekDataProvider(5000L)
                     }
 
@@ -136,7 +138,7 @@ class TvVideoPlayer(
             })
         }
 
-        player.addListener(object : com.google.android.exoplayer2.Player.EventListener {
+        this.player.addListener(object : com.google.android.exoplayer2.Player.Listener {
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 if (playbackState == ExoPlayer.STATE_READY) {
                     mTransportControlGlue.seekProvider?.let {
@@ -169,15 +171,6 @@ class TvVideoPlayer(
                 FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
             )
 
-            tvAnnotationMediator = TvAnnotationMediator(
-                player,
-                overlayContainer,
-                Executors.newScheduledThreadPool(1),
-                Handler(Looper.getMainLooper()),
-                dispatcher,
-                DownloaderClient(okHttpClient)
-            )
-
             eventInfoContainerLayout = FrameLayout(rootView.context)
             rootView.addView(
                 eventInfoContainerLayout,
@@ -198,13 +191,13 @@ class TvVideoPlayer(
     override fun onReactorEventUpdate(eventId: String, updateId: String) {
         cancelStreamUrlPulling()
         dispatcher.launch(context = Dispatchers.Main) {
-            val result = dataManager.getEventDetails(eventId, updateId)
-            when (result) {
+            when (val result = dataManager.getEventDetails(eventId, updateId)) {
                 is Result.Success -> {
                     dataManager.currentEvent = result.value
                     updateStreamStatus(result.value)
                     playVideoOrDisplayEventInfo(result.value)
                     startStreamUrlPullingIfNeeded(result.value)
+                    fetchActions(result.value, true)
                 }
                 is Result.NetworkError -> {
                     logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
@@ -243,7 +236,7 @@ class TvVideoPlayer(
             when (val result = dataManager.getActions(timelineId, updateId)) {
                 is Result.Success -> {
 
-                    tvAnnotationMediator.feed(result.value.data.map { it.toAction() })
+                    tvAnnotationMediator.feed(result.value)
 
                     if (joinTimeline) {
                         val joinTimelineParam = JoinTimelineParam(timelineId, result.value.updateId)
@@ -272,8 +265,7 @@ class TvVideoPlayer(
 
     override fun playVideo(eventId: String) {
         dispatcher.launch(context = Dispatchers.Main) {
-            val result = dataManager.getEventDetails(eventId)
-            when (result) {
+            when (val result = dataManager.getEventDetails(eventId, updateId)) {
                 is Result.Success -> {
                     dataManager.currentEvent = result.value
                     updateStreamStatus(result.value)
@@ -290,7 +282,7 @@ class TvVideoPlayer(
                 }
                 is Result.GenericError -> {
                     logger.log(
-                        MessageLevel.DEBUG,
+                        MessageLevel.ERROR,
                         C.INTERNAL_ERROR_MESSAGE.plus(" ${result.errorMessage} ${result.errorCode}")
                     )
                 }
@@ -318,12 +310,12 @@ class TvVideoPlayer(
             StreamStatus.GEOBLOCKED -> {
                 streaming = false
                 player.pause()
-                showCustomInformationDialog(activity.getString(R.string.message_geoblocked_stream))
+                showCustomInformationDialog(context.getString(R.string.message_geoblocked_stream))
             }
             StreamStatus.NO_ENTITLEMENT -> {
                 streaming = false
                 player.pause()
-                showCustomInformationDialog(activity.getString(R.string.message_no_entitlement_stream))
+                showCustomInformationDialog(context.getString(R.string.message_no_entitlement_stream))
             }
             StreamStatus.UNKNOWN_ERROR -> {
                 streaming = false
@@ -402,5 +394,6 @@ class TvVideoPlayer(
         }
         dialogs.clear()
     }
+
     /**endregion */
 }

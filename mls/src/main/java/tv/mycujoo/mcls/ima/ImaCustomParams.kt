@@ -21,7 +21,7 @@ data class ImaCustomParams(
         }
         eventStatus?.let { eventStatus ->
             val eventStatusLastPart =
-                eventStatus.name.toLowerCase(Locale.ENGLISH).substringAfter(EVENT_STATUS_FIRST_PART)
+                eventStatus.name.lowercase(Locale.ENGLISH).substringAfter(EVENT_STATUS_FIRST_PART)
             stringBuilder.append("$AMP_EVENT_STATUS_EQUALS_TO$eventStatusLastPart")
         }
         params.entries.forEach { entry ->

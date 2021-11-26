@@ -13,13 +13,13 @@ import tv.mycujoo.mcls.R
 class MLSThumbsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet?, defStyle: Int = 0) :
     LinearLayout(context, attrs, defStyle) {
     // initial value for Thumb's number before measuring the screen size
-    var mNumOfThumbs = -1
-    var mThumbWidthInPixel: Int
-    var mThumbHeightInPixel: Int
-    var mHeroThumbWidthInPixel: Int
-    var mHeroThumbHeightInPixel: Int
-    var mMeasuredMarginInPixel: Int
-    val mBitmaps = SparseArray<Bitmap?>()
+    private var mNumOfThumbs = -1
+    private var mThumbWidthInPixel: Int
+    private var mThumbHeightInPixel: Int
+    private var mHeroThumbWidthInPixel: Int
+    private var mHeroThumbHeightInPixel: Int
+    private var mMeasuredMarginInPixel: Int
+    private val mBitmaps = SparseArray<Bitmap?>()
 
     // flag to determine if the number of thumbs in thumbs bar is set by user through
     // setNumberofThumbs API or auto-calculated according to android tv design spec.
@@ -223,7 +223,7 @@ class MLSThumbsBar @JvmOverloads constructor(context: Context, attrs: AttributeS
     /**
      * Create a thumb view, it's by default a ImageView.
      */
-    protected fun createThumbView(parent: ViewGroup): View {
+    private fun createThumbView(parent: ViewGroup): View {
         return ImageView(parent.context)
     }
 

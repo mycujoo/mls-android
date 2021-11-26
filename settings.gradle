@@ -1,2 +1,4 @@
 include ':app', ':mls', ':cast', ':ima'
+
+try {if(testing == "true") include ":app_test"} catch(ignored) {}
 rootProject.name = 'MLS-App'

@@ -45,7 +45,8 @@ class AnnotationListenerTest {
     @Before
     fun setUp() {
         MockitoAnnotations.openMocks(this)
-        annotationListener = AnnotationListener(playerView, overlayViewHelper, downloaderClient)
+        annotationListener = AnnotationListener(overlayViewHelper, downloaderClient)
+        annotationListener.attachPlayer(playerView)
         whenever(playerView.overlayHost).thenReturn(overlayContainer)
         whenever(playerView.context).thenReturn(context)
         Mockito.`when`(downloaderClient.download(any(), any()))
@@ -55,8 +56,7 @@ class AnnotationListenerTest {
     /**region addOverlay() tests*/
     @Test
     fun `given overlay with intro animation to add, should add it with animation`() {
-        val introTransitionSpec = TransitionSpec(15000L, AnimationType.FADE_IN, 2000L)
-        val action = getSampleShowOverlayAction(introTransitionSpec, 25000L)
+        val action = getSampleShowOverlayAction()
 
         annotationListener.addOverlay(action)
 

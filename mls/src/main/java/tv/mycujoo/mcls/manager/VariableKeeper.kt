@@ -4,8 +4,9 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.VariableEntity
+import javax.inject.Inject
 
-class VariableKeeper(private val dispatcher: CoroutineScope) : IVariableKeeper {
+class VariableKeeper @Inject constructor(private val dispatcher: CoroutineScope) : IVariableKeeper {
 
 
     private val timerPublisherMap = HashMap<String, BehaviorRelay<String>>()

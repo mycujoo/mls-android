@@ -18,12 +18,13 @@ import tv.mycujoo.mcls.manager.VariableTranslator
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.widgets.ProportionalImageView
 import tv.mycujoo.mcls.widgets.ScaffoldView
+import javax.inject.Inject
 
 /**
  * Helps with View related operations. i.e. Add/Remove overlay view to/from screen.
  *
  */
-class OverlayViewHelper(
+class OverlayViewHelper @Inject constructor(
     private val viewHandler: IViewHandler,
     private val overlayFactory: IOverlayFactory,
     private val animationFactory: AnimationFactory,
@@ -442,7 +443,7 @@ class OverlayViewHelper(
         viewHandler.incrementIdlingResource()
 
         overlayHost.post {
-            overlayHost.children.firstOrNull { it.tag == showOverlayAction.customId }?.let { view ->
+            overlayHost.children.firstOrNull { it.tag == showOverlayAction.customId }?.let { _ ->
 
                 viewHandler.getAnimationWithTag(showOverlayAction.customId)?.let {
                     it.cancel()
@@ -508,10 +509,8 @@ class OverlayViewHelper(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT
             )
             val positionGuide = showOverlayAction.viewSpec?.positionGuide
-            if (positionGuide == null) {
-                // should not happen
+                ?: // should not happen
                 return@post
-            }
 
             applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
 

@@ -13,11 +13,7 @@ import tv.mycujoo.mcls.core.IAnnotationFactory
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mcls.enum.LogLevel
-import tv.mycujoo.mcls.helper.IDownloaderClient
 import tv.mycujoo.mcls.manager.Logger
-import tv.mycujoo.mcls.manager.VariableKeeper
-import tv.mycujoo.mcls.manager.VariableTranslator
-import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import java.util.concurrent.ScheduledExecutorService
@@ -37,19 +33,10 @@ class AnnotationMediatorTest {
     private lateinit var testCoroutineScope: TestCoroutineScope
     private lateinit var heartBeatOuterRunnable: Runnable
     private lateinit var heartBeatInnerRunnable: Runnable
-    private lateinit var eventListener: Player.EventListener
+    private lateinit var eventListener: Player.Listener
 
     @Mock
     lateinit var playerView: MLSPlayerView
-
-    @Mock
-    lateinit var viewHandler: IViewHandler
-
-    @Mock
-    lateinit var variableKeeper: VariableKeeper
-
-    @Mock
-    lateinit var variableTranslator: VariableTranslator
 
     @Mock
     lateinit var dataManager: IDataManager
@@ -67,10 +54,10 @@ class AnnotationMediatorTest {
     lateinit var handler: Handler
 
     @Mock
-    lateinit var downloaderClient: IDownloaderClient
+    lateinit var annotationFactory: IAnnotationFactory
 
     @Mock
-    lateinit var annotationFactory: IAnnotationFactory
+    lateinit var position: Player.PositionInfo
 
     /**endregion */
 
@@ -97,21 +84,20 @@ class AnnotationMediatorTest {
         }
 
         whenever(player.addListener(any())).then {
-            eventListener = it.getArgument(0) as Player.EventListener
+            eventListener = it.getArgument(0) as Player.Listener
             true
         }
 
-        annotationMediator =
-            AnnotationMediator(
-                playerView,
-                annotationFactory,
-                dataManager,
-                testCoroutineScope,
-                player,
-                scheduledExecutorService,
-                handler,
-                Logger(LogLevel.MINIMAL)
-            )
+        annotationMediator = AnnotationMediator(
+            annotationFactory,
+            dataManager,
+            testCoroutineScope,
+            Logger(LogLevel.MINIMAL),
+            player,
+            handler,
+            scheduledExecutorService,
+        )
+        annotationMediator.initPlayerView(playerView)
 
         heartBeatOuterRunnable.run()
     }
@@ -191,7 +177,11 @@ class AnnotationMediatorTest {
         whenever(player.duration()).thenReturn(400L)
 
 
-        eventListener.onPositionDiscontinuity(Player.DISCONTINUITY_REASON_SEEK)
+        eventListener.onPositionDiscontinuity(
+            position,
+            position,
+            Player.DISCONTINUITY_REASON_SEEK
+        )
 
 
 //        verify(annotationFactory).setCurrentTime(123L, true)
@@ -204,7 +194,7 @@ class AnnotationMediatorTest {
         whenever(player.duration()).thenReturn(400L)
 
 
-        eventListener.onPlayerStateChanged(true, Player.STATE_READY)
+        eventListener.onPlayWhenReadyChanged(true, Player.STATE_READY)
 
 
         verify(playerView).updateTime(123L, 400L)
@@ -214,10 +204,10 @@ class AnnotationMediatorTest {
     fun `given ready in onPlayerStateChanged of player, with pending seek, should build lingering overlays`() {
         whenever(player.currentPosition()).thenReturn(123L)
         whenever(player.duration()).thenReturn(400L)
-        eventListener.onPositionDiscontinuity(Player.DISCONTINUITY_REASON_SEEK) // make seek = true
+        eventListener.onPositionDiscontinuity(position, position, Player.DISCONTINUITY_REASON_SEEK) // make seek = true
 
 
-        eventListener.onPlayerStateChanged(true, Player.STATE_READY)
+        eventListener.onPlayWhenReadyChanged(true, Player.STATE_READY)
 
 
 //        annotationFactory.processTimers()
@@ -234,7 +224,7 @@ class AnnotationMediatorTest {
         // seek = false // default
 
 
-        eventListener.onPlayerStateChanged(true, Player.STATE_READY)
+        eventListener.onPlayWhenReadyChanged(true, Player.STATE_READY)
 
 
 //        annotationFactory.processTimers()
@@ -279,10 +269,20 @@ class AnnotationMediatorTest {
     }
 
     @Test
-    fun `should shutdown scheduler on relase`() {
+    fun `should shutdown scheduler on release`() {
+        val annotationMediator = AnnotationMediator(
+            annotationFactory,
+            dataManager,
+            testCoroutineScope,
+            Logger(LogLevel.MINIMAL),
+            player,
+            handler,
+            scheduledExecutorService,
+        )
+
         annotationMediator.release()
 
-        verify(scheduledExecutorService).shutdown()
+        verify(scheduledExecutorService, times(1)).shutdown()
     }
 
     /**endregion */

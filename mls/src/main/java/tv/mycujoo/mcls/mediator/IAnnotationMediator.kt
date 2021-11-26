@@ -18,5 +18,5 @@ interface IAnnotationMediator {
     )
 
     fun feed(actionResponse: ActionResponse)
-    fun setLocalActions(annotations: List<Action>)
+    fun setLocalActions(actions: List<Action>)
 }

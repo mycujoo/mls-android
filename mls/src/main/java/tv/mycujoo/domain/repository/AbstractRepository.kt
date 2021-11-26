@@ -1,5 +1,6 @@
 package tv.mycujoo.domain.repository
 
+import android.util.Log
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -13,7 +14,13 @@ abstract class AbstractRepository {
                 is IOException -> tv.mycujoo.domain.entity.Result.NetworkError(throwable)
                 is HttpException -> {
                     val code = throwable.code()
-
+                    Log.e(
+                        TAG,
+                        "safeApiCall: $code \n\n\n" +
+                                "${throwable.response()?.body()} \n" +
+                                "${throwable.response()?.headers()} \n" +
+                                "${throwable.response()?.raw()} \n"
+                    )
                     return tv.mycujoo.domain.entity.Result.GenericError(
                         code,
                         throwable.message()
@@ -25,5 +32,9 @@ abstract class AbstractRepository {
                 }
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "AbstractRepository"
     }
 }

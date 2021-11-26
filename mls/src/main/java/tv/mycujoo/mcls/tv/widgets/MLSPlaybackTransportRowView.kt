@@ -56,7 +56,7 @@ class MLSPlaybackTransportRowView @JvmOverloads constructor(
         if (focused != null) {
             if (direction == FOCUS_UP) {
                 var index = indexOfChild(focusedChild)
-                index = index - 1
+                index -= 1
                 while (index >= 0) {
                     val view = getChildAt(index)
                     if (view.hasFocusable()) {
@@ -66,7 +66,7 @@ class MLSPlaybackTransportRowView @JvmOverloads constructor(
                 }
             } else if (direction == FOCUS_DOWN) {
                 var index = indexOfChild(focusedChild)
-                index = index + 1
+                index += 1
                 while (index < childCount) {
                     val view = getChildAt(index)
                     if (view.hasFocusable()) {

@@ -1,11 +1,10 @@
 package tv.mycujoo.mcls.core
 
+import android.content.Context
 import android.content.res.Resources
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player.*
-import com.google.android.exoplayer2.SimpleExoPlayer
-import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Plugin
 import kotlinx.coroutines.CoroutineScope
@@ -16,9 +15,10 @@ import kotlinx.coroutines.test.runBlockingTest
 import okhttp3.OkHttpClient
 import okhttp3.WebSocket
 import org.junit.*
+import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 import org.mockito.invocation.InvocationOnMock
+import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.*
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_GEOBLOCKED
@@ -31,19 +31,20 @@ import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.api.MLSBuilder
 import tv.mycujoo.mcls.api.MLSConfiguration
 import tv.mycujoo.mcls.cast.ICast
+import tv.mycujoo.mcls.cast.ICastListener
 import tv.mycujoo.mcls.cast.ICasterSession
 import tv.mycujoo.mcls.cast.ISessionManagerListener
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.entity.msc.VideoPlayerConfig
+import tv.mycujoo.mcls.helper.OverlayViewHelper
+import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.ViewHandler
 import tv.mycujoo.mcls.matcher.SeekParameterArgumentMatcher
 import tv.mycujoo.mcls.mediator.AnnotationMediator
 import tv.mycujoo.mcls.network.socket.MainWebSocketListener
-import tv.mycujoo.mcls.network.socket.ReactorListener
 import tv.mycujoo.mcls.network.socket.ReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
-import tv.mycujoo.mcls.player.MediaFactory
 import tv.mycujoo.mcls.player.MediaDatum
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mcls.widgets.PlayerControllerMode
@@ -52,14 +53,14 @@ import tv.mycujoo.mcls.widgets.mlstimebar.MLSTimeBar
 
 
 @ExperimentalCoroutinesApi
+@RunWith(MockitoJUnitRunner::class)
 class VideoPlayerMediatorTest {
 
 
     @get:Rule
     var coroutineTestRule = CoroutineTestRule()
 
-    private lateinit var videoPlayerMediator: VideoPlayerMediator
-
+    /** region Mocks */
     @Mock
     private lateinit var playerView: MLSPlayerView
 
@@ -67,19 +68,10 @@ class VideoPlayerMediatorTest {
     private lateinit var remotePlayerControllerView: RemotePlayerControllerView
 
     @Mock
-    lateinit var MLSBuilder: MLSBuilder
+    lateinit var mMLSBuilder: MLSBuilder
 
     @Mock
     lateinit var internalBuilder: InternalBuilder
-
-    @Mock
-    lateinit var videoPlayerConfig: VideoPlayerConfig
-
-    lateinit var reactorSocket: ReactorSocket
-    private lateinit var mainWebSocketListener: MainWebSocketListener
-
-    @Mock
-    lateinit var reactorListener: ReactorListener
 
     @Mock
     lateinit var webSocket: WebSocket
@@ -103,17 +95,7 @@ class VideoPlayerMediatorTest {
     lateinit var player: IPlayer
 
     @Mock
-    lateinit var exoPlayer: SimpleExoPlayer
-    private lateinit var exoPlayerMainEventListener: MainEventListener
-
-    @Mock
-    lateinit var mediaFactory: MediaFactory
-
-    @Mock
-    lateinit var hlsMediaSource: HlsMediaSource
-
-    @Mock
-    lateinit var mediaItem: MediaItem
+    lateinit var exoPlayer: ExoPlayer
 
     @Mock
     lateinit var timeBar: MLSTimeBar
@@ -123,9 +105,6 @@ class VideoPlayerMediatorTest {
 
     @Mock
     lateinit var youboraClient: YouboraClient
-
-    @Mock
-    lateinit var youboraPlugin: Plugin
 
     @Mock
     lateinit var exoplayer2Adapter: Exoplayer2Adapter
@@ -143,32 +122,41 @@ class VideoPlayerMediatorTest {
     lateinit var cast: ICast
 
     @Mock
-    lateinit var sessionManagerListener: ISessionManagerListener
-    lateinit var castListener: tv.mycujoo.mcls.cast.ICastListener
+    lateinit var plugin: Plugin
 
+    @Mock
+    lateinit var sessionManagerListener: ISessionManagerListener
+
+    @Mock
+    lateinit var overlayViewHelper: OverlayViewHelper
+
+    @Mock
+    lateinit var context: Context
+    /** endregion */
+
+    /** region fields */
+    private lateinit var castListener: ICastListener
+    private lateinit var reactorSocket: ReactorSocket
+    private lateinit var mainWebSocketListener: MainWebSocketListener
+    private lateinit var exoPlayerMainEventListener: MainEventListener
+    private lateinit var videoPlayerMediator: VideoPlayerMediator
+
+    /** endregion */
 
     @Before
     fun setUp() {
-        MockitoAnnotations.openMocks(this)
-
-        internalBuilder.initialize()
 
         whenever(okHttpClient.newWebSocket(any(), any())).thenReturn(webSocket)
         mainWebSocketListener = MainWebSocketListener()
-        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener)
-        reactorSocket.setUUID("SAMPLE_UUID")
+        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener, internalBuilder)
 
-        whenever(MLSBuilder.activity).thenReturn(activity)
-        whenever(MLSBuilder.createExoPlayer(any())).thenReturn(exoPlayer)
-        whenever(mediaFactory.createHlsMediaSource(any())).thenReturn(hlsMediaSource)
+        whenever(mMLSBuilder.activity).thenReturn(activity)
 
-        whenever(MLSBuilder.createReactorListener(any())).thenReturn(reactorListener)
-        whenever(MLSBuilder.mlsConfiguration).thenReturn(MLSConfiguration())
-        whenever(MLSBuilder.hasAnalytic).thenReturn(true)
+        whenever(mMLSBuilder.mlsConfiguration).thenReturn(MLSConfiguration())
+        whenever(mMLSBuilder.hasAnalytic).thenReturn(true)
 
-        whenever(MLSBuilder.publicKey).thenReturn("SAMPLE_PUBLIC_KEY")
-        whenever(MLSBuilder.internalBuilder).thenReturn(internalBuilder)
-        whenever(internalBuilder.createYouboraPlugin(any(), any())).thenReturn(youboraPlugin)
+        whenever(mMLSBuilder.publicKey).thenReturn("SAMPLE_PUBLIC_KEY")
+        whenever(mMLSBuilder.youboraPlugin).thenReturn(plugin)
         whenever(internalBuilder.createExoPlayerAdapter(any())).thenReturn(exoplayer2Adapter)
         whenever(internalBuilder.createYouboraClient(any())).thenReturn(youboraClient)
         whenever(internalBuilder.logger).thenReturn(logger)
@@ -187,27 +175,22 @@ class VideoPlayerMediatorTest {
 
 
         whenever(player.addListener(any())).then { storeExoPlayerListener(it) }
-        whenever(
-            cast.initialize(
-                any(),
-                any()
-            )
-        )
+        whenever(cast.initialize(any(), any()))
             .thenAnswer {
                 storeCastListener(it)
                 return@thenAnswer sessionManagerListener
             }
         videoPlayerMediator = VideoPlayerMediator(
-            videoPlayerConfig,
             viewHandler,
             reactorSocket,
             dispatcher,
             dataManager,
-            emptyList(),
-            cast,
-            internalBuilder.logger
+            internalBuilder.logger,
+            internalBuilder,
+            player,
+            overlayViewHelper
         )
-        videoPlayerMediator.initialize(playerView, player, MLSBuilder)
+        videoPlayerMediator.initialize(playerView, mMLSBuilder, listOf(), cast)
         videoPlayerMediator.setAnnotationMediator(annotationMediator)
     }
 
@@ -218,8 +201,8 @@ class VideoPlayerMediatorTest {
     }
 
     private fun storeCastListener(invocationOnMock: InvocationOnMock) {
-        if (invocationOnMock.arguments[1] is tv.mycujoo.mcls.cast.ICastListener) {
-            castListener = invocationOnMock.arguments[1] as tv.mycujoo.mcls.cast.ICastListener
+        if (invocationOnMock.arguments[1] is ICastListener) {
+            castListener = invocationOnMock.arguments[1] as ICastListener
         }
     }
 
@@ -230,7 +213,7 @@ class VideoPlayerMediatorTest {
 
     @Test
     fun `ensure seek_tolerance is applied`() {
-        verify(exoPlayer).setSeekParameters(argThat(SeekParameterArgumentMatcher(MLSBuilder.mlsConfiguration.seekTolerance)))
+        verify(exoPlayer).setSeekParameters(argThat(SeekParameterArgumentMatcher(mMLSBuilder.mlsConfiguration.seekTolerance)))
     }
 
     @Test
@@ -244,11 +227,21 @@ class VideoPlayerMediatorTest {
     @Test
     fun `given eventEntity to play, should fetch event details`() =
         runBlockingTest {
-            val event: EventEntity = getSampleEventEntity(emptyList())
-            videoPlayerMediator.playVideo(event)
+            val event: EventEntity = getSampleEventEntity(getSampleStreamList())
+            videoPlayerMediator.playVideo(event.id)
 
 
             verify(dataManager).getEventDetails(event.id)
+        }
+
+    @Test
+    fun `given eventEntity to play, should not fetch event details`() =
+        runBlockingTest {
+            val event: EventEntity = getSampleEventEntity(getSampleStreamList())
+            videoPlayerMediator.playVideo(event)
+
+
+            verify(dataManager, never()).getEventDetails(event.id)
         }
 
     @Test
@@ -259,8 +252,6 @@ class VideoPlayerMediatorTest {
                 eventEntityDetails
             )
         )
-        whenever(mediaFactory.createMediaItem(any())).thenReturn(mediaItem)
-        whenever(mediaFactory.createHlsMediaSource(any())).thenReturn(hlsMediaSource)
 
 
         videoPlayerMediator.playVideo(eventEntityDetails)
@@ -282,14 +273,13 @@ class VideoPlayerMediatorTest {
         coroutineTestRule.testDispatcher.advanceTimeBy(61000L)
         videoPlayerMediator.cancelPulling()
 
-        verify(dataManager, times(1)).getEventDetails(eventEntityDetails.id, null)
+        verify(dataManager, never()).getEventDetails(eventEntityDetails.id, null)
     }
 
     @Test
     fun `given event without streamUrl, should not play video`() = runBlockingTest {
         val event: EventEntity = getSampleEventEntity(emptyList())
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
-        whenever(mediaFactory.createHlsMediaSource(any<MediaItem>())).thenReturn(hlsMediaSource)
 
 
         videoPlayerMediator.playVideo(event)
@@ -423,7 +413,7 @@ class VideoPlayerMediatorTest {
         coroutineTestRule.testDispatcher.advanceTimeBy(61000L)
         videoPlayerMediator.cancelPulling()
 
-        verify(dataManager, times(3)).getEventDetails(event.id, null)
+        verify(dataManager, times(2)).getEventDetails(event.id, null)
     }
 
     @Test
@@ -462,75 +452,6 @@ class VideoPlayerMediatorTest {
         verify(webSocket).send("joinEvent;${secondEvent.id}")
     }
 
-    @Ignore("Event Status is not done on server yet")
-    @Test
-    fun `given event with anything but Started status to play, should not connect to reactor`() =
-        runBlockingTest {
-            val event = getSampleEventEntity(emptyList(), EventStatus.EVENT_STATUS_SCHEDULED)
-            whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
-
-
-
-            videoPlayerMediator.playVideo(event)
-            videoPlayerMediator.playVideo(
-                getSampleEventEntity(
-                    emptyList(),
-                    EventStatus.EVENT_STATUS_RESCHEDULED
-                )
-            )
-            videoPlayerMediator.playVideo(
-                getSampleEventEntity(
-                    emptyList(),
-                    EventStatus.EVENT_STATUS_CANCELLED
-                )
-            )
-            videoPlayerMediator.playVideo(
-                getSampleEventEntity(
-                    emptyList(),
-                    EventStatus.EVENT_STATUS_POSTPONED
-                )
-            )
-            videoPlayerMediator.playVideo(
-                getSampleEventEntity(
-                    emptyList(),
-                    EventStatus.EVENT_STATUS_DELAYED
-                )
-            )
-            videoPlayerMediator.playVideo(
-                getSampleEventEntity(
-                    emptyList(),
-                    EventStatus.EVENT_STATUS_PAUSED
-                )
-            )
-            videoPlayerMediator.playVideo(
-                getSampleEventEntity(
-                    emptyList(),
-                    EventStatus.EVENT_STATUS_DELAYED
-                )
-            )
-            videoPlayerMediator.playVideo(
-                getSampleEventEntity(
-                    emptyList(),
-                    EventStatus.EVENT_STATUS_SUSPENDED
-                )
-            )
-            videoPlayerMediator.playVideo(
-                getSampleEventEntity(
-                    emptyList(),
-                    EventStatus.EVENT_STATUS_FINISHED
-                )
-            )
-            videoPlayerMediator.playVideo(
-                getSampleEventEntity(
-                    emptyList(),
-                    EventStatus.EVENT_STATUS_UNSPECIFIED
-                )
-            )
-
-
-            verify(reactorSocket, never()).joinEvent(any())
-        }
-
     @Test
     fun `update viewers counter in VOD stream, should hide viewers counter in player wrapper`() =
         runBlockingTest {
@@ -539,11 +460,8 @@ class VideoPlayerMediatorTest {
             whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
 
 
-            whenever(exoPlayer.isCurrentWindowDynamic).thenReturn(false)
-
-
             videoPlayerMediator.playVideo(event)
-            exoPlayerMainEventListener.onPlayerStateChanged(true, 0)
+            exoPlayerMainEventListener.onPlayWhenReadyChanged(true, 0)
             mainWebSocketListener.onMessage(webSocket, "eventTotal;ck2343whlc43k0g90i92grc0u;17")
 
 
@@ -559,7 +477,7 @@ class VideoPlayerMediatorTest {
 
 
         videoPlayerMediator.playVideo(event)
-        exoPlayerMainEventListener.onPlayerStateChanged(true, 0)
+        exoPlayerMainEventListener.onPlayWhenReadyChanged(true, 0)
         mainWebSocketListener.onMessage(webSocket, "eventTotal;ck2343whlc43k0g90i92grc0u;17")
 
 
@@ -572,7 +490,7 @@ class VideoPlayerMediatorTest {
         whenever(dataManager.currentEvent).thenReturn(event)
 
 
-        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_READY)
+        exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_READY)
 
 
         verify(youboraClient).logEvent(event, false)
@@ -584,9 +502,9 @@ class VideoPlayerMediatorTest {
         whenever(dataManager.currentEvent).thenReturn(event)
 
 
-        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_READY)
-        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_READY)
-        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_READY)
+        exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_READY)
+        exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_READY)
+        exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_READY)
 
 
         verify(youboraClient, times(1)).logEvent(event, false)
@@ -594,13 +512,9 @@ class VideoPlayerMediatorTest {
 
     @Test
     fun `given player with any state other than ready, should not log event`() {
-        val event = getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_STARTED)
-        whenever(dataManager.currentEvent).thenReturn(event)
-
-
-        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_IDLE)
-        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_BUFFERING)
-        exoPlayerMainEventListener.onPlayerStateChanged(true, STATE_ENDED)
+        exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_IDLE)
+        exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_BUFFERING)
+        exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_ENDED)
 
 
         verify(youboraClient, never()).logEvent(any(), any())
@@ -652,17 +566,17 @@ class VideoPlayerMediatorTest {
     @Test
     fun `should pause local player, when connected to remote player`() {
         whenever(player.isPlaying()).thenReturn(true)
-        videoPlayerMediator.playVideo(getSampleEventEntity("id_0"))
+        videoPlayerMediator.playVideo(getSampleEventEntity(getSampleStreamList()))
 
         castListener.onSessionStarted(casterSession)
 
-        verify(player).pause()
+        verify(player, times(1)).pause()
     }
 
     @Test
     fun `should not pause local player if it's not playing, when connected to remote player`() {
         whenever(player.isPlaying()).thenReturn(false)
-        videoPlayerMediator.playVideo(getSampleEventEntity("id_0"))
+        videoPlayerMediator.playVideo(getSampleEventEntity(getSampleStreamList()))
 
         castListener.onSessionStarted(casterSession)
 
@@ -747,8 +661,6 @@ class VideoPlayerMediatorTest {
 
         fun getSampleStream(url: String?, errorCodeAndMessage: ErrorCodeAndMessage? = null) =
             Stream("id_0", "1200000", url, null, errorCodeAndMessage)
-
-        const val SAMPLE_UUID = "aa-bb-cc-dd-ee"
 
     }
 

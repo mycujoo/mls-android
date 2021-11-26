@@ -1,0 +1,30 @@
+name: Android Lib Test
+
+on:
+  push:
+    branches:
+      - 'null'
+
+jobs:
+  deploy:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: "17.x"
+
+      - name: Bundle install
+        run: bundle update --bundler && bundle install
+
+      - name: Init Local Properties for Gradle Config
+        run: touch local.properties
+
+      - name: Run JUnit tests
+        run: bundle exec fastlane tests
+
+      - name: Release the Library to Maven
+        run: nudle exec fastlane publish
+

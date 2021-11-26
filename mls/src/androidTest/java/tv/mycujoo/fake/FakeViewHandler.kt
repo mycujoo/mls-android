@@ -9,8 +9,8 @@ class FakeViewHandler(
 ) : ViewHandler(idlingResource) {
 
     var lastRemovedAnimationId: String? = null
-    var lastRemovedView: ScaffoldView? = null
-    var lastAddedView: ScaffoldView? = null
+    private var lastRemovedView: ScaffoldView? = null
+    private var lastAddedView: ScaffoldView? = null
 
     override fun removeAnimation(overlayTag: String) {
         lastRemovedAnimationId = overlayTag

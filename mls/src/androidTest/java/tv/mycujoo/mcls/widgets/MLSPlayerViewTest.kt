@@ -1,12 +1,12 @@
 package tv.mycujoo.mcls.widgets
 
-import android.content.Intent
+import android.content.Context
 import android.os.Handler
 import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
-import androidx.test.core.app.ApplicationProvider
+import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
@@ -15,81 +15,104 @@ import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.idling.CountingIdlingResource
 import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.internal.runner.junit4.statement.UiThreadStatement
-import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ui.PlayerControlView
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.android.synthetic.main.player_view_wrapper.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.Matcher
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import tv.mycujoo.data.entity.ActionResponse
-import tv.mycujoo.domain.entity.*
+import tv.mycujoo.TestActivity
 import tv.mycujoo.fake.FakeAnimationFactory
 import tv.mycujoo.matchers.TypeMatcher
 import tv.mycujoo.mcls.BlankActivity
 import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.api.MLSBuilder
 import tv.mycujoo.mcls.core.VideoPlayerMediator
-import tv.mycujoo.mcls.data.IDataManager
-import tv.mycujoo.mcls.entity.msc.VideoPlayerConfig
-import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.helper.OverlayFactory
 import tv.mycujoo.mcls.helper.OverlayViewHelper
-import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.VariableKeeper
 import tv.mycujoo.mcls.manager.VariableTranslator
 import tv.mycujoo.mcls.manager.ViewHandler
-import tv.mycujoo.mcls.model.JoinTimelineParam
-import tv.mycujoo.mcls.model.SingleLiveEvent
-import tv.mycujoo.mcls.network.socket.IReactorSocket
-import tv.mycujoo.mcls.network.socket.ReactorCallback
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaFactory
 import tv.mycujoo.mcls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mcls.player.Player
-import tv.mycujoo.mcls.player.Player.Companion.createExoPlayer
-import tv.mycujoo.mcls.player.Player.Companion.createMediaFactory
-
+import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
+@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class MLSPlayerViewTest {
 
-    private lateinit var MLSPlayerView: MLSPlayerView
-    private var viewHandler = ViewHandler(
-        CountingIdlingResource("ViewIdentifierManager")
-    )
-    private val variableTranslator = VariableTranslator(GlobalScope)
-    private val variableKeeper = VariableKeeper(GlobalScope)
+    @get:Rule(order = 0)
+    var hiltRule = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
+    var scenarioRule = activityScenarioRule<BlankActivity>()
+
+    /** region Injects */
+    @Inject
+    @ApplicationContext
+    lateinit var applicationContext: Context
+
+    @Inject
+    lateinit var viewHandler: ViewHandler
+
+    @Inject
+    lateinit var variableTranslator: VariableTranslator
+
+    @Inject
+    lateinit var variableKeeper: VariableKeeper
+
+    @Inject
+    lateinit var videoPlayerMediator: VideoPlayerMediator
+
+    @Inject
+    lateinit var exoPlayer: ExoPlayer
+
+    @Inject
+    lateinit var mediaFactory: MediaFactory
+
+    @Inject
+    lateinit var handler: Handler
+
+    @Inject
+    lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
+    /** endregion */
+
+    private lateinit var mMLSPlayerView: MLSPlayerView
 
     private var animationHelper = FakeAnimationFactory()
-
-    private lateinit var videoPlayerMediator: VideoPlayerMediator
     private lateinit var player: IPlayer
 
-    private lateinit var MLSBuilder: MLSBuilder
+    private lateinit var mMLSBuilder: MLSBuilder
 
 
     @Before
     fun setUp() {
-        val intent = Intent(ApplicationProvider.getApplicationContext(), BlankActivity::class.java)
-        val scenario = launchActivity<BlankActivity>(intent)
-        scenario.onActivity { activity ->
-            val frameLayout = activity.findViewById<FrameLayout>(R.id.blankActivity_rootView)
-            MLSPlayerView = MLSPlayerView(frameLayout.context)
-            MLSPlayerView.id = View.generateViewId()
-            frameLayout.addView(MLSPlayerView)
+        hiltRule.inject()
 
-            MLSPlayerView.idlingResource = viewHandler.idlingResource
-            MLSPlayerView.prepare(
+        scenarioRule.scenario.onActivity { activity ->
+            val frameLayout = activity.findViewById<FrameLayout>(R.id.blankActivity_rootView)
+            mMLSPlayerView = MLSPlayerView(frameLayout.context)
+            mMLSPlayerView.id = View.generateViewId()
+            frameLayout.addView(mMLSPlayerView)
+
+            mMLSPlayerView.idlingResource = viewHandler.idlingResource
+
+            mMLSPlayerView.prepare(
                 OverlayViewHelper(
                     viewHandler,
                     OverlayFactory(),
@@ -102,104 +125,29 @@ class MLSPlayerViewTest {
             )
 
 
-            MLSBuilder = MLSBuilder().withActivity(activity).publicKey("key_0")
-            MLSBuilder.build()
+            mMLSBuilder = MLSBuilder()
+                .publicKey("key_0")
+                .withActivity(activity)
+
+            mMLSBuilder.build()
         }
     }
 
     private fun setupPlayer() {
-        val dataManager = object : IDataManager {
-
-            override fun setLogLevel(logLevel: LogLevel) {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun getEventDetails(
-                eventId: String,
-                updateId: String?
-            ): Result<Exception, EventEntity> {
-                TODO("Not yet implemented")
-            }
-
-            override fun getEventsLiveData(): SingleLiveEvent<List<EventEntity>> {
-                TODO("Not yet implemented")
-            }
-
-            override fun fetchEvents(
-                pageSize: Int?,
-                pageToken: String?,
-                eventStatus: List<EventStatus>?,
-                orderBy: OrderByEventsParam?,
-                fetchEventCallback: ((eventList: List<EventEntity>, previousPageToken: String, nextPageToken: String) -> Unit)?
-            ) {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun getActions(
-                timelineId: String,
-                updateId: String?
-            ): Result<Exception, ActionResponse> {
-                TODO("Not yet implemented")
-            }
-
-            override var currentEvent: EventEntity?
-                get() = getSampleEventEntity(emptyList())
-                set(value) {}
-
-        }
-
-        val reactorSocket = object : IReactorSocket {
-
-            override fun setUUID(uuid: String) {
-            }
-
-            override fun joinEvent(eventId: String) {
-            }
-
-            override fun joinTimeline(param: JoinTimelineParam) {
-                TODO("Not yet implemented")
-            }
-
-            override fun leave(destroyAfter: Boolean) {
-            }
-
-            override fun addListener(reactorCallback: ReactorCallback) {
-
-            }
-        }
-
         UiThreadStatement.runOnUiThread {
-            player = Player()
-            val exoPlayer = createExoPlayer(MLSPlayerView.context)
-            player.create(
-                null,
-                MediaFactory(
-                    Player.createDefaultMediaSourceFactory(MLSPlayerView.context),
-                    createMediaFactory(MLSPlayerView.context),
-                    MediaItem.Builder()
-                ),
+            player = Player(
+                mediaFactory,
                 exoPlayer,
-                Handler(),
-                MediaOnLoadCompletedListener(exoPlayer)
+                mediaOnLoadCompletedListener,
+                handler
             )
-
-            videoPlayerMediator = VideoPlayerMediator(
-                VideoPlayerConfig.default(),
-                viewHandler,
-                reactorSocket,
-                GlobalScope,
-                dataManager,
-                emptyList(),
-                null,
-                Logger(LogLevel.MINIMAL)
-            )
+            player.create(null)
             videoPlayerMediator.initialize(
-                MLSPlayerView,
-                player,
-                MLSBuilder
+                mMLSPlayerView,
+                mMLSBuilder
             )
 
-            videoPlayerMediator.attachPlayer(MLSPlayerView)
+            videoPlayerMediator.attachPlayer(mMLSPlayerView)
         }
 
     }
@@ -233,13 +181,15 @@ class MLSPlayerViewTest {
 
     @Test
     fun displayGeoBlockedDialogTest() {
-        MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
+        mMLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        MLSPlayerView.showCustomInformationDialog("This stream cannot be watched in your area.")
+        mMLSPlayerView.showCustomInformationDialog(applicationContext.getString(R.string.message_geoblocked_stream))
 
 
-        onView(withText("This stream cannot be watched in your area.")).check(
+        Thread.sleep(5000)
+
+        onView(withText(applicationContext.getString(R.string.message_geoblocked_stream))).check(
             matches(
                 withEffectiveVisibility(Visibility.VISIBLE)
             )
@@ -248,10 +198,10 @@ class MLSPlayerViewTest {
 
     @Test
     fun displayEventInfoForPreEvent_shouldDisplayEventInfoWithData() {
-        MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
+        mMLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        MLSPlayerView.showPreEventInformationDialog()
+        mMLSPlayerView.showPreEventInformationDialog()
 
 
         onView(withText("title_0")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
@@ -260,10 +210,10 @@ class MLSPlayerViewTest {
 
     @Test
     fun displayEventInfoForPreEvent_shouldDisplayEventInfoWithPoster() {
-        MLSPlayerView.setPosterInfo("sample_url")
+        mMLSPlayerView.setPosterInfo("sample_url")
 
 
-        MLSPlayerView.showPreEventInformationDialog()
+        mMLSPlayerView.showPreEventInformationDialog()
 
 
         onView(withId(R.id.eventInfoPreEventDialog_posterView)).check(
@@ -280,10 +230,10 @@ class MLSPlayerViewTest {
 
     @Test
     fun whileDisplayingPreEventDialog_shouldNotTogglePlayerVisibilityOnClick() {
-        MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
+        mMLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        MLSPlayerView.showPreEventInformationDialog()
+        mMLSPlayerView.showPreEventInformationDialog()
         onView(withText("title_0")).perform(click())
 
 
@@ -296,10 +246,10 @@ class MLSPlayerViewTest {
 
     @Test
     fun displayEventInfoForStartedEvent_shouldDisplayEventInfo() {
-        MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
+        mMLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        MLSPlayerView.showStartedEventInformationDialog()
+        mMLSPlayerView.showStartedEventInformationDialog()
 
 
         onView(withText("title_0")).check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
@@ -308,14 +258,14 @@ class MLSPlayerViewTest {
 
     @Test
     fun hideInfoDialogs_removedAllInfoDialogChildren() {
-        MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
-        MLSPlayerView.showCustomInformationDialog("Message")
-        MLSPlayerView.showPreEventInformationDialog()
-        MLSPlayerView.showStartedEventInformationDialog()
+        mMLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
+        mMLSPlayerView.showCustomInformationDialog("Message")
+        mMLSPlayerView.showPreEventInformationDialog()
+        mMLSPlayerView.showStartedEventInformationDialog()
 
-        MLSPlayerView.hideInfoDialogs()
+        mMLSPlayerView.hideInfoDialogs()
 
-        onView(withId(MLSPlayerView.infoDialogContainerLayout.id)).check(
+        onView(withId(mMLSPlayerView.infoDialogContainerLayout.id)).check(
             matches(
                 hasChildCount(
                     0
@@ -326,10 +276,10 @@ class MLSPlayerViewTest {
 
     @Test
     fun whileDisplayingStartedEventDialog_shouldDismissDialogOnClick() {
-        MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
+        mMLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
 
 
-        MLSPlayerView.showStartedEventInformationDialog()
+        mMLSPlayerView.showStartedEventInformationDialog()
         onView(withText("title_0")).perform(click())
 
 
@@ -350,9 +300,9 @@ class MLSPlayerViewTest {
 
     @Test
     fun whileDisplayingStartedEventDialog_shouldTogglePlayerVisibilityOnClick() {
-        MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
+        mMLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
         setupPlayer()
-        MLSPlayerView.showStartedEventInformationDialog()
+        mMLSPlayerView.showStartedEventInformationDialog()
 
 
         onView(withText("title_0")).perform(click())
@@ -366,13 +316,13 @@ class MLSPlayerViewTest {
 
     @Test
     fun clickOnEventInfoButton_shouldDisplayEventInfo() {
-        MLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
+        mMLSPlayerView.setEventInfo("title_0", "desc_0", "2020-07-11T07:32:46Z")
         setupPlayer()
 
 
 
         UiThreadStatement.runOnUiThread {
-            MLSPlayerView.findViewById<ImageButton>(R.id.controller_informationButton)
+            mMLSPlayerView.findViewById<ImageButton>(R.id.controller_informationButton)
                 .performClick()
         }
 
@@ -385,7 +335,7 @@ class MLSPlayerViewTest {
     fun whenControllerIsDisplayed_topContainerShouldBeDisplayed() {
         UiThreadStatement.runOnUiThread {
             setupPlayer()
-            MLSPlayerView.updateControllerVisibility(true)
+            mMLSPlayerView.updateControllerVisibility(true)
         }
 
         onView(withId(R.id.controller_topRightContainer))
@@ -400,10 +350,10 @@ class MLSPlayerViewTest {
     fun whenControllerIsGone_topContainerShouldBeGone() {
         UiThreadStatement.runOnUiThread {
             setupPlayer()
-            MLSPlayerView.updateControllerVisibility(true)
+            mMLSPlayerView.updateControllerVisibility(true)
 
-            MLSPlayerView.playerView.showController()
-            MLSPlayerView.playerView.hideController()
+            mMLSPlayerView.playerView.showController()
+            mMLSPlayerView.playerView.hideController()
         }
 
         onView(withId(R.id.controller_topRightContainer))
@@ -417,14 +367,14 @@ class MLSPlayerViewTest {
         var id = 0
         UiThreadStatement.runOnUiThread {
             setupPlayer()
-            MLSPlayerView.updateControllerVisibility(true)
-            val button = Button(MLSPlayerView.context)
+            mMLSPlayerView.updateControllerVisibility(true)
+            val button = Button(mMLSPlayerView.context)
             button.text = "button"
             button.id = View.generateViewId()
             id = button.id
 
 
-            MLSPlayerView.addToTopRightContainer(button)
+            mMLSPlayerView.addToTopRightContainer(button)
         }
 
         onView(withId(id)).check(matches(isDisplayed()))
@@ -435,15 +385,15 @@ class MLSPlayerViewTest {
         var id = 0
         UiThreadStatement.runOnUiThread {
             setupPlayer()
-            MLSPlayerView.updateControllerVisibility(true)
-            val button = Button(MLSPlayerView.context)
+            mMLSPlayerView.updateControllerVisibility(true)
+            val button = Button(mMLSPlayerView.context)
             button.text = "button"
             button.id = View.generateViewId()
             id = button.id
-            MLSPlayerView.addToTopRightContainer(button)
+            mMLSPlayerView.addToTopRightContainer(button)
 
 
-            MLSPlayerView.removeFromTopRightContainer(button)
+            mMLSPlayerView.removeFromTopRightContainer(button)
         }
 
         onView(withId(id)).check(doesNotExist())
@@ -454,14 +404,14 @@ class MLSPlayerViewTest {
         var id = 0
         UiThreadStatement.runOnUiThread {
             setupPlayer()
-            MLSPlayerView.updateControllerVisibility(true)
-            val button = Button(MLSPlayerView.context)
+            mMLSPlayerView.updateControllerVisibility(true)
+            val button = Button(mMLSPlayerView.context)
             button.text = "button"
             button.id = View.generateViewId()
             id = button.id
 
 
-            MLSPlayerView.addToTopLeftContainer(button)
+            mMLSPlayerView.addToTopLeftContainer(button)
         }
 
         onView(withId(id)).check(matches(isDisplayed()))
@@ -472,15 +422,15 @@ class MLSPlayerViewTest {
         var id = 0
         UiThreadStatement.runOnUiThread {
             setupPlayer()
-            MLSPlayerView.updateControllerVisibility(true)
-            val button = Button(MLSPlayerView.context)
+            mMLSPlayerView.updateControllerVisibility(true)
+            val button = Button(mMLSPlayerView.context)
             button.text = "button"
             button.id = View.generateViewId()
             id = button.id
-            MLSPlayerView.addToTopLeftContainer(button)
+            mMLSPlayerView.addToTopLeftContainer(button)
 
 
-            MLSPlayerView.removeFromTopLeftContainer(button)
+            mMLSPlayerView.removeFromTopLeftContainer(button)
         }
 
         onView(withId(id)).check(doesNotExist())
@@ -504,6 +454,7 @@ class MLSPlayerViewTest {
     }
 
     /**region Fake data*/
+    /**
     companion object {
         private fun getSampleStreamList(): List<Stream> {
             return listOf(Stream("stream_id_0", Long.MAX_VALUE.toString(), "stream_url", null))
@@ -535,7 +486,7 @@ class MLSPlayerViewTest {
             )
         }
     }
-
+    */
     /**endregion */
 
 

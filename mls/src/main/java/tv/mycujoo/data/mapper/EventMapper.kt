@@ -64,12 +64,12 @@ class EventMapper {
         }
 
 
-        fun mapLocationSourceDataToLocationEntity(sourceData: LocationSourceData): Location {
+        private fun mapLocationSourceDataToLocationEntity(sourceData: LocationSourceData): Location {
             val physical = mapPhysicalSourceDataToPhysicalEntity(sourceData.physicalSourceData)
             return Location(physical)
         }
 
-        fun mapPhysicalSourceDataToPhysicalEntity(sourceData: PhysicalSourceData): Physical {
+        private fun mapPhysicalSourceDataToPhysicalEntity(sourceData: PhysicalSourceData): Physical {
             val coordinates = mapCoordinatesSourceCodeToCoordinatesEntity(sourceData.coordinates)
             return Physical(
                 sourceData.city,

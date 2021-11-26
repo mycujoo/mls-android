@@ -4,11 +4,13 @@ import android.animation.ObjectAnimator
 import android.util.Log
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.test.espresso.idling.CountingIdlingResource
+import tv.mycujoo.mcls.di.CountingIdlingResourceViewIdentifierManager
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.widgets.ScaffoldView
+import javax.inject.Inject
 
-open class ViewHandler(
-    val idlingResource: CountingIdlingResource
+open class ViewHandler @Inject constructor(
+    @CountingIdlingResourceViewIdentifierManager val idlingResource: CountingIdlingResource
 ) : IViewHandler {
 
 
@@ -119,6 +121,5 @@ open class ViewHandler(
         }
     }
     /**endregion */
-
 
 }

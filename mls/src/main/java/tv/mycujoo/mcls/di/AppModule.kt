@@ -1,6 +1,15 @@
 package tv.mycujoo.mcls.di
 
 import android.content.Context
+import android.content.res.AssetManager
+import android.os.Handler
+import android.os.Looper
+import androidx.test.espresso.idling.CountingIdlingResource
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
+import com.google.android.exoplayer2.source.hls.HlsMediaSource
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -10,14 +19,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.newSingleThreadContext
-import tv.mycujoo.domain.repository.EventsRepository
 import tv.mycujoo.mcls.BuildConfig
-import tv.mycujoo.mcls.api.DataManager
-import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.PrefManager
+import tv.mycujoo.mcls.player.MediaFactory
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
 import javax.inject.Singleton
 
 /**
@@ -30,23 +39,86 @@ open class AppModule {
 
     @Provides
     @Singleton
-    open fun providePrefManager(@ApplicationContext context: Context): IPrefManager {
+    fun provideLogger(): Logger {
+        return Logger(LogLevel.MINIMAL)
+    }
+
+    @Provides
+    @Singleton
+    fun providePrefManager(@ApplicationContext context: Context): IPrefManager {
         return PrefManager(context.getSharedPreferences("MLS", Context.MODE_PRIVATE))
     }
 
     @ObsoleteCoroutinesApi
     @Provides
     @Singleton
-    open fun provideCoroutineScope(): CoroutineScope {
-
+    fun provideCoroutineScope(): CoroutineScope {
         val job = SupervisorJob()
-
         return CoroutineScope(newSingleThreadContext(BuildConfig.LIBRARY_PACKAGE_NAME) + job)
+    }
+
+    @CountingIdlingResourceViewIdentifierManager
+    @Provides
+    @Singleton
+    fun provideViewIdentifierManagerCountingIdlingResources(): CountingIdlingResource {
+        return CountingIdlingResource("ViewIdentifierManager")
     }
 
     @Provides
     @Singleton
-    open fun provideDataManager(scope: CoroutineScope, repository: EventsRepository): IDataManager {
-        return DataManager(scope, repository, Logger(LogLevel.MINIMAL))
+    fun provideScheduledExecutorService(): ScheduledExecutorService {
+        return Executors.newScheduledThreadPool(1)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMediaFactory(
+        mediaSourceFactory: DefaultMediaSourceFactory,
+        hlsMediaSource: HlsMediaSource.Factory
+    ): MediaFactory {
+        return MediaFactory(
+            mediaSourceFactory,
+            hlsMediaSource,
+            MediaItem.Builder()
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideHandler(): Handler {
+        return Handler(Looper.myLooper() ?: Looper.getMainLooper())
+    }
+
+    @Provides
+    @Singleton
+    fun provideExoPlayer(@ApplicationContext context: Context): ExoPlayer {
+        return ExoPlayer.Builder(context)
+            .setSeekBackIncrementMs(10000)
+            .setSeekForwardIncrementMs(10000)
+            .build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideHlsMediaSource(): HlsMediaSource.Factory {
+        return HlsMediaSource.Factory(
+            DefaultHttpDataSource.Factory()
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun provideDefaultMediaSourceFactory(
+        @ApplicationContext context: Context
+    ): DefaultMediaSourceFactory {
+        return DefaultMediaSourceFactory(
+            context
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun provideAssetManager(@ApplicationContext context: Context): AssetManager {
+        return context.assets
     }
 }

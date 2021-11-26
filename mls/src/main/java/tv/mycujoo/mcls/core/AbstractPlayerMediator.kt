@@ -15,7 +15,7 @@ import tv.mycujoo.mcls.network.socket.ReactorCallback
 abstract class AbstractPlayerMediator(
     private val reactorSocket: IReactorSocket,
     private val coroutineScope: CoroutineScope,
-    protected val logger: Logger
+    private val logger: Logger
 ) {
     /**region Abstracts*/
     abstract fun playVideo(event: EventEntity)

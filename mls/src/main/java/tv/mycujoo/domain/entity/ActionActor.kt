@@ -94,12 +94,10 @@ class ActionActor {
             currentTime: Long,
             action: Action.ShowOverlayAction
         ): Boolean {
-            val bound: Long
-            if (action.outroTransitionSpec != null) {
-                bound =
-                    action.outroTransitionSpec.offset
+            val bound: Long = if (action.outroTransitionSpec != null) {
+                action.outroTransitionSpec.offset
             } else {
-                bound = action.offset + (action.duration ?: 0L)
+                action.offset + (action.duration ?: 0L)
             }
             return currentTime < bound && currentTime + C.ONE_SECOND_IN_MS > bound
         }

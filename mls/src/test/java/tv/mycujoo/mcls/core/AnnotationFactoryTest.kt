@@ -18,10 +18,9 @@ import tv.mycujoo.mcls.matcher.TimerVariablesMapArgumentMatcher
 import tv.mycujoo.mcls.matcher.TransitionSpecArgumentMatcher
 import tv.mycujoo.mcls.matcher.VariablesMapArgumentMatcher
 import tv.mycujoo.mcls.player.IPlayer
+import tv.mycujoo.mcls.widgets.MLSPlayerView
 import kotlin.test.assertTrue
 
-
-@OptIn(ExperimentalStdlibApi::class)
 class AnnotationFactoryTest {
 
     /**region subject under test*/
@@ -37,10 +36,10 @@ class AnnotationFactoryTest {
     lateinit var player: IPlayer
 
     @Mock
-    lateinit var viewHandler: IViewHandler
-
-    @Mock
     lateinit var variableKeeper: IVariableKeeper
+    
+    @Mock
+    lateinit var playerView: MLSPlayerView
     /**endregion */
 
     /**region Setup*/
@@ -894,7 +893,7 @@ class AnnotationFactoryTest {
     /**region ReshowOverlayAction related*/
     @Test
     fun `given ReshowOverlayAction, should show overlay`() {
-        val showOverlayAction = getSampleShowOverlayAction(5000L, -1L) // id is cid_1001
+        val showOverlayAction = getSampleShowOverlayAction() // id is cid_1001
         val reshowOverlayAction = Action.ReshowOverlayAction("id_01", 8000L, -1L, "cid_1001")
         annotationFactory.setActions(listOf(showOverlayAction, reshowOverlayAction))
 
@@ -911,7 +910,7 @@ class AnnotationFactoryTest {
 
     @Test
     fun `given ReshowOverlayAction, without related ShowOverlay should not show overlay`() {
-        val showOverlayAction = getSampleShowOverlayAction(5000L, -1L) // id is cid_1001
+        val showOverlayAction = getSampleShowOverlayAction() // id is cid_1001
         val reshowOverlayAction = Action.ReshowOverlayAction("id_01", 8000L, -1L, "cid_1002")
         annotationFactory.setActions(listOf(showOverlayAction, reshowOverlayAction))
 
@@ -985,7 +984,7 @@ class AnnotationFactoryTest {
     /**region ReshowOverlayAction related*/
     @Test
     fun `given ReshowOverlayAction, should show overlay, -absolute-time-system`() {
-        val showOverlayAction = getSampleShowOverlayAction(0L, 1605609885000L) // id is cid_1001
+        val showOverlayAction = getSampleShowOverlayAction() // id is cid_1001
         val reshowOverlayAction =
             Action.ReshowOverlayAction("id_01", 2000L, 1605609887000L, "cid_1001")
         annotationFactory.setActions(listOf(showOverlayAction, reshowOverlayAction))

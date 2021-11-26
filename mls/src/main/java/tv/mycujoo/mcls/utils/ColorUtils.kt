@@ -30,9 +30,9 @@ class ColorUtils {
                 )
                 return toARGB(color1)
             }
-            if (color.length == 9) {
-                return "#".plus(color.substring(7, 9)).plus(color.substring(1, 7))
-            } else return color
+            return if (color.length == 9) {
+                "#".plus(color.substring(7, 9)).plus(color.substring(1, 7))
+            } else color
 
         }
 

@@ -8,13 +8,14 @@ import tv.mycujoo.mcls.manager.IVariableKeeper
 import tv.mycujoo.mcls.manager.TimerEntity
 import tv.mycujoo.mcls.manager.TimerVariable
 import tv.mycujoo.mcls.utils.TimeUtils
+import tv.mycujoo.mcls.widgets.MLSPlayerView
 import java.util.concurrent.CopyOnWriteArrayList
+import javax.inject.Inject
 
-class AnnotationFactory(
+class AnnotationFactory @Inject constructor(
     private val annotationListener: IAnnotationListener,
     private val variableKeeper: IVariableKeeper
-) :
-    IAnnotationFactory {
+) : IAnnotationFactory {
 
     /**region Fields*/
     private var sortedActions =
@@ -33,17 +34,23 @@ class AnnotationFactory(
         CopyOnWriteArrayList<Action>() // union of Sorted actions + Local actions
     /**endregion */
 
-    /**region Over-ridden functions*/
+    override fun attachPlayerView(playerView: MLSPlayerView) {
+        annotationListener.attachPlayer(playerView)
+    }
+
     override fun setActions(actions: List<Action>) {
-        val sortedTemp =
-            actions
-                .sortedWith(compareBy<Action> { it.offset }.thenByDescending { it.priority })
+        val sortedTemp = actions
+            .sortedWith(compareBy<Action> { it.offset }.thenByDescending { it.priority })
 
         val deleteActions = ArrayList<Action>()
         deleteActions.addAll(sortedTemp.filterIsInstance<Action.DeleteAction>())
 
         sortedActions.clear()
-        sortedActions.addAll(sortedTemp.filter { actionObject -> deleteActions.none { actionObject.id == it.id } })
+        sortedActions.addAll(sortedTemp.filter { actionObject ->
+            deleteActions.none {
+                actionObject.id == it.id
+            }
+        })
     }
 
     override fun setLocalActions(annotations: List<Action>) {
@@ -279,8 +286,6 @@ class AnnotationFactory(
                     // should not happen
                 }
             }
-
-
         }
 
 
@@ -391,12 +396,8 @@ class AnnotationFactory(
         varVariables: HashMap<String, VariableEntity>
     ) {
         if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS > action.offset) {
-            varVariables[action.name]?.let { variableEntity ->
-                variableEntity.variable.increment(action.amount)
-            }
+            varVariables[action.name]?.variable?.increment(action.amount)
         }
     }
-
-
     /**endregion */
 }

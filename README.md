@@ -13,7 +13,7 @@ MLS Android SDK enables apps to play videos that are hosted on MyCujoo Live Serv
 Add dependency to SDK in app-level build.gradle file:
 
     implementation 'tv.mycujoo.mls:mls:MLS_LATEST_VERSION_HERE'
-    
+
 #### Add MLSPlayerView
 
 In xml layout file of your activity (or fragment) add MLSPayerView. 
@@ -32,27 +32,50 @@ in order to communicate with SDK, MLS class must be instantiated. Init MLS whene
         // code ommited for brevity
         
         // constraint MLSPlayerView here
-
+    
         val playerEventsListener = object : PlayerEventsListener {
             override fun onIsPlayingChanged(playing: Boolean) {
             }
             override fun onPlayerStateChanged(playbackState: Int) {
             }
         }
-
+    
         val uiEventListener = object : UIEventListener {
             override fun onFullScreenButtonClicked(fullScreen: Boolean) {
             }
         }
-
+    
         // create MLS component
         MLS = MLSBuilder().publicKey("YOUR_PUBLIC_KEY_HERE")
             .withActivity(this)
+            .setAnalyticsAccount("ANALYTICS_ACCOUNT_CODE") // Or You can add it via the Manifest
             .setPlayerEventsListener(playerEventsListener)
             .setUIEventListener(uiEventListener)
             .setConfiguration(MLSConfiguration())
             .build()
-      
+
+
+##### Notes: 
+
+You Can provide the public key from the AndroidManifest using this meta tag:
+
+       <application 
+           ...>
+           ...
+           <meta-data
+                   android:name="tv.mycujoo.MLS_PUBLIC_KEY"
+                   android:value="YOUR_PUBLIC_KEY_HERE" />
+       </application>
+
+And You can set your Youbora Account via the manifest
+
+      <application
+         ...>
+         ...
+         <meta-data
+                  android:name="tv.mycujoo.MLS_ANALYTICS_ACCOUNT"
+                  android:value="ACCOUNT_CODE_HERE" />
+      </application>
 
 #### Attach & detach PlayerView
 
@@ -90,9 +113,54 @@ in order to communicate with SDK, MLS class must be instantiated. Init MLS whene
         // use VideoPlayer to play video
         val videoPlayer = MLS.getVideoPlayer()
         videoPlayer.playVideo("EVENT_ID_HERE") // or event object itself
-        
-       
-      
+
+
+​      
+
+## Android TV Player
+
+1. Implement the library
+
+   ```groovy
+   implementation 'tv.mycujoo.mls:mls:MLS_LATEST_VERSION_HERE'
+   ```
+
+   
+
+2. Add Public Key to the Manifest using:
+
+   ```xml
+   <application 
+       ...>
+       ...
+       <meta-data
+               android:name="tv.mycujoo.MLS_PUBLIC_KEY"
+               android:value="YOUR_PUBLIC_KEY_HERE" />
+   </application>
+   ```
+
+3. Add the Playback Fragment in the Activity XML using:
+
+   ```xml
+   <androidx.fragment.app.FragmentContainerView
+           android:id="@+id/playback_fragment"
+           android:tag="playback_tag"
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           android:name="tv.mycujoo.ui.PlaybackFragment" />
+   ```
+
+4. Play your event fast and easy with this code in the Activity's Kotlin Class
+
+   ```kotlin
+   fun onCreate(...) {
+     (supportFragmentManager.findFragmentByTag("playback_tag") as PlaybackFragment).playEvent(
+               EVENT_ID_HERE
+           )
+   }
+   
+   
+   ```
 
 ### Modules
 #### Cast Module (Google Cast support)

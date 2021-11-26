@@ -11,7 +11,7 @@ import tv.mycujoo.mcls.api.PlayerEventsListener
  * Each event might or might not be interest of MLS SDK and User. Hence these listeners are separated
  */
 class PlayerEventsListener(private val playerEventsListener: PlayerEventsListener) :
-    Player.EventListener {
+    Player.Listener {
 
     /**
      * called when (core) video player state changes

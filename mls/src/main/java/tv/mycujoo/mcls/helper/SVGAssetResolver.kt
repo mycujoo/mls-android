@@ -16,7 +16,7 @@ class SVGAssetResolver(private val typeFaceFactory: ITypeFaceFactory) : SVGExter
             }
 
             //Important! lower case the font name as name of font files can NOT be upper case in assets
-            val lowerCasedFontName = fontFamily.toLowerCase(Locale.ENGLISH)
+            val lowerCasedFontName = fontFamily.lowercase(Locale.ENGLISH)
             if (lowerCasedFontName.contains(ROBOTO_MONO_BOLD)) {
                 return typeFaceFactory.createFromAsset(ROBOTO_MONO_BOLD_FILE_NAME)
             }

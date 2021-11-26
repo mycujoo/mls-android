@@ -15,12 +15,11 @@ class VerticalBiasMatcher(private val expectedVerticalBias: Float) : TypeSafeMat
         item?.let { view ->
             val screenHeight = (view.parent as ViewGroup).height
 
-            val target = (screenHeight * expectedVerticalBias).toInt()
-            when (target) {
+            return when ((screenHeight * expectedVerticalBias).toInt()) {
                 in view.top..view.bottom -> {
-                    return true
+                    true
                 }
-                else -> return false
+                else -> false
             }
         }
 

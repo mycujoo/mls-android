@@ -1,68 +1,97 @@
 package tv.mycujoo.mcls.tv.player
 
 import android.os.Handler
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.Player
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.Action
-import tv.mycujoo.mcls.core.AnnotationFactory
+import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.mcls.core.BuildPoint
+import tv.mycujoo.mcls.core.IAnnotationFactory
+import tv.mycujoo.mcls.data.IDataManager
+import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.C.Companion.ONE_SECOND_IN_MS
-import tv.mycujoo.mcls.helper.AnimationFactory
-import tv.mycujoo.mcls.helper.DownloaderClient
-import tv.mycujoo.mcls.helper.OverlayFactory
-import tv.mycujoo.mcls.helper.OverlayViewHelper
-import tv.mycujoo.mcls.manager.VariableKeeper
-import tv.mycujoo.mcls.manager.VariableTranslator
+import tv.mycujoo.mcls.enum.MessageLevel
+import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.ViewHandler
+import tv.mycujoo.mcls.mediator.IAnnotationMediator
 import tv.mycujoo.mcls.player.IPlayer
+import tv.mycujoo.mcls.widgets.MLSPlayerView
+import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-class TvAnnotationMediator(
-    player: IPlayer,
-    overlayContainer: ConstraintLayout,
-    scheduler: ScheduledExecutorService,
-    handler: Handler,
-    coroutineScope: CoroutineScope,
-    downloaderClient: DownloaderClient
-) {
+class TvAnnotationMediator @Inject constructor(
+    private val tvAnnotationFactory: IAnnotationFactory,
+    private val player: IPlayer,
+    private val dispatcher: CoroutineScope,
+    private val dataManager: IDataManager,
+    private val logger: Logger,
+    private val viewHandler: ViewHandler
+) : IAnnotationMediator {
 
-    private var annotationFactory: AnnotationFactory
-    private var tvAnnotationListener: TvAnnotationListener
-    private val viewHandler:
-            ViewHandler =
-        ViewHandler(CountingIdlingResource("ViewIdentifierManager"))
-    private val variableTranslator = VariableTranslator(coroutineScope)
-    private val variableKeeper = VariableKeeper(coroutineScope)
+
+    private val scheduler: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
 
     private var hasPendingSeek: Boolean = false
+    override fun initPlayerView(playerView: MLSPlayerView) {
+        TODO("Not yet implemented")
+    }
 
-    init {
-        viewHandler.setOverlayHost(overlayContainer)
+    override fun release() {
+        TODO("Not yet implemented")
+    }
 
-        val overlayViewHelper =
-            OverlayViewHelper(
-                viewHandler,
-                OverlayFactory(),
-                AnimationFactory(),
-                variableTranslator,
-                variableKeeper
+    override var onSizeChangedCallback = {
+        tvAnnotationFactory.build(
+            BuildPoint(
+                player.currentPosition(),
+                player.currentAbsoluteTime(),
+                player,
+                player.isPlaying()
             )
+        )
+    }
 
-        tvAnnotationListener =
-            TvAnnotationListener(
-                overlayContainer,
-                overlayViewHelper,
-                downloaderClient
-            )
+    override fun fetchActions(
+        timelineId: String,
+        updateId: String?,
+        resultCallback: ((result: Result<Exception, ActionResponse>) -> Unit)?
+    ) {
+        dispatcher.launch(context = Dispatchers.Main) {
+            val result = dataManager.getActions(timelineId, updateId)
+            resultCallback?.invoke(result)
+            when (result) {
+                is Result.Success -> {
+                    feed(result.value)
+                }
+                is Result.NetworkError -> {
+                    logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
+                }
+                is Result.GenericError -> {
+                    logger.log(
+                        MessageLevel.DEBUG,
+                        C.INTERNAL_ERROR_MESSAGE.plus(" ${result.errorMessage} ${result.errorCode}")
+                    )
+                }
+            }
+        }
+    }
 
+    override fun feed(actionResponse: ActionResponse) {
+        tvAnnotationFactory.setActions(actionResponse.data.map { it.toAction() })
+    }
 
-        annotationFactory =
-            AnnotationFactory(tvAnnotationListener, variableKeeper)
+    override fun setLocalActions(actions: List<Action>) {
+        tvAnnotationFactory.setLocalActions(actions)
+    }
 
-        player.addListener(object : Player.EventListener {
+    fun initialize(handler: Handler) {
+
+        player.addListener(object : Player.Listener {
             override fun onPositionDiscontinuity(reason: Int) {
                 if (reason == Player.DISCONTINUITY_REASON_SEEK) {
                     hasPendingSeek = true
@@ -73,7 +102,7 @@ class TvAnnotationMediator(
                 if (playbackState == Player.STATE_READY && hasPendingSeek) {
                     hasPendingSeek = false
 
-                    annotationFactory.build(
+                    tvAnnotationFactory.build(
                         BuildPoint(
                             player.currentPosition(),
                             player.currentAbsoluteTime(),
@@ -100,7 +129,7 @@ class TvAnnotationMediator(
 
         val exoRunnable = Runnable {
             if (player.isPlaying()) {
-                annotationFactory.build(
+                tvAnnotationFactory.build(
                     BuildPoint(
                         player.currentPosition(),
                         player.currentAbsoluteTime(),
@@ -121,9 +150,5 @@ class TvAnnotationMediator(
             ONE_SECOND_IN_MS,
             TimeUnit.MILLISECONDS
         )
-    }
-
-    fun feed(actionsList: List<Action>) {
-        annotationFactory.setActions(actionsList)
     }
 }

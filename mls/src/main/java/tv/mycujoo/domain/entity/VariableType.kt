@@ -13,7 +13,7 @@ enum class VariableType {
 
     companion object {
         fun fromValueOrNone(value: String) =
-            values().firstOrNull { it.name.toLowerCase(Locale.getDefault()) == value }
+            values().firstOrNull { it.name.lowercase(Locale.getDefault()) == value }
                 ?: UNSPECIFIED
     }
 }

@@ -14,8 +14,8 @@ class MLSControlBar : LinearLayout {
 
     private var mChildMarginFromCenter = 0
     private var mOnChildFocusedListener: OnChildFocusedListener? = null
-    var mLastFocusIndex = -1
-    var mDefaultFocusToMiddle = true
+    private var mLastFocusIndex = -1
+    private var mDefaultFocusToMiddle = true
 
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {}
     constructor(context: Context?, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle) {}
@@ -24,12 +24,12 @@ class MLSControlBar : LinearLayout {
         mDefaultFocusToMiddle = defaultFocusToMiddle
     }
 
-    val defaultFocusIndex: Int
+    private val defaultFocusIndex: Int
         get() = if (mDefaultFocusToMiddle) childCount / 2 else 0
 
     override fun onRequestFocusInDescendants(direction: Int, previouslyFocusedRect: Rect?): Boolean {
         if (childCount > 0) {
-            val index = if (mLastFocusIndex >= 0 && mLastFocusIndex < childCount) mLastFocusIndex else defaultFocusIndex
+            val index = if (mLastFocusIndex in 0 until childCount) mLastFocusIndex else defaultFocusIndex
             if (getChildAt(index).requestFocus(direction, previouslyFocusedRect)) {
                 return true
             }
@@ -39,7 +39,7 @@ class MLSControlBar : LinearLayout {
 
     override fun addFocusables(views: ArrayList<View>, direction: Int, focusableMode: Int) {
         if (direction == FOCUS_UP || direction == FOCUS_DOWN) {
-            if (mLastFocusIndex >= 0 && mLastFocusIndex < childCount) {
+            if (mLastFocusIndex in 0 until childCount) {
                 views.add(getChildAt(mLastFocusIndex))
             } else if (childCount > 0) {
                 views.add(getChildAt(defaultFocusIndex))

@@ -32,10 +32,10 @@ class MLSFastForwardAction(
 
         for (i in 1..numOfSpeed) {
             val multiplier = i + 1
-            labels[i] = context.getResources().getString(
+            labels[i] = context.resources.getString(
                 R.string.lb_control_display_fast_forward_multiplier, multiplier
             )
-            labels2[i] = context.getResources().getString(
+            labels2[i] = context.resources.getString(
                 R.string.lb_playback_controls_fast_forward_multiplier, multiplier
             )
         }

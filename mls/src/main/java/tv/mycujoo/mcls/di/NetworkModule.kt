@@ -3,6 +3,7 @@ package tv.mycujoo.mcls.di
 import android.content.Context
 import android.util.Log
 import com.squareup.moshi.Moshi
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -11,6 +12,7 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import okio.Buffer
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -32,8 +34,16 @@ import javax.inject.Singleton
 open class NetworkModule {
 
     private val maxAgeInSecond: Int = 60 * 5
-    private val publicBaseUrl: String = "https://mls.mycujoo.tv"
-    private val mlsApiBaseUrl: String = "https://mls-api.mycujoo.tv"
+
+    @PublicBaseUrl
+    @Provides
+    @Singleton
+    fun publicBaseUrl(): String = "https://mls.mycujoo.tv"
+
+    @ApiBaseUrl
+    @Provides
+    @Singleton
+    fun mlsApiBaseUrl(): String = "https://mls-api.mycujoo.tv"
 
     @Provides
     @Singleton
@@ -53,11 +63,11 @@ open class NetworkModule {
                     .removeHeader("Cache-Control")
                     .addHeader("Cache-Control", "public, max-age=$maxAgeInSecond")
                     .build()
-                val requestBody = chain.request().body()
+                val requestBody = chain.request().body
                 if (requestBody != null) {
                     Log.d(
                         "NetworkModule",
-                        "intercept: " + chain.request().method() + " " + chain.request().url()
+                        "intercept: " + chain.request().method + " " + chain.request().url
                     )
                     val buffer = Buffer()
                     requestBody.writeTo(buffer)
@@ -69,30 +79,39 @@ open class NetworkModule {
                 }
                 chain.proceed(newRequest)
             }
+            .addInterceptor(HttpLoggingInterceptor())
             .cache(cache)
 
         return okHttpBuilder.build()
     }
 
     @Provides
-    @Named("PUBLIC-API")
+    @PublicApi
     @Singleton
-    open fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+    open fun provideRetrofit(
+        okHttpClient: OkHttpClient,
+        @PublicBaseUrl publicBaseUrl: String
+    ): Retrofit {
         val moshi : Moshi = Moshi.Builder()
             .add(JodaJsonAdapter())
             .build()
 
-        return Retrofit.Builder().baseUrl(publicBaseUrl)
+        return Retrofit.Builder()
+            .baseUrl(publicBaseUrl)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .client(okHttpClient)
             .build()
     }
 
     @Provides
-    @Named("MLS-API")
+    @MLSAPI
     @Singleton
-    open fun provideMlsApiRetrofit(okHttpClient: OkHttpClient): Retrofit {
-        return Retrofit.Builder().baseUrl(mlsApiBaseUrl)
+     fun provideMlsApiRetrofit(
+        okHttpClient: OkHttpClient,
+        @ApiBaseUrl baseUrl: String
+    ): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(baseUrl)
             .addConverterFactory(MoshiConverterFactory.create())
             .client(okHttpClient)
             .build()
@@ -100,8 +119,9 @@ open class NetworkModule {
 
     @Provides
     @Singleton
-    open fun provideMlsApi(@Named("MLS-API") retrofit: Retrofit): MlsApi {
+     fun provideMlsApi(@MLSAPI retrofit: Retrofit): MlsApi {
         return retrofit.create(MlsApi::class.java)
     }
-
 }
+
+private const val TAG = "NetworkModule"

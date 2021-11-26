@@ -4,7 +4,6 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.Player.STATE_READY
-import com.google.android.exoplayer2.SimpleExoPlayer
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -21,29 +20,25 @@ class VideoPlayerTest {
 
     private lateinit var videoPlayer: VideoPlayer
 
-    private lateinit var eventListener: Player.EventListener
+    private lateinit var eventListener: Player.Listener
 
     @Mock
-    lateinit var exoPlayer: SimpleExoPlayer
-
-    @Mock
-    lateinit var audioComponent: ExoPlayer.AudioComponent
+    lateinit var exoPlayer: ExoPlayer
 
     @Mock
     lateinit var videoPlayerMediator: VideoPlayerMediator
 
     @Mock
-    lateinit var MLSPlayerView: MLSPlayerView
+    lateinit var mMLSPlayerView: MLSPlayerView
 
     @Before
     fun setUp() {
         MockitoAnnotations.openMocks(this)
-        whenever(exoPlayer.addListener(any<Player.EventListener>())).then { i ->
-            eventListener = i.getArgument<Player.EventListener>(0)
+        whenever(exoPlayer.addListener(any())).then { i ->
+            eventListener = i.getArgument(0)
             eventListener
         }
-        videoPlayer = VideoPlayer(exoPlayer, videoPlayerMediator, MLSPlayerView)
-        whenever(exoPlayer.audioComponent).thenReturn(audioComponent)
+        videoPlayer = VideoPlayer(exoPlayer, videoPlayerMediator, mMLSPlayerView)
     }
 
     @Test
@@ -101,7 +96,7 @@ class VideoPlayerTest {
     fun `test optimisticCurrentTime with prior seekTo, before loading content`() {
         whenever(exoPlayer.currentPosition).thenReturn(42L)
         videoPlayer.seekTo(15)
-        eventListener.onPlayerStateChanged(true, STATE_BUFFERING)
+        eventListener.onPlayWhenReadyChanged(true, STATE_BUFFERING)
 
         assertEquals(15, videoPlayer.optimisticCurrentTime())
     }
@@ -110,7 +105,9 @@ class VideoPlayerTest {
     fun `test optimisticCurrentTime with prior seekTo, after loading content`() {
         whenever(exoPlayer.currentPosition).thenReturn(42L)
         videoPlayer.seekTo(15)
-        eventListener.onPlayerStateChanged(true, STATE_READY)
+
+        // TODO: Figure out Why changing this doesn't work, and what is the expected behaviour?
+        eventListener.onPlayWhenReadyChanged(true, STATE_READY)
 
 
         assertEquals(0, videoPlayer.optimisticCurrentTime())
@@ -151,14 +148,14 @@ class VideoPlayerTest {
 
     @Test
     fun `test isMuted true`() {
-        whenever(audioComponent.volume).thenReturn(0F)
+        whenever(exoPlayer.volume).thenReturn(0F)
 
         assertEquals(true, videoPlayer.isMuted())
     }
 
     @Test
     fun `test isMuted false`() {
-        whenever(audioComponent.volume).thenReturn(1F)
+        whenever(exoPlayer.volume).thenReturn(1F)
 
         assertEquals(false, videoPlayer.isMuted())
     }
@@ -167,14 +164,14 @@ class VideoPlayerTest {
     fun `test muting audio`() {
         videoPlayer.mute()
 
-        verify(audioComponent).volume = 0F
+        verify(exoPlayer).volume = 0F
     }
 
     @Test
     fun `test showEventInfoOverlay`() {
         videoPlayer.showEventInfoOverlay()
 
-        verify(MLSPlayerView).showStartedEventInformationDialog()
+        verify(mMLSPlayerView).showStartedEventInformationDialog()
     }
 
     @Test
@@ -182,7 +179,7 @@ class VideoPlayerTest {
         videoPlayer.hideEventInfoOverlay()
 
 
-        verify(MLSPlayerView).hideInfoDialogs()
+        verify(mMLSPlayerView).hideInfoDialogs()
     }
 
     @Test

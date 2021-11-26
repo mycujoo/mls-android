@@ -1,8 +1,12 @@
 default_platform(:android)
 
 platform :android do
-  desc "Runs all the tests"
   lane :tests do
     gradle(task: "mls:test")
   end
+
+  lane :publish do
+      gradle(task: "mls:publish")
+  end
 end
+
