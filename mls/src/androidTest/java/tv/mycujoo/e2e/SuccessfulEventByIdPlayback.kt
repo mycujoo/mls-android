@@ -1,14 +1,31 @@
 package tv.mycujoo.e2e
 
+
+/**
+ * Tests Successful Playback Scenario.
+ * To use this test, we can request event by id, and pass the video url as the id.
+ * This way, the test will inject the video url into the event.
+ *
+ * Example:
+ * mMLS.getVideoPlayer().playVideo("https://vod-eu.mycujoo.tv/hls/ckw25mmlaxl8i0hbqp6wr5pft/master.m3u8")
+ *
+ * Will result in the Response :
+ * EventSourceData(
+ *      id = "1",
+ *      ...
+ *      streams = listOf(
+ *          StreamSourceData(id = "1",fullUrl = "https://vod-eu.mycujoo.tv/hls/ckw25mmlaxl8i0hbqp6wr5pft/master.m3u8")
+ *      )
+ * )
+ */
+
 import android.content.Context
-import android.util.Log
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.idling.CountingIdlingResource
 import androidx.test.filters.LargeTest
 import androidx.test.internal.runner.junit4.statement.UiThreadStatement
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player
 import dagger.Module
 import dagger.Provides
@@ -27,7 +44,7 @@ import tv.mycujoo.data.model.*
 import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.di.PlayerModule
 import tv.mycujoo.mcls.network.MlsApi
-import java.lang.Exception
+import tv.mycujoo.waitUntilIdle
 import javax.inject.Singleton
 
 @HiltAndroidTest
@@ -41,58 +58,31 @@ class SuccessfulEventByIdPlayback : E2ETest() {
     @BindValue
     val exoPlayer = ExoPlayer.Builder(context).build()
 
+    val videoIdlingResource = CountingIdlingResource("VIDEO")
+
     @Before
     fun setUp() {
         IdlingRegistry.getInstance().register(videoIdlingResource)
     }
 
     @Test
-    fun testInitialStartup() {
+    fun testPlayEvent() {
         videoIdlingResource.increment()
 
         exoPlayer.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 super.onIsPlayingChanged(isPlaying)
-                Log.d(TAG, "onIsPlayingChanged: $isPlaying")
                 if (isPlaying) videoIdlingResource.decrement()
-            }
-
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                super.onPlaybackStateChanged(playbackState)
-                Log.d(TAG, "onPlaybackStateChanged: $playbackState")
-            }
-
-            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
-                super.onPlayWhenReadyChanged(playWhenReady, reason)
-                Log.d(TAG, "onPlayWhenReadyChanged: $playWhenReady, $reason")
-            }
-
-            override fun onPlayerError(error: PlaybackException) {
-                super.onPlayerError(error)
-                Log.d(TAG, "onPlayerError: ${error.message} ${error.errorCode} ${error.cause}")
             }
         })
 
-        val videoUrl = "https://vod-eu.mycujoo.tv/hls/ckw25mmlaxl8i0hbqp6wr5pft/master.m3u8"
+        mMLS.getVideoPlayer().playVideo("https://vod-eu.mycujoo.tv/hls/ckw25mmlaxl8i0hbqp6wr5pft/master.m3u8")
 
-        mMLS.getVideoPlayer().playVideo(videoUrl)
-
-
-        while (!videoIdlingResource.isIdleNow) {
-            Log.d(TAG, "testInitialStartup: looping")
-            Thread.sleep(500)
-        }
+        waitUntilIdle(videoIdlingResource)
 
         UiThreadStatement.runOnUiThread {
             assert(exoPlayer.isPlaying)
         }
-    }
-
-    companion object {
-        private const val TAG = "SuccessfulEventByIdPlay"
-
-        @JvmStatic
-        val videoIdlingResource = CountingIdlingResource("VIDEO")
     }
 
     @Module

@@ -1,10 +1,8 @@
 package tv.mycujoo.e2e
 
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-import androidx.test.espresso.Espresso
+import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.idling.CountingIdlingResource
+import androidx.test.internal.runner.junit4.statement.UiThreadStatement
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,7 +11,9 @@ import dagger.hilt.android.testing.UninstallModules
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import org.joda.time.DateTime
+import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import tv.mycujoo.E2ETest
 import tv.mycujoo.data.entity.ActionResponse
@@ -22,11 +22,6 @@ import tv.mycujoo.mcls.core.PlayerEventsListener
 import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.network.MlsApi
 import javax.inject.Singleton
-import androidx.test.espresso.IdlingRegistry
-import androidx.test.espresso.base.MainThread
-import androidx.test.internal.runner.junit4.statement.UiThreadStatement
-import org.junit.After
-import org.junit.Ignore
 
 @HiltAndroidTest
 @UninstallModules(NetworkModule::class)
@@ -35,10 +30,8 @@ class SwitchEventWhenDifferent : E2ETest() {
     private val registry = IdlingRegistry.getInstance()
     lateinit var globalIdlingResources: CountingIdlingResource
 
-
     @Before
     fun initIdleResourcing() {
-        Log.d("MYTAG", "initIdleResourcing: ")
         globalIdlingResources = CountingIdlingResource("GLOBAL")
         registry.register(globalIdlingResources)
     }
