@@ -4,11 +4,11 @@
 
 ### For usage showcase please refer to Sample-app [https://github.com/mycujoo/mls-android-sample-app]
 
-### Overview
+## Overview
 MLS Android SDK enables apps to play videos that are hosted on MyCujoo Live Service platform while making displaying of annotations possible. MLS will handle all possible features an app needs to broadcast an event. From retrieving events list to displaying the video itself & annotations on it.
 
 
-#### Init MLS SDK main component
+### Init MLS SDK main component
 
 Add dependency to SDK in app-level build.gradle file:
 
@@ -102,23 +102,20 @@ Note: You Can provide the public key from the AndroidManifest using this meta ta
         videoPlayer.playVideo("EVENT_ID_HERE") // or event object itself
 
 
-​      
+​     
 
-## Android TV Player
+### Init TV SDK
 
-1. Implement the library
+#### Implement the library
 
    ```groovy
    implementation 'tv.mycujoo.mls:mls:MLS_LATEST_VERSION_HERE'
    ```
 
-   
-
-2. Add Public Key to the Manifest using:
+#### Add Public Key to the Manifest using:
 
    ```xml
-   <application 
-       ...>
+   <application>
        ...
        <meta-data
                android:name="tv.mycujoo.MLS_PUBLIC_KEY"
@@ -126,7 +123,7 @@ Note: You Can provide the public key from the AndroidManifest using this meta ta
    </application>
    ```
 
-3. Add the Playback Fragment in the Activity XML using:
+#### Add the Playback Fragment in the Activity XML using:
 
    ```xml
    <androidx.fragment.app.FragmentContainerView
@@ -137,19 +134,64 @@ Note: You Can provide the public key from the AndroidManifest using this meta ta
            android:name="tv.mycujoo.ui.PlaybackFragment" />
    ```
 
-4. Play your event fast and easy with this code in the Activity's Kotlin Class
+#### Play your event fast and easy with this code in the Activity's Kotlin Class
 
    ```kotlin
-   fun onCreate(...) {
-     (supportFragmentManager.findFragmentByTag("playback_tag") as PlaybackFragment).playEvent(
-               EVENT_ID_HERE
-           )
-   }
+// Extend Activity From FragmentActivity
+class TvMainActivity : FragmentActivity() {
+
+	// Define the Fragment
+   private val videoFragment = MLSTVFragment()
    
-   
+   // Inflate it
+   override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        uiBinding = ActivityTvMainBinding.inflate(layoutInflater)
+        setContentView(uiBinding.root)
+				
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container, videoFragment, "PLAYBACK")
+            .commit()
+    }
+    
+    // Build MLSTV
+    override fun onResumeFragments() {
+        super.onResumeFragments()
+
+        mMLSTV = MLSTvBuilder()
+            .withMLSTvFragment(videoFragment)
+            .publicKey(PUBLIC_KEY_HERE) // In case you don't like the Manifest Tag
+            .setConfiguration(
+                MLSTVConfiguration(
+                    1000L,
+                    TVVideoPlayerConfig(
+                        primaryColor = "#ff0000",
+                        secondaryColor = "#fff000",
+                        autoPlay = true,
+                        showBackForwardsButtons = true,
+                        showSeekBar = true,
+                        showTimers = true,
+                        showLiveViewers = true,
+                    )
+                )
+            )
+            .build()
+
+				// Now the Player is Accessable and Inflated
+        mMLSTV.getVideoPlayer().playVideo(EVENT_ID_HERE)
+    }
+}
    ```
 
+
+
+### Very Important Note:
+
+Please Use AppCompat Parent Theme in your TV Activity. You can do that by using the `Theme.AppCompat.Leanback` Parent Theme in your Styles for the activity. It's located under the `androidx.leanback:leanback:$leanback_version` package.
+
 ### Modules
+
 #### Cast Module (Google Cast support)
 If you are interested to support Google Cast in MLS, import MLS-Cast module and provide it to builder of MLS-component.
 [Here](https://github.com/mycujoo/mls-android/blob/master/cast/README.md) is the document on how to use it.
