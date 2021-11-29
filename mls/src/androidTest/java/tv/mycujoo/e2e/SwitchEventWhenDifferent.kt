@@ -1,70 +1,118 @@
+/**
+ * Tests Successful Playback Scenario.
+ * To use this test, we can request event by id, and pass the video url as the id.
+ * This way, the test will inject the video url into the event.
+ *
+ * Example:
+ * mMLS.getVideoPlayer().playVideo("https://vod-eu.mycujoo.tv/hls/ckw25mmlaxl8i0hbqp6wr5pft/master.m3u8")
+ *
+ * Will result in the Response :
+ * EventSourceData(
+ *      id = "https://vod-eu.mycujoo.tv/hls/ckw25mmlaxl8i0hbqp6wr5pft/master.m3u8",
+ *      ...
+ *      streams = listOf(
+ *          StreamSourceData(id = "1",fullUrl = "https://vod-eu.mycujoo.tv/hls/ckw25mmlaxl8i0hbqp6wr5pft/master.m3u8")
+ *      )
+ * )
+ */
+
 package tv.mycujoo.e2e
 
-import androidx.test.espresso.IdlingRegistry
+import android.content.Context
+import android.util.Log
 import androidx.test.espresso.idling.CountingIdlingResource
 import androidx.test.internal.runner.junit4.statement.UiThreadStatement
+import androidx.test.platform.app.InstrumentationRegistry
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.Player
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.testing.BindValue
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.UninstallModules
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import org.joda.time.DateTime
-import org.junit.After
-import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import tv.mycujoo.E2ETest
+import tv.mycujoo.IdlingResourceHelper
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.data.model.*
-import tv.mycujoo.mcls.core.PlayerEventsListener
 import tv.mycujoo.mcls.di.NetworkModule
+import tv.mycujoo.mcls.di.PlayerModule
 import tv.mycujoo.mcls.network.MlsApi
 import javax.inject.Singleton
 
 @HiltAndroidTest
-@UninstallModules(NetworkModule::class)
+@UninstallModules(NetworkModule::class, PlayerModule::class)
 class SwitchEventWhenDifferent : E2ETest() {
 
-    private val registry = IdlingRegistry.getInstance()
-    lateinit var globalIdlingResources: CountingIdlingResource
+    private val TAG = "SwitchEventWhenDifferent"
 
-    @Before
-    fun initIdleResourcing() {
-        globalIdlingResources = CountingIdlingResource("GLOBAL")
-        registry.register(globalIdlingResources)
-    }
+    @BindValue
+    val context: Context = InstrumentationRegistry.getInstrumentation().context
 
-    @After
-    fun detach() {
-        registry.unregister(globalIdlingResources)
-    }
+    @BindValue
+    val exoPlayer = ExoPlayer.Builder(context).build()
 
-    @Ignore("Work Under Progress")
+    val videoIdlingResource = CountingIdlingResource("VIDEO")
+
+    val helper = IdlingResourceHelper(videoIdlingResource)
+
     @Test
-    fun whenPlayingAnEventVideoPlayerShouldPlayAnEventInsideExoPlayer() =
+    fun whenPlayerIsPlayingAndPlaySecondEventRequestedShouldSwitchVideoPlaying() {
+        // Given we have 2 events shown in the screen
+        Log.d(TAG, "Given we have 2 events shown in the screen")
+        val firstEvent = "https://vod-eu.mycujoo.tv/hls/ckw25mmlaxl8i0hbqp6wr5pft/master.m3u8"
+        val secondEvent =
+            "https://playlists.mycujoo.tv/match-recap/playlist.m3u8?eventId=ckvmcys5vgdi80hbq79txdzrs&highlightIds=ckw0w3v6l3ode15bhh50qbqi5,ckw0w5dm13lwp158620ipbgwx,ckw0wd3pd3n1s15b9cc5k50m5,ckw0wijlc3lx315864ujwbusl,ckw0wq4nv3lxb1586dgm5eco5,ckw0x38cr3oem15bh1ca5dclp,ckw0yio5z3n3c15b9bf128044,ckw0yuppa3m13158656zbaszv,ckw0z4snj3n7715b96lpvhgzp,ckw0zcw6t3m7a1586cgdi0he5,ckw0zrr8l3me81586bnrb7tex,ckw0zzvpy3nrz15b9hs5f0o6p,ckw108zv73ny915b9gf1l16qn,ckw10bt023mqu1586aszde2vo"
+
+        exoPlayer.addListener(object : Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                super.onIsPlayingChanged(isPlaying)
+                // Since there is a pause event, we should pause when playing happens only
+                if (isPlaying) {
+                    videoIdlingResource.decrement()
+                }
+            }
+        })
+
+        // When we choose the first event
+        Log.d(TAG, "And the exoplayer should not be playing the first event")
+        videoIdlingResource.increment()
+        mMLS.getVideoPlayer().playVideo(firstEvent)
+        helper.waitUntilIdle()
+
+        // Then We should see the video we picked played in the player
         UiThreadStatement.runOnUiThread {
-            var expectedPlayerStatus = true
-
-
-            globalIdlingResources.increment()
-
-            val playerEventsListener =
-                PlayerEventsListener(object : tv.mycujoo.mcls.api.PlayerEventsListener {
-                    override fun onIsPlayingChanged(playing: Boolean) {
-                        globalIdlingResources.decrement()
-                        assert(playing)
-                    }
-
-                    override fun onPlayerStateChanged(playbackState: Int) {
-                    }
-                })
-
-
-            mMLS.getVideoPlayer().setPlayerEventsListener(playerEventsListener)
-            mMLS.getVideoPlayer().playVideo("1")
+            Log.d(TAG, "Then We should see the video we picked played in the player")
+            val firstMediaItem = exoPlayer.getMediaItemAt(0)
+            assert(firstMediaItem.localConfiguration?.uri.toString() == firstEvent)
+            assert(exoPlayer.isPlaying)
         }
+
+        // When we choose the second event
+        Log.d(TAG, "When we choose the second event")
+        videoIdlingResource.increment()
+        mMLS.getVideoPlayer().playVideo(secondEvent)
+        helper.waitUntilIdle()
+
+        // Then the exoplayer should play the second event
+        UiThreadStatement.runOnUiThread {
+            Log.d(TAG, "Then the exoplayer should play the second event")
+            val secondMediaItem = exoPlayer.getMediaItemAt(0)
+            assert(secondMediaItem.localConfiguration?.uri.toString() == secondEvent)
+            assert(exoPlayer.isPlaying)
+        }
+
+        // And the exoplayer should not be playing the first event
+        UiThreadStatement.runOnUiThread {
+            Log.d(TAG, "And the exoplayer should NOT be playing the first event")
+            val secondMediaItem = exoPlayer.getMediaItemAt(0)
+            assert(secondMediaItem.localConfiguration?.uri.toString() != firstEvent)
+        }
+    }
 
 
     @Module
@@ -75,8 +123,6 @@ class SwitchEventWhenDifferent : E2ETest() {
         @Provides
         fun provideMlsApi(): MlsApi {
             return object : MlsApi {
-
-                // Actual Useful used request
                 override suspend fun getEventDetails(
                     id: String,
                     updateId: String?
@@ -105,30 +151,15 @@ class SwitchEventWhenDifferent : E2ETest() {
                         status = "AVAILABLE",
                         streams = listOf(
                             StreamSourceData(
-                                id = "",
+                                id = "id",
                                 dvrWindowString = "",
-                                fullUrl = "https://playlists.mycujoo.football/eu/ckvwbajqyr3hu0gbljp9k4t9w/master.m3u8",
                                 widevine = null,
-                                errorCodeAndMessage = null
+                                fullUrl = id
                             )
                         ),
                         thumbnailUrl = "url",
                         timezone = "",
                         title = "Title"
-                    )
-                }
-
-                /** region Unused Invocations*/
-                override suspend fun getEvents(
-                    pageSize: Int?,
-                    pageToken: String?,
-                    status: List<String>?,
-                    orderBy: String?
-                ): EventsSourceData {
-                    return EventsSourceData(
-                        events = listOf(),
-                        previousPageToken = null,
-                        nextPageToken = null
                     )
                 }
 
@@ -141,10 +172,20 @@ class SwitchEventWhenDifferent : E2ETest() {
                     )
                 }
 
-                /** endregion */
+                override suspend fun getEvents(
+                    pageSize: Int?,
+                    pageToken: String?,
+                    status: List<String>?,
+                    orderBy: String?
+                ): EventsSourceData {
+                    return EventsSourceData(
+                        events = listOf(),
+                        previousPageToken = null,
+                        nextPageToken = null
+                    )
+                }
             }
         }
-
 
         @Singleton
         @Provides
