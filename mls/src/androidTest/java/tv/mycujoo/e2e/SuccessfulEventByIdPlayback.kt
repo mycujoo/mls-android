@@ -1,6 +1,3 @@
-package tv.mycujoo.e2e
-
-
 /**
  * Tests Successful Playback Scenario.
  * To use this test, we can request event by id, and pass the video url as the id.
@@ -18,6 +15,8 @@ package tv.mycujoo.e2e
  *      )
  * )
  */
+
+package tv.mycujoo.e2e
 
 import android.content.Context
 import androidx.test.espresso.IdlingRegistry
@@ -39,12 +38,12 @@ import org.joda.time.DateTime
 import org.junit.Before
 import org.junit.Test
 import tv.mycujoo.E2ETest
+import tv.mycujoo.IdlingResourceHelper
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.data.model.*
 import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.di.PlayerModule
 import tv.mycujoo.mcls.network.MlsApi
-import tv.mycujoo.waitUntilIdle
 import javax.inject.Singleton
 
 @HiltAndroidTest
@@ -60,6 +59,8 @@ class SuccessfulEventByIdPlayback : E2ETest() {
 
     val videoIdlingResource = CountingIdlingResource("VIDEO")
 
+    val helper = IdlingResourceHelper(videoIdlingResource)
+
     @Before
     fun setUp() {
         IdlingRegistry.getInstance().register(videoIdlingResource)
@@ -72,13 +73,13 @@ class SuccessfulEventByIdPlayback : E2ETest() {
         exoPlayer.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 super.onIsPlayingChanged(isPlaying)
-                if (isPlaying) videoIdlingResource.decrement()
+                videoIdlingResource.decrement()
             }
         })
 
         mMLS.getVideoPlayer().playVideo("https://vod-eu.mycujoo.tv/hls/ckw25mmlaxl8i0hbqp6wr5pft/master.m3u8")
 
-        waitUntilIdle(videoIdlingResource)
+        helper.waitUntilIdle()
 
         UiThreadStatement.runOnUiThread {
             assert(exoPlayer.isPlaying)
