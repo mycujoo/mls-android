@@ -7,7 +7,6 @@ import com.google.android.exoplayer2.Player.STATE_READY
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.jetbrains.annotations.TestOnly
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.Result
@@ -20,6 +19,7 @@ import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
+import tv.mycujoo.mcls.api.PlayerViewContract
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -37,7 +37,7 @@ class AnnotationMediator @Inject constructor(
 ) : IAnnotationMediator {
 
 
-    private lateinit var playerView: MLSPlayerView
+    private lateinit var playerViewContract: PlayerViewContract
 
     /**region Fields*/
     private val scheduledRunnable: Runnable
@@ -54,7 +54,7 @@ class AnnotationMediator @Inject constructor(
         val exoRunnable = Runnable {
             if (player.isPlaying()) {
                 val currentPosition = player.currentPosition()
-                annotationFactory.attachPlayerView(playerView)
+                annotationFactory.attachPlayerView(playerViewContract)
                 annotationFactory.build(
                     BuildPoint(
                         currentPosition,
@@ -64,7 +64,10 @@ class AnnotationMediator @Inject constructor(
                     )
                 )
 
-                playerView.updateTime(currentPosition, player.duration())
+                val playerView = playerViewContract
+                if (playerView is MLSPlayerView) {
+                    playerView.updateTime(currentPosition, player.duration())
+                }
             }
         }
 
@@ -126,7 +129,10 @@ class AnnotationMediator @Inject constructor(
                     hasPendingSeek = true
                 }
 
-                playerView.updateTime(time, player.duration())
+                val playerView = playerViewContract
+                if (playerView is MLSPlayerView) {
+                    playerView.updateTime(time, player.duration())
+                }
             }
 
             /**
@@ -137,7 +143,10 @@ class AnnotationMediator @Inject constructor(
                 super.onPlayWhenReadyChanged(playWhenReady, playbackState)
 
                 if (playbackState == STATE_READY) {
-                    playerView.updateTime(player.currentPosition(), player.duration())
+                    val playerView = playerViewContract
+                    if (playerView is MLSPlayerView) {
+                        playerView.updateTime(player.currentPosition(), player.duration())
+                    }
                 }
 
                 if (playbackState == STATE_READY && hasPendingSeek) {
@@ -158,7 +167,10 @@ class AnnotationMediator @Inject constructor(
                 super.onPlaybackStateChanged(playbackState)
 
                 if (playbackState == STATE_READY) {
-                    playerView.updateTime(player.currentPosition(), player.duration())
+                    val playerView = playerViewContract
+                    if (playerView is MLSPlayerView) {
+                        playerView.updateTime(player.currentPosition(), player.duration())
+                    }
                 }
 
                 if (playbackState == STATE_READY && hasPendingSeek) {
@@ -178,10 +190,14 @@ class AnnotationMediator @Inject constructor(
         player.addListener(eventListener)
     }
 
-    override fun initPlayerView(playerView: MLSPlayerView) {
+    override fun initPlayerView(playerView: PlayerViewContract) {
         scheduler = Executors.newScheduledThreadPool(1)
-        this.playerView = playerView
-        playerView.setOnSizeChangedCallback(onSizeChangedCallback)
+        this.playerViewContract = playerView
+
+        val contract = playerViewContract
+        if (contract is MLSPlayerView) {
+            contract.setOnSizeChangedCallback(onSizeChangedCallback)
+        }
     }
     /**endregion */
 
@@ -195,7 +211,7 @@ class AnnotationMediator @Inject constructor(
     }
 
     override var onSizeChangedCallback = {
-        annotationFactory.attachPlayerView(playerView)
+        annotationFactory.attachPlayerView(playerViewContract)
         annotationFactory.build(
             BuildPoint(
                 player.currentPosition(),
