@@ -22,7 +22,7 @@ class MLSTV @Inject constructor(
         tvVideoPlayer.mlsTVConfiguration = builder.mlsTVConfiguration
 
         viewHandler.setOverlayHost(mlsTvFragment.overlayHost)
-        tvVideoPlayer.initialize(mlsTvFragment)
+        tvVideoPlayer.initialize(mlsTvFragment, builder)
     }
 
 

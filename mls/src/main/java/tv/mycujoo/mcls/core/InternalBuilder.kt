@@ -29,7 +29,7 @@ open class InternalBuilder @Inject constructor(
 ) {
 
     private var ima: IIma? = null
-    private var logLevel: LogLevel = MLSConfiguration().logLevel
+    private var logLevel = logger.getLogLevel()
 
     /**region Fields*/
 
