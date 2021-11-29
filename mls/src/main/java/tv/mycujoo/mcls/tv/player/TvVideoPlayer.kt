@@ -1,5 +1,6 @@
 package tv.mycujoo.mcls.tv.player
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import android.view.Gravity
@@ -13,6 +14,7 @@ import androidx.leanback.media.PlaybackGlue
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter
 import com.google.android.exoplayer2.ui.AdViewProvider
+import com.npaw.youbora.lib6.plugin.Plugin
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,6 +23,7 @@ import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.entity.Stream
 import tv.mycujoo.mcls.R
+import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.api.MLSTVConfiguration
 import tv.mycujoo.mcls.core.AbstractPlayerMediator
 import tv.mycujoo.mcls.core.AnnotationFactory
@@ -37,6 +40,8 @@ import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaDatum
 import tv.mycujoo.mcls.player.MediaFactory
+import tv.mycujoo.mcls.tv.api.MLSTvBuilder
+import tv.mycujoo.mcls.tv.api.MLSTvInternalBuilder
 import tv.mycujoo.mcls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackTransportControlGlueImpl
@@ -50,15 +55,14 @@ import javax.inject.Inject
 
 class TvVideoPlayer @Inject constructor(
     @ApplicationContext val context: Context,
-    private val mediaFactory: MediaFactory,
     private val reactorSocket: IReactorSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     private val logger: Logger,
     private val player: IPlayer,
     private val tvAnnotationMediator: TvAnnotationMediator,
-    private val exoPlayer: ExoPlayer,
-    private val annotationFactory: IAnnotationFactory
+    private val annotationFactory: IAnnotationFactory,
+    private val internalBuilder: MLSTvInternalBuilder,
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
     lateinit var mMlsTvFragment: MLSTVFragment
@@ -74,7 +78,18 @@ class TvVideoPlayer @Inject constructor(
     private lateinit var controllerAgent: ControllerAgent
 
     private lateinit var overlayContainer: ConstraintLayout
+
     /**endregion */
+
+    /**
+     * Youbora client instance to log analytics through
+     */
+    private lateinit var youboraClient: YouboraClient
+
+    /**
+     * Indicates if SDK user desires to have analytics enabled
+     */
+    private var hasAnalytic = false
 
     /**
      * Latest updateId received from Reactor service, or null if not joined at all
@@ -82,7 +97,7 @@ class TvVideoPlayer @Inject constructor(
     private var updateId: String? = null
 
     /**region Initializing*/
-    fun initialize(mlsTvFragment: MLSTVFragment) {
+    fun initialize(mlsTvFragment: MLSTVFragment, builder: MLSTvBuilder) {
         annotationFactory.attachPlayerView(mlsTvFragment)
         this.mMlsTvFragment = mlsTvFragment
 
@@ -94,6 +109,16 @@ class TvVideoPlayer @Inject constructor(
                 ima,
             )
         }
+
+        hasAnalytic = builder.hasAnalytic
+        if (builder.hasAnalytic) {
+            initAnalytic(
+                builder.mlsTvFragment.requireActivity(),
+                this.player.getDirectInstance()!!,
+                builder.youboraPlugin
+            )
+        }
+
 
         this.player.getDirectInstance()?.let { exoPlayer ->
             ima?.setPlayer(exoPlayer)
@@ -187,6 +212,27 @@ class TvVideoPlayer @Inject constructor(
     }
 
     /**endregion */
+    private fun initAnalytic(
+        activity: Activity,
+        exoPlayer: ExoPlayer,
+        plugin: Plugin
+    ) {
+        plugin.activity = activity
+        plugin.adapter = internalBuilder.createExoPlayerAdapter(exoPlayer)
+
+        youboraClient = internalBuilder.createYouboraClient(plugin)
+    }
+
+    fun attachPlayer(playerView: MLSPlayerView) {
+        playerView.playerView.player = player.getDirectInstance()
+        playerView.playerView.hideController()
+
+        if (hasAnalytic) {
+            youboraClient.start()
+        }
+
+    }
+
     override fun onReactorEventUpdate(eventId: String, updateId: String) {
         cancelStreamUrlPulling()
         dispatcher.launch(context = Dispatchers.Main) {
