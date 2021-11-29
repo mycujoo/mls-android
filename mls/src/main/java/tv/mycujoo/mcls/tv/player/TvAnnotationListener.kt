@@ -7,8 +7,7 @@ import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.mcls.core.IAnnotationListener
 import tv.mycujoo.mcls.helper.DownloaderClient
 import tv.mycujoo.mcls.helper.OverlayViewHelper
-import tv.mycujoo.mcls.player.IPlayer
-import tv.mycujoo.mcls.widgets.MLSPlayerView
+import tv.mycujoo.mcls.api.PlayerViewContract
 import javax.inject.Inject
 
 class TvAnnotationListener @Inject constructor(
@@ -18,10 +17,10 @@ class TvAnnotationListener @Inject constructor(
     private val downloaderClient: DownloaderClient
 ) : IAnnotationListener {
 
-    private lateinit var MLSPlayerView: MLSPlayerView
+    private lateinit var mPlayerViewContract: PlayerViewContract
 
-    override fun attachPlayer(player: MLSPlayerView) {
-        this.MLSPlayerView = player
+    override fun attachPlayer(player: PlayerViewContract) {
+        this.mPlayerViewContract = player
     }
 
     override fun addOverlay(showOverlayAction: Action.ShowOverlayAction) {

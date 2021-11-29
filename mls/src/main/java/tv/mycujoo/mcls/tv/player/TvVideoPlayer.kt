@@ -2,16 +2,12 @@ package tv.mycujoo.mcls.tv.player
 
 import android.content.Context
 import android.graphics.Color
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.leanback.app.VideoSupportFragment
 import androidx.leanback.app.VideoSupportFragmentGlueHost
 import androidx.leanback.media.PlaybackGlue
 import com.google.android.exoplayer2.ExoPlayer
@@ -27,6 +23,8 @@ import tv.mycujoo.domain.entity.Stream
 import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.api.MLSTVConfiguration
 import tv.mycujoo.mcls.core.AbstractPlayerMediator
+import tv.mycujoo.mcls.core.AnnotationFactory
+import tv.mycujoo.mcls.core.IAnnotationFactory
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.MessageLevel
@@ -39,7 +37,6 @@ import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaDatum
 import tv.mycujoo.mcls.player.MediaFactory
-import tv.mycujoo.mcls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mcls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackTransportControlGlueImpl
@@ -48,6 +45,7 @@ import tv.mycujoo.mcls.widgets.CustomInformationDialog
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mcls.widgets.PreEventInformationDialog
 import tv.mycujoo.mcls.widgets.UiEvent
+import tv.mycujoo.ui.MLSTVFragment
 import javax.inject.Inject
 
 class TvVideoPlayer @Inject constructor(
@@ -59,10 +57,11 @@ class TvVideoPlayer @Inject constructor(
     private val logger: Logger,
     private val player: IPlayer,
     private val tvAnnotationMediator: TvAnnotationMediator,
-    private val exoPlayer: ExoPlayer
+    private val exoPlayer: ExoPlayer,
+    private val annotationFactory: IAnnotationFactory
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
-    lateinit var videoSupportFragment: VideoSupportFragment
+    lateinit var mMlsTvFragment: MLSTVFragment
     var ima: IIma? = null
     var mlsTVConfiguration: MLSTVConfiguration = MLSTVConfiguration()
 
@@ -83,10 +82,11 @@ class TvVideoPlayer @Inject constructor(
     private var updateId: String? = null
 
     /**region Initializing*/
-    fun initialize(videoSupportFragment: VideoSupportFragment) {
-        this.videoSupportFragment = videoSupportFragment
+    fun initialize(mlsTvFragment: MLSTVFragment) {
+        annotationFactory.attachPlayerView(mlsTvFragment)
+        this.mMlsTvFragment = mlsTvFragment
 
-        val adViewProvider = addAdViewProvider(videoSupportFragment.view)
+        val adViewProvider = addAdViewProvider(mMlsTvFragment.uiBinding.fragmentRoot)
         ima?.setAdViewProvider(adViewProvider)
 
         player.apply {
@@ -102,14 +102,14 @@ class TvVideoPlayer @Inject constructor(
         this.player.getDirectInstance()!!.playWhenReady =
             mlsTVConfiguration.videoPlayerConfig.autoPlay
         leanbackAdapter = LeanbackPlayerAdapter(context, this.player.getDirectInstance()!!, 1000)
-        glueHost = VideoSupportFragmentGlueHost(videoSupportFragment)
+        glueHost = VideoSupportFragmentGlueHost(mMlsTvFragment.videoSupportFragment)
 
         val progressBar = ProgressBar(context)
         progressBar.indeterminateDrawable.setTint(Color.parseColor(mlsTVConfiguration.videoPlayerConfig.primaryColor))
         val layoutParams = FrameLayout.LayoutParams(120, 120)
         layoutParams.gravity = Gravity.CENTER
         progressBar.visibility = View.GONE
-        (videoSupportFragment.requireView() as FrameLayout).addView(progressBar, layoutParams)
+        mMlsTvFragment.uiBinding.fragmentRoot.addView(progressBar, layoutParams)
         controllerAgent = ControllerAgent(player.getPlayer()!!)
         controllerAgent.setBufferProgressBar(progressBar)
         mTransportControlGlue = MLSPlaybackTransportControlGlueImpl(
@@ -159,10 +159,10 @@ class TvVideoPlayer @Inject constructor(
             }
         })
 
-        if (videoSupportFragment.view == null) {
+        if (mMlsTvFragment.view == null) {
             throw IllegalArgumentException("Fragment must be supported in a state which has active view!")
         } else {
-            val rootView = videoSupportFragment.requireView() as FrameLayout
+            val rootView = mMlsTvFragment.uiBinding.fragmentRoot
 
             overlayContainer = ConstraintLayout(rootView.context)
             rootView.addView(
@@ -180,10 +180,9 @@ class TvVideoPlayer @Inject constructor(
         }
     }
 
-    private fun addAdViewProvider(fragmentView: View?): AdViewProvider {
-        val view = (fragmentView as FrameLayout)
-        val frameLayout = FrameLayout(view.context)
-        view.addView(frameLayout, 0)
+    private fun addAdViewProvider(fragmentView: FrameLayout): AdViewProvider {
+        val frameLayout = FrameLayout(fragmentView.context)
+        fragmentView.addView(frameLayout, 0)
         return AdViewProvider { frameLayout }
     }
 

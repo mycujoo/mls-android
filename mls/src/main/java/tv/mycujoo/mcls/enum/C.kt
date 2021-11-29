@@ -33,6 +33,8 @@ class C {
             "'Activity' should be provided before setting 'Ima'."
         const val AD_UNIT_MUST_START_WITH_SLASH_IN_MLS_BUILDER_MESSAGE =
             "Ad-unit provided must start with a forward-slash."
+        const val FRAGMENT_MUST_BE_INFLATED_WHEN_BUILDING =
+            "Fragment Must Be Inflated when building the MLSTV Library"
 
 
     }
