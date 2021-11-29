@@ -9,6 +9,8 @@
  * Will result in the Response :
  * EventSourceData(
  *      id = "https://vod-eu.mycujoo.tv/hls/ckw25mmlaxl8i0hbqp6wr5pft/master.m3u8",
+ *      title = "title: https://vod-eu.mycujoo.tv/hls/ckw25mmlaxl8i0hbqp6wr5pft/master.m3u8",
+ *      description = "description: https://vod-eu.mycujoo.tv/hls/ckw25mmlaxl8i0hbqp6wr5pft/master.m3u8",
  *      ...
  *      streams = listOf(
  *          StreamSourceData(id = "1",fullUrl = "https://vod-eu.mycujoo.tv/hls/ckw25mmlaxl8i0hbqp6wr5pft/master.m3u8")
@@ -20,7 +22,11 @@ package tv.mycujoo.e2e
 
 import android.content.Context
 import android.util.Log
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.idling.CountingIdlingResource
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.internal.runner.junit4.statement.UiThreadStatement
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.android.exoplayer2.ExoPlayer
@@ -39,6 +45,7 @@ import tv.mycujoo.E2ETest
 import tv.mycujoo.IdlingResourceHelper
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.data.model.*
+import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.di.PlayerModule
 import tv.mycujoo.mcls.network.MlsApi
@@ -92,6 +99,22 @@ class SwitchEventWhenDifferent : E2ETest() {
             assert(exoPlayer.isPlaying)
         }
 
+        Log.d(TAG, "When Pressing the info button")
+        onView(withId(R.id.controller_informationButtonLayout))
+            .perform(click())
+
+        Log.d(TAG, "Then I should see the first event info")
+        onView(withId(R.id.startedEventInfoDialog_titleTextView))
+            .check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+        onView(withId(R.id.startedEventInfoDialog_bodyTextView))
+            .check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+        onView(withId(R.id.startedEventInfoDialog_titleTextView))
+            .check(matches(withText("title: $firstEvent")))
+        onView(withId(R.id.startedEventInfoDialog_bodyTextView))
+            .check(matches(withText("description: $firstEvent")))
+
+
+
         // When we choose the second event
         Log.d(TAG, "When we choose the second event")
         videoIdlingResource.increment()
@@ -105,6 +128,20 @@ class SwitchEventWhenDifferent : E2ETest() {
             assert(secondMediaItem.localConfiguration?.uri.toString() == secondEvent)
             assert(exoPlayer.isPlaying)
         }
+
+        Log.d(TAG, "When Pressing the info button")
+        onView(withId(R.id.controller_informationButtonLayout))
+            .perform(click())
+
+        Log.d(TAG, "Then I should see the second event info")
+        onView(withId(R.id.startedEventInfoDialog_titleTextView))
+            .check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+        onView(withId(R.id.startedEventInfoDialog_bodyTextView))
+            .check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+        onView(withId(R.id.startedEventInfoDialog_titleTextView))
+            .check(matches(withText("title: $secondEvent")))
+        onView(withId(R.id.startedEventInfoDialog_bodyTextView))
+            .check(matches(withText("description: $secondEvent")))
 
         // And the exoplayer should not be playing the first event
         UiThreadStatement.runOnUiThread {
@@ -130,7 +167,8 @@ class SwitchEventWhenDifferent : E2ETest() {
                     return EventSourceData(
                         id = id,
                         timeline_ids = listOf(),
-                        description = "Description",
+                        title = "title: $id",
+                        description = "description: $id",
                         is_test = true,
                         locationSourceData = LocationSourceData(
                             physicalSourceData = PhysicalSourceData(
@@ -158,8 +196,7 @@ class SwitchEventWhenDifferent : E2ETest() {
                             )
                         ),
                         thumbnailUrl = "url",
-                        timezone = "",
-                        title = "Title"
+                        timezone = ""
                     )
                 }
 
