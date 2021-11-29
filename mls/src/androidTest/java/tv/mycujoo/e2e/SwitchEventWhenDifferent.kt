@@ -99,10 +99,12 @@ class SwitchEventWhenDifferent : E2ETest() {
             assert(exoPlayer.isPlaying)
         }
 
+        // When Pressing the info button
         Log.d(TAG, "When Pressing the info button")
         onView(withId(R.id.controller_informationButtonLayout))
             .perform(click())
 
+        // Then I should see the first event info
         Log.d(TAG, "Then I should see the first event info")
         onView(withId(R.id.startedEventInfoDialog_titleTextView))
             .check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
@@ -129,10 +131,12 @@ class SwitchEventWhenDifferent : E2ETest() {
             assert(exoPlayer.isPlaying)
         }
 
+        // When Pressing the info button
         Log.d(TAG, "When Pressing the info button")
         onView(withId(R.id.controller_informationButtonLayout))
             .perform(click())
 
+        // Then I should see the second event info
         Log.d(TAG, "Then I should see the second event info")
         onView(withId(R.id.startedEventInfoDialog_titleTextView))
             .check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
