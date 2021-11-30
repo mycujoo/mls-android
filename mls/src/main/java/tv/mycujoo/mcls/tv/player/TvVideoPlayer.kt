@@ -305,19 +305,22 @@ class TvVideoPlayer @Inject constructor(
 
     /**region Playback*/
     override fun playVideo(event: EventEntity) {
-        playVideo(event.id)
+        dataManager.currentEvent = event
+        updateStreamStatus(event)
+        playVideoOrDisplayEventInfo(event)
+
+        if (event.isNativeMLS) {
+            joinEvent(event)
+            startStreamUrlPullingIfNeeded(event)
+            fetchActions(event, true)
+        }
     }
 
     override fun playVideo(eventId: String) {
         dispatcher.launch(context = Dispatchers.Main) {
             when (val result = dataManager.getEventDetails(eventId, updateId)) {
                 is Result.Success -> {
-                    dataManager.currentEvent = result.value
-                    updateStreamStatus(result.value)
-                    playVideoOrDisplayEventInfo(result.value)
-                    joinEvent(result.value)
-                    fetchActions(result.value, true)
-                    startStreamUrlPullingIfNeeded(result.value)
+                    playVideo(result.value)
                 }
                 is Result.NetworkError -> {
                     logger.log(
