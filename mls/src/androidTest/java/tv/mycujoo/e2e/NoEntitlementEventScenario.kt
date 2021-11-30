@@ -1,31 +1,16 @@
-/**
- * Tests Successful Playback Scenario.
- * To use this test, we can request event by id, and pass the video url as the id.
- * This way, the test will inject the video url into the event.
- *
- * Example:
- * mMLS.getVideoPlayer().playVideo("https://vod-eu.mycujoo.tv/hls/ckw25mmlaxl8i0hbqp6wr5pft/master.m3u8")
- *
- * Will result in the Response :
- * EventSourceData(
- *      id = "1",
- *      ...
- *      streams = listOf(
- *          StreamSourceData(id = "1",fullUrl = "https://vod-eu.mycujoo.tv/hls/ckw25mmlaxl8i0hbqp6wr5pft/master.m3u8")
- *      )
- * )
- */
-
 package tv.mycujoo.e2e
 
 import android.content.Context
-import androidx.test.espresso.IdlingRegistry
+import android.util.Log
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.assertion.ViewAssertions
+import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.idling.CountingIdlingResource
-import androidx.test.filters.LargeTest
-import androidx.test.internal.runner.junit4.statement.UiThreadStatement
+import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.Player
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,12 +20,14 @@ import dagger.hilt.android.testing.UninstallModules
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import org.joda.time.DateTime
-import org.junit.Before
 import org.junit.Test
 import tv.mycujoo.E2ETest
 import tv.mycujoo.IdlingResourceHelper
 import tv.mycujoo.data.entity.ActionResponse
+import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_GEOBLOCKED
+import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_NO_ENTITLEMENT
 import tv.mycujoo.data.model.*
+import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.di.PlayerModule
 import tv.mycujoo.mcls.network.MlsApi
@@ -48,8 +35,8 @@ import javax.inject.Singleton
 
 @HiltAndroidTest
 @UninstallModules(NetworkModule::class, PlayerModule::class)
-@LargeTest
-class SuccessfulEventByIdPlayback : E2ETest() {
+class NoEntitlementEventScenario : E2ETest() {
+    private val TAG = "EventWithErrorShouldShowErrorDialog"
 
     @BindValue
     val context: Context = InstrumentationRegistry.getInstrumentation().context
@@ -57,33 +44,26 @@ class SuccessfulEventByIdPlayback : E2ETest() {
     @BindValue
     val exoPlayer = ExoPlayer.Builder(context).build()
 
-    val videoIdlingResource = CountingIdlingResource("VIDEO")
+    private val videoIdlingResource = CountingIdlingResource("VIDEO")
 
     val helper = IdlingResourceHelper(videoIdlingResource)
 
-    @Before
-    fun setUp() {
-        IdlingRegistry.getInstance().register(videoIdlingResource)
-    }
-
     @Test
-    fun testPlayEvent() {
-        videoIdlingResource.increment()
+    fun testErrorDialog() {
+        // when we play a geo-blocked event
+        mMLS.getVideoPlayer().playVideo("s")
 
-        exoPlayer.addListener(object : Player.Listener {
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                super.onIsPlayingChanged(isPlaying)
-                if (isPlaying) videoIdlingResource.decrement()
-            }
-        })
+        // Then I should see the first event info
+        Log.d(TAG, "Then I should see Geo Blocked Error in the screen")
+        onView(withId(R.id.preEventInfoDialog_titleTextView))
+            .check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+        onView(withId(R.id.preEventInfoDialog_bodyTextView))
+            .check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
 
-        mMLS.getVideoPlayer().playVideo("https://vod-eu.mycujoo.tv/hls/ckw25mmlaxl8i0hbqp6wr5pft/master.m3u8")
-
-        helper.waitUntilIdle()
-
-        UiThreadStatement.runOnUiThread {
-            assert(exoPlayer.isPlaying)
-        }
+        onView(withId(R.id.preEventInfoDialog_titleTextView))
+            .check(matches(withText("title")))
+        onView(withId(R.id.preEventInfoDialog_bodyTextView))
+            .check(matches(withText(context.getString(R.string.message_no_entitlement_stream))))
     }
 
     @Module
@@ -101,7 +81,8 @@ class SuccessfulEventByIdPlayback : E2ETest() {
                     return EventSourceData(
                         id = "1",
                         timeline_ids = listOf(),
-                        description = "Description",
+                        title = "title",
+                        description = "description",
                         is_test = true,
                         locationSourceData = LocationSourceData(
                             physicalSourceData = PhysicalSourceData(
@@ -122,15 +103,18 @@ class SuccessfulEventByIdPlayback : E2ETest() {
                         status = "AVAILABLE",
                         streams = listOf(
                             StreamSourceData(
-                                id = "id",
+                                id = "1",
                                 dvrWindowString = "",
                                 widevine = null,
-                                fullUrl = id
+                                fullUrl = "1",
+                                errorCodeAndMessage = ErrorCodeAndMessageSourceData(
+                                    code = ERROR_CODE_NO_ENTITLEMENT,
+                                    message = ERROR_CODE_NO_ENTITLEMENT
+                                )
                             )
                         ),
                         thumbnailUrl = "url",
-                        timezone = "",
-                        title = "Title"
+                        timezone = ""
                     )
                 }
 
@@ -165,4 +149,3 @@ class SuccessfulEventByIdPlayback : E2ETest() {
         }
     }
 }
-

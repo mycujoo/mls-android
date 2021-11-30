@@ -37,13 +37,14 @@ import tv.mycujoo.mcls.widgets.mlstimebar.MLSTimeBar
 import tv.mycujoo.mcls.widgets.mlstimebar.PointOfInterest
 import tv.mycujoo.mcls.widgets.mlstimebar.PointOfInterestType
 import tv.mycujoo.mcls.widgets.mlstimebar.TimelineMarkerView
+import tv.mycujoo.mcls.api.PlayerViewContract
 import java.util.*
 import kotlin.collections.ArrayList
 
 
 class MLSPlayerView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : ConstraintLayout(context, attrs, defStyleAttr), IPlayerView {
+) : ConstraintLayout(context, attrs, defStyleAttr), IPlayerView, PlayerViewContract {
 
 
     /**region UI Fields*/
@@ -197,6 +198,10 @@ class MLSPlayerView @JvmOverloads constructor(
             )
         }
     }
+
+    override fun context(): Context = context
+
+    override fun overlayHost(): ConstraintLayout = overlayHost
 
     fun setTimelineMarker(list: List<TimelineMarkerEntity>) {
         list.map {

@@ -89,15 +89,6 @@ open class AppModule {
         return Handler(Looper.myLooper() ?: Looper.getMainLooper())
     }
 
-    @Provides
-    @Singleton
-    fun provideExoPlayer(@ApplicationContext context: Context): ExoPlayer {
-        return ExoPlayer.Builder(context)
-            .setSeekBackIncrementMs(10000)
-            .setSeekForwardIncrementMs(10000)
-            .build()
-    }
-
     @Singleton
     @Provides
     fun provideHlsMediaSource(): HlsMediaSource.Factory {

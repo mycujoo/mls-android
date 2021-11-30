@@ -12,6 +12,8 @@ class Logger @Inject constructor(private var logLevel: LogLevel) {
         this.logLevel = logLevel
     }
 
+    fun getLogLevel(): LogLevel = logLevel
+
     fun log(messageLevel: MessageLevel, message: String?) {
         if (message == null) {
             return

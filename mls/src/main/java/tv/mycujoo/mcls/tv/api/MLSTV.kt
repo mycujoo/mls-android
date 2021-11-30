@@ -1,26 +1,28 @@
 package tv.mycujoo.mcls.tv.api
 
-import androidx.leanback.app.VideoSupportFragment
 import tv.mycujoo.mcls.api.DataProvider
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.manager.IPrefManager
+import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.tv.player.TvVideoPlayer
+import tv.mycujoo.ui.MLSTVFragment
 import javax.inject.Inject
 
 class MLSTV @Inject constructor(
     private val dataManager: IDataManager,
     private val prefManager: IPrefManager,
-    private val tvVideoPlayer: TvVideoPlayer
+    private val tvVideoPlayer: TvVideoPlayer,
+    private val viewHandler: IViewHandler,
 ) {
 
-    fun initialize(builder: MLSTvBuilder, videoSupportFragment: VideoSupportFragment) {
+    fun initialize(builder: MLSTvBuilder, mlsTvFragment: MLSTVFragment) {
         persistPublicKey(builder.publicKey)
 
         tvVideoPlayer.mlsTVConfiguration = builder.mlsTVConfiguration
 
-        tvVideoPlayer.initialize(videoSupportFragment)
-        tvVideoPlayer.videoSupportFragment = videoSupportFragment
+        viewHandler.setOverlayHost(mlsTvFragment.overlayHost)
+        tvVideoPlayer.initialize(mlsTvFragment, builder)
     }
 
 

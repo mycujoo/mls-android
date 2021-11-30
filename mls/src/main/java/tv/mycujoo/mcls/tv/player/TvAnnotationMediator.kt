@@ -19,6 +19,7 @@ import tv.mycujoo.mcls.manager.ViewHandler
 import tv.mycujoo.mcls.mediator.IAnnotationMediator
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
+import tv.mycujoo.ui.MLSTVFragment
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -30,66 +31,12 @@ class TvAnnotationMediator @Inject constructor(
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     private val logger: Logger,
-    private val viewHandler: ViewHandler
-) : IAnnotationMediator {
+    private val viewHandler: ViewHandler,
+    private val handler: Handler,
+    scheduler: ScheduledExecutorService
+) {
 
-
-    private val scheduler: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
-
-    private var hasPendingSeek: Boolean = false
-    override fun initPlayerView(playerView: MLSPlayerView) {
-        TODO("Not yet implemented")
-    }
-
-    override fun release() {
-        TODO("Not yet implemented")
-    }
-
-    override var onSizeChangedCallback = {
-        tvAnnotationFactory.build(
-            BuildPoint(
-                player.currentPosition(),
-                player.currentAbsoluteTime(),
-                player,
-                player.isPlaying()
-            )
-        )
-    }
-
-    override fun fetchActions(
-        timelineId: String,
-        updateId: String?,
-        resultCallback: ((result: Result<Exception, ActionResponse>) -> Unit)?
-    ) {
-        dispatcher.launch(context = Dispatchers.Main) {
-            val result = dataManager.getActions(timelineId, updateId)
-            resultCallback?.invoke(result)
-            when (result) {
-                is Result.Success -> {
-                    feed(result.value)
-                }
-                is Result.NetworkError -> {
-                    logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
-                }
-                is Result.GenericError -> {
-                    logger.log(
-                        MessageLevel.DEBUG,
-                        C.INTERNAL_ERROR_MESSAGE.plus(" ${result.errorMessage} ${result.errorCode}")
-                    )
-                }
-            }
-        }
-    }
-
-    override fun feed(actionResponse: ActionResponse) {
-        tvAnnotationFactory.setActions(actionResponse.data.map { it.toAction() })
-    }
-
-    override fun setLocalActions(actions: List<Action>) {
-        tvAnnotationFactory.setLocalActions(actions)
-    }
-
-    fun initialize(handler: Handler) {
+    init {
 
         player.addListener(object : Player.Listener {
             override fun onPositionDiscontinuity(reason: Int) {
@@ -121,10 +68,6 @@ class TvAnnotationMediator @Inject constructor(
                     viewHandler.getAnimations().forEach { it.pause() }
                 }
             }
-
-            override fun onPlaybackStateChanged(state: Int) {
-
-            }
         })
 
         val exoRunnable = Runnable {
@@ -151,4 +94,41 @@ class TvAnnotationMediator @Inject constructor(
             TimeUnit.MILLISECONDS
         )
     }
+
+    private var hasPendingSeek: Boolean = false
+
+    fun fetchActions(
+        timelineId: String,
+        updateId: String?,
+        resultCallback: ((result: Result<Exception, ActionResponse>) -> Unit)?
+    ) {
+        dispatcher.launch(context = Dispatchers.Main) {
+            val result = dataManager.getActions(timelineId, updateId)
+            resultCallback?.invoke(result)
+            when (result) {
+                is Result.Success -> {
+                    feed(result.value)
+                }
+                is Result.NetworkError -> {
+                    logger.log(MessageLevel.DEBUG, C.NETWORK_ERROR_MESSAGE.plus("${result.error}"))
+                }
+                is Result.GenericError -> {
+                    logger.log(
+                        MessageLevel.DEBUG,
+                        C.INTERNAL_ERROR_MESSAGE.plus(" ${result.errorMessage} ${result.errorCode}")
+                    )
+                }
+            }
+        }
+    }
+
+    fun feed(actionResponse: ActionResponse) {
+        tvAnnotationFactory.setActions(actionResponse.data.map { it.toAction() })
+    }
+
+    fun setLocalActions(actions: List<Action>) {
+        tvAnnotationFactory.setLocalActions(actions)
+    }
+
+
 }

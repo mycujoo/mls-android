@@ -56,15 +56,6 @@ interface AppModuleBinds {
     @Singleton
     fun bindOverlayFactory(overlayFactory: OverlayFactory): IOverlayFactory
 
-    @Singleton
-    @Binds
-    fun bindAnnotationMediator(annotationMediator: AnnotationMediator): IAnnotationMediator
-
-    @Singleton
-    @Binds
-    @TV
-    fun bindTvAnnotationMediator(annotationMediator: TvAnnotationMediator): IAnnotationMediator
-
     @Binds
     @Singleton
     fun bindViewHandler(viewHandler: ViewHandler): IViewHandler
