@@ -93,6 +93,8 @@ class MLS @Inject constructor(
     }
 
     private fun initializeMediatorsIfNeeded(mMLSPlayerView: MLSPlayerView) {
+        playerView = mMLSPlayerView
+        viewHandler.setOverlayHost(playerView.overlayHost)
         if (mediatorInitialized) {
             mMLSPlayerView.playerView.onResume()
             player.reInit(ExoPlayer.Builder(context)
