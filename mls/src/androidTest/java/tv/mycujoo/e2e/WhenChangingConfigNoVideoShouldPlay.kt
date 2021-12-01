@@ -32,7 +32,9 @@ import javax.inject.Singleton
 @HiltAndroidTest
 @UninstallModules(NetworkModule::class, PlayerModule::class)
 class WhenChangingConfigNoVideoShouldPlay : E2ETest() {
-    private val TAG = "EventWithErrorShouldShowErrorDialog"
+    companion object {
+        private const val TAG = "EventWithErrorShouldShowErrorDialog"
+    }
 
     @BindValue
     val context: Context = InstrumentationRegistry.getInstrumentation().context
@@ -44,7 +46,7 @@ class WhenChangingConfigNoVideoShouldPlay : E2ETest() {
 
     val helper = IdlingResourceHelper(videoIdlingResource)
 
-    val event1 = EventSourceData(
+    private val event1 = EventSourceData(
         id = "ckw25ntnkxlam0hbqnfhx3gk0",
         title = "Top 10 Gol Serie C 2021/22 - 14^ Giornata",
         description = "I dieci gol più belli della 14^ giornata di Serie C",
@@ -77,7 +79,7 @@ class WhenChangingConfigNoVideoShouldPlay : E2ETest() {
         )
     )
 
-    val event2 = EventSourceData(
+    private val event2 = EventSourceData(
         id = "ckw25ntnkxlam0hbqnfhx3gk0",
         title = "Top 10 Gol Serie C 2021/22 - 14^ Giornata",
         description = "I dieci gol più belli della 14^ giornata di Serie C",
