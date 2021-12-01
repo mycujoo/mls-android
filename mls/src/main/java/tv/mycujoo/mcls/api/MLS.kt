@@ -10,6 +10,8 @@ import com.google.android.exoplayer2.util.Util
 import dagger.hilt.android.qualifiers.ApplicationContext
 import tv.mycujoo.mcls.core.VideoPlayerMediator
 import tv.mycujoo.mcls.data.IDataManager
+import tv.mycujoo.mcls.enum.C
+import tv.mycujoo.mcls.enum.C.Companion.IDENTITY_TOKEN_PREF_KEY
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
 import tv.mycujoo.mcls.helper.SVGAssetResolver
 import tv.mycujoo.mcls.helper.TypeFaceFactory
@@ -53,7 +55,8 @@ class MLS @Inject constructor(
     fun initializeComponent(builder: MLSBuilder) {
         this.builder = builder
         videoPlayerMediator.videoPlayerConfig = builder.mlsConfiguration.videoPlayerConfig
-        persistPublicKey(this.builder.publicKey)
+        persistPublicKey(builder.publicKey)
+        persistIdentityToken(builder.identityToken)
 
         initSvgRenderingLibrary(assetManager)
 
@@ -66,6 +69,10 @@ class MLS @Inject constructor(
         player.getDirectInstance()?.let { exoPlayer ->
             builder.ima?.setPlayer(exoPlayer)
         }
+    }
+
+    fun setIdentityToken(identityToken: String) {
+        persistIdentityToken(identityToken)
     }
 
     /**
@@ -218,6 +225,10 @@ class MLS @Inject constructor(
      */
     private fun persistPublicKey(publicKey: String) {
         prefManager.persist(PUBLIC_KEY_PREF_KEY, publicKey)
+    }
+
+    private fun persistIdentityToken(identityToken: String) {
+        prefManager.persist(IDENTITY_TOKEN_PREF_KEY, identityToken)
     }
 
     /**endregion */
