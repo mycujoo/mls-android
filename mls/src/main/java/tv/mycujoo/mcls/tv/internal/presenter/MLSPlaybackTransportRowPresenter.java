@@ -277,67 +277,57 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
          */
         public ViewHolder(View rootView, Presenter descriptionPresenter) {
             super(rootView);
-            mImageView = (ImageView) rootView.findViewById(R.id.image);
-            mDescriptionDock = (ViewGroup) rootView.findViewById(R.id.description_dock);
-            mCurrentTime = (TextView) rootView.findViewById(R.id.current_time);
-            mTimersContainer = (LinearLayout) rootView.findViewById(R.id.tvController_timersContainer);
-            mTotalTime = (TextView) rootView.findViewById(R.id.total_time);
-            mSeeKBarContainer = (FrameLayout) rootView.findViewById(R.id.tvController_seekBarContainer);
-            mProgressBar = (MLSSeekBar) rootView.findViewById(R.id.playback_progress);
-            mProgressBar.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    onProgressBarClicked(MLSPlaybackTransportRowPresenter.ViewHolder.this);
+            mImageView = rootView.findViewById(R.id.image);
+            mDescriptionDock = rootView.findViewById(R.id.description_dock);
+            mCurrentTime = rootView.findViewById(R.id.current_time);
+            mTimersContainer = rootView.findViewById(R.id.tvController_timersContainer);
+            mTotalTime = rootView.findViewById(R.id.total_time);
+            mSeeKBarContainer = rootView.findViewById(R.id.tvController_seekBarContainer);
+            mProgressBar = rootView.findViewById(R.id.playback_progress);
+            mProgressBar.setOnClickListener(view -> onProgressBarClicked(ViewHolder.this));
+            mProgressBar.setOnKeyListener((view, keyCode, keyEvent) -> {
+                // when in seek only allow this keys
+                switch (keyCode) {
+                    case KeyEvent.KEYCODE_DPAD_UP:
+                    case KeyEvent.KEYCODE_DPAD_DOWN:
+                        // eat DPAD UP/DOWN in seek mode
+                        return mInSeek;
+                    case KeyEvent.KEYCODE_DPAD_LEFT:
+                    case KeyEvent.KEYCODE_MINUS:
+                    case KeyEvent.KEYCODE_MEDIA_REWIND:
+                        if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+                            onBackward();
+                        }
+                        return true;
+                    case KeyEvent.KEYCODE_DPAD_RIGHT:
+                    case KeyEvent.KEYCODE_PLUS:
+                    case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+                        if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+                            onForward();
+                        }
+                        return true;
+                    case KeyEvent.KEYCODE_DPAD_CENTER:
+                    case KeyEvent.KEYCODE_ENTER:
+                        if (!mInSeek) {
+                            return false;
+                        }
+                        if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
+                            stopSeek(false);
+                        }
+                        return true;
+                    case KeyEvent.KEYCODE_BACK:
+                    case KeyEvent.KEYCODE_ESCAPE:
+                        if (!mInSeek) {
+                            return false;
+                        }
+                        if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
+                            // SeekBar does not support cancel in accessibility mode, so always
+                            // "confirm" if accessibility is on.
+                            stopSeek(!mProgressBar.isAccessibilityFocused());
+                        }
+                        return true;
                 }
-            });
-            mProgressBar.setOnKeyListener(new View.OnKeyListener() {
-
-                @Override
-                public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
-                    // when in seek only allow this keys
-                    switch (keyCode) {
-                        case KeyEvent.KEYCODE_DPAD_UP:
-                        case KeyEvent.KEYCODE_DPAD_DOWN:
-                            // eat DPAD UP/DOWN in seek mode
-                            return mInSeek;
-                        case KeyEvent.KEYCODE_DPAD_LEFT:
-                        case KeyEvent.KEYCODE_MINUS:
-                        case KeyEvent.KEYCODE_MEDIA_REWIND:
-                            if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
-                                onBackward();
-                            }
-                            return true;
-                        case KeyEvent.KEYCODE_DPAD_RIGHT:
-                        case KeyEvent.KEYCODE_PLUS:
-                        case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
-                            if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
-                                onForward();
-                            }
-                            return true;
-                        case KeyEvent.KEYCODE_DPAD_CENTER:
-                        case KeyEvent.KEYCODE_ENTER:
-                            if (!mInSeek) {
-                                return false;
-                            }
-                            if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
-                                stopSeek(false);
-                            }
-                            return true;
-                        case KeyEvent.KEYCODE_BACK:
-                        case KeyEvent.KEYCODE_ESCAPE:
-                            if (!mInSeek) {
-                                return false;
-                            }
-                            if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
-                                // SeekBar does not support cancel in accessibility mode, so always
-                                // "confirm" if accessibility is on.
-                                stopSeek(Build.VERSION.SDK_INT >= 21
-                                        ? !mProgressBar.isAccessibilityFocused() : true);
-                            }
-                            return true;
-                    }
-                    return false;
-                }
+                return false;
             });
             mProgressBar.setAccessibilitySeekListener(new MLSSeekBar.AccessibilitySeekListener() {
                 @Override
@@ -351,9 +341,8 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
                 }
             });
             mProgressBar.setMax(Integer.MAX_VALUE); //current progress will be a fraction of this
-            mControlsDock = (ViewGroup) rootView.findViewById(R.id.controls_dock);
-            mSecondaryControlsDock =
-                    (ViewGroup) rootView.findViewById(R.id.secondary_controls_dock);
+            mControlsDock = rootView.findViewById(R.id.controls_dock);
+            mSecondaryControlsDock = rootView.findViewById(R.id.secondary_controls_dock);
             mDescriptionViewHolder = descriptionPresenter == null ? null :
                     descriptionPresenter.onCreateViewHolder(mDescriptionDock);
             if (mDescriptionViewHolder != null) {
@@ -606,16 +595,12 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
     OnActionClickedListener mOnActionClickedListener;
 
     private final MLSControlBarPresenter.OnControlSelectedListener mOnControlSelectedListener =
-            new MLSControlBarPresenter.OnControlSelectedListener() {
-                @Override
-                public void onControlSelected(Presenter.ViewHolder itemViewHolder, Object item,
-                                              MLSControlBarPresenter.BoundData data) {
-                    MLSPlaybackTransportRowPresenter.ViewHolder vh = ((MLSPlaybackTransportRowPresenter.BoundData) data).mRowViewHolder;
-                    if (vh.mSelectedViewHolder != itemViewHolder || vh.mSelectedItem != item) {
-                        vh.mSelectedViewHolder = itemViewHolder;
-                        vh.mSelectedItem = item;
-                        vh.dispatchItemSelection();
-                    }
+            (itemViewHolder, item, data) -> {
+                ViewHolder vh = ((BoundData) data).mRowViewHolder;
+                if (vh.mSelectedViewHolder != itemViewHolder || vh.mSelectedItem != item) {
+                    vh.mSelectedViewHolder = itemViewHolder;
+                    vh.mSelectedItem = item;
+                    vh.dispatchItemSelection();
                 }
             };
 
@@ -762,16 +747,11 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
                 .onCreateViewHolder(vh.mSecondaryControlsDock);
         vh.mSecondaryControlsDock.addView(vh.mSecondaryControlsVh.view);
         ((MLSPlaybackTransportRowView) vh.view.findViewById(R.id.transport_row))
-                .setOnUnhandledKeyListener(new MLSPlaybackTransportRowView.OnUnhandledKeyListener() {
-                    @Override
-                    public boolean onUnhandledKey(KeyEvent event) {
-                        if (vh.getOnKeyListener() != null) {
-                            if (vh.getOnKeyListener().onKey(vh.view, event.getKeyCode(), event)) {
-                                return true;
-                            }
-                        }
-                        return false;
+                .setOnUnhandledKeyListener(event -> {
+                    if (vh.getOnKeyListener() != null && event != null) {
+                        return vh.getOnKeyListener().onKey(vh.view, event.getKeyCode(), event);
                     }
+                    return false;
                 });
     }
 
