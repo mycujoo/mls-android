@@ -27,6 +27,8 @@ interface IPlayer {
     fun release()
     fun destroy()
 
+    fun clearQue()
+
     fun play(drmMediaData: MediaDatum.DRMMediaData)
     fun play(mediaData: MediaDatum.MediaData)
 

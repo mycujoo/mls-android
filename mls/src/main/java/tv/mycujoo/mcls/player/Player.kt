@@ -207,6 +207,10 @@ class Player @Inject constructor(
         mediaData = null
     }
 
+    override fun clearQue() {
+        exoPlayer.clearMediaItems()
+    }
+
     /**
      * Play media item
      * @param drmMediaData
