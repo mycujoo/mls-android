@@ -3,7 +3,6 @@ package tv.mycujoo.mcls.tv.internal.presenter;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.os.Build;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -135,7 +134,7 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
                             thumbHeroIndex = insertIndex;
                         } else {
                             newPos = mTotalTimeInMs;
-                            thumbHeroIndex = insertIndex > 0 ? insertIndex - 1 : 0;
+                            thumbHeroIndex = insertIndex - 1;
                         }
                     }
                 } else {
@@ -462,8 +461,6 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
                 }
             }
         }
-
-        ;
 
         Presenter getPresenter(boolean primary) {
             ObjectAdapter adapter = primary
