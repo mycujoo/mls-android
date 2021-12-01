@@ -78,13 +78,20 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
     protected void onCreatePrimaryActions(ArrayObjectAdapter primaryActionsAdapter) {
         TVVideoPlayerConfig videoPlayerConfig = config.getVideoPlayerConfig();
         if (videoPlayerConfig.getShowBackForwardsButtons()) {
-            primaryActionsAdapter.add(mRewindAction = new MLSRewindAction(getContext(), 1, videoPlayerConfig.getPrimaryColor()));
+            primaryActionsAdapter.add(mRewindAction =
+                    new MLSRewindAction(getContext(), 1, videoPlayerConfig.getPrimaryColor()));
         }
 
         primaryActionsAdapter.add(mPlayPauseAction =
                 new MLSPlayPauseAction(getContext(), videoPlayerConfig.getPrimaryColor()));
+
         if (videoPlayerConfig.getShowBackForwardsButtons()) {
-            primaryActionsAdapter.add(mFastForwardAction = new MLSFastForwardAction(getContext(), 1, videoPlayerConfig.getPrimaryColor()));
+            mFastForwardAction = new MLSFastForwardAction(
+                    getContext(),
+                    1,
+                    videoPlayerConfig.getPrimaryColor()
+            );
+            primaryActionsAdapter.add(mFastForwardAction);
         }
     }
 
@@ -93,8 +100,10 @@ public class MLSPlaybackTransportControlGlueImpl<T extends PlayerAdapter> extend
         final AbstractDetailsDescriptionPresenter detailsPresenter =
                 new AbstractDetailsDescriptionPresenter() {
                     @Override
-                    protected void onBindDescription(ViewHolder
-                                                             viewHolder, Object obj) {
+                    protected void onBindDescription(
+                            ViewHolder viewHolder,
+                            Object obj
+                    ) {
                         MLSPlaybackBaseControlGlue glue = (MLSPlaybackBaseControlGlue) obj;
                         viewHolder.getTitle().setText(glue.getTitle());
                         viewHolder.getSubtitle().setText(glue.getSubtitle());

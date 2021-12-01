@@ -32,13 +32,11 @@ import java.util.Arrays;
 import tv.mycujoo.mcls.R;
 import tv.mycujoo.mcls.api.MLSTVConfiguration;
 import tv.mycujoo.mcls.entity.msc.TVVideoPlayerConfig;
-import tv.mycujoo.mcls.manager.TvTimelineMarkerManager;
 import tv.mycujoo.mcls.tv.internal.controller.ControllerAgent;
 import tv.mycujoo.mcls.tv.widgets.MLSPlaybackTransportRowView;
 import tv.mycujoo.mcls.tv.widgets.MLSSeekBar;
 import tv.mycujoo.mcls.tv.widgets.MLSThumbsBar;
 import tv.mycujoo.mcls.widgets.MLSPlayerView;
-import tv.mycujoo.mcls.widgets.mlstimebar.TimelineMarkerWidget;
 
 public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
 
@@ -342,8 +340,9 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
             mProgressBar.setMax(Integer.MAX_VALUE); //current progress will be a fraction of this
             mControlsDock = rootView.findViewById(R.id.controls_dock);
             mSecondaryControlsDock = rootView.findViewById(R.id.secondary_controls_dock);
-            mDescriptionViewHolder = descriptionPresenter == null ? null :
-                    descriptionPresenter.onCreateViewHolder(mDescriptionDock);
+            mDescriptionViewHolder = descriptionPresenter == null
+                    ? null
+                    : descriptionPresenter.onCreateViewHolder(mDescriptionDock);
             if (mDescriptionViewHolder != null) {
                 mDescriptionDock.addView(mDescriptionViewHolder.view);
             }
@@ -363,10 +362,6 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
             mTimelineMarkerAnchor = rootView.findViewById(R.id.tvController_timelineMarkerAnchor);
             mTimelineMarkerBackgroundLayout = rootView.findViewById(R.id.tvController_timelineMarkerBackgroundLayout);
             mTimelineMarkerTextView = rootView.findViewById(R.id.tvController_timelineMarkerTextView);
-
-            TimelineMarkerWidget timelineMarkerView = new TimelineMarkerWidget(mTimelineMarkerAnchor, mTimelineMarkerBackgroundLayout, mTimelineMarkerTextView, config.getVideoPlayerConfig().getPrimaryColor());
-            TvTimelineMarkerManager tvTimelineMarkerManager = new TvTimelineMarkerManager(mProgressBar, timelineMarkerView);
-
 
             TVVideoPlayerConfig videoPlayerConfig = config.getVideoPlayerConfig();
             setProgressColor(Color.parseColor(videoPlayerConfig.getPrimaryColor()));
@@ -723,8 +718,13 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
 
     @Override
     protected RowPresenter.ViewHolder createRowViewHolder(ViewGroup parent) {
+
         View v = LayoutInflater.from(parent.getContext()).inflate(
-                R.layout.layout_mls_playback_transport_controls_row, parent, false);
+                R.layout.layout_mls_playback_transport_controls_row,
+                parent,
+                false
+        );
+
         MLSPlaybackTransportRowPresenter.ViewHolder vh = new MLSPlaybackTransportRowPresenter.ViewHolder(v, mDescriptionPresenter);
         initRow(vh);
         return vh;
@@ -733,11 +733,15 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
     private void initRow(final MLSPlaybackTransportRowPresenter.ViewHolder vh) {
         vh.mControlsVh = (MLSControlBarPresenter.ViewHolder) mPlaybackControlsPresenter
                 .onCreateViewHolder(vh.mControlsDock);
-        vh.mProgressBar.setProgressColor(mProgressColorSet ? mProgressColor
+
+        vh.mProgressBar.setProgressColor(mProgressColorSet
+                ? mProgressColor
                 : getDefaultProgressColor(vh.mControlsDock.getContext()));
+
         vh.mProgressBar.setSecondaryProgressColor(mSecondaryProgressColorSet
                 ? mSecondaryProgressColor
                 : getDefaultSecondaryProgressColor(vh.mControlsDock.getContext()));
+
         vh.mControlsDock.addView(vh.mControlsVh.view);
 
         vh.mSecondaryControlsVh = (MLSControlBarPresenter.ViewHolder) mSecondaryControlsPresenter
@@ -783,8 +787,11 @@ public class MLSPlaybackTransportRowPresenter extends PlaybackRowPresenter {
         vh.mSecondaryBoundData.adapter = row.getSecondaryActionsAdapter();
         vh.mSecondaryBoundData.presenter = vh.getPresenter(false);
         vh.mSecondaryBoundData.mRowViewHolder = vh;
-        mSecondaryControlsPresenter.onBindViewHolder(vh.mSecondaryControlsVh,
-                vh.mSecondaryBoundData);
+
+        mSecondaryControlsPresenter.onBindViewHolder(
+                vh.mSecondaryControlsVh,
+                vh.mSecondaryBoundData
+        );
 
         vh.setTotalTime(row.getDuration());
         vh.setCurrentPosition(row.getCurrentPosition());
