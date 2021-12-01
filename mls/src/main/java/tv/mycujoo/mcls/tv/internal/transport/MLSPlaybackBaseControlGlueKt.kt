@@ -19,7 +19,7 @@ import tv.mycujoo.mcls.tv.widgets.MLSRewindAction
 abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
     context: Context,
     val mPlayerAdapter: T,
-    val config: MLSTVConfiguration?,
+    val config: MLSTVConfiguration,
     val controllerAgent: ControllerAgent
 ) : PlaybackGlue(context),
     OnActionClickedListener,
@@ -77,7 +77,7 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
 
         const val DEBUG = false
 
-        protected fun notifyItemChanged(adapter: ArrayObjectAdapter, obj: Any?) {
+        fun notifyItemChanged(adapter: ArrayObjectAdapter, obj: Any?) {
             val index = adapter.indexOf(obj)
             if (index >= 0) {
                 adapter.notifyArrayItemRangeChanged(index, 1)
@@ -86,16 +86,18 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
     }
 
     var mControlsRow: PlaybackControlsRow? = null
-    var mControlsRowPresenter: PlaybackRowPresenter? = null
-    var mPlayPauseAction: MLSPlayPauseAction? = null
-    var mRewindAction: MLSRewindAction? = null
-    var mFastForwardAction: MLSFastForwardAction? = null
+    private var mControlsRowPresenter: PlaybackRowPresenter? = null
+
+    lateinit var mPlayPauseAction: MLSPlayPauseAction
+    lateinit var mRewindAction: MLSRewindAction
+    lateinit var mFastForwardAction: MLSFastForwardAction
+
     var mIsPlaying = false
     var mFadeWhenPlaying = true
 
-    var mSubtitle: String? = null
-    var mTitle: String? = null
-    var mCover: Drawable? = null
+    private var mSubtitle: String? = null
+    private var mTitle: String? = null
+    private var mCover: Drawable? = null
 
     private var mPlayerCallback: PlaybackGlueHost.PlayerCallback? = null
     private var mBuffering = false
@@ -182,7 +184,7 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
         mPlayerAdapter.onAttachedToHost(host)
     }
 
-    fun onAttachHostCallback() {
+    private fun onAttachHostCallback() {
         if (mVideoWidth != 0 && mVideoHeight != 0) {
             mPlayerCallback?.onVideoSizeChanged(mVideoWidth, mVideoHeight)
         }
@@ -197,7 +199,7 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
         controllerAgent.onBufferingStateChanged(mBuffering)
     }
 
-    fun onDetachHostCallback() {
+    private fun onDetachHostCallback() {
         mErrorSet = false
         mErrorCode = 0
         mErrorMessage = null
@@ -222,7 +224,7 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
         super.onDetachedFromHost()
     }
 
-    fun onCreateDefaultControlsRow() {
+    private fun onCreateDefaultControlsRow() {
         if (mControlsRow == null) {
             val controlsRow = PlaybackControlsRow(this)
             setControlsRow(controlsRow)
@@ -230,7 +232,7 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
 
     }
 
-    fun onCreateDefaultRowPresenter() {
+    private fun onCreateDefaultRowPresenter() {
         if (mControlsRowPresenter == null) {
             setPlaybackRowPresenter(onCreateRowPresenter(controllerAgent))
         }
@@ -256,7 +258,7 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
      *
      * @see PlaybackGlueHost#isControlsOverlayAutoHideEnabled()
      */
-    public fun isControlsOverlayAutoHideEnabled(): Boolean = mFadeWhenPlaying
+    fun isControlsOverlayAutoHideEnabled(): Boolean = mFadeWhenPlaying
 
     /**
      * Sets the controls row to be managed by the glue layer. If
@@ -269,7 +271,9 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
      * The primary actions and playback state related aspects of the row
      * are updated by the glue.
      */
-    fun setControlsRow(controlsRow: PlaybackControlsRow) {
+    open fun setControlsRow(controlsRow: PlaybackControlsRow) {
+        Log.d(TAG, "setControlsRow: ")
+
         mControlsRow = controlsRow
         mControlsRow?.currentPosition = -1
         mControlsRow?.duration = -1
@@ -293,7 +297,7 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
     /**
      * Sets the controls row Presenter to be managed by the glue layer.
      */
-    fun setPlaybackRowPresenter(presenter: PlaybackRowPresenter) {
+    private fun setPlaybackRowPresenter(presenter: PlaybackRowPresenter) {
         mControlsRowPresenter = presenter
     }
 
@@ -305,9 +309,9 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
     /**
      * Returns the playback controls row Presenter managed by the glue layer.
      */
-    fun getPlaybackRowPresenter() = mControlsRowPresenter
+    private fun getPlaybackRowPresenter() = mControlsRowPresenter
 
-    abstract override fun onActionClicked(action: Action?)
+    abstract override fun onActionClicked(action: Action)
 
     /**
      * Handles key events and returns true if handled.  A subclass may override this to provide
@@ -315,7 +319,7 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
      */
     abstract override fun onKey(v: View?, keyCode: Int, event: KeyEvent?): Boolean
 
-    fun updateControlsRow() = onMetadataChanged()
+    private fun updateControlsRow() = onMetadataChanged()
 
     override fun isPlaying(): Boolean = mPlayerAdapter.isPlaying
 
@@ -359,19 +363,18 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
      *
      * @param primaryActionsAdapter The adapter to add primary {@link Action}s.
      */
-    protected fun onCreatePrimaryActions(primaryActionsAdapter: ArrayObjectAdapter) {
-    }
+    protected abstract fun onCreatePrimaryActions(primaryActionsAdapter: ArrayObjectAdapter)
 
     /**
      * May be overridden to add secondary actions to the adapter.
      *
      * @param secondaryActionsAdapter The adapter you need to add the {@link Action}s to.
      */
-    protected fun onCreateSecondaryActions(secondaryActionsAdapter: ArrayObjectAdapter) {
+    protected open fun onCreateSecondaryActions(secondaryActionsAdapter: ArrayObjectAdapter) {
     }
 
     @CallSuper
-    protected fun onUpdateProgress() {
+    protected open fun onUpdateProgress() {
         mControlsRow?.currentPosition = if (mPlayerAdapter.isPrepared) {
             getCurrentPosition()
         } else {
@@ -396,12 +399,12 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
     /**
      * @return The duration of the media item in milliseconds.
      */
-    fun getDuration() = mPlayerAdapter.duration
+    private fun getDuration() = mPlayerAdapter.duration
 
     /**
      * @return The current position of the media item in milliseconds.
      */
-    fun getCurrentPosition() = mPlayerAdapter.currentPosition
+    private fun getCurrentPosition() = mPlayerAdapter.currentPosition
 
     /**
      * @return The current buffered position of the media item in milliseconds.
@@ -439,7 +442,7 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
     /**
      * @return The drawable representing cover image.
      */
-    fun getArt() = mCover
+    private fun getArt() = mCover
 
     /**
      * Sets the media subtitle. The subtitle will be rendered by default description presenter
@@ -493,8 +496,8 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
      * Event when play state changed.
      */
     @CallSuper
-    protected fun onPlayStateChanged() {
-        playerCallbacks.forEach { it.onPlayStateChanged(this) }
+    protected open fun onPlayStateChanged() {
+        playerCallbacks?.forEach { it.onPlayStateChanged(this) }
     }
 
     /**
@@ -502,7 +505,7 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
      */
     @CallSuper
     protected fun onPlayCompleted() {
-        playerCallbacks.forEach { it.onPlayCompleted(this) }
+        playerCallbacks?.forEach { it.onPlayCompleted(this) }
     }
 
     /**

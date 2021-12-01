@@ -1,5 +1,6 @@
 package tv.mycujoo.mcls.core
 
+import android.util.Log
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.OverlayAct.*
 import tv.mycujoo.mcls.enum.C.Companion.ONE_SECOND_IN_MS
