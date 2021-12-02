@@ -75,6 +75,10 @@ class MLS @Inject constructor(
         persistIdentityToken(identityToken)
     }
 
+    fun removeIdentityToken() {
+        persistIdentityToken("")
+    }
+
     /**
      * Init SVGRendering library by providing AssetManager
      * Custom font is used by registering an external fire resolver. Font are used in rendering SVG into view.
@@ -104,10 +108,12 @@ class MLS @Inject constructor(
         viewHandler.setOverlayHost(playerView.overlayHost)
         if (mediatorInitialized) {
             mMLSPlayerView.playerView.onResume()
-            player.reInit(ExoPlayer.Builder(context)
-                .setSeekBackIncrementMs(10000)
-                .setSeekForwardIncrementMs(10000)
-                .build())
+            player.reInit(
+                ExoPlayer.Builder(context)
+                    .setSeekBackIncrementMs(10000)
+                    .setSeekForwardIncrementMs(10000)
+                    .build()
+            )
             videoPlayerMediator.initialize(mMLSPlayerView, builder)
 
             builder.ima?.let { ima ->
