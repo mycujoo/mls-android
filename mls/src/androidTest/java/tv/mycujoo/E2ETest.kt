@@ -40,7 +40,7 @@ abstract class E2ETest {
 
             constraintMLSPlayerView(activity.resources.configuration.orientation, activity)
             mMLS = mlsTestBuilder
-                .publicKey("ss")
+                .publicKey("publicKey")
                 .withActivity(activity)
                 .setConfiguration(
                     MLSConfiguration(
