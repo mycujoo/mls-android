@@ -76,7 +76,7 @@ class MLS @Inject constructor(
     }
 
     fun removeIdentityToken() {
-        persistIdentityToken("")
+        prefManager.delete(IDENTITY_TOKEN_PREF_KEY)
     }
 
     /**

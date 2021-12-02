@@ -11,9 +11,16 @@ class PrefManager @Inject constructor(private val sharedPreferences: SharedPrefe
     override fun get(key: String): String? {
         return sharedPreferences.getString(key, null)
     }
+
+    override fun delete(key: String) {
+        val editor = sharedPreferences.edit()
+        editor.remove(key)
+        editor.apply()
+    }
 }
 
 interface IPrefManager {
     fun persist(key: String, value: String)
     fun get(key: String): String?
+    fun delete(key: String)
 }
