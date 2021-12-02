@@ -38,6 +38,7 @@ class TvAnnotationMediator @Inject constructor(
 
     init {
 
+
         player.addListener(object : Player.Listener {
             override fun onPositionDiscontinuity(reason: Int) {
                 if (reason == Player.DISCONTINUITY_REASON_SEEK) {
