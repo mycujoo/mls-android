@@ -49,7 +49,7 @@ class MLSSeekBar(context: Context, attrs: AttributeSet?) : View(context, attrs) 
     private var mActiveBarHeight: Int
     private var mAccessibilitySeekListener: AccessibilitySeekListener? = null
 
-    private lateinit var seekBarListener: SeekBarListener
+    private var seekBarListener: SeekBarListener? = null
     private val poiArrayList = ArrayList<PointOfInterest>()
     private val poiPositionsOnScreen = ArrayList<PositionedPointOfInterest>()
 
@@ -188,7 +188,7 @@ class MLSSeekBar(context: Context, attrs: AttributeSet?) : View(context, attrs) 
 
     fun setCurrentTimeBySeek(pos: Long) {
         val ratio = pos.toDouble() / totalTime
-        seekBarListener.onSeekTo((ratio * mBackgroundRect.width()).toInt(), poiPositionsOnScreen)
+        seekBarListener?.onSeekTo((ratio * mBackgroundRect.width()).toInt(), poiPositionsOnScreen)
     }
     /**
      * Get max value.
