@@ -19,6 +19,10 @@ class MLSTV @Inject constructor(
     fun initialize(builder: MLSTvBuilder, mlsTvFragment: MLSTVFragment) {
         persistPublicKey(builder.publicKey)
 
+        if(builder.identityToken.isNotEmpty()) {
+            persistIdentityToken(builder.identityToken)
+        }
+
         tvVideoPlayer.mlsTVConfiguration = builder.mlsTVConfiguration
 
         viewHandler.setOverlayHost(mlsTvFragment.overlayHost)
@@ -34,6 +38,14 @@ class MLSTV @Inject constructor(
         return dataManager
     }
 
+    fun setIdentityToken(identityToken: String) {
+        persistIdentityToken(identityToken)
+    }
+
+    fun removeIdentityToken() {
+        prefManager.delete(C.IDENTITY_TOKEN_PREF_KEY)
+    }
+
     /**region msc Functions*/
     /**
      * store public key in shared-pref
@@ -41,6 +53,10 @@ class MLSTV @Inject constructor(
      */
     private fun persistPublicKey(publicKey: String) {
         prefManager.persist(C.PUBLIC_KEY_PREF_KEY, publicKey)
+    }
+
+    private fun persistIdentityToken(identityToken: String) {
+        prefManager.persist(C.IDENTITY_TOKEN_PREF_KEY, identityToken)
     }
 
     /**endregion */

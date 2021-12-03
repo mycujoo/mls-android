@@ -12,6 +12,10 @@
             android:exported="true"
             android:name="tv.mycujoo.TestActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
+
+        <activity android:name="tv.mycujoo.TvTestActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Leanback" />
     </application>
 
 </manifest>
