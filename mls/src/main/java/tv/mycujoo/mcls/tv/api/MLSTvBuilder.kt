@@ -18,7 +18,7 @@ import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.ui.MLSTVFragment
 import java.lang.IllegalStateException
 
-class MLSTvBuilder {
+open class MLSTvBuilder {
 
     internal lateinit var mlsTvFragment: MLSTVFragment
     private var analyticsAccount: String = ""
@@ -26,6 +26,8 @@ class MLSTvBuilder {
     internal lateinit var youboraPlugin: Plugin
         private set
     internal var publicKey: String = ""
+        private set
+    internal var identityToken: String = ""
         private set
     internal var mlsTVConfiguration: MLSTVConfiguration = MLSTVConfiguration()
         private set
@@ -41,6 +43,10 @@ class MLSTvBuilder {
             throw IllegalArgumentException(C.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
         this.publicKey = publicKey
+    }
+
+    fun identityToken(identityToken: String) = apply {
+        this.identityToken = identityToken
     }
 
     fun withMLSTvFragment(mlsTvFragment: MLSTVFragment) =
@@ -113,7 +119,7 @@ class MLSTvBuilder {
     /**
      * init public key if not present
      */
-    private fun initPublicKeyIfNeeded() {
+    protected fun initPublicKeyIfNeeded() {
         // grab public key from Manifest if not set manually,
         if (publicKey.isEmpty()) {
             mlsTvFragment.requireActivity().applicationContext.let {
@@ -128,7 +134,7 @@ class MLSTvBuilder {
 
     fun setLogLevel(logLevel: LogLevel) = apply { this.logLevel = logLevel }
 
-    fun build(): MLSTV {
+    open fun build(): MLSTV {
         if (!mlsTvFragment.isResumed) {
             throw IllegalStateException(C.FRAGMENT_MUST_BE_INFLATED_WHEN_BUILDING)
         }
