@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="tv.mycujoo.mcls">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <application>
+    <application
+        android:usesCleartextTraffic="true"
+        tools:targetApi="n">
         <activity
             android:exported="true"
             android:name="tv.mycujoo.TestActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
+
+        <activity android:name="tv.mycujoo.TvTestActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Leanback" />
     </application>
 
 </manifest>
