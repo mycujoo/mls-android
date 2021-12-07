@@ -13,6 +13,7 @@ import tv.mycujoo.mcls.helper.AnimationClassifierHelper.Companion.hasDynamicIntr
 import tv.mycujoo.mcls.helper.AnimationClassifierHelper.Companion.hasDynamicOutroAnimation
 import tv.mycujoo.mcls.helper.AnimationClassifierHelper.Companion.hasStaticIntroAnimation
 import tv.mycujoo.mcls.helper.AnimationClassifierHelper.Companion.hasStaticOutroAnimation
+import tv.mycujoo.mcls.manager.IVariableKeeper
 import tv.mycujoo.mcls.manager.VariableKeeper
 import tv.mycujoo.mcls.manager.VariableTranslator
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
@@ -29,7 +30,7 @@ class OverlayViewHelper @Inject constructor(
     private val overlayFactory: IOverlayFactory,
     private val animationFactory: AnimationFactory,
     private val variableTranslator: VariableTranslator,
-    private val variableKeeper: VariableKeeper
+    private val variableKeeper: IVariableKeeper
 ) {
 
     /**region Add view*/
