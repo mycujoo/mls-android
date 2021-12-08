@@ -92,6 +92,14 @@ class MLS @Inject constructor(
     }
 
     /**
+     * Clears playback que without releasing Exoplayer, which makes reinitilizing the player faster
+     * and more reliable
+     */
+    fun clearQue() {
+        player.clearQue()
+    }
+
+    /**
      * Init video player mediator
      * which mediate video related component and their events, i.e. view-handler to handle view transition & references.
      * @param MLSPlayerView
