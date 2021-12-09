@@ -16,7 +16,11 @@ class MLSTV @Inject constructor(
     private val viewHandler: IViewHandler,
 ) {
 
+    lateinit var tvBuilder: MLSTvBuilder
+
     fun initialize(builder: MLSTvBuilder, mlsTvFragment: MLSTVFragment) {
+        tvBuilder = builder
+
         persistPublicKey(builder.publicKey)
 
         if(builder.identityToken.isNotEmpty()) {
@@ -44,6 +48,10 @@ class MLSTV @Inject constructor(
 
     fun removeIdentityToken() {
         prefManager.delete(C.IDENTITY_TOKEN_PREF_KEY)
+    }
+
+    fun onStop() {
+        tvVideoPlayer.release()
     }
 
     /**region msc Functions*/

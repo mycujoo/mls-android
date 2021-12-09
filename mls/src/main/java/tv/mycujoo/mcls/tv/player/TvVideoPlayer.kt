@@ -404,6 +404,18 @@ class TvVideoPlayer @Inject constructor(
             )
         }
     }
+
+    /**
+     * Release resources & leave Reactor service
+     */
+    fun release() {
+        streaming = false
+        player.release()
+        if (hasAnalytic) {
+            youboraClient.stop()
+        }
+        reactorSocket.leave(true)
+    }
     /**endregion */
 
     /**region Event-information layout*/
