@@ -1,5 +1,6 @@
 package tv.mycujoo.mcls.helper
 
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.util.Log
 import android.view.View
@@ -47,7 +48,7 @@ class OverlayViewHelper @Inject constructor(
         overlayHost: ConstraintLayout,
         showOverlayAction: Action.ShowOverlayAction
     ) {
-        if (showOverlayAction.introTransitionSpec!!.animationType == AnimationType.NONE) {
+        if (showOverlayAction.introTransitionSpec?.animationType == AnimationType.NONE) {
             addViewWithNoAnimation(
                 context,
                 overlayHost,
@@ -80,21 +81,34 @@ class OverlayViewHelper @Inject constructor(
                     variableKeeper
                 )
 
+            val positionGuide = showOverlayAction.viewSpec?.positionGuide ?: PositionGuide(
+                left = 0f,
+                top = 0f
+            )
+            val animationType =
+                showOverlayAction.introTransitionSpec?.animationType ?: AnimationType.NONE
+
+            val introTransitionSpec = showOverlayAction.introTransitionSpec ?: TransitionSpec(
+                offset = 0,
+                animationType = animationType,
+                animationDuration = 0
+            )
+
             when {
-                hasStaticIntroAnimation(showOverlayAction.introTransitionSpec!!.animationType) -> {
+                hasStaticIntroAnimation(animationType) -> {
                     doAddViewWithStaticAnimation(
                         overlayHost,
                         scaffoldView,
-                        showOverlayAction.viewSpec!!.positionGuide!!,
-                        showOverlayAction.introTransitionSpec
+                        positionGuide,
+                        introTransitionSpec
                     )
                 }
-                hasDynamicIntroAnimation(showOverlayAction.introTransitionSpec.animationType) -> {
+                hasDynamicIntroAnimation(animationType) -> {
                     doAddViewWithDynamicAnimation(
                         overlayHost,
                         scaffoldView,
-                        showOverlayAction.viewSpec!!.positionGuide!!,
-                        showOverlayAction.introTransitionSpec
+                        positionGuide,
+                        introTransitionSpec
                     )
                 }
                 else -> {
@@ -176,9 +190,11 @@ class OverlayViewHelper @Inject constructor(
             introTransitionSpec.animationType,
             introTransitionSpec.animationDuration
         )
-        viewHandler.addAnimation(scaffoldView.tag as String, animation!!)
-        animation.start()
-        viewHandler.decrementIdlingResource()
+        animation?.let {
+            viewHandler.addAnimation(scaffoldView.tag as String, animation)
+            animation.start()
+            viewHandler.decrementIdlingResource()
+        }
     }
     /**endregion */
 
@@ -199,10 +215,15 @@ class OverlayViewHelper @Inject constructor(
                 variableKeeper
             )
 
+        val positionGuide = showOverlayAction.viewSpec?.positionGuide ?: PositionGuide(
+            left = 0f,
+            top = 0f
+        )
+
         doAddViewWithNoAnimation(
             overlayHost,
             scaffoldView,
-            showOverlayAction.viewSpec!!.positionGuide!!
+            positionGuide
         )
 
     }
@@ -413,13 +434,10 @@ class OverlayViewHelper @Inject constructor(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT
             )
 
-
-            val positionGuide = showOverlayAction.viewSpec!!.positionGuide
-            if (positionGuide == null) {
-                // should not happen
-                Log.e("OverlayEntityView", "animation must not be null")
-                return@post
-            }
+            val positionGuide = showOverlayAction.viewSpec?.positionGuide ?: PositionGuide(
+                left = 0f,
+                top = 0f
+            )
 
 
             applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
@@ -583,7 +601,10 @@ class OverlayViewHelper @Inject constructor(
             ConstraintLayout.LayoutParams.WRAP_CONTENT
         )
 
-        val positionGuide = showOverlayAction.viewSpec!!.positionGuide!!
+        val positionGuide = showOverlayAction.viewSpec?.positionGuide ?: PositionGuide(
+            left = 0f,
+            top = 0f
+        )
 
         applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
 
