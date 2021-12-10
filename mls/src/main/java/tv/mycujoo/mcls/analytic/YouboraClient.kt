@@ -1,51 +1,100 @@
 package tv.mycujoo.mcls.analytic
 
-import android.util.Log
+import android.app.Activity
+import androidx.annotation.VisibleForTesting
+import com.google.android.exoplayer2.ExoPlayer
+import com.npaw.youbora.lib6.YouboraLog
+import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
+import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
 import tv.mycujoo.domain.entity.EventEntity
+import tv.mycujoo.mcls.enum.LogLevel
+import tv.mycujoo.mcls.enum.MessageLevel
+import tv.mycujoo.mcls.manager.Logger
+import tv.mycujoo.mcls.utils.UuidUtils
+import javax.inject.Inject
 
 /**
  * Integration with Youbora, the analytical tool.
- * @param uuid to identify user.
- * @param plugin Youbora plugin
+ * @param logger to log events for developers.
+ * @param uuidUtils grants access to Uuid for any given session
  */
-class YouboraClient(private val uuid: String, private val plugin: Plugin) {
+class YouboraClient @Inject constructor(
+    private val logger: Logger,
+    private val uuidUtils: UuidUtils
+) : AnalyticsClient {
+
+    var plugin: Plugin? = null
+
+    /**
+     * Only AnalyticsClient should know about the implementation of the analytics server and libs
+     * This ensures only this class knows about youbora
+     */
+    fun setYouboraPlugin(
+        activity: Activity,
+        exoPlayer: ExoPlayer,
+        accountCode: String
+    ) {
+        val youboraOptions = Options()
+        youboraOptions.accountCode = accountCode
+        youboraOptions.isAutoDetectBackground = true
+
+        plugin = Plugin(youboraOptions, activity.baseContext)
+
+        plugin?.activity = activity
+        plugin?.adapter = Exoplayer2Adapter(exoPlayer)
+
+        when (logger.getLogLevel()) {
+            LogLevel.MINIMAL -> {
+                YouboraLog.setDebugLevel(YouboraLog.Level.SILENT)
+            }
+            LogLevel.INFO -> {
+                YouboraLog.setDebugLevel(YouboraLog.Level.DEBUG)
+            }
+            LogLevel.VERBOSE -> {
+                YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE)
+            }
+        }
+    }
 
     /**
      * log an Event to Youbora.
      */
-    fun logEvent(event: EventEntity?, live: Boolean) {
-        if (event == null) {
-            Log.e("YouboraClient", "event is null")
+    override fun logEvent(event: EventEntity?, live: Boolean) {
+        val savedPlugin = plugin
+        if (savedPlugin == null) {
+            logger.log(MessageLevel.ERROR, "Please Set Plugin Before Logging Event!!")
             return
         }
-        plugin.options.username = uuid
-        plugin.options.contentTitle = event.title
-        plugin.options.contentResource = event.streams.firstOrNull()?.toString()
-        plugin.options.contentIsLive = live
+        if (event == null) {
+            logger.log(MessageLevel.ERROR, "event is null")
+            return
+        }
+        savedPlugin.options.username = uuidUtils.getUuid()
+        savedPlugin.options.contentTitle = event.title
+        savedPlugin.options.contentResource = event.streams.firstOrNull()?.toString()
+        savedPlugin.options.contentIsLive = live
 
 
-        plugin.options.contentCustomDimension2 = event.id
-        plugin.options.contentCustomDimension14 = getVideoSource(event)
+        savedPlugin.options.contentCustomDimension2 = event.id
+        savedPlugin.options.contentCustomDimension14 = getVideoSource(event)
 
-        plugin.options.contentCustomDimension15 = event.streams.firstOrNull()?.id
+        savedPlugin.options.contentCustomDimension15 = event.streams.firstOrNull()?.id
     }
 
     /**
      * activate analytical plugin
      */
-    fun start() {
-        if (plugin.adapter != null) {
-            plugin.adapter.fireResume()
-        }
+    override fun start() {
+        plugin?.adapter?.fireResume()
     }
 
 
     /**
      * deactivate analytical plugin
      */
-    fun stop() {
-        plugin.fireStop()
+    override fun stop() {
+        plugin?.fireStop()
     }
 
     /**region Internal*/
@@ -56,6 +105,7 @@ class YouboraClient(private val uuid: String, private val plugin: Plugin) {
             NONE_NATIVE_SOURCE
         }
     }
+
     /**endregion */
 
     companion object {
@@ -63,4 +113,8 @@ class YouboraClient(private val uuid: String, private val plugin: Plugin) {
         const val NONE_NATIVE_SOURCE = "NonNativeMLS"
     }
 
+    @VisibleForTesting
+    fun attachPlugin(plugin: Plugin) {
+        this.plugin = plugin
+    }
 }

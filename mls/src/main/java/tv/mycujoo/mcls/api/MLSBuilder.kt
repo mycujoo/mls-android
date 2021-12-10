@@ -2,8 +2,6 @@ package tv.mycujoo.mcls.api
 
 import android.app.Activity
 import android.content.pm.PackageManager
-import com.npaw.youbora.lib6.plugin.Options
-import com.npaw.youbora.lib6.plugin.Plugin
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.internal.modules.ApplicationContextModule
@@ -29,8 +27,6 @@ open class MLSBuilder {
     internal var publicKey: String = ""
         private set
     internal var identityToken: String = ""
-        private set
-    internal lateinit var youboraPlugin: Plugin
         private set
     internal var activity: Activity? = null
         private set
@@ -121,8 +117,8 @@ open class MLSBuilder {
     }
 
     /**
-     * create Youbora Plugin.
-     * To Initiate the Library, the lib searches for they key in 3 different places
+     * creates an account key for analytics.
+     * the lib searches for they key in 3 different places
      *
      *  1. If Youbora Code was Provided with analyticsAccount(String),
      *     Then use it
@@ -137,25 +133,20 @@ open class MLSBuilder {
      *  3. else,
      *      Then use MyCujoo Default Account Name
      */
-    protected fun initYouboraPlugin() {
+    fun getAnalyticsAccountCode(): String {
         // Provided via the Builder
-        var code = analyticsAccount
-
-        // Provided from the Manifest
-        if (code.isEmpty()) {
-            code = grabAnalyticsKeyFromManifest()
+        if (analyticsAccount.isNotEmpty()) {
+            return analyticsAccount
         }
 
-        // MyCujoo Account Code
-        if (code.isEmpty()) {
-            code = BuildConfig.MYCUJOO_YOUBORA_ACCOUNT_NAME
+        // If Provided via Manifest
+        val manifestAnalyticsCode = grabAnalyticsKeyFromManifest()
+        if (manifestAnalyticsCode.isNotEmpty()) {
+            return manifestAnalyticsCode
         }
 
-        val youboraOptions = Options()
-        youboraOptions.accountCode = code
-        youboraOptions.isAutoDetectBackground = true
-
-        youboraPlugin = Plugin(youboraOptions, activity!!.baseContext)
+        // Default Value
+        return BuildConfig.MYCUJOO_YOUBORA_ACCOUNT_NAME
     }
 
     /**
@@ -200,8 +191,6 @@ open class MLSBuilder {
         if (publicKey.isEmpty()) {
             throw IllegalArgumentException(PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
-
-        initYouboraPlugin()
 
         val graph = DaggerMLSApplication_HiltComponents_SingletonC.builder()
             .applicationContextModule(ApplicationContextModule(activity))
