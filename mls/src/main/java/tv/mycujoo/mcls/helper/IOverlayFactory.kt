@@ -11,9 +11,6 @@ import tv.mycujoo.mcls.widgets.ScaffoldView
  */
 interface IOverlayFactory {
     fun createScaffoldView(
-        context: Context,
         showOverlayAction: Action.ShowOverlayAction,
-        variableTranslator: VariableTranslator,
-        variableKeeper: IVariableKeeper
     ): ScaffoldView
 }
