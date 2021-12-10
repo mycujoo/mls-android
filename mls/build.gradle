@@ -169,7 +169,7 @@ dependencies {
 
     // Exoplayer
     api 'com.google.android.exoplayer:exoplayer:2.16.1'
-    api 'com.nicepeopleatwork:exoplayer-adapter:6.7.27'
+    api 'com.nicepeopleatwork:exoplayer-adapter:6.7.29'
 
 
     //TV

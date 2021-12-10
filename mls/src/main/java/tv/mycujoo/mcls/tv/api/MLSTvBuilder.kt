@@ -1,8 +1,6 @@
 package tv.mycujoo.mcls.tv.api
 
 import android.content.pm.PackageManager
-import com.npaw.youbora.lib6.plugin.Options
-import com.npaw.youbora.lib6.plugin.Plugin
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.internal.modules.ApplicationContextModule
@@ -16,15 +14,12 @@ import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.ui.MLSTVFragment
-import java.lang.IllegalStateException
 
 open class MLSTvBuilder {
 
     internal lateinit var mlsTvFragment: MLSTVFragment
     private var analyticsAccount: String = ""
 
-    internal lateinit var youboraPlugin: Plugin
-        private set
     internal var publicKey: String = ""
         private set
     internal var identityToken: String = ""
@@ -69,25 +64,20 @@ open class MLSTvBuilder {
      *  3. else,
      *      Then use MyCujoo Default Account Name
      */
-    protected fun initYouboraPlugin() {
+    fun getAnalyticsCode(): String {
         // Provided via the Builder
-        var code = analyticsAccount
-
-        // Provided from the Manifest
-        if (code.isEmpty()) {
-            code = grabAnalyticsKeyFromManifest()
+        if (analyticsAccount.isNotEmpty()) {
+            return analyticsAccount
         }
 
-        // MyCujoo Account Code
-        if (code.isEmpty()) {
-            code = BuildConfig.MYCUJOO_YOUBORA_ACCOUNT_NAME
+        // If Provided via Manifest
+        val manifestAnalyticsCode = grabAnalyticsKeyFromManifest()
+        if (manifestAnalyticsCode.isNotEmpty()) {
+            return manifestAnalyticsCode
         }
 
-        val youboraOptions = Options()
-        youboraOptions.accountCode = code
-        youboraOptions.isAutoDetectBackground = true
-
-        youboraPlugin = Plugin(youboraOptions, mlsTvFragment.requireActivity().baseContext)
+        // Default Value
+        return BuildConfig.MYCUJOO_YOUBORA_ACCOUNT_NAME
     }
 
     /**
@@ -143,8 +133,6 @@ open class MLSTvBuilder {
         if (publicKey.isEmpty()) {
             throw IllegalArgumentException(C.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
-
-        initYouboraPlugin()
 
         val graph = DaggerMLSApplication_HiltComponents_SingletonC.builder()
             .applicationContextModule(

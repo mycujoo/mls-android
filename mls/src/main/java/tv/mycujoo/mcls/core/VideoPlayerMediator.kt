@@ -6,7 +6,6 @@ import com.google.android.exoplayer2.Player.STATE_BUFFERING
 import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.ui.TimeBar
-import com.npaw.youbora.lib6.plugin.Plugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,6 +15,7 @@ import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.Stream
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mcls.R
+import tv.mycujoo.mcls.analytic.AnalyticsClient
 import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.api.MLSBuilder
 import tv.mycujoo.mcls.api.VideoPlayer
@@ -35,13 +35,11 @@ import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.mediator.AnnotationMediator
 import tv.mycujoo.mcls.model.JoinTimelineParam
 import tv.mycujoo.mcls.network.socket.IReactorSocket
-import tv.mycujoo.mcls.player.IPlayer
-import tv.mycujoo.mcls.player.MediaDatum
-import tv.mycujoo.mcls.player.PlaybackLocation
+import tv.mycujoo.mcls.player.*
 import tv.mycujoo.mcls.player.PlaybackLocation.LOCAL
 import tv.mycujoo.mcls.player.PlaybackLocation.REMOTE
-import tv.mycujoo.mcls.player.PlaybackState
 import tv.mycujoo.mcls.utils.StringUtils
+import tv.mycujoo.mcls.utils.UuidUtils
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.LIVE_ON_THE_EDGE
 import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.VOD
@@ -62,9 +60,10 @@ class VideoPlayerMediator @Inject constructor(
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     private val logger: Logger,
-    private val internalBuilder: InternalBuilder,
+    private val uuidUtils: UuidUtils,
     private val player: IPlayer,
     private val overlayViewHelper: OverlayViewHelper,
+    private val analyticsClient: AnalyticsClient,
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
     private var cast: ICast? = null
@@ -92,11 +91,6 @@ class VideoPlayerMediator @Inject constructor(
      * Indicates if SDK user desires to have analytics enabled
      */
     private var hasAnalytic = false
-
-    /**
-     * Youbora client instance to log analytics through
-     */
-    private lateinit var youboraClient: YouboraClient
 
     /**
      * Indicates if current video session is logged or not, for analytical purposes
@@ -172,7 +166,7 @@ class VideoPlayerMediator @Inject constructor(
 
             hasAnalytic = builder.hasAnalytic
             if (builder.hasAnalytic) {
-                initAnalytic(builder.activity!!, it, builder.youboraPlugin)
+                initAnalytic(builder.activity!!, it, builder.getAnalyticsAccountCode())
             }
 
             initPlayerView(
@@ -409,15 +403,22 @@ class VideoPlayerMediator @Inject constructor(
         }
     }
 
+    /**
+     * Abstracting Analytics client from Youbora
+     * Here we can
+     */
     private fun initAnalytic(
         activity: Activity,
         exoPlayer: ExoPlayer,
-        plugin: Plugin
+        analyticsAccountCode: String
     ) {
-        plugin.activity = activity
-        plugin.adapter = internalBuilder.createExoPlayerAdapter(exoPlayer)
-
-        youboraClient = internalBuilder.createYouboraClient(plugin)
+        if (analyticsClient is YouboraClient) {
+            analyticsClient.setYouboraPlugin(
+                activity,
+                exoPlayer,
+                analyticsAccountCode
+            )
+        }
     }
 
     fun attachPlayer(playerView: MLSPlayerView) {
@@ -425,7 +426,7 @@ class VideoPlayerMediator @Inject constructor(
         playerView.playerView.hideController()
 
         if (hasAnalytic) {
-            youboraClient.start()
+            analyticsClient.start()
         }
 
     }
@@ -442,6 +443,10 @@ class VideoPlayerMediator @Inject constructor(
      */
     fun onPause() {
         cast?.onPause()
+    }
+
+    fun onStop() {
+        stopYoubora()
     }
 
     /**
@@ -741,7 +746,7 @@ class VideoPlayerMediator @Inject constructor(
      */
     private fun startYoubora() {
         if (hasAnalytic) {
-            youboraClient.start()
+            analyticsClient.start()
         }
     }
 
@@ -750,7 +755,7 @@ class VideoPlayerMediator @Inject constructor(
      */
     private fun stopYoubora() {
         if (hasAnalytic) {
-            youboraClient.stop()
+            analyticsClient.stop()
         }
     }
 
@@ -865,7 +870,7 @@ class VideoPlayerMediator @Inject constructor(
             return
         }
         if (playbackState == STATE_READY) {
-            youboraClient.logEvent(dataManager.currentEvent, player.isLive())
+            analyticsClient.logEvent(dataManager.currentEvent, player.isLive())
             logged = true
         }
     }
@@ -888,7 +893,7 @@ class VideoPlayerMediator @Inject constructor(
         cancelPulling()
         player.release()
         if (hasAnalytic) {
-            youboraClient.stop()
+            analyticsClient.stop()
         }
         reactorSocket.leave(true)
     }
@@ -933,7 +938,7 @@ class VideoPlayerMediator @Inject constructor(
         val params = CasterLoadRemoteMediaParams(
             id = event.id,
             publicKey = publicKey,
-            uuid = internalBuilder.getUuid(),
+            uuid = uuidUtils.getUuid(),
             widevine = widevine,
             fullUrl = fullUrl,
             title = event.title,

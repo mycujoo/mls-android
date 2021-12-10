@@ -15,7 +15,6 @@ import androidx.leanback.media.PlaybackGlue
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter
 import com.google.android.exoplayer2.ui.AdViewProvider
-import com.npaw.youbora.lib6.plugin.Plugin
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +23,7 @@ import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.entity.Stream
 import tv.mycujoo.mcls.R
+import tv.mycujoo.mcls.analytic.AnalyticsClient
 import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.api.MLSTVConfiguration
 import tv.mycujoo.mcls.core.AbstractPlayerMediator
@@ -40,7 +40,6 @@ import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaDatum
 import tv.mycujoo.mcls.tv.api.MLSTvBuilder
-import tv.mycujoo.mcls.tv.api.MLSTvInternalBuilder
 import tv.mycujoo.mcls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackTransportControlGlueImplKt
@@ -61,7 +60,7 @@ class TvVideoPlayer @Inject constructor(
     private val player: IPlayer,
     private val tvAnnotationMediator: TvAnnotationMediator,
     private val annotationFactory: IAnnotationFactory,
-    private val internalBuilder: MLSTvInternalBuilder,
+    private val analyticsClient: AnalyticsClient,
     private val controllerAgent: ControllerAgent
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
@@ -79,11 +78,6 @@ class TvVideoPlayer @Inject constructor(
     private lateinit var overlayContainer: ConstraintLayout
 
     /**endregion */
-
-    /**
-     * Youbora client instance to log analytics through
-     */
-    private lateinit var youboraClient: YouboraClient
 
     /**
      * Indicates if SDK user desires to have analytics enabled
@@ -118,7 +112,7 @@ class TvVideoPlayer @Inject constructor(
             initAnalytic(
                 builder.mlsTvFragment.requireActivity(),
                 this.player.getDirectInstance()!!,
-                builder.youboraPlugin
+                builder.getAnalyticsCode()
             )
         }
         this.player.getDirectInstance()?.let { exoPlayer ->
@@ -226,12 +220,15 @@ class TvVideoPlayer @Inject constructor(
     private fun initAnalytic(
         activity: Activity,
         exoPlayer: ExoPlayer,
-        plugin: Plugin
+        accountCode: String
     ) {
-        plugin.activity = activity
-        plugin.adapter = internalBuilder.createExoPlayerAdapter(exoPlayer)
-
-        youboraClient = internalBuilder.createYouboraClient(plugin)
+        if (analyticsClient is YouboraClient) {
+            analyticsClient.setYouboraPlugin(
+                activity,
+                exoPlayer,
+                accountCode
+            )
+        }
     }
 
     fun attachPlayer(playerView: MLSPlayerView) {
@@ -239,7 +236,7 @@ class TvVideoPlayer @Inject constructor(
         playerView.playerView.hideController()
 
         if (hasAnalytic) {
-            youboraClient.start()
+            analyticsClient.start()
         }
 
     }
@@ -412,7 +409,7 @@ class TvVideoPlayer @Inject constructor(
         streaming = false
         player.release()
         if (hasAnalytic) {
-            youboraClient.stop()
+            analyticsClient.stop()
         }
         reactorSocket.leave(true)
     }
