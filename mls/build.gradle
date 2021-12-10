@@ -188,4 +188,7 @@ dependencies {
 
     // AppCompat for Leanback
     implementation "androidx.leanback:leanback:1.2.0-alpha02"
+
+    // Logging
+    implementation 'com.jakewharton.timber:timber:5.0.1'
 }
