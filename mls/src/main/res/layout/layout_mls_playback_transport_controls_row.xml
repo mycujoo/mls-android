@@ -90,7 +90,7 @@
     <tv.mycujoo.mcls.tv.widgets.MLSPlaybackTransportRowView
         android:id="@+id/transport_row"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:paddingStart="?attr/browsePaddingStart"

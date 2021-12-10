@@ -28,6 +28,8 @@ open class MLSBuilder {
 
     internal var publicKey: String = ""
         private set
+    internal var identityToken: String = ""
+        private set
     internal lateinit var youboraPlugin: Plugin
         private set
     internal var activity: Activity? = null
@@ -55,6 +57,10 @@ open class MLSBuilder {
             throw IllegalArgumentException(PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
         this.publicKey = publicKey
+    }
+
+    fun identityToken(identityToken: String) = apply {
+        this.identityToken = identityToken
     }
 
     /**

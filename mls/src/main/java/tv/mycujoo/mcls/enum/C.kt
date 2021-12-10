@@ -8,6 +8,7 @@ class C {
 
         const val UUID_PREF_KEY = "UUID"
         const val PUBLIC_KEY_PREF_KEY = "PUBLIC_KEY"
+        const val IDENTITY_TOKEN_PREF_KEY = "IDENTITY_TOKEN"
 
         const val NETWORK_ERROR_MESSAGE = "Network error"
         const val INTERNAL_ERROR_MESSAGE = "Internal error"

@@ -5,7 +5,9 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.exoplayer2.Player
+import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.widgets.MLSPlayerView
+import javax.inject.Inject
 
 /**
  * Represent possible actions for Controller [Live state, Viewers count]
@@ -14,7 +16,7 @@ import tv.mycujoo.mcls.widgets.MLSPlayerView
  *
  * Use setViewerCountView() to change viewers count or hide it
  */
-class ControllerAgent(val player: Player) {
+class ControllerAgent @Inject constructor(val player: IPlayer) {
 
     private lateinit var viewersCountTextView: TextView
     private lateinit var viewersCountLayout: ConstraintLayout
@@ -34,8 +36,8 @@ class ControllerAgent(val player: Player) {
     }
 
     fun backToLive() {
-        if (player.duration > 0) {
-            player.seekTo(player.duration)
+        if (player.duration() > 0) {
+            player.seekTo(player.duration())
         }
     }
 

@@ -531,6 +531,7 @@ class VideoPlayerMediator @Inject constructor(
     override fun playVideo(event: EventEntity) {
         if(event.id != dataManager.currentEvent?.id) {
             if (streaming) streaming = false
+            player.clearQue()
         }
         dataManager.currentEvent = event
         updateStreamStatus(event)
