@@ -95,6 +95,7 @@ class YouboraClient @Inject constructor(
      */
     override fun stop() {
         plugin?.fireStop()
+        plugin?.removeAdapter()
     }
 
     /**region Internal*/

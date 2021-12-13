@@ -75,12 +75,7 @@ class AnnotationMediator @Inject constructor(
             handler.post(exoRunnable)
         }
 
-        scheduler.scheduleAtFixedRate(
-            scheduledRunnable,
-            ONE_SECOND_IN_MS,
-            ONE_SECOND_IN_MS,
-            TimeUnit.MILLISECONDS
-        )
+        initTicker()
     }
 
     override fun fetchActions(
@@ -191,13 +186,27 @@ class AnnotationMediator @Inject constructor(
     }
 
     override fun initPlayerView(playerView: PlayerViewContract) {
-        scheduler = Executors.newScheduledThreadPool(1)
+        initTicker()
         this.playerViewContract = playerView
 
         val contract = playerViewContract
         if (contract is MLSPlayerView) {
             contract.setOnSizeChangedCallback(onSizeChangedCallback)
         }
+    }
+
+    private fun initTicker() {
+        if (scheduler.isShutdown.not()) {
+            scheduler.shutdown()
+        }
+        scheduler = Executors.newScheduledThreadPool(1)
+
+        scheduler.scheduleAtFixedRate(
+            scheduledRunnable,
+            ONE_SECOND_IN_MS,
+            ONE_SECOND_IN_MS,
+            TimeUnit.MILLISECONDS
+        )
     }
     /**endregion */
 
