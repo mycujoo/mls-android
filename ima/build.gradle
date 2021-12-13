@@ -5,7 +5,7 @@ plugins {
 
 ext {
     PUBLISH_GROUP_ID = 'tv.mycujoo.mls'
-    PUBLISH_VERSION = '1.4.0-alpha04'
+    PUBLISH_VERSION = '1.4.0-alpha05'
     PUBLISH_ARTIFACT_ID = 'ima'
     PUBLISH_ARTIFACT_DESCRIPTION = 'Ima module of MLS SDK'
 }
@@ -68,7 +68,7 @@ dependencies {
 
     // Exoplayer
     implementation 'com.google.android.exoplayer:exoplayer:2.16.1'
-    implementation 'com.nicepeopleatwork:exoplayer-adapter:6.7.27'
+    implementation 'com.nicepeopleatwork:exoplayer-adapter:6.7.29'
 
     implementation 'com.google.android.exoplayer:extension-ima:2.16.1'
     implementation project(":mls")
