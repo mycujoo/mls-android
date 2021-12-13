@@ -35,3 +35,7 @@ app_test/
 /cast/.settings/org.eclipse.buildship.core.prefs
 /ima/.settings/org.eclipse.buildship.core.prefs
 /mls/.settings/org.eclipse.buildship.core.prefs
+
+
+# Infer Report
+/infer-out/
