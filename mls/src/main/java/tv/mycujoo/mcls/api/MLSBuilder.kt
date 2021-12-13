@@ -16,11 +16,21 @@ import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.enum.C.Companion.ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE
 import tv.mycujoo.mcls.ima.IIma
+import timber.log.Timber
+
+
+
 
 /**
  * builder of MLS(MCLS) main component
  */
 open class MLSBuilder {
+
+    init {
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
+    }
 
     private var analyticsAccount: String = ""
 
