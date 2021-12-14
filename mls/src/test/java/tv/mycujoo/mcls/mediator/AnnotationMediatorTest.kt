@@ -15,6 +15,7 @@ import tv.mycujoo.mcls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.player.IPlayer
+import tv.mycujoo.mcls.utils.ThreadUtils
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
@@ -59,6 +60,9 @@ class AnnotationMediatorTest {
     @Mock
     lateinit var position: Player.PositionInfo
 
+    @Mock
+    lateinit var threadUtils: ThreadUtils
+
     /**endregion */
 
     @Before
@@ -66,9 +70,15 @@ class AnnotationMediatorTest {
         MockitoAnnotations.openMocks(this)
         testCoroutineScope = TestCoroutineScope()
 
+        whenever(threadUtils.getScheduledExecutorService())
+            .thenReturn(scheduledExecutorService)
+
+        whenever(threadUtils.provideHandler())
+            .thenReturn(handler)
+
         whenever(
             scheduledExecutorService.scheduleAtFixedRate(
-                any<Runnable>(),
+                any(),
                 eq(ONE_SECOND_IN_MS),
                 eq(ONE_SECOND_IN_MS),
                 eq(TimeUnit.MILLISECONDS)
@@ -94,8 +104,7 @@ class AnnotationMediatorTest {
             testCoroutineScope,
             Logger(LogLevel.MINIMAL),
             player,
-            handler,
-            scheduledExecutorService,
+            threadUtils,
         )
         annotationMediator.initPlayerView(playerView)
 
@@ -108,7 +117,7 @@ class AnnotationMediatorTest {
         assert(this::heartBeatOuterRunnable.isInitialized)
         assert(this::heartBeatInnerRunnable.isInitialized)
         assert(this::eventListener.isInitialized)
-        verify(scheduledExecutorService).scheduleAtFixedRate(
+        verify(scheduledExecutorService, atLeastOnce()).scheduleAtFixedRate(
             any(),
             eq(ONE_SECOND_IN_MS),
             eq(ONE_SECOND_IN_MS),
@@ -270,19 +279,9 @@ class AnnotationMediatorTest {
 
     @Test
     fun `should shutdown scheduler on release`() {
-        val annotationMediator = AnnotationMediator(
-            annotationFactory,
-            dataManager,
-            testCoroutineScope,
-            Logger(LogLevel.MINIMAL),
-            player,
-            handler,
-            scheduledExecutorService,
-        )
-
         annotationMediator.release()
 
-        verify(scheduledExecutorService, times(1)).shutdown()
+        verify(scheduledExecutorService, atLeast(1)).shutdown()
     }
 
     /**endregion */

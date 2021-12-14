@@ -1,6 +1,5 @@
 package tv.mycujoo.mcls.player
 
-import android.os.Handler
 import android.util.Log
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayer
@@ -10,6 +9,7 @@ import com.google.android.exoplayer2.util.Util
 import tv.mycujoo.mcls.enum.C.Companion.DRM_WIDEVINE
 import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.mcls.ima.ImaCustomParams
+import tv.mycujoo.mcls.utils.ThreadUtils
 import javax.inject.Inject
 
 /**
@@ -18,13 +18,15 @@ import javax.inject.Inject
  * @see IPlayer
  */
 class Player @Inject constructor(
-    val mediaFactory: MediaFactory,
-    var exoPlayer: ExoPlayer,
-    var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener,
-    val handler: Handler
+    private val mediaFactory: MediaFactory,
+    private var exoPlayer: ExoPlayer,
+    private var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener,
+    private val threadUtils: ThreadUtils
 ) : IPlayer {
 
     /**region Fields*/
+
+    private val handler = threadUtils.provideHandler()
 
     /**
      * IIma integration
@@ -236,7 +238,6 @@ class Player @Inject constructor(
      * @param mediaData
      */
     override fun play(mediaData: MediaDatum.MediaData) {
-        Log.d(TAG, "play: mediaData")
         this.mediaData = mediaData
         val mediaItem = mediaFactory.createMediaItem(mediaData.fullUrl)
         play(mediaItem, mediaData.autoPlay)
@@ -248,7 +249,6 @@ class Player @Inject constructor(
      * @param autoPlay
      */
     private fun play(mediaItem: MediaItem, autoPlay: Boolean) {
-        Log.d(TAG, "play: mediaData")
         if (playbackPosition != -1L) {
             exoPlayer.seekTo(playbackPosition)
         }
