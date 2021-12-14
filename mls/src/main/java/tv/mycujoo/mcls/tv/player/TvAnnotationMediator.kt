@@ -33,12 +33,12 @@ class TvAnnotationMediator @Inject constructor(
     private val logger: Logger,
     private val viewHandler: ViewHandler,
     private val handler: Handler,
-    scheduler: ScheduledExecutorService
+    private var scheduler: ScheduledExecutorService
 ) {
 
+    private val scheduledRunnable: Runnable
+
     init {
-
-
         player.addListener(object : Player.Listener {
             override fun onPositionDiscontinuity(reason: Int) {
                 if (reason == Player.DISCONTINUITY_REASON_SEEK) {
@@ -84,16 +84,11 @@ class TvAnnotationMediator @Inject constructor(
             }
         }
 
-        val scheduledRunnable = Runnable {
+        scheduledRunnable = Runnable {
             handler.post(exoRunnable)
         }
 
-        scheduler.scheduleAtFixedRate(
-            scheduledRunnable,
-            ONE_SECOND_IN_MS,
-            ONE_SECOND_IN_MS,
-            TimeUnit.MILLISECONDS
-        )
+        initTicker()
     }
 
     private var hasPendingSeek: Boolean = false
@@ -132,4 +127,21 @@ class TvAnnotationMediator @Inject constructor(
     }
 
 
+    private fun initTicker() {
+        if (scheduler.isShutdown.not()) {
+            scheduler.shutdown()
+        }
+        scheduler = Executors.newScheduledThreadPool(1)
+
+        scheduler.scheduleAtFixedRate(
+            scheduledRunnable,
+            ONE_SECOND_IN_MS,
+            ONE_SECOND_IN_MS,
+            TimeUnit.MILLISECONDS
+        )
+    }
+
+    fun release() {
+        scheduler.shutdown()
+    }
 }
