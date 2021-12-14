@@ -18,6 +18,7 @@ import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.ViewHandler
 import tv.mycujoo.mcls.mediator.IAnnotationMediator
 import tv.mycujoo.mcls.player.IPlayer
+import tv.mycujoo.mcls.utils.ThreadUtils
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.ui.MLSTVFragment
 import java.util.concurrent.Executors
@@ -32,11 +33,12 @@ class TvAnnotationMediator @Inject constructor(
     private val dataManager: IDataManager,
     private val logger: Logger,
     private val viewHandler: ViewHandler,
-    private val handler: Handler,
-    private var scheduler: ScheduledExecutorService
+    private val threadUtils: ThreadUtils
 ) {
 
     private val scheduledRunnable: Runnable
+    private val handler = threadUtils.provideHandler()
+    private var scheduler = threadUtils.getScheduledExecutorService()
 
     init {
         player.addListener(object : Player.Listener {
@@ -131,7 +133,7 @@ class TvAnnotationMediator @Inject constructor(
         if (scheduler.isShutdown.not()) {
             scheduler.shutdown()
         }
-        scheduler = Executors.newScheduledThreadPool(1)
+        scheduler = threadUtils.getScheduledExecutorService()
 
         scheduler.scheduleAtFixedRate(
             scheduledRunnable,

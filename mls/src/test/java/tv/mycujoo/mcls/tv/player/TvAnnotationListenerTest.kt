@@ -58,7 +58,7 @@ class TvAnnotationListenerTest {
 
 
         Mockito.verify(overlayViewHelper)
-            .addView(context, tvOverlayContainer, action)
+            .addView(tvOverlayContainer, action)
     }
 
 

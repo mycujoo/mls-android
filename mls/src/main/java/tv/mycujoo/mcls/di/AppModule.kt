@@ -5,7 +5,6 @@ import android.content.res.AssetManager
 import android.os.Handler
 import android.os.Looper
 import androidx.test.espresso.idling.CountingIdlingResource
-import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
@@ -25,8 +24,7 @@ import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.PrefManager
 import tv.mycujoo.mcls.player.MediaFactory
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
+import tv.mycujoo.mcls.utils.ThreadUtils
 import javax.inject.Singleton
 
 /**
@@ -66,8 +64,8 @@ open class AppModule {
 
     @Provides
     @Singleton
-    fun provideScheduledExecutorService(): ScheduledExecutorService {
-        return Executors.newScheduledThreadPool(1)
+    fun provideSchedulersUtil(): ThreadUtils {
+        return ThreadUtils()
     }
 
     @Provides
@@ -81,12 +79,6 @@ open class AppModule {
             hlsMediaSource,
             MediaItem.Builder()
         )
-    }
-
-    @Provides
-    @Singleton
-    fun provideHandler(): Handler {
-        return Handler(Looper.myLooper() ?: Looper.getMainLooper())
     }
 
     @Singleton

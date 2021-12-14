@@ -1,6 +1,5 @@
 package tv.mycujoo.mcls.mediator
 
-import android.os.Handler
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.DISCONTINUITY_REASON_SEEK
 import com.google.android.exoplayer2.Player.STATE_READY
@@ -10,6 +9,7 @@ import kotlinx.coroutines.launch
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.Result
+import tv.mycujoo.mcls.api.PlayerViewContract
 import tv.mycujoo.mcls.core.BuildPoint
 import tv.mycujoo.mcls.core.IAnnotationFactory
 import tv.mycujoo.mcls.data.IDataManager
@@ -18,13 +18,10 @@ import tv.mycujoo.mcls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.player.IPlayer
+import tv.mycujoo.mcls.utils.ThreadUtils
 import tv.mycujoo.mcls.widgets.MLSPlayerView
-import tv.mycujoo.mcls.api.PlayerViewContract
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-
 
 class AnnotationMediator @Inject constructor(
     private val annotationFactory: IAnnotationFactory,
@@ -32,10 +29,11 @@ class AnnotationMediator @Inject constructor(
     private val dispatcher: CoroutineScope,
     private val logger: Logger,
     private val player: IPlayer,
-    var handler: Handler,
-    var scheduler: ScheduledExecutorService
+    private val threadUtils: ThreadUtils,
 ) : IAnnotationMediator {
 
+    private var scheduler = threadUtils.getScheduledExecutorService()
+    private val handler = threadUtils.provideHandler()
 
     private lateinit var playerViewContract: PlayerViewContract
 
@@ -199,7 +197,7 @@ class AnnotationMediator @Inject constructor(
         if (scheduler.isShutdown.not()) {
             scheduler.shutdown()
         }
-        scheduler = Executors.newScheduledThreadPool(1)
+        scheduler = threadUtils.getScheduledExecutorService()
 
         scheduler.scheduleAtFixedRate(
             scheduledRunnable,
