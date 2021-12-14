@@ -408,6 +408,7 @@ class TvVideoPlayer @Inject constructor(
     fun release() {
         streaming = false
         player.release()
+        tvAnnotationMediator.release()
         if (hasAnalytic) {
             analyticsClient.stop()
         }
