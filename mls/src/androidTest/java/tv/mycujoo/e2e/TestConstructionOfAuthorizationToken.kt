@@ -112,6 +112,27 @@ class TestConstructionOfAuthorizationToken : E2ETest() {
                 is Result.Success -> assert(false)
             }
         }
+
+        mockWebServer.dispatcher = object : QueueDispatcher() {
+            override fun dispatch(request: RecordedRequest): MockResponse {
+                Log.d("TAG", "dispatch: ${request.headers["Authorization"]}")
+                return if (request.headers["Authorization"] == "Bearer publicKey,ID") {
+                    MockResponse().setResponseCode(200)
+                } else {
+                    MockResponse().setResponseCode(403)
+                }
+            }
+        }
+
+        mMLS.setIdentityToken("ID")
+
+        runBlocking {
+            when (getEventDetails.execute(EventIdPairParam("event"))) {
+                is Result.GenericError -> assert(false) { "BAD HEADER" }
+                is Result.NetworkError -> assert(true)
+                is Result.Success -> assert(false)
+            }
+        }
     }
 
     @Module
