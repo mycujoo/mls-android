@@ -49,6 +49,7 @@ import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaFactory
 import tv.mycujoo.mcls.player.MediaOnLoadCompletedListener
 import tv.mycujoo.mcls.player.Player
+import tv.mycujoo.mcls.utils.ThreadUtils
 import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
@@ -86,10 +87,13 @@ class MLSPlayerViewTest {
     lateinit var mediaFactory: MediaFactory
 
     @Inject
-    lateinit var handler: Handler
+    lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
 
     @Inject
-    lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
+    lateinit var overlayFactory: OverlayFactory
+
+    @Inject
+    lateinit var threadUtils: ThreadUtils
     /** endregion */
 
     private lateinit var mMLSPlayerView: MLSPlayerView
@@ -115,10 +119,8 @@ class MLSPlayerViewTest {
             mMLSPlayerView.prepare(
                 OverlayViewHelper(
                     viewHandler,
-                    OverlayFactory(),
+                    overlayFactory,
                     animationHelper,
-                    variableTranslator,
-                    variableKeeper
                 ),
                 viewHandler,
                 emptyList()
@@ -139,7 +141,7 @@ class MLSPlayerViewTest {
                 mediaFactory,
                 exoPlayer,
                 mediaOnLoadCompletedListener,
-                handler
+                threadUtils
             )
             player.create(null)
             videoPlayerMediator.initialize(
