@@ -1,6 +1,5 @@
 package tv.mycujoo.mcls.player
 
-import android.util.Log
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
@@ -25,8 +24,6 @@ class Player @Inject constructor(
 ) : IPlayer {
 
     /**region Fields*/
-
-    private val handler = threadUtils.provideHandler()
 
     /**
      * IIma integration
@@ -260,7 +257,10 @@ class Player @Inject constructor(
 
                 exoPlayer.let {
                     val hlsMediaSource = mediaFactory.createHlsMediaSource(mediaItem)
-                    hlsMediaSource.addEventListener(handler, mediaOnLoadCompletedListener)
+                    hlsMediaSource.addEventListener(
+                        threadUtils.provideHandler(),
+                        mediaOnLoadCompletedListener
+                    )
                     if (ima != null) {
                         val adsMediaSource = ima!!.createMediaSource(
                             mediaFactory.defaultMediaSourceFactory,
@@ -285,7 +285,10 @@ class Player @Inject constructor(
         } else {
             exoPlayer.let {
                 val hlsMediaSource = mediaFactory.createHlsMediaSource(mediaItem)
-                hlsMediaSource.addEventListener(handler, mediaOnLoadCompletedListener)
+                hlsMediaSource.addEventListener(
+                    threadUtils.provideHandler(),
+                    mediaOnLoadCompletedListener
+                )
 
 
                 if (ima != null) {
@@ -373,9 +376,5 @@ class Player @Inject constructor(
      */
     override fun dvrWindowStartTime(): Long {
         return mediaOnLoadCompletedListener.getWindowStartTime()
-    }
-
-    companion object {
-        private const val TAG = "Player"
     }
 }
