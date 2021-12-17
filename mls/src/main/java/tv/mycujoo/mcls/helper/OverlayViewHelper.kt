@@ -268,6 +268,10 @@ class OverlayViewHelper @Inject constructor(
         removeViewWithNoAnimation(overlayHost, hideOverlayActionEntity.customId)
     }
 
+    fun clearScreen(overlayHost: ConstraintLayout) {
+        overlayHost.removeAllViewsInLayout()
+    }
+
     private fun removeViewWithNoAnimation(overlayHost: ConstraintLayout, overlayTag: String) {
         overlayHost.children.filter { it.tag == overlayTag }
             .forEach {
