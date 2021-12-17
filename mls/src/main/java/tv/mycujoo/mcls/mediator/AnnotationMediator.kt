@@ -6,12 +6,10 @@ import com.google.android.exoplayer2.Player.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.mcls.api.PlayerViewContract
-import tv.mycujoo.mcls.core.BuildPoint
 import tv.mycujoo.mcls.core.IAnnotationFactory
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
@@ -41,7 +39,7 @@ class AnnotationMediator @Inject constructor(
     /**region Fields*/
     private val scheduledRunnable: Runnable
 
-    private lateinit var eventListener: Player.Listener
+    private lateinit var eventListener: Listener
     private var hasPendingSeek: Boolean = false
     /**endregion */
 
@@ -54,14 +52,7 @@ class AnnotationMediator @Inject constructor(
             if (player.isPlaying()) {
                 val currentPosition = player.currentPosition()
                 annotationFactory.attachPlayerView(playerViewContract)
-                annotationFactory.build(
-                    BuildPoint(
-                        currentPosition,
-                        player.currentAbsoluteTime(),
-                        player,
-                        player.isPlaying()
-                    )
-                )
+                annotationFactory.build()
 
                 val playerView = playerViewContract
                 if (playerView is MLSPlayerView) {
@@ -108,7 +99,7 @@ class AnnotationMediator @Inject constructor(
     }
 
     private fun initEventListener(player: IPlayer) {
-        eventListener = object : Player.Listener {
+        eventListener = object : Listener {
 
             override fun onPositionDiscontinuity(
                 oldPosition: Player.PositionInfo,
@@ -146,14 +137,7 @@ class AnnotationMediator @Inject constructor(
                 if (playbackState == STATE_READY && hasPendingSeek) {
                     hasPendingSeek = false
 
-                    annotationFactory.build(
-                        BuildPoint(
-                            player.currentPosition(),
-                            player.currentAbsoluteTime(),
-                            player,
-                            player.isPlaying()
-                        )
-                    )
+                    annotationFactory.build()
                 }
             }
 
@@ -170,14 +154,7 @@ class AnnotationMediator @Inject constructor(
                 if (playbackState == STATE_READY && hasPendingSeek) {
                     hasPendingSeek = false
 
-                    annotationFactory.build(
-                        BuildPoint(
-                            player.currentPosition(),
-                            player.currentAbsoluteTime(),
-                            player,
-                            player.isPlaying()
-                        )
-                    )
+                    annotationFactory.build()
                 }
             }
 
@@ -185,14 +162,7 @@ class AnnotationMediator @Inject constructor(
                 super.onMediaItemTransition(mediaItem, reason)
                 if (reason == MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED && mediaItem != null) {
                     annotationFactory.setActions(emptyList())
-                    annotationFactory.build(
-                        BuildPoint(
-                            player.currentPosition(),
-                            player.currentAbsoluteTime(),
-                            player,
-                            player.isPlaying()
-                        )
-                    )
+                    annotationFactory.build()
                 }
             }
         }
@@ -235,14 +205,7 @@ class AnnotationMediator @Inject constructor(
 
     override var onSizeChangedCallback = {
         annotationFactory.attachPlayerView(playerViewContract)
-        annotationFactory.build(
-            BuildPoint(
-                player.currentPosition(),
-                player.currentAbsoluteTime(),
-                player,
-                player.isPlaying()
-            )
-        )
+        annotationFactory.build()
     }
 
     /**endregion */

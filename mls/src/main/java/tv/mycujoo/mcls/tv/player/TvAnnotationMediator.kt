@@ -1,6 +1,5 @@
 package tv.mycujoo.mcls.tv.player
 
-import android.os.Handler
 import com.google.android.exoplayer2.Player
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -8,7 +7,6 @@ import kotlinx.coroutines.launch
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.Result
-import tv.mycujoo.mcls.core.BuildPoint
 import tv.mycujoo.mcls.core.IAnnotationFactory
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
@@ -16,13 +14,8 @@ import tv.mycujoo.mcls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.ViewHandler
-import tv.mycujoo.mcls.mediator.IAnnotationMediator
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.utils.ThreadUtils
-import tv.mycujoo.mcls.widgets.MLSPlayerView
-import tv.mycujoo.ui.MLSTVFragment
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -52,14 +45,7 @@ class TvAnnotationMediator @Inject constructor(
                 if (playbackState == Player.STATE_READY && hasPendingSeek) {
                     hasPendingSeek = false
 
-                    tvAnnotationFactory.build(
-                        BuildPoint(
-                            player.currentPosition(),
-                            player.currentAbsoluteTime(),
-                            player,
-                            player.isPlaying()
-                        )
-                    )
+                    tvAnnotationFactory.build()
                 }
 
             }
@@ -75,14 +61,7 @@ class TvAnnotationMediator @Inject constructor(
 
         val exoRunnable = Runnable {
             if (player.isPlaying()) {
-                tvAnnotationFactory.build(
-                    BuildPoint(
-                        player.currentPosition(),
-                        player.currentAbsoluteTime(),
-                        player,
-                        isPlaying = true
-                    )
-                )
+                tvAnnotationFactory.build()
             }
         }
 
