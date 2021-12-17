@@ -1,9 +1,10 @@
 package tv.mycujoo.mcls.manager
 
 import android.animation.ObjectAnimator
-import android.util.Log
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.children
 import androidx.test.espresso.idling.CountingIdlingResource
+import timber.log.Timber
 import tv.mycujoo.mcls.di.CountingIdlingResourceViewIdentifierManager
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.widgets.ScaffoldView
@@ -58,14 +59,14 @@ open class ViewHandler @Inject constructor(
     /**region Overlay views*/
     override fun attachOverlayView(view: ScaffoldView) {
         if (view.tag == null || (view.tag is String).not()) {
-            Log.w("ViewIdentifierManager", "overlay tag should not be null")
+            Timber.w("overlay tag should not be null")
             return
         }
         val viewTag = view.tag as String
         if (attachedViewList.any {
                 it.tag == viewTag
             }) {
-            Log.w("ViewIdentifierManager", "Should not add an already active view")
+            Timber.w("Should not add an already active view")
         } else {
             attachedViewList.add(view)
             overlayHost.addView(view)
@@ -78,7 +79,7 @@ open class ViewHandler @Inject constructor(
         }
 
         if (view.tag == null || (view.tag is String).not()) {
-            Log.w("ViewIdentifierManager", "overlay tag should not be null [detachOverlay()]")
+            Timber.w("overlay tag should not be null [detachOverlay()]")
             return
         }
 
@@ -105,6 +106,12 @@ open class ViewHandler @Inject constructor(
 
     /**region msc*/
     override fun clearAll() {
+        overlayHost.children.forEach {
+            if (attachedViewList.contains(it)) {
+                overlayHost.removeView(it)
+            }
+        }
+
         attachedViewList.clear()
         animations.clear()
         viewIdToIdMap.clear()

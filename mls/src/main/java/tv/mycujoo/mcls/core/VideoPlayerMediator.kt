@@ -64,6 +64,7 @@ class VideoPlayerMediator @Inject constructor(
     private val player: IPlayer,
     private val overlayViewHelper: OverlayViewHelper,
     private val analyticsClient: AnalyticsClient,
+    private val annotationFactory: IAnnotationFactory
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
     private var cast: ICast? = null
@@ -537,6 +538,7 @@ class VideoPlayerMediator @Inject constructor(
         if(event.id != dataManager.currentEvent?.id) {
             if (streaming) streaming = false
             player.clearQue()
+            annotationFactory.clearOverlays()
         }
         dataManager.currentEvent = event
         updateStreamStatus(event)

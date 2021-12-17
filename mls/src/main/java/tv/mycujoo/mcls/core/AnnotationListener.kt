@@ -89,6 +89,6 @@ class AnnotationListener @Inject constructor(
     }
 
     override fun clearScreen() {
-        overlayViewHelper.clearScreen(mMLSPlayerView.overlayHost())
+        overlayViewHelper.clearScreen()
     }
 }
