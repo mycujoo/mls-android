@@ -1,21 +1,38 @@
 package tv.mycujoo.mcls.tv.api
 
+import android.app.Activity
+import android.content.Context
 import android.content.pm.PackageManager
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModel
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.internal.modules.ApplicationContextModule
 import dagger.hilt.components.SingletonComponent
+import timber.log.Timber
 import tv.mycujoo.DaggerMLSApplication_HiltComponents_SingletonC
+import tv.mycujoo.MLSApplication_HiltComponents
 import tv.mycujoo.mcls.BuildConfig
 import tv.mycujoo.mcls.api.MLSTVConfiguration
+import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.di.AppModule
 import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.ima.IIma
+import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.ui.MLSTVFragment
 
 open class MLSTvBuilder {
+
+    init {
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
+    }
 
     internal lateinit var mlsTvFragment: MLSTVFragment
     private var analyticsAccount: String = ""
@@ -32,6 +49,8 @@ open class MLSTvBuilder {
         private set
     internal var hasAnalytic: Boolean = true
         private set
+
+    private var graph: MLSApplication_HiltComponents.SingletonC? = null
 
     fun publicKey(publicKey: String) = apply {
         if (publicKey == "YOUR_PUBLIC_KEY_HERE") {
@@ -134,15 +153,7 @@ open class MLSTvBuilder {
             throw IllegalArgumentException(C.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
 
-        val graph = DaggerMLSApplication_HiltComponents_SingletonC.builder()
-            .applicationContextModule(
-                ApplicationContextModule(
-                    mlsTvFragment.requireActivity().applicationContext
-                )
-            )
-            .networkModule(NetworkModule())
-            .appModule(AppModule())
-            .build()
+        val graph = getGraph(mlsTvFragment.requireContext())
 
         val mlsTv = graph.provideMLSTV()
         mlsTv.initialize(this, mlsTvFragment)
@@ -150,9 +161,59 @@ open class MLSTvBuilder {
         return mlsTv
     }
 
+    // Headless is a client without UI elements in it.
+    open fun buildHeadless(activity: FragmentActivity): HeadlessMLSTv {
+        initPublicKeyIfNeeded()
+        if (publicKey.isEmpty()) {
+            throw IllegalArgumentException(C.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
+        }
+
+        val prefManager = getGraph(activity.baseContext).providePrefsManager()
+        prefManager.persist(C.IDENTITY_TOKEN_PREF_KEY, identityToken)
+        prefManager.persist(C.PUBLIC_KEY_PREF_KEY, publicKey)
+
+        val headlessMLSTv = HeadlessMLSTv(activity.baseContext)
+        activity.lifecycle.addObserver(headlessMLSTv)
+
+        return headlessMLSTv
+    }
+
+    private fun getGraph(applicationContext: Context): MLSApplication_HiltComponents.SingletonC {
+        val currentGraph = graph
+        return if (currentGraph == null) {
+            val newGraph = DaggerMLSApplication_HiltComponents_SingletonC.builder()
+                .applicationContextModule(ApplicationContextModule(applicationContext))
+                .networkModule(NetworkModule())
+                .appModule(AppModule())
+                .build()
+            graph = newGraph
+            newGraph
+        } else {
+            currentGraph
+        }
+    }
+
+    inner class HeadlessMLSTv(val context: Context) : DefaultLifecycleObserver {
+
+        fun getDataManager(): IDataManager {
+            return getGraph(context).provideDataManager()
+        }
+
+        override fun onDestroy(owner: LifecycleOwner) {
+            val prefManager = getGraph(context).providePrefsManager()
+            prefManager.delete(C.IDENTITY_TOKEN_PREF_KEY)
+            prefManager.delete(C.PUBLIC_KEY_PREF_KEY)
+            super.onDestroy(owner)
+        }
+    }
+
     @InstallIn(SingletonComponent::class)
     @EntryPoint
     interface TvEntries {
         fun provideMLSTV(): MLSTV
+
+        fun provideDataManager(): IDataManager
+
+        fun providePrefsManager(): IPrefManager
     }
 }
