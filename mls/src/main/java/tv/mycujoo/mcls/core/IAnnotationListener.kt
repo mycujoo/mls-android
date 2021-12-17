@@ -36,4 +36,6 @@ interface IAnnotationListener {
      * clears entire screen
      */
     fun clearScreen(idList: List<String>)
+
+    fun clearScreen()
 }
