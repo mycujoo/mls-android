@@ -6,7 +6,7 @@ import tv.mycujoo.mcls.api.PlayerViewContract
 interface IAnnotationFactory {
     fun setActions(actions: List<Action>)
     fun attachPlayerView(playerView: PlayerViewContract)
-    fun build(buildPoint: BuildPoint)
+    fun build()
 
     fun getCurrentActions(): List<Action>
     fun setLocalActions(annotations: List<Action>)
