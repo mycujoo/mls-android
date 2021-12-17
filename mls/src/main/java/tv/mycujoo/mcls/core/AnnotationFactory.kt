@@ -401,4 +401,8 @@ class AnnotationFactory @Inject constructor(
         }
     }
     /**endregion */
+
+    override fun clearOverlays() {
+        annotationListener.clearScreen()
+    }
 }
