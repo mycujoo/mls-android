@@ -10,4 +10,6 @@ interface IAnnotationFactory {
 
     fun getCurrentActions(): List<Action>
     fun setLocalActions(annotations: List<Action>)
+
+    fun clearOverlays()
 }
