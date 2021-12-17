@@ -87,4 +87,8 @@ class AnnotationListener @Inject constructor(
             playerContract.clearScreen(idList)
         }
     }
+
+    override fun clearScreen() {
+        overlayViewHelper.clearScreen(mMLSPlayerView.overlayHost())
+    }
 }

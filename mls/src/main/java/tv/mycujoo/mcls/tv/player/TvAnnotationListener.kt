@@ -86,4 +86,8 @@ class TvAnnotationListener @Inject constructor(
     override fun clearScreen(idList: List<String>) {
 //        todo!
     }
+
+    override fun clearScreen() {
+//        todo!
+    }
 }
