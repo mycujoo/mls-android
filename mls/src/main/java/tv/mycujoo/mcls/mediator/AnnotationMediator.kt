@@ -1,11 +1,12 @@
 package tv.mycujoo.mcls.mediator
 
+import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.Player.DISCONTINUITY_REASON_SEEK
-import com.google.android.exoplayer2.Player.STATE_READY
+import com.google.android.exoplayer2.Player.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.Result
@@ -169,6 +170,21 @@ class AnnotationMediator @Inject constructor(
                 if (playbackState == STATE_READY && hasPendingSeek) {
                     hasPendingSeek = false
 
+                    annotationFactory.build(
+                        BuildPoint(
+                            player.currentPosition(),
+                            player.currentAbsoluteTime(),
+                            player,
+                            player.isPlaying()
+                        )
+                    )
+                }
+            }
+
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                super.onMediaItemTransition(mediaItem, reason)
+                if (reason == MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED && mediaItem != null) {
+                    annotationFactory.setActions(emptyList())
                     annotationFactory.build(
                         BuildPoint(
                             player.currentPosition(),
