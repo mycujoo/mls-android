@@ -208,6 +208,7 @@ class Player @Inject constructor(
 
     override fun clearQue() {
         exoPlayer.clearMediaItems()
+        mediaData = null
     }
 
     /**
