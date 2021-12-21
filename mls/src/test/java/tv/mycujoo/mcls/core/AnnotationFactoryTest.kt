@@ -37,7 +37,7 @@ class AnnotationFactoryTest {
 
     @Mock
     lateinit var variableKeeper: IVariableKeeper
-    
+
     @Mock
     lateinit var playerView: MLSPlayerView
     /**endregion */
@@ -51,7 +51,8 @@ class AnnotationFactoryTest {
 
         annotationFactory = AnnotationFactory(
             annotationListener,
-            variableKeeper
+            variableKeeper,
+            player
         )
     }
 
@@ -92,8 +93,10 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(action))
 
 
-        val buildPoint = BuildPoint(2001L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(2001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
         verify(annotationListener).addOrUpdateLingeringMidwayOverlay(
@@ -113,8 +116,10 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(action))
 
 
-        val buildPoint = BuildPoint(2001L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(2001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
         verify(annotationListener, never()).addOrUpdateLingeringMidwayOverlay(any())
@@ -129,12 +134,20 @@ class AnnotationFactoryTest {
             Action.ShowOverlayAction("id_01", -1000L, 1605609881000L, null, customId = "cid_00")
         val transitionSpec = TransitionSpec(-1000L, AnimationType.NONE, 0L)
         val hideOverlayAction =
-            Action.HideOverlayAction("id_01", -1000L, 1605609881000L, transitionSpec, customId = "cid_00")
+            Action.HideOverlayAction(
+                "id_01",
+                -1000L,
+                1605609881000L,
+                transitionSpec,
+                customId = "cid_00"
+            )
         annotationFactory.setActions(listOf(action, hideOverlayAction))
 
 
-        val buildPoint = BuildPoint(2001L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(2001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
         verify(annotationListener, never()).addOrUpdateLingeringMidwayOverlay(
@@ -161,8 +174,10 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(action, reshowOverlayAction))
 
 
-        val buildPoint = BuildPoint(2001L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(2001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
         verify(annotationListener, times(1)).addOrUpdateLingeringMidwayOverlay(
@@ -190,9 +205,10 @@ class AnnotationFactoryTest {
             Action.ReshowOverlayAction("id_01", -1000L, 1605609881000L, "cid_00")
         annotationFactory.setActions(listOf(action, reshowOverlayAction))
 
-
-        val buildPoint = BuildPoint(2001L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(2001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
         verify(annotationListener, never()).addOrUpdateLingeringMidwayOverlay(any())
@@ -210,8 +226,10 @@ class AnnotationFactoryTest {
             Action.CreateTimerAction("id_00", -2000L, 1605609880000L, "name", capValue = -1L)
         annotationFactory.setActions(listOf(action))
 
-        val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(0L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
             argThat(
@@ -231,8 +249,10 @@ class AnnotationFactoryTest {
             Action.CreateTimerAction("id_00", -1L, 1605609881999L, "name", capValue = -1L)
         annotationFactory.setActions(listOf(action))
 
-        val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(0L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
             argThat(
@@ -254,8 +274,10 @@ class AnnotationFactoryTest {
             Action.StartTimerAction("id_01", -2000L, 1605609880000L, "name")
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction))
 
-        val buildPoint = BuildPoint(1000L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(1000L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
             argThat(
@@ -277,8 +299,10 @@ class AnnotationFactoryTest {
             Action.StartTimerAction("id_01", -1L, 1605609881999L, "name")
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction))
 
-        val buildPoint = BuildPoint(1000L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(1000L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
             argThat(
@@ -302,8 +326,10 @@ class AnnotationFactoryTest {
             Action.PauseTimerAction("id_01", -1000L, 1605609881000L, "name")
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction, pauseTimerAction))
 
-        val buildPoint = BuildPoint(2000L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(2000L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
             argThat(
@@ -327,8 +353,10 @@ class AnnotationFactoryTest {
             Action.PauseTimerAction("id_01", 1000L, 1605609883000L, "name")
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction, pauseTimerAction))
 
-        val buildPoint = BuildPoint(2000L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(2000L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
             argThat(
@@ -352,8 +380,10 @@ class AnnotationFactoryTest {
             Action.AdjustTimerAction("id_01", -1000L, 1605609881000L, "name", value = 2000L)
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction, adjustTimerAction))
 
-        val buildPoint = BuildPoint(2000L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(2000L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
             argThat(
@@ -378,8 +408,10 @@ class AnnotationFactoryTest {
             Action.AdjustTimerAction("id_01", -1L, 1605609881999L, "name", value = 2000L)
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction, adjustTimerAction))
 
-        val buildPoint = BuildPoint(2000L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(2000L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
             argThat(
@@ -404,8 +436,10 @@ class AnnotationFactoryTest {
             Action.SkipTimerAction("id_01", -1000L, 1605609881000L, "name", value = 2000L)
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction, skipTimerAction))
 
-        val buildPoint = BuildPoint(2000L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(2000L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
             argThat(
@@ -429,8 +463,10 @@ class AnnotationFactoryTest {
             Action.SkipTimerAction("id_01", -1L, 1605609881999L, "name", value = 2000L)
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction, skipTimerAction))
 
-        val buildPoint = BuildPoint(2000L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(2000L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
             argThat(
@@ -452,8 +488,10 @@ class AnnotationFactoryTest {
             Action.CreateVariableAction("id_00", -123L, 123456L, Variable.LongVariable("name", 1L))
         annotationFactory.setActions(listOf(action))
 
-        val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(0L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
         verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name", "1")))
     }
@@ -471,8 +509,10 @@ class AnnotationFactoryTest {
             )
         annotationFactory.setActions(listOf(action))
 
-        val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(0L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
         verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name", "1")))
     }
@@ -487,8 +527,10 @@ class AnnotationFactoryTest {
             Action.IncrementVariableAction("id_01", -123L, 123456L, "name", 2.toDouble())
         annotationFactory.setActions(listOf(createVariableAction, incrementVariableAction))
 
-        val buildPoint = BuildPoint(0L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(0L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
         verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name", "2")))
     }
@@ -524,8 +566,10 @@ class AnnotationFactoryTest {
             Action.MarkTimelineAction("id_00", -1000L, 1605609881000L, 1000L, "Goal", "#ffffff")
         annotationFactory.setActions(listOf(action))
 
-        val buildPoint = BuildPoint(0L, 1605609882000L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(0L)
+        whenever(player.currentAbsoluteTime()).thenReturn(1605609882000L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
         verify(annotationListener).setTimelineMarkers(eq(emptyList()))
     }
@@ -538,8 +582,10 @@ class AnnotationFactoryTest {
             Action.MarkTimelineAction("id_00", -1L, 1605609881999L, 1000L, "Goal", "#ffffff")
         annotationFactory.setActions(listOf(action))
 
-        val buildPoint = BuildPoint(0L, 1605609882000L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(0L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
         verify(annotationListener).setTimelineMarkers(eq(emptyList()))
     }
@@ -570,8 +616,10 @@ class AnnotationFactoryTest {
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
 
-        val buildPoint = BuildPoint(3001L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(3001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
         verify(
@@ -588,12 +636,17 @@ class AnnotationFactoryTest {
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         val firstBuildPoint =
             BuildPoint(4001L, -1L, player, isPlaying = true)
-        annotationFactory.build(firstBuildPoint)
+
+        whenever(player.currentPosition()).thenReturn(4001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
-        val secondBuildPoint =
-            BuildPoint(3001L, -1L, player, isPlaying = true)
-        annotationFactory.build(secondBuildPoint)
+        whenever(player.currentPosition()).thenReturn(3001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
         verify(
@@ -614,8 +667,10 @@ class AnnotationFactoryTest {
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
 
-        val buildPoint = BuildPoint(4001L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(4001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
         verify(annotationListener).addOverlay(argThat(ShowOverlayActionArgumentMatcher("id_01")))
@@ -627,14 +682,16 @@ class AnnotationFactoryTest {
         val action = Action.ShowOverlayAction("id_01", 5000L, -1L, null)
         annotationFactory.setActions(listOf(action))
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
-        val firstBuildPoint =
-            BuildPoint(4001L, -1L, player, isPlaying = true)
-        annotationFactory.build(firstBuildPoint)
 
+        whenever(player.currentPosition()).thenReturn(4001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
-        val secondBuildPoint =
-            BuildPoint(4501L, -1L, player, isPlaying = true)
-        annotationFactory.build(secondBuildPoint)
+        whenever(player.currentPosition()).thenReturn(4501L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
         verify(
@@ -657,10 +714,10 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(action))
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
-
-        val buildPoint =
-            BuildPoint(9001L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(9001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
         verify(
@@ -677,9 +734,10 @@ class AnnotationFactoryTest {
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
 
-        val buildPoint =
-            BuildPoint(9001L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(9001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
         verify(
@@ -694,13 +752,16 @@ class AnnotationFactoryTest {
         val action = Action.ShowOverlayAction("id_01", 5000L, -1L, null, duration = 5000L)
         annotationFactory.setActions(listOf(action))
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
-        val firstBuildPoint =
-            BuildPoint(4001L, -1L, player, isPlaying = true)
-        annotationFactory.build(firstBuildPoint)
 
-        val secondBuildPoint =
-            BuildPoint(9001L, -1L, player, isPlaying = true)
-        annotationFactory.build(secondBuildPoint)
+        whenever(player.currentPosition()).thenReturn(4001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
+
+        whenever(player.currentPosition()).thenReturn(9001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
         verify(
@@ -724,13 +785,16 @@ class AnnotationFactoryTest {
         )
         annotationFactory.setActions(listOf(action))
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
-        val firstBuildPoint =
-            BuildPoint(4001L, -1L, player, isPlaying = true)
-        annotationFactory.build(firstBuildPoint)
 
-        val secondBuildPoint =
-            BuildPoint(9001L, -1L, player, isPlaying = true)
-        annotationFactory.build(secondBuildPoint)
+        whenever(player.currentPosition()).thenReturn(4001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
+
+        whenever(player.currentPosition()).thenReturn(9001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
         verify(
@@ -750,9 +814,10 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(action))
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
-        val buildPoint =
-            BuildPoint(15000L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(15001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
         verify(
@@ -770,14 +835,16 @@ class AnnotationFactoryTest {
         val action = Action.ShowOverlayAction("id_01", 5000L, -1L, null, duration = 5000L)
         annotationFactory.setActions(listOf(action))
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
-        val firstBuildPoint =
-            BuildPoint(4001L, -1L, player, isPlaying = true)
-        annotationFactory.build(firstBuildPoint)
 
+        whenever(player.currentPosition()).thenReturn(4001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
-        val secondBuildPoint =
-            BuildPoint(15000L, -1L, player, isPlaying = true)
-        annotationFactory.build(secondBuildPoint)
+        whenever(player.currentPosition()).thenReturn(15000L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
         verify(
@@ -802,11 +869,10 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(action))
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
-
-        val buildPoint =
-            BuildPoint(15000L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
-
+        whenever(player.currentPosition()).thenReturn(15000L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
         verify(
             annotationListener,
@@ -829,14 +895,16 @@ class AnnotationFactoryTest {
         )
         annotationFactory.setActions(listOf(action))
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
-        val firstBuildPoint =
-            BuildPoint(4001L, -1L, player, isPlaying = true)
-        annotationFactory.build(firstBuildPoint)
 
+        whenever(player.currentPosition()).thenReturn(4001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
-        val secondBuildPoint =
-            BuildPoint(15000L, -1L, player, isPlaying = true)
-        annotationFactory.build(secondBuildPoint)
+        whenever(player.currentPosition()).thenReturn(15000L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
         verify(
@@ -860,15 +928,20 @@ class AnnotationFactoryTest {
             customId = "cid_1001"
         )
         annotationFactory.setActions(listOf(showOverlayAction))
-        val prepareBuildPoint = BuildPoint(1L, -1L, player, isPlaying = true)
-        annotationFactory.build(prepareBuildPoint)
+
+        whenever(player.currentPosition()).thenReturn(1L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
+
+
         val action = Action.HideOverlayAction("id_01", 5000L, -1L, null, "cid_1001")
         annotationFactory.setActions(listOf(action))
 
-
-        val buildPoint = BuildPoint(4001L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
-
+        whenever(player.currentPosition()).thenReturn(4001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
         verify(annotationListener).removeOverlay("cid_1001", null)
         verify(annotationListener, times(1)).addOverlay(showOverlayAction)
@@ -881,8 +954,10 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(hideOverlayAction, reshowOverlayAction))
 
 
-        val buildPoint = BuildPoint(4001L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(4001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
         verify(annotationListener, never()).removeOverlay("cid_1001", null)
@@ -897,9 +972,10 @@ class AnnotationFactoryTest {
         val reshowOverlayAction = Action.ReshowOverlayAction("id_01", 8000L, -1L, "cid_1001")
         annotationFactory.setActions(listOf(showOverlayAction, reshowOverlayAction))
 
-
-        val buildPoint = BuildPoint(7001L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(7001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
         verify(annotationListener).addOverlay(any())
@@ -915,8 +991,10 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(showOverlayAction, reshowOverlayAction))
 
 
-        val buildPoint = BuildPoint(7001L, -1L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        whenever(player.currentPosition()).thenReturn(7001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
 
 
         verify(annotationListener, never()).addOverlay(any())
@@ -937,10 +1015,12 @@ class AnnotationFactoryTest {
         whenever(player.duration()).thenReturn(120000L)
         whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
 
-
+        whenever(player.currentPosition()).thenReturn(4001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(1605609886001L)
+        whenever(player.isPlaying()).thenReturn(true)
         val buildPoint =
             BuildPoint(4001L, 1605609886001L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        annotationFactory.build()
 
 
         verify(annotationListener).addOverlay(argThat(ShowOverlayActionArgumentMatcher("id_01")))
@@ -959,7 +1039,14 @@ class AnnotationFactoryTest {
         )
         annotationFactory.setActions(listOf(action))
         val prepareBuildPoint = BuildPoint(1L, 1605609885001L, player, isPlaying = true)
-        annotationFactory.build(prepareBuildPoint)
+
+
+        whenever(player.currentPosition()).thenReturn(1L)
+        whenever(player.currentAbsoluteTime()).thenReturn(1605609885001L)
+        whenever(player.isPlaying()).thenReturn(true)
+        annotationFactory.build()
+
+
         val outroTransitionSpec = TransitionSpec(3000L, AnimationType.FADE_OUT, 3000L)
         val hideAction =
             Action.HideOverlayAction("id_01", -1L, 1605609887000L, outroTransitionSpec, "cid_01")
@@ -968,10 +1055,12 @@ class AnnotationFactoryTest {
         whenever(player.duration()).thenReturn(120000L)
         whenever(player.dvrWindowStartTime()).thenReturn(1605609885000L)
 
-
+        whenever(player.currentPosition()).thenReturn(1001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(1605609886001L)
+        whenever(player.isPlaying()).thenReturn(true)
         val buildPoint =
             BuildPoint(1001L, 1605609886001L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+        annotationFactory.build()
 
 
         verify(annotationListener).removeOverlay(
@@ -991,10 +1080,13 @@ class AnnotationFactoryTest {
         whenever(player.duration()).thenReturn(120000L)
         whenever(player.dvrWindowStartTime()).thenReturn(1605609885000L)
 
-
+        whenever(player.currentPosition()).thenReturn(1001L)
+        whenever(player.currentAbsoluteTime()).thenReturn(1605609886001L)
+        whenever(player.isPlaying()).thenReturn(true)
         val buildPoint =
             BuildPoint(1001L, 1605609886001L, player, isPlaying = true)
-        annotationFactory.build(buildPoint)
+
+        annotationFactory.build()
 
 
         verify(annotationListener).addOverlay(any())
