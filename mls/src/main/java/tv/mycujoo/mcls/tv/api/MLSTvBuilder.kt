@@ -143,23 +143,22 @@ open class MLSTvBuilder {
 
     fun setLogLevel(logLevel: LogLevel) = apply { this.logLevel = logLevel }
 
-    open fun build(): MLSTV {
-        if (!mlsTvFragment.isResumed) {
-            throw IllegalStateException(C.FRAGMENT_MUST_BE_INFLATED_WHEN_BUILDING)
-        }
-
+    open fun build(context: Context): MLSTV {
         initPublicKeyIfNeeded()
         if (publicKey.isEmpty()) {
             throw IllegalArgumentException(C.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
 
-        val graph = getGraph(mlsTvFragment.requireContext())
+        val graph = getGraph(context)
 
         val mlsTv = graph.provideMLSTV()
         mlsTv.initialize(this, mlsTvFragment)
 
+        mlsTvFragment.lifecycle.addObserver(mlsTv)
+
         return mlsTv
     }
+
 
     // Headless is a client without UI elements in it.
     open fun buildHeadless(activity: FragmentActivity): HeadlessMLSTv {

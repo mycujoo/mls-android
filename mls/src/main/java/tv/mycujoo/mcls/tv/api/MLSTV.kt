@@ -1,5 +1,7 @@
 package tv.mycujoo.mcls.tv.api
 
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import tv.mycujoo.mcls.api.DataProvider
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
@@ -14,12 +16,26 @@ class MLSTV @Inject constructor(
     private val prefManager: IPrefManager,
     private val tvVideoPlayer: TvVideoPlayer,
     private val viewHandler: IViewHandler,
-) {
+) : DefaultLifecycleObserver {
 
     lateinit var tvBuilder: MLSTvBuilder
+    lateinit var mlsTvFragment: MLSTVFragment
+
+    override fun onResume(owner: LifecycleOwner) {
+        super.onResume(owner)
+
+        viewHandler.setOverlayHost(mlsTvFragment.overlayHost)
+        tvVideoPlayer.initialize(mlsTvFragment, tvBuilder)
+    }
+
+    override fun onStop(owner: LifecycleOwner) {
+        super.onStop(owner)
+        tvVideoPlayer.release()
+    }
 
     fun initialize(builder: MLSTvBuilder, mlsTvFragment: MLSTVFragment) {
         tvBuilder = builder
+        this.mlsTvFragment = mlsTvFragment
 
         persistPublicKey(builder.publicKey)
 
@@ -28,9 +44,6 @@ class MLSTV @Inject constructor(
         }
 
         tvVideoPlayer.mlsTVConfiguration = builder.mlsTVConfiguration
-
-        viewHandler.setOverlayHost(mlsTvFragment.overlayHost)
-        tvVideoPlayer.initialize(mlsTvFragment, builder)
     }
 
 
@@ -48,10 +61,6 @@ class MLSTV @Inject constructor(
 
     fun removeIdentityToken() {
         prefManager.delete(C.IDENTITY_TOKEN_PREF_KEY)
-    }
-
-    fun onStop() {
-        tvVideoPlayer.release()
     }
 
     /**region msc Functions*/

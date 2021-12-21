@@ -89,6 +89,9 @@ class TvVideoPlayer @Inject constructor(
      */
     private var updateId: String? = null
 
+    private var playerReady = false
+    private var pendingEvent: EventEntity? = null
+
     /**region Initializing*/
     fun initialize(mlsTvFragment: MLSTVFragment, builder: MLSTvBuilder) {
         this.mMlsTvFragment = mlsTvFragment
@@ -208,6 +211,9 @@ class TvVideoPlayer @Inject constructor(
                 FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
             )
         }
+
+        playerReady = true
+        playPendingEvent()
     }
 
     private fun addAdViewProvider(fragmentView: FrameLayout): AdViewProvider {
@@ -317,10 +323,16 @@ class TvVideoPlayer @Inject constructor(
         updateStreamStatus(event)
         playVideoOrDisplayEventInfo(event)
 
-        if (event.isNativeMLS) {
-            joinEvent(event)
-            startStreamUrlPullingIfNeeded(event)
-            fetchActions(event, true)
+//        if (event.isNativeMLS) {
+//            joinEvent(event)
+//            startStreamUrlPullingIfNeeded(event)
+//            fetchActions(event, true)
+//        }
+    }
+
+    fun playPendingEvent() {
+        pendingEvent?.let {
+            playVideo(it)
         }
     }
 
