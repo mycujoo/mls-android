@@ -128,6 +128,9 @@ class VideoPlayerMediatorTest {
 
     @Mock
     lateinit var mediaFactory: MediaFactory
+
+    @Mock
+    lateinit var annotationFactory: AnnotationFactory
     /** endregion */
 
     /** region fields */
@@ -183,6 +186,7 @@ class VideoPlayerMediatorTest {
             player,
             overlayViewHelper,
             youboraClient,
+            annotationFactory
         )
         videoPlayerMediator.initialize(playerView, mMLSBuilder, listOf(), cast)
         videoPlayerMediator.setAnnotationMediator(annotationMediator)
