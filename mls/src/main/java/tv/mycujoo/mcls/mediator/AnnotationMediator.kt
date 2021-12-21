@@ -102,8 +102,8 @@ class AnnotationMediator @Inject constructor(
         eventListener = object : Listener {
 
             override fun onPositionDiscontinuity(
-                oldPosition: Player.PositionInfo,
-                newPosition: Player.PositionInfo,
+                oldPosition: PositionInfo,
+                newPosition: PositionInfo,
                 reason: Int
             ) {
                 super.onPositionDiscontinuity(oldPosition, newPosition, reason)
