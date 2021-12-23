@@ -161,20 +161,17 @@ open class MLSTvBuilder {
 
 
     // Headless is a client without UI elements in it.
-    open fun buildHeadless(activity: FragmentActivity): HeadlessMLSTv {
+    open fun buildHeadless(context: Context): HeadlessMLSTv {
         initPublicKeyIfNeeded()
         if (publicKey.isEmpty()) {
             throw IllegalArgumentException(C.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
 
-        val prefManager = getGraph(activity.baseContext).providePrefsManager()
+        val prefManager = getGraph(context).providePrefsManager()
         prefManager.persist(C.IDENTITY_TOKEN_PREF_KEY, identityToken)
         prefManager.persist(C.PUBLIC_KEY_PREF_KEY, publicKey)
 
-        val headlessMLSTv = HeadlessMLSTv(activity.baseContext)
-        activity.lifecycle.addObserver(headlessMLSTv)
-
-        return headlessMLSTv
+        return getGraph(context).provideMLSTVHeadless()
     }
 
     private fun getGraph(applicationContext: Context): MLSApplication_HiltComponents.SingletonC {
@@ -192,26 +189,12 @@ open class MLSTvBuilder {
         }
     }
 
-    inner class HeadlessMLSTv(val context: Context) : DefaultLifecycleObserver {
-
-        fun getDataManager(): IDataManager {
-            return getGraph(context).provideDataManager()
-        }
-
-        override fun onDestroy(owner: LifecycleOwner) {
-            val prefManager = getGraph(context).providePrefsManager()
-            prefManager.delete(C.IDENTITY_TOKEN_PREF_KEY)
-            prefManager.delete(C.PUBLIC_KEY_PREF_KEY)
-            super.onDestroy(owner)
-        }
-    }
-
     @InstallIn(SingletonComponent::class)
     @EntryPoint
     interface TvEntries {
         fun provideMLSTV(): MLSTV
 
-        fun provideDataManager(): IDataManager
+        fun provideMLSTVHeadless(): HeadlessMLSTv
 
         fun providePrefsManager(): IPrefManager
     }
