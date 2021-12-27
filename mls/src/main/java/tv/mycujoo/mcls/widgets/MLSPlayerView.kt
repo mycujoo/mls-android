@@ -1,6 +1,7 @@
 package tv.mycujoo.mcls.widgets
 
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
@@ -16,14 +17,23 @@ import androidx.annotation.MainThread
 import androidx.annotation.Nullable
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.PlayerView
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
 import kotlinx.android.synthetic.main.player_view_wrapper.view.*
+import timber.log.Timber
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
+import tv.mycujoo.mcls.BuildConfig
 import tv.mycujoo.mcls.R
+import tv.mycujoo.mcls.api.MLS
+import tv.mycujoo.mcls.api.MLSBuilder
+import tv.mycujoo.mcls.api.MLSConfiguration
+import tv.mycujoo.mcls.api.PlayerViewContract
 import tv.mycujoo.mcls.core.UIEventListener
 import tv.mycujoo.mcls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mcls.helper.OverlayViewHelper
@@ -37,7 +47,6 @@ import tv.mycujoo.mcls.widgets.mlstimebar.MLSTimeBar
 import tv.mycujoo.mcls.widgets.mlstimebar.PointOfInterest
 import tv.mycujoo.mcls.widgets.mlstimebar.PointOfInterestType
 import tv.mycujoo.mcls.widgets.mlstimebar.TimelineMarkerView
-import tv.mycujoo.mcls.api.PlayerViewContract
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -84,6 +93,8 @@ class MLSPlayerView @JvmOverloads constructor(
 
     @Nullable
     lateinit var idlingResource: CountingIdlingResource
+
+    private lateinit var mMLS: MLS
     /**endregion */
 
     /**region Initializing*/
@@ -148,6 +159,79 @@ class MLSPlayerView @JvmOverloads constructor(
         playerView.hideController()
         playerView.controllerAutoShow = false
         playerView.useController = false
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
+
+        setup()
+    }
+
+    private fun setup() {
+        val activity = context as FragmentActivity
+
+        activity.lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onCreate(owner: LifecycleOwner) {
+                super.onCreate(owner)
+
+                Timber.d("OnCreate")
+
+                mMLS =
+                    MLSBuilder()
+                        .withActivity(activity)
+                        .setConfiguration(MLSConfiguration(
+                            1000L,
+                            VideoPlayerConfig(
+                                primaryColor = "#0000ff", secondaryColor = "#fff000",
+                                autoPlay = true,
+                                enableControls = true,
+                                showPlayPauseButtons = true,
+                                showBackForwardsButtons = true,
+                                showSeekBar = true,
+                                showTimers = true,
+                                showFullScreenButton = true,
+                                showLiveViewers = true,
+                                showEventInfoButton = true
+                            )
+                        ))
+                        .build()
+            }
+
+            override fun onStart(owner: LifecycleOwner) {
+                super.onStart(owner)
+                Timber.d("OnStart")
+                mMLS.onStart(this@MLSPlayerView)
+            }
+
+            override fun onResume(owner: LifecycleOwner) {
+                super.onResume(owner)
+                Timber.d("OnResume")
+                mMLS.onResume(this@MLSPlayerView)
+            }
+
+            override fun onPause(owner: LifecycleOwner) {
+                mMLS.onPause()
+                Timber.d("OnPause")
+                super.onPause(owner)
+            }
+
+            override fun onStop(owner: LifecycleOwner) {
+                mMLS.onStop()
+                Timber.d("OnStop")
+                super.onStop(owner)
+            }
+
+            override fun onDestroy(owner: LifecycleOwner) {
+                mMLS.onDestroy()
+                Timber.d("OnDestroy")
+                super.onDestroy(owner)
+            }
+        })
+    }
+
+
+    fun getController(): MLS {
+        return mMLS
     }
 
     fun prepare(
