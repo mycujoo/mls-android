@@ -17,6 +17,7 @@ import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.analytic.AnalyticsClient
 import tv.mycujoo.mcls.analytic.YouboraClient
+import tv.mycujoo.mcls.analytic.YouboraCustomDimensions
 import tv.mycujoo.mcls.api.MLSBuilder
 import tv.mycujoo.mcls.api.VideoPlayer
 import tv.mycujoo.mcls.cast.CasterLoadRemoteMediaParams
@@ -167,7 +168,12 @@ class VideoPlayerMediator @Inject constructor(
 
             hasAnalytic = builder.hasAnalytic
             if (builder.hasAnalytic) {
-                initAnalytic(builder.activity!!, it, builder.getAnalyticsAccountCode())
+                initAnalytic(
+                    builder.activity!!,
+                    it,
+                    builder.getAnalyticsAccountCode(),
+                    builder.customYouboraDimensions
+                )
             }
 
             initPlayerView(
@@ -411,13 +417,15 @@ class VideoPlayerMediator @Inject constructor(
     private fun initAnalytic(
         activity: Activity,
         exoPlayer: ExoPlayer,
-        analyticsAccountCode: String
+        analyticsAccountCode: String,
+        customDimensions: YouboraCustomDimensions?
     ) {
         if (analyticsClient is YouboraClient) {
             analyticsClient.setYouboraPlugin(
                 activity,
                 exoPlayer,
-                analyticsAccountCode
+                analyticsAccountCode,
+                customDimensions
             )
         }
     }
@@ -535,7 +543,7 @@ class VideoPlayerMediator @Inject constructor(
      * So it does not matter the stream url exist in the given param. Always the response from server will be used.
      */
     override fun playVideo(event: EventEntity) {
-        if(event.id != dataManager.currentEvent?.id) {
+        if (event.id != dataManager.currentEvent?.id) {
             if (streaming) streaming = false
             player.clearQue()
             annotationFactory.clearOverlays()
