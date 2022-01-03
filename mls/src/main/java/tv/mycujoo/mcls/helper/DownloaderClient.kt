@@ -1,7 +1,7 @@
 package tv.mycujoo.mcls.helper
 
-import android.util.Log
 import okhttp3.*
+import timber.log.Timber
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.SvgData
 import java.io.IOException
@@ -27,13 +27,15 @@ class DownloaderClient @Inject constructor(
         showOverlayAction: Action.ShowOverlayAction,
         callback: (Action.ShowOverlayAction) -> Unit
     ) {
+        if (showOverlayAction.svgData?.svgUrl == null) {
+            return
+        }
 
-
-        val svgUrl = showOverlayAction.svgData!!.svgUrl!!
+        val svgUrl = showOverlayAction.svgData.svgUrl
         val request: Request = Request.Builder().url(svgUrl).build()
         okHttpClient.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                Log.e("DownloaderClient", "downloadSVGThenCallListener() - onFailure()")
+                Timber.e("downloadSVGThenCallListener() - onFailure()")
             }
 
             override fun onResponse(call: Call, response: Response) {
