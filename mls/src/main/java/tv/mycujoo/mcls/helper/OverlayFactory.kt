@@ -31,7 +31,7 @@ class OverlayFactory @Inject constructor(
         showOverlayAction: Action.ShowOverlayAction,
     ): ScaffoldView {
 
-        val size = showOverlayAction.viewSpec!!.size!!
+        val size = showOverlayAction.viewSpec?.size ?: Pair(-1f, -1f)
         val scaffoldView = ScaffoldView(size.first, size.second, context)
         scaffoldView.id = View.generateViewId()
         scaffoldView.tag = showOverlayAction.customId

@@ -30,7 +30,6 @@ class TvAnnotationMediator @Inject constructor(
 ) {
 
     private val scheduledRunnable: Runnable
-    private val handler = threadUtils.provideHandler()
     private var scheduler = threadUtils.getScheduledExecutorService()
 
     init {
@@ -66,7 +65,7 @@ class TvAnnotationMediator @Inject constructor(
         }
 
         scheduledRunnable = Runnable {
-            handler.post(exoRunnable)
+            threadUtils.provideHandler().post(exoRunnable)
         }
 
         initTicker()

@@ -19,6 +19,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.entity.Stream
@@ -44,6 +45,7 @@ import tv.mycujoo.mcls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackTransportControlGlueImplKt
 import tv.mycujoo.mcls.utils.StringUtils
+import tv.mycujoo.mcls.utils.ThreadUtils
 import tv.mycujoo.mcls.widgets.CustomInformationDialog
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mcls.widgets.PreEventInformationDialog
@@ -61,7 +63,8 @@ class TvVideoPlayer @Inject constructor(
     private val tvAnnotationMediator: TvAnnotationMediator,
     private val annotationFactory: IAnnotationFactory,
     private val analyticsClient: AnalyticsClient,
-    private val controllerAgent: ControllerAgent
+    private val controllerAgent: ControllerAgent,
+    private val threadUtils: ThreadUtils
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
     lateinit var mMlsTvFragment: MLSTVFragment
@@ -90,7 +93,6 @@ class TvVideoPlayer @Inject constructor(
     private var updateId: String? = null
 
     private var playerReady = false
-    private var pendingEvent: EventEntity? = null
 
     /**region Initializing*/
     fun initialize(mlsTvFragment: MLSTVFragment, builder: MLSTvBuilder) {
@@ -247,6 +249,18 @@ class TvVideoPlayer @Inject constructor(
 
     }
 
+    fun setLocalAnnotations(annotations: List<Action>) {
+        if (playerReady) {
+            tvAnnotationMediator.setLocalActions(annotations)
+        } else {
+            val retry = Runnable {
+                setLocalAnnotations(annotations)
+            }
+
+            threadUtils.provideHandler().postDelayed(retry, 500L)
+        }
+    }
+
     override fun onReactorEventUpdate(eventId: String, updateId: String) {
         cancelStreamUrlPulling()
         dispatcher.launch(context = Dispatchers.Main) {
@@ -320,18 +334,25 @@ class TvVideoPlayer @Inject constructor(
     /**region Playback*/
     override fun playVideo(event: EventEntity) {
         dataManager.currentEvent = event
-        updateStreamStatus(event)
-        playVideoOrDisplayEventInfo(event)
 
-//        if (event.isNativeMLS) {
-//            joinEvent(event)
-//            startStreamUrlPullingIfNeeded(event)
-//            fetchActions(event, true)
-//        }
+        if (playerReady) {
+            updateStreamStatus(event)
+            playVideoOrDisplayEventInfo(event)
+
+            if (event.isNativeMLS) {
+                joinEvent(event)
+                startStreamUrlPullingIfNeeded(event)
+                fetchActions(event, true)
+            }
+        } else {
+            threadUtils.provideHandler().postDelayed({
+                playVideo(event)
+            }, 100)
+        }
     }
 
-    fun playPendingEvent() {
-        pendingEvent?.let {
+    private fun playPendingEvent() {
+        dataManager.currentEvent?.let {
             playVideo(it)
         }
     }
