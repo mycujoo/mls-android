@@ -16,6 +16,7 @@ import timber.log.Timber
 import tv.mycujoo.DaggerMLSApplication_HiltComponents_SingletonC
 import tv.mycujoo.MLSApplication_HiltComponents
 import tv.mycujoo.mcls.BuildConfig
+import tv.mycujoo.mcls.analytic.YouboraCustomDimensions
 import tv.mycujoo.mcls.api.MLSTVConfiguration
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.di.AppModule
@@ -51,6 +52,7 @@ open class MLSTvBuilder {
     internal var hasAnalytic: Boolean = true
         private set
     internal var context: Context? = null
+    internal var youboraCustomDimensions: YouboraCustomDimensions? = null
 
     private var graph: MLSApplication_HiltComponents.SingletonC? = null
 
@@ -71,6 +73,10 @@ open class MLSTvBuilder {
 
     fun withMLSTvFragment(mlsTvFragment: MLSTVFragment) =
         apply { this.mlsTvFragment = mlsTvFragment }
+
+    fun withYouboraCustomDimensions(customDimensions: YouboraCustomDimensions) = apply {
+        this.youboraCustomDimensions = customDimensions
+    }
 
     /**
      * create Youbora Plugin.
