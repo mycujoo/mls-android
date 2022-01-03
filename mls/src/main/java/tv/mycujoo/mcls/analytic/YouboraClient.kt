@@ -25,7 +25,7 @@ class YouboraClient @Inject constructor(
 ) : AnalyticsClient {
 
     var plugin: Plugin? = null
-    var youboraCustomDimensions: YouboraCustomDimensions? = null
+    var videoAnalyticsCustomData: VideoAnalyticsCustomData? = null
 
     /**
      * Only AnalyticsClient should know about the implementation of the analytics server and libs
@@ -35,7 +35,7 @@ class YouboraClient @Inject constructor(
         activity: Activity,
         exoPlayer: ExoPlayer,
         accountCode: String,
-        youboraCustomDimensions: YouboraCustomDimensions?
+        videoAnalyticsCustomData: VideoAnalyticsCustomData?
     ) {
         val youboraOptions = Options()
         youboraOptions.accountCode = accountCode
@@ -58,7 +58,7 @@ class YouboraClient @Inject constructor(
             }
         }
 
-        this.youboraCustomDimensions = youboraCustomDimensions
+        this.videoAnalyticsCustomData = videoAnalyticsCustomData
     }
 
     /**
@@ -85,7 +85,7 @@ class YouboraClient @Inject constructor(
 
         savedPlugin.options.contentCustomDimension15 = event.streams.firstOrNull()?.id
 
-        youboraCustomDimensions?.let {
+        videoAnalyticsCustomData?.let {
             savedPlugin.options.contentCustomDimension1 = it.contentCustomDimension1
             savedPlugin.options.contentCustomDimension3 = it.contentCustomDimension3
             savedPlugin.options.contentCustomDimension4 = it.contentCustomDimension4

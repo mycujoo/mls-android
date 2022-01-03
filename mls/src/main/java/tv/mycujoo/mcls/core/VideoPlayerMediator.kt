@@ -17,7 +17,7 @@ import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.analytic.AnalyticsClient
 import tv.mycujoo.mcls.analytic.YouboraClient
-import tv.mycujoo.mcls.analytic.YouboraCustomDimensions
+import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
 import tv.mycujoo.mcls.api.MLSBuilder
 import tv.mycujoo.mcls.api.VideoPlayer
 import tv.mycujoo.mcls.cast.CasterLoadRemoteMediaParams
@@ -172,7 +172,7 @@ class VideoPlayerMediator @Inject constructor(
                     builder.activity!!,
                     it,
                     builder.getAnalyticsAccountCode(),
-                    builder.customYouboraDimensions
+                    builder.customVideoAnalyticsData
                 )
             }
 
@@ -418,14 +418,14 @@ class VideoPlayerMediator @Inject constructor(
         activity: Activity,
         exoPlayer: ExoPlayer,
         analyticsAccountCode: String,
-        customDimensions: YouboraCustomDimensions?
+        customData: VideoAnalyticsCustomData?
     ) {
         if (analyticsClient is YouboraClient) {
             analyticsClient.setYouboraPlugin(
                 activity,
                 exoPlayer,
                 analyticsAccountCode,
-                customDimensions
+                customData
             )
         }
     }
