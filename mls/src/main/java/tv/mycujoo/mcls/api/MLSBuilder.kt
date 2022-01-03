@@ -17,7 +17,7 @@ import tv.mycujoo.mcls.enum.C.Companion.ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSA
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE
 import tv.mycujoo.mcls.ima.IIma
 import timber.log.Timber
-import tv.mycujoo.mcls.analytic.YouboraCustomDimensions
+import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
 
 
 /**
@@ -35,7 +35,7 @@ open class MLSBuilder {
 
     internal var publicKey: String = ""
         private set
-    internal var customYouboraDimensions: YouboraCustomDimensions? = null
+    internal var customVideoAnalyticsData: VideoAnalyticsCustomData? = null
     internal var identityToken: String = ""
         private set
     internal var activity: Activity? = null
@@ -69,8 +69,8 @@ open class MLSBuilder {
         this.identityToken = identityToken
     }
 
-    fun youboraCustomDimensions(customDimensions: YouboraCustomDimensions) = apply {
-        this.customYouboraDimensions = customDimensions
+    fun withVideoAnalyticsCustomData(customData: VideoAnalyticsCustomData) = apply {
+        this.customVideoAnalyticsData = customData
     }
 
     /**

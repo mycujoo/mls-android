@@ -26,7 +26,7 @@ import tv.mycujoo.domain.entity.Stream
 import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.analytic.AnalyticsClient
 import tv.mycujoo.mcls.analytic.YouboraClient
-import tv.mycujoo.mcls.analytic.YouboraCustomDimensions
+import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
 import tv.mycujoo.mcls.api.MLSTVConfiguration
 import tv.mycujoo.mcls.core.AbstractPlayerMediator
 import tv.mycujoo.mcls.core.IAnnotationFactory
@@ -119,7 +119,7 @@ class TvVideoPlayer @Inject constructor(
                 builder.mlsTvFragment.requireActivity(),
                 this.player.getDirectInstance()!!,
                 builder.getAnalyticsCode(),
-                builder.youboraCustomDimensions
+                builder.videoAnalyticsCustomData
             )
         }
         this.player.getDirectInstance()?.let { exoPlayer ->
@@ -231,14 +231,14 @@ class TvVideoPlayer @Inject constructor(
         activity: Activity,
         exoPlayer: ExoPlayer,
         accountCode: String,
-        youboraCustomDimensions: YouboraCustomDimensions?
+        videoAnalyticsCustomData: VideoAnalyticsCustomData?
     ) {
         if (analyticsClient is YouboraClient) {
             analyticsClient.setYouboraPlugin(
                 activity,
                 exoPlayer,
                 accountCode,
-                youboraCustomDimensions
+                videoAnalyticsCustomData
             )
         }
     }

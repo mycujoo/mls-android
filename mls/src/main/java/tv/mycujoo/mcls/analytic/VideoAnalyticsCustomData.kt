@@ -1,6 +1,6 @@
 package tv.mycujoo.mcls.analytic
 
-data class YouboraCustomDimensions(
+data class VideoAnalyticsCustomData(
     val contentCustomDimension1: String?,
     val contentCustomDimension3: String?,
     val contentCustomDimension4: String?,

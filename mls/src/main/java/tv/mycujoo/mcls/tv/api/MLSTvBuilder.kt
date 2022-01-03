@@ -1,13 +1,7 @@
 package tv.mycujoo.mcls.tv.api
 
-import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModel
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.internal.modules.ApplicationContextModule
@@ -16,9 +10,8 @@ import timber.log.Timber
 import tv.mycujoo.DaggerMLSApplication_HiltComponents_SingletonC
 import tv.mycujoo.MLSApplication_HiltComponents
 import tv.mycujoo.mcls.BuildConfig
-import tv.mycujoo.mcls.analytic.YouboraCustomDimensions
+import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
 import tv.mycujoo.mcls.api.MLSTVConfiguration
-import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.di.AppModule
 import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.enum.C
@@ -52,7 +45,7 @@ open class MLSTvBuilder {
     internal var hasAnalytic: Boolean = true
         private set
     internal var context: Context? = null
-    internal var youboraCustomDimensions: YouboraCustomDimensions? = null
+    internal var videoAnalyticsCustomData: VideoAnalyticsCustomData? = null
 
     private var graph: MLSApplication_HiltComponents.SingletonC? = null
 
@@ -74,8 +67,8 @@ open class MLSTvBuilder {
     fun withMLSTvFragment(mlsTvFragment: MLSTVFragment) =
         apply { this.mlsTvFragment = mlsTvFragment }
 
-    fun withYouboraCustomDimensions(customDimensions: YouboraCustomDimensions) = apply {
-        this.youboraCustomDimensions = customDimensions
+    fun withVideoAnalyticsCustomData(customData: VideoAnalyticsCustomData) = apply {
+        this.videoAnalyticsCustomData = customData
     }
 
     /**
