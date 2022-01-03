@@ -30,6 +30,7 @@ class C {
 
         // developer messages
         const val PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE = "Public key must be set!"
+        const val CONTEXT_MUST_BE_SET_IN_MLS_TV_BUILDER_MESSAGE = "Context Must be set when building the SDK"
         const val ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE =
             "'Activity' should be provided before setting 'Ima'."
         const val AD_UNIT_MUST_START_WITH_SLASH_IN_MLS_BUILDER_MESSAGE =

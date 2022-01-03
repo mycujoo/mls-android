@@ -25,6 +25,7 @@ import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.ui.MLSTVFragment
+import java.lang.Exception
 
 open class MLSTvBuilder {
 
@@ -49,6 +50,7 @@ open class MLSTvBuilder {
         private set
     internal var hasAnalytic: Boolean = true
         private set
+    internal var context: Context? = null
 
     private var graph: MLSApplication_HiltComponents.SingletonC? = null
 
@@ -57,6 +59,10 @@ open class MLSTvBuilder {
             throw IllegalArgumentException(C.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
         this.publicKey = publicKey
+    }
+
+    fun withContext(context: Context) = apply {
+        this.context = context
     }
 
     fun identityToken(identityToken: String) = apply {
@@ -143,13 +149,15 @@ open class MLSTvBuilder {
 
     fun setLogLevel(logLevel: LogLevel) = apply { this.logLevel = logLevel }
 
-    open fun build(context: Context): MLSTV {
+    open fun build(): MLSTV {
+        val buildContext = context ?: throw Exception(C.CONTEXT_MUST_BE_SET_IN_MLS_TV_BUILDER_MESSAGE)
+
         initPublicKeyIfNeeded()
         if (publicKey.isEmpty()) {
             throw IllegalArgumentException(C.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
 
-        val graph = getGraph(context)
+        val graph = getGraph(buildContext)
 
         val mlsTv = graph.provideMLSTV()
         mlsTv.initialize(this, mlsTvFragment)
