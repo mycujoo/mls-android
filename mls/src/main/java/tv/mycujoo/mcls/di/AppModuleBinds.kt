@@ -14,10 +14,7 @@ import tv.mycujoo.mcls.core.AnnotationListener
 import tv.mycujoo.mcls.core.IAnnotationFactory
 import tv.mycujoo.mcls.core.IAnnotationListener
 import tv.mycujoo.mcls.data.IDataManager
-import tv.mycujoo.mcls.helper.DownloaderClient
-import tv.mycujoo.mcls.helper.IDownloaderClient
-import tv.mycujoo.mcls.helper.IOverlayFactory
-import tv.mycujoo.mcls.helper.OverlayFactory
+import tv.mycujoo.mcls.helper.*
 import tv.mycujoo.mcls.manager.IVariableKeeper
 import tv.mycujoo.mcls.manager.VariableKeeper
 import tv.mycujoo.mcls.manager.ViewHandler
@@ -82,4 +79,8 @@ interface AppModuleBinds {
     @Binds
     @Singleton
     fun bindAnalyticsClient(youboraClient: YouboraClient): AnalyticsClient
+
+    @Binds
+    @Singleton
+    fun bindTypeFaceFactory(ITypeFaceFactory: TypeFaceFactory): ITypeFaceFactory
 }
