@@ -37,7 +37,12 @@ class MLS @Inject constructor(
     private val annotationMediator: AnnotationMediator,
     private val player: IPlayer,
     private val assetManager: AssetManager,
+    svgAssetResolver: SVGAssetResolver
 ) : MLSAbstract() {
+
+    init {
+        SVG.registerExternalFileResolver(svgAssetResolver)
+    }
 
     /**region Fields*/
     private lateinit var playerView: MLSPlayerView
@@ -57,8 +62,6 @@ class MLS @Inject constructor(
         videoPlayerMediator.videoPlayerConfig = builder.mlsConfiguration.videoPlayerConfig
         persistPublicKey(builder.publicKey)
         persistIdentityToken(builder.identityToken)
-
-        initSvgRenderingLibrary(assetManager)
 
         player.apply {
             create(
@@ -85,11 +88,7 @@ class MLS @Inject constructor(
      * @param assetManager type of AssetManager that will be used to read fonts
      * @see SVGAssetResolver
      */
-    private fun initSvgRenderingLibrary(assetManager: AssetManager) {
-        SVG.registerExternalFileResolver(
-            SVGAssetResolver(TypeFaceFactory(assetManager))
-        )
-    }
+
 
     /**
      * Clears playback que without releasing Exoplayer, which makes reinitilizing the player faster
@@ -191,6 +190,7 @@ class MLS @Inject constructor(
      * Must be called on the onStop of host component.
      */
     override fun onStop() {
+        SVG.deregisterExternalFileResolver()
         if (Util.SDK_INT >= Build.VERSION_CODES.N) {
             release()
         }

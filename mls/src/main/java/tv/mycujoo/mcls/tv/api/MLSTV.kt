@@ -2,9 +2,11 @@ package tv.mycujoo.mcls.tv.api
 
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.caverock.androidsvg.SVG
 import tv.mycujoo.mcls.api.DataProvider
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
+import tv.mycujoo.mcls.helper.SVGAssetResolver
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.tv.player.TvVideoPlayer
@@ -16,10 +18,15 @@ class MLSTV @Inject constructor(
     private val prefManager: IPrefManager,
     private val tvVideoPlayer: TvVideoPlayer,
     private val viewHandler: IViewHandler,
+    svgAssetResolver: SVGAssetResolver
 ) : DefaultLifecycleObserver {
 
     lateinit var tvBuilder: MLSTvBuilder
     lateinit var mlsTvFragment: MLSTVFragment
+
+    init {
+        SVG.registerExternalFileResolver(svgAssetResolver)
+    }
 
     override fun onResume(owner: LifecycleOwner) {
         super.onResume(owner)
@@ -29,8 +36,9 @@ class MLSTV @Inject constructor(
     }
 
     override fun onStop(owner: LifecycleOwner) {
-        super.onStop(owner)
         tvVideoPlayer.release()
+        SVG.deregisterExternalFileResolver()
+        super.onStop(owner)
     }
 
     fun initialize(builder: MLSTvBuilder, mlsTvFragment: MLSTVFragment) {
