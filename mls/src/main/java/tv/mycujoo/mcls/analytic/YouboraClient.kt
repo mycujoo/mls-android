@@ -25,6 +25,7 @@ class YouboraClient @Inject constructor(
 ) : AnalyticsClient {
 
     var plugin: Plugin? = null
+    var videoAnalyticsCustomData: VideoAnalyticsCustomData? = null
 
     /**
      * Only AnalyticsClient should know about the implementation of the analytics server and libs
@@ -33,7 +34,8 @@ class YouboraClient @Inject constructor(
     fun setYouboraPlugin(
         activity: Activity,
         exoPlayer: ExoPlayer,
-        accountCode: String
+        accountCode: String,
+        videoAnalyticsCustomData: VideoAnalyticsCustomData?
     ) {
         val youboraOptions = Options()
         youboraOptions.accountCode = accountCode
@@ -55,6 +57,8 @@ class YouboraClient @Inject constructor(
                 YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE)
             }
         }
+
+        this.videoAnalyticsCustomData = videoAnalyticsCustomData
     }
 
     /**
@@ -80,6 +84,21 @@ class YouboraClient @Inject constructor(
         savedPlugin.options.contentCustomDimension14 = getVideoSource(event)
 
         savedPlugin.options.contentCustomDimension15 = event.streams.firstOrNull()?.id
+
+        videoAnalyticsCustomData?.let {
+            savedPlugin.options.contentCustomDimension1 = it.contentCustomDimension1
+            savedPlugin.options.contentCustomDimension3 = it.contentCustomDimension3
+            savedPlugin.options.contentCustomDimension4 = it.contentCustomDimension4
+            savedPlugin.options.contentCustomDimension5 = it.contentCustomDimension5
+            savedPlugin.options.contentCustomDimension6 = it.contentCustomDimension6
+            savedPlugin.options.contentCustomDimension7 = it.contentCustomDimension7
+            savedPlugin.options.contentCustomDimension8 = it.contentCustomDimension8
+            savedPlugin.options.contentCustomDimension9 = it.contentCustomDimension9
+            savedPlugin.options.contentCustomDimension10 = it.contentCustomDimension10
+            savedPlugin.options.contentCustomDimension11 = it.contentCustomDimension11
+            savedPlugin.options.contentCustomDimension12 = it.contentCustomDimension12
+            savedPlugin.options.contentCustomDimension13 = it.contentCustomDimension13
+        }
     }
 
     /**
