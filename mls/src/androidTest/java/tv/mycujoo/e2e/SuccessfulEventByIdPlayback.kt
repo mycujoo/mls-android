@@ -124,7 +124,7 @@ class SuccessfulEventByIdPlayback : E2ETest() {
                             StreamSourceData(
                                 id = "id",
                                 dvrWindowString = "",
-                                widevine = null,
+                                drm = null,
                                 fullUrl = id
                             )
                         ),
