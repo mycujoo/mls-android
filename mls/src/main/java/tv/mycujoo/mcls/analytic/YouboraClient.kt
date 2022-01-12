@@ -96,7 +96,6 @@ class YouboraClient @Inject constructor(
             savedPlugin.options.contentCustomDimension9 = it.contentCustomDimension9
             savedPlugin.options.contentCustomDimension10 = it.contentCustomDimension10
             savedPlugin.options.contentCustomDimension11 = it.contentCustomDimension11
-            savedPlugin.options.contentCustomDimension12 = it.contentCustomDimension12
             savedPlugin.options.contentCustomDimension13 = it.contentCustomDimension13
         }
     }

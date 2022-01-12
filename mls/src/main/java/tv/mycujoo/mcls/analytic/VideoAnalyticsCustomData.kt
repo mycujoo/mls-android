@@ -11,6 +11,5 @@ data class VideoAnalyticsCustomData(
     val contentCustomDimension9: String?,
     val contentCustomDimension10: String?,
     val contentCustomDimension11: String?,
-    val contentCustomDimension12: String?,
     val contentCustomDimension13: String?,
 )
