@@ -1,15 +1,15 @@
 package tv.mycujoo.mcls.analytic
 
 data class VideoAnalyticsCustomData(
-    val contentCustomDimension1: String?,
-    val contentCustomDimension3: String?,
-    val contentCustomDimension4: String?,
-    val contentCustomDimension5: String?,
-    val contentCustomDimension6: String?,
-    val contentCustomDimension7: String?,
-    val contentCustomDimension8: String?,
-    val contentCustomDimension9: String?,
-    val contentCustomDimension10: String?,
-    val contentCustomDimension11: String?,
-    val contentCustomDimension13: String?,
+    val contentCustomDimension1: String? = null,
+    val contentCustomDimension3: String? = null,
+    val contentCustomDimension4: String? = null,
+    val contentCustomDimension5: String? = null,
+    val contentCustomDimension6: String? = null,
+    val contentCustomDimension7: String? = null,
+    val contentCustomDimension8: String? = null,
+    val contentCustomDimension9: String? = null,
+    val contentCustomDimension10: String? = null,
+    val contentCustomDimension11: String? = null,
+    val contentCustomDimension13: String? = null
 )
