@@ -472,6 +472,26 @@ class VideoPlayerMediator @Inject constructor(
 
     /**endregion */
 
+    /**
+     * Changing Video Analytics Custom Data On Runtime After Building
+     */
+    fun setVideoAnalyticsCustomData(
+        activity: Activity,
+        analyticsAccountCode: String,
+        customData: VideoAnalyticsCustomData?
+    ) {
+        if (hasAnalytic && analyticsClient is YouboraClient) {
+            player.getDirectInstance()?.let { exoPlayer ->
+                analyticsClient.setYouboraPlugin(
+                    activity,
+                    exoPlayer,
+                    analyticsAccountCode,
+                    customData
+                )
+            }
+        }
+    }
+
     /**region Over-ridden functions*/
     /**
      * called when there is an update in the joined room from Reactor service
