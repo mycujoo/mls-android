@@ -8,6 +8,7 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ui.AdViewProvider
 import com.google.android.exoplayer2.util.Util
 import dagger.hilt.android.qualifiers.ApplicationContext
+import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
 import tv.mycujoo.mcls.core.VideoPlayerMediator
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
@@ -145,6 +146,18 @@ class MLS @Inject constructor(
 
         annotationMediator.initPlayerView(playerView)
         videoPlayerMediator.setAnnotationMediator(annotationMediator)
+    }
+
+    fun setVideoAnalyticsCustomData(
+        videoAnalyticsCustomData: VideoAnalyticsCustomData,
+    ) {
+        builder.activity?.let {
+            videoPlayerMediator.setVideoAnalyticsCustomData(
+                it,
+                builder.getAnalyticsAccountCode(),
+                videoAnalyticsCustomData
+            )
+        }
     }
 
     /**endregion */
