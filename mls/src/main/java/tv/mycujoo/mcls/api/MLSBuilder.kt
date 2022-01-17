@@ -35,6 +35,10 @@ open class MLSBuilder {
 
     internal var publicKey: String = ""
         private set
+    internal var pseudoUserId: String? = null
+        private set
+    internal var userId: String? = null
+        private set
     internal var customVideoAnalyticsData: VideoAnalyticsCustomData? = null
     internal var identityToken: String = ""
         private set
@@ -67,6 +71,14 @@ open class MLSBuilder {
 
     fun identityToken(identityToken: String) = apply {
         this.identityToken = identityToken
+    }
+
+    fun customPseudoUserId(pseudoUserId: String) = apply {
+        this.pseudoUserId = pseudoUserId
+    }
+
+    fun customLoggedInUserId(userId: String) = apply {
+        this.userId = userId
     }
 
     fun withVideoAnalyticsCustomData(customData: VideoAnalyticsCustomData) = apply {
