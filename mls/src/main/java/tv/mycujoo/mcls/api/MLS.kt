@@ -11,15 +11,14 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
 import tv.mycujoo.mcls.core.VideoPlayerMediator
 import tv.mycujoo.mcls.data.IDataManager
-import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.C.Companion.IDENTITY_TOKEN_PREF_KEY
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
 import tv.mycujoo.mcls.helper.SVGAssetResolver
-import tv.mycujoo.mcls.helper.TypeFaceFactory
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.mediator.AnnotationMediator
 import tv.mycujoo.mcls.player.IPlayer
+import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import javax.inject.Inject
 
@@ -38,6 +37,7 @@ class MLS @Inject constructor(
     private val annotationMediator: AnnotationMediator,
     private val player: IPlayer,
     private val assetManager: AssetManager,
+    private val userPreferencesUtils: UserPreferencesUtils,
     svgAssetResolver: SVGAssetResolver
 ) : MLSAbstract() {
 
@@ -64,6 +64,14 @@ class MLS @Inject constructor(
         persistPublicKey(builder.publicKey)
         persistIdentityToken(builder.identityToken)
 
+        builder.pseudoUserId?.let {
+            userPreferencesUtils.setPseudoUserId(it)
+        }
+
+        builder.userId?.let {
+            userPreferencesUtils.setLoggedInUserId(it)
+        }
+
         player.apply {
             create(
                 builder.ima,
@@ -81,6 +89,20 @@ class MLS @Inject constructor(
 
     fun removeIdentityToken() {
         prefManager.delete(IDENTITY_TOKEN_PREF_KEY)
+    }
+
+    /**
+     * Changes User Id Globally
+     */
+    fun customLoggedInUserId(userId: String) {
+        userPreferencesUtils.setLoggedInUserId(userId)
+    }
+
+    /**
+     * Changes Pseudo User Id Globally
+     */
+    fun customPseudoUserId(pseudoUserId: String) {
+        userPreferencesUtils.setPseudoUserId(pseudoUserId)
     }
 
     /**

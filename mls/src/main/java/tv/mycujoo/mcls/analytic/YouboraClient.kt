@@ -7,25 +7,26 @@ import com.npaw.youbora.lib6.YouboraLog
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
+import timber.log.Timber
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.manager.Logger
-import tv.mycujoo.mcls.utils.UuidUtils
+import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import javax.inject.Inject
 
 /**
  * Integration with Youbora, the analytical tool.
  * @param logger to log events for developers.
- * @param uuidUtils grants access to Uuid for any given session
+ * @param userPreferencesUtils to get user specific params (This is a singleton)
  */
 class YouboraClient @Inject constructor(
     private val logger: Logger,
-    private val uuidUtils: UuidUtils
+    private val userPreferencesUtils: UserPreferencesUtils
 ) : AnalyticsClient {
 
-    var plugin: Plugin? = null
-    var videoAnalyticsCustomData: VideoAnalyticsCustomData? = null
+    private var plugin: Plugin? = null
+    private var videoAnalyticsCustomData: VideoAnalyticsCustomData? = null
 
     /**
      * Only AnalyticsClient should know about the implementation of the analytics server and libs
@@ -35,7 +36,7 @@ class YouboraClient @Inject constructor(
         activity: Activity,
         exoPlayer: ExoPlayer,
         accountCode: String,
-        videoAnalyticsCustomData: VideoAnalyticsCustomData?
+        videoAnalyticsCustomData: VideoAnalyticsCustomData?,
     ) {
         val youboraOptions = Options()
         youboraOptions.accountCode = accountCode
@@ -74,15 +75,18 @@ class YouboraClient @Inject constructor(
             logger.log(MessageLevel.ERROR, "event is null")
             return
         }
-        savedPlugin.options.username = uuidUtils.getUuid()
+        savedPlugin.options.username = userPreferencesUtils.getPseudoUserId()
         savedPlugin.options.contentTitle = event.title
         savedPlugin.options.contentResource = event.streams.firstOrNull()?.toString()
         savedPlugin.options.contentIsLive = live
 
 
         savedPlugin.options.contentCustomDimension2 = event.id
-        savedPlugin.options.contentCustomDimension14 = getVideoSource(event)
 
+        savedPlugin.options.contentCustomDimension12 =
+            userPreferencesUtils.getLoggedInUserId() ?: userPreferencesUtils.getPseudoUserId()
+
+        savedPlugin.options.contentCustomDimension14 = getVideoSource(event)
         savedPlugin.options.contentCustomDimension15 = event.streams.firstOrNull()?.id
 
         videoAnalyticsCustomData?.let {
@@ -98,6 +102,9 @@ class YouboraClient @Inject constructor(
             savedPlugin.options.contentCustomDimension11 = it.contentCustomDimension11
             savedPlugin.options.contentCustomDimension13 = it.contentCustomDimension13
         }
+
+        Timber.d("dim12 ${savedPlugin.options.contentCustomDimension12}")
+        Timber.d("username ${savedPlugin.options.username}")
     }
 
     /**

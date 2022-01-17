@@ -10,6 +10,7 @@ import tv.mycujoo.mcls.helper.SVGAssetResolver
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.tv.player.TvVideoPlayer
+import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import tv.mycujoo.ui.MLSTVFragment
 import javax.inject.Inject
 
@@ -18,6 +19,7 @@ class MLSTV @Inject constructor(
     private val prefManager: IPrefManager,
     private val tvVideoPlayer: TvVideoPlayer,
     private val viewHandler: IViewHandler,
+    private val userPreferencesUtils: UserPreferencesUtils,
     svgAssetResolver: SVGAssetResolver
 ) : DefaultLifecycleObserver {
 
@@ -45,6 +47,14 @@ class MLSTV @Inject constructor(
         tvBuilder = builder
         this.mlsTvFragment = mlsTvFragment
 
+        builder.pseudoUserId?.let {
+            userPreferencesUtils.setPseudoUserId(it)
+        }
+
+        builder.userId?.let {
+            userPreferencesUtils.setLoggedInUserId(it)
+        }
+
         persistPublicKey(builder.publicKey)
 
         if(builder.identityToken.isNotEmpty()) {
@@ -54,6 +64,19 @@ class MLSTV @Inject constructor(
         tvVideoPlayer.mlsTVConfiguration = builder.mlsTVConfiguration
     }
 
+    /**
+     * Changes User Id Globally
+     */
+    fun customPseudoUserId(userId: String) {
+        userPreferencesUtils.setLoggedInUserId(userId)
+    }
+
+    /**
+     * Changes Pseudo User Id Globally
+     */
+    fun customLoggedInUserId(pseudoUserId: String) {
+        userPreferencesUtils.setPseudoUserId(pseudoUserId)
+    }
 
     fun getVideoPlayer(): TvVideoPlayer {
         return tvVideoPlayer
