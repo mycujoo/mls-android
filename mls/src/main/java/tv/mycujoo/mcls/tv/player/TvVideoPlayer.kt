@@ -13,12 +13,14 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.leanback.app.VideoSupportFragmentGlueHost
 import androidx.leanback.media.PlaybackGlue
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter
 import com.google.android.exoplayer2.ui.AdViewProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
@@ -81,6 +83,11 @@ class TvVideoPlayer @Inject constructor(
 
     private lateinit var overlayContainer: ConstraintLayout
 
+    /**
+     * Indicates if current video session is logged or not, for analytical purposes
+     */
+    private var logged = false
+
     /**endregion */
 
     /**
@@ -134,7 +141,7 @@ class TvVideoPlayer @Inject constructor(
 
             glueHost = VideoSupportFragmentGlueHost(mMlsTvFragment.videoSupportFragment)
 
-            Log.d(TAG, "initialize: Attached VideoSupportFragmentGlueHost and leanbackAdapter")
+            Timber.d("initialize: Attached VideoSupportFragmentGlueHost and leanbackAdapter")
         }
 
         // Buffer Progress Bar
@@ -175,7 +182,7 @@ class TvVideoPlayer @Inject constructor(
             })
         }
 
-        this.player.addListener(object : com.google.android.exoplayer2.Player.Listener {
+        this.player.addListener(object : Player.Listener {
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 if (playbackState == ExoPlayer.STATE_READY) {
                     mTransportControlGlue.getSeekProvider()?.let {
@@ -193,6 +200,8 @@ class TvVideoPlayer @Inject constructor(
                     // VOD
                     controllerAgent.setControllerLiveMode(MLSPlayerView.LiveState.VOD)
                 }
+
+                logEventIfNeeded(playbackState)
             }
         })
 
@@ -224,6 +233,23 @@ class TvVideoPlayer @Inject constructor(
         val frameLayout = FrameLayout(fragmentView.context)
         fragmentView.addView(frameLayout, 0)
         return AdViewProvider { frameLayout }
+    }
+
+    /**
+     * Log event through Youbora client.
+     * Log should take place if only analytics is enabled in configuration and should only happen once per stream
+     */
+    private fun logEventIfNeeded(playbackState: Int) {
+        if (!hasAnalytic) {
+            return
+        }
+        if (logged) {
+            return
+        }
+        if (playbackState == Player.STATE_READY) {
+            analyticsClient.logEvent(dataManager.currentEvent, player.isLive())
+            logged = true
+        }
     }
 
     /**endregion */
@@ -394,6 +420,7 @@ class TvVideoPlayer @Inject constructor(
             StreamStatus.PLAYABLE -> {
                 if (streaming.not()) {
                     streaming = true
+                    logged = false
 
                     play(event.streams.first())
                     eventInfoContainerLayout.visibility = View.GONE
