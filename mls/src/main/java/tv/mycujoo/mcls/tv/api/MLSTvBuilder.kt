@@ -32,6 +32,10 @@ open class MLSTvBuilder {
     internal lateinit var mlsTvFragment: MLSTVFragment
     private var analyticsAccount: String = ""
 
+    internal var pseudoUserId: String? = null
+        private set
+    internal var userId: String? = null
+        private set
     internal var publicKey: String = ""
         private set
     internal var identityToken: String = ""
@@ -54,6 +58,14 @@ open class MLSTvBuilder {
             throw IllegalArgumentException(C.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
         this.publicKey = publicKey
+    }
+
+    fun customPseudoUserId(pseudoUserId: String) = apply {
+        this.pseudoUserId = pseudoUserId
+    }
+
+    fun userId(userId: String) = apply {
+        this.userId = userId
     }
 
     fun withContext(context: Context) = apply {
