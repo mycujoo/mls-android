@@ -7,7 +7,6 @@ import com.npaw.youbora.lib6.YouboraLog
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
-import timber.log.Timber
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.enum.MessageLevel
@@ -102,9 +101,6 @@ class YouboraClient @Inject constructor(
             savedPlugin.options.contentCustomDimension11 = it.contentCustomDimension11
             savedPlugin.options.contentCustomDimension13 = it.contentCustomDimension13
         }
-
-        Timber.d("dim12 ${savedPlugin.options.contentCustomDimension12}")
-        Timber.d("username ${savedPlugin.options.username}")
     }
 
     /**
