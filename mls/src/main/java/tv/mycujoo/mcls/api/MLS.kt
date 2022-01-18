@@ -99,6 +99,13 @@ class MLS @Inject constructor(
     }
 
     /**
+     * Delete User Id Globally
+     */
+    fun removeLoggedInUserId() {
+        userPreferencesUtils.setLoggedInUserId("")
+    }
+
+    /**
      * Changes Pseudo User Id Globally
      */
     fun customPseudoUserId(pseudoUserId: String) {
