@@ -9,7 +9,7 @@ class UserPreferencesUtils @Inject constructor(
 ) {
 
     private var mPseudoUserId: String? = null
-    private var mLoggedInUserId: String? = null
+    private var mUserId: String? = null
 
     /**
      * Generate Pseudo User Id when not persisted, and persist one if  not exist
@@ -30,11 +30,15 @@ class UserPreferencesUtils @Inject constructor(
         this.mPseudoUserId = pseudoUserId
     }
 
-    fun getLoggedInUserId() = mLoggedInUserId ?: prefManager.get(C.USER_ID_PREF_KEY)
+    fun getUserId() = mUserId ?: prefManager.get(C.USER_ID_PREF_KEY)
 
-    fun setLoggedInUserId(userId: String) {
+    fun setUserId(userId: String) {
         prefManager.persist(C.USER_ID_PREF_KEY, userId)
-        mLoggedInUserId = userId
+        mUserId = userId
+    }
+
+    fun removeUserId() {
+        prefManager.delete(C.USER_ID_PREF_KEY)
     }
 
     /**
