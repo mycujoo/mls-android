@@ -77,7 +77,7 @@ open class MLSBuilder {
         this.pseudoUserId = pseudoUserId
     }
 
-    fun customLoggedInUserId(userId: String) = apply {
+    fun userId(userId: String) = apply {
         this.userId = userId
     }
 

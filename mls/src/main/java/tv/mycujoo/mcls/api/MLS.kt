@@ -69,7 +69,7 @@ class MLS @Inject constructor(
         }
 
         builder.userId?.let {
-            userPreferencesUtils.setLoggedInUserId(it)
+            userPreferencesUtils.setUserId(it)
         }
 
         player.apply {
@@ -94,21 +94,21 @@ class MLS @Inject constructor(
     /**
      * Changes User Id Globally
      */
-    fun customLoggedInUserId(userId: String) {
-        userPreferencesUtils.setLoggedInUserId(userId)
+    fun setUserId(userId: String) {
+        userPreferencesUtils.setUserId(userId)
     }
 
     /**
      * Delete User Id Globally
      */
-    fun removeLoggedInUserId() {
-        userPreferencesUtils.setLoggedInUserId("")
+    fun removeUserId() {
+        userPreferencesUtils.removeUserId()
     }
 
     /**
      * Changes Pseudo User Id Globally
      */
-    fun customPseudoUserId(pseudoUserId: String) {
+    fun setCustomPseudoUserId(pseudoUserId: String) {
         userPreferencesUtils.setPseudoUserId(pseudoUserId)
     }
 

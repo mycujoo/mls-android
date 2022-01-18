@@ -83,7 +83,7 @@ class YouboraClient @Inject constructor(
         savedPlugin.options.contentCustomDimension2 = event.id
 
         savedPlugin.options.contentCustomDimension12 =
-            userPreferencesUtils.getLoggedInUserId() ?: userPreferencesUtils.getPseudoUserId()
+            userPreferencesUtils.getUserId() ?: userPreferencesUtils.getPseudoUserId()
 
         savedPlugin.options.contentCustomDimension14 = getVideoSource(event)
         savedPlugin.options.contentCustomDimension15 = event.streams.firstOrNull()?.id
