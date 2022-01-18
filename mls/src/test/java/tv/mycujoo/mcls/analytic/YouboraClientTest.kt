@@ -13,6 +13,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.mcls.manager.Logger
+import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import tv.mycujoo.mcls.utils.UuidUtils
 import kotlin.test.assertEquals
 
@@ -29,6 +30,9 @@ class YouboraClientTest {
     @Mock
     lateinit var uuidUtils: UuidUtils
 
+    @Mock
+    lateinit var userPreferencesUtils: UserPreferencesUtils
+
     private var options = Options()
 
     @Mock
@@ -41,7 +45,7 @@ class YouboraClientTest {
         whenever(plugin.adapter).thenReturn(playerAdapter)
         whenever(uuidUtils.getUuid()).thenReturn("uuid")
 
-        youboraClient = YouboraClient(logger, uuidUtils)
+        youboraClient = YouboraClient(logger, userPreferencesUtils)
         youboraClient.attachPlugin(plugin)
     }
 
