@@ -374,6 +374,7 @@ class VideoPlayerMediator @Inject constructor(
                 }
 
                 override fun onSessionStartFailed(session: ICasterSession?) {
+                    Timber.d("onSessionStartFailed $session")
                     onApplicationDisconnected(session)
                 }
 
@@ -386,10 +387,12 @@ class VideoPlayerMediator @Inject constructor(
                 }
 
                 override fun onSessionEnding(session: ICasterSession?) {
+                    Timber.d("onSessionEnding $session")
                     onApplicationDisconnected(session)
                 }
 
                 override fun onSessionEnded(session: ICasterSession?) {
+                    Timber.d("onSessionEnded $session")
                     onApplicationDisconnected(session)
                 }
 
@@ -661,10 +664,10 @@ class VideoPlayerMediator @Inject constructor(
                     storeEvent(event)
                     playerView.hideInfoDialogs()
                     playerView.updateControllerVisibility(isPlaying = true)
+                    // If playback is local, depend on the config, else always load the video but don't play
+                    play(event.streams.first(), playbackLocation != REMOTE)
                     if (playbackLocation == REMOTE) {
                         loadRemoteMedia(event)
-                    } else {
-                        play(event.streams.first())
                     }
                 }
             }
@@ -694,14 +697,14 @@ class VideoPlayerMediator @Inject constructor(
      * @param stream information needed to play an event. including stream url, encoded type, etc
      * @see Stream
      */
-    private fun play(stream: Stream) {
+    private fun play(stream: Stream, playWhenReady: Boolean? = null) {
         if (stream.widevine?.fullUrl != null && stream.widevine.licenseUrl != null) {
             player.play(
                 MediaDatum.DRMMediaData(
                     fullUrl = stream.widevine.fullUrl,
                     dvrWindowSize = stream.getDvrWindowSize(),
                     licenseUrl = stream.widevine.licenseUrl,
-                    autoPlay = videoPlayerConfig.autoPlay
+                    autoPlay = playWhenReady ?: videoPlayerConfig.autoPlay
                 )
             )
         } else if (stream.fullUrl != null) {
@@ -709,7 +712,7 @@ class VideoPlayerMediator @Inject constructor(
                 MediaDatum.MediaData(
                     fullUrl = stream.fullUrl,
                     dvrWindowSize = stream.getDvrWindowSize(),
-                    autoPlay = videoPlayerConfig.autoPlay
+                    autoPlay = playWhenReady ?: videoPlayerConfig.autoPlay
                 )
             )
         }
@@ -963,6 +966,8 @@ class VideoPlayerMediator @Inject constructor(
         if(event.streamStatus() != PLAYABLE) {
             return
         }
+
+        dataManager.currentEvent = event
 
         val params = if (event.isNativeMLS) {
             CasterLoadRemoteMediaParams(
