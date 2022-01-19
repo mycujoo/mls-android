@@ -2,7 +2,6 @@ package tv.mycujoo.mcls.cast
 
 data class CasterLoadRemoteMediaParams(
     val id: String,
-    val fullUrl: String,
     val title: String,
     val thumbnailUrl: String,
     val isPlaying: Boolean,

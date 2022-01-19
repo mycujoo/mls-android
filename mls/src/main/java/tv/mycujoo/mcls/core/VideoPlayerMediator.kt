@@ -1,14 +1,15 @@
 package tv.mycujoo.mcls.core
 
 import android.app.Activity
+import android.util.Log
 import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player.*
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.ui.TimeBar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
@@ -16,8 +17,8 @@ import tv.mycujoo.domain.entity.Stream
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.analytic.AnalyticsClient
-import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
+import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.api.MLSBuilder
 import tv.mycujoo.mcls.api.VideoPlayer
 import tv.mycujoo.mcls.cast.CasterLoadRemoteMediaParams
@@ -46,6 +47,7 @@ import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.LIVE_ON_THE_EDGE
 import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.VOD
 import tv.mycujoo.mcls.widgets.PlayerControllerMode
 import tv.mycujoo.mcls.widgets.RemotePlayerControllerListener
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 /**
@@ -649,10 +651,13 @@ class VideoPlayerMediator @Inject constructor(
                     streaming = true
                     logged = false
                     storeEvent(event)
-                    play(event.streams.first())
                     playerView.hideInfoDialogs()
                     playerView.updateControllerVisibility(isPlaying = true)
-                    loadRemoteMedia(event)
+                    if (playbackLocation == REMOTE) {
+                        loadRemoteMedia(event)
+                    } else {
+                        play(event.streams.first())
+                    }
                 }
             }
             GEOBLOCKED -> {
@@ -942,17 +947,16 @@ class VideoPlayerMediator @Inject constructor(
      * Cast module must be integrated by user and configured
      */
     private fun loadRemoteMedia(event: EventEntity) {
-        if (event.streams.isEmpty() || event.streams.first().fullUrl == null) {
+        Timber.d("loadRemoteMedia: $event")
+        if(event.streamStatus() != PLAYABLE) {
             return
         }
-        val fullUrl = event.streams.first().fullUrl.toString()
 
         val params = if (event.isNativeMLS) {
             CasterLoadRemoteMediaParams(
                 id = event.id,
                 publicKey = publicKey,
                 pseudoUserId = userPreferencesUtils.getPseudoUserId(),
-                fullUrl = fullUrl,
                 title = event.title,
                 thumbnailUrl = event.thumbnailUrl ?: "",
                 isPlaying = player.isPlaying(),
@@ -962,13 +966,14 @@ class VideoPlayerMediator @Inject constructor(
             CasterLoadRemoteMediaParams(
                 id = event.id,
                 customPlaylistUrl = event.streams[0].fullUrl,
-                fullUrl = fullUrl,
                 title = event.title,
                 thumbnailUrl = event.thumbnailUrl ?: "",
                 isPlaying = player.isPlaying(),
                 currentPosition = player.currentPosition()
             )
         }
+
+        Timber.d("${cast != null}")
 
         cast?.loadRemoteMedia(params)
     }
