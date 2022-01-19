@@ -40,7 +40,7 @@ import tv.mycujoo.mcls.player.*
 import tv.mycujoo.mcls.player.PlaybackLocation.LOCAL
 import tv.mycujoo.mcls.player.PlaybackLocation.REMOTE
 import tv.mycujoo.mcls.utils.StringUtils
-import tv.mycujoo.mcls.utils.UuidUtils
+import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.LIVE_ON_THE_EDGE
 import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.VOD
@@ -61,7 +61,7 @@ class VideoPlayerMediator @Inject constructor(
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     private val logger: Logger,
-    private val uuidUtils: UuidUtils,
+    private val userPreferencesUtils: UserPreferencesUtils,
     private val player: IPlayer,
     private val overlayViewHelper: OverlayViewHelper,
     private val analyticsClient: AnalyticsClient,
@@ -446,10 +446,6 @@ class VideoPlayerMediator @Inject constructor(
         cast?.onPause()
     }
 
-    fun onStop() {
-        stopYoubora()
-    }
-
     /**
      * Config PlayerView appearance and behaviour based on user preferences
      */
@@ -656,6 +652,7 @@ class VideoPlayerMediator @Inject constructor(
                     play(event.streams.first())
                     playerView.hideInfoDialogs()
                     playerView.updateControllerVisibility(isPlaying = true)
+                    loadRemoteMedia(event)
                 }
             }
             GEOBLOCKED -> {
@@ -910,10 +907,9 @@ class VideoPlayerMediator @Inject constructor(
         streaming = false
         cancelPulling()
         player.release()
-        if (hasAnalytic) {
-            analyticsClient.stop()
-        }
         reactorSocket.leave(true)
+        cast?.release()
+        stopYoubora()
     }
 
     /**
@@ -950,20 +946,29 @@ class VideoPlayerMediator @Inject constructor(
             return
         }
         val fullUrl = event.streams.first().fullUrl.toString()
-        val widevine = event.streams.first().widevine
 
-
-        val params = CasterLoadRemoteMediaParams(
-            id = event.id,
-            publicKey = publicKey,
-            uuid = uuidUtils.getUuid(),
-            widevine = widevine,
-            fullUrl = fullUrl,
-            title = event.title,
-            thumbnailUrl = event.thumbnailUrl ?: "",
-            isPlaying = player.isPlaying(),
-            currentPosition = player.currentPosition()
-        )
+        val params = if (event.isNativeMLS) {
+            CasterLoadRemoteMediaParams(
+                id = event.id,
+                publicKey = publicKey,
+                pseudoUserId = userPreferencesUtils.getPseudoUserId(),
+                fullUrl = fullUrl,
+                title = event.title,
+                thumbnailUrl = event.thumbnailUrl ?: "",
+                isPlaying = player.isPlaying(),
+                currentPosition = player.currentPosition()
+            )
+        } else {
+            CasterLoadRemoteMediaParams(
+                id = event.id,
+                customPlaylistUrl = event.streams[0].fullUrl,
+                fullUrl = fullUrl,
+                title = event.title,
+                thumbnailUrl = event.thumbnailUrl ?: "",
+                isPlaying = player.isPlaying(),
+                currentPosition = player.currentPosition()
+            )
+        }
 
         cast?.loadRemoteMedia(params)
     }
