@@ -2,8 +2,8 @@ package tv.mycujoo.mcls.core
 
 import android.app.Activity
 import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.Player.STATE_BUFFERING
-import com.google.android.exoplayer2.Player.STATE_READY
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player.*
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.ui.TimeBar
 import kotlinx.coroutines.CoroutineScope
