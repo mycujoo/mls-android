@@ -17,7 +17,7 @@ class MediaInfoBuilder {
          */
         @JvmStatic
         fun build(
-            url: String,
+            url: String?,
             title: String?,
             thumbnailUrl: String,
             customData: JSONObject

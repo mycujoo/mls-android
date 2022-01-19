@@ -178,7 +178,7 @@ class Cast(
         Log.d("MLS_CAST", "loadRemoteMedia: $customData")
 
         val mediaInfo = MediaInfoBuilder.build(
-            params.fullUrl,
+            "",
             params.title,
             params.thumbnailUrl,
             customData
