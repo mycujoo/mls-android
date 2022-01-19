@@ -564,14 +564,17 @@ class VideoPlayerMediator @Inject constructor(
      * So it does not matter the stream url exist in the given param. Always the response from server will be used.
      */
     override fun playVideo(event: EventEntity) {
+        var shouldPlayWhenReady: Boolean? = null
+
         if (event.id != dataManager.currentEvent?.id) {
             if (streaming) streaming = false
+            shouldPlayWhenReady = true
             player.clearQue()
             annotationFactory.clearOverlays()
         }
         dataManager.currentEvent = event
         updateStreamStatus(event)
-        playVideoOrDisplayEventInfo(event)
+        playVideoOrDisplayEventInfo(event, shouldPlayWhenReady)
 
         // If the event is constructed manually and not a native MLS, it should not be replaced with any other version
         if (event.isNativeMLS) {
@@ -604,44 +607,13 @@ class VideoPlayerMediator @Inject constructor(
     }
 
     /**
-     * internal use: play event which is NOT native to MLS,
-     * in other words, user has provided parameter to make a streamable event.
-     * @param event the externally defined event which is about to play
-     */
-    private fun playExternalEvent(event: EventEntity) {
-        event.streams.firstOrNull()?.let {
-
-            player.play(
-                MediaDatum.MediaData(
-                    fullUrl = event.streams.first().fullUrl.toString(),
-                    dvrWindowSize = Long.MAX_VALUE,
-                    autoPlay = videoPlayerConfig.autoPlay
-                )
-            )
-            playerView.updateControllerVisibility(videoPlayerConfig.autoPlay)
-
-            playerView.setEventInfo(
-                event.title,
-                event.description,
-                event.getFormattedStartTimeDate()
-            )
-            playerView.hideInfoDialogs()
-            if (videoPlayerConfig.showEventInfoButton) {
-                playerView.showEventInfoButton()
-            } else {
-                playerView.hideEventInfoButton()
-            }
-        }
-    }
-
-    /**
      * internal use: either play video, or display event info dialog.
      * This is decided based on status of stream url of event,
      * if it is playable, video player will start to stream.
      * @param event the event which is about to stream/display info
      * @see StreamStatus
      */
-    private fun playVideoOrDisplayEventInfo(event: EventEntity) {
+    private fun playVideoOrDisplayEventInfo(event: EventEntity, playWhenReady: Boolean? = null) {
         playerView.setEventInfo(event.title, event.description, event.getFormattedStartTimeDate())
         playerView.setPosterInfo(event.poster_url)
         if (videoPlayerConfig.showEventInfoButton) {
@@ -667,7 +639,7 @@ class VideoPlayerMediator @Inject constructor(
                     // If playback is local, depend on the config, else always load the video but don't play
                     play(event.streams.first(), playbackLocation != REMOTE)
                     if (playbackLocation == REMOTE) {
-                        loadRemoteMedia(event)
+                        loadRemoteMedia(event, playWhenReady)
                     }
                 }
             }
@@ -961,7 +933,7 @@ class VideoPlayerMediator @Inject constructor(
      * @param event to be streamed Event
      * Cast module must be integrated by user and configured
      */
-    private fun loadRemoteMedia(event: EventEntity) {
+    private fun loadRemoteMedia(event: EventEntity, playWhenReady: Boolean? = null) {
         Timber.d("loadRemoteMedia: $event")
         if(event.streamStatus() != PLAYABLE) {
             return
@@ -976,7 +948,7 @@ class VideoPlayerMediator @Inject constructor(
                 pseudoUserId = userPreferencesUtils.getPseudoUserId(),
                 title = event.title,
                 thumbnailUrl = event.thumbnailUrl ?: "",
-                isPlaying = player.isPlaying(),
+                isPlaying = playWhenReady ?: player.isPlaying(),
                 currentPosition = player.currentPosition()
             )
         } else {
@@ -985,12 +957,10 @@ class VideoPlayerMediator @Inject constructor(
                 customPlaylistUrl = event.streams[0].fullUrl,
                 title = event.title,
                 thumbnailUrl = event.thumbnailUrl ?: "",
-                isPlaying = player.isPlaying(),
+                isPlaying = playWhenReady ?: player.isPlaying(),
                 currentPosition = player.currentPosition()
             )
         }
-
-        Timber.d("${cast != null}")
 
         cast?.loadRemoteMedia(params)
     }
