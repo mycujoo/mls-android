@@ -27,6 +27,9 @@ class C {
         const val CAST_LICENSE_URL_KEY = "licenseUrl"
         const val CAST_PROTECTION_SYSTEM_KEY = "protectionSystem"
 
+        const val CAST_CUSTOM_PLAYLIST_URL = "customPlaylistUrl"
+        const val CAST_IDENTITY_TOKEN = "identityToken"
+
         const val DRM_WIDEVINE = "widevine"
 
 

@@ -18,4 +18,6 @@ interface ICast {
 
     fun onResume()
     fun onPause()
+
+    fun release()
 }
