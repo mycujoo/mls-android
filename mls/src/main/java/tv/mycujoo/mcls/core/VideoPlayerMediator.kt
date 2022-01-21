@@ -1,14 +1,15 @@
 package tv.mycujoo.mcls.core
 
 import android.app.Activity
+import android.util.Log
 import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.Player.STATE_BUFFERING
-import com.google.android.exoplayer2.Player.STATE_READY
+import com.google.android.exoplayer2.Player.*
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.ui.TimeBar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
@@ -16,8 +17,8 @@ import tv.mycujoo.domain.entity.Stream
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.analytic.AnalyticsClient
-import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
+import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.api.MLSBuilder
 import tv.mycujoo.mcls.api.VideoPlayer
 import tv.mycujoo.mcls.cast.CasterLoadRemoteMediaParams
@@ -40,12 +41,13 @@ import tv.mycujoo.mcls.player.*
 import tv.mycujoo.mcls.player.PlaybackLocation.LOCAL
 import tv.mycujoo.mcls.player.PlaybackLocation.REMOTE
 import tv.mycujoo.mcls.utils.StringUtils
-import tv.mycujoo.mcls.utils.UuidUtils
+import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.LIVE_ON_THE_EDGE
 import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.VOD
 import tv.mycujoo.mcls.widgets.PlayerControllerMode
 import tv.mycujoo.mcls.widgets.RemotePlayerControllerListener
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 /**
@@ -61,7 +63,7 @@ class VideoPlayerMediator @Inject constructor(
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     private val logger: Logger,
-    private val uuidUtils: UuidUtils,
+    private val userPreferencesUtils: UserPreferencesUtils,
     private val player: IPlayer,
     private val overlayViewHelper: OverlayViewHelper,
     private val analyticsClient: AnalyticsClient,
@@ -364,6 +366,7 @@ class VideoPlayerMediator @Inject constructor(
                 }
 
                 override fun onSessionStartFailed(session: ICasterSession?) {
+                    Timber.d("onSessionStartFailed $session")
                     onApplicationDisconnected(session)
                 }
 
@@ -376,10 +379,12 @@ class VideoPlayerMediator @Inject constructor(
                 }
 
                 override fun onSessionEnding(session: ICasterSession?) {
+                    Timber.d("onSessionEnding $session")
                     onApplicationDisconnected(session)
                 }
 
                 override fun onSessionEnded(session: ICasterSession?) {
+                    Timber.d("onSessionEnded $session")
                     onApplicationDisconnected(session)
                 }
 
@@ -444,10 +449,6 @@ class VideoPlayerMediator @Inject constructor(
      */
     fun onPause() {
         cast?.onPause()
-    }
-
-    fun onStop() {
-        stopYoubora()
     }
 
     /**
@@ -555,14 +556,17 @@ class VideoPlayerMediator @Inject constructor(
      * So it does not matter the stream url exist in the given param. Always the response from server will be used.
      */
     override fun playVideo(event: EventEntity) {
+        var shouldPlayWhenReady: Boolean? = null
+
         if (event.id != dataManager.currentEvent?.id) {
             if (streaming) streaming = false
+            shouldPlayWhenReady = true
             player.clearQue()
             annotationFactory.clearOverlays()
         }
         dataManager.currentEvent = event
         updateStreamStatus(event)
-        playVideoOrDisplayEventInfo(event)
+        playVideoOrDisplayEventInfo(event, shouldPlayWhenReady)
 
         // If the event is constructed manually and not a native MLS, it should not be replaced with any other version
         if (event.isNativeMLS) {
@@ -595,44 +599,13 @@ class VideoPlayerMediator @Inject constructor(
     }
 
     /**
-     * internal use: play event which is NOT native to MLS,
-     * in other words, user has provided parameter to make a streamable event.
-     * @param event the externally defined event which is about to play
-     */
-    private fun playExternalEvent(event: EventEntity) {
-        event.streams.firstOrNull()?.let {
-
-            player.play(
-                MediaDatum.MediaData(
-                    fullUrl = event.streams.first().fullUrl.toString(),
-                    dvrWindowSize = Long.MAX_VALUE,
-                    autoPlay = videoPlayerConfig.autoPlay
-                )
-            )
-            playerView.updateControllerVisibility(videoPlayerConfig.autoPlay)
-
-            playerView.setEventInfo(
-                event.title,
-                event.description,
-                event.getFormattedStartTimeDate()
-            )
-            playerView.hideInfoDialogs()
-            if (videoPlayerConfig.showEventInfoButton) {
-                playerView.showEventInfoButton()
-            } else {
-                playerView.hideEventInfoButton()
-            }
-        }
-    }
-
-    /**
      * internal use: either play video, or display event info dialog.
      * This is decided based on status of stream url of event,
      * if it is playable, video player will start to stream.
      * @param event the event which is about to stream/display info
      * @see StreamStatus
      */
-    private fun playVideoOrDisplayEventInfo(event: EventEntity) {
+    private fun playVideoOrDisplayEventInfo(event: EventEntity, playWhenReady: Boolean? = null) {
         playerView.setEventInfo(event.title, event.description, event.getFormattedStartTimeDate())
         playerView.setPosterInfo(event.poster_url)
         if (videoPlayerConfig.showEventInfoButton) {
@@ -653,9 +626,13 @@ class VideoPlayerMediator @Inject constructor(
                     streaming = true
                     logged = false
                     storeEvent(event)
-                    play(event.streams.first())
                     playerView.hideInfoDialogs()
                     playerView.updateControllerVisibility(isPlaying = true)
+                    // If playback is local, depend on the config, else always load the video but don't play
+                    play(event.streams.first(), playbackLocation != REMOTE)
+                    if (playbackLocation == REMOTE) {
+                        loadRemoteMedia(event, playWhenReady)
+                    }
                 }
             }
             GEOBLOCKED -> {
@@ -684,14 +661,14 @@ class VideoPlayerMediator @Inject constructor(
      * @param stream information needed to play an event. including stream url, encoded type, etc
      * @see Stream
      */
-    private fun play(stream: Stream) {
+    private fun play(stream: Stream, playWhenReady: Boolean? = null) {
         if (stream.widevine?.fullUrl != null && stream.widevine.licenseUrl != null) {
             player.play(
                 MediaDatum.DRMMediaData(
                     fullUrl = stream.widevine.fullUrl,
                     dvrWindowSize = stream.getDvrWindowSize(),
                     licenseUrl = stream.widevine.licenseUrl,
-                    autoPlay = videoPlayerConfig.autoPlay
+                    autoPlay = playWhenReady ?: videoPlayerConfig.autoPlay
                 )
             )
         } else if (stream.fullUrl != null) {
@@ -699,7 +676,7 @@ class VideoPlayerMediator @Inject constructor(
                 MediaDatum.MediaData(
                     fullUrl = stream.fullUrl,
                     dvrWindowSize = stream.getDvrWindowSize(),
-                    autoPlay = videoPlayerConfig.autoPlay
+                    autoPlay = playWhenReady ?: videoPlayerConfig.autoPlay
                 )
             )
         }
@@ -910,10 +887,9 @@ class VideoPlayerMediator @Inject constructor(
         streaming = false
         cancelPulling()
         player.release()
-        if (hasAnalytic) {
-            analyticsClient.stop()
-        }
         reactorSocket.leave(true)
+        cast?.release()
+        stopYoubora()
     }
 
     /**
@@ -945,25 +921,34 @@ class VideoPlayerMediator @Inject constructor(
      * @param event to be streamed Event
      * Cast module must be integrated by user and configured
      */
-    private fun loadRemoteMedia(event: EventEntity) {
-        if (event.streams.isEmpty() || event.streams.first().fullUrl == null) {
+    private fun loadRemoteMedia(event: EventEntity, playWhenReady: Boolean? = null) {
+        Timber.d("loadRemoteMedia: $event")
+        if(event.streamStatus() != PLAYABLE) {
             return
         }
-        val fullUrl = event.streams.first().fullUrl.toString()
-        val widevine = event.streams.first().widevine
 
+        dataManager.currentEvent = event
 
-        val params = CasterLoadRemoteMediaParams(
-            id = event.id,
-            publicKey = publicKey,
-            uuid = uuidUtils.getUuid(),
-            widevine = widevine,
-            fullUrl = fullUrl,
-            title = event.title,
-            thumbnailUrl = event.thumbnailUrl ?: "",
-            isPlaying = player.isPlaying(),
-            currentPosition = player.currentPosition()
-        )
+        val params = if (event.isNativeMLS) {
+            CasterLoadRemoteMediaParams(
+                id = event.id,
+                publicKey = publicKey,
+                pseudoUserId = userPreferencesUtils.getPseudoUserId(),
+                title = event.title,
+                thumbnailUrl = event.thumbnailUrl ?: "",
+                isPlaying = playWhenReady ?: player.isPlaying(),
+                currentPosition = player.currentPosition()
+            )
+        } else {
+            CasterLoadRemoteMediaParams(
+                id = event.id,
+                customPlaylistUrl = event.streams[0].fullUrl,
+                title = event.title,
+                thumbnailUrl = event.thumbnailUrl ?: "",
+                isPlaying = playWhenReady ?: player.isPlaying(),
+                currentPosition = player.currentPosition()
+            )
+        }
 
         cast?.loadRemoteMedia(params)
     }
