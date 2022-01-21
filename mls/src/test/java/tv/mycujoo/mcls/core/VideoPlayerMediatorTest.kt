@@ -44,6 +44,7 @@ import tv.mycujoo.mcls.network.socket.ReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaDatum
 import tv.mycujoo.mcls.player.MediaFactory
+import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import tv.mycujoo.mcls.utils.UuidUtils
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mcls.widgets.PlayerControllerMode
@@ -68,6 +69,9 @@ class VideoPlayerMediatorTest {
 
     @Mock
     lateinit var mMLSBuilder: MLSBuilder
+
+    @Mock
+    lateinit var userPreferencesUtils: UserPreferencesUtils
 
     @Mock
     lateinit var uuidUtils: UuidUtils
@@ -182,7 +186,7 @@ class VideoPlayerMediatorTest {
             dispatcher,
             dataManager,
             logger,
-            uuidUtils,
+            userPreferencesUtils,
             player,
             overlayViewHelper,
             youboraClient,
