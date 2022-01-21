@@ -18,10 +18,14 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.newSingleThreadContext
 import tv.mycujoo.mcls.BuildConfig
+import tv.mycujoo.mcls.core.IAnnotationFactory
+import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.PrefManager
+import tv.mycujoo.mcls.mediator.AnnotationMediator
+import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaFactory
 import tv.mycujoo.mcls.utils.ThreadUtils
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
@@ -115,5 +119,25 @@ open class AppModule {
     @Provides
     fun provideAssetManager(@ApplicationContext context: Context): AssetManager {
         return context.assets
+    }
+
+    @Singleton
+    @Provides
+    fun provideAnnotationMediator(
+        annotationFactory: IAnnotationFactory,
+        dataManager: IDataManager,
+        dispatcher: CoroutineScope,
+        logger: Logger,
+        player: IPlayer,
+        threadUtils: ThreadUtils
+    ): AnnotationMediator {
+        return AnnotationMediator(
+            annotationFactory,
+            dataManager,
+            dispatcher,
+            logger,
+            player,
+            threadUtils
+        )
     }
 }
