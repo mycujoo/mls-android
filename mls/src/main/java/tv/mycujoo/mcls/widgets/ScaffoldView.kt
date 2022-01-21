@@ -15,7 +15,7 @@ class ScaffoldView @JvmOverloads constructor(
     attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    private var svgStringBuilder = StringBuilder()
+    private lateinit var svgString: String
     private lateinit var variablePlaceHolder: List<String>
     private lateinit var latestVariableValue: MutableMap<String, Any>
 
@@ -42,7 +42,7 @@ class ScaffoldView @JvmOverloads constructor(
     }
 
     fun setSVGSource(svgString: String) {
-        svgStringBuilder = StringBuilder(svgString)
+        this.svgString = svgString
     }
 
     fun setScaleType(scaleType: ImageView.ScaleType) {
@@ -70,7 +70,7 @@ class ScaffoldView @JvmOverloads constructor(
     fun onVariableUpdated(
         updatedPair: Pair<String, Any>
     ) {
-        if (this::variablePlaceHolder.isInitialized.not() || this::latestVariableValue.isInitialized.not()) {
+        if (this::variablePlaceHolder.isInitialized.not() || this::latestVariableValue.isInitialized.not() || this::svgString.isInitialized.not()) {
             return
         }
 
@@ -80,7 +80,7 @@ class ScaffoldView @JvmOverloads constructor(
 
         latestVariableValue[updatedPair.first] = updatedPair.second
 
-        val currentSvg = StringBuilder(svgStringBuilder)
+        val currentSvg = StringBuilder(svgString)
 
         if (currentSvg.isNotEmpty()) {
             variablePlaceHolder.filter { latestVariableValue.contains(it) }.forEach { entry ->
@@ -96,5 +96,21 @@ class ScaffoldView @JvmOverloads constructor(
                 setSVG(SVG.getFromString(currentSvg.toString()))
             }
         }
+
+//        var svgString = this.svgString
+//        variablePlaceHolder.filter { latestVariableValue.contains(it) }.forEach { entry ->
+//            latestVariableValue[entry]?.let { value ->
+//                svgString =
+//                    svgString.replace(entry, value.toString())
+//            }
+//        }
+
+
+
+//        post {
+//            setSVG(SVG.getFromString(svgString))
+//        }
     }
+
+
 }
