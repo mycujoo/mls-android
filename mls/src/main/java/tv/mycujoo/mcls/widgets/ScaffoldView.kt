@@ -6,6 +6,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.annotation.UiThread
 import com.caverock.androidsvg.SVG
+import timber.log.Timber
 
 class ScaffoldView @JvmOverloads constructor(
     widthPercentage: Float = -1F,
@@ -14,7 +15,6 @@ class ScaffoldView @JvmOverloads constructor(
     attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    private lateinit var svgString: String
     private lateinit var variablePlaceHolder: List<String>
     private lateinit var latestVariableValue: MutableMap<String, Any>
 
@@ -41,7 +41,7 @@ class ScaffoldView @JvmOverloads constructor(
     }
 
     fun setSVGSource(svgString: String) {
-        this.svgString = svgString
+        svgStringBuilder = StringBuilder(svgString)
     }
 
     fun setScaleType(scaleType: ImageView.ScaleType) {
@@ -69,7 +69,7 @@ class ScaffoldView @JvmOverloads constructor(
     fun onVariableUpdated(
         updatedPair: Pair<String, Any>
     ) {
-        if (this::variablePlaceHolder.isInitialized.not() || this::latestVariableValue.isInitialized.not() || this::svgString.isInitialized.not()) {
+        if (this::variablePlaceHolder.isInitialized.not() || this::latestVariableValue.isInitialized.not()) {
             return
         }
 
@@ -79,18 +79,25 @@ class ScaffoldView @JvmOverloads constructor(
 
         latestVariableValue[updatedPair.first] = updatedPair.second
 
-        var svgString = this.svgString
-        variablePlaceHolder.filter { latestVariableValue.contains(it) }.forEach { entry ->
-            latestVariableValue[entry]?.let { value ->
-                svgString =
-                    svgString.replace(entry, value.toString())
-            }
-        }
+        val currentSvg = StringBuilder(svgStringBuilder)
 
-        post {
-            setSVG(SVG.getFromString(svgString))
+        if (currentSvg.isNotEmpty()) {
+            variablePlaceHolder.filter { latestVariableValue.contains(it) }.forEach { entry ->
+                latestVariableValue[entry]?.let { value ->
+                    val start = currentSvg.indexOf(entry)
+                    if (start > -1) {
+                        currentSvg.replace(start, start + entry.length, value.toString())
+                    }
+                }
+            }
+
+            post {
+                setSVG(SVG.getFromString(currentSvg.toString()))
+            }
         }
     }
 
-
+    companion object {
+        private var svgStringBuilder = StringBuilder()
+    }
 }

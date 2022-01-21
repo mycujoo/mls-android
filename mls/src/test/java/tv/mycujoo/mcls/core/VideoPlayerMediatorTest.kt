@@ -186,10 +186,10 @@ class VideoPlayerMediatorTest {
             player,
             overlayViewHelper,
             youboraClient,
-            annotationFactory
+            annotationFactory,
+            annotationMediator
         )
         videoPlayerMediator.initialize(playerView, mMLSBuilder, listOf(), cast)
-        videoPlayerMediator.setAnnotationMediator(annotationMediator)
     }
 
     private fun storeExoPlayerListener(invocationOnMock: InvocationOnMock) {
