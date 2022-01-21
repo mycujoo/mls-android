@@ -159,7 +159,6 @@ class MLS @Inject constructor(
             }
 
             annotationMediator.initPlayerView(playerView)
-            videoPlayerMediator.setAnnotationMediator(annotationMediator)
             return
         }
         mediatorInitialized = true
@@ -174,7 +173,6 @@ class MLS @Inject constructor(
         )
 
         annotationMediator.initPlayerView(playerView)
-        videoPlayerMediator.setAnnotationMediator(annotationMediator)
     }
 
     fun setVideoAnalyticsCustomData(

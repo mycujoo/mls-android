@@ -65,7 +65,8 @@ class VideoPlayerMediator @Inject constructor(
     private val player: IPlayer,
     private val overlayViewHelper: OverlayViewHelper,
     private val analyticsClient: AnalyticsClient,
-    private val annotationFactory: IAnnotationFactory
+    private val annotationFactory: IAnnotationFactory,
+    private val annotationMediator: AnnotationMediator,
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
     private var cast: ICast? = null
@@ -83,11 +84,6 @@ class VideoPlayerMediator @Inject constructor(
      * MLSPlayerView which exoplayer will integrate with
      */
     private lateinit var playerView: MLSPlayerView
-
-    /**
-     * Annotation Mediator to handle Annotation Actions acts
-     */
-    private lateinit var annotationMediator: AnnotationMediator
 
     /**
      * Indicates if SDK user desires to have analytics enabled
@@ -185,10 +181,6 @@ class VideoPlayerMediator @Inject constructor(
                 initCaster(cast, player, MLSPlayerView)
             }
         }
-    }
-
-    fun setAnnotationMediator(annotationMediator: AnnotationMediator) {
-        this.annotationMediator = annotationMediator
     }
 
     private fun initPlayerView(
@@ -740,10 +732,6 @@ class VideoPlayerMediator @Inject constructor(
     }
 
     private fun fetchActions(timelineId: String, updateId: String?, joinTimeLine: Boolean) {
-        if (this::annotationMediator.isInitialized.not()) {
-            return
-        }
-
         annotationMediator.fetchActions(timelineId, updateId) { result ->
             when (result) {
                 is Success -> {
