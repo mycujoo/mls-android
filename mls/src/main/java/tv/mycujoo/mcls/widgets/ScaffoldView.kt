@@ -15,6 +15,7 @@ class ScaffoldView @JvmOverloads constructor(
     attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
+    private var svgStringBuilder = StringBuilder()
     private lateinit var variablePlaceHolder: List<String>
     private lateinit var latestVariableValue: MutableMap<String, Any>
 
@@ -95,9 +96,5 @@ class ScaffoldView @JvmOverloads constructor(
                 setSVG(SVG.getFromString(currentSvg.toString()))
             }
         }
-    }
-
-    companion object {
-        private var svgStringBuilder = StringBuilder()
     }
 }
