@@ -58,8 +58,20 @@ class ActionActor {
         }
 
         hideMap.forEach {
-            val act = getCurrentAct(now, it.value)
-            returnList.add(Pair(act, it.value))
+            if (returnList.isNotEmpty()) {
+                try {
+                    val lastShowOverlay =
+                        returnList.last { item ->
+                            item.second is Action.ShowOverlayAction &&
+                                    (item.second as Action.ShowOverlayAction).customId == it.key
+                        }
+                    returnList.remove(lastShowOverlay)
+                } catch (noItemFound: NoSuchElementException) {
+                }
+
+            }
+//            val act = getCurrentAct(now, it.value)
+//            returnList.add(Pair(act, it.value))
         }
 
         afterwardsShowOverlayActions.forEach { afterwardsShowOverlayAction ->
