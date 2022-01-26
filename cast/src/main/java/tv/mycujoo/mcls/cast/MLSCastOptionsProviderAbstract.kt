@@ -11,8 +11,7 @@ import com.google.android.gms.cast.framework.media.CastMediaOptions
  */
 abstract class MLSCastOptionsProviderAbstract : OptionsProvider {
 
-    override fun getCastOptions(context: Context?): CastOptions {
-        requireNotNull(context)
+    override fun getCastOptions(context: Context): CastOptions {
         val mediaOptions = CastMediaOptions.Builder()
             .build()
 
@@ -22,7 +21,7 @@ abstract class MLSCastOptionsProviderAbstract : OptionsProvider {
             .build()
     }
 
-    override fun getAdditionalSessionProviders(context: Context?): MutableList<SessionProvider> {
+    override fun getAdditionalSessionProviders(context: Context): MutableList<SessionProvider> {
         return mutableListOf()
     }
 }
