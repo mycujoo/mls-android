@@ -180,7 +180,8 @@ open class MLSTvBuilder {
 
 
     // Headless is a client without UI elements in it.
-    open fun buildHeadless(context: Context): HeadlessMLSTv {
+    @Deprecated("Please use HeadlessMLSBuilder()")
+    open fun buildHeadless(context: Context): HeadlessMLS {
         initPublicKeyIfNeeded()
         if (publicKey.isEmpty()) {
             throw IllegalArgumentException(C.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
@@ -213,7 +214,7 @@ open class MLSTvBuilder {
     interface TvEntries {
         fun provideMLSTV(): MLSTV
 
-        fun provideMLSTVHeadless(): HeadlessMLSTv
+        fun provideMLSTVHeadless(): HeadlessMLS
 
         fun providePrefsManager(): IPrefManager
     }
