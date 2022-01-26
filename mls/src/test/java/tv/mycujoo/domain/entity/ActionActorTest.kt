@@ -1,5 +1,6 @@
 package tv.mycujoo.domain.entity
 
+import org.junit.Ignore
 import org.junit.Test
 import tv.mycujoo.mcls.TestData.Companion.getSampleHideOverlayAction
 import tv.mycujoo.mcls.TestData.Companion.getSampleShowOverlayActionN
@@ -32,8 +33,11 @@ class ActionActorTest {
             1L,
             arrayListOf(showOverlayAction),
             arrayListOf(hideOverlayAction)
-
         )
+
+        act.forEach {
+            print("${it.first}, ")
+        }
 
 
         assert(act.size == 2)
@@ -42,7 +46,7 @@ class ActionActorTest {
     }
 
     @Test
-    fun `given ShowAction, then HideAction, should return OUTRO`() {
+    fun `given ShowAction, then HideAction, should remove the ShowAction`() {
         val showOverlayAction = getSampleShowOverlayActionN(1000L, "cid_00")
         val hideOverlayAction = getSampleHideOverlayAction(1000L, "cid_00")
 
@@ -53,11 +57,9 @@ class ActionActorTest {
             arrayListOf(hideOverlayAction)
         )
 
-
-        assert(act.size == 1)
-        assert(act.any { it.first == ActionActor.ActionAct.OUTRO && it.second == hideOverlayAction })
-        assert(act.none { it.first == ActionActor.ActionAct.INTRO })
-
+        assert(act.isEmpty()) {
+            println("${act.size}")
+        }
     }
 
     @Test
@@ -137,7 +139,7 @@ class ActionActorTest {
 
 
     @Test
-    fun `given multiple ShowAction with same cid, and multiple HideAction with same cid in-between, should return OUTRO with latest HideAction`() {
+    fun `given multiple ShowAction with same cid, and multiple HideAction with same cid in-between, should return empty list`() {
         val showOverlayActionFirst = getSampleShowOverlayActionN(1000L, "cid_00")
         val hideOverlayActionFirst = getSampleHideOverlayAction(3000L, "cid_00")
         val showOverlayActionSecond = getSampleShowOverlayActionN(6000L, "cid_00")
@@ -157,9 +159,11 @@ class ActionActorTest {
         )
 
 
-        assert(act.size == 1)
-        assert(act.any { it.first == ActionActor.ActionAct.OUTRO && it.second == hideOverlayActionSecond })
-        assert(act.none { it.first == ActionActor.ActionAct.INTRO })
+        assert(act.size == 0) {
+            println("${act.size}")
+        }
+//        assert(act.any { it.first == ActionActor.ActionAct.OUTRO && it.second == hideOverlayActionSecond })
+//        assert(act.none { it.first == ActionActor.ActionAct.INTRO })
     }
 
     @Test
@@ -172,6 +176,10 @@ class ActionActorTest {
             arrayListOf(hideOverlayAction)
         )
 
+        println("${act.size}")
+        act.forEach {
+            println("${it.first}")
+        }
 
         assert(act.size == 1)
         assert(act.any { it.first == ActionActor.ActionAct.OUTRO && it.second == hideOverlayAction })

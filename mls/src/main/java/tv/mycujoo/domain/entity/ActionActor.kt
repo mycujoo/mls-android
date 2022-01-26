@@ -37,7 +37,7 @@ class ActionActor {
                 hideOverlayActions.remove(relatedHideOverlayAction)
                 if (relatedHideOverlayAction.offset >= action.offset) {
                     showMap.remove(relatedHideOverlayAction.customId)
-                    hideMap[relatedHideOverlayAction.customId] = relatedHideOverlayAction
+//                    hideMap[relatedHideOverlayAction.customId] = relatedHideOverlayAction
                 } else {
                     hideMap.remove(action.customId)
                     showMap[action.customId] = action
@@ -58,20 +58,17 @@ class ActionActor {
         }
 
         hideMap.forEach {
-            if (returnList.isNotEmpty()) {
-                try {
-                    val lastShowOverlay =
-                        returnList.last { item ->
-                            item.second is Action.ShowOverlayAction &&
-                                    (item.second as Action.ShowOverlayAction).customId == it.key
-                        }
-                    returnList.remove(lastShowOverlay)
-                } catch (noItemFound: NoSuchElementException) {
-                }
-
+            try {
+                val lastShowOverlay =
+                    returnList.last { item ->
+                        item.second is Action.ShowOverlayAction &&
+                                (item.second as Action.ShowOverlayAction).customId == it.key
+                    }
+                returnList.remove(lastShowOverlay)
+            } catch (noItemFound: NoSuchElementException) {
+                val act = getCurrentAct(now, it.value)
+                returnList.add(Pair(act, it.value))
             }
-//            val act = getCurrentAct(now, it.value)
-//            returnList.add(Pair(act, it.value))
         }
 
         afterwardsShowOverlayActions.forEach { afterwardsShowOverlayAction ->
