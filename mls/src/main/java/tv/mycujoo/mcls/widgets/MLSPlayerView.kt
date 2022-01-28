@@ -22,6 +22,7 @@ import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.PlayerView
 import kotlinx.android.synthetic.main.main_controls_layout.view.*
 import kotlinx.android.synthetic.main.player_view_wrapper.view.*
+import timber.log.Timber
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.core.UIEventListener
@@ -60,6 +61,8 @@ class MLSPlayerView @JvmOverloads constructor(
     private var fullScreenButton: ImageButton
     private val remotePlayerControllerView: RemotePlayerControllerView
     private val externalInformationButtonLayout: FrameLayout
+
+    private var isCasting = false
     /**endregion */
 
     /**region Fields*/
@@ -203,6 +206,10 @@ class MLSPlayerView @JvmOverloads constructor(
 
     override fun overlayHost(): ConstraintLayout = overlayHost
 
+    fun setIsCasting(isCasting: Boolean) {
+        this.isCasting = isCasting
+    }
+
     fun setTimelineMarker(list: List<TimelineMarkerEntity>) {
         list.map {
             PointOfInterest(
@@ -342,12 +349,17 @@ class MLSPlayerView @JvmOverloads constructor(
                     hideEventInfoButton()
                 }
                 controllerVisibility(true)
-                playerView.player?.playWhenReady = config.autoPlay
+
+                if (isCasting) {
+                    playerView.player?.playWhenReady = false
+                } else {
+                    playerView.player?.playWhenReady = config.autoPlay
+                }
                 playerView.showController()
             }
 
         } catch (e: Exception) {
-            Log.e("PlayerViewWrapper", e.message ?: "Error in configuring")
+            Timber.e(e.message ?: "Error in configuring")
         }
     }
 
