@@ -44,6 +44,11 @@ class Player @Inject constructor(
     private var resumeWindow: Int = C.INDEX_UNSET
 
     /**
+     * Indicator about casting status
+     */
+    private var casting: Boolean = false
+
+    /**
      * Indicator that shows player should automatically start playing the item,
      * as soon as it's loaded
      */
@@ -278,7 +283,11 @@ class Player @Inject constructor(
                         simplePlayer.setMediaSource(hlsMediaSource, false)
                     }
                     simplePlayer.prepare()
-                    simplePlayer.playWhenReady = autoPlay
+                    if (casting) {
+                        simplePlayer.playWhenReady = false
+                    } else {
+                        simplePlayer.playWhenReady = autoPlay
+                    }
                     resumePosition = C.INDEX_UNSET.toLong()
                     resumeWindow = C.INDEX_UNSET
                 }
@@ -361,6 +370,9 @@ class Player @Inject constructor(
             .none { it.first <= targetAbsoluteTime && it.first + it.second >= targetAbsoluteTime }
     }
 
+    override fun setIsCasting(isCasting: Boolean) {
+        casting = isCasting
+    }
 
     /**
      * Return current DVR window size

@@ -311,6 +311,7 @@ class VideoPlayerMediator @Inject constructor(
             fun onApplicationDisconnected(casterSession: ICasterSession?) {
                 updatePlaybackLocation(LOCAL)
                 switchControllerMode(LOCAL)
+                player.setIsCasting(false)
                 startYoubora()
                 casterSession?.getRemoteMediaClient()?.let { remoteMediaClient ->
                     player.seekTo(remoteMediaClient.approximateStreamPosition())
@@ -326,6 +327,7 @@ class VideoPlayerMediator @Inject constructor(
                 if (casterSession == null) {
                     return
                 }
+                player.setIsCasting(true)
                 updateRemotePlayerWithLocalPlayerData()
                 updatePlaybackLocation(REMOTE)
                 switchControllerMode(REMOTE)
@@ -343,6 +345,7 @@ class VideoPlayerMediator @Inject constructor(
                 if (casterSession == null) {
                     return
                 }
+                player.setIsCasting(true)
                 stopYoubora()
                 updatePlaybackLocation(REMOTE)
                 switchControllerMode(REMOTE)
@@ -362,29 +365,32 @@ class VideoPlayerMediator @Inject constructor(
                 }
 
                 override fun onSessionStarted(session: ICasterSession?) {
+                    player.setIsCasting(true)
                     onCastSessionStarted(session)
                 }
 
                 override fun onSessionStartFailed(session: ICasterSession?) {
-                    Timber.d("onSessionStartFailed $session")
+                    player.setIsCasting(false)
                     onApplicationDisconnected(session)
                 }
 
                 override fun onSessionResumed(session: ICasterSession?) {
+                    player.setIsCasting(true)
                     onCastSessionResumed(session)
                 }
 
                 override fun onSessionResumeFailed(session: ICasterSession?) {
+                    player.setIsCasting(false)
                     onApplicationDisconnected(session)
                 }
 
                 override fun onSessionEnding(session: ICasterSession?) {
-                    Timber.d("onSessionEnding $session")
+                    player.setIsCasting(false)
                     onApplicationDisconnected(session)
                 }
 
                 override fun onSessionEnded(session: ICasterSession?) {
-                    Timber.d("onSessionEnded $session")
+                    player.setIsCasting(false)
                     onApplicationDisconnected(session)
                 }
 
@@ -640,18 +646,27 @@ class VideoPlayerMediator @Inject constructor(
                 player.pause()
                 playerView.showCustomInformationDialog(playerView.resources.getString(R.string.message_geoblocked_stream))
                 playerView.updateControllerVisibility(isPlaying = false)
+                if (playbackLocation == REMOTE) {
+                    cast?.release()
+                }
             }
             NO_ENTITLEMENT -> {
                 streaming = false
                 player.pause()
                 playerView.showCustomInformationDialog(playerView.resources.getString(R.string.message_no_entitlement_stream))
                 playerView.updateControllerVisibility(isPlaying = false)
+                if (playbackLocation == REMOTE) {
+                    cast?.release()
+                }
             }
             UNKNOWN_ERROR -> {
                 streaming = false
                 player.pause()
                 playerView.showPreEventInformationDialog()
                 playerView.updateControllerVisibility(isPlaying = false)
+                if (playbackLocation == REMOTE) {
+                    cast?.release()
+                }
             }
         }
     }
@@ -662,20 +677,13 @@ class VideoPlayerMediator @Inject constructor(
      * @see Stream
      */
     private fun play(stream: Stream, playWhenReady: Boolean? = null) {
-
-        val autoPlay = if (playbackLocation == REMOTE) {
-            false
-        } else {
-            playWhenReady ?: videoPlayerConfig.autoPlay
-        }
-
         if (stream.widevine?.fullUrl != null && stream.widevine.licenseUrl != null) {
             player.play(
                 MediaDatum.DRMMediaData(
                     fullUrl = stream.widevine.fullUrl,
                     dvrWindowSize = stream.getDvrWindowSize(),
                     licenseUrl = stream.widevine.licenseUrl,
-                    autoPlay = autoPlay
+                    autoPlay = playWhenReady ?: videoPlayerConfig.autoPlay
                 )
             )
         } else if (stream.fullUrl != null) {
@@ -683,7 +691,7 @@ class VideoPlayerMediator @Inject constructor(
                 MediaDatum.MediaData(
                     fullUrl = stream.fullUrl,
                     dvrWindowSize = stream.getDvrWindowSize(),
-                    autoPlay = autoPlay
+                    autoPlay = playWhenReady ?: videoPlayerConfig.autoPlay
                 )
             )
         }
@@ -895,7 +903,6 @@ class VideoPlayerMediator @Inject constructor(
         cancelPulling()
         player.release()
         reactorSocket.leave(true)
-        cast?.release()
         stopYoubora()
     }
 
