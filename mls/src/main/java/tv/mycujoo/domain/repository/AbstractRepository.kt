@@ -1,8 +1,8 @@
 package tv.mycujoo.domain.repository
 
-import android.util.Log
 import retrofit2.HttpException
-import java.io.IOException
+import timber.log.Timber
+import tv.mycujoo.mcls.network.NoConnectionInterceptor
 
 abstract class AbstractRepository {
     suspend fun <T> safeApiCall(apiCall: suspend () -> T): tv.mycujoo.domain.entity.Result<Exception, T> {
@@ -11,11 +11,9 @@ abstract class AbstractRepository {
             tv.mycujoo.domain.entity.Result.Success(apiCall.invoke())
         } catch (throwable: Throwable) {
             when (throwable) {
-                is IOException -> tv.mycujoo.domain.entity.Result.NetworkError(throwable)
                 is HttpException -> {
                     val code = throwable.code()
-                    Log.e(
-                        TAG,
+                    Timber.e(
                         "safeApiCall: $code \n\n\n" +
                                 "${throwable.response()?.body()} \n" +
                                 "${throwable.response()?.headers()} \n" +
@@ -27,14 +25,16 @@ abstract class AbstractRepository {
                     )
 
                 }
+                is NoConnectionInterceptor.NoInternetException -> {
+                    tv.mycujoo.domain.entity.Result.NetworkError(throwable)
+                }
+                is NoConnectionInterceptor.NoConnectivityException -> {
+                    tv.mycujoo.domain.entity.Result.NetworkError(throwable)
+                }
                 else -> {
                     tv.mycujoo.domain.entity.Result.NetworkError(Exception(throwable))
                 }
             }
         }
-    }
-
-    companion object {
-        private const val TAG = "AbstractRepository"
     }
 }
