@@ -1,9 +1,7 @@
 package tv.mycujoo.mcls.di
 
 import android.content.Context
-import android.util.Log
 import com.squareup.moshi.Moshi
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,14 +14,15 @@ import okhttp3.logging.HttpLoggingInterceptor
 import okio.Buffer
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import timber.log.Timber
 import tv.mycujoo.data.jsonadapter.JodaJsonAdapter
 import tv.mycujoo.mcls.enum.C.Companion.IDENTITY_TOKEN_PREF_KEY
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.network.MlsApi
+import tv.mycujoo.mcls.network.NoConnectionInterceptor
 import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
-import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -48,7 +47,11 @@ open class NetworkModule {
 
     @Provides
     @Singleton
-    open fun provideOkHttp(prefManager: IPrefManager, @ApplicationContext context: Context): OkHttpClient {
+    open fun provideOkHttp(
+        prefManager: IPrefManager,
+        @ApplicationContext context: Context,
+        noConnectionInterceptor: NoConnectionInterceptor
+    ): OkHttpClient {
 
         val cacheSize = 10 * 1024 * 1024 // 10 MiB
         val cache = Cache(context.cacheDir, cacheSize.toLong())
@@ -56,11 +59,12 @@ open class NetworkModule {
         val okHttpBuilder = OkHttpClient.Builder()
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
-            .connectTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(5, TimeUnit.SECONDS)
+            .addInterceptor(noConnectionInterceptor)
             .addInterceptor { chain: Interceptor.Chain ->
                 var authorizationHeader = "Bearer ${prefManager.get(PUBLIC_KEY_PREF_KEY)}"
 
-                if(prefManager.get(IDENTITY_TOKEN_PREF_KEY).isNullOrEmpty().not()) {
+                if (prefManager.get(IDENTITY_TOKEN_PREF_KEY).isNullOrEmpty().not()) {
                     authorizationHeader += ",${prefManager.get(IDENTITY_TOKEN_PREF_KEY)}"
                 }
 
@@ -72,16 +76,15 @@ open class NetworkModule {
                     .build()
                 val requestBody = chain.request().body
                 if (requestBody != null) {
-                    Log.d(
-                        "NetworkModule",
-                        "intercept: " + chain.request().method + " " + chain.request().url
+                    Timber.d(
+                        "intercept: ${chain.request().method} ${chain.request().url}"
                     )
                     val buffer = Buffer()
                     requestBody.writeTo(buffer)
                     val charset = Charset.forName("UTF-8")
                     val contentType = requestBody.contentType()
                     if (contentType != null) {
-                        Log.d("NetworkModule", "intercept: " + buffer.readString(charset))
+                        Timber.d("intercept: ${buffer.readString(charset)}")
                     }
                 }
                 chain.proceed(newRequest)
@@ -99,7 +102,7 @@ open class NetworkModule {
         okHttpClient: OkHttpClient,
         @PublicBaseUrl publicBaseUrl: String
     ): Retrofit {
-        val moshi : Moshi = Moshi.Builder()
+        val moshi: Moshi = Moshi.Builder()
             .add(JodaJsonAdapter())
             .build()
 
@@ -113,7 +116,7 @@ open class NetworkModule {
     @Provides
     @MLSAPI
     @Singleton
-     fun provideMlsApiRetrofit(
+    fun provideMlsApiRetrofit(
         okHttpClient: OkHttpClient,
         @ApiBaseUrl baseUrl: String
     ): Retrofit {
@@ -126,9 +129,8 @@ open class NetworkModule {
 
     @Provides
     @Singleton
-     fun provideMlsApi(@MLSAPI retrofit: Retrofit): MlsApi {
+    fun provideMlsApi(@MLSAPI retrofit: Retrofit): MlsApi {
         return retrofit.create(MlsApi::class.java)
     }
 }
 
-private const val TAG = "NetworkModule"
