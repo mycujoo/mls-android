@@ -14,7 +14,7 @@ import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import tv.mycujoo.ui.MLSTVFragment
 import javax.inject.Inject
 
-class MLSTV @Inject constructor(
+open class MLSTV @Inject constructor(
     private val dataManager: IDataManager,
     private val prefManager: IPrefManager,
     private val tvVideoPlayer: TvVideoPlayer,

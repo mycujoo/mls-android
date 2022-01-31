@@ -662,13 +662,20 @@ class VideoPlayerMediator @Inject constructor(
      * @see Stream
      */
     private fun play(stream: Stream, playWhenReady: Boolean? = null) {
+
+        val autoPlay = if (playbackLocation == REMOTE) {
+            false
+        } else {
+            playWhenReady ?: videoPlayerConfig.autoPlay
+        }
+
         if (stream.widevine?.fullUrl != null && stream.widevine.licenseUrl != null) {
             player.play(
                 MediaDatum.DRMMediaData(
                     fullUrl = stream.widevine.fullUrl,
                     dvrWindowSize = stream.getDvrWindowSize(),
                     licenseUrl = stream.widevine.licenseUrl,
-                    autoPlay = playWhenReady ?: videoPlayerConfig.autoPlay
+                    autoPlay = autoPlay
                 )
             )
         } else if (stream.fullUrl != null) {
@@ -676,7 +683,7 @@ class VideoPlayerMediator @Inject constructor(
                 MediaDatum.MediaData(
                     fullUrl = stream.fullUrl,
                     dvrWindowSize = stream.getDvrWindowSize(),
-                    autoPlay = playWhenReady ?: videoPlayerConfig.autoPlay
+                    autoPlay = autoPlay
                 )
             )
         }
@@ -923,7 +930,7 @@ class VideoPlayerMediator @Inject constructor(
      */
     private fun loadRemoteMedia(event: EventEntity, playWhenReady: Boolean? = null) {
         Timber.d("loadRemoteMedia: $event")
-        if(event.streamStatus() != PLAYABLE) {
+        if (event.streamStatus() != PLAYABLE) {
             return
         }
 
