@@ -59,7 +59,7 @@ open class NetworkModule {
         val okHttpBuilder = OkHttpClient.Builder()
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
-            .connectTimeout(5, TimeUnit.SECONDS)
+            .connectTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(noConnectionInterceptor)
             .addInterceptor { chain: Interceptor.Chain ->
                 var authorizationHeader = "Bearer ${prefManager.get(PUBLIC_KEY_PREF_KEY)}"
