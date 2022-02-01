@@ -397,6 +397,7 @@ class AnnotationFactory @Inject constructor(
     /**endregion */
 
     override fun clearOverlays() {
+        localActions.clear()
         annotationListener.clearScreen()
     }
 }
