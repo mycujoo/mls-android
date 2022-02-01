@@ -1,7 +1,6 @@
 package tv.mycujoo.mcls.core
 
 import android.app.Activity
-import android.util.Log
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player.*
 import com.google.android.exoplayer2.SeekParameters
@@ -47,7 +46,6 @@ import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.LIVE_ON_THE_EDGE
 import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.VOD
 import tv.mycujoo.mcls.widgets.PlayerControllerMode
 import tv.mycujoo.mcls.widgets.RemotePlayerControllerListener
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 /**
@@ -140,7 +138,7 @@ class VideoPlayerMediator @Inject constructor(
         publicKey = builder.publicKey
 
         player.getDirectInstance()?.let {
-            videoPlayer = VideoPlayer(it, this, MLSPlayerView)
+            videoPlayer = VideoPlayer(it, this, playerView)
 
             builder.mlsConfiguration.seekTolerance.let { accuracy ->
                 if (accuracy > 0) {
@@ -160,7 +158,7 @@ class VideoPlayerMediator @Inject constructor(
             }
             builder.uiEventListener?.let { uiEventCallback ->
                 videoPlayer.setUIEventListener(uiEventCallback)
-                MLSPlayerView.uiEventListener = uiEventCallback
+                playerView.uiEventListener = uiEventCallback
 
             }
 
@@ -175,12 +173,12 @@ class VideoPlayerMediator @Inject constructor(
             }
 
             initPlayerView(
-                MLSPlayerView,
+                playerView,
                 timelineMarkerActionEntities
             )
 
             if (cast != null) {
-                initCaster(cast, player, MLSPlayerView)
+                initCaster(cast, player, playerView)
             }
         }
     }
@@ -189,7 +187,9 @@ class VideoPlayerMediator @Inject constructor(
         MLSPlayerView: MLSPlayerView,
         timelineMarkerActionEntities: List<TimelineMarkerEntity>
     ) {
-        MLSPlayerView.prepare(
+        playerView = MLSPlayerView
+
+        playerView.prepare(
             overlayViewHelper,
             viewHandler,
             timelineMarkerActionEntities
@@ -240,25 +240,25 @@ class VideoPlayerMediator @Inject constructor(
         player.addListener(mainEventListener)
         player.loadLastVideo()
         dataManager.currentEvent?.let {
-            MLSPlayerView.setEventInfo(it.title, it.description, it.getFormattedStartTimeDate())
+            playerView.setEventInfo(it.title, it.description, it.getFormattedStartTimeDate())
             if (it.poster_url != null) {
-                MLSPlayerView.setPosterInfo(it.poster_url)
+                playerView.setPosterInfo(it.poster_url)
             }
         }
 
-        MLSPlayerView.getTimeBar().addListener(object : TimeBar.OnScrubListener {
+        playerView.getTimeBar().addListener(object : TimeBar.OnScrubListener {
             override fun onScrubMove(timeBar: TimeBar, position: Long) {
                 //do nothing
-                MLSPlayerView.scrubbedTo(position)
+                playerView.scrubbedTo(position)
             }
 
             override fun onScrubStart(timeBar: TimeBar, position: Long) {
                 //do nothing
-                MLSPlayerView.scrubStartedAt(position)
+                playerView.scrubStartedAt(position)
             }
 
             override fun onScrubStop(timeBar: TimeBar, position: Long, canceled: Boolean) {
-                MLSPlayerView.scrubStopAt(position)
+                playerView.scrubStopAt(position)
                 timelineMarkerActionEntities.firstOrNull { position in it.offset - 10000L..it.offset + 10000L }
                     ?.let {
                         player.seekTo(it.offset)
@@ -267,7 +267,7 @@ class VideoPlayerMediator @Inject constructor(
             }
         })
 
-        MLSPlayerView.config(videoPlayerConfig)
+        playerView.config(videoPlayerConfig)
     }
 
     private fun initCaster(
@@ -276,6 +276,7 @@ class VideoPlayerMediator @Inject constructor(
         MLSPlayerView: MLSPlayerView
     ) {
         this.cast = cast
+        this.playerView = MLSPlayerView
         fun addRemotePlayerControllerListener() {
             playerView.getRemotePlayerControllerView().listener =
                 object : RemotePlayerControllerListener {
@@ -311,6 +312,8 @@ class VideoPlayerMediator @Inject constructor(
             fun onApplicationDisconnected(casterSession: ICasterSession?) {
                 updatePlaybackLocation(LOCAL)
                 switchControllerMode(LOCAL)
+                player.setIsCasting(false)
+                playerView.setIsCasting(false)
                 startYoubora()
                 casterSession?.getRemoteMediaClient()?.let { remoteMediaClient ->
                     player.seekTo(remoteMediaClient.approximateStreamPosition())
@@ -326,6 +329,8 @@ class VideoPlayerMediator @Inject constructor(
                 if (casterSession == null) {
                     return
                 }
+                player.setIsCasting(true)
+                playerView.setIsCasting(true)
                 updateRemotePlayerWithLocalPlayerData()
                 updatePlaybackLocation(REMOTE)
                 switchControllerMode(REMOTE)
@@ -343,6 +348,8 @@ class VideoPlayerMediator @Inject constructor(
                 if (casterSession == null) {
                     return
                 }
+                player.setIsCasting(true)
+                playerView.setIsCasting(true)
                 stopYoubora()
                 updatePlaybackLocation(REMOTE)
                 switchControllerMode(REMOTE)
@@ -366,7 +373,6 @@ class VideoPlayerMediator @Inject constructor(
                 }
 
                 override fun onSessionStartFailed(session: ICasterSession?) {
-                    Timber.d("onSessionStartFailed $session")
                     onApplicationDisconnected(session)
                 }
 
@@ -379,12 +385,10 @@ class VideoPlayerMediator @Inject constructor(
                 }
 
                 override fun onSessionEnding(session: ICasterSession?) {
-                    Timber.d("onSessionEnding $session")
                     onApplicationDisconnected(session)
                 }
 
                 override fun onSessionEnded(session: ICasterSession?) {
-                    Timber.d("onSessionEnded $session")
                     onApplicationDisconnected(session)
                 }
 
@@ -403,7 +407,7 @@ class VideoPlayerMediator @Inject constructor(
                 }
             }
 
-            it.initialize(MLSPlayerView.context, castListener)
+            it.initialize(playerView.context, castListener)
         }
     }
 
@@ -427,7 +431,9 @@ class VideoPlayerMediator @Inject constructor(
         }
     }
 
-    fun attachPlayer(playerView: MLSPlayerView) {
+    fun attachPlayer(mlsPlayerView: MLSPlayerView) {
+        playerView = mlsPlayerView
+
         playerView.playerView.player = player.getDirectInstance()
         playerView.playerView.hideController()
 
@@ -640,18 +646,27 @@ class VideoPlayerMediator @Inject constructor(
                 player.pause()
                 playerView.showCustomInformationDialog(playerView.resources.getString(R.string.message_geoblocked_stream))
                 playerView.updateControllerVisibility(isPlaying = false)
+                if (playbackLocation == REMOTE) {
+                    cast?.release()
+                }
             }
             NO_ENTITLEMENT -> {
                 streaming = false
                 player.pause()
                 playerView.showCustomInformationDialog(playerView.resources.getString(R.string.message_no_entitlement_stream))
                 playerView.updateControllerVisibility(isPlaying = false)
+                if (playbackLocation == REMOTE) {
+                    cast?.release()
+                }
             }
             UNKNOWN_ERROR -> {
                 streaming = false
                 player.pause()
                 playerView.showPreEventInformationDialog()
                 playerView.updateControllerVisibility(isPlaying = false)
+                if (playbackLocation == REMOTE) {
+                    cast?.release()
+                }
             }
         }
     }
@@ -662,20 +677,13 @@ class VideoPlayerMediator @Inject constructor(
      * @see Stream
      */
     private fun play(stream: Stream, playWhenReady: Boolean? = null) {
-
-        val autoPlay = if (playbackLocation == REMOTE) {
-            false
-        } else {
-            playWhenReady ?: videoPlayerConfig.autoPlay
-        }
-
         if (stream.widevine?.fullUrl != null && stream.widevine.licenseUrl != null) {
             player.play(
                 MediaDatum.DRMMediaData(
                     fullUrl = stream.widevine.fullUrl,
                     dvrWindowSize = stream.getDvrWindowSize(),
                     licenseUrl = stream.widevine.licenseUrl,
-                    autoPlay = autoPlay
+                    autoPlay = playWhenReady ?: videoPlayerConfig.autoPlay
                 )
             )
         } else if (stream.fullUrl != null) {
@@ -683,7 +691,7 @@ class VideoPlayerMediator @Inject constructor(
                 MediaDatum.MediaData(
                     fullUrl = stream.fullUrl,
                     dvrWindowSize = stream.getDvrWindowSize(),
-                    autoPlay = autoPlay
+                    autoPlay = playWhenReady ?: videoPlayerConfig.autoPlay
                 )
             )
         }
@@ -895,7 +903,6 @@ class VideoPlayerMediator @Inject constructor(
         cancelPulling()
         player.release()
         reactorSocket.leave(true)
-        cast?.release()
         stopYoubora()
     }
 

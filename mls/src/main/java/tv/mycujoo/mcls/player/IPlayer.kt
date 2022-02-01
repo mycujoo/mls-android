@@ -32,6 +32,8 @@ interface IPlayer {
     fun play(drmMediaData: MediaDatum.DRMMediaData)
     fun play(mediaData: MediaDatum.MediaData)
 
+    fun setIsCasting(isCasting: Boolean)
+
     fun play()
     fun pause()
 
