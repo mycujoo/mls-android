@@ -46,6 +46,7 @@ import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.LIVE_ON_THE_EDGE
 import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.VOD
 import tv.mycujoo.mcls.widgets.PlayerControllerMode
 import tv.mycujoo.mcls.widgets.RemotePlayerControllerListener
+import java.lang.RuntimeException
 import javax.inject.Inject
 
 /**
@@ -407,7 +408,11 @@ class VideoPlayerMediator @Inject constructor(
                 }
             }
 
-            it.initialize(playerView.context, castListener)
+            try {
+                it.initialize(playerView.context, castListener)
+            } catch (castInitializationException: RuntimeException) {
+                logger.log(MessageLevel.ERROR, castInitializationException.message)
+            }
         }
     }
 
