@@ -22,8 +22,8 @@ jobs:
       - name: Init Local Properties for Gradle Config
         run: touch local.properties
 
-#      - name: Accept Android SDK Licences
-#      - run: ~/Library/Android/sdk/tools/bin/sdkmanager –licenses
+      - name: Accept Android SDK Licences
+      - run: yes | sdkmanager –licenses
 
       - name: Run JUnit tests
         run: bundle exec fastlane tests
