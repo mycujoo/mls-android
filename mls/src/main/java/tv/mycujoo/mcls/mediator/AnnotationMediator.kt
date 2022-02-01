@@ -21,7 +21,9 @@ import tv.mycujoo.mcls.utils.ThreadUtils
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class AnnotationMediator @Inject constructor(
     private val annotationFactory: IAnnotationFactory,
     private val dataManager: IDataManager,

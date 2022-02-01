@@ -120,24 +120,4 @@ open class AppModule {
     fun provideAssetManager(@ApplicationContext context: Context): AssetManager {
         return context.assets
     }
-
-    @Singleton
-    @Provides
-    fun provideAnnotationMediator(
-        annotationFactory: IAnnotationFactory,
-        dataManager: IDataManager,
-        dispatcher: CoroutineScope,
-        logger: Logger,
-        player: IPlayer,
-        threadUtils: ThreadUtils
-    ): AnnotationMediator {
-        return AnnotationMediator(
-            annotationFactory,
-            dataManager,
-            dispatcher,
-            logger,
-            player,
-            threadUtils
-        )
-    }
 }
