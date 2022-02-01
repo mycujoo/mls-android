@@ -16,11 +16,13 @@ import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.widgets.ProportionalImageView
 import tv.mycujoo.mcls.widgets.ScaffoldView
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Helps with View related operations. i.e. Add/Remove overlay view to/from screen.
  *
  */
+@Singleton
 class OverlayViewHelper @Inject constructor(
     private val viewHandler: IViewHandler,
     private val overlayFactory: IOverlayFactory,
