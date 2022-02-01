@@ -3,7 +3,8 @@ name: Android Lib Test
 on:
   push:
     branches:
-      - 'trunk'
+#      - 'trunk'
+       - 'null'
 
 jobs:
   deploy:
@@ -21,6 +22,9 @@ jobs:
 
       - name: Init Local Properties for Gradle Config
         run: touch local.properties
+
+      - name: Accept Android SDK Licences
+        run: yes | ~/Library/Android/sdk/tools/bin/sdkmanager –licenses
 
       - name: Run JUnit tests
         run: bundle exec fastlane tests

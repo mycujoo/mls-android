@@ -15,8 +15,6 @@ class MLSTestBuilder @Inject constructor(
             throw IllegalArgumentException(C.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
 
-        initYouboraPlugin()
-
         mls.initializeComponent(this)
 
         return mls

@@ -13,6 +13,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import tv.mycujoo.mcls.utils.ThreadUtils
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -29,9 +30,6 @@ class PlayerTest {
     lateinit var mediaFactory: MediaFactory
 
     @Mock
-    lateinit var handler: Handler
-
-    @Mock
     lateinit var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener
 
     @Mock
@@ -40,12 +38,14 @@ class PlayerTest {
     @Mock
     lateinit var hlsMediaSource: HlsMediaSource
 
+    @Mock
+    lateinit var threadUtils: ThreadUtils
 
     @Before
     fun setUp() {
         MockitoAnnotations.openMocks(this)
 
-        player = Player(mediaFactory, exoPlayer, mediaOnLoadCompletedListener, handler)
+        player = Player(mediaFactory, exoPlayer, mediaOnLoadCompletedListener, threadUtils)
     }
 
     private fun initPlayer() {

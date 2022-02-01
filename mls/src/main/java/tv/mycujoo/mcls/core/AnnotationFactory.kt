@@ -10,29 +10,32 @@ import tv.mycujoo.mcls.manager.TimerEntity
 import tv.mycujoo.mcls.manager.TimerVariable
 import tv.mycujoo.mcls.utils.TimeUtils
 import tv.mycujoo.mcls.api.PlayerViewContract
+import tv.mycujoo.mcls.player.IPlayer
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
 
 class AnnotationFactory @Inject constructor(
     private val annotationListener: IAnnotationListener,
-    private val variableKeeper: IVariableKeeper
+    private val variableKeeper: IVariableKeeper,
+    private val player: IPlayer
 ) : IAnnotationFactory {
 
     /**region Fields*/
     private var sortedActions =
-        CopyOnWriteArrayList<Action>()// actions, sorted by offset, then by priority
+        CopyOnWriteArrayList<Action>() // actions, sorted by offset, then by priority
     private var adjustedActions =
-        CopyOnWriteArrayList<Action>()// sortedActionList + adjusted offset time
+        CopyOnWriteArrayList<Action>() // sortedActionList + adjusted offset time
     private var timeSystem = TimeSystem.RELATIVE
 
     private var onScreenOverlayIds =
-        CopyOnWriteArrayList<String>()// on-screen overlay actions cid
+        CopyOnWriteArrayList<String>() // on-screen overlay actions cid
 
     private var localActions =
         CopyOnWriteArrayList<Action>() // local Actions which will be merged with server defined actions
 
     private var allActions =
         CopyOnWriteArrayList<Action>() // union of Sorted actions + Local actions
+
     /**endregion */
 
     override fun attachPlayerView(playerView: PlayerViewContract) {
@@ -59,7 +62,7 @@ class AnnotationFactory @Inject constructor(
         localActions.addAll(annotations)
     }
 
-    override fun build(buildPoint: BuildPoint) {
+    override fun build() {
         allActions.apply {
             clear()
             addAll(localActions)
@@ -67,7 +70,7 @@ class AnnotationFactory @Inject constructor(
         }
 
         val currentTimeInInDvrWindowDuration = TimeRangeHelper.isCurrentTimeInDvrWindowDuration(
-            buildPoint.player.duration(),
+            player.duration(),
 //            buildPoint.player.dvrWindowSize()
             Long.MAX_VALUE // todo! This should be filled from Stream's dvr-window size value
         )
@@ -76,7 +79,6 @@ class AnnotationFactory @Inject constructor(
             timeSystem = TimeSystem.RELATIVE
             adjustedActions.clear()
             process(
-                buildPoint,
                 currentTimeInInDvrWindowDuration,
                 allActions
             )
@@ -87,13 +89,12 @@ class AnnotationFactory @Inject constructor(
 
             allActions.forEach { action ->
                 val newOffset = TimeUtils.calculateOffset(
-                    buildPoint.player.dvrWindowStartTime(),
+                    player.dvrWindowStartTime(),
                     action.absoluteTime
                 )
                 adjustedActions.add(action.updateOffset(newOffset))
             }
             process(
-                buildPoint,
                 currentTimeInInDvrWindowDuration,
                 adjustedActions
             )
@@ -114,7 +115,6 @@ class AnnotationFactory @Inject constructor(
 
     /**region Processing actions*/
     private fun process(
-        buildPoint: BuildPoint,
         isInDvrWindow: Boolean,
         list: List<Action>
     ) {
@@ -127,8 +127,7 @@ class AnnotationFactory @Inject constructor(
         val timelineMarkers = ArrayList<TimelineMarkerEntity>()
 
         list.forEach { action ->
-            val isInGap =
-                buildPoint.player.isWithinValidSegment(action.absoluteTime)?.not() ?: false
+            val isInGap = player.isWithinValidSegment(action.absoluteTime)?.not() ?: false
             when (action) {
                 is Action.ShowOverlayAction -> {
                     if (isInDvrWindow.not() && isInGap) {
@@ -137,12 +136,12 @@ class AnnotationFactory @Inject constructor(
                     addShowOverlayActionIfEligible(action, showOverlayList)
                 }
                 is Action.HideOverlayAction -> {
-                    if (action.isTillNowOrInRange(buildPoint.currentRelativePosition)) {
+                    if (action.isTillNowOrInRange(player.currentPosition())) {
                         hideOverlayList.add(action)
                     }
                 }
                 is Action.ReshowOverlayAction -> {
-                    if (action.isTillNowOrInRange(buildPoint.currentRelativePosition)) {
+                    if (action.isTillNowOrInRange(player.currentPosition())) {
                         list.firstOrNull { it is Action.ShowOverlayAction && it.customId == action.customId }
                             ?.let { relatedShowAction ->
                                 val updatedAction =
@@ -152,38 +151,38 @@ class AnnotationFactory @Inject constructor(
                     }
                 }
                 is Action.CreateTimerAction -> {
-                    if (action.isTillNowOrInRange(buildPoint.currentRelativePosition)) {
+                    if (action.isTillNowOrInRange(player.currentPosition())) {
                         createTimer(action, timerVariables)
                     }
                 }
                 is Action.StartTimerAction -> {
-                    if (action.isTillNowOrInRange(buildPoint.currentRelativePosition)) {
-                        startTimer(action, timerVariables, buildPoint)
+                    if (action.isTillNowOrInRange(player.currentPosition())) {
+                        startTimer(action, timerVariables)
                     }
                 }
                 is Action.PauseTimerAction -> {
-                    if (action.isTillNowOrInRange(buildPoint.currentRelativePosition)) {
-                        pauseTimer(action, timerVariables, buildPoint)
+                    if (action.isTillNowOrInRange(player.currentPosition())) {
+                        pauseTimer(action, timerVariables)
                     }
                 }
                 is Action.AdjustTimerAction -> {
-                    if (action.isTillNowOrInRange(buildPoint.currentRelativePosition)) {
-                        adjustTimer(action, timerVariables, buildPoint)
+                    if (action.isTillNowOrInRange(player.currentPosition())) {
+                        adjustTimer(action, timerVariables)
                     }
                 }
                 is Action.SkipTimerAction -> {
-                    if (action.isTillNowOrInRange(buildPoint.currentRelativePosition)) {
-                        skipTimer(action, timerVariables, buildPoint)
+                    if (action.isTillNowOrInRange(player.currentPosition())) {
+                        skipTimer(action, timerVariables)
                     }
                 }
                 is Action.CreateVariableAction -> {
-                    if (action.isTillNowOrInRange(buildPoint.currentRelativePosition)) {
-                        createVariable(action, buildPoint, varVariables)
+                    if (action.isTillNowOrInRange(player.currentPosition())) {
+                        createVariable(action, varVariables)
                     }
                 }
                 is Action.IncrementVariableAction -> {
-                    if (action.isTillNowOrInRange(buildPoint.currentRelativePosition)) {
-                        incrementVariable(action, buildPoint, varVariables)
+                    if (action.isTillNowOrInRange(player.currentPosition())) {
+                        incrementVariable(action, varVariables)
                     }
                 }
                 is Action.MarkTimelineAction -> {
@@ -207,7 +206,7 @@ class AnnotationFactory @Inject constructor(
         }
 
         val act = ActionActor().act(
-            buildPoint.currentRelativePosition, showOverlayList, hideOverlayList
+            player.currentPosition(), showOverlayList, hideOverlayList
         )
         act.forEach { pair ->
             when (pair.second) {
@@ -241,8 +240,8 @@ class AnnotationFactory @Inject constructor(
                             }
                             annotationListener.addOrUpdateLingeringIntroOverlay(
                                 showOverlayAction,
-                                buildPoint.currentRelativePosition - showOverlayAction.introTransitionSpec!!.offset,
-                                buildPoint.isPlaying
+                                player.currentPosition() - showOverlayAction.introTransitionSpec!!.offset,
+                                player.isPlaying()
                             )
 
                         }
@@ -335,23 +334,21 @@ class AnnotationFactory @Inject constructor(
     private fun startTimer(
         action: Action.StartTimerAction,
         timerVariables: HashMap<String, TimerVariable>,
-        buildPoint: BuildPoint
     ) {
         timerVariables[action.name]?.start(
             TimerEntity.StartTimer(action.name, action.offset),
-            buildPoint.currentRelativePosition
+            player.currentPosition()
         )
 
     }
 
     private fun pauseTimer(
         action: Action.PauseTimerAction,
-        timerVariables: HashMap<String, TimerVariable>,
-        buildPoint: BuildPoint
+        timerVariables: HashMap<String, TimerVariable>
     ) {
         timerVariables[action.name]?.pause(
             TimerEntity.PauseTimer(action.name, action.offset),
-            buildPoint.currentRelativePosition
+            player.currentPosition()
         )
 
     }
@@ -359,32 +356,29 @@ class AnnotationFactory @Inject constructor(
     private fun adjustTimer(
         action: Action.AdjustTimerAction,
         timerVariables: HashMap<String, TimerVariable>,
-        buildPoint: BuildPoint
     ) {
         timerVariables[action.name]?.adjust(
             TimerEntity.AdjustTimer(action.name, action.offset, action.value),
-            buildPoint.currentRelativePosition
+            player.currentPosition()
         )
 
     }
 
     private fun skipTimer(
         action: Action.SkipTimerAction,
-        timerVariables: HashMap<String, TimerVariable>,
-        buildPoint: BuildPoint
+        timerVariables: HashMap<String, TimerVariable>
     ) {
         timerVariables[action.name]?.skip(
             TimerEntity.SkipTimer(action.name, action.offset, action.value),
-            buildPoint.currentRelativePosition
+            player.currentPosition()
         )
     }
 
     private fun createVariable(
         action: Action.CreateVariableAction,
-        buildPoint: BuildPoint,
         varVariables: HashMap<String, VariableEntity>
     ) {
-        if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS > action.offset) {
+        if (player.currentPosition() + ONE_SECOND_IN_MS > action.offset) {
             variableKeeper.createVariablePublisher(action.variable.name)
             varVariables[action.variable.name] =
                 VariableEntity(action.id, action.offset, action.variable.copy())
@@ -393,12 +387,16 @@ class AnnotationFactory @Inject constructor(
 
     private fun incrementVariable(
         action: Action.IncrementVariableAction,
-        buildPoint: BuildPoint,
         varVariables: HashMap<String, VariableEntity>
     ) {
-        if (buildPoint.currentRelativePosition + ONE_SECOND_IN_MS > action.offset) {
+        if (player.currentPosition() + ONE_SECOND_IN_MS > action.offset) {
             varVariables[action.name]?.variable?.increment(action.amount)
         }
     }
+
     /**endregion */
+
+    override fun clearOverlays() {
+        annotationListener.clearScreen()
+    }
 }

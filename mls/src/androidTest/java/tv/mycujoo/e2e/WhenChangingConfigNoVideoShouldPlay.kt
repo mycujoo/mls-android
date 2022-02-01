@@ -60,7 +60,7 @@ class WhenChangingConfigNoVideoShouldPlay : E2ETest() {
                 id = "ckw25ntnkxlam0hbqnfhx3gk0",
                 dvrWindowString = "",
                 fullUrl = "https://vod-eu.mycujoo.tv/hls/ckw25mmlaxl8i0hbqp6wr5pft/master.m3u8",
-                widevine = null,
+                drm = null,
                 errorCodeAndMessage = null
             )
         ),
@@ -208,7 +208,7 @@ class WhenChangingConfigNoVideoShouldPlay : E2ETest() {
                         StreamSourceData(
                             id = "1",
                             dvrWindowString = "",
-                            widevine = null,
+                            drm = null,
                             fullUrl = "1",
                             errorCodeAndMessage = ErrorCodeAndMessageSourceData(
                                 code = ServerConstants.ERROR_CODE_NO_ENTITLEMENT,

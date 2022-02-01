@@ -1,16 +1,15 @@
 package tv.mycujoo.mcls.mediator
 
-import android.os.Handler
+import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.Player.DISCONTINUITY_REASON_SEEK
-import com.google.android.exoplayer2.Player.STATE_READY
+import com.google.android.exoplayer2.Player.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.Result
-import tv.mycujoo.mcls.core.BuildPoint
+import tv.mycujoo.mcls.api.PlayerViewContract
 import tv.mycujoo.mcls.core.IAnnotationFactory
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
@@ -18,31 +17,31 @@ import tv.mycujoo.mcls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.player.IPlayer
+import tv.mycujoo.mcls.utils.ThreadUtils
 import tv.mycujoo.mcls.widgets.MLSPlayerView
-import tv.mycujoo.mcls.api.PlayerViewContract
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import javax.inject.Singleton
 
-
+@Singleton
 class AnnotationMediator @Inject constructor(
     private val annotationFactory: IAnnotationFactory,
     private val dataManager: IDataManager,
     private val dispatcher: CoroutineScope,
     private val logger: Logger,
     private val player: IPlayer,
-    var handler: Handler,
-    var scheduler: ScheduledExecutorService
+    private val threadUtils: ThreadUtils,
 ) : IAnnotationMediator {
 
+    private var scheduler = threadUtils.getScheduledExecutorService()
+    private val handler = threadUtils.provideHandler()
 
     private lateinit var playerViewContract: PlayerViewContract
 
     /**region Fields*/
     private val scheduledRunnable: Runnable
 
-    private lateinit var eventListener: Player.Listener
+    private lateinit var eventListener: Listener
     private var hasPendingSeek: Boolean = false
     /**endregion */
 
@@ -55,14 +54,7 @@ class AnnotationMediator @Inject constructor(
             if (player.isPlaying()) {
                 val currentPosition = player.currentPosition()
                 annotationFactory.attachPlayerView(playerViewContract)
-                annotationFactory.build(
-                    BuildPoint(
-                        currentPosition,
-                        player.currentAbsoluteTime(),
-                        player,
-                        player.isPlaying()
-                    )
-                )
+                annotationFactory.build()
 
                 val playerView = playerViewContract
                 if (playerView is MLSPlayerView) {
@@ -75,12 +67,7 @@ class AnnotationMediator @Inject constructor(
             handler.post(exoRunnable)
         }
 
-        scheduler.scheduleAtFixedRate(
-            scheduledRunnable,
-            ONE_SECOND_IN_MS,
-            ONE_SECOND_IN_MS,
-            TimeUnit.MILLISECONDS
-        )
+        initTicker()
     }
 
     override fun fetchActions(
@@ -114,11 +101,11 @@ class AnnotationMediator @Inject constructor(
     }
 
     private fun initEventListener(player: IPlayer) {
-        eventListener = object : Player.Listener {
+        eventListener = object : Listener {
 
             override fun onPositionDiscontinuity(
-                oldPosition: Player.PositionInfo,
-                newPosition: Player.PositionInfo,
+                oldPosition: PositionInfo,
+                newPosition: PositionInfo,
                 reason: Int
             ) {
                 super.onPositionDiscontinuity(oldPosition, newPosition, reason)
@@ -152,14 +139,7 @@ class AnnotationMediator @Inject constructor(
                 if (playbackState == STATE_READY && hasPendingSeek) {
                     hasPendingSeek = false
 
-                    annotationFactory.build(
-                        BuildPoint(
-                            player.currentPosition(),
-                            player.currentAbsoluteTime(),
-                            player,
-                            player.isPlaying()
-                        )
-                    )
+                    annotationFactory.build()
                 }
             }
 
@@ -176,14 +156,15 @@ class AnnotationMediator @Inject constructor(
                 if (playbackState == STATE_READY && hasPendingSeek) {
                     hasPendingSeek = false
 
-                    annotationFactory.build(
-                        BuildPoint(
-                            player.currentPosition(),
-                            player.currentAbsoluteTime(),
-                            player,
-                            player.isPlaying()
-                        )
-                    )
+                    annotationFactory.build()
+                }
+            }
+
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                super.onMediaItemTransition(mediaItem, reason)
+                if (reason == MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED && mediaItem != null) {
+                    annotationFactory.setActions(emptyList())
+                    annotationFactory.build()
                 }
             }
         }
@@ -191,13 +172,27 @@ class AnnotationMediator @Inject constructor(
     }
 
     override fun initPlayerView(playerView: PlayerViewContract) {
-        scheduler = Executors.newScheduledThreadPool(1)
+        initTicker()
         this.playerViewContract = playerView
 
         val contract = playerViewContract
         if (contract is MLSPlayerView) {
             contract.setOnSizeChangedCallback(onSizeChangedCallback)
         }
+    }
+
+    private fun initTicker() {
+        if (scheduler.isShutdown.not()) {
+            scheduler.shutdown()
+        }
+        scheduler = threadUtils.getScheduledExecutorService()
+
+        scheduler.scheduleAtFixedRate(
+            scheduledRunnable,
+            ONE_SECOND_IN_MS,
+            ONE_SECOND_IN_MS,
+            TimeUnit.MILLISECONDS
+        )
     }
     /**endregion */
 
@@ -212,14 +207,7 @@ class AnnotationMediator @Inject constructor(
 
     override var onSizeChangedCallback = {
         annotationFactory.attachPlayerView(playerViewContract)
-        annotationFactory.build(
-            BuildPoint(
-                player.currentPosition(),
-                player.currentAbsoluteTime(),
-                player,
-                player.isPlaying()
-            )
-        )
+        annotationFactory.build()
     }
 
     /**endregion */

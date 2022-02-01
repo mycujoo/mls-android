@@ -8,17 +8,17 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ui.AdViewProvider
 import com.google.android.exoplayer2.util.Util
 import dagger.hilt.android.qualifiers.ApplicationContext
+import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
 import tv.mycujoo.mcls.core.VideoPlayerMediator
 import tv.mycujoo.mcls.data.IDataManager
-import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.C.Companion.IDENTITY_TOKEN_PREF_KEY
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
 import tv.mycujoo.mcls.helper.SVGAssetResolver
-import tv.mycujoo.mcls.helper.TypeFaceFactory
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.mediator.AnnotationMediator
 import tv.mycujoo.mcls.player.IPlayer
+import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import javax.inject.Inject
 
@@ -37,7 +37,13 @@ class MLS @Inject constructor(
     private val annotationMediator: AnnotationMediator,
     private val player: IPlayer,
     private val assetManager: AssetManager,
+    private val userPreferencesUtils: UserPreferencesUtils,
+    svgAssetResolver: SVGAssetResolver
 ) : MLSAbstract() {
+
+    init {
+        SVG.registerExternalFileResolver(svgAssetResolver)
+    }
 
     /**region Fields*/
     private lateinit var playerView: MLSPlayerView
@@ -58,7 +64,13 @@ class MLS @Inject constructor(
         persistPublicKey(builder.publicKey)
         persistIdentityToken(builder.identityToken)
 
-        initSvgRenderingLibrary(assetManager)
+        builder.pseudoUserId?.let {
+            userPreferencesUtils.setPseudoUserId(it)
+        }
+
+        builder.userId?.let {
+            userPreferencesUtils.setUserId(it)
+        }
 
         player.apply {
             create(
@@ -80,16 +92,33 @@ class MLS @Inject constructor(
     }
 
     /**
+     * Changes User Id Globally
+     */
+    fun setUserId(userId: String) {
+        userPreferencesUtils.setUserId(userId)
+    }
+
+    /**
+     * Delete User Id Globally
+     */
+    fun removeUserId() {
+        userPreferencesUtils.removeUserId()
+    }
+
+    /**
+     * Changes Pseudo User Id Globally
+     */
+    fun setCustomPseudoUserId(pseudoUserId: String) {
+        userPreferencesUtils.setPseudoUserId(pseudoUserId)
+    }
+
+    /**
      * Init SVGRendering library by providing AssetManager
      * Custom font is used by registering an external fire resolver. Font are used in rendering SVG into view.
      * @param assetManager type of AssetManager that will be used to read fonts
      * @see SVGAssetResolver
      */
-    private fun initSvgRenderingLibrary(assetManager: AssetManager) {
-        SVG.registerExternalFileResolver(
-            SVGAssetResolver(TypeFaceFactory(assetManager))
-        )
-    }
+
 
     /**
      * Clears playback que without releasing Exoplayer, which makes reinitilizing the player faster
@@ -130,7 +159,6 @@ class MLS @Inject constructor(
             }
 
             annotationMediator.initPlayerView(playerView)
-            videoPlayerMediator.setAnnotationMediator(annotationMediator)
             return
         }
         mediatorInitialized = true
@@ -145,7 +173,18 @@ class MLS @Inject constructor(
         )
 
         annotationMediator.initPlayerView(playerView)
-        videoPlayerMediator.setAnnotationMediator(annotationMediator)
+    }
+
+    fun setVideoAnalyticsCustomData(
+        videoAnalyticsCustomData: VideoAnalyticsCustomData,
+    ) {
+        builder.activity?.let {
+            videoPlayerMediator.setVideoAnalyticsCustomData(
+                it,
+                builder.getAnalyticsAccountCode(),
+                videoAnalyticsCustomData
+            )
+        }
     }
 
     /**endregion */
@@ -191,6 +230,7 @@ class MLS @Inject constructor(
      * Must be called on the onStop of host component.
      */
     override fun onStop() {
+        SVG.deregisterExternalFileResolver()
         if (Util.SDK_INT >= Build.VERSION_CODES.N) {
             release()
         }

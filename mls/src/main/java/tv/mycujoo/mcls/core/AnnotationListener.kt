@@ -23,7 +23,6 @@ class AnnotationListener @Inject constructor(
     override fun addOverlay(showOverlayAction: Action.ShowOverlayAction) {
         downloaderClient.download(showOverlayAction) { downloadedShowOverlayAction ->
             overlayViewHelper.addView(
-                mMLSPlayerView.context(),
                 mMLSPlayerView.overlayHost(),
                 downloadedShowOverlayAction
             )
@@ -87,5 +86,9 @@ class AnnotationListener @Inject constructor(
         if (playerContract is MLSPlayerView) {
             playerContract.clearScreen(idList)
         }
+    }
+
+    override fun clearScreen() {
+        overlayViewHelper.clearScreen()
     }
 }

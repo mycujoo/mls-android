@@ -3,6 +3,7 @@ package tv.mycujoo.mcls.api
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.STATE_READY
+import timber.log.Timber
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.mcls.core.PlayerEventsListener
@@ -80,9 +81,11 @@ class VideoPlayer(
     }
 
     override fun seekTo(position: Int) {
+        Timber.d("Seeking to $position, Current Track ${exoPlayer.currentMediaItem}")
         optimisticSeekingPosition = position
 
         exoPlayer.seekTo(position * ONE_SECOND_IN_MS)
+        exoPlayer.play()
     }
 
     override fun currentTime(): Int {

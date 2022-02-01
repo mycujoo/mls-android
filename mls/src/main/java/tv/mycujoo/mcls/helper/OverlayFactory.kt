@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import android.view.View
 import com.caverock.androidsvg.SVG
+import dagger.hilt.android.qualifiers.ApplicationContext
+import timber.log.Timber
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.mcls.manager.IVariableKeeper
 import tv.mycujoo.mcls.manager.VariableTranslator
@@ -15,19 +17,21 @@ import javax.inject.Inject
  *
  *
  * @param context context to create View from
- * @param showOverlayAction Action which provides data of to be created view
  * @param variableKeeper provides observables to for variables defined/used in Overlay
  */
-class OverlayFactory @Inject constructor() : IOverlayFactory {
+class OverlayFactory @Inject constructor(
+    @ApplicationContext val context: Context,
+    val variableKeeper: IVariableKeeper
+) : IOverlayFactory {
 
+    /**
+     * @param showOverlayAction Action which provides data of to be created view
+     */
     override fun createScaffoldView(
-        context: Context,
         showOverlayAction: Action.ShowOverlayAction,
-        variableTranslator: VariableTranslator,
-        variableKeeper: IVariableKeeper
     ): ScaffoldView {
 
-        val size = showOverlayAction.viewSpec!!.size!!
+        val size = showOverlayAction.viewSpec?.size ?: Pair(-1f, -1f)
         val scaffoldView = ScaffoldView(size.first, size.second, context)
         scaffoldView.id = View.generateViewId()
         scaffoldView.tag = showOverlayAction.customId

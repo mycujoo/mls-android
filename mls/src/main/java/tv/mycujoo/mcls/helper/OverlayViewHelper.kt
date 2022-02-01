@@ -1,7 +1,5 @@
 package tv.mycujoo.mcls.helper
 
-import android.animation.ObjectAnimator
-import android.content.Context
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
@@ -14,9 +12,6 @@ import tv.mycujoo.mcls.helper.AnimationClassifierHelper.Companion.hasDynamicIntr
 import tv.mycujoo.mcls.helper.AnimationClassifierHelper.Companion.hasDynamicOutroAnimation
 import tv.mycujoo.mcls.helper.AnimationClassifierHelper.Companion.hasStaticIntroAnimation
 import tv.mycujoo.mcls.helper.AnimationClassifierHelper.Companion.hasStaticOutroAnimation
-import tv.mycujoo.mcls.manager.IVariableKeeper
-import tv.mycujoo.mcls.manager.VariableKeeper
-import tv.mycujoo.mcls.manager.VariableTranslator
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.widgets.ProportionalImageView
 import tv.mycujoo.mcls.widgets.ScaffoldView
@@ -29,9 +24,7 @@ import javax.inject.Inject
 class OverlayViewHelper @Inject constructor(
     private val viewHandler: IViewHandler,
     private val overlayFactory: IOverlayFactory,
-    private val animationFactory: AnimationFactory,
-    private val variableTranslator: VariableTranslator,
-    private val variableKeeper: IVariableKeeper
+    private val animationFactory: AnimationFactory
 ) {
 
     /**region Add view*/
@@ -39,24 +32,20 @@ class OverlayViewHelper @Inject constructor(
      * Add overlay view to host view with specified animation. If there is a specified animation, it will be add with amimation,
      * otherwise no animation will be created.
      * This is the only method that should be used for 'Adding' overlay. All other methods are private and considered internal service.
-     * @param context to create view with
      * @param overlayHost to host to overlay view
      * @param showOverlayAction data needed for type of animation and overlay
      */
     fun addView(
-        context: Context,
         overlayHost: ConstraintLayout,
         showOverlayAction: Action.ShowOverlayAction
     ) {
         if (showOverlayAction.introTransitionSpec?.animationType == AnimationType.NONE) {
             addViewWithNoAnimation(
-                context,
                 overlayHost,
                 showOverlayAction
             )
         } else {
             addViewWithAnimation(
-                context,
                 overlayHost,
                 showOverlayAction
             )
@@ -66,20 +55,13 @@ class OverlayViewHelper @Inject constructor(
 
     /**region Add view with animation*/
     private fun addViewWithAnimation(
-        context: Context,
         overlayHost: ConstraintLayout,
         showOverlayAction: Action.ShowOverlayAction
     ) {
         viewHandler.incrementIdlingResource()
 
         overlayHost.post {
-            val scaffoldView =
-                overlayFactory.createScaffoldView(
-                    context,
-                    showOverlayAction,
-                    variableTranslator,
-                    variableKeeper
-                )
+            val scaffoldView = overlayFactory.createScaffoldView(showOverlayAction)
 
             val positionGuide = showOverlayAction.viewSpec?.positionGuide ?: PositionGuide(
                 left = 0f,
@@ -201,19 +183,12 @@ class OverlayViewHelper @Inject constructor(
 
     /**region Add view with NO animation*/
     private fun addViewWithNoAnimation(
-        context: Context,
         overlayHost: ConstraintLayout,
         showOverlayAction: Action.ShowOverlayAction
     ) {
         viewHandler.incrementIdlingResource()
 
-        val scaffoldView =
-            overlayFactory.createScaffoldView(
-                context,
-                showOverlayAction,
-                variableTranslator,
-                variableKeeper
-            )
+        val scaffoldView = overlayFactory.createScaffoldView(showOverlayAction)
 
         val positionGuide = showOverlayAction.viewSpec?.positionGuide ?: PositionGuide(
             left = 0f,
@@ -291,6 +266,10 @@ class OverlayViewHelper @Inject constructor(
         hideOverlayActionEntity: HideOverlayActionEntity
     ) {
         removeViewWithNoAnimation(overlayHost, hideOverlayActionEntity.customId)
+    }
+
+    fun clearScreen() {
+        viewHandler.clearAll()
     }
 
     private fun removeViewWithNoAnimation(overlayHost: ConstraintLayout, overlayTag: String) {
@@ -400,13 +379,7 @@ class OverlayViewHelper @Inject constructor(
 
         overlayHost.post {
 
-            val scaffoldView =
-                overlayFactory.createScaffoldView(
-                    overlayHost.context,
-                    showOverlayAction,
-                    variableTranslator,
-                    variableKeeper
-                )
+            val scaffoldView = overlayFactory.createScaffoldView(showOverlayAction)
 
             scaffoldView.doOnLayout {
 
@@ -464,14 +437,11 @@ class OverlayViewHelper @Inject constructor(
         overlayHost.post {
             overlayHost.children.firstOrNull { it.tag == showOverlayAction.customId }?.let { _ ->
 
-                viewHandler.getAnimationWithTag(showOverlayAction.customId)?.let {
-                    it.cancel()
-                }
+                viewHandler.getAnimationWithTag(showOverlayAction.customId)?.cancel()
                 viewHandler.removeAnimation(showOverlayAction.customId)
 
-                val scaffoldView = viewHandler.getOverlayView(
-                    showOverlayAction.customId
-                )
+                val scaffoldView = viewHandler.getOverlayView(showOverlayAction.customId)
+
                 scaffoldView?.let {
                     viewHandler.detachOverlayView(
                         it
@@ -500,13 +470,7 @@ class OverlayViewHelper @Inject constructor(
     ) {
         overlayHost.post {
 
-            val scaffoldView =
-                overlayFactory.createScaffoldView(
-                    overlayHost.context,
-                    showOverlayAction,
-                    variableTranslator,
-                    variableKeeper
-                )
+            val scaffoldView = overlayFactory.createScaffoldView(showOverlayAction)
 
             scaffoldView.doOnLayout {
 
@@ -552,9 +516,7 @@ class OverlayViewHelper @Inject constructor(
         val scaffoldView = viewHandler.getOverlayView(showOverlayAction.customId) ?: return
 
         overlayHost.post {
-            viewHandler.getAnimationWithTag(showOverlayAction.customId)?.let {
-                it.cancel()
-            }
+            viewHandler.getAnimationWithTag(showOverlayAction.customId)?.cancel()
             viewHandler.removeAnimation(showOverlayAction.customId)
 
             viewHandler.detachOverlayView(
@@ -583,7 +545,7 @@ class OverlayViewHelper @Inject constructor(
         } else {
             overlayHost.post {
                 addViewWithNoAnimation(
-                    overlayHost.context, overlayHost, showOverlayAction
+                    overlayHost, showOverlayAction
                 )
             }
         }

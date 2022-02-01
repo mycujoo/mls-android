@@ -1,7 +1,5 @@
 package tv.mycujoo.mcls.player
 
-import android.os.Handler
-import android.util.Log
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
@@ -10,6 +8,7 @@ import com.google.android.exoplayer2.util.Util
 import tv.mycujoo.mcls.enum.C.Companion.DRM_WIDEVINE
 import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.mcls.ima.ImaCustomParams
+import tv.mycujoo.mcls.utils.ThreadUtils
 import javax.inject.Inject
 
 /**
@@ -18,10 +17,10 @@ import javax.inject.Inject
  * @see IPlayer
  */
 class Player @Inject constructor(
-    val mediaFactory: MediaFactory,
-    var exoPlayer: ExoPlayer,
-    var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener,
-    val handler: Handler
+    private val mediaFactory: MediaFactory,
+    private var exoPlayer: ExoPlayer,
+    private var mediaOnLoadCompletedListener: MediaOnLoadCompletedListener,
+    private val threadUtils: ThreadUtils
 ) : IPlayer {
 
     /**region Fields*/
@@ -43,6 +42,11 @@ class Player @Inject constructor(
      * This value is invalid if there is no item being played
      */
     private var resumeWindow: Int = C.INDEX_UNSET
+
+    /**
+     * Indicator about casting status
+     */
+    private var casting: Boolean = false
 
     /**
      * Indicator that shows player should automatically start playing the item,
@@ -209,6 +213,7 @@ class Player @Inject constructor(
 
     override fun clearQue() {
         exoPlayer.clearMediaItems()
+        mediaData = null
     }
 
     /**
@@ -236,7 +241,6 @@ class Player @Inject constructor(
      * @param mediaData
      */
     override fun play(mediaData: MediaDatum.MediaData) {
-        Log.d(TAG, "play: mediaData")
         this.mediaData = mediaData
         val mediaItem = mediaFactory.createMediaItem(mediaData.fullUrl)
         play(mediaItem, mediaData.autoPlay)
@@ -248,7 +252,6 @@ class Player @Inject constructor(
      * @param autoPlay
      */
     private fun play(mediaItem: MediaItem, autoPlay: Boolean) {
-        Log.d(TAG, "play: mediaData")
         if (playbackPosition != -1L) {
             exoPlayer.seekTo(playbackPosition)
         }
@@ -260,7 +263,10 @@ class Player @Inject constructor(
 
                 exoPlayer.let {
                     val hlsMediaSource = mediaFactory.createHlsMediaSource(mediaItem)
-                    hlsMediaSource.addEventListener(handler, mediaOnLoadCompletedListener)
+                    hlsMediaSource.addEventListener(
+                        threadUtils.provideHandler(),
+                        mediaOnLoadCompletedListener
+                    )
                     if (ima != null) {
                         val adsMediaSource = ima!!.createMediaSource(
                             mediaFactory.defaultMediaSourceFactory,
@@ -277,7 +283,11 @@ class Player @Inject constructor(
                         simplePlayer.setMediaSource(hlsMediaSource, false)
                     }
                     simplePlayer.prepare()
-                    simplePlayer.playWhenReady = autoPlay
+                    if (casting) {
+                        simplePlayer.playWhenReady = false
+                    } else {
+                        simplePlayer.playWhenReady = autoPlay
+                    }
                     resumePosition = C.INDEX_UNSET.toLong()
                     resumeWindow = C.INDEX_UNSET
                 }
@@ -285,7 +295,10 @@ class Player @Inject constructor(
         } else {
             exoPlayer.let {
                 val hlsMediaSource = mediaFactory.createHlsMediaSource(mediaItem)
-                hlsMediaSource.addEventListener(handler, mediaOnLoadCompletedListener)
+                hlsMediaSource.addEventListener(
+                    threadUtils.provideHandler(),
+                    mediaOnLoadCompletedListener
+                )
 
 
                 if (ima != null) {
@@ -357,6 +370,9 @@ class Player @Inject constructor(
             .none { it.first <= targetAbsoluteTime && it.first + it.second >= targetAbsoluteTime }
     }
 
+    override fun setIsCasting(isCasting: Boolean) {
+        casting = isCasting
+    }
 
     /**
      * Return current DVR window size
@@ -373,9 +389,5 @@ class Player @Inject constructor(
      */
     override fun dvrWindowStartTime(): Long {
         return mediaOnLoadCompletedListener.getWindowStartTime()
-    }
-
-    companion object {
-        private const val TAG = "Player"
     }
 }

@@ -2,8 +2,6 @@ package tv.mycujoo.mcls.api
 
 import android.app.Activity
 import android.content.pm.PackageManager
-import com.npaw.youbora.lib6.plugin.Options
-import com.npaw.youbora.lib6.plugin.Plugin
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.internal.modules.ApplicationContextModule
@@ -18,19 +16,31 @@ import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.enum.C.Companion.ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE
 import tv.mycujoo.mcls.ima.IIma
+import timber.log.Timber
+import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
+
 
 /**
  * builder of MLS(MCLS) main component
  */
 open class MLSBuilder {
 
+    init {
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
+    }
+
     private var analyticsAccount: String = ""
 
     internal var publicKey: String = ""
         private set
-    internal var identityToken: String = ""
+    internal var pseudoUserId: String? = null
         private set
-    internal lateinit var youboraPlugin: Plugin
+    internal var userId: String? = null
+        private set
+    internal var customVideoAnalyticsData: VideoAnalyticsCustomData? = null
+    internal var identityToken: String = ""
         private set
     internal var activity: Activity? = null
         private set
@@ -61,6 +71,18 @@ open class MLSBuilder {
 
     fun identityToken(identityToken: String) = apply {
         this.identityToken = identityToken
+    }
+
+    fun customPseudoUserId(pseudoUserId: String) = apply {
+        this.pseudoUserId = pseudoUserId
+    }
+
+    fun userId(userId: String) = apply {
+        this.userId = userId
+    }
+
+    fun withVideoAnalyticsCustomData(customData: VideoAnalyticsCustomData) = apply {
+        this.customVideoAnalyticsData = customData
     }
 
     /**
@@ -121,8 +143,8 @@ open class MLSBuilder {
     }
 
     /**
-     * create Youbora Plugin.
-     * To Initiate the Library, the lib searches for they key in 3 different places
+     * creates an account key for analytics.
+     * the lib searches for they key in 3 different places
      *
      *  1. If Youbora Code was Provided with analyticsAccount(String),
      *     Then use it
@@ -137,25 +159,20 @@ open class MLSBuilder {
      *  3. else,
      *      Then use MyCujoo Default Account Name
      */
-    protected fun initYouboraPlugin() {
+    fun getAnalyticsAccountCode(): String {
         // Provided via the Builder
-        var code = analyticsAccount
-
-        // Provided from the Manifest
-        if (code.isEmpty()) {
-            code = grabAnalyticsKeyFromManifest()
+        if (analyticsAccount.isNotEmpty()) {
+            return analyticsAccount
         }
 
-        // MyCujoo Account Code
-        if (code.isEmpty()) {
-            code = BuildConfig.MYCUJOO_YOUBORA_ACCOUNT_NAME
+        // If Provided via Manifest
+        val manifestAnalyticsCode = grabAnalyticsKeyFromManifest()
+        if (manifestAnalyticsCode.isNotEmpty()) {
+            return manifestAnalyticsCode
         }
 
-        val youboraOptions = Options()
-        youboraOptions.accountCode = code
-        youboraOptions.isAutoDetectBackground = true
-
-        youboraPlugin = Plugin(youboraOptions, activity!!.baseContext)
+        // Default Value
+        return BuildConfig.MYCUJOO_YOUBORA_ACCOUNT_NAME
     }
 
     /**
@@ -200,8 +217,6 @@ open class MLSBuilder {
         if (publicKey.isEmpty()) {
             throw IllegalArgumentException(PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
-
-        initYouboraPlugin()
 
         val graph = DaggerMLSApplication_HiltComponents_SingletonC.builder()
             .applicationContextModule(ApplicationContextModule(activity))

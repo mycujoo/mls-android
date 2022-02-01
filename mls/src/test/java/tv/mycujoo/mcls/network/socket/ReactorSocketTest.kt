@@ -7,8 +7,8 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.*
-import tv.mycujoo.mcls.core.InternalBuilder
 import tv.mycujoo.mcls.model.JoinTimelineParam
+import tv.mycujoo.mcls.utils.UuidUtils
 
 class ReactorSocketTest {
 
@@ -16,7 +16,7 @@ class ReactorSocketTest {
     private lateinit var mainWebSocketListener: MainWebSocketListener
 
     @Mock
-    lateinit var internalBuilder: InternalBuilder
+    lateinit var uuidUtils: UuidUtils
 
     @Mock
     lateinit var okHttpClient: OkHttpClient
@@ -34,7 +34,7 @@ class ReactorSocketTest {
         whenever(okHttpClient.newWebSocket(any(), any())).thenReturn(webSocket)
 
         mainWebSocketListener = MainWebSocketListener()
-        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener, internalBuilder)
+        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener, uuidUtils)
         reactorSocket.addListener(reactorCallback)
     }
 

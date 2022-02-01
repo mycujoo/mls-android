@@ -17,7 +17,7 @@ class MediaInfoBuilder {
          */
         @JvmStatic
         fun build(
-            url: String,
+            url: String?,
             title: String?,
             thumbnailUrl: String,
             customData: JSONObject
@@ -25,7 +25,7 @@ class MediaInfoBuilder {
             val movieMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE)
             movieMetadata.putString(MediaMetadata.KEY_TITLE, title ?: "")
             movieMetadata.addImage(WebImage((Uri.parse(thumbnailUrl))))
-            return MediaInfo.Builder(url)
+            return MediaInfo.Builder(url ?: "")
                 .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
                 .setContentType(M3U8_MIME_TYPE)
                 .setCustomData(customData)

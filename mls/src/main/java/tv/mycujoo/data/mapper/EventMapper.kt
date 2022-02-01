@@ -37,7 +37,7 @@ class EventMapper {
         }
 
         private fun mapStreamSourceToStreamEntity(sourceData: StreamSourceData): Stream {
-            val widevine = mapWidevineSourceDataToWidevineEntity(sourceData.widevine)
+            val widevine = mapWidevineSourceDataToWidevineEntity(sourceData.drm?.widevine)
             val errorCodeAndMessage =
                 mapErrorCodeAndMessageSourceDataToErrorCodeAndMessageEntity(sourceData.errorCodeAndMessage)
             return Stream(

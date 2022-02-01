@@ -4,14 +4,15 @@ import android.util.Log
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
-import tv.mycujoo.mcls.core.InternalBuilder
+import timber.log.Timber
+import tv.mycujoo.mcls.utils.UuidUtils
 import tv.mycujoo.mcls.model.JoinTimelineParam
 import javax.inject.Inject
 
 class ReactorSocket @Inject constructor(
     private val okHttpClient: OkHttpClient,
     private val mainSocketListener: MainWebSocketListener,
-    private val internalBuilder: InternalBuilder
+    private val uuidUtils: UuidUtils
 ) : IReactorSocket {
 
     private lateinit var webSocket: WebSocket
@@ -46,7 +47,7 @@ class ReactorSocket @Inject constructor(
 
         this.eventId = eventId
         if (this::webSocket.isInitialized.not()) {
-            Log.e(ReactorSocket::class.java.canonicalName, "webSocket must be initialized")
+            Timber.e("webSocket must be initialized")
             return
         }
         webSocket.send("$JOIN_EVENT$eventId")
@@ -117,7 +118,7 @@ class ReactorSocket @Inject constructor(
         webSocket = okHttpClient.newWebSocket(request, mainSocketListener)
         created = true
 
-        webSocket.send("$SESSION_ID${internalBuilder.getUuid()}")
+        webSocket.send("$SESSION_ID${uuidUtils.getUuid()}")
     }
 
 

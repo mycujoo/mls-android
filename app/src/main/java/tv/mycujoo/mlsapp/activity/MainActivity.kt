@@ -11,6 +11,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.EventStatus
 import tv.mycujoo.domain.entity.OrderByEventsParam
+import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
 import tv.mycujoo.mcls.api.MLS
 import tv.mycujoo.mcls.api.MLSBuilder
 import tv.mycujoo.mcls.api.MLSConfiguration
@@ -63,6 +64,15 @@ class MainActivity : AppCompatActivity() {
                 .withActivity(this)
                 .setPlayerEventsListener(playerEventsListener)
                 .setUIEventListener(uiEventListener)
+                .setAnalyticsAccount("ANALYTICS_ACCOUNT_CODE")              // OPTIONAL
+                .userId("USER_ID")                                   // OPTIONAL
+                .identityToken("IDENTITY_TOKEN")                // OPTIONAL
+                .customPseudoUserId("CUSTOM_PSEUDO_USER_ID")    // OPTIONAL
+                .withVideoAnalyticsCustomData(
+                    VideoAnalyticsCustomData(                               // Optional
+                        contentCustomDimension11 = "CUSTOM_DIMENSION"
+                    )
+                )
                 .setConfiguration(
                     MLSConfiguration(
                         1000L,

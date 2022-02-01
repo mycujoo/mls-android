@@ -79,16 +79,21 @@ class ScaffoldView @JvmOverloads constructor(
 
         latestVariableValue[updatedPair.first] = updatedPair.second
 
-        var svgString = this.svgString
-        variablePlaceHolder.filter { latestVariableValue.contains(it) }.forEach { entry ->
-            latestVariableValue[entry]?.let { value ->
-                svgString =
-                    svgString.replace(entry, value.toString())
-            }
-        }
+        val currentSvg = StringBuilder(svgString)
 
-        post {
-            setSVG(SVG.getFromString(svgString))
+        if (currentSvg.isNotEmpty()) {
+            variablePlaceHolder.filter { latestVariableValue.contains(it) }.forEach { entry ->
+                latestVariableValue[entry]?.let { value ->
+                    val start = currentSvg.indexOf(entry)
+                    if (start > -1) {
+                        currentSvg.replace(start, start + entry.length, value.toString())
+                    }
+                }
+            }
+
+            post {
+                setSVG(SVG.getFromString(currentSvg.toString()))
+            }
         }
     }
 

@@ -1,25 +1,59 @@
 package tv.mycujoo.mcls.tv.api
 
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import com.caverock.androidsvg.SVG
 import tv.mycujoo.mcls.api.DataProvider
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
+import tv.mycujoo.mcls.helper.SVGAssetResolver
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.tv.player.TvVideoPlayer
+import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import tv.mycujoo.ui.MLSTVFragment
 import javax.inject.Inject
 
-class MLSTV @Inject constructor(
+open class MLSTV @Inject constructor(
     private val dataManager: IDataManager,
     private val prefManager: IPrefManager,
     private val tvVideoPlayer: TvVideoPlayer,
     private val viewHandler: IViewHandler,
-) {
+    private val userPreferencesUtils: UserPreferencesUtils,
+    svgAssetResolver: SVGAssetResolver
+) : DefaultLifecycleObserver {
 
     lateinit var tvBuilder: MLSTvBuilder
+    lateinit var mlsTvFragment: MLSTVFragment
+
+    init {
+        SVG.registerExternalFileResolver(svgAssetResolver)
+    }
+
+    override fun onResume(owner: LifecycleOwner) {
+        super.onResume(owner)
+
+        viewHandler.setOverlayHost(mlsTvFragment.overlayHost)
+        tvVideoPlayer.initialize(mlsTvFragment, tvBuilder)
+    }
+
+    override fun onStop(owner: LifecycleOwner) {
+        tvVideoPlayer.release()
+        SVG.deregisterExternalFileResolver()
+        super.onStop(owner)
+    }
 
     fun initialize(builder: MLSTvBuilder, mlsTvFragment: MLSTVFragment) {
         tvBuilder = builder
+        this.mlsTvFragment = mlsTvFragment
+
+        builder.pseudoUserId?.let {
+            userPreferencesUtils.setPseudoUserId(it)
+        }
+
+        builder.userId?.let {
+            userPreferencesUtils.setUserId(it)
+        }
 
         persistPublicKey(builder.publicKey)
 
@@ -28,11 +62,28 @@ class MLSTV @Inject constructor(
         }
 
         tvVideoPlayer.mlsTVConfiguration = builder.mlsTVConfiguration
-
-        viewHandler.setOverlayHost(mlsTvFragment.overlayHost)
-        tvVideoPlayer.initialize(mlsTvFragment, builder)
     }
 
+    /**
+     * Changes User Id Globally
+     */
+    fun setCustomPseudoUserId(userId: String) {
+        userPreferencesUtils.setPseudoUserId(userId)
+    }
+
+    /**
+     * Changes Pseudo User Id Globally
+     */
+    fun setUserId(pseudoUserId: String) {
+        userPreferencesUtils.setUserId(pseudoUserId)
+    }
+
+    /**
+     * Removes Pseudo User Id Globally
+     */
+    fun removeUserId() {
+        userPreferencesUtils.removeUserId()
+    }
 
     fun getVideoPlayer(): TvVideoPlayer {
         return tvVideoPlayer
@@ -48,10 +99,6 @@ class MLSTV @Inject constructor(
 
     fun removeIdentityToken() {
         prefManager.delete(C.IDENTITY_TOKEN_PREF_KEY)
-    }
-
-    fun onStop() {
-        tvVideoPlayer.release()
     }
 
     /**region msc Functions*/

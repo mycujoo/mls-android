@@ -105,7 +105,7 @@ class NoEntitlementEventScenario : E2ETest() {
                             StreamSourceData(
                                 id = "1",
                                 dvrWindowString = "",
-                                widevine = null,
+                                drm = null,
                                 fullUrl = "1",
                                 errorCodeAndMessage = ErrorCodeAndMessageSourceData(
                                     code = ERROR_CODE_NO_ENTITLEMENT,

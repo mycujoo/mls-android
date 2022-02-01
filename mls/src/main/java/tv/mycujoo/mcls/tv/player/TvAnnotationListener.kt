@@ -26,7 +26,6 @@ class TvAnnotationListener @Inject constructor(
     override fun addOverlay(showOverlayAction: Action.ShowOverlayAction) {
         downloaderClient.download(showOverlayAction) {
             overlayViewHelper.addView(
-                overlayContainer.context,
                 overlayContainer,
                 it
             )
@@ -85,6 +84,10 @@ class TvAnnotationListener @Inject constructor(
     }
 
     override fun clearScreen(idList: List<String>) {
+//        todo!
+    }
+
+    override fun clearScreen() {
 //        todo!
     }
 }

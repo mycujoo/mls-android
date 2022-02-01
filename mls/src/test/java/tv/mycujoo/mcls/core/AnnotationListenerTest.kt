@@ -61,7 +61,7 @@ class AnnotationListenerTest {
         annotationListener.addOverlay(action)
 
 
-        verify(overlayViewHelper).addView(context, overlayContainer, action)
+        verify(overlayViewHelper).addView(overlayContainer, action)
     }
 
     @Test
@@ -72,7 +72,7 @@ class AnnotationListenerTest {
         annotationListener.addOverlay(action)
 
 
-        verify(overlayViewHelper).addView(context, overlayContainer, action)
+        verify(overlayViewHelper).addView(overlayContainer, action)
     }
     /**endregion */
 

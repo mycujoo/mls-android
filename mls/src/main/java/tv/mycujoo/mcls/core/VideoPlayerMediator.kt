@@ -2,20 +2,21 @@ package tv.mycujoo.mcls.core
 
 import android.app.Activity
 import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.Player.STATE_BUFFERING
-import com.google.android.exoplayer2.Player.STATE_READY
+import com.google.android.exoplayer2.Player.*
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.ui.TimeBar
-import com.npaw.youbora.lib6.plugin.Plugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result.*
 import tv.mycujoo.domain.entity.Stream
 import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mcls.R
+import tv.mycujoo.mcls.analytic.AnalyticsClient
+import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
 import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.api.MLSBuilder
 import tv.mycujoo.mcls.api.VideoPlayer
@@ -35,18 +36,17 @@ import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.mediator.AnnotationMediator
 import tv.mycujoo.mcls.model.JoinTimelineParam
 import tv.mycujoo.mcls.network.socket.IReactorSocket
-import tv.mycujoo.mcls.player.IPlayer
-import tv.mycujoo.mcls.player.MediaDatum
-import tv.mycujoo.mcls.player.PlaybackLocation
+import tv.mycujoo.mcls.player.*
 import tv.mycujoo.mcls.player.PlaybackLocation.LOCAL
 import tv.mycujoo.mcls.player.PlaybackLocation.REMOTE
-import tv.mycujoo.mcls.player.PlaybackState
 import tv.mycujoo.mcls.utils.StringUtils
+import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.LIVE_ON_THE_EDGE
 import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.VOD
 import tv.mycujoo.mcls.widgets.PlayerControllerMode
 import tv.mycujoo.mcls.widgets.RemotePlayerControllerListener
+import java.lang.RuntimeException
 import javax.inject.Inject
 
 /**
@@ -62,9 +62,12 @@ class VideoPlayerMediator @Inject constructor(
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     private val logger: Logger,
-    private val internalBuilder: InternalBuilder,
+    private val userPreferencesUtils: UserPreferencesUtils,
     private val player: IPlayer,
     private val overlayViewHelper: OverlayViewHelper,
+    private val analyticsClient: AnalyticsClient,
+    private val annotationFactory: IAnnotationFactory,
+    private val annotationMediator: AnnotationMediator,
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
     private var cast: ICast? = null
@@ -84,19 +87,9 @@ class VideoPlayerMediator @Inject constructor(
     private lateinit var playerView: MLSPlayerView
 
     /**
-     * Annotation Mediator to handle Annotation Actions acts
-     */
-    private lateinit var annotationMediator: AnnotationMediator
-
-    /**
      * Indicates if SDK user desires to have analytics enabled
      */
     private var hasAnalytic = false
-
-    /**
-     * Youbora client instance to log analytics through
-     */
-    private lateinit var youboraClient: YouboraClient
 
     /**
      * Indicates if current video session is logged or not, for analytical purposes
@@ -146,7 +139,7 @@ class VideoPlayerMediator @Inject constructor(
         publicKey = builder.publicKey
 
         player.getDirectInstance()?.let {
-            videoPlayer = VideoPlayer(it, this, MLSPlayerView)
+            videoPlayer = VideoPlayer(it, this, playerView)
 
             builder.mlsConfiguration.seekTolerance.let { accuracy ->
                 if (accuracy > 0) {
@@ -166,35 +159,38 @@ class VideoPlayerMediator @Inject constructor(
             }
             builder.uiEventListener?.let { uiEventCallback ->
                 videoPlayer.setUIEventListener(uiEventCallback)
-                MLSPlayerView.uiEventListener = uiEventCallback
+                playerView.uiEventListener = uiEventCallback
 
             }
 
             hasAnalytic = builder.hasAnalytic
             if (builder.hasAnalytic) {
-                initAnalytic(builder.activity!!, it, builder.youboraPlugin)
+                initAnalytic(
+                    builder.activity!!,
+                    it,
+                    builder.getAnalyticsAccountCode(),
+                    builder.customVideoAnalyticsData
+                )
             }
 
             initPlayerView(
-                MLSPlayerView,
+                playerView,
                 timelineMarkerActionEntities
             )
 
             if (cast != null) {
-                initCaster(cast, player, MLSPlayerView)
+                initCaster(cast, player, playerView)
             }
         }
-    }
-
-    fun setAnnotationMediator(annotationMediator: AnnotationMediator) {
-        this.annotationMediator = annotationMediator
     }
 
     private fun initPlayerView(
         MLSPlayerView: MLSPlayerView,
         timelineMarkerActionEntities: List<TimelineMarkerEntity>
     ) {
-        MLSPlayerView.prepare(
+        playerView = MLSPlayerView
+
+        playerView.prepare(
             overlayViewHelper,
             viewHandler,
             timelineMarkerActionEntities
@@ -245,25 +241,25 @@ class VideoPlayerMediator @Inject constructor(
         player.addListener(mainEventListener)
         player.loadLastVideo()
         dataManager.currentEvent?.let {
-            MLSPlayerView.setEventInfo(it.title, it.description, it.getFormattedStartTimeDate())
+            playerView.setEventInfo(it.title, it.description, it.getFormattedStartTimeDate())
             if (it.poster_url != null) {
-                MLSPlayerView.setPosterInfo(it.poster_url)
+                playerView.setPosterInfo(it.poster_url)
             }
         }
 
-        MLSPlayerView.getTimeBar().addListener(object : TimeBar.OnScrubListener {
+        playerView.getTimeBar().addListener(object : TimeBar.OnScrubListener {
             override fun onScrubMove(timeBar: TimeBar, position: Long) {
                 //do nothing
-                MLSPlayerView.scrubbedTo(position)
+                playerView.scrubbedTo(position)
             }
 
             override fun onScrubStart(timeBar: TimeBar, position: Long) {
                 //do nothing
-                MLSPlayerView.scrubStartedAt(position)
+                playerView.scrubStartedAt(position)
             }
 
             override fun onScrubStop(timeBar: TimeBar, position: Long, canceled: Boolean) {
-                MLSPlayerView.scrubStopAt(position)
+                playerView.scrubStopAt(position)
                 timelineMarkerActionEntities.firstOrNull { position in it.offset - 10000L..it.offset + 10000L }
                     ?.let {
                         player.seekTo(it.offset)
@@ -272,7 +268,7 @@ class VideoPlayerMediator @Inject constructor(
             }
         })
 
-        MLSPlayerView.config(videoPlayerConfig)
+        playerView.config(videoPlayerConfig)
     }
 
     private fun initCaster(
@@ -281,6 +277,7 @@ class VideoPlayerMediator @Inject constructor(
         MLSPlayerView: MLSPlayerView
     ) {
         this.cast = cast
+        this.playerView = MLSPlayerView
         fun addRemotePlayerControllerListener() {
             playerView.getRemotePlayerControllerView().listener =
                 object : RemotePlayerControllerListener {
@@ -316,6 +313,8 @@ class VideoPlayerMediator @Inject constructor(
             fun onApplicationDisconnected(casterSession: ICasterSession?) {
                 updatePlaybackLocation(LOCAL)
                 switchControllerMode(LOCAL)
+                player.setIsCasting(false)
+                playerView.setIsCasting(false)
                 startYoubora()
                 casterSession?.getRemoteMediaClient()?.let { remoteMediaClient ->
                     player.seekTo(remoteMediaClient.approximateStreamPosition())
@@ -331,6 +330,8 @@ class VideoPlayerMediator @Inject constructor(
                 if (casterSession == null) {
                     return
                 }
+                player.setIsCasting(true)
+                playerView.setIsCasting(true)
                 updateRemotePlayerWithLocalPlayerData()
                 updatePlaybackLocation(REMOTE)
                 switchControllerMode(REMOTE)
@@ -348,6 +349,8 @@ class VideoPlayerMediator @Inject constructor(
                 if (casterSession == null) {
                     return
                 }
+                player.setIsCasting(true)
+                playerView.setIsCasting(true)
                 stopYoubora()
                 updatePlaybackLocation(REMOTE)
                 switchControllerMode(REMOTE)
@@ -405,27 +408,42 @@ class VideoPlayerMediator @Inject constructor(
                 }
             }
 
-            it.initialize(MLSPlayerView.context, castListener)
+            try {
+                it.initialize(playerView.context, castListener)
+            } catch (castInitializationException: RuntimeException) {
+                logger.log(MessageLevel.ERROR, castInitializationException.message)
+            }
         }
     }
 
+    /**
+     * Abstracting Analytics client from Youbora
+     * Here we can
+     */
     private fun initAnalytic(
         activity: Activity,
         exoPlayer: ExoPlayer,
-        plugin: Plugin
+        analyticsAccountCode: String,
+        customData: VideoAnalyticsCustomData?
     ) {
-        plugin.activity = activity
-        plugin.adapter = internalBuilder.createExoPlayerAdapter(exoPlayer)
-
-        youboraClient = internalBuilder.createYouboraClient(plugin)
+        if (analyticsClient is YouboraClient) {
+            analyticsClient.setYouboraPlugin(
+                activity,
+                exoPlayer,
+                analyticsAccountCode,
+                customData
+            )
+        }
     }
 
-    fun attachPlayer(playerView: MLSPlayerView) {
+    fun attachPlayer(mlsPlayerView: MLSPlayerView) {
+        playerView = mlsPlayerView
+
         playerView.playerView.player = player.getDirectInstance()
         playerView.playerView.hideController()
 
         if (hasAnalytic) {
-            youboraClient.start()
+            analyticsClient.start()
         }
 
     }
@@ -457,6 +475,26 @@ class VideoPlayerMediator @Inject constructor(
     }
 
     /**endregion */
+
+    /**
+     * Changing Video Analytics Custom Data On Runtime After Building
+     */
+    fun setVideoAnalyticsCustomData(
+        activity: Activity,
+        analyticsAccountCode: String,
+        customData: VideoAnalyticsCustomData?
+    ) {
+        if (hasAnalytic && analyticsClient is YouboraClient) {
+            player.getDirectInstance()?.let { exoPlayer ->
+                analyticsClient.setYouboraPlugin(
+                    activity,
+                    exoPlayer,
+                    analyticsAccountCode,
+                    customData
+                )
+            }
+        }
+    }
 
     /**region Over-ridden functions*/
     /**
@@ -529,13 +567,17 @@ class VideoPlayerMediator @Inject constructor(
      * So it does not matter the stream url exist in the given param. Always the response from server will be used.
      */
     override fun playVideo(event: EventEntity) {
-        if(event.id != dataManager.currentEvent?.id) {
+        var shouldPlayWhenReady: Boolean? = null
+
+        if (event.id != dataManager.currentEvent?.id) {
             if (streaming) streaming = false
+            shouldPlayWhenReady = true
             player.clearQue()
+            annotationFactory.clearOverlays()
         }
         dataManager.currentEvent = event
         updateStreamStatus(event)
-        playVideoOrDisplayEventInfo(event)
+        playVideoOrDisplayEventInfo(event, shouldPlayWhenReady)
 
         // If the event is constructed manually and not a native MLS, it should not be replaced with any other version
         if (event.isNativeMLS) {
@@ -568,44 +610,13 @@ class VideoPlayerMediator @Inject constructor(
     }
 
     /**
-     * internal use: play event which is NOT native to MLS,
-     * in other words, user has provided parameter to make a streamable event.
-     * @param event the externally defined event which is about to play
-     */
-    private fun playExternalEvent(event: EventEntity) {
-        event.streams.firstOrNull()?.let {
-
-            player.play(
-                MediaDatum.MediaData(
-                    fullUrl = event.streams.first().fullUrl.toString(),
-                    dvrWindowSize = Long.MAX_VALUE,
-                    autoPlay = videoPlayerConfig.autoPlay
-                )
-            )
-            playerView.updateControllerVisibility(videoPlayerConfig.autoPlay)
-
-            playerView.setEventInfo(
-                event.title,
-                event.description,
-                event.getFormattedStartTimeDate()
-            )
-            playerView.hideInfoDialogs()
-            if (videoPlayerConfig.showEventInfoButton) {
-                playerView.showEventInfoButton()
-            } else {
-                playerView.hideEventInfoButton()
-            }
-        }
-    }
-
-    /**
      * internal use: either play video, or display event info dialog.
      * This is decided based on status of stream url of event,
      * if it is playable, video player will start to stream.
      * @param event the event which is about to stream/display info
      * @see StreamStatus
      */
-    private fun playVideoOrDisplayEventInfo(event: EventEntity) {
+    private fun playVideoOrDisplayEventInfo(event: EventEntity, playWhenReady: Boolean? = null) {
         playerView.setEventInfo(event.title, event.description, event.getFormattedStartTimeDate())
         playerView.setPosterInfo(event.poster_url)
         if (videoPlayerConfig.showEventInfoButton) {
@@ -626,9 +637,13 @@ class VideoPlayerMediator @Inject constructor(
                     streaming = true
                     logged = false
                     storeEvent(event)
-                    play(event.streams.first())
                     playerView.hideInfoDialogs()
                     playerView.updateControllerVisibility(isPlaying = true)
+                    // If playback is local, depend on the config, else always load the video but don't play
+                    play(event.streams.first(), playbackLocation != REMOTE)
+                    if (playbackLocation == REMOTE) {
+                        loadRemoteMedia(event, playWhenReady)
+                    }
                 }
             }
             GEOBLOCKED -> {
@@ -636,18 +651,27 @@ class VideoPlayerMediator @Inject constructor(
                 player.pause()
                 playerView.showCustomInformationDialog(playerView.resources.getString(R.string.message_geoblocked_stream))
                 playerView.updateControllerVisibility(isPlaying = false)
+                if (playbackLocation == REMOTE) {
+                    cast?.release()
+                }
             }
             NO_ENTITLEMENT -> {
                 streaming = false
                 player.pause()
                 playerView.showCustomInformationDialog(playerView.resources.getString(R.string.message_no_entitlement_stream))
                 playerView.updateControllerVisibility(isPlaying = false)
+                if (playbackLocation == REMOTE) {
+                    cast?.release()
+                }
             }
             UNKNOWN_ERROR -> {
                 streaming = false
                 player.pause()
                 playerView.showPreEventInformationDialog()
                 playerView.updateControllerVisibility(isPlaying = false)
+                if (playbackLocation == REMOTE) {
+                    cast?.release()
+                }
             }
         }
     }
@@ -657,14 +681,14 @@ class VideoPlayerMediator @Inject constructor(
      * @param stream information needed to play an event. including stream url, encoded type, etc
      * @see Stream
      */
-    private fun play(stream: Stream) {
+    private fun play(stream: Stream, playWhenReady: Boolean? = null) {
         if (stream.widevine?.fullUrl != null && stream.widevine.licenseUrl != null) {
             player.play(
                 MediaDatum.DRMMediaData(
                     fullUrl = stream.widevine.fullUrl,
                     dvrWindowSize = stream.getDvrWindowSize(),
                     licenseUrl = stream.widevine.licenseUrl,
-                    autoPlay = videoPlayerConfig.autoPlay
+                    autoPlay = playWhenReady ?: videoPlayerConfig.autoPlay
                 )
             )
         } else if (stream.fullUrl != null) {
@@ -672,7 +696,7 @@ class VideoPlayerMediator @Inject constructor(
                 MediaDatum.MediaData(
                     fullUrl = stream.fullUrl,
                     dvrWindowSize = stream.getDvrWindowSize(),
-                    autoPlay = videoPlayerConfig.autoPlay
+                    autoPlay = playWhenReady ?: videoPlayerConfig.autoPlay
                 )
             )
         }
@@ -705,10 +729,6 @@ class VideoPlayerMediator @Inject constructor(
     }
 
     private fun fetchActions(timelineId: String, updateId: String?, joinTimeLine: Boolean) {
-        if (this::annotationMediator.isInitialized.not()) {
-            return
-        }
-
         annotationMediator.fetchActions(timelineId, updateId) { result ->
             when (result) {
                 is Success -> {
@@ -741,7 +761,7 @@ class VideoPlayerMediator @Inject constructor(
      */
     private fun startYoubora() {
         if (hasAnalytic) {
-            youboraClient.start()
+            analyticsClient.start()
         }
     }
 
@@ -750,7 +770,7 @@ class VideoPlayerMediator @Inject constructor(
      */
     private fun stopYoubora() {
         if (hasAnalytic) {
-            youboraClient.stop()
+            analyticsClient.stop()
         }
     }
 
@@ -865,7 +885,7 @@ class VideoPlayerMediator @Inject constructor(
             return
         }
         if (playbackState == STATE_READY) {
-            youboraClient.logEvent(dataManager.currentEvent, player.isLive())
+            analyticsClient.logEvent(dataManager.currentEvent, player.isLive())
             logged = true
         }
     }
@@ -887,10 +907,8 @@ class VideoPlayerMediator @Inject constructor(
         streaming = false
         cancelPulling()
         player.release()
-        if (hasAnalytic) {
-            youboraClient.stop()
-        }
         reactorSocket.leave(true)
+        stopYoubora()
     }
 
     /**
@@ -922,25 +940,34 @@ class VideoPlayerMediator @Inject constructor(
      * @param event to be streamed Event
      * Cast module must be integrated by user and configured
      */
-    private fun loadRemoteMedia(event: EventEntity) {
-        if (event.streams.isEmpty() || event.streams.first().fullUrl == null) {
+    private fun loadRemoteMedia(event: EventEntity, playWhenReady: Boolean? = null) {
+        Timber.d("loadRemoteMedia: $event")
+        if (event.streamStatus() != PLAYABLE) {
             return
         }
-        val fullUrl = event.streams.first().fullUrl.toString()
-        val widevine = event.streams.first().widevine
 
+        dataManager.currentEvent = event
 
-        val params = CasterLoadRemoteMediaParams(
-            id = event.id,
-            publicKey = publicKey,
-            uuid = internalBuilder.getUuid(),
-            widevine = widevine,
-            fullUrl = fullUrl,
-            title = event.title,
-            thumbnailUrl = event.thumbnailUrl ?: "",
-            isPlaying = player.isPlaying(),
-            currentPosition = player.currentPosition()
-        )
+        val params = if (event.isNativeMLS) {
+            CasterLoadRemoteMediaParams(
+                id = event.id,
+                publicKey = publicKey,
+                pseudoUserId = userPreferencesUtils.getPseudoUserId(),
+                title = event.title,
+                thumbnailUrl = event.thumbnailUrl ?: "",
+                isPlaying = playWhenReady ?: player.isPlaying(),
+                currentPosition = player.currentPosition()
+            )
+        } else {
+            CasterLoadRemoteMediaParams(
+                id = event.id,
+                customPlaylistUrl = event.streams[0].fullUrl,
+                title = event.title,
+                thumbnailUrl = event.thumbnailUrl ?: "",
+                isPlaying = playWhenReady ?: player.isPlaying(),
+                currentPosition = player.currentPosition()
+            )
+        }
 
         cast?.loadRemoteMedia(params)
     }

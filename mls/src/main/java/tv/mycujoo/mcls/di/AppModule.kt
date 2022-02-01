@@ -1,11 +1,9 @@
 package tv.mycujoo.mcls.di
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.res.AssetManager
-import android.os.Handler
-import android.os.Looper
 import androidx.test.espresso.idling.CountingIdlingResource
-import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
@@ -20,13 +18,17 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.newSingleThreadContext
 import tv.mycujoo.mcls.BuildConfig
+import tv.mycujoo.mcls.core.IAnnotationFactory
+import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.PrefManager
+import tv.mycujoo.mcls.mediator.AnnotationMediator
+import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaFactory
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
+import tv.mycujoo.mcls.utils.ThreadUtils
+import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import javax.inject.Singleton
 
 /**
@@ -45,8 +47,8 @@ open class AppModule {
 
     @Provides
     @Singleton
-    fun providePrefManager(@ApplicationContext context: Context): IPrefManager {
-        return PrefManager(context.getSharedPreferences("MLS", Context.MODE_PRIVATE))
+    fun providePrefManager(preferences: SharedPreferences): IPrefManager {
+        return PrefManager(preferences)
     }
 
     @ObsoleteCoroutinesApi
@@ -55,6 +57,18 @@ open class AppModule {
     fun provideCoroutineScope(): CoroutineScope {
         val job = SupervisorJob()
         return CoroutineScope(newSingleThreadContext(BuildConfig.LIBRARY_PACKAGE_NAME) + job)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserPreferencesUtils(prefManager: IPrefManager): UserPreferencesUtils {
+        return UserPreferencesUtils(prefManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
+        return context.getSharedPreferences("MLS", Context.MODE_PRIVATE)
     }
 
     @CountingIdlingResourceViewIdentifierManager
@@ -66,8 +80,8 @@ open class AppModule {
 
     @Provides
     @Singleton
-    fun provideScheduledExecutorService(): ScheduledExecutorService {
-        return Executors.newScheduledThreadPool(1)
+    fun provideSchedulersUtil(): ThreadUtils {
+        return ThreadUtils()
     }
 
     @Provides
@@ -81,12 +95,6 @@ open class AppModule {
             hlsMediaSource,
             MediaItem.Builder()
         )
-    }
-
-    @Provides
-    @Singleton
-    fun provideHandler(): Handler {
-        return Handler(Looper.myLooper() ?: Looper.getMainLooper())
     }
 
     @Singleton

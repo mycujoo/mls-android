@@ -1,6 +1,7 @@
 package tv.mycujoo.mcls.cast
 
 import android.content.Context
+import android.util.Log
 import android.view.ViewStub
 import androidx.mediarouter.app.MediaRouteButton
 import com.google.android.gms.cast.MediaLoadOptions
@@ -34,6 +35,7 @@ class Cast(
 
     private lateinit var sessionManagerListener: SessionManagerListener<CastSession>
     private lateinit var castListener: ICastListener
+
     /**endregion */
 
     constructor(
@@ -156,29 +158,37 @@ class Cast(
 
     /**
      * Load given parameters into remote device
-     * @param CasterLoadRemoteMediaParams data needed to load content on remote cient
+     * @param params CasterLoadRemoteMediaParams data needed to load content on remote client
      */
     override fun loadRemoteMedia(
         params: CasterLoadRemoteMediaParams
     ) {
-        val customData =
+        Log.d("MLS_CAST", "loadRemoteMedia Starting")
+        val customData = params.customPlaylistUrl?.let {
             CustomDataBuilder.build(
-                params.id,
-                params.publicKey,
-                params.uuid,
-                params.widevine
+                it
             )
-        val mediaInfo =
-            MediaInfoBuilder.build(
-                params.fullUrl,
-                params.title,
-                params.thumbnailUrl,
-                customData
-            )
-        val mediaLoadOptions: MediaLoadOptions =
-            MediaLoadOptions.Builder().setAutoplay(params.isPlaying)
-                .setPlayPosition(params.currentPosition)
-                .build()
+        } ?: CustomDataBuilder.build(
+            params.id,
+            params.publicKey,
+            params.pseudoUserId,
+            params.identityToken
+        )
+
+        Log.d("MLS_CAST", "loadRemoteMedia: $customData")
+
+        val mediaInfo = MediaInfoBuilder.build(
+            "",
+            params.title,
+            params.thumbnailUrl,
+            customData
+        )
+
+        val mediaLoadOptions: MediaLoadOptions = MediaLoadOptions
+            .Builder()
+            .setAutoplay(params.isPlaying)
+            .setPlayPosition(params.currentPosition)
+            .build()
         getRemoteMediaClient()?.load(mediaInfo, mediaLoadOptions)
     }
 
@@ -278,5 +288,10 @@ class Cast(
         castContext.sessionManager.removeSessionManagerListener(
             sessionManagerListener, CastSession::class.java
         )
+    }
+
+    override fun release() {
+        Log.d("Cast", "release: ")
+        castContext.sessionManager.endCurrentSession(true)
     }
 }

@@ -1,11 +1,9 @@
 package tv.mycujoo.mcls.core
 
-import android.content.Context
 import android.content.res.Resources
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player.*
-import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Plugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -37,7 +35,6 @@ import tv.mycujoo.mcls.cast.ISessionManagerListener
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mcls.helper.OverlayViewHelper
-import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.ViewHandler
 import tv.mycujoo.mcls.matcher.SeekParameterArgumentMatcher
@@ -46,6 +43,9 @@ import tv.mycujoo.mcls.network.socket.MainWebSocketListener
 import tv.mycujoo.mcls.network.socket.ReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaDatum
+import tv.mycujoo.mcls.player.MediaFactory
+import tv.mycujoo.mcls.utils.UserPreferencesUtils
+import tv.mycujoo.mcls.utils.UuidUtils
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mcls.widgets.PlayerControllerMode
 import tv.mycujoo.mcls.widgets.RemotePlayerControllerView
@@ -71,7 +71,10 @@ class VideoPlayerMediatorTest {
     lateinit var mMLSBuilder: MLSBuilder
 
     @Mock
-    lateinit var internalBuilder: InternalBuilder
+    lateinit var userPreferencesUtils: UserPreferencesUtils
+
+    @Mock
+    lateinit var uuidUtils: UuidUtils
 
     @Mock
     lateinit var webSocket: WebSocket
@@ -107,9 +110,6 @@ class VideoPlayerMediatorTest {
     lateinit var youboraClient: YouboraClient
 
     @Mock
-    lateinit var exoplayer2Adapter: Exoplayer2Adapter
-
-    @Mock
     lateinit var annotationMediator: AnnotationMediator
 
     @Mock
@@ -131,7 +131,10 @@ class VideoPlayerMediatorTest {
     lateinit var overlayViewHelper: OverlayViewHelper
 
     @Mock
-    lateinit var context: Context
+    lateinit var mediaFactory: MediaFactory
+
+    @Mock
+    lateinit var annotationFactory: AnnotationFactory
     /** endregion */
 
     /** region fields */
@@ -148,7 +151,7 @@ class VideoPlayerMediatorTest {
 
         whenever(okHttpClient.newWebSocket(any(), any())).thenReturn(webSocket)
         mainWebSocketListener = MainWebSocketListener()
-        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener, internalBuilder)
+        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener, uuidUtils)
 
         whenever(mMLSBuilder.activity).thenReturn(activity)
 
@@ -156,10 +159,7 @@ class VideoPlayerMediatorTest {
         whenever(mMLSBuilder.hasAnalytic).thenReturn(true)
 
         whenever(mMLSBuilder.publicKey).thenReturn("SAMPLE_PUBLIC_KEY")
-        whenever(mMLSBuilder.youboraPlugin).thenReturn(plugin)
-        whenever(internalBuilder.createExoPlayerAdapter(any())).thenReturn(exoplayer2Adapter)
-        whenever(internalBuilder.createYouboraClient(any())).thenReturn(youboraClient)
-        whenever(internalBuilder.logger).thenReturn(logger)
+        whenever(mMLSBuilder.getAnalyticsAccountCode()).thenReturn("analytics_code")
 
         whenever(playerView.context).thenReturn(activity)
         whenever(playerView.resources).thenReturn(resources)
@@ -185,13 +185,15 @@ class VideoPlayerMediatorTest {
             reactorSocket,
             dispatcher,
             dataManager,
-            internalBuilder.logger,
-            internalBuilder,
+            logger,
+            userPreferencesUtils,
             player,
-            overlayViewHelper
+            overlayViewHelper,
+            youboraClient,
+            annotationFactory,
+            annotationMediator
         )
         videoPlayerMediator.initialize(playerView, mMLSBuilder, listOf(), cast)
-        videoPlayerMediator.setAnnotationMediator(annotationMediator)
     }
 
     private fun storeExoPlayerListener(invocationOnMock: InvocationOnMock) {

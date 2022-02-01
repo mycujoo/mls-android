@@ -13,18 +13,22 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.leanback.app.VideoSupportFragmentGlueHost
 import androidx.leanback.media.PlaybackGlue
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter
 import com.google.android.exoplayer2.ui.AdViewProvider
-import com.npaw.youbora.lib6.plugin.Plugin
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import timber.log.Timber
+import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.entity.Stream
 import tv.mycujoo.mcls.R
+import tv.mycujoo.mcls.analytic.AnalyticsClient
 import tv.mycujoo.mcls.analytic.YouboraClient
+import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
 import tv.mycujoo.mcls.api.MLSTVConfiguration
 import tv.mycujoo.mcls.core.AbstractPlayerMediator
 import tv.mycujoo.mcls.core.IAnnotationFactory
@@ -40,11 +44,11 @@ import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaDatum
 import tv.mycujoo.mcls.tv.api.MLSTvBuilder
-import tv.mycujoo.mcls.tv.api.MLSTvInternalBuilder
 import tv.mycujoo.mcls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackTransportControlGlueImplKt
 import tv.mycujoo.mcls.utils.StringUtils
+import tv.mycujoo.mcls.utils.ThreadUtils
 import tv.mycujoo.mcls.widgets.CustomInformationDialog
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mcls.widgets.PreEventInformationDialog
@@ -61,8 +65,9 @@ class TvVideoPlayer @Inject constructor(
     private val player: IPlayer,
     private val tvAnnotationMediator: TvAnnotationMediator,
     private val annotationFactory: IAnnotationFactory,
-    private val internalBuilder: MLSTvInternalBuilder,
-    private val controllerAgent: ControllerAgent
+    private val analyticsClient: AnalyticsClient,
+    private val controllerAgent: ControllerAgent,
+    private val threadUtils: ThreadUtils
 ) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
 
     lateinit var mMlsTvFragment: MLSTVFragment
@@ -78,12 +83,12 @@ class TvVideoPlayer @Inject constructor(
 
     private lateinit var overlayContainer: ConstraintLayout
 
-    /**endregion */
-
     /**
-     * Youbora client instance to log analytics through
+     * Indicates if current video session is logged or not, for analytical purposes
      */
-    private lateinit var youboraClient: YouboraClient
+    private var logged = false
+
+    /**endregion */
 
     /**
      * Indicates if SDK user desires to have analytics enabled
@@ -94,6 +99,8 @@ class TvVideoPlayer @Inject constructor(
      * Latest updateId received from Reactor service, or null if not joined at all
      */
     private var updateId: String? = null
+
+    private var playerReady = false
 
     /**region Initializing*/
     fun initialize(mlsTvFragment: MLSTVFragment, builder: MLSTvBuilder) {
@@ -118,7 +125,8 @@ class TvVideoPlayer @Inject constructor(
             initAnalytic(
                 builder.mlsTvFragment.requireActivity(),
                 this.player.getDirectInstance()!!,
-                builder.youboraPlugin
+                builder.getAnalyticsCode(),
+                builder.videoAnalyticsCustomData
             )
         }
         this.player.getDirectInstance()?.let { exoPlayer ->
@@ -133,7 +141,7 @@ class TvVideoPlayer @Inject constructor(
 
             glueHost = VideoSupportFragmentGlueHost(mMlsTvFragment.videoSupportFragment)
 
-            Log.d(TAG, "initialize: Attached VideoSupportFragmentGlueHost and leanbackAdapter")
+            Timber.d("initialize: Attached VideoSupportFragmentGlueHost and leanbackAdapter")
         }
 
         // Buffer Progress Bar
@@ -174,7 +182,7 @@ class TvVideoPlayer @Inject constructor(
             })
         }
 
-        this.player.addListener(object : com.google.android.exoplayer2.Player.Listener {
+        this.player.addListener(object : Player.Listener {
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 if (playbackState == ExoPlayer.STATE_READY) {
                     mTransportControlGlue.getSeekProvider()?.let {
@@ -192,6 +200,8 @@ class TvVideoPlayer @Inject constructor(
                     // VOD
                     controllerAgent.setControllerLiveMode(MLSPlayerView.LiveState.VOD)
                 }
+
+                logEventIfNeeded(playbackState)
             }
         })
 
@@ -214,6 +224,9 @@ class TvVideoPlayer @Inject constructor(
                 FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
             )
         }
+
+        playerReady = true
+        playPendingEvent()
     }
 
     private fun addAdViewProvider(fragmentView: FrameLayout): AdViewProvider {
@@ -222,16 +235,38 @@ class TvVideoPlayer @Inject constructor(
         return AdViewProvider { frameLayout }
     }
 
+    /**
+     * Log event through Youbora client.
+     * Log should take place if only analytics is enabled in configuration and should only happen once per stream
+     */
+    private fun logEventIfNeeded(playbackState: Int) {
+        if (!hasAnalytic) {
+            return
+        }
+        if (logged) {
+            return
+        }
+        if (playbackState == Player.STATE_READY) {
+            analyticsClient.logEvent(dataManager.currentEvent, player.isLive())
+            logged = true
+        }
+    }
+
     /**endregion */
     private fun initAnalytic(
         activity: Activity,
         exoPlayer: ExoPlayer,
-        plugin: Plugin
+        accountCode: String,
+        videoAnalyticsCustomData: VideoAnalyticsCustomData?
     ) {
-        plugin.activity = activity
-        plugin.adapter = internalBuilder.createExoPlayerAdapter(exoPlayer)
-
-        youboraClient = internalBuilder.createYouboraClient(plugin)
+        if (analyticsClient is YouboraClient) {
+            analyticsClient.setYouboraPlugin(
+                activity,
+                exoPlayer,
+                accountCode,
+                videoAnalyticsCustomData
+            )
+        }
     }
 
     fun attachPlayer(playerView: MLSPlayerView) {
@@ -239,9 +274,21 @@ class TvVideoPlayer @Inject constructor(
         playerView.playerView.hideController()
 
         if (hasAnalytic) {
-            youboraClient.start()
+            analyticsClient.start()
         }
 
+    }
+
+    fun setLocalAnnotations(annotations: List<Action>) {
+        if (playerReady) {
+            tvAnnotationMediator.setLocalActions(annotations)
+        } else {
+            val retry = Runnable {
+                setLocalAnnotations(annotations)
+            }
+
+            threadUtils.provideHandler().postDelayed(retry, 500L)
+        }
     }
 
     override fun onReactorEventUpdate(eventId: String, updateId: String) {
@@ -317,13 +364,26 @@ class TvVideoPlayer @Inject constructor(
     /**region Playback*/
     override fun playVideo(event: EventEntity) {
         dataManager.currentEvent = event
-        updateStreamStatus(event)
-        playVideoOrDisplayEventInfo(event)
 
-        if (event.isNativeMLS) {
-            joinEvent(event)
-            startStreamUrlPullingIfNeeded(event)
-            fetchActions(event, true)
+        if (playerReady) {
+            updateStreamStatus(event)
+            playVideoOrDisplayEventInfo(event)
+
+            if (event.isNativeMLS) {
+                joinEvent(event)
+                startStreamUrlPullingIfNeeded(event)
+                fetchActions(event, true)
+            }
+        } else {
+            threadUtils.provideHandler().postDelayed({
+                playVideo(event)
+            }, 100)
+        }
+    }
+
+    private fun playPendingEvent() {
+        dataManager.currentEvent?.let {
+            playVideo(it)
         }
     }
 
@@ -360,6 +420,7 @@ class TvVideoPlayer @Inject constructor(
             StreamStatus.PLAYABLE -> {
                 if (streaming.not()) {
                     streaming = true
+                    logged = false
 
                     play(event.streams.first())
                     eventInfoContainerLayout.visibility = View.GONE
@@ -411,8 +472,9 @@ class TvVideoPlayer @Inject constructor(
     fun release() {
         streaming = false
         player.release()
+        tvAnnotationMediator.release()
         if (hasAnalytic) {
-            youboraClient.stop()
+            analyticsClient.stop()
         }
         reactorSocket.leave(true)
     }
