@@ -6,7 +6,6 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.annotation.UiThread
 import com.caverock.androidsvg.SVG
-import timber.log.Timber
 
 class ScaffoldView @JvmOverloads constructor(
     widthPercentage: Float = -1F,
@@ -96,20 +95,6 @@ class ScaffoldView @JvmOverloads constructor(
                 setSVG(SVG.getFromString(currentSvg.toString()))
             }
         }
-
-//        var svgString = this.svgString
-//        variablePlaceHolder.filter { latestVariableValue.contains(it) }.forEach { entry ->
-//            latestVariableValue[entry]?.let { value ->
-//                svgString =
-//                    svgString.replace(entry, value.toString())
-//            }
-//        }
-
-
-
-//        post {
-//            setSVG(SVG.getFromString(svgString))
-//        }
     }
 
 
