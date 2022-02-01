@@ -3,6 +3,7 @@ package tv.mycujoo.domain.repository
 import retrofit2.HttpException
 import timber.log.Timber
 import tv.mycujoo.mcls.network.NoConnectionInterceptor
+import java.io.IOException
 
 abstract class AbstractRepository {
     suspend fun <T> safeApiCall(apiCall: suspend () -> T): tv.mycujoo.domain.entity.Result<Exception, T> {
@@ -25,7 +26,8 @@ abstract class AbstractRepository {
                     )
 
                 }
-                is NoConnectionInterceptor.NoInternetException -> {
+                is IOException -> {
+                    // Network Error
                     tv.mycujoo.domain.entity.Result.NetworkError(throwable)
                 }
                 is NoConnectionInterceptor.NoConnectivityException -> {

@@ -19,8 +19,6 @@ class NoConnectionInterceptor @Inject constructor(
     override fun intercept(chain: Interceptor.Chain): Response {
         return if (!isConnectionOn()) {
             throw NoConnectivityException()
-        } else if(!isInternetAvailable()) {
-            throw NoInternetException()
         } else {
             chain.proceed(chain.request())
         }
@@ -45,25 +43,8 @@ class NoConnectionInterceptor @Inject constructor(
         }
     }
 
-    private fun isInternetAvailable(): Boolean {
-        return try {
-            val url = URL("https://elevensports.com")
-            val urlConnection: HttpURLConnection = url.openConnection() as HttpURLConnection
-            urlConnection.connect()
-            urlConnection.disconnect()
-            true
-        } catch (e: IOException) {
-            false
-        }
-    }
-
     class NoConnectivityException : IOException() {
         override val message: String
             get() = "No network available, please check your WiFi or Data connection"
-    }
-
-    class NoInternetException : IOException() {
-        override val message: String
-            get() = "No internet available, please check your connected WIFi or Data"
     }
 }
