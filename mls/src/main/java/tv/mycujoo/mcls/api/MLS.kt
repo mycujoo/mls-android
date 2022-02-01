@@ -21,6 +21,7 @@ import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * main component of MLS(MCLS) SDK.
@@ -28,6 +29,7 @@ import javax.inject.Inject
  * @constructor takes MLSBuilder and returns implementation of MLSAbstract
  * @see MLSAbstract
  */
+@Singleton
 class MLS @Inject constructor(
     @ApplicationContext private val context: Context,
     private val videoPlayerMediator: VideoPlayerMediator,

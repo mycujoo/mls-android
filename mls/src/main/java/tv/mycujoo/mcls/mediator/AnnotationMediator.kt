@@ -1,7 +1,6 @@
 package tv.mycujoo.mcls.mediator
 
 import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,36 +38,10 @@ class AnnotationMediator @Inject constructor(
     private lateinit var playerViewContract: PlayerViewContract
 
     /**region Fields*/
-    private val scheduledRunnable: Runnable
 
     private lateinit var eventListener: Listener
     private var hasPendingSeek: Boolean = false
     /**endregion */
-
-    /**region Initialization*/
-    init {
-
-        initEventListener(player)
-
-        val exoRunnable = Runnable {
-            if (player.isPlaying()) {
-                val currentPosition = player.currentPosition()
-                annotationFactory.attachPlayerView(playerViewContract)
-                annotationFactory.build()
-
-                val playerView = playerViewContract
-                if (playerView is MLSPlayerView) {
-                    playerView.updateTime(currentPosition, player.duration())
-                }
-            }
-        }
-
-        scheduledRunnable = Runnable {
-            handler.post(exoRunnable)
-        }
-
-        initTicker()
-    }
 
     override fun fetchActions(
         timelineId: String,
@@ -172,16 +145,25 @@ class AnnotationMediator @Inject constructor(
     }
 
     override fun initPlayerView(playerView: PlayerViewContract) {
-        initTicker()
         this.playerViewContract = playerView
+        if (playerView is MLSPlayerView) {
+            annotationFactory.attachPlayerView(playerViewContract)
+            initEventListener(player)
 
-        val contract = playerViewContract
-        if (contract is MLSPlayerView) {
-            contract.setOnSizeChangedCallback(onSizeChangedCallback)
+            initTicker {
+                handler.post {
+                    if (player.isPlaying()) {
+                        annotationFactory.build()
+                        val currentPosition = player.currentPosition()
+                        playerView.updateTime(currentPosition, player.duration())
+                    }
+                }
+            }
+            playerView.setOnSizeChangedCallback(onSizeChangedCallback)
         }
     }
 
-    private fun initTicker() {
+    private fun initTicker(scheduledRunnable: Runnable) {
         if (scheduler.isShutdown.not()) {
             scheduler.shutdown()
         }
