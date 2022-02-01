@@ -23,7 +23,7 @@ jobs:
         run: touch local.properties
 
       - name: Accept Android SDK Licences
-      - run: yes | sdkmanager –licenses
+        run: yes | sdkmanager –licenses
 
       - name: Run JUnit tests
         run: bundle exec fastlane tests
