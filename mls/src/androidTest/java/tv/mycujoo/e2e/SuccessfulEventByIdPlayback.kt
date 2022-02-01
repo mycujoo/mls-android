@@ -73,7 +73,7 @@ class SuccessfulEventByIdPlayback : E2ETest() {
         exoPlayer.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 super.onIsPlayingChanged(isPlaying)
-                if (isPlaying) videoIdlingResource.decrement()
+                if (isPlaying && !videoIdlingResource.isIdleNow) videoIdlingResource.decrement()
             }
         })
 

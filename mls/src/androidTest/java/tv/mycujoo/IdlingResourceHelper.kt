@@ -14,7 +14,7 @@ class IdlingResourceHelper constructor(countingIdlingResource: CountingIdlingRes
     companion object {
         private lateinit var IdlingResource: CountingIdlingResource
         private var startTime: Long = System.currentTimeMillis()
-        private var timeoutMillisecond = 5000L
+        private var timeoutMillisecond = 10000L
     }
 
     fun setTimeoutLimit(timeLimitInMilliSeconds: Long) {
