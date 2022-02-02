@@ -48,6 +48,7 @@ import tv.mycujoo.mcls.widgets.PlayerControllerMode
 import tv.mycujoo.mcls.widgets.RemotePlayerControllerListener
 import java.lang.RuntimeException
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Manages video-player related components.
@@ -56,6 +57,7 @@ import javax.inject.Inject
  * @param dispatcher coroutine scope context used in I/O bound calls
  * @param dataManager data manager which holds current data(event) loaded
  */
+@Singleton
 class VideoPlayerMediator @Inject constructor(
     private val viewHandler: IViewHandler,
     private val reactorSocket: IReactorSocket,

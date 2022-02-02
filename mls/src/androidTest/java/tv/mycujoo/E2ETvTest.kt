@@ -2,6 +2,7 @@ package tv.mycujoo
 
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
 import androidx.test.ext.junit.rules.activityScenarioRule
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -52,6 +53,7 @@ open class E2ETvTest {
             mMLSTV = MLSTvBuilder()
                 .withMLSTvFragment(videoFragment)
                 .publicKey("publicKey")
+                .withContext(ApplicationProvider.getApplicationContext())
                 .setConfiguration(
                     MLSTVConfiguration(
                         1000L,
