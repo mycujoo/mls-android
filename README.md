@@ -166,33 +166,28 @@ class TvMainActivity : FragmentActivity() {
             .beginTransaction()
             .replace(R.id.fragment_container, videoFragment, "PLAYBACK")
             .commit()
-    }
-    
-    // Build MLSTV
-    override fun onResumeFragments() {
-        super.onResumeFragments()
 
-        mMLSTV = MLSTvBuilder()
-            .withMLSTvFragment(videoFragment)
-            .publicKey(PUBLIC_KEY_HERE) // In case you don't like the Manifest Tag
-            .setConfiguration(
-                MLSTVConfiguration(
-                    1000L,
-                    TVVideoPlayerConfig(
-                        primaryColor = "#ff0000",
-                        secondaryColor = "#fff000",
-                        autoPlay = true,
-                        showBackForwardsButtons = true,
-                        showSeekBar = true,
-                        showTimers = true,
-                        showLiveViewers = true,
-                    )
-                )
-            )
-            .build()
+       mMLSTV = MLSTvBuilder()
+           .withContext(this)
+           .withMLSTvFragment(videoFragment)
+           .publicKey(PUBLIC_KEY_HERE)
+           .setConfiguration(
+               MLSTVConfiguration(
+                   1000L,
+                   TVVideoPlayerConfig(
+                       primaryColor = "#ff0000",
+                       secondaryColor = "#fff000",
+                       autoPlay = true,
+                       showBackForwardsButtons = true,
+                       showSeekBar = true,
+                       showTimers = true,
+                       showLiveViewers = true,
+                   )
+               )
+           )
+           .build()
 
-				// Now the Player is Accessable and Inflated
-        mMLSTV.getVideoPlayer().playVideo(EVENT_ID_HERE)
+       mMLSTV.getVideoPlayer().playVideo(EVENT_ID_HERE)
     }
 }
    ```
