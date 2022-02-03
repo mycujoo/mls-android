@@ -261,36 +261,34 @@ class Player @Inject constructor(
             exoPlayer.let { simplePlayer ->
                 simplePlayer.seekTo(resumeWindow, resumePosition)
 
-                exoPlayer.let {
-                    val hlsMediaSource = mediaFactory.createHlsMediaSource(mediaItem)
-                    hlsMediaSource.addEventListener(
-                        threadUtils.provideHandler(),
-                        mediaOnLoadCompletedListener
-                    )
-                    if (ima != null) {
-                        val adsMediaSource = ima!!.createMediaSource(
-                            mediaFactory.defaultMediaSourceFactory,
-                            hlsMediaSource,
-                            ImaCustomParams(
-                                eventId = mediaData?.eventId,
-                                streamId = mediaData?.streamId,
-                                eventStatus = mediaData?.eventStatus
-                            )
+                val hlsMediaSource = mediaFactory.createHlsMediaSource(mediaItem)
+                hlsMediaSource.addEventListener(
+                    threadUtils.provideHandler(),
+                    mediaOnLoadCompletedListener
+                )
+                if (ima != null) {
+                    val adsMediaSource = ima!!.createMediaSource(
+                        mediaFactory.defaultMediaSourceFactory,
+                        hlsMediaSource,
+                        ImaCustomParams(
+                            eventId = mediaData?.eventId,
+                            streamId = mediaData?.streamId,
+                            eventStatus = mediaData?.eventStatus
                         )
-                        simplePlayer.setMediaSource(adsMediaSource, false)
+                    )
+                    simplePlayer.setMediaSource(adsMediaSource, false)
 
-                    } else {
-                        simplePlayer.setMediaSource(hlsMediaSource, false)
-                    }
-                    simplePlayer.prepare()
-                    if (casting) {
-                        simplePlayer.playWhenReady = false
-                    } else {
-                        simplePlayer.playWhenReady = autoPlay
-                    }
-                    resumePosition = C.INDEX_UNSET.toLong()
-                    resumeWindow = C.INDEX_UNSET
+                } else {
+                    simplePlayer.setMediaSource(hlsMediaSource, false)
                 }
+                simplePlayer.prepare()
+                if (casting) {
+                    simplePlayer.playWhenReady = false
+                } else {
+                    simplePlayer.playWhenReady = autoPlay
+                }
+                resumePosition = C.INDEX_UNSET.toLong()
+                resumeWindow = C.INDEX_UNSET
             }
         } else {
             exoPlayer.let {

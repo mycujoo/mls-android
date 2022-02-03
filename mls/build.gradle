@@ -169,6 +169,8 @@ dependencies {
 
     // Exoplayer
     api 'com.google.android.exoplayer:exoplayer:2.16.1'
+    api 'com.google.android.exoplayer:exoplayer-hls:2.16.1'
+
     api 'com.nicepeopleatwork:exoplayer-adapter:6.7.29'
 
 
