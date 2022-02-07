@@ -3,7 +3,8 @@ name: Android Lib Test
 on:
   push:
     branches:
-      - 'trunk'
+#      - 'trunk'
+      - 'null'
 
 jobs:
   deploy:
