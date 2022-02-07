@@ -14,6 +14,14 @@ jobs:
       - name: Setup JDK
         uses: actions/setup-java@v1
         with:
+          java-version: "8.x"
+
+      - name: Accept Android SDK Licences
+        run: yes | ~/Library/Android/sdk/tools/bin/sdkmanager –-licenses
+
+      - name: Setup JDK
+        uses: actions/setup-java@v1
+        with:
           java-version: "11.x"
 
       - name: Bundle install
@@ -21,9 +29,6 @@ jobs:
 
       - name: Init Local Properties for Gradle Config
         run: touch local.properties
-
-      - name: Accept Android SDK Licences
-        run: yes | ~/Library/Android/sdk/tools/bin/sdkmanager –-licenses
 
       - name: Run JUnit tests
         run: bundle exec fastlane tests
