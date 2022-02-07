@@ -18,7 +18,7 @@ jobs:
 
       - name: Accept Android SDK Licences
         run: |
-          yes | sdkmanager --update
+          yes | ~/Library/Android/sdk/tools/bin/sdkmanager --update
 #          yes | ~/Library/Android/sdk/tools/bin/sdkmanager --licenses
 
 
