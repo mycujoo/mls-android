@@ -3,6 +3,7 @@ package tv.mycujoo.mcls.tv.player
 import android.app.Activity
 import android.content.Context
 import android.graphics.Color
+import android.os.Build
 import android.util.Log
 import android.view.Gravity
 import android.view.View
@@ -34,6 +35,7 @@ import tv.mycujoo.mcls.core.AbstractPlayerMediator
 import tv.mycujoo.mcls.core.IAnnotationFactory
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
+import tv.mycujoo.mcls.enum.DeviceType
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.enum.StreamStatus
 import tv.mycujoo.mcls.helper.ViewersCounterHelper.Companion.isViewersCountValid
@@ -260,10 +262,13 @@ class TvVideoPlayer @Inject constructor(
         videoAnalyticsCustomData: VideoAnalyticsCustomData?
     ) {
         if (analyticsClient is YouboraClient) {
+            val isFireTv = Build.MODEL.contains("AFT", true)
+
             analyticsClient.setYouboraPlugin(
                 activity,
                 exoPlayer,
                 accountCode,
+                if (isFireTv) DeviceType.FIRE_TV else DeviceType.ANDROID_TV,
                 videoAnalyticsCustomData
             )
         }

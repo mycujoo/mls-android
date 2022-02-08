@@ -8,6 +8,7 @@ import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
 import tv.mycujoo.domain.entity.EventEntity
+import tv.mycujoo.mcls.enum.DeviceType
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.manager.Logger
@@ -35,11 +36,24 @@ class YouboraClient @Inject constructor(
         activity: Activity,
         exoPlayer: ExoPlayer,
         accountCode: String,
+        deviceType: DeviceType,
         videoAnalyticsCustomData: VideoAnalyticsCustomData?,
     ) {
         val youboraOptions = Options()
         youboraOptions.accountCode = accountCode
         youboraOptions.isAutoDetectBackground = true
+
+        when (deviceType) {
+            DeviceType.ANDROID_TV -> {
+                youboraOptions.deviceCode = "AndroidTV"
+            }
+            DeviceType.FIRE_TV -> {
+                youboraOptions.deviceCode = "FireTV"
+            }
+            DeviceType.ANDROID -> {
+                youboraOptions.deviceCode = "Android"
+            }
+        }
 
         plugin = Plugin(youboraOptions, activity.baseContext)
 

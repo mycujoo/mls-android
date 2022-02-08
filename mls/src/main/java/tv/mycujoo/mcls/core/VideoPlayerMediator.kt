@@ -27,6 +27,7 @@ import tv.mycujoo.mcls.cast.ICasterSession
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mcls.enum.C
+import tv.mycujoo.mcls.enum.DeviceType
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.enum.StreamStatus.*
 import tv.mycujoo.mcls.helper.OverlayViewHelper
@@ -440,6 +441,7 @@ class VideoPlayerMediator @Inject constructor(
                 activity,
                 exoPlayer,
                 analyticsAccountCode,
+                DeviceType.ANDROID,
                 customData
             )
         }
@@ -499,6 +501,7 @@ class VideoPlayerMediator @Inject constructor(
                     activity,
                     exoPlayer,
                     analyticsAccountCode,
+                    DeviceType.ANDROID,
                     customData
                 )
             }
