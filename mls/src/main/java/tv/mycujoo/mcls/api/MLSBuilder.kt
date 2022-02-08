@@ -18,6 +18,8 @@ import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_ME
 import tv.mycujoo.mcls.ima.IIma
 import timber.log.Timber
 import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
+import tv.mycujoo.mcls.enum.LogLevel
+import kotlin.math.log
 
 
 /**
@@ -33,6 +35,7 @@ open class MLSBuilder {
 
     private var analyticsAccount: String = ""
 
+    internal var logLevel = LogLevel.MINIMAL
     internal var publicKey: String = ""
         private set
     internal var pseudoUserId: String? = null
@@ -67,6 +70,10 @@ open class MLSBuilder {
             throw IllegalArgumentException(PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
         this.publicKey = publicKey
+    }
+
+    fun setLogLevel(logLevel: LogLevel) = apply {
+        this.logLevel = logLevel
     }
 
     fun identityToken(identityToken: String) = apply {

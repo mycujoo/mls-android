@@ -101,6 +101,11 @@ class YouboraClient @Inject constructor(
             savedPlugin.options.contentCustomDimension11 = it.contentCustomDimension11
             savedPlugin.options.contentCustomDimension13 = it.contentCustomDimension13
         }
+
+        val optionsBundle = savedPlugin.options.toBundle()
+        optionsBundle.keySet().forEach {
+            logger.log(MessageLevel.VERBOSE, "Youbora Option: $it : ${optionsBundle.get(it)}")
+        }
     }
 
     /**

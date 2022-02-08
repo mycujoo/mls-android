@@ -5,7 +5,7 @@ plugins {
 
 ext {
     PUBLISH_GROUP_ID = 'tv.mycujoo.mls'
-    PUBLISH_VERSION = '1.4.0-alpha32'
+    PUBLISH_VERSION = '1.4.0-alpha33'
     PUBLISH_ARTIFACT_ID = 'cast'
     PUBLISH_ARTIFACT_DESCRIPTION = 'Cast module of MLS SDK'
 }
@@ -19,8 +19,6 @@ android {
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
