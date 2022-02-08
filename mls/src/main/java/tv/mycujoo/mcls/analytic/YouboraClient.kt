@@ -79,6 +79,7 @@ class YouboraClient @Inject constructor(
         savedPlugin.options.contentResource = event.streams.firstOrNull()?.toString()
         savedPlugin.options.contentIsLive = live
 
+        savedPlugin.options.deviceCode = "49"
 
         savedPlugin.options.contentCustomDimension2 = event.id
 
