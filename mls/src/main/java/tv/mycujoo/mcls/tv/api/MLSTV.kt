@@ -8,6 +8,7 @@ import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.helper.SVGAssetResolver
 import tv.mycujoo.mcls.manager.IPrefManager
+import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.tv.player.TvVideoPlayer
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
@@ -20,6 +21,7 @@ open class MLSTV @Inject constructor(
     private val tvVideoPlayer: TvVideoPlayer,
     private val viewHandler: IViewHandler,
     private val userPreferencesUtils: UserPreferencesUtils,
+    private val logger: Logger,
     svgAssetResolver: SVGAssetResolver
 ) : DefaultLifecycleObserver {
 
@@ -45,6 +47,7 @@ open class MLSTV @Inject constructor(
 
     fun initialize(builder: MLSTvBuilder, mlsTvFragment: MLSTVFragment) {
         tvBuilder = builder
+        this.logger.setLogLevel(builder.logLevel)
         this.mlsTvFragment = mlsTvFragment
 
         builder.pseudoUserId?.let {
