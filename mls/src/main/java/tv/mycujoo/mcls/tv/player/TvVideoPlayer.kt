@@ -107,8 +107,9 @@ class TvVideoPlayer @Inject constructor(
     /**region Initializing*/
     fun initialize(mlsTvFragment: MLSTVFragment, builder: MLSTvBuilder) {
         this.mMlsTvFragment = mlsTvFragment
+        this.ima = builder.ima
 
-        // Initilizers for Other Components
+        // Initializers for Other Components
         annotationFactory.attachPlayerView(mlsTvFragment)
         val adViewProvider = addAdViewProvider(mMlsTvFragment.uiBinding.fragmentRoot)
 

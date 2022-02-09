@@ -134,11 +134,11 @@ open class MLSTvBuilder {
     }
 
     fun ima(ima: IIma) = apply {
-        if (mlsTvFragment.activity == null) {
-            throw IllegalArgumentException(C.ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE)
-        }
+        val ctx = context
+            ?: throw IllegalArgumentException(C.CONTEXT_MUST_BE_SET_IN_MLS_TV_BUILDER_MESSAGE)
+
         this.ima = ima.apply {
-            createAdsLoader(mlsTvFragment.requireActivity())
+            createAdsLoader(ctx)
         }
     }
 
