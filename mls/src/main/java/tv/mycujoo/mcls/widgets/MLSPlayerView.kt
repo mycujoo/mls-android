@@ -697,7 +697,8 @@ class MLSPlayerView @JvmOverloads constructor(
         RESIZE_MODE_FIT(0),
         RESIZE_MODE_FIXED_WIDTH(1),
         RESIZE_MODE_FIXED_HEIGHT(2),
-        RESIZE_MODE_FILL(3);
+        RESIZE_MODE_FILL(3),
+        RESIZE_MODE_ZOOM(4);
     }
     /**endregion */
 
