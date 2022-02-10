@@ -17,6 +17,7 @@ class ScaffoldView @JvmOverloads constructor(
     private lateinit var svgString: String
     private lateinit var variablePlaceHolder: List<String>
     private lateinit var latestVariableValue: MutableMap<String, Any>
+    private val stringManipulator = StringBuilder()
 
     private var proportionalImageView: ProportionalImageView =
         ProportionalImageView(context, widthPercentage, heightPercentage, attrs, defStyleAttr)
@@ -79,20 +80,21 @@ class ScaffoldView @JvmOverloads constructor(
 
         latestVariableValue[updatedPair.first] = updatedPair.second
 
-        val currentSvg = StringBuilder(svgString)
+        stringManipulator.clear()
+        stringManipulator.append(svgString)
 
-        if (currentSvg.isNotEmpty()) {
+        if (stringManipulator.isNotEmpty()) {
             variablePlaceHolder.filter { latestVariableValue.contains(it) }.forEach { entry ->
                 latestVariableValue[entry]?.let { value ->
-                    val start = currentSvg.indexOf(entry)
+                    val start = stringManipulator.indexOf(entry)
                     if (start > -1) {
-                        currentSvg.replace(start, start + entry.length, value.toString())
+                        stringManipulator.replace(start, start + entry.length, value.toString())
                     }
                 }
             }
 
             post {
-                setSVG(SVG.getFromString(currentSvg.toString()))
+                setSVG(SVG.getFromString(stringManipulator.toString()))
             }
         }
     }
