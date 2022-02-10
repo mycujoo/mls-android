@@ -17,6 +17,7 @@ interface IPlayer {
     fun addListener(eventListener: Player.Listener)
 
     fun seekTo(offset: Long)
+    fun seekToWhenReady(offset: Long)
     fun currentPosition(): Long
     fun currentAbsoluteTime(): Long
     fun duration(): Long

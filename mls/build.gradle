@@ -17,7 +17,7 @@ scabbard {
 // publish information on Maven
 ext {
     PUBLISH_GROUP_ID = 'tv.mycujoo.mls'
-    PUBLISH_VERSION = '1.4.0-alpha32'
+    PUBLISH_VERSION = '1.4.0-alpha38'
     PUBLISH_ARTIFACT_ID = 'mls'
     PUBLISH_ARTIFACT_DESCRIPTION = 'Android MLS SDK'
 }
@@ -42,8 +42,6 @@ android {
 //        }
 
 
-        versionCode 1
-        versionName version
     }
 
     compileOptions {
@@ -169,6 +167,8 @@ dependencies {
 
     // Exoplayer
     api 'com.google.android.exoplayer:exoplayer:2.16.1'
+    api 'com.google.android.exoplayer:exoplayer-hls:2.16.1'
+
     api 'com.nicepeopleatwork:exoplayer-adapter:6.7.29'
 
 

@@ -27,6 +27,7 @@ import tv.mycujoo.mcls.cast.ICasterSession
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mcls.enum.C
+import tv.mycujoo.mcls.enum.DeviceType
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.enum.StreamStatus.*
 import tv.mycujoo.mcls.helper.OverlayViewHelper
@@ -319,7 +320,13 @@ class VideoPlayerMediator @Inject constructor(
                 playerView.setIsCasting(false)
                 startYoubora()
                 casterSession?.getRemoteMediaClient()?.let { remoteMediaClient ->
-                    player.seekTo(remoteMediaClient.approximateStreamPosition())
+                    dataManager.currentEvent?.let { event ->
+                        Timber.d("Trying to continue ${event.id}")
+                        streaming = false
+                        playVideoOrDisplayEventInfo(event)
+                        player.seekToWhenReady(remoteMediaClient.approximateStreamPosition())
+                    }
+
                     if (remoteMediaClient.isPlaying()) {
                         player.play()
                     } else {
@@ -340,7 +347,8 @@ class VideoPlayerMediator @Inject constructor(
                 addRemotePlayerControllerListener()
                 stopYoubora()
                 dataManager.currentEvent?.let { event ->
-                    loadRemoteMedia(event)
+                    loadRemoteMedia(event, player.currentPosition())
+                    player.clearQue()
                 }
                 if (player.isPlaying()) {
                     player.pause()
@@ -433,6 +441,7 @@ class VideoPlayerMediator @Inject constructor(
                 activity,
                 exoPlayer,
                 analyticsAccountCode,
+                DeviceType.ANDROID,
                 customData
             )
         }
@@ -492,6 +501,7 @@ class VideoPlayerMediator @Inject constructor(
                     activity,
                     exoPlayer,
                     analyticsAccountCode,
+                    DeviceType.ANDROID,
                     customData
                 )
             }
@@ -586,6 +596,8 @@ class VideoPlayerMediator @Inject constructor(
             joinEvent(event)
             startStreamUrlPullingIfNeeded(event)
             fetchActions(event, true)
+        } else {
+            cancelStreamUrlPulling()
         }
     }
 
@@ -642,9 +654,11 @@ class VideoPlayerMediator @Inject constructor(
                     playerView.hideInfoDialogs()
                     playerView.updateControllerVisibility(isPlaying = true)
                     // If playback is local, depend on the config, else always load the video but don't play
-                    play(event.streams.first(), playbackLocation != REMOTE)
-                    if (playbackLocation == REMOTE) {
-                        loadRemoteMedia(event, playWhenReady)
+                    if (playbackLocation == LOCAL) {
+                        play(event.streams.first(), playbackLocation != REMOTE)
+                    }
+                    else if (playbackLocation == REMOTE) {
+                        loadRemoteMedia(event, 0, playWhenReady)
                     }
                 }
             }
@@ -942,7 +956,7 @@ class VideoPlayerMediator @Inject constructor(
      * @param event to be streamed Event
      * Cast module must be integrated by user and configured
      */
-    private fun loadRemoteMedia(event: EventEntity, playWhenReady: Boolean? = null) {
+    private fun loadRemoteMedia(event: EventEntity, currentPosition: Long, playWhenReady: Boolean? = null) {
         Timber.d("loadRemoteMedia: $event")
         if (event.streamStatus() != PLAYABLE) {
             return
@@ -958,7 +972,7 @@ class VideoPlayerMediator @Inject constructor(
                 title = event.title,
                 thumbnailUrl = event.thumbnailUrl ?: "",
                 isPlaying = playWhenReady ?: player.isPlaying(),
-                currentPosition = player.currentPosition()
+                currentPosition = currentPosition
             )
         } else {
             CasterLoadRemoteMediaParams(

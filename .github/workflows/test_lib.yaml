@@ -4,7 +4,7 @@ on:
   push:
     branches:
 #      - 'trunk'
-       - 'null'
+      - 'null'
 
 jobs:
   deploy:
@@ -15,16 +15,24 @@ jobs:
       - name: Setup JDK
         uses: actions/setup-java@v1
         with:
-          java-version: "17.x"
+          java-version: "8.x"
+
+      - name: Accept Android SDK Licences
+        run: |
+          yes | ~/Library/Android/sdk/tools/bin/sdkmanager --update
+#          yes | ~/Library/Android/sdk/tools/bin/sdkmanager --licenses
+
+
+      - name: Setup JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: "11.x"
 
       - name: Bundle install
         run: bundle update --bundler && bundle install
 
       - name: Init Local Properties for Gradle Config
         run: touch local.properties
-
-      - name: Accept Android SDK Licences
-        run: yes | ~/Library/Android/sdk/tools/bin/sdkmanager –licenses
 
       - name: Run JUnit tests
         run: bundle exec fastlane tests

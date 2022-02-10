@@ -15,6 +15,7 @@ import tv.mycujoo.mcls.enum.C.Companion.IDENTITY_TOKEN_PREF_KEY
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
 import tv.mycujoo.mcls.helper.SVGAssetResolver
 import tv.mycujoo.mcls.manager.IPrefManager
+import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.mediator.AnnotationMediator
 import tv.mycujoo.mcls.player.IPlayer
@@ -40,6 +41,7 @@ class MLS @Inject constructor(
     private val player: IPlayer,
     private val assetManager: AssetManager,
     private val userPreferencesUtils: UserPreferencesUtils,
+    private val logger: Logger,
     svgAssetResolver: SVGAssetResolver
 ) : MLSAbstract() {
 
@@ -62,6 +64,7 @@ class MLS @Inject constructor(
      */
     fun initializeComponent(builder: MLSBuilder) {
         this.builder = builder
+        logger.setLogLevel(builder.logLevel)
         videoPlayerMediator.videoPlayerConfig = builder.mlsConfiguration.videoPlayerConfig
         persistPublicKey(builder.publicKey)
         persistIdentityToken(builder.identityToken)

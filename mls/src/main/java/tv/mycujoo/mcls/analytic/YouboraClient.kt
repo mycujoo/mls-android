@@ -8,6 +8,7 @@ import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
 import tv.mycujoo.domain.entity.EventEntity
+import tv.mycujoo.mcls.enum.DeviceType
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.manager.Logger
@@ -35,11 +36,24 @@ class YouboraClient @Inject constructor(
         activity: Activity,
         exoPlayer: ExoPlayer,
         accountCode: String,
+        deviceType: DeviceType,
         videoAnalyticsCustomData: VideoAnalyticsCustomData?,
     ) {
         val youboraOptions = Options()
         youboraOptions.accountCode = accountCode
         youboraOptions.isAutoDetectBackground = true
+
+        when (deviceType) {
+            DeviceType.ANDROID_TV -> {
+                youboraOptions.deviceCode = "AndroidTV"
+            }
+            DeviceType.FIRE_TV -> {
+                youboraOptions.deviceCode = "FireTV"
+            }
+            DeviceType.ANDROID -> {
+                youboraOptions.deviceCode = "Android"
+            }
+        }
 
         plugin = Plugin(youboraOptions, activity.baseContext)
 
@@ -79,7 +93,6 @@ class YouboraClient @Inject constructor(
         savedPlugin.options.contentResource = event.streams.firstOrNull()?.toString()
         savedPlugin.options.contentIsLive = live
 
-
         savedPlugin.options.contentCustomDimension2 = event.id
 
         savedPlugin.options.contentCustomDimension12 =
@@ -100,6 +113,11 @@ class YouboraClient @Inject constructor(
             savedPlugin.options.contentCustomDimension10 = it.contentCustomDimension10
             savedPlugin.options.contentCustomDimension11 = it.contentCustomDimension11
             savedPlugin.options.contentCustomDimension13 = it.contentCustomDimension13
+        }
+
+        val optionsBundle = savedPlugin.options.toBundle()
+        optionsBundle.keySet().forEach {
+            logger.log(MessageLevel.VERBOSE, "Youbora Option: $it : ${optionsBundle.get(it)}")
         }
     }
 

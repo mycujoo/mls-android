@@ -4,6 +4,7 @@ import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.Player.STATE_READY
 import com.google.android.exoplayer2.util.Util
 import tv.mycujoo.mcls.enum.C.Companion.DRM_WIDEVINE
 import tv.mycujoo.mcls.ima.IIma
@@ -113,6 +114,20 @@ class Player @Inject constructor(
      */
     override fun seekTo(offset: Long) {
         exoPlayer.seekTo(offset)
+    }
+
+    override fun seekToWhenReady(offset: Long) {
+        var seeked = false
+        exoPlayer.addListener(object: Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                super.onPlaybackStateChanged(playbackState)
+
+                if (playbackState == STATE_READY && !seeked) {
+                    exoPlayer.seekTo(offset)
+                    seeked = true
+                }
+            }
+        })
     }
 
     /**
@@ -261,36 +276,34 @@ class Player @Inject constructor(
             exoPlayer.let { simplePlayer ->
                 simplePlayer.seekTo(resumeWindow, resumePosition)
 
-                exoPlayer.let {
-                    val hlsMediaSource = mediaFactory.createHlsMediaSource(mediaItem)
-                    hlsMediaSource.addEventListener(
-                        threadUtils.provideHandler(),
-                        mediaOnLoadCompletedListener
-                    )
-                    if (ima != null) {
-                        val adsMediaSource = ima!!.createMediaSource(
-                            mediaFactory.defaultMediaSourceFactory,
-                            hlsMediaSource,
-                            ImaCustomParams(
-                                eventId = mediaData?.eventId,
-                                streamId = mediaData?.streamId,
-                                eventStatus = mediaData?.eventStatus
-                            )
+                val hlsMediaSource = mediaFactory.createHlsMediaSource(mediaItem)
+                hlsMediaSource.addEventListener(
+                    threadUtils.provideHandler(),
+                    mediaOnLoadCompletedListener
+                )
+                if (ima != null) {
+                    val adsMediaSource = ima!!.createMediaSource(
+                        mediaFactory.defaultMediaSourceFactory,
+                        hlsMediaSource,
+                        ImaCustomParams(
+                            eventId = mediaData?.eventId,
+                            streamId = mediaData?.streamId,
+                            eventStatus = mediaData?.eventStatus
                         )
-                        simplePlayer.setMediaSource(adsMediaSource, false)
+                    )
+                    simplePlayer.setMediaSource(adsMediaSource, false)
 
-                    } else {
-                        simplePlayer.setMediaSource(hlsMediaSource, false)
-                    }
-                    simplePlayer.prepare()
-                    if (casting) {
-                        simplePlayer.playWhenReady = false
-                    } else {
-                        simplePlayer.playWhenReady = autoPlay
-                    }
-                    resumePosition = C.INDEX_UNSET.toLong()
-                    resumeWindow = C.INDEX_UNSET
+                } else {
+                    simplePlayer.setMediaSource(hlsMediaSource, false)
                 }
+                simplePlayer.prepare()
+                if (casting) {
+                    simplePlayer.playWhenReady = false
+                } else {
+                    simplePlayer.playWhenReady = autoPlay
+                }
+                resumePosition = C.INDEX_UNSET.toLong()
+                resumeWindow = C.INDEX_UNSET
             }
         } else {
             exoPlayer.let {
