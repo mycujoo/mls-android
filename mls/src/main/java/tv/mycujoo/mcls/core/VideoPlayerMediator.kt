@@ -596,6 +596,8 @@ class VideoPlayerMediator @Inject constructor(
             joinEvent(event)
             startStreamUrlPullingIfNeeded(event)
             fetchActions(event, true)
+        } else {
+            cancelStreamUrlPulling()
         }
     }
 
