@@ -5,8 +5,10 @@ import android.view.View
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.util.Pools
 import androidx.core.view.children
 import androidx.core.view.doOnLayout
+import timber.log.Timber
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.mcls.helper.AnimationClassifierHelper.Companion.hasDynamicIntroAnimation
 import tv.mycujoo.mcls.helper.AnimationClassifierHelper.Companion.hasDynamicOutroAnimation
@@ -30,6 +32,11 @@ class OverlayViewHelper @Inject constructor(
 ) {
 
     /**region Add view*/
+    private val wrapContentLayoutParams = ConstraintLayout.LayoutParams(
+        ConstraintLayout.LayoutParams.WRAP_CONTENT,
+        ConstraintLayout.LayoutParams.WRAP_CONTENT
+    )
+
     /**
      * Add overlay view to host view with specified animation. If there is a specified animation, it will be add with amimation,
      * otherwise no animation will be created.
@@ -112,19 +119,15 @@ class OverlayViewHelper @Inject constructor(
     ) {
         val constraintSet = ConstraintSet()
         constraintSet.clone(overlayHost)
-        val layoutParams = ConstraintLayout.LayoutParams(
-            ConstraintLayout.LayoutParams.WRAP_CONTENT,
-            ConstraintLayout.LayoutParams.WRAP_CONTENT
-        )
 
         applyPositionGuide(
             positionGuide,
             constraintSet,
-            layoutParams,
+            wrapContentLayoutParams,
             scaffoldView
         )
 
-        scaffoldView.layoutParams = layoutParams
+        scaffoldView.layoutParams = wrapContentLayoutParams
         scaffoldView.visibility = View.INVISIBLE
         constraintSet.applyTo(overlayHost)
         viewHandler.attachOverlayView(scaffoldView)
@@ -151,21 +154,17 @@ class OverlayViewHelper @Inject constructor(
     ) {
         val constraintSet = ConstraintSet()
         constraintSet.clone(overlayHost)
-        val layoutParams = ConstraintLayout.LayoutParams(
-            ConstraintLayout.LayoutParams.WRAP_CONTENT,
-            ConstraintLayout.LayoutParams.WRAP_CONTENT
-        )
 
         applyPositionGuide(
             positionGuide,
             constraintSet,
-            layoutParams,
+            wrapContentLayoutParams,
             scaffoldView
         )
 
 
         constraintSet.applyTo(overlayHost)
-        scaffoldView.layoutParams = layoutParams
+        scaffoldView.layoutParams = wrapContentLayoutParams
 
         viewHandler.attachOverlayView(scaffoldView)
 
@@ -214,21 +213,17 @@ class OverlayViewHelper @Inject constructor(
         overlayHost.post {
             val constraintSet = ConstraintSet()
             constraintSet.clone(overlayHost)
-            val layoutParams = ConstraintLayout.LayoutParams(
-                ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                ConstraintLayout.LayoutParams.WRAP_CONTENT
-            )
 
             applyPositionGuide(
                 positionGuide,
                 constraintSet,
-                layoutParams,
+                wrapContentLayoutParams,
                 scaffoldView
             )
 
 
             constraintSet.applyTo(overlayHost)
-            scaffoldView.layoutParams = layoutParams
+            scaffoldView.layoutParams = wrapContentLayoutParams
 
             viewHandler.attachOverlayView(scaffoldView)
             scaffoldView.doOnLayout {
@@ -404,10 +399,6 @@ class OverlayViewHelper @Inject constructor(
 
             val constraintSet = ConstraintSet()
             constraintSet.clone(overlayHost)
-            val layoutParams = ConstraintLayout.LayoutParams(
-                ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                ConstraintLayout.LayoutParams.WRAP_CONTENT
-            )
 
             val positionGuide = showOverlayAction.viewSpec?.positionGuide ?: PositionGuide(
                 left = 0f,
@@ -415,10 +406,10 @@ class OverlayViewHelper @Inject constructor(
             )
 
 
-            applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
+            applyPositionGuide(positionGuide, constraintSet, wrapContentLayoutParams, scaffoldView)
 
 
-            scaffoldView.layoutParams = layoutParams
+            scaffoldView.layoutParams = wrapContentLayoutParams
             scaffoldView.visibility = View.INVISIBLE
             constraintSet.applyTo(overlayHost)
             viewHandler.attachOverlayView(scaffoldView)
@@ -489,24 +480,18 @@ class OverlayViewHelper @Inject constructor(
 
             val constraintSet = ConstraintSet()
             constraintSet.clone(overlayHost)
-            val layoutParams = ConstraintLayout.LayoutParams(
-                ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                ConstraintLayout.LayoutParams.WRAP_CONTENT
-            )
             val positionGuide = showOverlayAction.viewSpec?.positionGuide
                 ?: // should not happen
                 return@post
 
-            applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
+            applyPositionGuide(positionGuide, constraintSet, wrapContentLayoutParams, scaffoldView)
 
-            scaffoldView.layoutParams = layoutParams
+            scaffoldView.layoutParams = wrapContentLayoutParams
             scaffoldView.visibility = View.INVISIBLE
             constraintSet.applyTo(overlayHost)
             viewHandler.attachOverlayView(scaffoldView)
 
         }
-
-
     }
 
     private fun updateLingeringOutroOverlay(
@@ -553,31 +538,32 @@ class OverlayViewHelper @Inject constructor(
         }
     }
 
+    private val constraintLayoutPool = Pools.SynchronizedPool<ConstraintSet>(10)
+
     private fun updateLingeringMidway(
         overlayHost: ConstraintLayout,
         showOverlayAction: Action.ShowOverlayAction,
         scaffoldView: ScaffoldView
     ) {
-        val constraintSet = ConstraintSet()
-        constraintSet.clone(overlayHost)
-        val layoutParams = ConstraintLayout.LayoutParams(
-            ConstraintLayout.LayoutParams.WRAP_CONTENT,
-            ConstraintLayout.LayoutParams.WRAP_CONTENT
-        )
+        var constraintSet = constraintLayoutPool.acquire()
+        if (constraintSet == null) {
+            constraintSet = ConstraintSet()
+            constraintSet.clone(overlayHost)
+        }
 
         val positionGuide = showOverlayAction.viewSpec?.positionGuide ?: PositionGuide(
             left = 0f,
             top = 0f
         )
 
-        applyPositionGuide(positionGuide, constraintSet, layoutParams, scaffoldView)
+        applyPositionGuide(positionGuide, constraintSet, wrapContentLayoutParams, scaffoldView)
 
 
-        scaffoldView.layoutParams = layoutParams
-
+        scaffoldView.layoutParams = wrapContentLayoutParams
 
         scaffoldView.visibility = View.VISIBLE
         constraintSet.applyTo(overlayHost)
+        constraintLayoutPool.release(constraintSet)
     }
 
 
