@@ -32,10 +32,6 @@ class OverlayViewHelper @Inject constructor(
 ) {
 
     /**region Add view*/
-    private val wrapContentLayoutParams = ConstraintLayout.LayoutParams(
-        ConstraintLayout.LayoutParams.WRAP_CONTENT,
-        ConstraintLayout.LayoutParams.WRAP_CONTENT
-    )
 
     /**
      * Add overlay view to host view with specified animation. If there is a specified animation, it will be add with amimation,
@@ -120,6 +116,11 @@ class OverlayViewHelper @Inject constructor(
         val constraintSet = ConstraintSet()
         constraintSet.clone(overlayHost)
 
+        val wrapContentLayoutParams = ConstraintLayout.LayoutParams(
+            ConstraintLayout.LayoutParams.WRAP_CONTENT,
+            ConstraintLayout.LayoutParams.WRAP_CONTENT
+        )
+
         applyPositionGuide(
             positionGuide,
             constraintSet,
@@ -154,6 +155,11 @@ class OverlayViewHelper @Inject constructor(
     ) {
         val constraintSet = ConstraintSet()
         constraintSet.clone(overlayHost)
+
+        val wrapContentLayoutParams = ConstraintLayout.LayoutParams(
+            ConstraintLayout.LayoutParams.WRAP_CONTENT,
+            ConstraintLayout.LayoutParams.WRAP_CONTENT
+        )
 
         applyPositionGuide(
             positionGuide,
@@ -213,6 +219,11 @@ class OverlayViewHelper @Inject constructor(
         overlayHost.post {
             val constraintSet = ConstraintSet()
             constraintSet.clone(overlayHost)
+
+            val wrapContentLayoutParams = ConstraintLayout.LayoutParams(
+                ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                ConstraintLayout.LayoutParams.WRAP_CONTENT
+            )
 
             applyPositionGuide(
                 positionGuide,
@@ -352,7 +363,7 @@ class OverlayViewHelper @Inject constructor(
 
                 if (animation == null) {
                     // should not happen
-                    Log.e("OverlayEntityView", "animation must not be null")
+                    Timber.tag("OverlayEntityView").e("animation must not be null")
                     return@forEach
                 }
 
@@ -390,7 +401,7 @@ class OverlayViewHelper @Inject constructor(
                 )
 
                 if (animation == null) {
-                    Log.e("OverlayEntityView", "animation must not be null")
+                    Timber.tag("OverlayEntityView").e("animation must not be null")
                     return@doOnLayout
                 }
                 viewHandler.decrementIdlingResource()
@@ -405,6 +416,10 @@ class OverlayViewHelper @Inject constructor(
                 top = 0f
             )
 
+            val wrapContentLayoutParams = ConstraintLayout.LayoutParams(
+                ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                ConstraintLayout.LayoutParams.WRAP_CONTENT
+            )
 
             applyPositionGuide(positionGuide, constraintSet, wrapContentLayoutParams, scaffoldView)
 
@@ -484,6 +499,11 @@ class OverlayViewHelper @Inject constructor(
                 ?: // should not happen
                 return@post
 
+            val wrapContentLayoutParams = ConstraintLayout.LayoutParams(
+                ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                ConstraintLayout.LayoutParams.WRAP_CONTENT
+            )
+
             applyPositionGuide(positionGuide, constraintSet, wrapContentLayoutParams, scaffoldView)
 
             scaffoldView.layoutParams = wrapContentLayoutParams
@@ -554,6 +574,11 @@ class OverlayViewHelper @Inject constructor(
         val positionGuide = showOverlayAction.viewSpec?.positionGuide ?: PositionGuide(
             left = 0f,
             top = 0f
+        )
+
+        val wrapContentLayoutParams = ConstraintLayout.LayoutParams(
+            ConstraintLayout.LayoutParams.WRAP_CONTENT,
+            ConstraintLayout.LayoutParams.WRAP_CONTENT
         )
 
         applyPositionGuide(positionGuide, constraintSet, wrapContentLayoutParams, scaffoldView)
