@@ -1,6 +1,5 @@
 package tv.mycujoo.mcls.helper
 
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -116,19 +115,15 @@ class OverlayViewHelper @Inject constructor(
         val constraintSet = ConstraintSet()
         constraintSet.clone(overlayHost)
 
-        val wrapContentLayoutParams = ConstraintLayout.LayoutParams(
-            ConstraintLayout.LayoutParams.WRAP_CONTENT,
-            ConstraintLayout.LayoutParams.WRAP_CONTENT
-        )
+        val layoutParams = getDefaultLayoutParams()
 
         applyPositionGuide(
             positionGuide,
-            constraintSet,
-            wrapContentLayoutParams,
+            layoutParams,
             scaffoldView
         )
 
-        scaffoldView.layoutParams = wrapContentLayoutParams
+        scaffoldView.layoutParams = layoutParams
         scaffoldView.visibility = View.INVISIBLE
         constraintSet.applyTo(overlayHost)
         viewHandler.attachOverlayView(scaffoldView)
@@ -156,21 +151,17 @@ class OverlayViewHelper @Inject constructor(
         val constraintSet = ConstraintSet()
         constraintSet.clone(overlayHost)
 
-        val wrapContentLayoutParams = ConstraintLayout.LayoutParams(
-            ConstraintLayout.LayoutParams.WRAP_CONTENT,
-            ConstraintLayout.LayoutParams.WRAP_CONTENT
-        )
+        val layoutParams = getDefaultLayoutParams()
 
         applyPositionGuide(
             positionGuide,
-            constraintSet,
-            wrapContentLayoutParams,
+            layoutParams,
             scaffoldView
         )
 
 
         constraintSet.applyTo(overlayHost)
-        scaffoldView.layoutParams = wrapContentLayoutParams
+        scaffoldView.layoutParams = layoutParams
 
         viewHandler.attachOverlayView(scaffoldView)
 
@@ -220,21 +211,17 @@ class OverlayViewHelper @Inject constructor(
             val constraintSet = ConstraintSet()
             constraintSet.clone(overlayHost)
 
-            val wrapContentLayoutParams = ConstraintLayout.LayoutParams(
-                ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                ConstraintLayout.LayoutParams.WRAP_CONTENT
-            )
+            val layoutParams = getDefaultLayoutParams()
 
             applyPositionGuide(
                 positionGuide,
-                constraintSet,
-                wrapContentLayoutParams,
+                layoutParams,
                 scaffoldView
             )
 
 
             constraintSet.applyTo(overlayHost)
-            scaffoldView.layoutParams = wrapContentLayoutParams
+            scaffoldView.layoutParams = layoutParams
 
             viewHandler.attachOverlayView(scaffoldView)
             scaffoldView.doOnLayout {
@@ -416,15 +403,12 @@ class OverlayViewHelper @Inject constructor(
                 top = 0f
             )
 
-            val wrapContentLayoutParams = ConstraintLayout.LayoutParams(
-                ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                ConstraintLayout.LayoutParams.WRAP_CONTENT
-            )
+            val layoutParams = getDefaultLayoutParams()
 
-            applyPositionGuide(positionGuide, constraintSet, wrapContentLayoutParams, scaffoldView)
+            applyPositionGuide(positionGuide, layoutParams, scaffoldView)
 
 
-            scaffoldView.layoutParams = wrapContentLayoutParams
+            scaffoldView.layoutParams = layoutParams
             scaffoldView.visibility = View.INVISIBLE
             constraintSet.applyTo(overlayHost)
             viewHandler.attachOverlayView(scaffoldView)
@@ -499,14 +483,11 @@ class OverlayViewHelper @Inject constructor(
                 ?: // should not happen
                 return@post
 
-            val wrapContentLayoutParams = ConstraintLayout.LayoutParams(
-                ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                ConstraintLayout.LayoutParams.WRAP_CONTENT
-            )
+            val layoutParams = getDefaultLayoutParams()
 
-            applyPositionGuide(positionGuide, constraintSet, wrapContentLayoutParams, scaffoldView)
+            applyPositionGuide(positionGuide, layoutParams, scaffoldView)
 
-            scaffoldView.layoutParams = wrapContentLayoutParams
+            scaffoldView.layoutParams = layoutParams
             scaffoldView.visibility = View.INVISIBLE
             constraintSet.applyTo(overlayHost)
             viewHandler.attachOverlayView(scaffoldView)
@@ -576,15 +557,11 @@ class OverlayViewHelper @Inject constructor(
             top = 0f
         )
 
-        val wrapContentLayoutParams = ConstraintLayout.LayoutParams(
-            ConstraintLayout.LayoutParams.WRAP_CONTENT,
-            ConstraintLayout.LayoutParams.WRAP_CONTENT
-        )
+        val layoutParams = getDefaultLayoutParams()
 
-        applyPositionGuide(positionGuide, constraintSet, wrapContentLayoutParams, scaffoldView)
+        applyPositionGuide(positionGuide, layoutParams, scaffoldView)
 
-
-        scaffoldView.layoutParams = wrapContentLayoutParams
+        scaffoldView.layoutParams = layoutParams
 
         scaffoldView.visibility = View.VISIBLE
         constraintSet.applyTo(overlayHost)
@@ -652,13 +629,11 @@ class OverlayViewHelper @Inject constructor(
      * @param positionGuide guides how a view should be positioned on screen.
      * i.e. distance to left/right/top/bottom axis of screen in percentage.
      *
-     * @param constraintSet current constraint set of host view. which should be preserved, but can be over-written.
      * @param layoutParams layout params needed for positioning the view
      * @param scaffoldView the overlay view itself which is going to be positioned
      */
     private fun applyPositionGuide(
         positionGuide: PositionGuide,
-        constraintSet: ConstraintSet,
         layoutParams: ConstraintLayout.LayoutParams,
         scaffoldView: ScaffoldView
     ) {
@@ -668,7 +643,6 @@ class OverlayViewHelper @Inject constructor(
                 return@let
             }
             setLeftConstraints(
-                constraintSet,
                 it,
                 layoutParams,
                 scaffoldView
@@ -678,20 +652,25 @@ class OverlayViewHelper @Inject constructor(
             if (it < 0F) {
                 return@let
             }
-            setRightConstraints(constraintSet, it, layoutParams)
+            setRightConstraints(
+                it,
+                layoutParams
+            )
         }
         positionGuide.top?.let {
             if (it < 0F) {
                 return@let
             }
-            setTopConstraints(constraintSet, it, layoutParams)
+            setTopConstraints(
+                it,
+                layoutParams
+            )
         }
         positionGuide.bottom?.let {
             if (it < 0F) {
                 return@let
             }
             setBottomConstraints(
-                constraintSet,
                 it,
                 layoutParams,
                 scaffoldView
@@ -731,16 +710,12 @@ class OverlayViewHelper @Inject constructor(
     }
 
     private fun setBottomConstraints(
-        constraintSet: ConstraintSet,
         it: Float,
         layoutParams: ConstraintLayout.LayoutParams,
         proportionalImageView: View
     ) {
-        val bottomGuideLineId = View.generateViewId()
-        constraintSet.create(bottomGuideLineId, ConstraintSet.HORIZONTAL)
-        constraintSet.setGuidelinePercent(bottomGuideLineId, 1F - (it / 100))
+        layoutParams.verticalBias = 1F - (it / 100)
 
-        layoutParams.bottomToBottom = bottomGuideLineId
         if (proportionalImageView is ProportionalImageView) {
             proportionalImageView.scaleType = ImageView.ScaleType.FIT_END
         } else {
@@ -749,40 +724,25 @@ class OverlayViewHelper @Inject constructor(
     }
 
     private fun setTopConstraints(
-        constraintSet: ConstraintSet,
         it: Float,
         layoutParams: ConstraintLayout.LayoutParams
     ) {
-        val topGuideLineId = View.generateViewId()
-        constraintSet.create(topGuideLineId, ConstraintSet.HORIZONTAL)
-        constraintSet.setGuidelinePercent(topGuideLineId, it / 100)
-
-        layoutParams.topToTop = topGuideLineId
+        layoutParams.verticalBias = it / 100
     }
 
     private fun setRightConstraints(
-        constraintSet: ConstraintSet,
         it: Float,
         layoutParams: ConstraintLayout.LayoutParams
     ) {
-        val rightGuideLineId = View.generateViewId()
-        constraintSet.create(rightGuideLineId, ConstraintSet.VERTICAL)
-        constraintSet.setGuidelinePercent(rightGuideLineId, 1F - (it / 100))
-
-        layoutParams.rightToRight = rightGuideLineId
+        layoutParams.horizontalBias = 1F - (it / 100)
     }
 
     private fun setLeftConstraints(
-        constraintSet: ConstraintSet,
         it: Float,
         layoutParams: ConstraintLayout.LayoutParams,
         proportionalImageView: View
     ) {
-        val leftGuideLineId = View.generateViewId()
-        constraintSet.create(leftGuideLineId, ConstraintSet.VERTICAL)
-        constraintSet.setGuidelinePercent(leftGuideLineId, it / 100)
-
-        layoutParams.leftToLeft = leftGuideLineId
+        layoutParams.horizontalBias = it / 100
         if (proportionalImageView is ProportionalImageView) {
             proportionalImageView.scaleType = ImageView.ScaleType.FIT_START
         } else {
@@ -790,6 +750,17 @@ class OverlayViewHelper @Inject constructor(
         }
     }
 
+    private fun getDefaultLayoutParams(): ConstraintLayout.LayoutParams {
+        val layoutParams = ConstraintLayout.LayoutParams(
+            ConstraintLayout.LayoutParams.WRAP_CONTENT,
+            ConstraintLayout.LayoutParams.WRAP_CONTENT
+        )
+        layoutParams.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+        layoutParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+        layoutParams.leftToLeft = ConstraintLayout.LayoutParams.PARENT_ID
+        layoutParams.rightToRight = ConstraintLayout.LayoutParams.PARENT_ID
 
+        return layoutParams
+    }
     /**endregion */
 }
