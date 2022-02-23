@@ -1,26 +1,28 @@
 package tv.mycujoo.mcls.core
 
+import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.MockitoAnnotations
+import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.*
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.domain.entity.AnimationType
 import tv.mycujoo.domain.entity.TransitionSpec
 import tv.mycujoo.domain.entity.Variable
+import tv.mycujoo.mcls.TestData.Companion.getSampleHideOverlayAction
 import tv.mycujoo.mcls.TestData.Companion.getSampleShowOverlayAction
 import tv.mycujoo.mcls.manager.IVariableKeeper
-import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.matcher.ShowOverlayActionArgumentMatcher
 import tv.mycujoo.mcls.matcher.TimerVariablesMapArgumentMatcher
 import tv.mycujoo.mcls.matcher.TransitionSpecArgumentMatcher
 import tv.mycujoo.mcls.matcher.VariablesMapArgumentMatcher
 import tv.mycujoo.mcls.player.IPlayer
-import tv.mycujoo.mcls.widgets.MLSPlayerView
 import kotlin.test.assertTrue
 
+@RunWith(MockitoJUnitRunner::class)
 class AnnotationFactoryTest {
 
     /**region subject under test*/
@@ -38,17 +40,11 @@ class AnnotationFactoryTest {
     @Mock
     lateinit var variableKeeper: IVariableKeeper
 
-    @Mock
-    lateinit var playerView: MLSPlayerView
     /**endregion */
 
     /**region Setup*/
     @Before
     fun setUp() {
-        MockitoAnnotations.openMocks(this)
-
-        whenever(player.dvrWindowSize()).thenReturn(60000)
-
         annotationFactory = AnnotationFactory(
             annotationListener,
             variableKeeper,
@@ -87,15 +83,15 @@ class AnnotationFactoryTest {
     @Test
     fun `given ShowOverlayAction {eligible} with Negative offset, should act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         val action = Action.ShowOverlayAction("id_01", -1000L, 1605609881000L, null)
         annotationFactory.setActions(listOf(action))
 
 
         whenever(player.currentPosition()).thenReturn(2001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
 
@@ -109,7 +105,7 @@ class AnnotationFactoryTest {
     @Test
     fun `given ShowOverlayAction {not eligible} with Negative offset, should not act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         val action =
             Action.ShowOverlayAction("id_01", -1000L, 1605609881000L, null, duration = 5000L)
@@ -117,8 +113,8 @@ class AnnotationFactoryTest {
 
 
         whenever(player.currentPosition()).thenReturn(2001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
 
@@ -128,7 +124,7 @@ class AnnotationFactoryTest {
     @Test
     fun `given ShowOverlayAction {eligible} with Negative offset, then HideOverlayAction, should not act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         val action =
             Action.ShowOverlayAction("id_01", -1000L, 1605609881000L, null, customId = "cid_00")
@@ -145,8 +141,8 @@ class AnnotationFactoryTest {
 
 
         whenever(player.currentPosition()).thenReturn(2001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
 
@@ -160,7 +156,7 @@ class AnnotationFactoryTest {
     @Test
     fun `given ShowOverlayAction {eligible} with Negative offset from ReshowOverlayAction, should act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         val action = Action.ShowOverlayAction(
             "id_01",
@@ -175,8 +171,8 @@ class AnnotationFactoryTest {
 
 
         whenever(player.currentPosition()).thenReturn(2001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
 
@@ -187,11 +183,10 @@ class AnnotationFactoryTest {
         )
     }
 
-
     @Test
     fun `given ShowOverlayAction {not eligible} with Negative offset from ReshowOverlayAction, should not act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
         val action = Action.ShowOverlayAction(
             "id_01",
@@ -206,8 +201,8 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(action, reshowOverlayAction))
 
         whenever(player.currentPosition()).thenReturn(2001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
 
@@ -221,14 +216,14 @@ class AnnotationFactoryTest {
     @Test
     fun `given CreateTimerAction with Negative offset, should act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         val action =
             Action.CreateTimerAction("id_00", -2000L, 1605609880000L, "name", capValue = -1L)
         annotationFactory.setActions(listOf(action))
 
         whenever(player.currentPosition()).thenReturn(0L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
@@ -244,14 +239,14 @@ class AnnotationFactoryTest {
     @Test
     fun `given CreateTimerAction with -1L offset, should act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         val action =
             Action.CreateTimerAction("id_00", -1L, 1605609881999L, "name", capValue = -1L)
         annotationFactory.setActions(listOf(action))
 
         whenever(player.currentPosition()).thenReturn(0L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
@@ -267,7 +262,7 @@ class AnnotationFactoryTest {
     @Test
     fun `given StartTimerAction with Negative offset, should act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         val createTimerAction =
             Action.CreateTimerAction("id_00", -2000L, 1605609880000L, "name", capValue = -1L)
         val startTimerAction =
@@ -275,8 +270,8 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction))
 
         whenever(player.currentPosition()).thenReturn(1000L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
@@ -292,7 +287,7 @@ class AnnotationFactoryTest {
     @Test
     fun `given StartTimerAction with -1L offset, should act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         val createTimerAction =
             Action.CreateTimerAction("id_00", -1L, 1605609881999L, "name", capValue = -1L)
         val startTimerAction =
@@ -300,8 +295,8 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction))
 
         whenever(player.currentPosition()).thenReturn(1000L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
@@ -317,7 +312,7 @@ class AnnotationFactoryTest {
     @Test
     fun `given PauseTimerAction with Negative offset, should act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         val createTimerAction =
             Action.CreateTimerAction("id_00", -2000L, 1605609880000L, "name", capValue = -1L)
         val startTimerAction =
@@ -327,8 +322,8 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction, pauseTimerAction))
 
         whenever(player.currentPosition()).thenReturn(2000L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
@@ -344,7 +339,7 @@ class AnnotationFactoryTest {
     @Test
     fun `given PauseTimerAction with -1L offset, should act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         val createTimerAction =
             Action.CreateTimerAction("id_00", -1L, 1605609881999L, "name", capValue = -1L)
         val startTimerAction =
@@ -354,8 +349,8 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction, pauseTimerAction))
 
         whenever(player.currentPosition()).thenReturn(2000L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
@@ -371,7 +366,7 @@ class AnnotationFactoryTest {
     @Test
     fun `given AdjustTimerAction with Negative offset, should act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         val createTimerAction =
             Action.CreateTimerAction("id_00", -2000L, 1605609880000L, "name", capValue = -1L)
         val startTimerAction =
@@ -381,8 +376,8 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction, adjustTimerAction))
 
         whenever(player.currentPosition()).thenReturn(2000L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
@@ -395,11 +390,10 @@ class AnnotationFactoryTest {
         )
     }
 
-
     @Test
     fun `given AdjustTimerAction with -1L offset, should act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         val createTimerAction =
             Action.CreateTimerAction("id_00", -1L, 1605609881999L, "name", capValue = -1L)
         val startTimerAction =
@@ -409,8 +403,8 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction, adjustTimerAction))
 
         whenever(player.currentPosition()).thenReturn(2000L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
@@ -423,11 +417,10 @@ class AnnotationFactoryTest {
         )
     }
 
-
     @Test
     fun `given SkipTimerAction with Negative offset, should act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         val createTimerAction =
             Action.CreateTimerAction("id_00", -2000L, 1605609880000L, "name", capValue = -1L)
         val startTimerAction =
@@ -437,8 +430,8 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction, skipTimerAction))
 
         whenever(player.currentPosition()).thenReturn(2000L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
@@ -454,7 +447,7 @@ class AnnotationFactoryTest {
     @Test
     fun `given SkipTimerAction with -1L offset, should act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         val createTimerAction =
             Action.CreateTimerAction("id_00", -1L, 1605609881999L, "name", capValue = -1L)
         val startTimerAction =
@@ -464,8 +457,8 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(createTimerAction, startTimerAction, skipTimerAction))
 
         whenever(player.currentPosition()).thenReturn(2000L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         verify(variableKeeper).notifyTimers(
@@ -483,14 +476,14 @@ class AnnotationFactoryTest {
     @Test
     fun `given CreateVariableAction with Negative offset, should act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         val action =
             Action.CreateVariableAction("id_00", -123L, 123456L, Variable.LongVariable("name", 1L))
         annotationFactory.setActions(listOf(action))
 
         whenever(player.currentPosition()).thenReturn(0L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name", "1")))
@@ -499,7 +492,7 @@ class AnnotationFactoryTest {
     @Test
     fun `given CreateVariableAction with -1L offset, should act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         val action =
             Action.CreateVariableAction(
                 "id_00",
@@ -510,8 +503,8 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(action))
 
         whenever(player.currentPosition()).thenReturn(0L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name", "1")))
@@ -520,7 +513,7 @@ class AnnotationFactoryTest {
     @Test
     fun `given IncrementVariableAction with Negative offset, should act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         val createVariableAction =
             Action.CreateVariableAction("id_00", -123L, 123456L, Variable.LongVariable("name", 0L))
         val incrementVariableAction =
@@ -528,8 +521,8 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(createVariableAction, incrementVariableAction))
 
         whenever(player.currentPosition()).thenReturn(0L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         verify(variableKeeper).notifyVariables(argThat(VariablesMapArgumentMatcher("name", "2")))
@@ -538,7 +531,7 @@ class AnnotationFactoryTest {
 //    @Test
 //    fun `given IncrementVariableAction with -1L offset, should act on it`() {
 //        whenever(player.duration()).thenReturn(120000L)
-//        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
 //        val createVariableAction =
 //            Action.CreateVariableAction(
 //                "id_00",
@@ -561,14 +554,12 @@ class AnnotationFactoryTest {
     @Test
     fun `given MarkTimeLine with Negative offset, should not act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         val action =
             Action.MarkTimelineAction("id_00", -1000L, 1605609881000L, 1000L, "Goal", "#ffffff")
         annotationFactory.setActions(listOf(action))
 
         whenever(player.currentPosition()).thenReturn(0L)
-        whenever(player.currentAbsoluteTime()).thenReturn(1605609882000L)
-        whenever(player.isPlaying()).thenReturn(true)
         annotationFactory.build()
 
         verify(annotationListener).setTimelineMarkers(eq(emptyList()))
@@ -577,14 +568,14 @@ class AnnotationFactoryTest {
     @Test
     fun `given MarkTimeLine with -1L offset, should not act on it`() {
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609882000L)
+
         val action =
             Action.MarkTimelineAction("id_00", -1L, 1605609881999L, 1000L, "Goal", "#ffffff")
         annotationFactory.setActions(listOf(action))
 
         whenever(player.currentPosition()).thenReturn(0L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         verify(annotationListener).setTimelineMarkers(eq(emptyList()))
@@ -617,8 +608,8 @@ class AnnotationFactoryTest {
 
 
         whenever(player.currentPosition()).thenReturn(3001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
 
@@ -634,18 +625,10 @@ class AnnotationFactoryTest {
         val action = Action.ShowOverlayAction("id_01", 5000L, -1L, null)
         annotationFactory.setActions(listOf(action))
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
-        val firstBuildPoint =
-            BuildPoint(4001L, -1L, player, isPlaying = true)
-
         whenever(player.currentPosition()).thenReturn(4001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
         annotationFactory.build()
 
-
         whenever(player.currentPosition()).thenReturn(3001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
         annotationFactory.build()
 
 
@@ -668,8 +651,8 @@ class AnnotationFactoryTest {
 
 
         whenever(player.currentPosition()).thenReturn(4001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
 
@@ -684,13 +667,13 @@ class AnnotationFactoryTest {
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
         whenever(player.currentPosition()).thenReturn(4001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         whenever(player.currentPosition()).thenReturn(4501L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
 
@@ -700,7 +683,6 @@ class AnnotationFactoryTest {
         ).addOverlay(argThat(ShowOverlayActionArgumentMatcher("id_01")))
         verify(annotationListener, never()).removeLingeringOverlay(any(), any())
     }
-
 
     @Test
     fun `given outro-in-range{from Outro-spec} off-screen ShowOverlayAction, should not add nor remove overlay`() {
@@ -715,8 +697,8 @@ class AnnotationFactoryTest {
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
         whenever(player.currentPosition()).thenReturn(9001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
 
@@ -735,8 +717,8 @@ class AnnotationFactoryTest {
 
 
         whenever(player.currentPosition()).thenReturn(9001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
 
@@ -754,13 +736,13 @@ class AnnotationFactoryTest {
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
         whenever(player.currentPosition()).thenReturn(4001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         whenever(player.currentPosition()).thenReturn(9001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
 
@@ -787,13 +769,9 @@ class AnnotationFactoryTest {
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
         whenever(player.currentPosition()).thenReturn(4001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
         annotationFactory.build()
 
         whenever(player.currentPosition()).thenReturn(9001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
         annotationFactory.build()
 
 
@@ -815,8 +793,8 @@ class AnnotationFactoryTest {
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
         whenever(player.currentPosition()).thenReturn(15001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
 
@@ -837,13 +815,13 @@ class AnnotationFactoryTest {
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
         whenever(player.currentPosition()).thenReturn(4001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         whenever(player.currentPosition()).thenReturn(15000L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
 
@@ -870,8 +848,8 @@ class AnnotationFactoryTest {
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
         whenever(player.currentPosition()).thenReturn(15000L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         verify(
@@ -897,13 +875,13 @@ class AnnotationFactoryTest {
         whenever(player.isWithinValidSegment(any())).thenReturn(true)
 
         whenever(player.currentPosition()).thenReturn(4001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         whenever(player.currentPosition()).thenReturn(15000L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
 
@@ -930,8 +908,8 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(showOverlayAction))
 
         whenever(player.currentPosition()).thenReturn(1L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
 
@@ -939,8 +917,8 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(action))
 
         whenever(player.currentPosition()).thenReturn(4001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
         verify(annotationListener).removeOverlay("cid_1001", null)
@@ -955,8 +933,8 @@ class AnnotationFactoryTest {
 
 
         whenever(player.currentPosition()).thenReturn(4001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
 
@@ -973,8 +951,8 @@ class AnnotationFactoryTest {
         annotationFactory.setActions(listOf(showOverlayAction, reshowOverlayAction))
 
         whenever(player.currentPosition()).thenReturn(7001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
 
@@ -992,8 +970,8 @@ class AnnotationFactoryTest {
 
 
         whenever(player.currentPosition()).thenReturn(7001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(-1L)
-        whenever(player.isPlaying()).thenReturn(true)
+
+
         annotationFactory.build()
 
 
@@ -1005,8 +983,9 @@ class AnnotationFactoryTest {
     /**endregion */
     /**endregion */
 
+
     /**region Absolute time system*/
-    @Ignore
+    @Ignore("Time Error in CI (Java Related)")
     @Test
     fun `given ShowOverlay action, should add overlay, absolute time system`() {
         val action = Action.ShowOverlayAction("id_01", -1L, 1605609887000L)
@@ -1018,8 +997,6 @@ class AnnotationFactoryTest {
         whenever(player.currentPosition()).thenReturn(4001L)
         whenever(player.currentAbsoluteTime()).thenReturn(1605609886001L)
         whenever(player.isPlaying()).thenReturn(true)
-        val buildPoint =
-            BuildPoint(4001L, 1605609886001L, player, isPlaying = true)
         annotationFactory.build()
 
 
@@ -1027,7 +1004,7 @@ class AnnotationFactoryTest {
         verify(annotationListener, never()).removeLingeringOverlay(any(), any())
     }
 
-    @Ignore
+    @Ignore("Time Conversion Error in the CI")
     @Test
     fun `given HideOverlay action, should remove overlay, -absolute-time-system`() {
         val action = Action.ShowOverlayAction(
@@ -1038,7 +1015,6 @@ class AnnotationFactoryTest {
             customId = "cid_01"
         )
         annotationFactory.setActions(listOf(action))
-        val prepareBuildPoint = BuildPoint(1L, 1605609885001L, player, isPlaying = true)
 
 
         whenever(player.currentPosition()).thenReturn(1L)
@@ -1058,8 +1034,6 @@ class AnnotationFactoryTest {
         whenever(player.currentPosition()).thenReturn(1001L)
         whenever(player.currentAbsoluteTime()).thenReturn(1605609886001L)
         whenever(player.isPlaying()).thenReturn(true)
-        val buildPoint =
-            BuildPoint(1001L, 1605609886001L, player, isPlaying = true)
         annotationFactory.build()
 
 
@@ -1078,13 +1052,7 @@ class AnnotationFactoryTest {
             Action.ReshowOverlayAction("id_01", 2000L, 1605609887000L, "cid_1001")
         annotationFactory.setActions(listOf(showOverlayAction, reshowOverlayAction))
         whenever(player.duration()).thenReturn(120000L)
-        whenever(player.dvrWindowStartTime()).thenReturn(1605609885000L)
-
         whenever(player.currentPosition()).thenReturn(1001L)
-        whenever(player.currentAbsoluteTime()).thenReturn(1605609886001L)
-        whenever(player.isPlaying()).thenReturn(true)
-        val buildPoint =
-            BuildPoint(1001L, 1605609886001L, player, isPlaying = true)
 
         annotationFactory.build()
 
@@ -1098,4 +1066,45 @@ class AnnotationFactoryTest {
     /**endregion */
 
     /**endregion */
+
+    @Test
+    fun `given mcls actions should get mcls actions as current actions`() {
+        val showOverlayAction = getSampleShowOverlayAction()
+        annotationFactory.setMCLSActions(listOf(showOverlayAction))
+        annotationFactory.build()
+        annotationFactory.getCurrentActions() shouldBeEqualTo listOf(showOverlayAction)
+    }
+
+    @Test
+    fun `given mcls actions then gql actions should get mcls actions as current actions`() {
+        val showOverlayAction = getSampleShowOverlayAction()
+        annotationFactory.setMCLSActions(listOf(showOverlayAction))
+        val hideOverlayActions = getSampleHideOverlayAction(animationType = AnimationType.NONE)
+        annotationFactory.setActions(listOf(hideOverlayActions))
+
+        annotationFactory.getCurrentActions() shouldBeEqualTo listOf(showOverlayAction)
+    }
+
+    @Test
+    fun `given gql actions then mcls actions should get mcls actions as current actions`() {
+        val hideOverlayActions = getSampleHideOverlayAction(animationType = AnimationType.NONE)
+        annotationFactory.setActions(listOf(hideOverlayActions))
+        val showOverlayAction = getSampleShowOverlayAction()
+        annotationFactory.setMCLSActions(listOf(showOverlayAction))
+
+        annotationFactory.getCurrentActions() shouldBeEqualTo listOf(showOverlayAction)
+    }
+
+    @Test
+    fun `given mcls actions then clear screen then gql actions should get mcls actions as current actions`() {
+        val showOverlayAction = getSampleShowOverlayAction()
+        annotationFactory.setMCLSActions(listOf(showOverlayAction))
+
+        annotationFactory.clearOverlays()
+
+        val hideOverlayActions = getSampleHideOverlayAction(animationType = AnimationType.NONE)
+        annotationFactory.setActions(listOf(hideOverlayActions))
+
+        annotationFactory.getCurrentActions() shouldBeEqualTo listOf(hideOverlayActions)
+    }
 }
