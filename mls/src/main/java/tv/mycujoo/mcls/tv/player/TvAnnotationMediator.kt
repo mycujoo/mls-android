@@ -103,7 +103,7 @@ class TvAnnotationMediator @Inject constructor(
     }
 
     fun setLocalActions(actions: List<Action>) {
-        tvAnnotationFactory.setLocalActions(actions)
+        tvAnnotationFactory.setActions(actions)
     }
 
 

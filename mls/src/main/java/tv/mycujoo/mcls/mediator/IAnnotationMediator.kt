@@ -18,5 +18,6 @@ interface IAnnotationMediator {
 
     fun feed(actionResponse: ActionResponse)
     fun setLocalActions(actions: List<Action>)
+    fun setMCLSActions(actions: List<Action>)
     fun initPlayerView(playerView: PlayerViewContract)
 }
