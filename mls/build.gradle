@@ -198,4 +198,5 @@ dependencies {
 
     // Kluent for Assertions
     testImplementation 'org.amshove.kluent:kluent-android:1.68'
+    androidTestImplementation 'org.amshove.kluent:kluent-android:1.68'
 }
