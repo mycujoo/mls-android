@@ -1,7 +1,7 @@
 package tv.mycujoo.mcls.core
 
+import timber.log.Timber
 import tv.mycujoo.domain.entity.*
-import tv.mycujoo.domain.entity.OverlayAct.*
 import tv.mycujoo.mcls.api.PlayerViewContract
 import tv.mycujoo.mcls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mcls.helper.*
@@ -99,7 +99,6 @@ class AnnotationFactory @Inject constructor(
 
         val currentTimeInInDvrWindowDuration = TimeRangeHelper.isCurrentTimeInDvrWindowDuration(
             player.duration(),
-//            buildPoint.player.dvrWindowSize()
             Long.MAX_VALUE // todo! This should be filled from Stream's dvr-window size value
         )
 
@@ -128,7 +127,6 @@ class AnnotationFactory @Inject constructor(
             )
 
         }
-
     }
 
     override fun getCurrentActions(): List<Action> {
