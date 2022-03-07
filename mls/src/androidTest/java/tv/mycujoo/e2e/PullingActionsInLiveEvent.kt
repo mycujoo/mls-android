@@ -45,6 +45,16 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.concurrent.thread
 
+/**
+ * Testing 2 Sets of Actions, Applied at runtime with delay in between.
+ * First set contains only ShowOverlay action
+ * Second set contains the first set, but it contains as an addition
+ * the hideOverlay action for the scoreboard.
+ *
+ * As a safe mechanism, I added the hideOverlay with no accompanied ShowOverlayAction to test the behaviour
+ * of the SDK on that case, note that this case is not expected from the API.
+ */
+
 @HiltAndroidTest
 @UninstallModules(NetworkModule::class, PlayerModule::class)
 class PullingActionsInLiveEvent : E2ETest() {
