@@ -54,15 +54,6 @@ class TimersTimingCorrectly : E2ETest() {
             // To Evade ExoPlayer OnMediaTransition Clearing Actions, We Wait a couple seconds
             Handler(Looper.getMainLooper()).postDelayed({
                 val actions = actionSet1()
-//                actions.add(
-//                    Action.AdjustTimerAction(
-//                        id = "timer",
-//                        offset = 0,
-//                        absoluteTime = INVALID_TIME,
-//                        name = "\$main_timer",
-//                        value = 50000
-//                    )
-//                )
 
                 mMLS.getVideoPlayer().setLocalAnnotations(actions)
             }, 2000)
@@ -83,105 +74,72 @@ class TimersTimingCorrectly : E2ETest() {
 
             actions.addAll(footballDefaultActions())
 
-            actions.add(
-                Action.StartTimerAction(
-                    id = "timer",
-                    offset = 0,
-                    absoluteTime = INVALID_TIME,
-                    name = "\$main_timer"
+            actions.addAll(
+                listOf(
+                    Action.StartTimerAction(
+                        id = "timer",
+                        offset = 0,
+                        absoluteTime = INVALID_TIME,
+                        name = "\$main_timer"
+                    ),
+                    Action.PauseTimerAction(
+                        id = "timer",
+                        offset = 250,
+                        absoluteTime = INVALID_TIME,
+                        name = "\$main_timer"
+                    ),
+                    Action.StartTimerAction(
+                        id = "timer",
+                        offset = 500,
+                        absoluteTime = INVALID_TIME,
+                        name = "\$main_timer",
+                    ),
+                    Action.PauseTimerAction(
+                        id = "timer",
+                        offset = 750,
+                        absoluteTime = INVALID_TIME,
+                        name = "\$main_timer"
+                    ),
+                    Action.StartTimerAction(
+                        id = "timer",
+                        offset = 1000,
+                        absoluteTime = INVALID_TIME,
+                        name = "\$main_timer"
+                    ),
+                    Action.PauseTimerAction(
+                        id = "timer",
+                        offset = 1250,
+                        absoluteTime = INVALID_TIME,
+                        name = "\$main_timer"
+                    ),
+                    // This is causing trouble if the timer is paused
+                    Action.AdjustTimerAction(
+                        id = "timer",
+                        offset = 1450,
+                        absoluteTime = INVALID_TIME,
+                        name = "\$main_timer",
+                        value = 50000
+                    ),
+                    Action.StartTimerAction(
+                        id = "timer",
+                        offset = 1500,
+                        absoluteTime = INVALID_TIME,
+                        name = "\$main_timer",
+                    ),
+                    Action.PauseTimerAction(
+                        id = "timer",
+                        offset = 1750,
+                        absoluteTime = INVALID_TIME,
+                        name = "\$main_timer"
+                    ),
+                    Action.StartTimerAction(
+                        id = "timer",
+                        offset = 2000,
+                        absoluteTime = INVALID_TIME,
+                        name = "\$main_timer",
+                    )
                 )
             )
-
-            actions.add(
-                Action.PauseTimerAction(
-                    id = "timer",
-                    offset = 250,
-                    absoluteTime = INVALID_TIME,
-                    name = "\$main_timer"
-                )
-            )
-
-            actions.add(
-                Action.StartTimerAction(
-                    id = "timer",
-                    offset = 500,
-                    absoluteTime = INVALID_TIME,
-                    name = "\$main_timer",
-                )
-            )
-
-            actions.add(
-                Action.PauseTimerAction(
-                    id = "timer",
-                    offset = 750,
-                    absoluteTime = INVALID_TIME,
-                    name = "\$main_timer"
-                )
-            )
-
-            actions.add(
-                Action.StartTimerAction(
-                    id = "timer",
-                    offset = 1000,
-                    absoluteTime = INVALID_TIME,
-                    name = "\$main_timer"
-                )
-            )
-
-            actions.add(
-                Action.PauseTimerAction(
-                    id = "timer",
-                    offset = 1250,
-                    absoluteTime = INVALID_TIME,
-                    name = "\$main_timer"
-                )
-            )
-
-            actions.add(
-                Action.AdjustTimerAction(
-                    id = "timer",
-                    offset = 1450,
-                    absoluteTime = INVALID_TIME,
-                    name = "\$main_timer",
-                    value = 50000
-                )
-            )
-
-            actions.add(
-                Action.StartTimerAction(
-                    id = "timer",
-                    offset = 1500,
-                    absoluteTime = INVALID_TIME,
-                    name = "\$main_timer",
-                )
-            )
-
-            actions.add(
-                Action.PauseTimerAction(
-                    id = "timer",
-                    offset = 1750,
-                    absoluteTime = INVALID_TIME,
-                    name = "\$main_timer"
-                )
-            )
-
-            actions.add(
-                Action.StartTimerAction(
-                    id = "timer",
-                    offset = 2000,
-                    absoluteTime = INVALID_TIME,
-                    name = "\$main_timer",
-                )
-            )
-
-//            actions.add(
-//                Action.PauseTimerAction(
-//                    id = "timer",
-//                    offset = 2250,
-//                    absoluteTime = INVALID_TIME,
-//                    name = "\$main_timer"
-//                )
-//            )
 
             actions.add(
                 Action.ShowOverlayAction(
