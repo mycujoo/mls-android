@@ -37,7 +37,7 @@ class ActionActor {
                 hideOverlayActions.remove(relatedHideOverlayAction)
                 if (relatedHideOverlayAction.offset >= action.offset) {
                     showMap.remove(relatedHideOverlayAction.customId)
-//                    hideMap[relatedHideOverlayAction.customId] = relatedHideOverlayAction
+                    hideMap[relatedHideOverlayAction.customId] = relatedHideOverlayAction
                 } else {
                     hideMap.remove(action.customId)
                     showMap[action.customId] = action
