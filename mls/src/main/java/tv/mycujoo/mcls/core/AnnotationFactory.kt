@@ -1,16 +1,15 @@
 package tv.mycujoo.mcls.core
 
-import android.util.Log
+import timber.log.Timber
 import tv.mycujoo.domain.entity.*
-import tv.mycujoo.domain.entity.OverlayAct.*
+import tv.mycujoo.mcls.api.PlayerViewContract
 import tv.mycujoo.mcls.enum.C.Companion.ONE_SECOND_IN_MS
 import tv.mycujoo.mcls.helper.*
 import tv.mycujoo.mcls.manager.IVariableKeeper
 import tv.mycujoo.mcls.manager.TimerEntity
 import tv.mycujoo.mcls.manager.TimerVariable
-import tv.mycujoo.mcls.utils.TimeUtils
-import tv.mycujoo.mcls.api.PlayerViewContract
 import tv.mycujoo.mcls.player.IPlayer
+import tv.mycujoo.mcls.utils.TimeUtils
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
 
@@ -33,6 +32,8 @@ class AnnotationFactory @Inject constructor(
     private var localActions =
         CopyOnWriteArrayList<Action>() // local Actions which will be merged with server defined actions
 
+    private var isMCLSActions = false
+
     private var allActions =
         CopyOnWriteArrayList<Action>() // union of Sorted actions + Local actions
 
@@ -42,7 +43,15 @@ class AnnotationFactory @Inject constructor(
         annotationListener.attachPlayer(playerView)
     }
 
+    /**
+     * Set Local Actions, used for Mapped GQL events
+     * @param actions List of Mapped GQL events to List<Action>
+     */
     override fun setActions(actions: List<Action>) {
+        if (isMCLSActions) {
+            return
+        }
+
         val sortedTemp = actions
             .sortedWith(compareBy<Action> { it.offset }.thenByDescending { it.priority })
 
@@ -57,9 +66,28 @@ class AnnotationFactory @Inject constructor(
         })
     }
 
-    override fun setLocalActions(annotations: List<Action>) {
-        localActions.clear()
-        localActions.addAll(annotations)
+    /**
+     * Set Actions, used for MCLS Events
+     * @param annotations List of MCLS Actions
+     */
+    override fun setMCLSActions(annotations: List<Action>) {
+        if (annotations.isEmpty()) {
+            return
+        }
+
+        isMCLSActions = true
+        val sortedTemp = annotations
+            .sortedWith(compareBy<Action> { it.offset }.thenByDescending { it.priority })
+
+        val deleteActions = ArrayList<Action>()
+        deleteActions.addAll(sortedTemp.filterIsInstance<Action.DeleteAction>())
+
+        sortedActions.clear()
+        sortedActions.addAll(sortedTemp.filter { actionObject ->
+            deleteActions.none {
+                actionObject.id == it.id
+            }
+        })
     }
 
     override fun build() {
@@ -71,7 +99,6 @@ class AnnotationFactory @Inject constructor(
 
         val currentTimeInInDvrWindowDuration = TimeRangeHelper.isCurrentTimeInDvrWindowDuration(
             player.duration(),
-//            buildPoint.player.dvrWindowSize()
             Long.MAX_VALUE // todo! This should be filled from Stream's dvr-window size value
         )
 
@@ -100,7 +127,6 @@ class AnnotationFactory @Inject constructor(
             )
 
         }
-
     }
 
     override fun getCurrentActions(): List<Action> {
@@ -397,6 +423,7 @@ class AnnotationFactory @Inject constructor(
     /**endregion */
 
     override fun clearOverlays() {
+        isMCLSActions = false
         localActions.clear()
         annotationListener.clearScreen()
     }

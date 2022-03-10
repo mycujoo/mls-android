@@ -70,7 +70,7 @@ class AnnotationMediator @Inject constructor(
     }
 
     override fun feed(actionResponse: ActionResponse) {
-        annotationFactory.setActions(actionResponse.data.map { it.toAction() })
+        annotationFactory.setMCLSActions(actionResponse.data.map { it.toAction() })
     }
 
     private fun initEventListener(player: IPlayer) {
@@ -180,7 +180,11 @@ class AnnotationMediator @Inject constructor(
 
     /**region Over-ridden Functions*/
     override fun setLocalActions(actions: List<Action>) {
-        annotationFactory.setLocalActions(actions)
+        annotationFactory.setActions(actions)
+    }
+
+    override fun setMCLSActions(actions: List<Action>) {
+        annotationFactory.setMCLSActions(actions)
     }
 
     override fun release() {
