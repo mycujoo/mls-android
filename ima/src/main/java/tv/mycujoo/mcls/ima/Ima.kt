@@ -7,11 +7,11 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.source.ads.AdsLoader
 import com.google.android.exoplayer2.source.ads.AdsMediaSource
 import com.google.android.exoplayer2.ui.AdViewProvider
 import com.google.android.exoplayer2.upstream.DataSpec
 import com.google.common.annotations.VisibleForTesting
-import com.google.common.collect.ImmutableList
 import tv.mycujoo.domain.entity.EventStatus
 import tv.mycujoo.mcls.enum.C
 import java.net.URLEncoder
@@ -109,7 +109,7 @@ class Ima(
         if (this::adsLoader.isInitialized.not()) {
             throw IllegalStateException()
         }
-        val provider = DefaultMediaSourceFactory.AdsLoaderProvider { adsLoader }
+        val provider = AdsLoader.Provider { adsLoader }
         defaultMediaSourceFactory.setAdsLoaderProvider(provider)
     }
 
