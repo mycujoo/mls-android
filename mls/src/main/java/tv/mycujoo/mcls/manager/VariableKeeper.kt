@@ -5,7 +5,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.VariableEntity
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class VariableKeeper @Inject constructor(private val dispatcher: CoroutineScope) : IVariableKeeper {
 
 
@@ -72,9 +74,9 @@ class VariableKeeper @Inject constructor(private val dispatcher: CoroutineScope)
         }
     }
 
-    override fun notifyVariables(variableEntities: HashMap<String, VariableEntity>) {
+    override fun notifyVariables(timerVariables: HashMap<String, VariableEntity>) {
         variablePublisherMap.forEach { e ->
-            variableEntities[e.key]?.let { setEntityVariable ->
+            timerVariables[e.key]?.let { setEntityVariable ->
                 e.value.accept(setEntityVariable.variable.printValue())
             }
         }

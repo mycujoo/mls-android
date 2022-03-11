@@ -13,10 +13,12 @@ import dagger.hilt.android.testing.BindValue
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.UninstallModules
 import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldBeIn
 import org.joda.time.DateTime
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import timber.log.Timber
 import tv.mycujoo.E2ETest
 import tv.mycujoo.IdlingResourceHelper
 import tv.mycujoo.domain.entity.*
@@ -24,6 +26,7 @@ import tv.mycujoo.mcls.di.PlayerModule
 import tv.mycujoo.mcls.manager.VariableKeeper
 import tv.mycujoo.mcls.model.ScreenTimerDirection
 import tv.mycujoo.mcls.model.ScreenTimerFormat
+import tv.mycujoo.mcls.player.IPlayer
 import javax.inject.Inject
 
 @HiltAndroidTest
@@ -39,9 +42,13 @@ class TimersTimingCorrectly : E2ETest() {
     @Inject
     lateinit var variableKeeper: VariableKeeper
 
+    @Inject
+    lateinit var player: IPlayer
+
     private val videoIdlingResource = CountingIdlingResource("VIDEO")
     private val warmupResource = CountingIdlingResource("WARM_UP")
-    val helper = IdlingResourceHelper(videoIdlingResource)
+    private val videoHelper = IdlingResourceHelper(videoIdlingResource)
+    private val warmupHelper = IdlingResourceHelper(warmupResource)
 
     @Before
     fun setUp() {
@@ -57,12 +64,14 @@ class TimersTimingCorrectly : E2ETest() {
 
     @Test
     fun testTimerAdjustment() {
+        warmupHelper.setTimeoutLimit(60000)
+
         videoIdlingResource.increment()
-        warmupResource.increment()
 
         exoPlayer.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 super.onIsPlayingChanged(isPlaying)
+                Timber.d("onIsPlayingChanged $isPlaying")
                 if (isPlaying && !videoIdlingResource.isIdleNow) videoIdlingResource.decrement()
             }
         })
@@ -78,17 +87,58 @@ class TimersTimingCorrectly : E2ETest() {
             }, 1000)
         }
 
+        videoHelper.waitUntilIdle()
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            // TODO: Improve This, this doesn't match correct behavior
-            variableKeeper.observeOnTimer("\$${TIMER_NAME}") {
-                it.second shouldBeEqualTo "1:00"
-                warmupResource.decrement()
+        var isOverlayInflated = false
+        while (!isOverlayInflated) {
+            if (variableKeeper.getValue("\$${TIMER_NAME}").isNotEmpty()) {
+                isOverlayInflated = true
             }
-        }, 10000)
+            Thread.sleep(200)
+        }
 
-        // To make sure the test has passed
-        Thread.sleep(11000)
+        // region normal ticker
+        Thread.sleep(300) // Current Play Time 0:01
+        variableKeeper.getValue("\$${TIMER_NAME}") shouldBeEqualTo "0:01"
+
+        Thread.sleep(1000) // Current Play Time 0:02
+        variableKeeper.getValue("\$${TIMER_NAME}") shouldBeEqualTo "0:02"
+
+        Thread.sleep(1000) // Current Play Time 0:03
+        variableKeeper.getValue("\$${TIMER_NAME}") shouldBeEqualTo "0:03"
+
+        Thread.sleep(1000) // Current Play Time 0:04
+        variableKeeper.getValue("\$${TIMER_NAME}") shouldBeEqualTo "0:04"
+
+        // Due to the time sensitive nature of this operation. I face a variability of 500 milliseconds
+        // That's why I'm checking like this
+        Thread.sleep(1000) // Current Play Time 0:05
+        variableKeeper.getValue("\$${TIMER_NAME}") shouldBeIn listOf("0:05", "0:06")
+        // endregion
+
+        // region pause ticker
+        Thread.sleep(1000) // Current Play Time 0:06
+        variableKeeper.getValue("\$${TIMER_NAME}") shouldBeIn listOf("0:05", "0:06")
+
+        Thread.sleep(1000) // Current Play Time 0:07
+        variableKeeper.getValue("\$${TIMER_NAME}") shouldBeIn listOf("0:05", "0:06")
+        // endregion
+
+        // region adjust timer
+        Thread.sleep(1000) // Current Play Time 0:08
+        variableKeeper.getValue("\$${TIMER_NAME}") shouldBeEqualTo "1:00"
+
+        Thread.sleep(1000) // Current Play Time 0:09
+        variableKeeper.getValue("\$${TIMER_NAME}") shouldBeEqualTo "1:00"
+        // endregion
+
+        // region normal ticker
+        Thread.sleep(2000) // Current Play Time 0:10
+        variableKeeper.getValue("\$${TIMER_NAME}") shouldBeEqualTo "1:01"
+
+        Thread.sleep(1000) // Current Play Time 0:11
+        variableKeeper.getValue("\$${TIMER_NAME}") shouldBeEqualTo "1:02"
+        // endregion
     }
 
     companion object {
@@ -107,29 +157,29 @@ class TimersTimingCorrectly : E2ETest() {
                 listOf(
                     Action.StartTimerAction(
                         id = "timer",
-                        offset = 1000,
+                        offset = 0,
                         absoluteTime = INVALID_TIME,
-                        name = "\$main_timer"
+                        name = "\$${TIMER_NAME}"
                     ),
                     Action.PauseTimerAction(
                         id = "timer",
                         offset = 6000,
                         absoluteTime = INVALID_TIME,
-                        name = "\$main_timer"
+                        name = "\$${TIMER_NAME}"
                     ),
                     // This is causing trouble if the timer is paused
                     Action.AdjustTimerAction(
                         id = "timer",
-                        offset = 7000,
+                        offset = 8500,
                         absoluteTime = INVALID_TIME,
-                        name = "\$main_timer",
+                        name = "\$${TIMER_NAME}",
                         value = 60000
                     ),
                     Action.StartTimerAction(
                         id = "timer",
-                        offset = 7500,
+                        offset = 7000,
                         absoluteTime = INVALID_TIME,
-                        name = "\$main_timer",
+                        name = "\$${TIMER_NAME}",
                     ),
                 )
             )
@@ -147,7 +197,7 @@ class TimersTimingCorrectly : E2ETest() {
                     placeHolders = listOf(
                         "\$home_score",
                         "\$away_score",
-                        "\$main_timer",
+                        "\$${TIMER_NAME}",
                         "\$home_abbr",
                         "\$away_abbr",
                         "\$home_color",
