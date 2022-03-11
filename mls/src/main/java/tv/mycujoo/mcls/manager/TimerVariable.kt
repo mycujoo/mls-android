@@ -1,5 +1,6 @@
 package tv.mycujoo.mcls.manager
 
+import timber.log.Timber
 import tv.mycujoo.mcls.model.ScreenTimerDirection
 import tv.mycujoo.mcls.model.ScreenTimerFormat
 
@@ -107,11 +108,7 @@ class TimerVariable(
                         }
                     }
                     is TimerEntity.AdjustTimer -> {
-                        delta = if (direction == ScreenTimerDirection.UP) {
-                            startValue + now - timerEntity.offset + timerEntity.value
-                        } else {
-                            startValue - (now - timerEntity.offset + timerEntity.value)
-                        }
+                        delta = timerEntity.value
                     }
                     is TimerEntity.SkipTimer -> {
                         if (direction == ScreenTimerDirection.UP) {
