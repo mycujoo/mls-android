@@ -23,7 +23,7 @@ import tv.mycujoo.E2ETest
 import tv.mycujoo.IdlingResourceHelper
 import tv.mycujoo.domain.entity.*
 import tv.mycujoo.mcls.di.PlayerModule
-import tv.mycujoo.mcls.manager.VariableKeeper
+import tv.mycujoo.mcls.manager.IVariableKeeper
 import tv.mycujoo.mcls.model.ScreenTimerDirection
 import tv.mycujoo.mcls.model.ScreenTimerFormat
 import tv.mycujoo.mcls.player.IPlayer
@@ -40,7 +40,7 @@ class TimersTimingCorrectly : E2ETest() {
     val exoPlayer = ExoPlayer.Builder(context).build()
 
     @Inject
-    lateinit var variableKeeper: VariableKeeper
+    lateinit var variableKeeper: IVariableKeeper
 
     @Inject
     lateinit var player: IPlayer
@@ -98,9 +98,6 @@ class TimersTimingCorrectly : E2ETest() {
         }
 
         // region normal ticker
-        Thread.sleep(300) // Current Play Time 0:01
-        variableKeeper.getValue("\$${TIMER_NAME}") shouldBeEqualTo "0:01"
-
         Thread.sleep(1000) // Current Play Time 0:02
         variableKeeper.getValue("\$${TIMER_NAME}") shouldBeEqualTo "0:02"
 
@@ -113,15 +110,15 @@ class TimersTimingCorrectly : E2ETest() {
         // Due to the time sensitive nature of this operation. I face a variability of 500 milliseconds
         // That's why I'm checking like this
         Thread.sleep(1000) // Current Play Time 0:05
-        variableKeeper.getValue("\$${TIMER_NAME}") shouldBeIn listOf("0:05", "0:06")
+        variableKeeper.getValue("\$${TIMER_NAME}") shouldBeEqualTo "0:05"
         // endregion
 
         // region pause ticker
         Thread.sleep(1000) // Current Play Time 0:06
-        variableKeeper.getValue("\$${TIMER_NAME}") shouldBeIn listOf("0:05", "0:06")
+        variableKeeper.getValue("\$${TIMER_NAME}") shouldBeEqualTo "0:06"
 
         Thread.sleep(1000) // Current Play Time 0:07
-        variableKeeper.getValue("\$${TIMER_NAME}") shouldBeIn listOf("0:05", "0:06")
+        variableKeeper.getValue("\$${TIMER_NAME}") shouldBeEqualTo "0:06"
         // endregion
 
         // region adjust timer
@@ -133,7 +130,7 @@ class TimersTimingCorrectly : E2ETest() {
         // endregion
 
         // region normal ticker
-        Thread.sleep(2000) // Current Play Time 0:10
+        Thread.sleep(6000) // Current Play Time 0:10
         variableKeeper.getValue("\$${TIMER_NAME}") shouldBeEqualTo "1:01"
 
         Thread.sleep(1000) // Current Play Time 0:11
@@ -170,14 +167,14 @@ class TimersTimingCorrectly : E2ETest() {
                     // This is causing trouble if the timer is paused
                     Action.AdjustTimerAction(
                         id = "timer",
-                        offset = 8500,
+                        offset = 8000,
                         absoluteTime = INVALID_TIME,
                         name = "\$${TIMER_NAME}",
                         value = 60000
                     ),
                     Action.StartTimerAction(
                         id = "timer",
-                        offset = 7000,
+                        offset = 15000,
                         absoluteTime = INVALID_TIME,
                         name = "\$${TIMER_NAME}",
                     ),
