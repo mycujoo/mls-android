@@ -55,30 +55,18 @@ class TimerVariable(
 
     override fun start(startTimer: TimerEntity.StartTimer, now: Long) {
         commands.add(startTimer)
-        Timber.d("Before Start ${getTimeInMinutesSecondFormat(currentTime)} $now")
         recalculate(now)
-        Timber.d("After Start ${getTimeInMinutesSecondFormat(currentTime)} $now")
-        Timber.d(" ")
-        Timber.d(" ")
     }
 
     override fun pause(pauseTimer: TimerEntity.PauseTimer, now: Long) {
-        Timber.d("Before Pause ${getTimeInMinutesSecondFormat(currentTime)} $now")
         commands.add(pauseTimer)
         recalculate(now)
-        Timber.d("After Pause ${getTimeInMinutesSecondFormat(currentTime)} $now")
-        Timber.d(" ")
-        Timber.d(" ")
     }
 
 
     override fun adjust(adjustTimer: TimerEntity.AdjustTimer, now: Long) {
-        Timber.d("Before Adjust ${getTimeInMinutesSecondFormat(currentTime)} $now")
         commands.add(adjustTimer)
         recalculate(now)
-        Timber.d("After Adjust ${getTimeInMinutesSecondFormat(currentTime)} $now")
-        Timber.d(" ")
-        Timber.d(" ")
     }
 
     override fun skip(skipTimer: TimerEntity.SkipTimer, now: Long) {
@@ -101,7 +89,6 @@ class TimerVariable(
         var isTicking = false
         sorted
             .forEach { timerEntity ->
-                Timber.d("$now ${timerEntity.offset}")
                 if (now < timerEntity.offset) {
                     return@forEach
                 }
@@ -111,14 +98,6 @@ class TimerVariable(
                             return@forEach
                         }
                         isTicking = true
-
-                        Timber.d(
-                            "Delta $delta, $now - ${timerEntity.offset} = ${now - timerEntity.offset}  ||  ${
-                                getTimeInMinutesSecondFormat(
-                                    currentTime
-                                )
-                            }"
-                        )
                         if (direction == ScreenTimerDirection.UP) {
                             delta += now - timerEntity.offset
                         } else {
@@ -150,7 +129,6 @@ class TimerVariable(
                 }
 
             }
-        Timber.d("####################\t\t####################")
         currentTime = delta
     }
 
