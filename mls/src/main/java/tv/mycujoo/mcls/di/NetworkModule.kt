@@ -45,6 +45,16 @@ open class NetworkModule {
     @Singleton
     fun mlsApiBaseUrl(): String = "https://mls-api.mycujoo.tv"
 
+    @ConcurrencySocketUrl
+    @Provides
+    @Singleton
+    fun provideConcurrencySocketUrl(): String = "wss://bff-rt.mycujoo.tv"
+
+    @ReactorUrl
+    @Provides
+    @Singleton
+    fun provideReactorSocketUrl(): String = "wss://mls-rt.mycujoo.tv"
+
     @Provides
     @Singleton
     open fun provideOkHttp(

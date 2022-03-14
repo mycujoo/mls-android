@@ -3,6 +3,7 @@ package tv.mycujoo.mcls.network.socket
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
+import tv.mycujoo.mcls.di.ConcurrencySocketUrl
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -12,6 +13,7 @@ class ConcurrencySocket @Inject constructor(
     private val okHttpClient: OkHttpClient,
     private val mainSocketListener: MainWebSocketListener,
     private val userPreferencesUtils: UserPreferencesUtils,
+    @ConcurrencySocketUrl private val webSocketUrl: String,
 ) : IConcurrencySocket {
 
     private lateinit var webSocket: WebSocket
@@ -41,7 +43,7 @@ class ConcurrencySocket @Inject constructor(
     }
 
     private fun createSocket(eventId: String) {
-        val request = Request.Builder().url("$CONCURRENCY_WEB_SOCKET_URL$eventId").build()
+        val request = Request.Builder().url("$webSocketUrl/event/$eventId").build()
         webSocket = okHttpClient.newWebSocket(request, mainSocketListener)
         created = true
     }
