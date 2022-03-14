@@ -384,7 +384,7 @@ class AnnotationFactoryTest {
             argThat(
                 TimerVariablesMapArgumentMatcher(
                     "name",
-                    "0:05"
+                    "0:02"
                 )
             )
         )
@@ -411,7 +411,7 @@ class AnnotationFactoryTest {
             argThat(
                 TimerVariablesMapArgumentMatcher(
                     "name",
-                    "0:04"
+                    "0:02"
                 )
             )
         )
