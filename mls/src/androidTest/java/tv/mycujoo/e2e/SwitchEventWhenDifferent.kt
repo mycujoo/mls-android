@@ -46,8 +46,10 @@ import tv.mycujoo.IdlingResourceHelper
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.data.model.*
 import tv.mycujoo.mcls.R
+import tv.mycujoo.mcls.di.ConcurrencySocketUrl
 import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.di.PlayerModule
+import tv.mycujoo.mcls.di.ReactorUrl
 import tv.mycujoo.mcls.network.MlsApi
 import javax.inject.Singleton
 
@@ -159,6 +161,16 @@ class SwitchEventWhenDifferent : E2ETest() {
     @Module
     @InstallIn(SingletonComponent::class)
     class TestNetworkModule {
+
+        @ConcurrencySocketUrl
+        @Provides
+        @Singleton
+        fun provideConcurrencySocketUrl(): String = "wss://bff-rt.mycujoo.tv"
+
+        @ReactorUrl
+        @Provides
+        @Singleton
+        fun provideReactorSocketUrl(): String = "wss://mls-rt.mycujoo.tv"
 
         @Singleton
         @Provides
