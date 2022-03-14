@@ -32,9 +32,7 @@ import tv.mycujoo.data.jsonadapter.JodaJsonAdapter
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.params.EventIdPairParam
 import tv.mycujoo.domain.usecase.GetEventDetailUseCase
-import tv.mycujoo.mcls.di.MLSAPI
-import tv.mycujoo.mcls.di.NetworkModule
-import tv.mycujoo.mcls.di.PublicApi
+import tv.mycujoo.mcls.di.*
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.network.MlsApi
@@ -110,6 +108,16 @@ class TestTvConstructionOfIDToken : E2ETvTest() {
     @Module
     @InstallIn(SingletonComponent::class)
     open class TestNetworkModule {
+
+        @ConcurrencySocketUrl
+        @Provides
+        @Singleton
+        fun provideConcurrencySocketUrl(): String = "wss://bff-rt.mycujoo.tv"
+
+        @ReactorUrl
+        @Provides
+        @Singleton
+        fun provideReactorSocketUrl(): String = "wss://mls-rt.mycujoo.tv"
 
         private val maxAgeInSecond: Int = 60 * 5
 
