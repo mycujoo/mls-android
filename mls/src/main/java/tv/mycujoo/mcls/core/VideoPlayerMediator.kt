@@ -32,10 +32,13 @@ import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.enum.StreamStatus.*
 import tv.mycujoo.mcls.helper.OverlayViewHelper
 import tv.mycujoo.mcls.helper.ViewersCounterHelper.Companion.isViewersCountValid
+import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.mediator.AnnotationMediator
 import tv.mycujoo.mcls.model.JoinTimelineParam
+import tv.mycujoo.mcls.network.socket.IConcurrencySocket
+import tv.mycujoo.mcls.network.socket.IDENTITY_TOKEN
 import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.player.*
 import tv.mycujoo.mcls.player.PlaybackLocation.LOCAL
@@ -47,7 +50,6 @@ import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.LIVE_ON_THE_EDGE
 import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.VOD
 import tv.mycujoo.mcls.widgets.PlayerControllerMode
 import tv.mycujoo.mcls.widgets.RemotePlayerControllerListener
-import java.lang.RuntimeException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -71,7 +73,8 @@ class VideoPlayerMediator @Inject constructor(
     private val analyticsClient: AnalyticsClient,
     private val annotationFactory: IAnnotationFactory,
     private val annotationMediator: AnnotationMediator,
-) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
+    private val concurrencySocket: IConcurrencySocket,
+) : AbstractPlayerMediator(reactorSocket, concurrencySocket, dispatcher, logger) {
 
     private var cast: ICast? = null
     var videoPlayerConfig: VideoPlayerConfig = VideoPlayerConfig.default()
@@ -656,8 +659,7 @@ class VideoPlayerMediator @Inject constructor(
                     // If playback is local, depend on the config, else always load the video but don't play
                     if (playbackLocation == LOCAL) {
                         play(event.streams.first(), playbackLocation != REMOTE)
-                    }
-                    else if (playbackLocation == REMOTE) {
+                    } else if (playbackLocation == REMOTE) {
                         loadRemoteMedia(event, 0, playWhenReady)
                     }
                 }
@@ -770,6 +772,49 @@ class VideoPlayerMediator @Inject constructor(
     }
 
     /**endregion */
+
+    /**
+     * region Concurrency functions
+     */
+
+    fun startWatchSession(eventId: String) {
+        concurrencySocket.startSession(eventId, userPreferencesUtils.getIdentityToken())
+    }
+
+    /**
+     * If concurrency Limit Exceeded, show An Error Message (This would be the device started watching earlier)
+     */
+    override fun onConcurrencyLimitExceeded() {
+        streaming = false
+        player.clearQue()
+        annotationFactory.clearOverlays()
+        player.pause()
+        playerView.showCustomInformationDialog(playerView.resources.getString(R.string.message_concurrency_limit_exceeded))
+        playerView.updateControllerVisibility(isPlaying = false)
+        if (playbackLocation == REMOTE) {
+            cast?.release()
+        }
+    }
+
+    override fun onConcurrencyNoEntitlement() {
+        streaming = false
+        player.clearQue()
+        annotationFactory.clearOverlays()
+        player.pause()
+        playerView.showCustomInformationDialog(playerView.resources.getString(R.string.message_no_entitlement_stream))
+        playerView.updateControllerVisibility(isPlaying = false)
+        if (playbackLocation == REMOTE) {
+            cast?.release()
+        }
+    }
+
+    override fun onConcurrencySocketError(message: String) {
+        logger.log(MessageLevel.ERROR, message)
+    }
+
+    /**
+     * endregion
+     */
 
     /**region Youbora functions*/
     /**
@@ -924,6 +969,7 @@ class VideoPlayerMediator @Inject constructor(
         cancelPulling()
         player.release()
         reactorSocket.leave(true)
+        concurrencySocket.leaveCurrentSession()
         stopYoubora()
     }
 
@@ -956,7 +1002,11 @@ class VideoPlayerMediator @Inject constructor(
      * @param event to be streamed Event
      * Cast module must be integrated by user and configured
      */
-    private fun loadRemoteMedia(event: EventEntity, currentPosition: Long, playWhenReady: Boolean? = null) {
+    private fun loadRemoteMedia(
+        event: EventEntity,
+        currentPosition: Long,
+        playWhenReady: Boolean? = null
+    ) {
         Timber.d("loadRemoteMedia: $event")
         if (event.streamStatus() != PLAYABLE) {
             return

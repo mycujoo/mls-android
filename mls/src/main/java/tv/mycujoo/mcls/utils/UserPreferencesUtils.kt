@@ -2,6 +2,7 @@ package tv.mycujoo.mcls.utils
 
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.manager.IPrefManager
+import tv.mycujoo.mcls.network.socket.IDENTITY_TOKEN
 import javax.inject.Inject
 
 class UserPreferencesUtils @Inject constructor(
@@ -39,6 +40,10 @@ class UserPreferencesUtils @Inject constructor(
 
     fun removeUserId() {
         prefManager.delete(C.USER_ID_PREF_KEY)
+    }
+
+    fun getIdentityToken(): String? {
+        return prefManager.get(C.IDENTITY_TOKEN_PREF_KEY)
     }
 
     /**

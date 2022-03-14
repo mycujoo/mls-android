@@ -3,7 +3,9 @@ package tv.mycujoo.mcls.network.socket
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class MainWebSocketListener @Inject constructor() : WebSocketListener() {
 
 
