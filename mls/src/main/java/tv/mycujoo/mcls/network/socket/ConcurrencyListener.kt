@@ -33,12 +33,12 @@ class ConcurrencyListener constructor(
         }
 
         // OK Response
-        if (responses[0].lowercase() == "ok" && responses.size == 2) {
+        if (responses[0] == "ok" && responses.size == 2) {
             return ConcurrencyMessage.OK
         }
 
         // Limit Exceeded
-        if(responses[0].lowercase() == "concurrencyLimitExceeded") {
+        if(responses[0] == "concurrencyLimitExceeded") {
             return ConcurrencyMessage.CONCURRENCY_LIMIT_EXCEEDED
         }
 

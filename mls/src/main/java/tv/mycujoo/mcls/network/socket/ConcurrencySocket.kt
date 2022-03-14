@@ -1,10 +1,8 @@
 package tv.mycujoo.mcls.network.socket
 
-import androidx.annotation.VisibleForTesting
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
-import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,7 +15,6 @@ class ConcurrencySocket @Inject constructor(
 ) : IConcurrencySocket {
 
     private lateinit var webSocket: WebSocket
-    var connected = false
     var created = false
 
     override fun addListener(concurrencyCallback: ConcurrencyCallback) {
@@ -25,10 +22,6 @@ class ConcurrencySocket @Inject constructor(
     }
 
     override fun startSession(eventId: String, identityToken: String?) {
-        if (connected) {
-            leaveCurrentSession()
-        }
-
         if (created.not()) {
             createSocket(eventId)
         }
