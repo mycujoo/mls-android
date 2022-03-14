@@ -19,10 +19,6 @@ import tv.mycujoo.mcls.manager.IVariableKeeper
 import tv.mycujoo.mcls.manager.VariableKeeper
 import tv.mycujoo.mcls.manager.ViewHandler
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
-import tv.mycujoo.mcls.network.socket.ConcurrencySocket
-import tv.mycujoo.mcls.network.socket.IConcurrencySocket
-import tv.mycujoo.mcls.network.socket.IReactorSocket
-import tv.mycujoo.mcls.network.socket.ReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.Player
 import tv.mycujoo.mcls.tv.player.TvAnnotationListener
@@ -61,14 +57,6 @@ interface AppModuleBinds {
     @Binds
     @Singleton
     fun bindIVariableKeeper(variableKeeper: VariableKeeper): IVariableKeeper
-
-    @Binds
-    @Singleton
-    fun bindReactorSocket(ReactorSocket: ReactorSocket): IReactorSocket
-
-    @Binds
-    @Singleton
-    fun bindConcurrencySocket(concurrencySocket: ConcurrencySocket): IConcurrencySocket
 
     @Binds
     @Singleton
