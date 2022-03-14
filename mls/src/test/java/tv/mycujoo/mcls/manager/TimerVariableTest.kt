@@ -174,7 +174,7 @@ class TimerVariableTest {
         timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 6000L)
         timerVariable.adjust(TimerEntity.AdjustTimer("sample_name", 4000L, 20000L), 6000L)
 
-        assertEquals("0:22", timerVariable.getTime())
+        assertEquals("0:20", timerVariable.getTime())
     }
 
     @Test
@@ -189,7 +189,7 @@ class TimerVariableTest {
         timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 6000L)
         timerVariable.adjust(TimerEntity.AdjustTimer("sample_name", 4000L, 20000L), 6000L)
 
-        assertEquals("0:18", timerVariable.getTime())
+        assertEquals("0:20", timerVariable.getTime())
     }
 
     @Test
