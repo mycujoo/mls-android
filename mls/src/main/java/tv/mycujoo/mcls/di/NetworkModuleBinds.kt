@@ -13,6 +13,9 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Module
 interface NetworkModuleBinds {
+
+
+
     @Binds
     @Singleton
     fun bindReactorSocket(ReactorSocket: ReactorSocket): IReactorSocket

@@ -1,18 +1,19 @@
 package tv.mycujoo.mcls.network.socket
 
-import android.util.Log
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
 import timber.log.Timber
-import tv.mycujoo.mcls.utils.UuidUtils
+import tv.mycujoo.mcls.di.ReactorUrl
 import tv.mycujoo.mcls.model.JoinTimelineParam
+import tv.mycujoo.mcls.utils.UuidUtils
 import javax.inject.Inject
 
 class ReactorSocket @Inject constructor(
     private val okHttpClient: OkHttpClient,
     private val mainSocketListener: MainWebSocketListener,
-    private val uuidUtils: UuidUtils
+    private val uuidUtils: UuidUtils,
+    @ReactorUrl private val webSocketUrl: String,
 ) : IReactorSocket {
 
     private lateinit var webSocket: WebSocket
@@ -114,7 +115,7 @@ class ReactorSocket @Inject constructor(
     }
 
     private fun createSocket() {
-        val request = Request.Builder().url(WEB_SOCKET_URL).build()
+        val request = Request.Builder().url(webSocketUrl).build()
         webSocket = okHttpClient.newWebSocket(request, mainSocketListener)
         created = true
 

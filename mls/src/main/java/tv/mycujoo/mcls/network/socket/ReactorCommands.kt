@@ -1,8 +1,5 @@
 package tv.mycujoo.mcls.network.socket
 
-const val WEB_SOCKET_URL= "wss://mls-rt.mycujoo.tv"
-const val CONCURRENCY_WEB_SOCKET_URL= "wss://bff-rt.mycujoo.tv/event/"
-
 const val SEMICOLON = ";"
 
 const val SESSION_ID = "sessionId;"
