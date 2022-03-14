@@ -9,11 +9,14 @@ import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.enum.StreamStatus
 import tv.mycujoo.mcls.manager.Logger
+import tv.mycujoo.mcls.network.socket.ConcurrencyCallback
+import tv.mycujoo.mcls.network.socket.IConcurrencySocket
 import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.network.socket.ReactorCallback
 
 abstract class AbstractPlayerMediator(
     private val reactorSocket: IReactorSocket,
+    concurrencySocket: IConcurrencySocket,
     private val coroutineScope: CoroutineScope,
     private val logger: Logger
 ) {
@@ -24,6 +27,10 @@ abstract class AbstractPlayerMediator(
     abstract fun onReactorEventUpdate(eventId: String, updateId: String)
     abstract fun onReactorCounterUpdate(counts: String)
     abstract fun onReactorTimelineUpdate(timelineId: String, updateId: String)
+
+    abstract fun onConcurrencyLimitExceeded()
+    abstract fun onConcurrencyNoEntitlement()
+    abstract fun onConcurrencySocketError(message: String)
     /**endregion */
 
     /**region Initializing*/
@@ -37,12 +44,49 @@ abstract class AbstractPlayerMediator(
             override fun onCounterUpdate(counts: String) {
                 onReactorCounterUpdate(counts)
                 logger.log(MessageLevel.INFO, C.VIEWERS_COUNT_UPDATE_MESSAGE)
-
             }
 
             override fun onTimelineUpdate(timelineId: String, updateId: String) {
                 onReactorTimelineUpdate(timelineId, updateId)
                 logger.log(MessageLevel.INFO, C.TIMELINE_UPDATE_MESSAGE)
+            }
+        })
+
+        concurrencySocket.addListener(object : ConcurrencyCallback {
+            override fun onLimitExceeded() {
+                onConcurrencyLimitExceeded()
+            }
+
+            // No Action Required, the situation is OK
+            override fun onOK() {}
+
+            // TODO: Request Further Information
+            override fun onForbidden() {
+                onConcurrencyNoEntitlement()
+            }
+
+            override fun onNoEntitlement() {
+                onConcurrencyNoEntitlement()
+            }
+
+            // Should Retry with backoff strategy
+            override fun onInternalError() {
+                onConcurrencySocketError("Internal Error")
+            }
+
+            // Similar to Internal Error
+            override fun onUnknownError() {
+                onConcurrencySocketError("Unknown Error")
+            }
+
+            // Bad Request Error
+            override fun onInvalidCommand() {
+                onConcurrencySocketError("Invalid Command")
+            }
+
+            // Bad Request Error
+            override fun onMissingIdentifier() {
+                onConcurrencySocketError("Missing Identifier")
             }
         })
     }
