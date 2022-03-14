@@ -42,6 +42,7 @@ import tv.mycujoo.mcls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.model.JoinTimelineParam
+import tv.mycujoo.mcls.network.socket.ConcurrencySocket
 import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaDatum
@@ -61,6 +62,7 @@ import javax.inject.Inject
 class TvVideoPlayer @Inject constructor(
     @ApplicationContext val context: Context,
     private val reactorSocket: IReactorSocket,
+    private val concurrencySocket: ConcurrencySocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     private val logger: Logger,
@@ -70,7 +72,7 @@ class TvVideoPlayer @Inject constructor(
     private val analyticsClient: AnalyticsClient,
     private val controllerAgent: ControllerAgent,
     private val threadUtils: ThreadUtils
-) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
+) : AbstractPlayerMediator(reactorSocket, concurrencySocket, dispatcher, logger) {
 
     lateinit var mMlsTvFragment: MLSTVFragment
     var ima: IIma? = null
@@ -331,6 +333,18 @@ class TvVideoPlayer @Inject constructor(
 
     override fun onReactorTimelineUpdate(timelineId: String, updateId: String) {
         fetchActions(timelineId, updateId, false)
+    }
+
+    override fun onConcurrencyLimitExceeded() {
+        // TODO
+    }
+
+    override fun onConcurrencyNoEntitlement() {
+        // TODO
+    }
+
+    override fun onConcurrencySocketError(message: String) {
+        // TODO
     }
 
     private fun fetchActions(event: EventEntity, joinTimeLine: Boolean) {

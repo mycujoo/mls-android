@@ -1,5 +1,6 @@
 package tv.mycujoo.mcls.network.socket
 
+import androidx.annotation.VisibleForTesting
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
@@ -35,7 +36,7 @@ class ConcurrencySocket @Inject constructor(
         val requestMessage = if (identityToken == null) {
             "$SESSION_ID${userPreferencesUtils.getPseudoUserId()}"
         } else {
-            "$SESSION_ID${userPreferencesUtils.getPseudoUserId()}$IDENTITY_TOKEN$identityToken"
+            "$SESSION_ID${userPreferencesUtils.getPseudoUserId()}$SEMICOLON$IDENTITY_TOKEN$identityToken"
         }
 
         webSocket.send(requestMessage)

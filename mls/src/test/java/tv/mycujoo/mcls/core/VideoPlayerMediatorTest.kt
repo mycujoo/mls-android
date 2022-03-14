@@ -39,6 +39,7 @@ import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.ViewHandler
 import tv.mycujoo.mcls.matcher.SeekParameterArgumentMatcher
 import tv.mycujoo.mcls.mediator.AnnotationMediator
+import tv.mycujoo.mcls.network.socket.ConcurrencySocket
 import tv.mycujoo.mcls.network.socket.MainWebSocketListener
 import tv.mycujoo.mcls.network.socket.ReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
@@ -108,6 +109,9 @@ class VideoPlayerMediatorTest {
 
     @Mock
     lateinit var youboraClient: YouboraClient
+
+    @Mock
+    lateinit var concurrencySocket: ConcurrencySocket
 
     @Mock
     lateinit var annotationMediator: AnnotationMediator
@@ -191,7 +195,8 @@ class VideoPlayerMediatorTest {
             overlayViewHelper,
             youboraClient,
             annotationFactory,
-            annotationMediator
+            annotationMediator,
+            concurrencySocket,
         )
         videoPlayerMediator.initialize(playerView, mMLSBuilder, listOf(), cast)
     }
