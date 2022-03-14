@@ -36,7 +36,7 @@ class ConcurrencySocketTest {
         whenever(okHttpClient.newWebSocket(any(), any())).thenReturn(webSocket)
 
         concurrencySocket =
-            ConcurrencySocket(okHttpClient, mainWebSocketListener, userPreferencesUtils)
+            ConcurrencySocket(okHttpClient, mainWebSocketListener, userPreferencesUtils, "wss://bff-rt.mycujoo.tv")
     }
 
     @Test
