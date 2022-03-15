@@ -15,5 +15,5 @@ interface IVariableKeeper {
     fun createVariablePublisher(name: String)
     fun observeOnVariable(variableName: String, callback: (Pair<String, String>) -> Unit)
     fun getVariableNames(): List<String>
-    fun notifyVariables(timerVariables: HashMap<String, VariableEntity>)
+    fun notifyVariables(variableEntities: HashMap<String, VariableEntity>)
 }
