@@ -28,9 +28,9 @@ abstract class AbstractPlayerMediator(
     abstract fun onReactorCounterUpdate(counts: String)
     abstract fun onReactorTimelineUpdate(timelineId: String, updateId: String)
 
+    abstract fun onConcurrencyBadRequest(reason: String)
     abstract fun onConcurrencyLimitExceeded()
-    abstract fun onConcurrencyNoEntitlement()
-    abstract fun onConcurrencySocketError(message: String)
+    abstract fun onConcurrencyServerError()
     /**endregion */
 
     /**region Initializing*/
@@ -57,36 +57,12 @@ abstract class AbstractPlayerMediator(
                 onConcurrencyLimitExceeded()
             }
 
-            // No Action Required, the situation is OK
-            override fun onOK() {}
-
-            // TODO: Request Further Information
-            override fun onForbidden() {
-                onConcurrencyNoEntitlement()
+            override fun onBadRequest(reason: String) {
+                onConcurrencyBadRequest(reason)
             }
 
-            override fun onNoEntitlement() {
-                onConcurrencyNoEntitlement()
-            }
-
-            // Should Retry with backoff strategy
-            override fun onInternalError() {
-                onConcurrencySocketError("Internal Error")
-            }
-
-            // Similar to Internal Error
-            override fun onUnknownError() {
-                onConcurrencySocketError("Unknown Error")
-            }
-
-            // Bad Request Error
-            override fun onInvalidCommand() {
-                onConcurrencySocketError("Invalid Command")
-            }
-
-            // Bad Request Error
-            override fun onMissingIdentifier() {
-                onConcurrencySocketError("Missing Identifier")
+            override fun onServerError() {
+                onConcurrencyServerError()
             }
         })
     }

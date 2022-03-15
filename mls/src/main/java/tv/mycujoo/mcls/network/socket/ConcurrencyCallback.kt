@@ -2,19 +2,9 @@ package tv.mycujoo.mcls.network.socket
 
 interface ConcurrencyCallback {
 
-    fun onOK()
+    fun onBadRequest(reason: String)
 
-    fun onMissingIdentifier()
-
-    fun onForbidden()
-
-    fun onNoEntitlement()
-
-    fun onInternalError()
-
-    fun onInvalidCommand()
-
-    fun onUnknownError()
+    fun onServerError()
 
     fun onLimitExceeded()
 }

@@ -23,7 +23,8 @@ data class EventEntity(
     val timeline_ids: List<String>,
     val metadata: Metadata?,
     val is_test: Boolean,
-    val isNativeMLS: Boolean = true
+    val isNativeMLS: Boolean = true,
+    val is_protected: Boolean = false
 ) {
     fun streamStatus(): StreamStatus {
         if (streams.isEmpty()) {

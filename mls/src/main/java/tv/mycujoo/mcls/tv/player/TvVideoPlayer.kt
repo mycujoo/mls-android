@@ -335,15 +335,15 @@ class TvVideoPlayer @Inject constructor(
         fetchActions(timelineId, updateId, false)
     }
 
+    override fun onConcurrencyBadRequest(reason: String) {
+        // TODO
+    }
+
     override fun onConcurrencyLimitExceeded() {
         // TODO
     }
 
-    override fun onConcurrencyNoEntitlement() {
-        // TODO
-    }
-
-    override fun onConcurrencySocketError(message: String) {
+    override fun onConcurrencyServerError() {
         // TODO
     }
 

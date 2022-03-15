@@ -44,6 +44,7 @@ import tv.mycujoo.mcls.player.*
 import tv.mycujoo.mcls.player.PlaybackLocation.LOCAL
 import tv.mycujoo.mcls.player.PlaybackLocation.REMOTE
 import tv.mycujoo.mcls.utils.StringUtils
+import tv.mycujoo.mcls.utils.ThreadUtils
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.LIVE_ON_THE_EDGE
@@ -74,6 +75,7 @@ class VideoPlayerMediator @Inject constructor(
     private val annotationFactory: IAnnotationFactory,
     private val annotationMediator: AnnotationMediator,
     private val concurrencySocket: IConcurrencySocket,
+    private val threadUtils: ThreadUtils,
 ) : AbstractPlayerMediator(reactorSocket, concurrencySocket, dispatcher, logger) {
 
     private var cast: ICast? = null
@@ -132,6 +134,22 @@ class VideoPlayerMediator @Inject constructor(
      */
     private var publicKey: String = ""
 
+    /**
+     * onConcurrencyLimitExceeded, the extension that the app can use to define it's own behaviour
+     * when the limit has been exceeded
+     */
+    private var onConcurrencyLimitExceeded: (() -> Unit)? = null
+
+    /**
+     * Retry action for ConcurrencyRequest
+     */
+    private val concurrencyRequestRetryHandler = threadUtils.provideHandler()
+    private val concurrencyRequestRetryRunnable = Runnable {
+        dataManager.currentEvent?.id?.let {
+            startWatchSession(it)
+        }
+    }
+
     /**endregion */
 
     /**region Initialization*/
@@ -143,6 +161,7 @@ class VideoPlayerMediator @Inject constructor(
     ) {
         this.playerView = MLSPlayerView
         publicKey = builder.publicKey
+        onConcurrencyLimitExceeded = builder.onConcurrencyLimitExceeded
 
         player.getDirectInstance()?.let {
             videoPlayer = VideoPlayer(it, this, playerView)
@@ -588,11 +607,16 @@ class VideoPlayerMediator @Inject constructor(
             if (streaming) streaming = false
             shouldPlayWhenReady = true
             player.clearQue()
+            concurrencyRequestRetryHandler.removeCallbacks(concurrencyRequestRetryRunnable)
             annotationFactory.clearOverlays()
         }
         dataManager.currentEvent = event
         updateStreamStatus(event)
         playVideoOrDisplayEventInfo(event, shouldPlayWhenReady)
+
+        if (event.is_protected) {
+            startWatchSession(eventId = event.id)
+        }
 
         // If the event is constructed manually and not a native MLS, it should not be replaced with any other version
         if (event.isNativeMLS) {
@@ -777,7 +801,7 @@ class VideoPlayerMediator @Inject constructor(
      * region Concurrency functions
      */
 
-    fun startWatchSession(eventId: String) {
+    private fun startWatchSession(eventId: String) {
         concurrencySocket.startSession(eventId, userPreferencesUtils.getIdentityToken())
     }
 
@@ -788,28 +812,21 @@ class VideoPlayerMediator @Inject constructor(
         streaming = false
         player.clearQue()
         annotationFactory.clearOverlays()
-        player.pause()
         playerView.showCustomInformationDialog(playerView.resources.getString(R.string.message_concurrency_limit_exceeded))
         playerView.updateControllerVisibility(isPlaying = false)
         if (playbackLocation == REMOTE) {
             cast?.release()
         }
+
+        onConcurrencyLimitExceeded?.invoke()
     }
 
-    override fun onConcurrencyNoEntitlement() {
-        streaming = false
-        player.clearQue()
-        annotationFactory.clearOverlays()
-        player.pause()
-        playerView.showCustomInformationDialog(playerView.resources.getString(R.string.message_no_entitlement_stream))
-        playerView.updateControllerVisibility(isPlaying = false)
-        if (playbackLocation == REMOTE) {
-            cast?.release()
-        }
+    override fun onConcurrencyBadRequest(reason: String) {
+        logger.log(MessageLevel.ERROR, reason)
     }
 
-    override fun onConcurrencySocketError(message: String) {
-        logger.log(MessageLevel.ERROR, message)
+    override fun onConcurrencyServerError() {
+        concurrencyRequestRetryHandler.postDelayed(concurrencyRequestRetryRunnable, 5000)
     }
 
     /**
