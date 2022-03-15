@@ -170,15 +170,17 @@ dependencies {
     testImplementation 'joda-time:joda-time:2.10.13'
 
     // Exoplayer
-    api 'com.google.android.exoplayer:exoplayer:2.17.0'
-    api 'com.google.android.exoplayer:exoplayer-hls:2.17.0'
+    def exo_player_version = "2.17.1"
+    api "com.google.android.exoplayer:exoplayer:$exo_player_version"
+    api "com.google.android.exoplayer:exoplayer-hls:$exo_player_version"
+    api "com.google.android.exoplayer:extension-leanback:$exo_player_version"
+    api "com.google.android.exoplayer:extension-okhttp:$exo_player_version"
 
     api 'com.nicepeopleatwork:exoplayer-adapter:6.7.29'
 
 
     //TV
     api "androidx.leanback:leanback-preference:1.0.0"
-    api 'com.google.android.exoplayer:extension-leanback:2.17.0'
 
     // Android Test Rules
     androidTestImplementation "androidx.test.ext:junit-ktx:1.1.3"

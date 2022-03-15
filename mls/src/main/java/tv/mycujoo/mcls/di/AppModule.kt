@@ -5,8 +5,10 @@ import android.content.SharedPreferences
 import android.content.res.AssetManager
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSource
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
+import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import dagger.Module
 import dagger.Provides
@@ -17,18 +19,18 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.newSingleThreadContext
+import okhttp3.Cache
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import tv.mycujoo.mcls.BuildConfig
-import tv.mycujoo.mcls.core.IAnnotationFactory
-import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.PrefManager
-import tv.mycujoo.mcls.mediator.AnnotationMediator
-import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaFactory
 import tv.mycujoo.mcls.utils.ThreadUtils
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 /**
@@ -43,6 +45,28 @@ open class AppModule {
     @Singleton
     fun provideLogger(): Logger {
         return Logger(LogLevel.MINIMAL)
+    }
+
+    @Provides
+    @Singleton
+    @ExoPlayerOkHttp
+    fun provideExoPlayerHttpClient(
+        @ApplicationContext context: Context
+    ): OkHttpClient {
+        val cacheSize = 10 * 1024 * 1024 // 10 MiB
+        val cache = Cache(context.cacheDir, cacheSize.toLong())
+
+        val loggingInterceptor = HttpLoggingInterceptor()
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+
+        val okHttpBuilder = OkHttpClient.Builder()
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .addInterceptor(loggingInterceptor)
+            .cache(cache)
+
+        return okHttpBuilder.build()
     }
 
     @Provides
@@ -99,9 +123,11 @@ open class AppModule {
 
     @Singleton
     @Provides
-    fun provideHlsMediaSource(): HlsMediaSource.Factory {
+    fun provideHlsMediaSource(
+        @ExoPlayerOkHttp okHttpClient: OkHttpClient
+    ): HlsMediaSource.Factory {
         return HlsMediaSource.Factory(
-            DefaultHttpDataSource.Factory()
+            OkHttpDataSource.Factory(okHttpClient)
         )
     }
 
@@ -110,9 +136,14 @@ open class AppModule {
     fun provideDefaultMediaSourceFactory(
         @ApplicationContext context: Context
     ): DefaultMediaSourceFactory {
-        return DefaultMediaSourceFactory(
-            context
-        )
+        val httpDataSourceFactory = DefaultHttpDataSource
+            .Factory()
+            .setAllowCrossProtocolRedirects(true)
+
+        val dataSource = DefaultDataSource
+            .Factory(context, httpDataSourceFactory)
+
+        return DefaultMediaSourceFactory(dataSource)
     }
 
     @Singleton
