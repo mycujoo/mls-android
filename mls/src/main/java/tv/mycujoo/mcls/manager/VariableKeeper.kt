@@ -74,9 +74,9 @@ class VariableKeeper @Inject constructor(private val dispatcher: CoroutineScope)
         }
     }
 
-    override fun notifyVariables(timerVariables: HashMap<String, VariableEntity>) {
+    override fun notifyVariables(variableEntities: HashMap<String, VariableEntity>) {
         variablePublisherMap.forEach { e ->
-            timerVariables[e.key]?.let { setEntityVariable ->
+            variableEntities[e.key]?.let { setEntityVariable ->
                 e.value.accept(setEntityVariable.variable.printValue())
             }
         }
