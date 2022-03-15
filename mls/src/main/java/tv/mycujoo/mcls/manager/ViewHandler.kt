@@ -106,11 +106,7 @@ open class ViewHandler @Inject constructor(
 
     /**region msc*/
     override fun clearAll() {
-        overlayHost.children.forEach {
-            if (attachedViewList.contains(it)) {
-                overlayHost.removeView(it)
-            }
-        }
+        overlayHost.removeAllViewsInLayout()
 
         attachedViewList.clear()
         animations.clear()

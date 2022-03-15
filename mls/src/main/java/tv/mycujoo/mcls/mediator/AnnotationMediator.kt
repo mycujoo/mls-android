@@ -171,7 +171,7 @@ class AnnotationMediator @Inject constructor(
 
         scheduler.scheduleAtFixedRate(
             scheduledRunnable,
-            ONE_SECOND_IN_MS,
+            0, // Initial Delay
             ONE_SECOND_IN_MS,
             TimeUnit.MILLISECONDS
         )

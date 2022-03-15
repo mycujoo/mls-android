@@ -5,7 +5,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import tv.mycujoo.domain.entity.VariableEntity
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class VariableKeeper @Inject constructor(private val dispatcher: CoroutineScope) : IVariableKeeper {
 
 

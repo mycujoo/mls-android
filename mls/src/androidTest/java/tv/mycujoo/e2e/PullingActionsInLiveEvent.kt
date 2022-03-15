@@ -9,8 +9,6 @@ import androidx.test.internal.runner.junit4.statement.UiThreadStatement
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,12 +16,10 @@ import dagger.hilt.android.testing.BindValue
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.UninstallModules
 import dagger.hilt.components.SingletonComponent
-import io.reactivex.rxjava3.schedulers.Schedulers
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.amshove.kluent.shouldBeEqualTo
-import org.jetbrains.annotations.Async
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -32,18 +28,14 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import tv.mycujoo.E2ETest
 import tv.mycujoo.IdlingResourceHelper
 import tv.mycujoo.domain.entity.*
-import tv.mycujoo.mcls.api.PlayerViewContract
 import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.di.PlayerModule
-import tv.mycujoo.mcls.helper.OverlayViewHelper
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.model.ScreenTimerDirection
 import tv.mycujoo.mcls.model.ScreenTimerFormat
 import tv.mycujoo.mcls.network.MlsApi
-import java.util.concurrent.Executors
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.concurrent.thread
 
 /**
  * Testing 2 Sets of Actions, Applied at runtime with delay in between.
@@ -175,7 +167,7 @@ class PullingActionsInLiveEvent : E2ETest() {
     "streams": [
         {
             "id": "ckwwahs2o000k0123hr2pqqwe",
-            "full_url": "https://europe-west-hls.mls.mycujoo.tv/mohammadalkalaleeb/ckwwahs2o000k0123hr2pqqwe/master.m3u8",
+            "full_url": "https://playlists.mycujoo.football/eu/ckyah0e5s0g9x0jfs68jxh1ia/master.m3u8",
             "has_secure_link": false,
             "is_protected": false,
             "has_geoblocking_rules": false,
