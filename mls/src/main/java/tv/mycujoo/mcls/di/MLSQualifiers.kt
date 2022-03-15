@@ -33,3 +33,7 @@ annotation class ReactorUrl
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 annotation class ConcurrencySocketUrl
+
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ExoPlayerOkHttp

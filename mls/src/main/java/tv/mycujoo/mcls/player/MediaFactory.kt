@@ -6,6 +6,7 @@ import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.hls.DefaultHlsExtractorFactory
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
+import com.google.android.exoplayer2.util.MimeTypes
 
 class MediaFactory(
     val defaultMediaSourceFactory: DefaultMediaSourceFactory,
@@ -23,6 +24,9 @@ class MediaFactory(
     }
 
     fun createMediaItem(uri: String): MediaItem {
-        return mediaItemBuilder.setUri(uri).build()
+        return mediaItemBuilder
+            .setUri(uri)
+            .setMimeType(MimeTypes.APPLICATION_M3U8)
+            .build()
     }
 }

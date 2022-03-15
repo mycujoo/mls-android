@@ -3,8 +3,10 @@ package tv.mycujoo.mcls.network.socket
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
+import timber.log.Timber
 import tv.mycujoo.mcls.di.ConcurrencySocketUrl
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
+import java.lang.IllegalArgumentException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,15 +18,14 @@ class ConcurrencySocket @Inject constructor(
     @ConcurrencySocketUrl private val webSocketUrl: String,
 ) : IConcurrencySocket {
 
-    private lateinit var webSocket: WebSocket
-    var created = false
+    private var webSocket: WebSocket? = null
 
     override fun addListener(concurrencyCallback: ConcurrencyCallback) {
         mainSocketListener.addListener(ConcurrencyListener(concurrencyCallback))
     }
 
     override fun startSession(eventId: String, identityToken: String?) {
-        if (created.not()) {
+        if (webSocket == null) {
             createSocket(eventId)
         }
 
@@ -34,17 +35,20 @@ class ConcurrencySocket @Inject constructor(
             "$SESSION_ID${userPreferencesUtils.getPseudoUserId()}$SEMICOLON$IDENTITY_TOKEN$identityToken"
         }
 
-        webSocket.send(requestMessage)
+        webSocket?.send(requestMessage)
     }
 
     override fun leaveCurrentSession() {
-        webSocket.close(NORMAL_CLOSURE_STATUS_CODE, null)
-        created = false
+        try {
+            webSocket?.close(NORMAL_CLOSURE_STATUS_CODE, null)
+        } catch (socketError: IllegalArgumentException) {
+            Timber.e("Error Closing the Socket ${socketError.message}")
+        }
+        webSocket = null
     }
 
     private fun createSocket(eventId: String) {
         val request = Request.Builder().url("$webSocketUrl/event/$eventId").build()
         webSocket = okHttpClient.newWebSocket(request, mainSocketListener)
-        created = true
     }
 }
