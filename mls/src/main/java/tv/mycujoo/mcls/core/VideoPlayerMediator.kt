@@ -32,13 +32,11 @@ import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.enum.StreamStatus.*
 import tv.mycujoo.mcls.helper.OverlayViewHelper
 import tv.mycujoo.mcls.helper.ViewersCounterHelper.Companion.isViewersCountValid
-import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.mediator.AnnotationMediator
 import tv.mycujoo.mcls.model.JoinTimelineParam
 import tv.mycujoo.mcls.network.socket.IConcurrencySocket
-import tv.mycujoo.mcls.network.socket.IDENTITY_TOKEN
 import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.player.*
 import tv.mycujoo.mcls.player.PlaybackLocation.LOCAL
@@ -607,7 +605,9 @@ class VideoPlayerMediator @Inject constructor(
             if (streaming) streaming = false
             shouldPlayWhenReady = true
             player.clearQue()
+            // Prepare to switch and leave current channel. If trying to reconnect cancel it
             concurrencyRequestRetryHandler.removeCallbacks(concurrencyRequestRetryRunnable)
+            concurrencySocket.leaveCurrentSession()
             annotationFactory.clearOverlays()
         }
         dataManager.currentEvent = event
