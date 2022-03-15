@@ -38,6 +38,8 @@ open class MLSBuilder {
     internal var logLevel = LogLevel.MINIMAL
     internal var publicKey: String = ""
         private set
+    internal var onConcurrencyLimitExceeded: (() -> Unit)? = null
+        private set
     internal var pseudoUserId: String? = null
         private set
     internal var userId: String? = null
@@ -82,6 +84,10 @@ open class MLSBuilder {
 
     fun customPseudoUserId(pseudoUserId: String) = apply {
         this.pseudoUserId = pseudoUserId
+    }
+
+    fun setOnConcurrencyLimitExceeded(action: () -> Unit) = apply {
+        onConcurrencyLimitExceeded = action
     }
 
     fun userId(userId: String) = apply {

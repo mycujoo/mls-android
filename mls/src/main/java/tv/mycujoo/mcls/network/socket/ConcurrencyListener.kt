@@ -2,8 +2,6 @@ package tv.mycujoo.mcls.network.socket
 
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
-import tv.mycujoo.mcls.enum.MessageLevel
-import tv.mycujoo.mcls.manager.Logger
 
 class ConcurrencyListener constructor(
     private val concurrencyCallback: ConcurrencyCallback
@@ -13,14 +11,15 @@ class ConcurrencyListener constructor(
         super.onMessage(webSocket, text)
 
         when (parseMessage(text)) {
-            ConcurrencyMessage.OK -> concurrencyCallback.onOK()
+            ConcurrencyMessage.OK -> {
+            }
             ConcurrencyMessage.CONCURRENCY_LIMIT_EXCEEDED -> concurrencyCallback.onLimitExceeded()
-            ConcurrencyMessage.MISSING_IDENTIFIER -> concurrencyCallback.onMissingIdentifier()
-            ConcurrencyMessage.FORBIDDEN -> concurrencyCallback.onForbidden()
-            ConcurrencyMessage.NOT_ENTITLED -> concurrencyCallback.onNoEntitlement()
-            ConcurrencyMessage.INTERNAL_ERROR -> concurrencyCallback.onInternalError()
-            ConcurrencyMessage.INVALID_COMMAND -> concurrencyCallback.onInvalidCommand()
-            ConcurrencyMessage.UNKNOWN_ERROR -> concurrencyCallback.onUnknownError()
+            ConcurrencyMessage.MISSING_IDENTIFIER -> concurrencyCallback.onBadRequest(ConcurrencyMessage.MISSING_IDENTIFIER.toString())
+            ConcurrencyMessage.FORBIDDEN -> concurrencyCallback.onBadRequest(ConcurrencyMessage.FORBIDDEN.toString())
+            ConcurrencyMessage.NOT_ENTITLED -> concurrencyCallback.onBadRequest(ConcurrencyMessage.NOT_ENTITLED.toString())
+            ConcurrencyMessage.INTERNAL_ERROR -> concurrencyCallback.onServerError()
+            ConcurrencyMessage.INVALID_COMMAND -> concurrencyCallback.onBadRequest(ConcurrencyMessage.INVALID_COMMAND.toString())
+            ConcurrencyMessage.UNKNOWN_ERROR -> concurrencyCallback.onBadRequest(ConcurrencyMessage.UNKNOWN_ERROR.toString())
         }
     }
 
