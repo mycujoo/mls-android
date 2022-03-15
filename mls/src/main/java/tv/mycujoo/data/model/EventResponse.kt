@@ -16,7 +16,8 @@ data class EventSourceData(
     @field:Json(name = "timezone") val timezone: String,
     @field:Json(name = "timeline_ids") val timeline_ids: List<String>,
     @field:Json(name = "metadata") val metadata: MetadataSourceData,
-    @field:Json(name = "is_test") val is_test: Boolean
+    @field:Json(name = "is_test") val is_test: Boolean,
+    @field:Json(name = "is_protected") val is_protected: Boolean,
 )
 
 data class StreamSourceData(

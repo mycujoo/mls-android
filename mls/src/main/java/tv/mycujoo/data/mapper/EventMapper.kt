@@ -28,7 +28,8 @@ class EventMapper {
                 sourceData.timezone,
                 sourceData.timeline_ids,
                 metaData,
-                sourceData.is_test
+                sourceData.is_test,
+                sourceData.is_protected,
             )
         }
 
