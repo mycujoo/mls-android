@@ -11,17 +11,17 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ConcurrencySocket @Inject constructor(
+class BFFRTSocket @Inject constructor(
     private val okHttpClient: OkHttpClient,
     private val mainSocketListener: MainWebSocketListener,
     private val userPreferencesUtils: UserPreferencesUtils,
     @ConcurrencySocketUrl private val webSocketUrl: String,
-) : IConcurrencySocket {
+) : IBFFRTSocket {
 
     private var webSocket: WebSocket? = null
 
-    override fun addListener(concurrencyCallback: ConcurrencyCallback) {
-        mainSocketListener.addListener(ConcurrencyListener(concurrencyCallback))
+    override fun addListener(BFFRTCallback: BFFRTCallback) {
+        mainSocketListener.addListener(BFFRTListener(BFFRTCallback))
     }
 
     override fun startSession(eventId: String, identityToken: String?) {

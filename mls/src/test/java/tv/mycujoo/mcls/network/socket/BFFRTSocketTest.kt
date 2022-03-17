@@ -1,9 +1,7 @@
 package tv.mycujoo.mcls.network.socket
 
 import okhttp3.OkHttpClient
-import okhttp3.Request
 import okhttp3.WebSocket
-import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,10 +14,10 @@ import org.mockito.kotlin.whenever
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
 
 @RunWith(MockitoJUnitRunner::class)
-class ConcurrencySocketTest {
+class BFFRTSocketTest {
 
     private lateinit var mainWebSocketListener: MainWebSocketListener
-    private lateinit var concurrencySocket: ConcurrencySocket
+    private lateinit var BFFRTSocket: BFFRTSocket
 
     @Mock
     lateinit var okHttpClient: OkHttpClient
@@ -35,14 +33,14 @@ class ConcurrencySocketTest {
         mainWebSocketListener = MainWebSocketListener()
         whenever(okHttpClient.newWebSocket(any(), any())).thenReturn(webSocket)
 
-        concurrencySocket =
-            ConcurrencySocket(okHttpClient, mainWebSocketListener, userPreferencesUtils, "wss://bff-rt.mycujoo.tv")
+        BFFRTSocket =
+            BFFRTSocket(okHttpClient, mainWebSocketListener, userPreferencesUtils, "wss://bff-rt.mycujoo.tv")
     }
 
     @Test
     fun `given start session with no identity token should start session`() {
         whenever(userPreferencesUtils.getPseudoUserId()).thenReturn("pseudo_user_id")
-        concurrencySocket.startSession("123", null)
+        BFFRTSocket.startSession("123", null)
 
         verify(webSocket, atLeastOnce()).send("${SESSION_ID}pseudo_user_id")
     }
@@ -50,7 +48,7 @@ class ConcurrencySocketTest {
     @Test
     fun `given start session with identity token should start session`() {
         whenever(userPreferencesUtils.getPseudoUserId()).thenReturn("pseudo_user_id")
-        concurrencySocket.startSession("123", "token")
+        BFFRTSocket.startSession("123", "token")
 
         verify(webSocket, atLeastOnce()).send("${SESSION_ID}pseudo_user_id$SEMICOLON${IDENTITY_TOKEN}token")
     }
@@ -59,8 +57,8 @@ class ConcurrencySocketTest {
     fun `given leave session should leave session`() {
         whenever(userPreferencesUtils.getPseudoUserId()).thenReturn("pseudo_user_id")
 
-        concurrencySocket.startSession("123", null)
-        concurrencySocket.leaveCurrentSession()
+        BFFRTSocket.startSession("123", null)
+        BFFRTSocket.leaveCurrentSession()
 
         verify(webSocket, atLeastOnce()).close(NORMAL_CLOSURE_STATUS_CODE, null)
     }
