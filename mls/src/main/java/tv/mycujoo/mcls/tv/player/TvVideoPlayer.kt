@@ -52,6 +52,7 @@ import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackTransportControlGlueImplKt
 import tv.mycujoo.mcls.utils.StringUtils
 import tv.mycujoo.mcls.utils.ThreadUtils
+import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import tv.mycujoo.mcls.widgets.CustomInformationDialog
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mcls.widgets.PreEventInformationDialog
@@ -71,7 +72,8 @@ class TvVideoPlayer @Inject constructor(
     private val annotationFactory: IAnnotationFactory,
     private val analyticsClient: AnalyticsClient,
     private val controllerAgent: ControllerAgent,
-    private val threadUtils: ThreadUtils
+    private val threadUtils: ThreadUtils,
+    private val userPreferencesUtils: UserPreferencesUtils,
 ) : AbstractPlayerMediator(reactorSocket, concurrencySocket, dispatcher, logger) {
 
     lateinit var mMlsTvFragment: MLSTVFragment
@@ -103,6 +105,22 @@ class TvVideoPlayer @Inject constructor(
      * Latest updateId received from Reactor service, or null if not joined at all
      */
     private var updateId: String? = null
+
+    /**
+     * onConcurrencyLimitExceeded, the extension that the app can use to define it's own behaviour
+     * when the limit has been exceeded
+     */
+    private var onConcurrencyLimitExceeded: (() -> Unit)? = null
+
+    /**
+     * Retry action for ConcurrencyRequest
+     */
+    private val concurrencyRequestRetryHandler = threadUtils.provideHandler()
+    private val concurrencyRequestRetryRunnable = Runnable {
+        dataManager.currentEvent?.id?.let {
+            startWatchSession(it)
+        }
+    }
 
     private var playerReady = false
 
@@ -335,16 +353,24 @@ class TvVideoPlayer @Inject constructor(
         fetchActions(timelineId, updateId, false)
     }
 
+    private fun startWatchSession(eventId: String) {
+        concurrencySocket.startSession(eventId, userPreferencesUtils.getIdentityToken())
+    }
+
     override fun onConcurrencyBadRequest(reason: String) {
-        // TODO
+        logger.log(MessageLevel.ERROR, reason)
     }
 
     override fun onConcurrencyLimitExceeded() {
-        // TODO
+        streaming = false
+        player.clearQue()
+        annotationFactory.clearOverlays()
+
+        onConcurrencyLimitExceeded?.invoke()
     }
 
     override fun onConcurrencyServerError() {
-        // TODO
+        concurrencyRequestRetryHandler.postDelayed(concurrencyRequestRetryRunnable, 5000)
     }
 
     private fun fetchActions(event: EventEntity, joinTimeLine: Boolean) {
