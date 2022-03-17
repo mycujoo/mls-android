@@ -805,6 +805,10 @@ class VideoPlayerMediator @Inject constructor(
         concurrencySocket.startSession(eventId, userPreferencesUtils.getIdentityToken())
     }
 
+    fun setOnConcurrencyControlExceeded(action: () -> Unit) {
+        onConcurrencyLimitExceeded = action
+    }
+
     /**
      * If concurrency Limit Exceeded, show An Error Message (This would be the device started watching earlier)
      */
