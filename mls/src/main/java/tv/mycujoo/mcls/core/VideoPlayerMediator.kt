@@ -1,7 +1,6 @@
 package tv.mycujoo.mcls.core
 
 import android.app.Activity
-import androidx.annotation.UiThread
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player.*
 import com.google.android.exoplayer2.SeekParameters
@@ -37,7 +36,7 @@ import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.mediator.AnnotationMediator
 import tv.mycujoo.mcls.model.JoinTimelineParam
-import tv.mycujoo.mcls.network.socket.IConcurrencySocket
+import tv.mycujoo.mcls.network.socket.IBFFRTSocket
 import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.player.*
 import tv.mycujoo.mcls.player.PlaybackLocation.LOCAL
@@ -73,9 +72,9 @@ class VideoPlayerMediator @Inject constructor(
     private val analyticsClient: AnalyticsClient,
     private val annotationFactory: IAnnotationFactory,
     private val annotationMediator: AnnotationMediator,
-    private val concurrencySocket: IConcurrencySocket,
+    private val bffRtSocket: IBFFRTSocket,
     private val threadUtils: ThreadUtils,
-) : AbstractPlayerMediator(reactorSocket, concurrencySocket, dispatcher, logger) {
+) : AbstractPlayerMediator(reactorSocket, bffRtSocket, dispatcher, logger) {
 
     private var cast: ICast? = null
     var videoPlayerConfig: VideoPlayerConfig = VideoPlayerConfig.default()
@@ -144,6 +143,8 @@ class VideoPlayerMediator @Inject constructor(
      */
     private val concurrencyRequestRetryHandler = threadUtils.provideHandler()
     private val concurrencyRequestRetryRunnable = Runnable {
+        Timber.d("Retrying")
+        bffRtSocket.leaveCurrentSession()
         dataManager.currentEvent?.id?.let {
             startWatchSession(it)
         }
@@ -608,7 +609,7 @@ class VideoPlayerMediator @Inject constructor(
             player.clearQue()
             // Prepare to switch and leave current channel. If trying to reconnect cancel it
             concurrencyRequestRetryHandler.removeCallbacks(concurrencyRequestRetryRunnable)
-            concurrencySocket.leaveCurrentSession()
+            bffRtSocket.leaveCurrentSession()
             annotationFactory.clearOverlays()
         }
         dataManager.currentEvent = event
@@ -803,7 +804,7 @@ class VideoPlayerMediator @Inject constructor(
      */
 
     private fun startWatchSession(eventId: String) {
-        concurrencySocket.startSession(eventId, userPreferencesUtils.getIdentityToken())
+        bffRtSocket.startSession(eventId, userPreferencesUtils.getIdentityToken())
     }
 
     fun setOnConcurrencyControlExceeded(action: () -> Unit) {
@@ -994,7 +995,7 @@ class VideoPlayerMediator @Inject constructor(
         cancelPulling()
         player.release()
         reactorSocket.leave(true)
-        concurrencySocket.leaveCurrentSession()
+        bffRtSocket.leaveCurrentSession()
         stopYoubora()
     }
 

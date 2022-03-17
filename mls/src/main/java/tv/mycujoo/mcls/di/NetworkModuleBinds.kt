@@ -4,8 +4,8 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import tv.mycujoo.mcls.network.socket.ConcurrencySocket
-import tv.mycujoo.mcls.network.socket.IConcurrencySocket
+import tv.mycujoo.mcls.network.socket.BFFRTSocket
+import tv.mycujoo.mcls.network.socket.IBFFRTSocket
 import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.network.socket.ReactorSocket
 import javax.inject.Singleton
@@ -22,5 +22,5 @@ interface NetworkModuleBinds {
 
     @Binds
     @Singleton
-    fun bindConcurrencySocket(concurrencySocket: ConcurrencySocket): IConcurrencySocket
+    fun bindConcurrencySocket(BFFRTSocket: BFFRTSocket): IBFFRTSocket
 }

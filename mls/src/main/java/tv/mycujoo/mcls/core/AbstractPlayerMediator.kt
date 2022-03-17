@@ -9,14 +9,14 @@ import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.enum.StreamStatus
 import tv.mycujoo.mcls.manager.Logger
-import tv.mycujoo.mcls.network.socket.ConcurrencyCallback
-import tv.mycujoo.mcls.network.socket.IConcurrencySocket
+import tv.mycujoo.mcls.network.socket.BFFRTCallback
+import tv.mycujoo.mcls.network.socket.IBFFRTSocket
 import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.network.socket.ReactorCallback
 
 abstract class AbstractPlayerMediator(
     private val reactorSocket: IReactorSocket,
-    concurrencySocket: IConcurrencySocket,
+    concurrencySocket: IBFFRTSocket,
     private val coroutineScope: CoroutineScope,
     private val logger: Logger
 ) {
@@ -52,7 +52,7 @@ abstract class AbstractPlayerMediator(
             }
         })
 
-        concurrencySocket.addListener(object : ConcurrencyCallback {
+        concurrencySocket.addListener(object : BFFRTCallback {
             override fun onLimitExceeded() {
                 onConcurrencyLimitExceeded()
             }

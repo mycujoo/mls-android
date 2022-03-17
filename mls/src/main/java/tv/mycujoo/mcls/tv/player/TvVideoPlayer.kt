@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import android.os.Build
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -42,7 +41,7 @@ import tv.mycujoo.mcls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.model.JoinTimelineParam
-import tv.mycujoo.mcls.network.socket.ConcurrencySocket
+import tv.mycujoo.mcls.network.socket.BFFRTSocket
 import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaDatum
@@ -63,7 +62,7 @@ import javax.inject.Inject
 class TvVideoPlayer @Inject constructor(
     @ApplicationContext val context: Context,
     private val reactorSocket: IReactorSocket,
-    private val concurrencySocket: ConcurrencySocket,
+    private val BFFRTSocket: BFFRTSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     private val logger: Logger,
@@ -74,7 +73,7 @@ class TvVideoPlayer @Inject constructor(
     private val controllerAgent: ControllerAgent,
     private val threadUtils: ThreadUtils,
     private val userPreferencesUtils: UserPreferencesUtils,
-) : AbstractPlayerMediator(reactorSocket, concurrencySocket, dispatcher, logger) {
+) : AbstractPlayerMediator(reactorSocket, BFFRTSocket, dispatcher, logger) {
 
     lateinit var mMlsTvFragment: MLSTVFragment
     var ima: IIma? = null
@@ -354,7 +353,7 @@ class TvVideoPlayer @Inject constructor(
     }
 
     private fun startWatchSession(eventId: String) {
-        concurrencySocket.startSession(eventId, userPreferencesUtils.getIdentityToken())
+        BFFRTSocket.startSession(eventId, userPreferencesUtils.getIdentityToken())
     }
 
     override fun onConcurrencyBadRequest(reason: String) {

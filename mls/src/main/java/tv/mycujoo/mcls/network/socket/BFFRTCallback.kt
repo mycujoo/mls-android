@@ -1,6 +1,6 @@
 package tv.mycujoo.mcls.network.socket
 
-interface ConcurrencyCallback {
+interface BFFRTCallback {
 
     fun onBadRequest(reason: String)
 

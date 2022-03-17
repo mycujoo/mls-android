@@ -1,10 +1,10 @@
 package tv.mycujoo.mcls.network.socket
 
-interface IConcurrencySocket {
+interface IBFFRTSocket {
 
     fun startSession(eventId: String, identityToken: String?)
 
     fun leaveCurrentSession()
 
-    fun addListener(concurrencyCallback: ConcurrencyCallback)
+    fun addListener(BFFRTCallback: BFFRTCallback)
 }
