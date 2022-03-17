@@ -125,7 +125,8 @@ class NoEntitlementEventScenario : E2ETest() {
                             )
                         ),
                         thumbnailUrl = "url",
-                        timezone = ""
+                        timezone = "",
+                        is_protected = false,
                     )
                 }
 

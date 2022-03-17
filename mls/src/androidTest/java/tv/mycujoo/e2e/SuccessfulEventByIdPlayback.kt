@@ -141,7 +141,8 @@ class SuccessfulEventByIdPlayback : E2ETest() {
                         ),
                         thumbnailUrl = "url",
                         timezone = "",
-                        title = "Title"
+                        title = "Title",
+                        is_protected = false,
                     )
                 }
 

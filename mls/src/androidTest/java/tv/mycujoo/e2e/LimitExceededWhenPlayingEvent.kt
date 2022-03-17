@@ -79,7 +79,7 @@ class LimitExceededWhenPlayingEvent : E2ETest() {
                                 {
                                     Timber.d("Sending Limit Exceeded")
                                     webSocket.send("concurrencyLimitExceeded;LIMIT")
-                                }, 7000
+                                }, 5000
                             )
                         }
                     }
@@ -105,6 +105,11 @@ class LimitExceededWhenPlayingEvent : E2ETest() {
 
         videoResourceHelper.waitUntilIdle()
         socketResourcesHelper.waitUntilIdle()
+
+        mMLS.getVideoPlayer().setOnConcurrencyControlExceeded {
+            Timber.d("OnConcurrencyControlExceeded Invoked")
+            if (socketResources.isIdleNow.not()) socketResources.decrement()
+        }
 
         Thread.sleep(10000)
 
