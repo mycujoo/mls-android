@@ -12,10 +12,9 @@ class BFFRTListener constructor(
 
         when (parseMessage(text)) {
             BFFRtMessage.CONCURRENCY_LIMIT_EXCEEDED -> BFFRTCallback.onLimitExceeded()
-            BFFRtMessage.FORBIDDEN -> BFFRTCallback.onBadRequest(BFFRtMessage.FORBIDDEN.toString())
-            BFFRtMessage.UNKNOWN_ERROR -> BFFRTCallback.onBadRequest(BFFRtMessage.UNKNOWN_ERROR.toString())
+            BFFRtMessage.BAD_REQUEST -> BFFRTCallback.onBadRequest(BFFRtMessage.BAD_REQUEST.toString())
             BFFRtMessage.INTERNAL_ERROR -> BFFRTCallback.onServerError()
-            BFFRtMessage.BAD_REQUEST -> BFFRTCallback.onBadRequest(BFFRtMessage.UNKNOWN_ERROR.toString())
+            else -> BFFRTCallback.onBadRequest(BFFRtMessage.UNKNOWN_ERROR.toString())
         }
     }
 
@@ -44,7 +43,7 @@ class BFFRTListener constructor(
             }
             // Just Need the error to indicate the need for login, no debugging required.
             "forbidden" -> {
-                BFFRtMessage.FORBIDDEN
+                BFFRtMessage.BAD_REQUEST
             }
             // Just Need the error to indicate that the event is not playable for this user, no debugging required.
             "preconditionFailed" -> {
@@ -61,7 +60,6 @@ class BFFRTListener constructor(
     enum class BFFRtMessage {
         CONCURRENCY_LIMIT_EXCEEDED,
         BAD_REQUEST,
-        FORBIDDEN,
         INTERNAL_ERROR,
         UNKNOWN_ERROR
     }

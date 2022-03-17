@@ -1,24 +1,23 @@
 package tv.mycujoo.mcls
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.*
+import kotlinx.coroutines.test.*
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
+@DelicateCoroutinesApi
 @ExperimentalCoroutinesApi
-class CoroutineTestRule(val testDispatcher: TestCoroutineDispatcher = TestCoroutineDispatcher()) :
-    TestWatcher() {
+class CoroutineTestRule : TestWatcher() {
+
+    val standardTestDispatcher = StandardTestDispatcher(name = "UI Thread")
+
     override fun starting(description: Description?) {
         super.starting(description)
-        Dispatchers.setMain(testDispatcher)
+        Dispatchers.setMain(standardTestDispatcher)
     }
 
     override fun finished(description: Description?) {
         super.finished(description)
-        Dispatchers.resetMain()
-        testDispatcher.cleanupTestCoroutines()
+        Dispatchers.resetMain() // reset the main dispatcher to the original Main dispatcher
     }
 }
