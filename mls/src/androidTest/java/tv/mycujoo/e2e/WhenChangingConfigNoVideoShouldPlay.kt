@@ -78,7 +78,8 @@ class WhenChangingConfigNoVideoShouldPlay : E2ETest() {
                 venue = "",
                 coordinates = CoordinatesSourceData(latitude = 0.0, longitude = 0.0)
             )
-        )
+        ),
+        is_protected = false,
     )
 
     private val event2 = EventSourceData(
@@ -103,7 +104,8 @@ class WhenChangingConfigNoVideoShouldPlay : E2ETest() {
                 venue = "",
                 coordinates = CoordinatesSourceData(latitude = 0.0, longitude = 0.0)
             )
-        )
+        ),
+        is_protected = false,
     )
 
     @Test
@@ -228,7 +230,8 @@ class WhenChangingConfigNoVideoShouldPlay : E2ETest() {
                         )
                     ),
                     thumbnailUrl = "url",
-                    timezone = ""
+                    timezone = "",
+                    is_protected = false,
                 )
 
                 override suspend fun getActions(
