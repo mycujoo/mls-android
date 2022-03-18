@@ -27,7 +27,7 @@ class BFFRTListener constructor(
         }
 
         // Limit Exceeded
-        if(responses[0] == "concurrencyLimitExceeded") {
+        if(responses[0] == "concurrencyLimitReached") {
             return BFFRtMessage.CONCURRENCY_LIMIT_EXCEEDED
         }
 
