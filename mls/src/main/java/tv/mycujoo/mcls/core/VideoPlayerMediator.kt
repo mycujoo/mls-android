@@ -622,7 +622,7 @@ class VideoPlayerMediator @Inject constructor(
             fetchActions(event, true)
 
             // GQL Mapped Events doesn't support concurrency limit on watch devices for now
-            if (event.is_protected) {
+            if (event.is_protected && event.streamStatus() == PLAYABLE) {
                 startWatchSession(eventId = event.id)
             }
         } else {
