@@ -56,14 +56,10 @@ open class AppModule {
         val cacheSize = 10 * 1024 * 1024 // 10 MiB
         val cache = Cache(context.cacheDir, cacheSize.toLong())
 
-        val loggingInterceptor = HttpLoggingInterceptor()
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
-
         val okHttpBuilder = OkHttpClient.Builder()
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .connectTimeout(30, TimeUnit.SECONDS)
-            .addInterceptor(loggingInterceptor)
             .cache(cache)
 
         return okHttpBuilder.build()

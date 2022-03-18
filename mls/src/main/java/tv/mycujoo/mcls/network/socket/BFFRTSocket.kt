@@ -29,13 +29,11 @@ class BFFRTSocket @Inject constructor(
             createSocket(eventId)
         }
 
-        val requestMessage = if (identityToken == null) {
-            "$SESSION_ID${userPreferencesUtils.getPseudoUserId()}"
-        } else {
-            "$SESSION_ID${userPreferencesUtils.getPseudoUserId()}$SEMICOLON$IDENTITY_TOKEN$identityToken"
-        }
+        webSocket?.send("$SESSION_ID${userPreferencesUtils.getPseudoUserId()}")
 
-        webSocket?.send(requestMessage)
+        if (identityToken != null) {
+            webSocket?.send("$IDENTITY_TOKEN$identityToken")
+        }
     }
 
     override fun leaveCurrentSession() {
@@ -48,7 +46,7 @@ class BFFRTSocket @Inject constructor(
     }
 
     private fun createSocket(eventId: String) {
-        val request = Request.Builder().url("$webSocketUrl/event/$eventId").build()
+        val request = Request.Builder().url("$webSocketUrl/events/$eventId").build()
         webSocket = okHttpClient.newWebSocket(request, mainSocketListener)
     }
 }
