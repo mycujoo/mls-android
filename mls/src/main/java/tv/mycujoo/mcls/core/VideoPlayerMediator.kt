@@ -136,7 +136,7 @@ class VideoPlayerMediator @Inject constructor(
      * onConcurrencyLimitExceeded, the extension that the app can use to define it's own behaviour
      * when the limit has been exceeded
      */
-    private var onConcurrencyLimitExceeded: (() -> Unit)? = null
+    private var onWatchConcurrencyLimitReached: (() -> Unit)? = null
 
     /**
      * Retry action for ConcurrencyRequest
@@ -161,7 +161,7 @@ class VideoPlayerMediator @Inject constructor(
     ) {
         this.playerView = MLSPlayerView
         publicKey = builder.publicKey
-        onConcurrencyLimitExceeded = builder.onConcurrencyLimitExceeded
+        onWatchConcurrencyLimitReached = builder.onWatchConcurrencyLimitReached
 
         player.getDirectInstance()?.let {
             videoPlayer = VideoPlayer(it, this, playerView)
@@ -807,8 +807,8 @@ class VideoPlayerMediator @Inject constructor(
         bffRtSocket.startSession(eventId, userPreferencesUtils.getIdentityToken())
     }
 
-    fun setOnConcurrencyControlExceeded(action: () -> Unit) {
-        onConcurrencyLimitExceeded = action
+    fun setOnWatchConcurrencyLimitReached(action: () -> Unit) {
+        onWatchConcurrencyLimitReached = action
     }
 
     /**
@@ -827,7 +827,7 @@ class VideoPlayerMediator @Inject constructor(
         }
         threadUtils.provideHandler().post(onLimitExceeded)
 
-        onConcurrencyLimitExceeded?.invoke()
+        onWatchConcurrencyLimitReached?.invoke()
     }
 
     override fun onConcurrencyBadRequest(reason: String) {

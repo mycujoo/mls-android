@@ -19,7 +19,6 @@ import tv.mycujoo.mcls.ima.IIma
 import timber.log.Timber
 import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
 import tv.mycujoo.mcls.enum.LogLevel
-import kotlin.math.log
 
 
 /**
@@ -38,7 +37,7 @@ open class MLSBuilder {
     internal var logLevel = LogLevel.MINIMAL
     internal var publicKey: String = ""
         private set
-    internal var onConcurrencyLimitExceeded: (() -> Unit)? = null
+    internal var onWatchConcurrencyLimitReached: (() -> Unit)? = null
         private set
     internal var pseudoUserId: String? = null
         private set
@@ -86,8 +85,8 @@ open class MLSBuilder {
         this.pseudoUserId = pseudoUserId
     }
 
-    fun setOnConcurrencyLimitExceeded(action: () -> Unit) = apply {
-        onConcurrencyLimitExceeded = action
+    fun setOnWatchConcurrencyLimitReached(action: () -> Unit) = apply {
+        onWatchConcurrencyLimitReached = action
     }
 
     fun userId(userId: String) = apply {
