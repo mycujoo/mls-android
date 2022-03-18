@@ -88,6 +88,7 @@ class ConcurrencyControl : E2ETest() {
 
     @Test
     fun testLimitExceeded() {
+        var concurrencySent = false
         mockWebServer.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 return MockResponse().withWebSocketUpgrade(object : WebSocketListener() {
@@ -96,7 +97,10 @@ class ConcurrencyControl : E2ETest() {
 
                         exoPlayerHandler.postDelayed(
                             {
-                                webSocket.send("concurrencyLimitExceeded;LIMIT")
+                                if (!concurrencySent) {
+                                    webSocket.send("concurrencyLimitReached;LIMIT")
+                                    concurrencySent = true
+                                }
                             }, 1000
                         )
                     }
@@ -110,8 +114,6 @@ class ConcurrencyControl : E2ETest() {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 super.onIsPlayingChanged(isPlaying)
                 if (isPlaying && !videoIdlingResource.isIdleNow) videoIdlingResource.decrement()
-
-                Timber.d("$exoPlayer")
             }
         })
 
@@ -160,8 +162,6 @@ class ConcurrencyControl : E2ETest() {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 super.onIsPlayingChanged(isPlaying)
                 if (isPlaying && !videoIdlingResource.isIdleNow) videoIdlingResource.decrement()
-
-                Timber.d("$exoPlayer")
             }
         })
 
@@ -176,7 +176,7 @@ class ConcurrencyControl : E2ETest() {
         onView(withId(R.id.preEventInfoDialog_bodyTextView))
             .check(doesNotExist())
 
-        responsesCount shouldBeEqualTo 1
+        responsesCount shouldBeEqualTo 2
     }
 
     /**
@@ -210,7 +210,7 @@ class ConcurrencyControl : E2ETest() {
                 super.onIsPlayingChanged(isPlaying)
                 if (isPlaying && !videoIdlingResource.isIdleNow) videoIdlingResource.decrement()
 
-                Timber.d("$exoPlayer")
+                
             }
         })
 
@@ -225,7 +225,7 @@ class ConcurrencyControl : E2ETest() {
         onView(withId(R.id.preEventInfoDialog_bodyTextView))
             .check(doesNotExist())
 
-        responsesCount shouldBeEqualTo 1
+        responsesCount shouldBeEqualTo 2
     }
 
     /**
@@ -258,8 +258,6 @@ class ConcurrencyControl : E2ETest() {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 super.onIsPlayingChanged(isPlaying)
                 if (isPlaying && !videoIdlingResource.isIdleNow) videoIdlingResource.decrement()
-
-                Timber.d("$exoPlayer")
             }
         })
 
@@ -274,7 +272,7 @@ class ConcurrencyControl : E2ETest() {
         onView(withId(R.id.preEventInfoDialog_bodyTextView))
             .check(doesNotExist())
 
-        responsesCount shouldBeEqualTo 1
+        responsesCount shouldBeEqualTo 2
     }
 
     /**
@@ -308,7 +306,7 @@ class ConcurrencyControl : E2ETest() {
                 super.onIsPlayingChanged(isPlaying)
                 if (isPlaying && !videoIdlingResource.isIdleNow) videoIdlingResource.decrement()
 
-                Timber.d("$exoPlayer")
+                
             }
         })
 
@@ -323,7 +321,7 @@ class ConcurrencyControl : E2ETest() {
         onView(withId(R.id.preEventInfoDialog_bodyTextView))
             .check(doesNotExist())
 
-        responsesCount shouldBeEqualTo 1
+        responsesCount shouldBeEqualTo 2
     }
 
     /**
@@ -357,7 +355,7 @@ class ConcurrencyControl : E2ETest() {
                 super.onIsPlayingChanged(isPlaying)
                 if (isPlaying && !videoIdlingResource.isIdleNow) videoIdlingResource.decrement()
 
-                Timber.d("$exoPlayer")
+                
             }
         })
 
@@ -372,7 +370,7 @@ class ConcurrencyControl : E2ETest() {
         onView(withId(R.id.preEventInfoDialog_bodyTextView))
             .check(doesNotExist())
 
-        responsesCount shouldBeEqualTo 1
+        responsesCount shouldBeEqualTo 2
     }
 
     /**
@@ -405,8 +403,6 @@ class ConcurrencyControl : E2ETest() {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 super.onIsPlayingChanged(isPlaying)
                 if (isPlaying && !videoIdlingResource.isIdleNow) videoIdlingResource.decrement()
-
-                Timber.d("$exoPlayer")
             }
         })
 
@@ -423,7 +419,7 @@ class ConcurrencyControl : E2ETest() {
 
         Timber.d(responsesCount.toString())
 
-        responsesCount shouldBeGreaterThan 1
+        responsesCount shouldBeGreaterThan 2
     }
 
     /**
@@ -456,8 +452,6 @@ class ConcurrencyControl : E2ETest() {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 super.onIsPlayingChanged(isPlaying)
                 if (isPlaying && !videoIdlingResource.isIdleNow) videoIdlingResource.decrement()
-
-                Timber.d("$exoPlayer")
             }
         })
 
@@ -472,7 +466,7 @@ class ConcurrencyControl : E2ETest() {
         onView(withId(R.id.preEventInfoDialog_bodyTextView))
             .check(doesNotExist())
 
-        responsesCount shouldBeEqualTo 1
+        responsesCount shouldBeEqualTo 2
     }
 
     companion object {
@@ -500,7 +494,7 @@ class ConcurrencyControl : E2ETest() {
             timeline_ids = listOf(),
             metadata = null,
             is_test = false,
-            isNativeMLS = false,
+            isNativeMLS = true,
             is_protected = true
         )
 
