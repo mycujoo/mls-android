@@ -61,6 +61,12 @@ import javax.inject.Singleton
  *      6. err;internal;identityToken;internalServerError
  *      7. ok;identityToken
  *      8. concurrencyLimitExceeded;LIMIT
+ *
+ *  The way the WebSocket works now is that it sends 2 requests.
+ *      a. StartSession via sessionId;$SESSION_ID
+ *      b. Entitlement Check via  identityToken:$IDENTITY_TOKEN
+ *
+ *  After that we wait for concurrencyLimitExceeded;LIMIT
  */
 
 @HiltAndroidTest
