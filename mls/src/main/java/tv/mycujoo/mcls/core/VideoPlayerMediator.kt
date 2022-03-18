@@ -143,7 +143,6 @@ class VideoPlayerMediator @Inject constructor(
      */
     private val concurrencyRequestRetryHandler = threadUtils.provideHandler()
     private val concurrencyRequestRetryRunnable = Runnable {
-        Timber.d("Retrying")
         bffRtSocket.leaveCurrentSession()
         dataManager.currentEvent?.id?.let {
             startWatchSession(it)
@@ -616,15 +615,16 @@ class VideoPlayerMediator @Inject constructor(
         updateStreamStatus(event)
         playVideoOrDisplayEventInfo(event, shouldPlayWhenReady)
 
-        if (event.is_protected) {
-            startWatchSession(eventId = event.id)
-        }
-
         // If the event is constructed manually and not a native MLS, it should not be replaced with any other version
         if (event.isNativeMLS) {
             joinEvent(event)
             startStreamUrlPullingIfNeeded(event)
             fetchActions(event, true)
+
+            // GQL Mapped Events doesn't support concurrency limit on watch devices for now
+            if (event.is_protected) {
+                startWatchSession(eventId = event.id)
+            }
         } else {
             cancelStreamUrlPulling()
         }
