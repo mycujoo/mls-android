@@ -141,12 +141,17 @@ class VideoPlayerMediator @Inject constructor(
     /**
      * Retry action for ConcurrencyRequest
      */
+    private var bffSocketRetryDelay = INITIAL_SOCKET_RETRY_DELAY
     private val concurrencyRequestRetryHandler = threadUtils.provideHandler()
     private val concurrencyRequestRetryRunnable = Runnable {
         bffRtSocket.leaveCurrentSession()
         dataManager.currentEvent?.id?.let {
             startWatchSession(it)
         }
+    }
+
+    companion object {
+        const val INITIAL_SOCKET_RETRY_DELAY = 2000L
     }
 
     /**endregion */
@@ -804,6 +809,7 @@ class VideoPlayerMediator @Inject constructor(
      */
 
     private fun startWatchSession(eventId: String) {
+        bffSocketRetryDelay = INITIAL_SOCKET_RETRY_DELAY
         bffRtSocket.startSession(eventId, userPreferencesUtils.getIdentityToken())
     }
 
@@ -835,7 +841,8 @@ class VideoPlayerMediator @Inject constructor(
     }
 
     override fun onConcurrencyServerError() {
-        concurrencyRequestRetryHandler.postDelayed(concurrencyRequestRetryRunnable, 5000)
+        concurrencyRequestRetryHandler.postDelayed(concurrencyRequestRetryRunnable, bffSocketRetryDelay)
+        bffSocketRetryDelay *= 2
     }
 
     /**
