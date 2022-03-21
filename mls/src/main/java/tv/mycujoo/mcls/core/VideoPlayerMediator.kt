@@ -36,18 +36,19 @@ import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.mediator.AnnotationMediator
 import tv.mycujoo.mcls.model.JoinTimelineParam
+import tv.mycujoo.mcls.network.socket.IBFFRTSocket
 import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.player.*
 import tv.mycujoo.mcls.player.PlaybackLocation.LOCAL
 import tv.mycujoo.mcls.player.PlaybackLocation.REMOTE
 import tv.mycujoo.mcls.utils.StringUtils
+import tv.mycujoo.mcls.utils.ThreadUtils
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.LIVE_ON_THE_EDGE
 import tv.mycujoo.mcls.widgets.MLSPlayerView.LiveState.VOD
 import tv.mycujoo.mcls.widgets.PlayerControllerMode
 import tv.mycujoo.mcls.widgets.RemotePlayerControllerListener
-import java.lang.RuntimeException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -71,7 +72,9 @@ class VideoPlayerMediator @Inject constructor(
     private val analyticsClient: AnalyticsClient,
     private val annotationFactory: IAnnotationFactory,
     private val annotationMediator: AnnotationMediator,
-) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
+    private val bffRtSocket: IBFFRTSocket,
+    private val threadUtils: ThreadUtils,
+) : AbstractPlayerMediator(reactorSocket, bffRtSocket, dispatcher, logger) {
 
     private var cast: ICast? = null
     var videoPlayerConfig: VideoPlayerConfig = VideoPlayerConfig.default()
@@ -129,6 +132,28 @@ class VideoPlayerMediator @Inject constructor(
      */
     private var publicKey: String = ""
 
+    /**
+     * onConcurrencyLimitExceeded, the extension that the app can use to define it's own behaviour
+     * when the limit has been exceeded
+     */
+    private var onWatchConcurrencyLimitReached: (() -> Unit)? = null
+
+    /**
+     * Retry action for ConcurrencyRequest
+     */
+    private var bffSocketRetryDelay = INITIAL_SOCKET_RETRY_DELAY
+    private val concurrencyRequestRetryHandler = threadUtils.provideHandler()
+    private val concurrencyRequestRetryRunnable = Runnable {
+        bffRtSocket.leaveCurrentSession()
+        dataManager.currentEvent?.id?.let {
+            startWatchSession(it)
+        }
+    }
+
+    companion object {
+        const val INITIAL_SOCKET_RETRY_DELAY = 2000L
+    }
+
     /**endregion */
 
     /**region Initialization*/
@@ -140,6 +165,7 @@ class VideoPlayerMediator @Inject constructor(
     ) {
         this.playerView = MLSPlayerView
         publicKey = builder.publicKey
+        onWatchConcurrencyLimitReached = builder.onWatchConcurrencyLimitReached
 
         player.getDirectInstance()?.let {
             videoPlayer = VideoPlayer(it, this, playerView)
@@ -585,6 +611,9 @@ class VideoPlayerMediator @Inject constructor(
             if (streaming) streaming = false
             shouldPlayWhenReady = true
             player.clearQue()
+            // Prepare to switch and leave current channel. If trying to reconnect cancel it
+            concurrencyRequestRetryHandler.removeCallbacks(concurrencyRequestRetryRunnable)
+            bffRtSocket.leaveCurrentSession()
             annotationFactory.clearOverlays()
         }
         dataManager.currentEvent = event
@@ -596,6 +625,11 @@ class VideoPlayerMediator @Inject constructor(
             joinEvent(event)
             startStreamUrlPullingIfNeeded(event)
             fetchActions(event, true)
+
+            // GQL Mapped Events doesn't support concurrency limit on watch devices for now
+            if (event.is_protected && event.streamStatus() == PLAYABLE) {
+                startWatchSession(eventId = event.id)
+            }
         } else {
             cancelStreamUrlPulling()
         }
@@ -656,8 +690,7 @@ class VideoPlayerMediator @Inject constructor(
                     // If playback is local, depend on the config, else always load the video but don't play
                     if (playbackLocation == LOCAL) {
                         play(event.streams.first(), playbackLocation != REMOTE)
-                    }
-                    else if (playbackLocation == REMOTE) {
+                    } else if (playbackLocation == REMOTE) {
                         loadRemoteMedia(event, 0, playWhenReady)
                     }
                 }
@@ -770,6 +803,51 @@ class VideoPlayerMediator @Inject constructor(
     }
 
     /**endregion */
+
+    /**
+     * region Concurrency functions
+     */
+
+    private fun startWatchSession(eventId: String) {
+        bffSocketRetryDelay = INITIAL_SOCKET_RETRY_DELAY
+        bffRtSocket.startSession(eventId, userPreferencesUtils.getIdentityToken())
+    }
+
+    fun setOnWatchConcurrencyLimitReached(action: () -> Unit) {
+        onWatchConcurrencyLimitReached = action
+    }
+
+    /**
+     * If concurrency Limit Exceeded, show An Error Message (This would be the device started watching earlier)
+     */
+    override fun onConcurrencyLimitExceeded() {
+        val onLimitExceeded = Runnable {
+            streaming = false
+            player.clearQue()
+            annotationFactory.clearOverlays()
+            playerView.showCustomInformationDialog(playerView.resources.getString(R.string.message_concurrency_limit_exceeded))
+            playerView.updateControllerVisibility(isPlaying = false)
+            if (playbackLocation == REMOTE) {
+                cast?.release()
+            }
+        }
+        threadUtils.provideHandler().post(onLimitExceeded)
+
+        onWatchConcurrencyLimitReached?.invoke()
+    }
+
+    override fun onConcurrencyBadRequest(reason: String) {
+        logger.log(MessageLevel.ERROR, reason)
+    }
+
+    override fun onConcurrencyServerError() {
+        concurrencyRequestRetryHandler.postDelayed(concurrencyRequestRetryRunnable, bffSocketRetryDelay)
+        bffSocketRetryDelay *= 2
+    }
+
+    /**
+     * endregion
+     */
 
     /**region Youbora functions*/
     /**
@@ -924,6 +1002,7 @@ class VideoPlayerMediator @Inject constructor(
         cancelPulling()
         player.release()
         reactorSocket.leave(true)
+        bffRtSocket.leaveCurrentSession()
         stopYoubora()
     }
 
@@ -956,7 +1035,11 @@ class VideoPlayerMediator @Inject constructor(
      * @param event to be streamed Event
      * Cast module must be integrated by user and configured
      */
-    private fun loadRemoteMedia(event: EventEntity, currentPosition: Long, playWhenReady: Boolean? = null) {
+    private fun loadRemoteMedia(
+        event: EventEntity,
+        currentPosition: Long,
+        playWhenReady: Boolean? = null
+    ) {
         Timber.d("loadRemoteMedia: $event")
         if (event.streamStatus() != PLAYABLE) {
             return

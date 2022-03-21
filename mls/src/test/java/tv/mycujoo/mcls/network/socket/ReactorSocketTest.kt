@@ -34,7 +34,7 @@ class ReactorSocketTest {
         whenever(okHttpClient.newWebSocket(any(), any())).thenReturn(webSocket)
 
         mainWebSocketListener = MainWebSocketListener()
-        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener, uuidUtils)
+        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener, uuidUtils, "wss://mls-rt.mycujoo.tv")
         reactorSocket.addListener(reactorCallback)
     }
 

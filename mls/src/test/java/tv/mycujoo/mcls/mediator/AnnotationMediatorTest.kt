@@ -2,6 +2,8 @@ package tv.mycujoo.mcls.mediator
 
 import android.os.Handler
 import com.google.android.exoplayer2.Player
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.Before
@@ -31,7 +33,6 @@ class AnnotationMediatorTest {
     /**endregion */
 
     /**region Fields*/
-    private lateinit var testCoroutineScope: TestCoroutineScope
     private lateinit var heartBeatOuterRunnable: Runnable
     private lateinit var heartBeatInnerRunnable: Runnable
     private lateinit var eventListener: Player.Listener
@@ -68,7 +69,6 @@ class AnnotationMediatorTest {
     @Before
     fun setUp() {
         MockitoAnnotations.openMocks(this)
-        testCoroutineScope = TestCoroutineScope()
 
         whenever(threadUtils.getScheduledExecutorService())
             .thenReturn(scheduledExecutorService)
@@ -79,7 +79,7 @@ class AnnotationMediatorTest {
         whenever(
             scheduledExecutorService.scheduleAtFixedRate(
                 any(),
-                eq(ONE_SECOND_IN_MS),
+                eq(0),
                 eq(ONE_SECOND_IN_MS),
                 eq(TimeUnit.MILLISECONDS)
             )
@@ -101,7 +101,7 @@ class AnnotationMediatorTest {
         annotationMediator = AnnotationMediator(
             annotationFactory,
             dataManager,
-            testCoroutineScope,
+            CoroutineScope(Dispatchers.Default),
             Logger(LogLevel.MINIMAL),
             player,
             threadUtils,
@@ -119,7 +119,7 @@ class AnnotationMediatorTest {
         assert(this::eventListener.isInitialized)
         verify(scheduledExecutorService, atLeastOnce()).scheduleAtFixedRate(
             any(),
-            eq(ONE_SECOND_IN_MS),
+            eq(0),
             eq(ONE_SECOND_IN_MS),
             eq(TimeUnit.MILLISECONDS)
         )

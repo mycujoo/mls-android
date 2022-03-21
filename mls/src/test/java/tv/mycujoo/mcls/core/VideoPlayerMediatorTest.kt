@@ -1,15 +1,14 @@
 package tv.mycujoo.mcls.core
 
 import android.content.res.Resources
+import android.os.Handler
+import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player.*
-import com.npaw.youbora.lib6.plugin.Plugin
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.*
+import kotlinx.coroutines.test.*
 import okhttp3.OkHttpClient
 import okhttp3.WebSocket
 import org.junit.*
@@ -39,26 +38,31 @@ import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.ViewHandler
 import tv.mycujoo.mcls.matcher.SeekParameterArgumentMatcher
 import tv.mycujoo.mcls.mediator.AnnotationMediator
+import tv.mycujoo.mcls.network.socket.BFFRTSocket
 import tv.mycujoo.mcls.network.socket.MainWebSocketListener
 import tv.mycujoo.mcls.network.socket.ReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaDatum
-import tv.mycujoo.mcls.player.MediaFactory
+import tv.mycujoo.mcls.utils.ThreadUtils
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import tv.mycujoo.mcls.utils.UuidUtils
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mcls.widgets.PlayerControllerMode
 import tv.mycujoo.mcls.widgets.RemotePlayerControllerView
 import tv.mycujoo.mcls.widgets.mlstimebar.MLSTimeBar
+import kotlin.coroutines.CoroutineContext
 
 
+@DelicateCoroutinesApi
 @ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class VideoPlayerMediatorTest {
 
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @get:Rule
-    var coroutineTestRule = CoroutineTestRule()
+    val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     /** region Mocks */
     @Mock
@@ -81,9 +85,6 @@ class VideoPlayerMediatorTest {
 
     @Mock
     lateinit var viewHandler: ViewHandler
-
-    @Mock
-    lateinit var dispatcher: CoroutineScope
 
     @Mock
     lateinit var dataManager: IDataManager
@@ -110,6 +111,9 @@ class VideoPlayerMediatorTest {
     lateinit var youboraClient: YouboraClient
 
     @Mock
+    lateinit var mBFFRTSocket: BFFRTSocket
+
+    @Mock
     lateinit var annotationMediator: AnnotationMediator
 
     @Mock
@@ -122,19 +126,19 @@ class VideoPlayerMediatorTest {
     lateinit var cast: ICast
 
     @Mock
-    lateinit var plugin: Plugin
-
-    @Mock
     lateinit var sessionManagerListener: ISessionManagerListener
 
     @Mock
     lateinit var overlayViewHelper: OverlayViewHelper
 
     @Mock
-    lateinit var mediaFactory: MediaFactory
+    lateinit var annotationFactory: AnnotationFactory
 
     @Mock
-    lateinit var annotationFactory: AnnotationFactory
+    lateinit var threadUtils: ThreadUtils
+
+    @Mock
+    lateinit var testCoroutineScope: CoroutineScope
     /** endregion */
 
     /** region fields */
@@ -148,10 +152,16 @@ class VideoPlayerMediatorTest {
 
     @Before
     fun setUp() {
+        whenever(testCoroutineScope.coroutineContext)
+            .thenReturn(StandardTestDispatcher())
+
+        whenever(threadUtils.provideHandler())
+            .thenReturn(Handler(Looper.getMainLooper()))
 
         whenever(okHttpClient.newWebSocket(any(), any())).thenReturn(webSocket)
         mainWebSocketListener = MainWebSocketListener()
-        reactorSocket = ReactorSocket(okHttpClient, mainWebSocketListener, uuidUtils)
+        reactorSocket =
+            ReactorSocket(okHttpClient, mainWebSocketListener, uuidUtils, "wss://mls-rt.mycujoo.tv")
 
         whenever(mMLSBuilder.activity).thenReturn(activity)
 
@@ -165,8 +175,6 @@ class VideoPlayerMediatorTest {
         whenever(playerView.resources).thenReturn(resources)
         whenever(playerView.getTimeBar()).thenReturn(timeBar)
         whenever(playerView.getRemotePlayerControllerView()).thenReturn(remotePlayerControllerView)
-
-        whenever(dispatcher.coroutineContext).thenReturn(coroutineTestRule.testDispatcher)
 
         whenever(player.getDirectInstance()).thenReturn(exoPlayer)
 
@@ -183,7 +191,7 @@ class VideoPlayerMediatorTest {
         videoPlayerMediator = VideoPlayerMediator(
             viewHandler,
             reactorSocket,
-            dispatcher,
+            testCoroutineScope,
             dataManager,
             logger,
             userPreferencesUtils,
@@ -191,7 +199,9 @@ class VideoPlayerMediatorTest {
             overlayViewHelper,
             youboraClient,
             annotationFactory,
-            annotationMediator
+            annotationMediator,
+            mBFFRTSocket,
+            threadUtils
         )
         videoPlayerMediator.initialize(playerView, mMLSBuilder, listOf(), cast)
     }
@@ -208,37 +218,32 @@ class VideoPlayerMediatorTest {
         }
     }
 
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-
     @Test
     fun `ensure seek_tolerance is applied`() {
         verify(exoPlayer).setSeekParameters(argThat(SeekParameterArgumentMatcher(mMLSBuilder.mlsConfiguration.seekTolerance)))
     }
 
     @Test
-    fun `given event with id to play, should fetch event details`() = runBlockingTest {
+    fun `given event with id to play, should fetch event details`(): Unit = runBlocking {
         videoPlayerMediator.playVideo("1eUBgUbXhriLFCT6A8E5a6Lv0R7")
+        Thread.sleep(50)
 
-
-        verify(dataManager).getEventDetails("1eUBgUbXhriLFCT6A8E5a6Lv0R7")
+        verify(dataManager).getEventDetails("1eUBgUbXhriLFCT6A8E5a6Lv0R7", null)
     }
 
     @Test
-    fun `given eventEntity to play, should fetch event details`() =
-        runBlockingTest {
-            val event: EventEntity = getSampleEventEntity(getSampleStreamList())
-            videoPlayerMediator.playVideo(event.id)
+    fun `given eventEntity to play, should fetch event details`(): Unit = runBlocking {
+        val event: EventEntity = getSampleEventEntity(getSampleStreamList())
+        videoPlayerMediator.playVideo(event.id)
 
+        Thread.sleep(50)
 
-            verify(dataManager).getEventDetails(event.id)
-        }
+        verify(dataManager, times(1)).getEventDetails(event.id)
+    }
 
     @Test
-    fun `given eventEntity to play, should not fetch event details`() =
-        runBlockingTest {
+    fun `given eventEntity to play, should not fetch event details`(): Unit =
+        runBlocking {
             val event: EventEntity = getSampleEventEntity(getSampleStreamList())
             videoPlayerMediator.playVideo(event)
 
@@ -247,7 +252,7 @@ class VideoPlayerMediatorTest {
         }
 
     @Test
-    fun `given event with streamUrl, should play video`() = runBlockingTest {
+    fun `given event with streamUrl, should play video`(): Unit = runBlocking {
         val eventEntityDetails = getSampleEventEntity(getSampleStreamList())
         whenever(dataManager.getEventDetails(eventEntityDetails.id)).thenReturn(
             Result.Success(
@@ -263,7 +268,7 @@ class VideoPlayerMediatorTest {
     }
 
     @Test
-    fun `given event with streamUrl, should never pull streamUrl`() = runBlockingTest {
+    fun `given event with streamUrl, should never pull streamUrl`(): Unit = runTest {
         val eventEntityDetails = getSampleEventEntity(getSampleStreamList())
         whenever(dataManager.getEventDetails(eventEntityDetails.id)).thenReturn(
             Result.Success(
@@ -272,14 +277,14 @@ class VideoPlayerMediatorTest {
         )
 
         videoPlayerMediator.playVideo(eventEntityDetails)
-        coroutineTestRule.testDispatcher.advanceTimeBy(61000L)
+        this.advanceTimeBy(61000L)
         videoPlayerMediator.cancelPulling()
 
         verify(dataManager, never()).getEventDetails(eventEntityDetails.id, null)
     }
 
     @Test
-    fun `given event without streamUrl, should not play video`() = runBlockingTest {
+    fun `given event without streamUrl, should not play video`(): Unit = runBlocking {
         val event: EventEntity = getSampleEventEntity(emptyList())
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
 
@@ -292,33 +297,34 @@ class VideoPlayerMediatorTest {
     }
 
     @Test
-    fun `given event to play which has timelineId, should fetchActions`() =
-        runBlockingTest {
-            val event: EventEntity = getSampleEventEntity(
-                id = "42",
-                streams = emptyList(),
-                timelineIds = "timeline_id_01"
-            )
-            whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
+    fun `given event to play which has timelineId, should fetchActions`(): Unit = runBlocking {
+        val event: EventEntity = getSampleEventEntity(
+            id = "42",
+            streams = emptyList(),
+            timelineIds = "timeline_id_01"
+        )
+        whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
 
 
-            videoPlayerMediator.playVideo(event.id)
-            videoPlayerMediator.cancelPulling()
+        videoPlayerMediator.playVideo(event.id)
+        videoPlayerMediator.cancelPulling()
 
-            val timelineIdCaptor = argumentCaptor<String>()
-            val updateIdCaptor = argumentCaptor<String>()
-            val callbackArgumentCaptor =
-                argumentCaptor<(result: Result<Exception, ActionResponse>) -> Unit>()
-            verify(annotationMediator).fetchActions(
-                timelineIdCaptor.capture(),
-                updateIdCaptor.capture(),
-                callbackArgumentCaptor.capture()
-            )
-        }
+        Thread.sleep(50)
+
+        val timelineIdCaptor = argumentCaptor<String>()
+        val updateIdCaptor = argumentCaptor<String>()
+        val callbackArgumentCaptor =
+            argumentCaptor<(result: Result<Exception, ActionResponse>) -> Unit>()
+        verify(annotationMediator).fetchActions(
+            timelineIdCaptor.capture(),
+            updateIdCaptor.capture(),
+            callbackArgumentCaptor.capture()
+        )
+    }
 
     @Test
-    fun `given event to play which does not have timelineId, should not call fetchActions`() =
-        runBlockingTest {
+    fun `given event to play which does not have timelineId, should not call fetchActions`(): Unit =
+        runBlocking {
             val event: EventEntity =
                 getSampleEventEntity(id = "42", streams = emptyList(), timelineIds = null)
             whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
@@ -332,7 +338,7 @@ class VideoPlayerMediatorTest {
         }
 
     @Test
-    fun `given event without streamUrl, should display event info`() = runBlockingTest {
+    fun `given event without streamUrl, should display event info`(): Unit = runBlocking {
         val event: EventEntity = getSampleEventEntity(emptyList())
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
 
@@ -343,7 +349,7 @@ class VideoPlayerMediatorTest {
     }
 
     @Test
-    fun `event with geoBlocked-stream, displays custom information dialog`() = runBlockingTest {
+    fun `event with geoBlocked-stream, displays custom information dialog`(): Unit = runBlocking {
         val geoBlockedStream = getSampleStream(
             null,
             ErrorCodeAndMessage(ERROR_CODE_GEOBLOCKED, null)
@@ -364,29 +370,30 @@ class VideoPlayerMediatorTest {
     }
 
     @Test
-    fun `event with noEntitlement-stream, displays custom information dialog`() = runBlockingTest {
-        val noEntitlementStream = getSampleStream(
-            null,
-            ErrorCodeAndMessage(ERROR_CODE_NO_ENTITLEMENT, null)
-        )
-        val event: EventEntity = getSampleEventEntity(
-            listOf(noEntitlementStream), EventStatus.EVENT_STATUS_SCHEDULED
-        )
-        whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
+    fun `event with noEntitlement-stream, displays custom information dialog`(): Unit =
+        runBlocking {
+            val noEntitlementStream = getSampleStream(
+                null,
+                ErrorCodeAndMessage(ERROR_CODE_NO_ENTITLEMENT, null)
+            )
+            val event: EventEntity = getSampleEventEntity(
+                listOf(noEntitlementStream), EventStatus.EVENT_STATUS_SCHEDULED
+            )
+            whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
 
 
-        videoPlayerMediator.playVideo(event)
-        videoPlayerMediator.cancelPulling()
+            videoPlayerMediator.playVideo(event)
+            videoPlayerMediator.cancelPulling()
 
 
-        verify(playerView).showCustomInformationDialog("Access to this stream is restricted.")
-        verify(player).pause()
-    }
+            verify(playerView).showCustomInformationDialog("Access to this stream is restricted.")
+            verify(player).pause()
+        }
 
 
     @Test
-    fun `event with unknownError-stream, displays pre-event information dialog`() =
-        runBlockingTest {
+    fun `event with unknownError-stream, displays pre-event information dialog`(): Unit =
+        runBlocking {
             val unknownErrorStream = getSampleStream(
                 null,
                 ErrorCodeAndMessage(ERROR_CODE_UNSPECIFIED, null)
@@ -407,19 +414,19 @@ class VideoPlayerMediatorTest {
         }
 
     @Test
-    fun `given event without streamUrl, should pull streamUrl periodically`() = runBlockingTest {
+    fun `given event without streamUrl, should pull streamUrl periodically`(): Unit = runTest {
         val event: EventEntity = getSampleEventEntity(emptyList())
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
 
         videoPlayerMediator.playVideo(event)
-        coroutineTestRule.testDispatcher.advanceTimeBy(61000L)
+        this.advanceTimeBy(61000L)
         videoPlayerMediator.cancelPulling()
 
-        verify(dataManager, times(2)).getEventDetails(event.id, null)
+        verify(dataManager, times(2)).getEventDetails(event.id)
     }
 
     @Test
-    fun `given event to play, should connect to reactor service`() = runBlockingTest {
+    fun `given event to play, should connect to reactor service`(): Unit = runBlocking {
         val event: EventEntity = getSampleEventEntity(emptyList())
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
 
@@ -432,7 +439,7 @@ class VideoPlayerMediatorTest {
     }
 
     @Test
-    fun `given 2nd event to play, should re-connect to reactor service`() = runBlockingTest {
+    fun `given 2nd event to play, should re-connect to reactor service`(): Unit = runBlocking {
         val firstEvent: EventEntity = getSampleEventEntity("42")
         whenever(dataManager.getEventDetails(firstEvent.id)).thenReturn(Result.Success(firstEvent))
         val secondEvent: EventEntity = getSampleEventEntity("57")
@@ -455,8 +462,8 @@ class VideoPlayerMediatorTest {
     }
 
     @Test
-    fun `update viewers counter in VOD stream, should hide viewers counter in player wrapper`() =
-        runBlockingTest {
+    fun `update viewers counter in VOD stream, should hide viewers counter in player wrapper`(): Unit =
+        runBlocking {
             val event =
                 getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_SCHEDULED)
             whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
@@ -471,7 +478,7 @@ class VideoPlayerMediatorTest {
         }
 
     @Test
-    fun `update viewers counter in LIVE stream, should update player view`() = runBlockingTest {
+    fun `update viewers counter in LIVE stream, should update player view`(): Unit = runBlocking {
         val event = getSampleEventEntity(getSampleStreamList(), EventStatus.EVENT_STATUS_SCHEDULED)
         whenever(dataManager.getEventDetails(event.id)).thenReturn(Result.Success(event))
         videoPlayerMediator.config(VideoPlayerConfig.default())
@@ -525,7 +532,7 @@ class VideoPlayerMediatorTest {
     /**region Cast*/
 
     @Test
-    fun `should load remote media, when connected to remote player`() = runBlockingTest {
+    fun `should load remote media, when connected to remote player`(): Unit = runBlocking {
         val event =
             getSampleEventEntity(
                 listOf(

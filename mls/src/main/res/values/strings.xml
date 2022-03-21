@@ -7,4 +7,5 @@
     <string name="dummy_app_id" translatable="false">dummy_value</string>
     <string name="message_geoblocked_stream">This stream cannot be watched in your area.</string>
     <string name="message_no_entitlement_stream">Access to this stream is restricted.</string>
+    <string name="message_concurrency_limit_exceeded">Device limit reached.</string>
 </resources>

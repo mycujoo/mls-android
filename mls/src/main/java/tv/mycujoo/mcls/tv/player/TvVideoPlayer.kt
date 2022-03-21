@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import android.os.Build
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -42,6 +41,7 @@ import tv.mycujoo.mcls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.model.JoinTimelineParam
+import tv.mycujoo.mcls.network.socket.BFFRTSocket
 import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaDatum
@@ -51,6 +51,7 @@ import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackTransportControlGlueImplKt
 import tv.mycujoo.mcls.utils.StringUtils
 import tv.mycujoo.mcls.utils.ThreadUtils
+import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import tv.mycujoo.mcls.widgets.CustomInformationDialog
 import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mcls.widgets.PreEventInformationDialog
@@ -61,6 +62,7 @@ import javax.inject.Inject
 class TvVideoPlayer @Inject constructor(
     @ApplicationContext val context: Context,
     private val reactorSocket: IReactorSocket,
+    private val BFFRTSocket: BFFRTSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     private val logger: Logger,
@@ -69,8 +71,9 @@ class TvVideoPlayer @Inject constructor(
     private val annotationFactory: IAnnotationFactory,
     private val analyticsClient: AnalyticsClient,
     private val controllerAgent: ControllerAgent,
-    private val threadUtils: ThreadUtils
-) : AbstractPlayerMediator(reactorSocket, dispatcher, logger) {
+    private val threadUtils: ThreadUtils,
+    private val userPreferencesUtils: UserPreferencesUtils,
+) : AbstractPlayerMediator(reactorSocket, BFFRTSocket, dispatcher, logger) {
 
     lateinit var mMlsTvFragment: MLSTVFragment
     var ima: IIma? = null
@@ -101,6 +104,22 @@ class TvVideoPlayer @Inject constructor(
      * Latest updateId received from Reactor service, or null if not joined at all
      */
     private var updateId: String? = null
+
+    /**
+     * onConcurrencyLimitExceeded, the extension that the app can use to define it's own behaviour
+     * when the limit has been exceeded
+     */
+    private var onConcurrencyLimitExceeded: (() -> Unit)? = null
+
+    /**
+     * Retry action for ConcurrencyRequest
+     */
+    private val concurrencyRequestRetryHandler = threadUtils.provideHandler()
+    private val concurrencyRequestRetryRunnable = Runnable {
+        dataManager.currentEvent?.id?.let {
+            startWatchSession(it)
+        }
+    }
 
     private var playerReady = false
 
@@ -331,6 +350,26 @@ class TvVideoPlayer @Inject constructor(
 
     override fun onReactorTimelineUpdate(timelineId: String, updateId: String) {
         fetchActions(timelineId, updateId, false)
+    }
+
+    private fun startWatchSession(eventId: String) {
+        BFFRTSocket.startSession(eventId, userPreferencesUtils.getIdentityToken())
+    }
+
+    override fun onConcurrencyBadRequest(reason: String) {
+        logger.log(MessageLevel.ERROR, reason)
+    }
+
+    override fun onConcurrencyLimitExceeded() {
+        streaming = false
+        player.clearQue()
+        annotationFactory.clearOverlays()
+
+        onConcurrencyLimitExceeded?.invoke()
+    }
+
+    override fun onConcurrencyServerError() {
+        concurrencyRequestRetryHandler.postDelayed(concurrencyRequestRetryRunnable, 5000)
     }
 
     private fun fetchActions(event: EventEntity, joinTimeLine: Boolean) {

@@ -28,8 +28,10 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import tv.mycujoo.E2ETest
 import tv.mycujoo.IdlingResourceHelper
 import tv.mycujoo.domain.entity.*
+import tv.mycujoo.mcls.di.ConcurrencySocketUrl
 import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.di.PlayerModule
+import tv.mycujoo.mcls.di.ReactorUrl
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.model.ScreenTimerDirection
 import tv.mycujoo.mcls.model.ScreenTimerFormat
@@ -388,6 +390,16 @@ class PullingActionsInLiveEvent : E2ETest() {
     @Module
     @InstallIn(SingletonComponent::class)
     class TestNetworkModule {
+
+        @ConcurrencySocketUrl
+        @Provides
+        @Singleton
+        fun provideConcurrencySocketUrl(): String = "wss://bff-rt.mycujoo.tv"
+
+        @ReactorUrl
+        @Provides
+        @Singleton
+        fun provideReactorSocketUrl(): String = "wss://mls-rt.mycujoo.tv"
 
         @Singleton
         @Provides

@@ -9,11 +9,14 @@ import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.enum.StreamStatus
 import tv.mycujoo.mcls.manager.Logger
+import tv.mycujoo.mcls.network.socket.BFFRTCallback
+import tv.mycujoo.mcls.network.socket.IBFFRTSocket
 import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.network.socket.ReactorCallback
 
 abstract class AbstractPlayerMediator(
     private val reactorSocket: IReactorSocket,
+    concurrencySocket: IBFFRTSocket,
     private val coroutineScope: CoroutineScope,
     private val logger: Logger
 ) {
@@ -24,6 +27,10 @@ abstract class AbstractPlayerMediator(
     abstract fun onReactorEventUpdate(eventId: String, updateId: String)
     abstract fun onReactorCounterUpdate(counts: String)
     abstract fun onReactorTimelineUpdate(timelineId: String, updateId: String)
+
+    abstract fun onConcurrencyBadRequest(reason: String)
+    abstract fun onConcurrencyLimitExceeded()
+    abstract fun onConcurrencyServerError()
     /**endregion */
 
     /**region Initializing*/
@@ -37,12 +44,25 @@ abstract class AbstractPlayerMediator(
             override fun onCounterUpdate(counts: String) {
                 onReactorCounterUpdate(counts)
                 logger.log(MessageLevel.INFO, C.VIEWERS_COUNT_UPDATE_MESSAGE)
-
             }
 
             override fun onTimelineUpdate(timelineId: String, updateId: String) {
                 onReactorTimelineUpdate(timelineId, updateId)
                 logger.log(MessageLevel.INFO, C.TIMELINE_UPDATE_MESSAGE)
+            }
+        })
+
+        concurrencySocket.addListener(object : BFFRTCallback {
+            override fun onLimitExceeded() {
+                onConcurrencyLimitExceeded()
+            }
+
+            override fun onBadRequest(reason: String) {
+                onConcurrencyBadRequest(reason)
+            }
+
+            override fun onServerError() {
+                onConcurrencyServerError()
             }
         })
     }

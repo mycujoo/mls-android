@@ -23,8 +23,10 @@ import tv.mycujoo.IdlingResourceHelper
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.data.entity.ServerConstants
 import tv.mycujoo.data.model.*
+import tv.mycujoo.mcls.di.ConcurrencySocketUrl
 import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.di.PlayerModule
+import tv.mycujoo.mcls.di.ReactorUrl
 import tv.mycujoo.mcls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mcls.network.MlsApi
 import javax.inject.Singleton
@@ -76,7 +78,8 @@ class WhenChangingConfigNoVideoShouldPlay : E2ETest() {
                 venue = "",
                 coordinates = CoordinatesSourceData(latitude = 0.0, longitude = 0.0)
             )
-        )
+        ),
+        is_protected = false,
     )
 
     private val event2 = EventSourceData(
@@ -101,7 +104,8 @@ class WhenChangingConfigNoVideoShouldPlay : E2ETest() {
                 venue = "",
                 coordinates = CoordinatesSourceData(latitude = 0.0, longitude = 0.0)
             )
-        )
+        ),
+        is_protected = false,
     )
 
     @Test
@@ -166,6 +170,15 @@ class WhenChangingConfigNoVideoShouldPlay : E2ETest() {
     @Module
     @InstallIn(SingletonComponent::class)
     class TestNetworkModule {
+        @ConcurrencySocketUrl
+        @Provides
+        @Singleton
+        fun provideConcurrencySocketUrl(): String = "wss://bff-rt.mycujoo.tv"
+
+        @ReactorUrl
+        @Provides
+        @Singleton
+        fun provideReactorSocketUrl(): String = "wss://mls-rt.mycujoo.tv"
 
         @Singleton
         @Provides
@@ -217,7 +230,8 @@ class WhenChangingConfigNoVideoShouldPlay : E2ETest() {
                         )
                     ),
                     thumbnailUrl = "url",
-                    timezone = ""
+                    timezone = "",
+                    is_protected = false,
                 )
 
                 override suspend fun getActions(

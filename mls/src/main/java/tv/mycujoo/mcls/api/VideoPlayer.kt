@@ -61,6 +61,10 @@ class VideoPlayer(
         exoPlayer.addListener(listener)
     }
 
+    fun setOnWatchConcurrencyLimitReached(action: () -> Unit) {
+        videoPlayerMediator.setOnWatchConcurrencyLimitReached(action)
+    }
+
     override fun setUIEventListener(listener: UIEventListener) {
         uiEventListener = listener
     }

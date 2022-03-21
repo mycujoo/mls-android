@@ -26,3 +26,14 @@ annotation class MLSAPI
 @Retention(AnnotationRetention.RUNTIME)
 annotation class TV
 
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ReactorUrl
+
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ConcurrencySocketUrl
+
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ExoPlayerOkHttp
