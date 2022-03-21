@@ -1,7 +1,7 @@
 package tv.mycujoo.mcls.api
 
-import android.app.Activity
 import android.content.pm.PackageManager
+import androidx.fragment.app.FragmentActivity
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.internal.modules.ApplicationContextModule
@@ -46,7 +46,7 @@ open class MLSBuilder {
     internal var customVideoAnalyticsData: VideoAnalyticsCustomData? = null
     internal var identityToken: String = ""
         private set
-    internal var activity: Activity? = null
+    internal var activity: FragmentActivity? = null
         private set
     internal var playerEventsListener: PlayerEventsListener? = null
         private set
@@ -100,7 +100,7 @@ open class MLSBuilder {
     /**
      * activity which will be hosting MLS
      */
-    fun withActivity(activity: Activity) = apply {
+    fun withActivity(activity: FragmentActivity) = apply {
         this.activity = activity
     }
 
@@ -237,6 +237,7 @@ open class MLSBuilder {
             .build()
 
         val mls = graph.provideMLS()
+        activity?.lifecycle?.addObserver(mls)
         mls.initializeComponent(this)
 
         return mls
