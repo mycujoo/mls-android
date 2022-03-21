@@ -50,6 +50,8 @@ open class MLSTvBuilder {
         private set
     internal var context: Context? = null
     internal var videoAnalyticsCustomData: VideoAnalyticsCustomData? = null
+    internal var onConcurrencyLimitExceeded: (() -> Unit)? = null
+        private set
 
     private var graph: MLSApplication_HiltComponents.SingletonC? = null
 
@@ -81,6 +83,10 @@ open class MLSTvBuilder {
 
     fun withVideoAnalyticsCustomData(customData: VideoAnalyticsCustomData) = apply {
         this.videoAnalyticsCustomData = customData
+    }
+
+    fun setOnConcurrencyLimitExceeded(action: () -> Unit) = apply {
+        onConcurrencyLimitExceeded = action
     }
 
     /**

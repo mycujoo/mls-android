@@ -348,6 +348,10 @@ class TvVideoPlayer @Inject constructor(
         }
     }
 
+    fun setOnConcurrencyLimitExceeded(action: () -> Unit) = apply {
+        onConcurrencyLimitExceeded = action
+    }
+
     override fun onReactorTimelineUpdate(timelineId: String, updateId: String) {
         fetchActions(timelineId, updateId, false)
     }
