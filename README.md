@@ -52,16 +52,11 @@ in order to communicate with SDK, MLS class must be instantiated. Init MLS whene
             .setPlayerEventsListener(playerEventsListener)
             .setUIEventListener(uiEventListener)
             .setConfiguration(MLSConfiguration())
+            .setOnConcurrencyLimitExceeded {
+                // React to this event on the App Layer    
+            }
             .build()
 
-
-For Concurrency Limit on watching devices you can use the flowing action in OnResume
-
-```kotlin
-MLS.getVideoPlayer().setOnWatchConcurrencyLimitReached {
-    // React to this event on the App Layer    
-}
-```
 
 ##### Notes: 
 
