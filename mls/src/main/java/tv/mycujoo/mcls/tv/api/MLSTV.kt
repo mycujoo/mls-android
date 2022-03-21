@@ -45,6 +45,11 @@ open class MLSTV @Inject constructor(
         super.onStop(owner)
     }
 
+    override fun onDestroy(owner: LifecycleOwner) {
+        tvBuilder.ima?.onDestroy()
+        super.onDestroy(owner)
+    }
+
     fun initialize(builder: MLSTvBuilder, mlsTvFragment: MLSTVFragment) {
         tvBuilder = builder
         this.logger.setLogLevel(builder.logLevel)
