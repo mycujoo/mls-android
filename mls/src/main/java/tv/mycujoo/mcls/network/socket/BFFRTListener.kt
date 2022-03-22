@@ -2,6 +2,7 @@ package tv.mycujoo.mcls.network.socket
 
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
+import timber.log.Timber
 
 class BFFRTListener constructor(
     private val BFFRTCallback: BFFRTCallback
@@ -19,6 +20,7 @@ class BFFRTListener constructor(
     }
 
     private fun parseMessage(message: String): BFFRtMessage {
+        Timber.d("BFFRTListener: $message")
         val responses = message.split(";")
 
         // Bad Response
