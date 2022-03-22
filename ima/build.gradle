@@ -5,7 +5,7 @@ plugins {
 
 ext {
     PUBLISH_GROUP_ID = 'tv.mycujoo.mls'
-    PUBLISH_VERSION = '1.4.0-alpha49'
+    PUBLISH_VERSION = '1.4.0-alpha50'
     PUBLISH_ARTIFACT_ID = 'ima'
     PUBLISH_ARTIFACT_DESCRIPTION = 'Ima module of MLS SDK'
 }
