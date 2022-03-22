@@ -11,6 +11,8 @@ class BFFRTListener constructor(
     override fun onMessage(webSocket: WebSocket, text: String) {
         super.onMessage(webSocket, text)
 
+        Timber.d("${webSocket.request()} $text")
+
         when (parseMessage(text)) {
             BFFRtMessage.CONCURRENCY_LIMIT_EXCEEDED -> BFFRTCallback.onLimitExceeded()
             BFFRtMessage.BAD_REQUEST -> BFFRTCallback.onBadRequest(BFFRtMessage.BAD_REQUEST.toString())
@@ -20,7 +22,6 @@ class BFFRTListener constructor(
     }
 
     private fun parseMessage(message: String): BFFRtMessage {
-        Timber.d("BFFRTListener: $message")
         val responses = message.split(";")
 
         // Bad Response
