@@ -41,7 +41,7 @@ import tv.mycujoo.mcls.helper.ViewersCounterHelper.Companion.isViewersCountValid
 import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.model.JoinTimelineParam
-import tv.mycujoo.mcls.network.socket.BFFRTSocket
+import tv.mycujoo.mcls.network.socket.IBFFRTSocket
 import tv.mycujoo.mcls.network.socket.IReactorSocket
 import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.player.MediaDatum
@@ -62,7 +62,7 @@ import javax.inject.Inject
 class TvVideoPlayer @Inject constructor(
     @ApplicationContext val context: Context,
     private val reactorSocket: IReactorSocket,
-    private val BFFRTSocket: BFFRTSocket,
+    private val BFFRTSocket: IBFFRTSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     private val logger: Logger,
@@ -117,6 +117,7 @@ class TvVideoPlayer @Inject constructor(
     private val concurrencyRequestRetryHandler = threadUtils.provideHandler()
     private val concurrencyRequestRetryRunnable = Runnable {
         dataManager.currentEvent?.id?.let {
+            Timber.d("Retry startWatch")
             startWatchSession(it)
         }
     }
@@ -127,6 +128,7 @@ class TvVideoPlayer @Inject constructor(
     fun initialize(mlsTvFragment: MLSTVFragment, builder: MLSTvBuilder) {
         this.mMlsTvFragment = mlsTvFragment
         this.ima = builder.ima
+        this.onConcurrencyLimitExceeded = builder.onConcurrencyLimitExceeded
 
         // Initializers for Other Components
         annotationFactory.attachPlayerView(mlsTvFragment)
@@ -207,6 +209,10 @@ class TvVideoPlayer @Inject constructor(
         this.player.addListener(object : Player.Listener {
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 if (playbackState == ExoPlayer.STATE_READY) {
+                    dataManager.currentEvent?.let { event ->
+                        if (event.is_protected && event.isNativeMLS) startWatchSession(event.id)
+                    }
+
                     mTransportControlGlue.getSeekProvider()?.let {
                         (it as MLSPlaybackSeekDataProvider).setSeekPositions(player.duration())
                     }
@@ -348,15 +354,12 @@ class TvVideoPlayer @Inject constructor(
         }
     }
 
-    fun setOnConcurrencyLimitExceeded(action: () -> Unit) = apply {
-        onConcurrencyLimitExceeded = action
-    }
-
     override fun onReactorTimelineUpdate(timelineId: String, updateId: String) {
         fetchActions(timelineId, updateId, false)
     }
 
     private fun startWatchSession(eventId: String) {
+        Timber.d("startWatchSession")
         BFFRTSocket.startSession(eventId, userPreferencesUtils.getIdentityToken())
     }
 
@@ -365,9 +368,13 @@ class TvVideoPlayer @Inject constructor(
     }
 
     override fun onConcurrencyLimitExceeded() {
-        streaming = false
-        player.clearQue()
-        annotationFactory.clearOverlays()
+        Timber.d("onConcurrencyLimitExceeded")
+        threadUtils.provideHandler().post {
+            streaming = false
+            player.clearQue()
+            annotationFactory.clearOverlays()
+        }
+
 
         onConcurrencyLimitExceeded?.invoke()
     }
@@ -422,7 +429,6 @@ class TvVideoPlayer @Inject constructor(
                 joinEvent(event)
                 startStreamUrlPullingIfNeeded(event)
                 fetchActions(event, true)
-                startWatchSession(event.id)
             }
         } else {
             threadUtils.provideHandler().postDelayed({
@@ -527,6 +533,7 @@ class TvVideoPlayer @Inject constructor(
             analyticsClient.stop()
         }
         reactorSocket.leave(true)
+        BFFRTSocket.leaveCurrentSession()
     }
     /**endregion */
 

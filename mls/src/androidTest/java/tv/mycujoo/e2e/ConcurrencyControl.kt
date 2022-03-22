@@ -104,7 +104,7 @@ class ConcurrencyControl : E2ETest() {
                         exoPlayerHandler.postDelayed(
                             {
                                 if (!concurrencySent) {
-                                    webSocket.send("concurrencyLimitReached;LIMIT")
+                                    webSocket.send("concurrencyLimitExceeded;LIMIT")
                                     concurrencySent = true
                                 }
                             }, 1000

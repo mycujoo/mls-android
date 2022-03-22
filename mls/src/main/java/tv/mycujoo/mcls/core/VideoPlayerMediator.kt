@@ -244,6 +244,14 @@ class VideoPlayerMediator @Inject constructor(
                 handleLiveModeState()
                 handlePlayStatusOfOverlayAnimationsWhileBuffering(playbackState, playWhenReady)
 
+                Timber.d("Playback State")
+                if (playbackState == STATE_READY) {
+                    dataManager.currentEvent?.let { event ->
+                        if (event.is_protected && event.isNativeMLS) startWatchSession(eventId = event.id)
+                    }
+                }
+
+
                 logEventIfNeeded(playbackState)
             }
 
@@ -625,11 +633,6 @@ class VideoPlayerMediator @Inject constructor(
             joinEvent(event)
             startStreamUrlPullingIfNeeded(event)
             fetchActions(event, true)
-
-            // GQL Mapped Events doesn't support concurrency limit on watch devices for now
-            if (event.is_protected && event.streamStatus() == PLAYABLE) {
-                startWatchSession(eventId = event.id)
-            }
         } else {
             cancelStreamUrlPulling()
         }
