@@ -422,6 +422,7 @@ class TvVideoPlayer @Inject constructor(
                 joinEvent(event)
                 startStreamUrlPullingIfNeeded(event)
                 fetchActions(event, true)
+                startWatchSession(event.id)
             }
         } else {
             threadUtils.provideHandler().postDelayed({
