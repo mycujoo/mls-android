@@ -311,7 +311,8 @@ class Player @Inject constructor(
                 resumeWindow = C.INDEX_UNSET
             }
         } else {
-            exoPlayer.let {
+            exoPlayer.let { simplePlayer ->
+
                 val hlsMediaSource = mediaFactory.createHlsMediaSource(mediaItem)
                 hlsMediaSource.addEventListener(
                     threadUtils.provideHandler(),
@@ -329,15 +330,14 @@ class Player @Inject constructor(
                             eventStatus = mediaData?.eventStatus
                         )
                     )
-                    it.setMediaSource(adsMediaSource, true)
+                    simplePlayer.setMediaSource(adsMediaSource, true)
 
                 } else {
-                    it.setMediaSource(hlsMediaSource, true)
+                    simplePlayer.setMediaSource(hlsMediaSource, true)
                 }
 
-
-                it.prepare()
-                it.playWhenReady = autoPlay
+                simplePlayer.prepare()
+                simplePlayer.playWhenReady = autoPlay
             }
         }
 
