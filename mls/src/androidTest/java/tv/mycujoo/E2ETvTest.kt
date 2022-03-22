@@ -12,7 +12,6 @@ import tv.mycujoo.mcls.entity.msc.TVVideoPlayerConfig
 import tv.mycujoo.mcls.tv.api.MLSTV
 import tv.mycujoo.mcls.tv.api.MLSTvBuilder
 import tv.mycujoo.ui.MLSTVFragment
-import javax.inject.Inject
 
 open class E2ETvTest {
 
@@ -23,9 +22,6 @@ open class E2ETvTest {
     var scenarioRule = activityScenarioRule<TvTestActivity>()
 
     protected val videoFragment = MLSTVFragment()
-
-    @Inject
-    lateinit var mlsTestBuilder: MLSTVTestBuilder
 
     protected lateinit var mMLSTV: MLSTV
 
