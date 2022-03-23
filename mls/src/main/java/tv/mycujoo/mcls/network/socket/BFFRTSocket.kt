@@ -29,9 +29,11 @@ class BFFRTSocket @Inject constructor(
             createSocket(eventId)
         }
 
+        Timber.d("$SESSION_ID${userPreferencesUtils.getPseudoUserId()}")
         webSocket?.send("$SESSION_ID${userPreferencesUtils.getPseudoUserId()}")
 
         if (identityToken != null) {
+            Timber.d("$IDENTITY_TOKEN$identityToken")
             webSocket?.send("$IDENTITY_TOKEN$identityToken")
         }
     }
