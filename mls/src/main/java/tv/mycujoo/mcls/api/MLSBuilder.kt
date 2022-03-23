@@ -60,6 +60,7 @@ open class MLSBuilder {
         private set
     internal var hasAnalytic: Boolean = true
         private set
+    internal var concurrencyLimitFeatureEnabled = true
 
     /**
      * public-key of user.
@@ -75,6 +76,10 @@ open class MLSBuilder {
 
     fun setLogLevel(logLevel: LogLevel) = apply {
         this.logLevel = logLevel
+    }
+
+    fun disableConcurrencyLimitFeature() = apply {
+        concurrencyLimitFeatureEnabled = false
     }
 
     fun identityToken(identityToken: String) = apply {

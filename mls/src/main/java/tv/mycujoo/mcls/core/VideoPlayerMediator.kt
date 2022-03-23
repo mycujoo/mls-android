@@ -139,6 +139,11 @@ class VideoPlayerMediator @Inject constructor(
     private var onConcurrencyLimitExceeded: (() -> Unit)? = null
 
     /**
+     * Concurrency Limit Feature Toggle
+     */
+    var concurrencyLimitEnabled = true
+
+    /**
      * Retry action for ConcurrencyRequest
      */
     private var bffSocketRetryDelay = INITIAL_SOCKET_RETRY_DELAY
@@ -166,6 +171,7 @@ class VideoPlayerMediator @Inject constructor(
         this.playerView = MLSPlayerView
         publicKey = builder.publicKey
         onConcurrencyLimitExceeded = builder.onConcurrencyLimitExceeded
+        concurrencyLimitEnabled = builder.concurrencyLimitFeatureEnabled
 
         player.getDirectInstance()?.let {
             videoPlayer = VideoPlayer(it, this, playerView)
@@ -247,7 +253,9 @@ class VideoPlayerMediator @Inject constructor(
                 Timber.d("Playback State")
                 if (playbackState == STATE_READY) {
                     dataManager.currentEvent?.let { event ->
-                        if (event.is_protected && event.isNativeMLS) startWatchSession(eventId = event.id)
+                        if (event.is_protected && event.isNativeMLS && concurrencyLimitEnabled) {
+                            startWatchSession(eventId = event.id)
+                        }
                     }
                 }
 
