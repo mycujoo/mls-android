@@ -15,21 +15,21 @@ class EventMapper {
             val metaData = mapMetaDataSourceDataToMetaDataEntity(sourceData.metadata)
 
             return EventEntity(
-                sourceData.id,
-                sourceData.title,
-                sourceData.description,
-                sourceData.thumbnailUrl,
-                sourceData.poster_url,
-                location,
-                sourceData.organiser,
-                date,
-                eventStatus,
-                streams,
-                sourceData.timezone,
-                sourceData.timeline_ids,
-                metaData,
-                sourceData.is_test,
-                sourceData.is_protected,
+                id = sourceData.id,
+                title = sourceData.title,
+                description = sourceData.description,
+                thumbnailUrl = sourceData.thumbnailUrl,
+                poster_url = sourceData.poster_url,
+                location = location,
+                organiser = sourceData.organiser,
+                start_time = date,
+                status = eventStatus,
+                streams = streams,
+                timezone = sourceData.timezone,
+                timeline_ids = sourceData.timeline_ids,
+                metadata = metaData,
+                is_test = sourceData.is_test,
+                is_protected = sourceData.is_protected,
             )
         }
 
