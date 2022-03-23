@@ -122,6 +122,11 @@ class TvVideoPlayer @Inject constructor(
         }
     }
 
+    /**
+     * Concurrency Limit Feature Toggle
+     */
+    var concurrencyLimitEnabled = true
+
     private var playerReady = false
 
     /**region Initializing*/
@@ -129,6 +134,7 @@ class TvVideoPlayer @Inject constructor(
         this.mMlsTvFragment = mlsTvFragment
         this.ima = builder.ima
         this.onConcurrencyLimitExceeded = builder.onConcurrencyLimitExceeded
+        this.concurrencyLimitEnabled = builder.concurrencyLimitFeatureEnabled
 
         // Initializers for Other Components
         annotationFactory.attachPlayerView(mlsTvFragment)
@@ -210,7 +216,9 @@ class TvVideoPlayer @Inject constructor(
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 if (playbackState == ExoPlayer.STATE_READY) {
                     dataManager.currentEvent?.let { event ->
-                        if (event.is_protected && event.isNativeMLS) startWatchSession(event.id)
+                        if (event.is_protected && event.isNativeMLS && concurrencyLimitEnabled) {
+                            startWatchSession(event.id)
+                        }
                     }
 
                     mTransportControlGlue.getSeekProvider()?.let {
