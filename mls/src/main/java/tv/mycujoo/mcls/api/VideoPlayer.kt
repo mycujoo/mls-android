@@ -61,7 +61,7 @@ class VideoPlayer(
         exoPlayer.addListener(listener)
     }
 
-    fun setOnConcurrencyLimitExceeded(action: () -> Unit) {
+    fun setOnConcurrencyLimitExceeded(action: (Int) -> Unit) {
         videoPlayerMediator.setOnConcurrencyLimitExceeded(action)
     }
 

@@ -68,8 +68,16 @@ class BFFRTListenerTest {
     @Test
     fun `given limit exceeded response should trigger onLimitExceeded`() {
         val listener = BFFRTListener(mBFFRTCallback)
+        listener.onMessage(webSocket, "concurrencyLimitExceeded;2")
+
+        verify(mBFFRTCallback, times(1)).onLimitExceeded(2)
+    }
+
+    @Test
+    fun `given limit exceeded response with invalid number should trigger onLimitExceeded`() {
+        val listener = BFFRTListener(mBFFRTCallback)
         listener.onMessage(webSocket, "concurrencyLimitExceeded;LIMIT")
 
-        verify(mBFFRTCallback, times(1)).onLimitExceeded()
+        verify(mBFFRTCallback, times(1)).onLimitExceeded(-1)
     }
 }

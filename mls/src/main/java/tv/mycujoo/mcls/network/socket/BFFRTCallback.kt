@@ -6,5 +6,5 @@ interface BFFRTCallback {
 
     fun onServerError()
 
-    fun onLimitExceeded()
+    fun onLimitExceeded(allowedDevicesNumber: Int)
 }
