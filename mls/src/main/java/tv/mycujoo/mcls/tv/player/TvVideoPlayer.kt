@@ -109,7 +109,7 @@ class TvVideoPlayer @Inject constructor(
      * onConcurrencyLimitExceeded, the extension that the app can use to define it's own behaviour
      * when the limit has been exceeded
      */
-    private var onConcurrencyLimitExceeded: (() -> Unit)? = null
+    private var onConcurrencyLimitExceeded: ((Int) -> Unit)? = null
 
     /**
      * Retry action for ConcurrencyRequest
@@ -386,7 +386,7 @@ class TvVideoPlayer @Inject constructor(
         logger.log(MessageLevel.ERROR, reason)
     }
 
-    override fun onConcurrencyLimitExceeded() {
+    override fun onConcurrencyLimitExceeded(allowedDevicesNumber: Int) {
         Timber.d("onConcurrencyLimitExceeded")
         if (concurrencyLimitEnabled) {
             threadUtils.provideHandler().post {
@@ -396,7 +396,7 @@ class TvVideoPlayer @Inject constructor(
             }
 
 
-            onConcurrencyLimitExceeded?.invoke()
+            onConcurrencyLimitExceeded?.invoke(allowedDevicesNumber)
         }
     }
 

@@ -3,6 +3,7 @@ package tv.mycujoo.mcls.network.socket
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import timber.log.Timber
+import java.lang.NumberFormatException
 
 class BFFRTListener constructor(
     private val BFFRTCallback: BFFRTCallback
@@ -14,7 +15,14 @@ class BFFRTListener constructor(
         Timber.d("${webSocket.request()} $text")
 
         when (parseMessage(text)) {
-            BFFRtMessage.CONCURRENCY_LIMIT_EXCEEDED -> BFFRTCallback.onLimitExceeded()
+            BFFRtMessage.CONCURRENCY_LIMIT_EXCEEDED -> {
+                val responses = text.split(";")
+                try {
+                    BFFRTCallback.onLimitExceeded(responses[1].toInt())
+                } catch (numberFormatException: NumberFormatException) {
+                    BFFRTCallback.onLimitExceeded(-1)
+                }
+            }
             BFFRtMessage.BAD_REQUEST -> BFFRTCallback.onBadRequest(BFFRtMessage.BAD_REQUEST.toString())
             BFFRtMessage.INTERNAL_ERROR -> BFFRTCallback.onServerError()
             else -> BFFRTCallback.onBadRequest(BFFRtMessage.UNKNOWN_ERROR.toString())

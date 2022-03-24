@@ -50,7 +50,7 @@ open class MLSTvBuilder {
         private set
     internal var context: Context? = null
     internal var videoAnalyticsCustomData: VideoAnalyticsCustomData? = null
-    internal var onConcurrencyLimitExceeded: (() -> Unit)? = null
+    internal var onConcurrencyLimitExceeded: ((Int) -> Unit)? = null
         private set
     internal var concurrencyLimitFeatureEnabled = true
 
@@ -86,7 +86,7 @@ open class MLSTvBuilder {
         this.videoAnalyticsCustomData = customData
     }
 
-    fun setOnConcurrencyLimitExceeded(action: () -> Unit) = apply {
+    fun setOnConcurrencyLimitExceeded(action: (Int) -> Unit) = apply {
         onConcurrencyLimitExceeded = action
     }
 

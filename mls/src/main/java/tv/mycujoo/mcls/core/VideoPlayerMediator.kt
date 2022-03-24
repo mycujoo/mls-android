@@ -136,7 +136,7 @@ class VideoPlayerMediator @Inject constructor(
      * onConcurrencyLimitExceeded, the extension that the app can use to define it's own behaviour
      * when the limit has been exceeded
      */
-    private var onConcurrencyLimitExceeded: (() -> Unit)? = null
+    private var onConcurrencyLimitExceeded: ((Int) -> Unit)? = null
 
     /**
      * Concurrency Limit Feature Toggle
@@ -805,14 +805,14 @@ class VideoPlayerMediator @Inject constructor(
         bffRtSocket.startSession(eventId, userPreferencesUtils.getIdentityToken())
     }
 
-    fun setOnConcurrencyLimitExceeded(action: () -> Unit) {
+    fun setOnConcurrencyLimitExceeded(action: (Int) -> Unit) {
         onConcurrencyLimitExceeded = action
     }
 
     /**
      * If concurrency Limit Exceeded, show An Error Message (This would be the device started watching earlier)
      */
-    override fun onConcurrencyLimitExceeded() {
+    override fun onConcurrencyLimitExceeded(allowedDevicesNumber: Int) {
         if (concurrencyLimitEnabled) {
             val onLimitExceeded = Runnable {
                 streaming = false
@@ -826,7 +826,7 @@ class VideoPlayerMediator @Inject constructor(
             }
             threadUtils.provideHandler().post(onLimitExceeded)
 
-            onConcurrencyLimitExceeded?.invoke()
+            onConcurrencyLimitExceeded?.invoke(allowedDevicesNumber)
         }
     }
 
