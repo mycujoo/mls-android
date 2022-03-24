@@ -813,19 +813,31 @@ class VideoPlayerMediator @Inject constructor(
      * If concurrency Limit Exceeded, show An Error Message (This would be the device started watching earlier)
      */
     override fun onConcurrencyLimitExceeded() {
-        val onLimitExceeded = Runnable {
-            streaming = false
-            player.clearQue()
-            annotationFactory.clearOverlays()
-            playerView.showCustomInformationDialog(playerView.resources.getString(R.string.message_concurrency_limit_exceeded))
-            playerView.updateControllerVisibility(isPlaying = false)
-            if (playbackLocation == REMOTE) {
-                cast?.release()
+        if (concurrencyLimitEnabled) {
+            val onLimitExceeded = Runnable {
+                streaming = false
+                player.clearQue()
+                annotationFactory.clearOverlays()
+                playerView.showCustomInformationDialog(playerView.resources.getString(R.string.message_concurrency_limit_exceeded))
+                playerView.updateControllerVisibility(isPlaying = false)
+                if (playbackLocation == REMOTE) {
+                    cast?.release()
+                }
             }
-        }
-        threadUtils.provideHandler().post(onLimitExceeded)
+            threadUtils.provideHandler().post(onLimitExceeded)
 
-        onConcurrencyLimitExceeded?.invoke()
+            onConcurrencyLimitExceeded?.invoke()
+        }
+    }
+
+    /**
+     * Stops Concurrency Limit for Future Events on Runtime
+     */
+    fun setConcurrencyLimitFeatureEnabled(enabled: Boolean) {
+        concurrencyLimitEnabled = enabled
+        if (!enabled) {
+            bffRtSocket.leaveCurrentSession()
+        }
     }
 
     override fun onConcurrencyBadRequest(reason: String) {

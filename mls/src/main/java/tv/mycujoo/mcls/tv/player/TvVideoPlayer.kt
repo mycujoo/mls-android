@@ -288,6 +288,17 @@ class TvVideoPlayer @Inject constructor(
         }
     }
 
+    /**
+     * Stops Concurrency Limit for Future Events on Runtime
+     */
+    fun setConcurrencyLimitFeatureEnabled(enabled: Boolean) {
+        concurrencyLimitEnabled = enabled
+
+        if (concurrencyLimitEnabled.not()) {
+            BFFRTSocket.leaveCurrentSession()
+        }
+    }
+
     /**endregion */
     private fun initAnalytic(
         activity: Activity,
@@ -377,14 +388,16 @@ class TvVideoPlayer @Inject constructor(
 
     override fun onConcurrencyLimitExceeded() {
         Timber.d("onConcurrencyLimitExceeded")
-        threadUtils.provideHandler().post {
-            streaming = false
-            player.clearQue()
-            annotationFactory.clearOverlays()
+        if (concurrencyLimitEnabled) {
+            threadUtils.provideHandler().post {
+                streaming = false
+                player.clearQue()
+                annotationFactory.clearOverlays()
+            }
+
+
+            onConcurrencyLimitExceeded?.invoke()
         }
-
-
-        onConcurrencyLimitExceeded?.invoke()
     }
 
     override fun onConcurrencyServerError() {

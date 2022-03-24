@@ -90,8 +90,8 @@ open class MLSTvBuilder {
         onConcurrencyLimitExceeded = action
     }
 
-    fun disableConcurrencyLimitFeature() = apply {
-        concurrencyLimitFeatureEnabled = false
+    fun setConcurrencyLimitFeatureEnabled(enabled: Boolean) = apply {
+        concurrencyLimitFeatureEnabled = enabled
     }
 
     /**

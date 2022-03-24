@@ -78,7 +78,7 @@ open class MLSBuilder {
         this.logLevel = logLevel
     }
 
-    fun setConcurrencyLimitEnabled(enabled: Boolean) = apply {
+    fun setConcurrencyLimitFeatureEnabled(enabled: Boolean) = apply {
         concurrencyLimitFeatureEnabled = enabled
     }
 
