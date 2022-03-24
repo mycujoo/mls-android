@@ -814,7 +814,7 @@ class VideoPlayerMediator @Inject constructor(
      */
     override fun onConcurrencyLimitExceeded(allowedDevicesNumber: Int) {
         if (concurrencyLimitEnabled) {
-            val onLimitExceeded = Runnable {
+            threadUtils.provideHandler().post {
                 streaming = false
                 player.clearQue()
                 annotationFactory.clearOverlays()
@@ -823,10 +823,9 @@ class VideoPlayerMediator @Inject constructor(
                 if (playbackLocation == REMOTE) {
                     cast?.release()
                 }
-            }
-            threadUtils.provideHandler().post(onLimitExceeded)
 
-            onConcurrencyLimitExceeded?.invoke(allowedDevicesNumber)
+                onConcurrencyLimitExceeded?.invoke(allowedDevicesNumber)
+            }
         }
     }
 

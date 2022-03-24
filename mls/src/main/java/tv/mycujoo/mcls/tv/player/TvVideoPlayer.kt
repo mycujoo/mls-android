@@ -393,10 +393,8 @@ class TvVideoPlayer @Inject constructor(
                 streaming = false
                 player.clearQue()
                 annotationFactory.clearOverlays()
+                onConcurrencyLimitExceeded?.invoke(allowedDevicesNumber)
             }
-
-
-            onConcurrencyLimitExceeded?.invoke(allowedDevicesNumber)
         }
     }
 
