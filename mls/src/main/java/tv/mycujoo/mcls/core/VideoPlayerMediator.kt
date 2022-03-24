@@ -232,37 +232,6 @@ class VideoPlayerMediator @Inject constructor(
         )
 
         val mainEventListener = object : MainEventListener {
-            /**
-             * To Fix the deprecation of onPlayerStateChanged, I replaced it with these 2 functions.
-             * onPlayWhenReadyChanged handles the first change of onPlayerStateChanged. which is
-             * PlayWhenReady.
-             * The Second handles the playback state. This is becuase onPlayWhenReadyChanged emits
-             * only 1 of 2 functions. Idle, and NotReady
-             */
-
-
-            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, playbackState: Int) {
-                super.onPlayWhenReadyChanged(playWhenReady, playbackState)
-
-                playWhenReadyState = playWhenReady
-                handlePlaybackStatus(playWhenReady, playbackState)
-                handleBufferingProgressBarVisibility(playbackState, playWhenReady)
-                handleLiveModeState()
-                handlePlayStatusOfOverlayAnimationsWhileBuffering(playbackState, playWhenReady)
-
-                Timber.d("Playback State")
-                if (playbackState == STATE_READY) {
-                    dataManager.currentEvent?.let { event ->
-                        if (event.is_protected && event.isNativeMLS && concurrencyLimitEnabled) {
-                            startWatchSession(eventId = event.id)
-                        }
-                    }
-                }
-
-
-                logEventIfNeeded(playbackState)
-            }
-
             override fun onPlaybackStateChanged(playbackState: Int) {
                 super.onPlaybackStateChanged(playbackState)
 
@@ -270,6 +239,18 @@ class VideoPlayerMediator @Inject constructor(
                 handleBufferingProgressBarVisibility(playbackState, playWhenReadyState)
                 handleLiveModeState()
                 handlePlayStatusOfOverlayAnimationsWhileBuffering(playbackState, playWhenReadyState)
+
+                logEventIfNeeded(playbackState)
+
+                if (playbackState == STATE_READY) {
+                    Timber.d("${dataManager.currentEvent?.id}")
+                    dataManager.currentEvent?.let { event ->
+                        if (event.is_protected && event.isNativeMLS && concurrencyLimitEnabled) {
+                            startWatchSession(eventId = event.id)
+                        }
+                    }
+                }
+
 
                 logEventIfNeeded(playbackState)
             }
