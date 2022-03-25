@@ -2,7 +2,7 @@ package tv.mycujoo.mcls.network.socket
 
 const val SEMICOLON = ";"
 
-const val SESSION_ID = "sessionId;"
+const val DEVICE_ID = "deviceId;"
 const val JOIN_EVENT = "joinEvent;"
 const val LEAVE_EVENT = "leaveEvent;"
 const val JOIN_TIMELINE = "joinTimeline;"

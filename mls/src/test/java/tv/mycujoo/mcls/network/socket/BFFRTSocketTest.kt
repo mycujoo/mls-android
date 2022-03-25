@@ -42,7 +42,7 @@ class BFFRTSocketTest {
         whenever(userPreferencesUtils.getPseudoUserId()).thenReturn("pseudo_user_id")
         BFFRTSocket.startSession("123", null)
 
-        verify(webSocket, atLeastOnce()).send("${SESSION_ID}pseudo_user_id")
+        verify(webSocket, atLeastOnce()).send("${DEVICE_ID}pseudo_user_id")
     }
 
     @Test
@@ -50,7 +50,7 @@ class BFFRTSocketTest {
         whenever(userPreferencesUtils.getPseudoUserId()).thenReturn("pseudo_user_id")
         BFFRTSocket.startSession("123", "token")
 
-        verify(webSocket, atLeastOnce()).send("${SESSION_ID}pseudo_user_id$SEMICOLON${IDENTITY_TOKEN}token")
+        verify(webSocket, atLeastOnce()).send("${DEVICE_ID}pseudo_user_id$SEMICOLON${IDENTITY_TOKEN}token")
     }
 
     @Test
