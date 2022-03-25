@@ -62,7 +62,7 @@ import javax.inject.Inject
 class TvVideoPlayer @Inject constructor(
     @ApplicationContext val context: Context,
     private val reactorSocket: IReactorSocket,
-    private val BFFRTSocket: IBFFRTSocket,
+    private val bffRtSocket: IBFFRTSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     private val logger: Logger,
@@ -73,7 +73,7 @@ class TvVideoPlayer @Inject constructor(
     private val controllerAgent: ControllerAgent,
     private val threadUtils: ThreadUtils,
     private val userPreferencesUtils: UserPreferencesUtils,
-) : AbstractPlayerMediator(reactorSocket, BFFRTSocket, dispatcher, logger) {
+) : AbstractPlayerMediator(reactorSocket, bffRtSocket, dispatcher, logger) {
 
     lateinit var mMlsTvFragment: MLSTVFragment
     var ima: IIma? = null
@@ -295,7 +295,7 @@ class TvVideoPlayer @Inject constructor(
         concurrencyLimitEnabled = enabled
 
         if (concurrencyLimitEnabled.not()) {
-            BFFRTSocket.leaveCurrentSession()
+            bffRtSocket.leaveCurrentSession()
         }
     }
 
@@ -379,7 +379,7 @@ class TvVideoPlayer @Inject constructor(
 
     private fun startWatchSession(eventId: String) {
         Timber.d("startWatchSession")
-        BFFRTSocket.startSession(eventId, userPreferencesUtils.getIdentityToken())
+        bffRtSocket.startSession(eventId, userPreferencesUtils.getIdentityToken())
     }
 
     override fun onConcurrencyBadRequest(reason: String) {
@@ -552,7 +552,7 @@ class TvVideoPlayer @Inject constructor(
             analyticsClient.stop()
         }
         reactorSocket.leave(true)
-        BFFRTSocket.leaveCurrentSession()
+        bffRtSocket.leaveCurrentSession()
     }
     /**endregion */
 
@@ -605,8 +605,4 @@ class TvVideoPlayer @Inject constructor(
     }
 
     /**endregion */
-
-    companion object {
-        private const val TAG = "TvVideoPlayer"
-    }
 }
