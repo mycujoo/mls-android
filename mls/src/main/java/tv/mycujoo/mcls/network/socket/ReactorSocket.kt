@@ -119,7 +119,7 @@ class ReactorSocket @Inject constructor(
         webSocket = okHttpClient.newWebSocket(request, mainSocketListener)
         created = true
 
-        webSocket.send("$SESSION_ID${uuidUtils.getUuid()}")
+        webSocket.send("$DEVICE_ID${uuidUtils.getUuid()}")
     }
 
 
