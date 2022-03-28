@@ -46,13 +46,13 @@ class BFFRTSocket @Inject constructor(
             threadUtils.provideHandler().postDelayed(
                 {
                     webSocket?.cancel()
+                    webSocket = null
                 },
                 300 // Gives the Server 300 Millis to close the connection gracefully (STATUS_CODE 1000)
             )
         } catch (socketError: IllegalArgumentException) {
             Timber.e("Error Closing the Socket ${socketError.message}")
         }
-        webSocket = null
     }
 
     private fun createSocket(eventId: String) {
