@@ -5,6 +5,7 @@ import okhttp3.Request
 import okhttp3.WebSocket
 import timber.log.Timber
 import tv.mycujoo.mcls.di.ConcurrencySocketUrl
+import tv.mycujoo.mcls.utils.ThreadUtils
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import java.lang.IllegalArgumentException
 import javax.inject.Inject
@@ -16,6 +17,7 @@ class BFFRTSocket @Inject constructor(
     private val mainSocketListener: MainWebSocketListener,
     private val userPreferencesUtils: UserPreferencesUtils,
     @ConcurrencySocketUrl private val webSocketUrl: String,
+    private val threadUtils: ThreadUtils
 ) : IBFFRTSocket {
 
     private var webSocket: WebSocket? = null
@@ -41,6 +43,12 @@ class BFFRTSocket @Inject constructor(
     override fun leaveCurrentSession() {
         try {
             webSocket?.close(NORMAL_CLOSURE_STATUS_CODE, null)
+            threadUtils.provideHandler().postDelayed(
+                {
+                    webSocket?.cancel()
+                },
+                300 // Gives the Server 300 Millis to close the connection gracefully (STATUS_CODE 1000)
+            )
         } catch (socketError: IllegalArgumentException) {
             Timber.e("Error Closing the Socket ${socketError.message}")
         }
