@@ -65,6 +65,10 @@ class VideoPlayer(
         videoPlayerMediator.setOnConcurrencyLimitExceeded(action)
     }
 
+    fun setConcurrencyLimitFeatureEnabled(enabled: Boolean) {
+        videoPlayerMediator.setConcurrencyLimitFeatureEnabled(enabled)
+    }
+
     override fun setUIEventListener(listener: UIEventListener) {
         uiEventListener = listener
     }
