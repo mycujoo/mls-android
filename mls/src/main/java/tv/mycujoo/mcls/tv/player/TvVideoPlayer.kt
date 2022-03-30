@@ -62,7 +62,7 @@ import javax.inject.Inject
 class TvVideoPlayer @Inject constructor(
     @ApplicationContext val context: Context,
     private val reactorSocket: IReactorSocket,
-    private val BFFRTSocket: IBFFRTSocket,
+    private val bffRtSocket: IBFFRTSocket,
     private val dispatcher: CoroutineScope,
     private val dataManager: IDataManager,
     private val logger: Logger,
@@ -73,7 +73,7 @@ class TvVideoPlayer @Inject constructor(
     private val controllerAgent: ControllerAgent,
     private val threadUtils: ThreadUtils,
     private val userPreferencesUtils: UserPreferencesUtils,
-) : AbstractPlayerMediator(reactorSocket, BFFRTSocket, dispatcher, logger) {
+) : AbstractPlayerMediator(reactorSocket, bffRtSocket, dispatcher, logger) {
 
     lateinit var mMlsTvFragment: MLSTVFragment
     var ima: IIma? = null
@@ -109,7 +109,7 @@ class TvVideoPlayer @Inject constructor(
      * onConcurrencyLimitExceeded, the extension that the app can use to define it's own behaviour
      * when the limit has been exceeded
      */
-    private var onConcurrencyLimitExceeded: (() -> Unit)? = null
+    private var onConcurrencyLimitExceeded: ((Int) -> Unit)? = null
 
     /**
      * Retry action for ConcurrencyRequest
@@ -122,6 +122,11 @@ class TvVideoPlayer @Inject constructor(
         }
     }
 
+    /**
+     * Concurrency Limit Feature Toggle
+     */
+    var concurrencyLimitEnabled = true
+
     private var playerReady = false
 
     /**region Initializing*/
@@ -129,6 +134,7 @@ class TvVideoPlayer @Inject constructor(
         this.mMlsTvFragment = mlsTvFragment
         this.ima = builder.ima
         this.onConcurrencyLimitExceeded = builder.onConcurrencyLimitExceeded
+        this.concurrencyLimitEnabled = builder.concurrencyLimitFeatureEnabled
 
         // Initializers for Other Components
         annotationFactory.attachPlayerView(mlsTvFragment)
@@ -210,7 +216,9 @@ class TvVideoPlayer @Inject constructor(
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 if (playbackState == ExoPlayer.STATE_READY) {
                     dataManager.currentEvent?.let { event ->
-                        if (event.is_protected && event.isNativeMLS) startWatchSession(event.id)
+                        if (event.is_protected && event.isNativeMLS && concurrencyLimitEnabled) {
+                            startWatchSession(event.id)
+                        }
                     }
 
                     mTransportControlGlue.getSeekProvider()?.let {
@@ -277,6 +285,17 @@ class TvVideoPlayer @Inject constructor(
         if (playbackState == Player.STATE_READY) {
             analyticsClient.logEvent(dataManager.currentEvent, player.isLive())
             logged = true
+        }
+    }
+
+    /**
+     * Stops Concurrency Limit for Future Events on Runtime
+     */
+    fun setConcurrencyLimitFeatureEnabled(enabled: Boolean) {
+        concurrencyLimitEnabled = enabled
+
+        if (concurrencyLimitEnabled.not()) {
+            bffRtSocket.leaveCurrentSession()
         }
     }
 
@@ -360,23 +379,23 @@ class TvVideoPlayer @Inject constructor(
 
     private fun startWatchSession(eventId: String) {
         Timber.d("startWatchSession")
-        BFFRTSocket.startSession(eventId, userPreferencesUtils.getIdentityToken())
+        bffRtSocket.startSession(eventId, userPreferencesUtils.getIdentityToken())
     }
 
     override fun onConcurrencyBadRequest(reason: String) {
         logger.log(MessageLevel.ERROR, reason)
     }
 
-    override fun onConcurrencyLimitExceeded() {
+    override fun onConcurrencyLimitExceeded(allowedDevicesNumber: Int) {
         Timber.d("onConcurrencyLimitExceeded")
-        threadUtils.provideHandler().post {
-            streaming = false
-            player.clearQue()
-            annotationFactory.clearOverlays()
+        if (concurrencyLimitEnabled) {
+            threadUtils.provideHandler().post {
+                streaming = false
+                player.clearQue()
+                annotationFactory.clearOverlays()
+                onConcurrencyLimitExceeded?.invoke(allowedDevicesNumber)
+            }
         }
-
-
-        onConcurrencyLimitExceeded?.invoke()
     }
 
     override fun onConcurrencyServerError() {
@@ -533,7 +552,7 @@ class TvVideoPlayer @Inject constructor(
             analyticsClient.stop()
         }
         reactorSocket.leave(true)
-        BFFRTSocket.leaveCurrentSession()
+        bffRtSocket.leaveCurrentSession()
     }
     /**endregion */
 
@@ -586,8 +605,4 @@ class TvVideoPlayer @Inject constructor(
     }
 
     /**endregion */
-
-    companion object {
-        private const val TAG = "TvVideoPlayer"
-    }
 }

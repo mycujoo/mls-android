@@ -136,7 +136,12 @@ class VideoPlayerMediator @Inject constructor(
      * onConcurrencyLimitExceeded, the extension that the app can use to define it's own behaviour
      * when the limit has been exceeded
      */
-    private var onConcurrencyLimitExceeded: (() -> Unit)? = null
+    private var onConcurrencyLimitExceeded: ((Int) -> Unit)? = null
+
+    /**
+     * Concurrency Limit Feature Toggle
+     */
+    var concurrencyLimitEnabled = true
 
     /**
      * Retry action for ConcurrencyRequest
@@ -166,6 +171,7 @@ class VideoPlayerMediator @Inject constructor(
         this.playerView = MLSPlayerView
         publicKey = builder.publicKey
         onConcurrencyLimitExceeded = builder.onConcurrencyLimitExceeded
+        concurrencyLimitEnabled = builder.concurrencyLimitFeatureEnabled
 
         player.getDirectInstance()?.let {
             videoPlayer = VideoPlayer(it, this, playerView)
@@ -226,35 +232,6 @@ class VideoPlayerMediator @Inject constructor(
         )
 
         val mainEventListener = object : MainEventListener {
-            /**
-             * To Fix the deprecation of onPlayerStateChanged, I replaced it with these 2 functions.
-             * onPlayWhenReadyChanged handles the first change of onPlayerStateChanged. which is
-             * PlayWhenReady.
-             * The Second handles the playback state. This is becuase onPlayWhenReadyChanged emits
-             * only 1 of 2 functions. Idle, and NotReady
-             */
-
-
-            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, playbackState: Int) {
-                super.onPlayWhenReadyChanged(playWhenReady, playbackState)
-
-                playWhenReadyState = playWhenReady
-                handlePlaybackStatus(playWhenReady, playbackState)
-                handleBufferingProgressBarVisibility(playbackState, playWhenReady)
-                handleLiveModeState()
-                handlePlayStatusOfOverlayAnimationsWhileBuffering(playbackState, playWhenReady)
-
-                Timber.d("Playback State")
-                if (playbackState == STATE_READY) {
-                    dataManager.currentEvent?.let { event ->
-                        if (event.is_protected && event.isNativeMLS) startWatchSession(eventId = event.id)
-                    }
-                }
-
-
-                logEventIfNeeded(playbackState)
-            }
-
             override fun onPlaybackStateChanged(playbackState: Int) {
                 super.onPlaybackStateChanged(playbackState)
 
@@ -262,6 +239,18 @@ class VideoPlayerMediator @Inject constructor(
                 handleBufferingProgressBarVisibility(playbackState, playWhenReadyState)
                 handleLiveModeState()
                 handlePlayStatusOfOverlayAnimationsWhileBuffering(playbackState, playWhenReadyState)
+
+                logEventIfNeeded(playbackState)
+
+                if (playbackState == STATE_READY) {
+                    Timber.d("${dataManager.currentEvent?.id}")
+                    dataManager.currentEvent?.let { event ->
+                        if (event.is_protected && event.isNativeMLS && concurrencyLimitEnabled) {
+                            startWatchSession(eventId = event.id)
+                        }
+                    }
+                }
+
 
                 logEventIfNeeded(playbackState)
             }
@@ -816,27 +805,38 @@ class VideoPlayerMediator @Inject constructor(
         bffRtSocket.startSession(eventId, userPreferencesUtils.getIdentityToken())
     }
 
-    fun setOnConcurrencyLimitExceeded(action: () -> Unit) {
+    fun setOnConcurrencyLimitExceeded(action: (Int) -> Unit) {
         onConcurrencyLimitExceeded = action
     }
 
     /**
      * If concurrency Limit Exceeded, show An Error Message (This would be the device started watching earlier)
      */
-    override fun onConcurrencyLimitExceeded() {
-        val onLimitExceeded = Runnable {
-            streaming = false
-            player.clearQue()
-            annotationFactory.clearOverlays()
-            playerView.showCustomInformationDialog(playerView.resources.getString(R.string.message_concurrency_limit_exceeded))
-            playerView.updateControllerVisibility(isPlaying = false)
-            if (playbackLocation == REMOTE) {
-                cast?.release()
+    override fun onConcurrencyLimitExceeded(allowedDevicesNumber: Int) {
+        if (concurrencyLimitEnabled) {
+            threadUtils.provideHandler().post {
+                streaming = false
+                player.clearQue()
+                annotationFactory.clearOverlays()
+                playerView.showCustomInformationDialog(playerView.resources.getString(R.string.message_concurrency_limit_exceeded))
+                playerView.updateControllerVisibility(isPlaying = false)
+                if (playbackLocation == REMOTE) {
+                    cast?.release()
+                }
+
+                onConcurrencyLimitExceeded?.invoke(allowedDevicesNumber)
             }
         }
-        threadUtils.provideHandler().post(onLimitExceeded)
+    }
 
-        onConcurrencyLimitExceeded?.invoke()
+    /**
+     * Stops Concurrency Limit for Future Events on Runtime
+     */
+    fun setConcurrencyLimitFeatureEnabled(enabled: Boolean) {
+        concurrencyLimitEnabled = enabled
+        if (!enabled) {
+            bffRtSocket.leaveCurrentSession()
+        }
     }
 
     override fun onConcurrencyBadRequest(reason: String) {

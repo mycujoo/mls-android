@@ -29,7 +29,7 @@ abstract class AbstractPlayerMediator(
     abstract fun onReactorTimelineUpdate(timelineId: String, updateId: String)
 
     abstract fun onConcurrencyBadRequest(reason: String)
-    abstract fun onConcurrencyLimitExceeded()
+    abstract fun onConcurrencyLimitExceeded(allowedDevicesNumber: Int)
     abstract fun onConcurrencyServerError()
     /**endregion */
 
@@ -53,8 +53,8 @@ abstract class AbstractPlayerMediator(
         })
 
         concurrencySocket.addListener(object : BFFRTCallback {
-            override fun onLimitExceeded() {
-                onConcurrencyLimitExceeded()
+            override fun onLimitExceeded(allowedDevicesNumber: Int) {
+                onConcurrencyLimitExceeded(allowedDevicesNumber)
             }
 
             override fun onBadRequest(reason: String) {

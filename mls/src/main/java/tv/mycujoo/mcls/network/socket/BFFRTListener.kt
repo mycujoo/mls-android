@@ -1,5 +1,6 @@
 package tv.mycujoo.mcls.network.socket
 
+import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import timber.log.Timber
@@ -14,7 +15,14 @@ class BFFRTListener constructor(
         Timber.d("${webSocket.request()} $text")
 
         when (parseMessage(text)) {
-            BFFRtMessage.CONCURRENCY_LIMIT_EXCEEDED -> BFFRTCallback.onLimitExceeded()
+            BFFRtMessage.CONCURRENCY_LIMIT_EXCEEDED -> {
+                val responses = text.split(";")
+                try {
+                    BFFRTCallback.onLimitExceeded(responses[1].toInt())
+                } catch (numberFormatException: NumberFormatException) {
+                    BFFRTCallback.onLimitExceeded(-1)
+                }
+            }
             BFFRtMessage.BAD_REQUEST -> BFFRTCallback.onBadRequest(BFFRtMessage.BAD_REQUEST.toString())
             BFFRtMessage.INTERNAL_ERROR -> BFFRTCallback.onServerError()
             else -> BFFRTCallback.onBadRequest(BFFRtMessage.UNKNOWN_ERROR.toString())
@@ -58,6 +66,24 @@ class BFFRTListener constructor(
             }
             else -> BFFRtMessage.UNKNOWN_ERROR
         }
+    }
+
+    override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+        super.onClosed(webSocket, code, reason)
+
+        Timber.d("onClosed Connection")
+    }
+
+    override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+        super.onClosing(webSocket, code, reason)
+
+        Timber.d("onClosing Connection")
+    }
+
+    override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+        super.onFailure(webSocket, t, response)
+
+        Timber.d("onFailure Connection")
     }
 
     enum class BFFRtMessage {
