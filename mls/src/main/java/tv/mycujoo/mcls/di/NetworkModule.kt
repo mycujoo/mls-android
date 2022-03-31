@@ -20,7 +20,6 @@ import tv.mycujoo.mcls.enum.C.Companion.IDENTITY_TOKEN_PREF_KEY
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.network.MlsApi
-import tv.mycujoo.mcls.network.NoConnectionInterceptor
 import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
@@ -59,8 +58,7 @@ open class NetworkModule {
     @Singleton
     open fun provideOkHttp(
         prefManager: IPrefManager,
-        @ApplicationContext context: Context,
-        noConnectionInterceptor: NoConnectionInterceptor
+        @ApplicationContext context: Context
     ): OkHttpClient {
 
         val cacheSize = 10 * 1024 * 1024 // 10 MiB
@@ -70,7 +68,6 @@ open class NetworkModule {
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .connectTimeout(30, TimeUnit.SECONDS)
-            .addInterceptor(noConnectionInterceptor)
             .addInterceptor { chain: Interceptor.Chain ->
                 var authorizationHeader = "Bearer ${prefManager.get(PUBLIC_KEY_PREF_KEY)}"
 
