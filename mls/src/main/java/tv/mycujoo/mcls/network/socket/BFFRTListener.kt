@@ -25,6 +25,7 @@ class BFFRTListener constructor(
             }
             BFFRtMessage.BAD_REQUEST -> BFFRTCallback.onBadRequest(BFFRtMessage.BAD_REQUEST.toString())
             BFFRtMessage.INTERNAL_ERROR -> BFFRTCallback.onServerError()
+            BFFRtMessage.OK, BFFRtMessage.DEBUG -> {}
             else -> BFFRTCallback.onBadRequest(BFFRtMessage.UNKNOWN_ERROR.toString())
         }
     }
@@ -40,6 +41,14 @@ class BFFRTListener constructor(
         // Limit Exceeded
         if(responses[0] == "concurrencyLimitExceeded") {
             return BFFRtMessage.CONCURRENCY_LIMIT_EXCEEDED
+        }
+
+        if(responses[0] == "ok") {
+            return BFFRtMessage.OK
+        }
+
+        if (responses[0] == "debug") {
+            return BFFRtMessage.DEBUG
         }
 
         // Errors
@@ -90,6 +99,8 @@ class BFFRTListener constructor(
         CONCURRENCY_LIMIT_EXCEEDED,
         BAD_REQUEST,
         INTERNAL_ERROR,
-        UNKNOWN_ERROR
+        UNKNOWN_ERROR,
+        OK,
+        DEBUG
     }
 }
