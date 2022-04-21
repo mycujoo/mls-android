@@ -45,6 +45,7 @@ import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.di.*
 import tv.mycujoo.mcls.network.MlsApi
 import tv.mycujoo.mcls.network.socket.*
+import tv.mycujoo.mcls.utils.ThreadUtils
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import tv.mycujoo.mcls.utils.UuidUtils
 import javax.inject.Singleton
@@ -71,7 +72,7 @@ import javax.inject.Singleton
 
 @HiltAndroidTest
 @UninstallModules(NetworkModuleBinds::class, PlayerModule::class, NetworkModule::class)
-class ConcurrencyControl : E2ETest() {
+class ConcurrencyControlTest : E2ETest() {
 
     private val videoIdlingResource = CountingIdlingResource("VIDEO")
     private val videoResourceHelper = IdlingResourceHelper(videoIdlingResource)
@@ -565,7 +566,8 @@ class ConcurrencyControl : E2ETest() {
                 okHttpClient,
                 mainSocketListener,
                 userPreferencesUtils,
-                mockWebServer.url("/concurrency").toString()
+                mockWebServer.url("/concurrency").toString(),
+                ThreadUtils()
             )
         }
 
