@@ -35,6 +35,7 @@ import tv.mycujoo.mcls.di.*
 import tv.mycujoo.mcls.network.MlsApi
 import tv.mycujoo.mcls.network.socket.*
 import tv.mycujoo.mcls.player.IPlayer
+import tv.mycujoo.mcls.utils.ThreadUtils
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import tv.mycujoo.mcls.utils.UuidUtils
 import javax.inject.Inject
@@ -221,7 +222,8 @@ class ConcurrencyControlTv : E2ETvTest() {
                 okHttpClient,
                 mainSocketListener,
                 userPreferencesUtils,
-                mockWebServer.url("/concurrency").toString()
+                mockWebServer.url("/concurrency").toString(),
+                ThreadUtils(),
             )
         }
 
