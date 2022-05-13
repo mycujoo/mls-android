@@ -63,10 +63,10 @@ data class Stream(
 ) {
     fun getDvrWindowSize(): Long {
         if (dvrWindowString == null) {
-            Long.MAX_VALUE
+            return Long.MAX_VALUE
         }
         return try {
-            dvrWindowString!!.toLong()
+            dvrWindowString.toLong()
         } catch (e: Exception) {
             Long.MAX_VALUE
         }
@@ -78,7 +78,7 @@ data class Stream(
     }
 
     fun hasError(): Boolean {
-        return errorCodeAndMessage?.code != null
+        return errorCodeAndMessage?.code.isNullOrEmpty().not()
     }
 
     fun isGeoBlocked(): Boolean {
@@ -105,12 +105,13 @@ data class Stream(
     }
 
     private fun isStreamRawPlayable(stream: Stream): Boolean {
-        return stream.fullUrl != null
+        return stream.fullUrl.isNullOrEmpty().not()
     }
 
     private fun isStreamWidevinePlayable(stream: Stream): Boolean {
         stream.widevine?.let { widevine ->
-            return widevine.licenseUrl != null && widevine.fullUrl != null
+            return widevine.licenseUrl.isNullOrEmpty().not() &&
+                    widevine.fullUrl.isNullOrEmpty().not()
         }
         return false
     }
