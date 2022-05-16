@@ -1058,7 +1058,8 @@ class VideoPlayerMediator @Inject constructor(
                 title = event.title,
                 thumbnailUrl = event.thumbnailUrl ?: "",
                 isPlaying = playWhenReady ?: player.isPlaying(),
-                currentPosition = currentPosition
+                currentPosition = currentPosition,
+                identityToken = userPreferencesUtils.getIdentityToken(),
             )
         } else {
             CasterLoadRemoteMediaParams(
