@@ -7,7 +7,7 @@ import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.manager.IPrefManager
 import javax.inject.Inject
 
-open class HeadlessMLSTv @Inject constructor(
+class HeadlessMLS @Inject constructor(
     @ApplicationContext val context: Context,
     private val dataManager: IDataManager,
     private val prefManager: IPrefManager
