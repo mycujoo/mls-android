@@ -52,6 +52,9 @@ in order to communicate with SDK, MLS class must be instantiated. Init MLS whene
             .setPlayerEventsListener(playerEventsListener)
             .setUIEventListener(uiEventListener)
             .setConfiguration(MLSConfiguration())
+            .setOnConcurrencyLimitExceeded {
+                // React to this event on the App Layer    
+            }
             .build()
 
 

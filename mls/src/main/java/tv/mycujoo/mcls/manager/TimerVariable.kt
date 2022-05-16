@@ -1,5 +1,6 @@
 package tv.mycujoo.mcls.manager
 
+import timber.log.Timber
 import tv.mycujoo.mcls.model.ScreenTimerDirection
 import tv.mycujoo.mcls.model.ScreenTimerFormat
 
@@ -77,12 +78,20 @@ class TimerVariable(
 
     /**region Private functions*/
     private fun recalculate(now: Long) {
-        val sorted =
-            commands.sortedWith(compareBy<TimerEntity> { it.offset }.thenByDescending { it.priority })
+        val sorted = commands.sortedWith(compareBy<TimerEntity> {
+            it.offset
+        }.thenByDescending {
+            it.priority
+        })
+
+
         var delta = startValue
         var isTicking = false
         sorted
             .forEach { timerEntity ->
+                if (now < timerEntity.offset) {
+                    return@forEach
+                }
                 when (timerEntity) {
                     is TimerEntity.StartTimer -> {
                         if (isTicking) {
@@ -107,11 +116,7 @@ class TimerVariable(
                         }
                     }
                     is TimerEntity.AdjustTimer -> {
-                        delta = if (direction == ScreenTimerDirection.UP) {
-                            startValue + now - timerEntity.offset + timerEntity.value
-                        } else {
-                            startValue - (now - timerEntity.offset + timerEntity.value)
-                        }
+                        delta = timerEntity.value
                     }
                     is TimerEntity.SkipTimer -> {
                         if (direction == ScreenTimerDirection.UP) {

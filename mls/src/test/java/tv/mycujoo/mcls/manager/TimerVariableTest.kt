@@ -174,7 +174,7 @@ class TimerVariableTest {
         timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 6000L)
         timerVariable.adjust(TimerEntity.AdjustTimer("sample_name", 4000L, 20000L), 6000L)
 
-        assertEquals("0:22", timerVariable.getTime())
+        assertEquals("0:20", timerVariable.getTime())
     }
 
     @Test
@@ -189,7 +189,7 @@ class TimerVariableTest {
         timerVariable.start(TimerEntity.StartTimer("sample_name", 3000L), 6000L)
         timerVariable.adjust(TimerEntity.AdjustTimer("sample_name", 4000L, 20000L), 6000L)
 
-        assertEquals("0:18", timerVariable.getTime())
+        assertEquals("0:20", timerVariable.getTime())
     }
 
     @Test
@@ -327,5 +327,23 @@ class TimerVariableTest {
 
 
         assertEquals("0:05", timerVariable.getTime())
+    }
+
+    @Test
+    fun `start pause adjust start`() {
+        val timerVariable = TimerVariable(
+            "sample_name",
+            ScreenTimerFormat.MINUTES_SECONDS,
+            ScreenTimerDirection.UP,
+            0L,
+            59940000L
+        )
+
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 2000L), 10000L)
+        timerVariable.pause(TimerEntity.PauseTimer("sample_name", 4000L), 10000L)
+        timerVariable.adjust(TimerEntity.AdjustTimer("sample_name", 5000L, 60000), 10000L)
+        timerVariable.start(TimerEntity.StartTimer("sample_name", 8000L), 11000L)
+
+        assertEquals("1:03", timerVariable.getTime())
     }
 }

@@ -1,7 +1,7 @@
 package tv.mycujoo.mcls.api
 
-import android.app.Activity
 import android.content.pm.PackageManager
+import androidx.fragment.app.FragmentActivity
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.internal.modules.ApplicationContextModule
@@ -19,7 +19,6 @@ import tv.mycujoo.mcls.ima.IIma
 import timber.log.Timber
 import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
 import tv.mycujoo.mcls.enum.LogLevel
-import kotlin.math.log
 
 
 /**
@@ -38,6 +37,8 @@ open class MLSBuilder {
     internal var logLevel = LogLevel.MINIMAL
     internal var publicKey: String = ""
         private set
+    internal var onConcurrencyLimitExceeded: ((Int) -> Unit)? = null
+        private set
     internal var pseudoUserId: String? = null
         private set
     internal var userId: String? = null
@@ -45,7 +46,7 @@ open class MLSBuilder {
     internal var customVideoAnalyticsData: VideoAnalyticsCustomData? = null
     internal var identityToken: String = ""
         private set
-    internal var activity: Activity? = null
+    internal var activity: FragmentActivity? = null
         private set
     internal var playerEventsListener: PlayerEventsListener? = null
         private set
@@ -59,6 +60,7 @@ open class MLSBuilder {
         private set
     internal var hasAnalytic: Boolean = true
         private set
+    internal var concurrencyLimitFeatureEnabled = true
 
     /**
      * public-key of user.
@@ -76,12 +78,20 @@ open class MLSBuilder {
         this.logLevel = logLevel
     }
 
+    fun setConcurrencyLimitFeatureEnabled(enabled: Boolean) = apply {
+        concurrencyLimitFeatureEnabled = enabled
+    }
+
     fun identityToken(identityToken: String) = apply {
         this.identityToken = identityToken
     }
 
     fun customPseudoUserId(pseudoUserId: String) = apply {
         this.pseudoUserId = pseudoUserId
+    }
+
+    fun setOnConcurrencyLimitExceeded(action: (Int) -> Unit) = apply {
+        onConcurrencyLimitExceeded = action
     }
 
     fun userId(userId: String) = apply {
@@ -95,7 +105,7 @@ open class MLSBuilder {
     /**
      * activity which will be hosting MLS
      */
-    fun withActivity(activity: Activity) = apply {
+    fun withActivity(activity: FragmentActivity) = apply {
         this.activity = activity
     }
 
@@ -232,6 +242,7 @@ open class MLSBuilder {
             .build()
 
         val mls = graph.provideMLS()
+        activity?.lifecycle?.addObserver(mls)
         mls.initializeComponent(this)
 
         return mls

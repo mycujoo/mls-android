@@ -5,18 +5,21 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Player.STATE_READY
+import com.google.android.exoplayer2.util.MimeTypes
 import com.google.android.exoplayer2.util.Util
 import tv.mycujoo.mcls.enum.C.Companion.DRM_WIDEVINE
 import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.mcls.ima.ImaCustomParams
 import tv.mycujoo.mcls.utils.ThreadUtils
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * MLS video player, implementing IPlayer contract.
  * All video playing related functionality is done by this class
  * @see IPlayer
  */
+@Singleton
 class Player @Inject constructor(
     private val mediaFactory: MediaFactory,
     private var exoPlayer: ExoPlayer,
@@ -246,6 +249,7 @@ class Player @Inject constructor(
         val mediaItem = MediaItem.Builder()
             .setDrmConfiguration(config)
             .setUri(drmMediaData.fullUrl)
+            .setMimeType(MimeTypes.APPLICATION_M3U8)
             .build()
 
         play(mediaItem, drmMediaData.autoPlay)
@@ -257,7 +261,8 @@ class Player @Inject constructor(
      */
     override fun play(mediaData: MediaDatum.MediaData) {
         this.mediaData = mediaData
-        val mediaItem = mediaFactory.createMediaItem(mediaData.fullUrl)
+        val mediaItem = mediaFactory
+            .createMediaItem(mediaData.fullUrl)
         play(mediaItem, mediaData.autoPlay)
     }
 
@@ -306,7 +311,8 @@ class Player @Inject constructor(
                 resumeWindow = C.INDEX_UNSET
             }
         } else {
-            exoPlayer.let {
+            exoPlayer.let { simplePlayer ->
+
                 val hlsMediaSource = mediaFactory.createHlsMediaSource(mediaItem)
                 hlsMediaSource.addEventListener(
                     threadUtils.provideHandler(),
@@ -324,15 +330,14 @@ class Player @Inject constructor(
                             eventStatus = mediaData?.eventStatus
                         )
                     )
-                    it.setMediaSource(adsMediaSource, true)
+                    simplePlayer.setMediaSource(adsMediaSource, true)
 
                 } else {
-                    it.setMediaSource(hlsMediaSource, true)
+                    simplePlayer.setMediaSource(hlsMediaSource, true)
                 }
 
-
-                it.prepare()
-                it.playWhenReady = autoPlay
+                simplePlayer.prepare()
+                simplePlayer.playWhenReady = autoPlay
             }
         }
 

@@ -50,6 +50,9 @@ open class MLSTvBuilder {
         private set
     internal var context: Context? = null
     internal var videoAnalyticsCustomData: VideoAnalyticsCustomData? = null
+    internal var onConcurrencyLimitExceeded: ((Int) -> Unit)? = null
+        private set
+    internal var concurrencyLimitFeatureEnabled = true
 
     private var graph: MLSApplication_HiltComponents.SingletonC? = null
 
@@ -81,6 +84,14 @@ open class MLSTvBuilder {
 
     fun withVideoAnalyticsCustomData(customData: VideoAnalyticsCustomData) = apply {
         this.videoAnalyticsCustomData = customData
+    }
+
+    fun setOnConcurrencyLimitExceeded(action: (Int) -> Unit) = apply {
+        onConcurrencyLimitExceeded = action
+    }
+
+    fun setConcurrencyLimitFeatureEnabled(enabled: Boolean) = apply {
+        concurrencyLimitFeatureEnabled = enabled
     }
 
     /**
@@ -161,7 +172,8 @@ open class MLSTvBuilder {
     fun setLogLevel(logLevel: LogLevel) = apply { this.logLevel = logLevel }
 
     open fun build(): MLSTV {
-        val buildContext = context ?: throw Exception(C.CONTEXT_MUST_BE_SET_IN_MLS_TV_BUILDER_MESSAGE)
+        val buildContext =
+            context ?: throw Exception(C.CONTEXT_MUST_BE_SET_IN_MLS_TV_BUILDER_MESSAGE)
 
         initPublicKeyIfNeeded()
         if (publicKey.isEmpty()) {

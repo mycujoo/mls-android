@@ -3,6 +3,7 @@ package tv.mycujoo.mcls.api
 import android.content.Context
 import android.content.res.AssetManager
 import android.os.Build
+import androidx.lifecycle.DefaultLifecycleObserver
 import com.caverock.androidsvg.SVG
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ui.AdViewProvider
@@ -43,7 +44,7 @@ class MLS @Inject constructor(
     private val userPreferencesUtils: UserPreferencesUtils,
     private val logger: Logger,
     svgAssetResolver: SVGAssetResolver
-) : MLSAbstract() {
+) : MLSAbstract(), DefaultLifecycleObserver {
 
     init {
         SVG.registerExternalFileResolver(svgAssetResolver)

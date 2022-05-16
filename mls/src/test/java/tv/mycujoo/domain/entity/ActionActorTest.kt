@@ -1,6 +1,8 @@
 package tv.mycujoo.domain.entity
 
-import org.junit.Ignore
+import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldContainNone
+import org.amshove.kluent.shouldNotContain
 import org.junit.Test
 import tv.mycujoo.mcls.TestData.Companion.getSampleHideOverlayAction
 import tv.mycujoo.mcls.TestData.Companion.getSampleShowOverlayActionN
@@ -57,9 +59,7 @@ class ActionActorTest {
             arrayListOf(hideOverlayAction)
         )
 
-        assert(act.isEmpty()) {
-            println("${act.size}")
-        }
+        act shouldNotContain showOverlayAction
     }
 
     @Test
@@ -139,7 +139,7 @@ class ActionActorTest {
 
 
     @Test
-    fun `given multiple ShowAction with same cid, and multiple HideAction with same cid in-between, should return empty list`() {
+    fun `given multiple ShowAction with same cid, and multiple HideAction with same cid in-between, should return list of one element`() {
         val showOverlayActionFirst = getSampleShowOverlayActionN(1000L, "cid_00")
         val hideOverlayActionFirst = getSampleHideOverlayAction(3000L, "cid_00")
         val showOverlayActionSecond = getSampleShowOverlayActionN(6000L, "cid_00")
@@ -159,9 +159,7 @@ class ActionActorTest {
         )
 
 
-        assert(act.size == 0) {
-            println("${act.size}")
-        }
+        act.size shouldBeEqualTo 1
 //        assert(act.any { it.first == ActionActor.ActionAct.OUTRO && it.second == hideOverlayActionSecond })
 //        assert(act.none { it.first == ActionActor.ActionAct.INTRO })
     }

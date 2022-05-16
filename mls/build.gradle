@@ -17,7 +17,7 @@ scabbard {
 // publish information on Maven
 ext {
     PUBLISH_GROUP_ID = 'tv.mycujoo.mls'
-    PUBLISH_VERSION = '1.4.0-alpha41'
+    PUBLISH_VERSION = '1.4.1'
     PUBLISH_ARTIFACT_ID = 'mls'
     PUBLISH_ARTIFACT_DESCRIPTION = 'Android MLS SDK'
 }
@@ -28,7 +28,7 @@ apply from: "../script/publish-mavencentral.gradle"
 
 android {
     compileSdkVersion 32
-    buildToolsVersion '32.1.0-rc1'
+    buildToolsVersion '33.0.0-rc2'
 
 
     defaultConfig {
@@ -56,12 +56,14 @@ android {
     buildTypes {
         release {
             buildConfigField "String", "MYCUJOO_YOUBORA_ACCOUNT_NAME", "\"mycujoo\""
+            buildConfigField "String", "SDK_VERSION", "\"$PUBLISH_VERSION\""
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
             buildConfigField "String", "MYCUJOO_YOUBORA_ACCOUNT_NAME", "\"mycujoodev\""
+            buildConfigField "String", "SDK_VERSION", "\"$PUBLISH_VERSION\""
             minifyEnabled false
             shrinkResources false
             testCoverageEnabled true
@@ -96,11 +98,14 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'androidx.core:core-ktx:1.7.0'
 
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.4.0"
-    implementation "androidx.navigation:navigation-fragment-ktx:2.3.5"
-    implementation "androidx.navigation:navigation-ui-ktx:2.3.5"
+    def lifecycle_ktx_version = "2.4.1"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_ktx_version"
+
+    def nav_ktx_version = "2.4.2"
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_ktx_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_ktx_version"
+
     implementation "androidx.tvprovider:tvprovider:1.1.0-alpha01"
-    implementation 'com.google.android.exoplayer:extension-mediasession:2.16.1'
 
     // Test related
     testImplementation 'junit:junit:4.13.2'
@@ -166,15 +171,18 @@ dependencies {
     testImplementation 'joda-time:joda-time:2.10.13'
 
     // Exoplayer
-    api 'com.google.android.exoplayer:exoplayer:2.16.1'
-    api 'com.google.android.exoplayer:exoplayer-hls:2.16.1'
+    def exo_player_version = "2.17.1"
+    api "com.google.android.exoplayer:exoplayer:$exo_player_version"
+    api "com.google.android.exoplayer:exoplayer-hls:$exo_player_version"
+    api "com.google.android.exoplayer:extension-leanback:$exo_player_version"
+    api "com.google.android.exoplayer:extension-okhttp:$exo_player_version"
+    api "com.google.android.exoplayer:extension-mediasession:$exo_player_version"
 
     api 'com.nicepeopleatwork:exoplayer-adapter:6.7.29'
 
 
     //TV
     api "androidx.leanback:leanback-preference:1.0.0"
-    api 'com.google.android.exoplayer:extension-leanback:2.16.1'
 
     // Android Test Rules
     androidTestImplementation "androidx.test.ext:junit-ktx:1.1.3"
@@ -191,4 +199,8 @@ dependencies {
 
     // Logging
     implementation 'com.jakewharton.timber:timber:5.0.1'
+
+    // Kluent for Assertions
+    testImplementation 'org.amshove.kluent:kluent-android:1.68'
+    androidTestImplementation 'org.amshove.kluent:kluent-android:1.68'
 }

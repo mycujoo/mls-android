@@ -39,3 +39,4 @@ app_test/
 
 # Infer Report
 /infer-out/
+/.java-version
