@@ -20,6 +20,8 @@ import com.google.android.exoplayer2.ui.TimeBar
 import com.google.android.exoplayer2.ui.TimeBar.OnScrubListener
 import com.google.android.exoplayer2.util.Assertions
 import com.google.android.exoplayer2.util.Util
+import timber.log.Timber
+import java.lang.IllegalArgumentException
 import java.util.*
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -599,8 +601,12 @@ class MLSTimeBar @JvmOverloads constructor(
                 return
             }
 
-            paint.color =
-                Color.parseColor(poi.poiType.color)
+            try {
+                paint.color = Color.parseColor(poi.poiType.color)
+            } catch (e: IllegalArgumentException) {
+                Timber.e("Unknown Color ${poi.poiType.color}")
+                paint.color = Color.WHITE
+            }
 
             val poiTimeMs = Util.constrainValue(
                 poiOffsetAdjusted,
