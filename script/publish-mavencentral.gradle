@@ -75,9 +75,9 @@ publishing {
                 }
                 developers {
                     developer {
-                        id = 'sherviiin'
-                        name = 'Shervin Shoorei'
-                        email = 'shervin@mycujoo.tv'
+                        id = 'm-kalaleeb'
+                        name = 'Mohammad Al Kalaleeb'
+                        email = 'mohammadalkalaleeb@mycujoo.tv'
                     }
                 }
                 scm {
