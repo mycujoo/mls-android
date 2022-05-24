@@ -98,11 +98,6 @@ class VideoPlayerMediator @Inject constructor(
     private var hasAnalytic = false
 
     /**
-     * Indicates if current video session is logged or not, for analytical purposes
-     */
-    private var logged = false
-
-    /**
      * Indicates if Reactor service is active and joined
      */
     private var joined: Boolean = false
@@ -240,8 +235,6 @@ class VideoPlayerMediator @Inject constructor(
                 handleLiveModeState()
                 handlePlayStatusOfOverlayAnimationsWhileBuffering(playbackState, playWhenReadyState)
 
-                logEventIfNeeded(playbackState)
-
                 if (playbackState == STATE_READY) {
                     Timber.d("${dataManager.currentEvent?.id}")
                     dataManager.currentEvent?.let { event ->
@@ -250,9 +243,6 @@ class VideoPlayerMediator @Inject constructor(
                         }
                     }
                 }
-
-
-                logEventIfNeeded(playbackState)
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -675,7 +665,7 @@ class VideoPlayerMediator @Inject constructor(
             PLAYABLE -> {
                 if (streaming.not()) {
                     streaming = true
-                    logged = false
+                    logEventIfNeeded()
                     storeEvent(event)
                     playerView.hideInfoDialogs()
                     playerView.updateControllerVisibility(isPlaying = true)
@@ -974,17 +964,11 @@ class VideoPlayerMediator @Inject constructor(
      * Log event through Youbora client.
      * Log should take place if only analytics is enabled in configuration and should only happen once per stream
      */
-    private fun logEventIfNeeded(playbackState: Int) {
+    private fun logEventIfNeeded() {
         if (!hasAnalytic) {
             return
         }
-        if (logged) {
-            return
-        }
-        if (playbackState == STATE_READY) {
-            analyticsClient.logEvent(dataManager.currentEvent, player.isLive())
-            logged = true
-        }
+        analyticsClient.logEvent(dataManager.currentEvent, player.isLive())
     }
 
     /**
