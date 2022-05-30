@@ -1,5 +1,6 @@
 package tv.mycujoo.mcls.utils
 
+import timber.log.Timber
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.network.socket.IDENTITY_TOKEN
@@ -16,7 +17,7 @@ class UserPreferencesUtils @Inject constructor(
      */
     fun getPseudoUserId() = mPseudoUserId ?: run {
         val storedId = prefManager.get(C.PSEUDO_USER_ID_PREF_KEY)
-        if (storedId != null) {
+        if (!storedId.isNullOrEmpty()) {
             storedId
         } else {
             val id = generatePseudoUserId()
