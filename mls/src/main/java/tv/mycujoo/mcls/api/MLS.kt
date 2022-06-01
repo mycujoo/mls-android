@@ -74,10 +74,6 @@ class MLS @Inject constructor(
             userPreferencesUtils.setPseudoUserId(it)
         }
 
-        builder.userId?.let {
-            userPreferencesUtils.setUserId(it)
-        }
-
         player.apply {
             create(
                 builder.ima,
@@ -95,20 +91,6 @@ class MLS @Inject constructor(
 
     fun removeIdentityToken() {
         prefManager.delete(IDENTITY_TOKEN_PREF_KEY)
-    }
-
-    /**
-     * Changes User Id Globally
-     */
-    fun setUserId(userId: String) {
-        userPreferencesUtils.setUserId(userId)
-    }
-
-    /**
-     * Delete User Id Globally
-     */
-    fun removeUserId() {
-        userPreferencesUtils.removeUserId()
     }
 
     /**

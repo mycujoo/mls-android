@@ -59,10 +59,6 @@ open class MLSTV @Inject constructor(
             userPreferencesUtils.setPseudoUserId(it)
         }
 
-        builder.userId?.let {
-            userPreferencesUtils.setUserId(it)
-        }
-
         persistPublicKey(builder.publicKey)
 
         if(builder.identityToken.isNotEmpty()) {
@@ -77,20 +73,6 @@ open class MLSTV @Inject constructor(
      */
     fun setCustomPseudoUserId(userId: String) {
         userPreferencesUtils.setPseudoUserId(userId)
-    }
-
-    /**
-     * Changes Pseudo User Id Globally
-     */
-    fun setUserId(pseudoUserId: String) {
-        userPreferencesUtils.setUserId(pseudoUserId)
-    }
-
-    /**
-     * Removes Pseudo User Id Globally
-     */
-    fun removeUserId() {
-        userPreferencesUtils.removeUserId()
     }
 
     fun getVideoPlayer(): TvVideoPlayer {

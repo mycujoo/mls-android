@@ -41,8 +41,6 @@ open class MLSBuilder {
         private set
     internal var pseudoUserId: String? = null
         private set
-    internal var userId: String? = null
-        private set
     internal var customVideoAnalyticsData: VideoAnalyticsCustomData? = null
     internal var identityToken: String = ""
         private set
@@ -92,10 +90,6 @@ open class MLSBuilder {
 
     fun setOnConcurrencyLimitExceeded(action: (Int) -> Unit) = apply {
         onConcurrencyLimitExceeded = action
-    }
-
-    fun userId(userId: String) = apply {
-        this.userId = userId
     }
 
     fun withVideoAnalyticsCustomData(customData: VideoAnalyticsCustomData) = apply {

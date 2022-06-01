@@ -1,5 +1,6 @@
 package tv.mycujoo.mcls.utils
 
+import timber.log.Timber
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.network.socket.IDENTITY_TOKEN
@@ -10,14 +11,13 @@ class UserPreferencesUtils @Inject constructor(
 ) {
 
     private var mPseudoUserId: String? = null
-    private var mUserId: String? = null
 
     /**
      * Generate Pseudo User Id when not persisted, and persist one if  not exist
      */
     fun getPseudoUserId() = mPseudoUserId ?: run {
         val storedId = prefManager.get(C.PSEUDO_USER_ID_PREF_KEY)
-        if (storedId != null) {
+        if (!storedId.isNullOrEmpty()) {
             storedId
         } else {
             val id = generatePseudoUserId()
@@ -29,17 +29,6 @@ class UserPreferencesUtils @Inject constructor(
     fun setPseudoUserId(pseudoUserId: String) {
         prefManager.persist(C.PSEUDO_USER_ID_PREF_KEY, pseudoUserId)
         this.mPseudoUserId = pseudoUserId
-    }
-
-    fun getUserId() = mUserId ?: prefManager.get(C.USER_ID_PREF_KEY)
-
-    fun setUserId(userId: String) {
-        prefManager.persist(C.USER_ID_PREF_KEY, userId)
-        mUserId = userId
-    }
-
-    fun removeUserId() {
-        prefManager.delete(C.USER_ID_PREF_KEY)
     }
 
     fun getIdentityToken(): String? {
