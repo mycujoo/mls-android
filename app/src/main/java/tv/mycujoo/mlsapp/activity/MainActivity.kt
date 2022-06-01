@@ -65,7 +65,6 @@ class MainActivity : AppCompatActivity() {
                 .setPlayerEventsListener(playerEventsListener)
                 .setUIEventListener(uiEventListener)
                 .setAnalyticsAccount("ANALYTICS_ACCOUNT_CODE")              // OPTIONAL
-                .userId("USER_ID")                                   // OPTIONAL
                 .identityToken("IDENTITY_TOKEN")                // OPTIONAL
                 .customPseudoUserId("CUSTOM_PSEUDO_USER_ID")    // OPTIONAL
                 .withVideoAnalyticsCustomData(
