@@ -17,7 +17,7 @@ scabbard {
 // publish information on Maven
 ext {
     PUBLISH_GROUP_ID = 'tv.mycujoo.mls'
-    PUBLISH_VERSION = '1.4.4'
+    PUBLISH_VERSION = '1.4.6'
     PUBLISH_ARTIFACT_ID = 'mls'
     PUBLISH_ARTIFACT_DESCRIPTION = 'Android MLS SDK'
 }
