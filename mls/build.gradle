@@ -28,7 +28,7 @@ apply from: "../script/publish-mavencentral.gradle"
 
 android {
     compileSdkVersion 32
-    buildToolsVersion '33.0.0-rc2'
+    buildToolsVersion '33.0.0'
 
 
     defaultConfig {
