@@ -9,11 +9,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import tv.mycujoo.domain.entity.Action
-import tv.mycujoo.domain.entity.EventEntity
+import tv.mycujoo.domain.entity.*
 import tv.mycujoo.domain.entity.Result.*
-import tv.mycujoo.domain.entity.Stream
-import tv.mycujoo.domain.entity.TimelineMarkerEntity
 import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.analytic.AnalyticsClient
 import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
@@ -671,7 +668,11 @@ class VideoPlayerMediator @Inject constructor(
                     playerView.updateControllerVisibility(isPlaying = true)
                     // If playback is local, depend on the config, else always load the video but don't play
                     if (playbackLocation == LOCAL) {
-                        play(event.streams.first(), playbackLocation != REMOTE)
+                        play(
+                            stream = event.streams.first(),
+                            playWhenReady = playbackLocation != REMOTE,
+                            eventStatus = event.status
+                        )
                     } else if (playbackLocation == REMOTE) {
                         loadRemoteMedia(event, 0, playWhenReady)
                     }
@@ -712,14 +713,19 @@ class VideoPlayerMediator @Inject constructor(
      * @param stream information needed to play an event. including stream url, encoded type, etc
      * @see Stream
      */
-    private fun play(stream: Stream, playWhenReady: Boolean? = null) {
+    private fun play(
+        stream: Stream,
+        playWhenReady: Boolean? = null,
+        eventStatus: EventStatus? = null,
+    ) {
         if (stream.widevine?.fullUrl != null && stream.widevine.licenseUrl != null) {
             player.play(
                 MediaDatum.DRMMediaData(
                     fullUrl = stream.widevine.fullUrl,
                     dvrWindowSize = stream.getDvrWindowSize(),
                     licenseUrl = stream.widevine.licenseUrl,
-                    autoPlay = playWhenReady ?: videoPlayerConfig.autoPlay
+                    autoPlay = playWhenReady ?: videoPlayerConfig.autoPlay,
+                    eventStatus = eventStatus,
                 )
             )
         } else if (stream.fullUrl != null) {
@@ -727,7 +733,8 @@ class VideoPlayerMediator @Inject constructor(
                 MediaDatum.MediaData(
                     fullUrl = stream.fullUrl,
                     dvrWindowSize = stream.getDvrWindowSize(),
-                    autoPlay = playWhenReady ?: videoPlayerConfig.autoPlay
+                    autoPlay = playWhenReady ?: videoPlayerConfig.autoPlay,
+                    eventStatus = eventStatus,
                 )
             )
         }
@@ -834,7 +841,10 @@ class VideoPlayerMediator @Inject constructor(
     }
 
     override fun onConcurrencyServerError() {
-        concurrencyRequestRetryHandler.postDelayed(concurrencyRequestRetryRunnable, bffSocketRetryDelay)
+        concurrencyRequestRetryHandler.postDelayed(
+            concurrencyRequestRetryRunnable,
+            bffSocketRetryDelay
+        )
         bffSocketRetryDelay *= 2
     }
 
