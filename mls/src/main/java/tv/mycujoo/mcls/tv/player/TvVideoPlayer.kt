@@ -49,6 +49,7 @@ import tv.mycujoo.mcls.tv.api.MLSTvBuilder
 import tv.mycujoo.mcls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackTransportControlGlueImplKt
+import tv.mycujoo.mcls.utils.DeviceUtils
 import tv.mycujoo.mcls.utils.StringUtils
 import tv.mycujoo.mcls.utils.ThreadUtils
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
@@ -307,14 +308,14 @@ class TvVideoPlayer @Inject constructor(
         videoAnalyticsCustomData: VideoAnalyticsCustomData?
     ) {
         if (analyticsClient is YouboraClient) {
-            val isFireTv = Build.MODEL.contains("AFT", true)
+            val deviceType = DeviceUtils.detectTVDeviceType(activity)
 
             analyticsClient.setYouboraPlugin(
-                activity,
-                exoPlayer,
-                accountCode,
-                if (isFireTv) DeviceType.FIRE_TV else DeviceType.ANDROID_TV,
-                videoAnalyticsCustomData
+                activity = activity,
+                exoPlayer = exoPlayer,
+                accountCode = accountCode,
+                deviceType = deviceType,
+                videoAnalyticsCustomData = videoAnalyticsCustomData,
             )
         }
     }
