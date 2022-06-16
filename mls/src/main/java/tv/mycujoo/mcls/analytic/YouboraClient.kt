@@ -43,17 +43,7 @@ class YouboraClient @Inject constructor(
         youboraOptions.accountCode = accountCode
         youboraOptions.isAutoDetectBackground = true
 
-        when (deviceType) {
-            DeviceType.ANDROID_TV -> {
-                youboraOptions.deviceCode = "AndroidTV"
-            }
-            DeviceType.FIRE_TV -> {
-                youboraOptions.deviceCode = "FireTV"
-            }
-            DeviceType.ANDROID -> {
-                youboraOptions.deviceCode = "Android"
-            }
-        }
+        youboraOptions.deviceCode = deviceType.value
 
         plugin = Plugin(youboraOptions, activity.baseContext)
 
