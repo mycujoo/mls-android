@@ -330,6 +330,10 @@ class TvVideoPlayer @Inject constructor(
 
     }
 
+    fun getPlayerDirectInstance(): ExoPlayer? {
+        return player.getDirectInstance()
+    }
+
     fun setLocalAnnotations(annotations: List<Action>) {
         if (playerReady) {
             tvAnnotationMediator.setLocalActions(annotations)
