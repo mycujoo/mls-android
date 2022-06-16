@@ -1,7 +1,8 @@
 package tv.mycujoo.mcls.enum
 
-enum class DeviceType {
-    ANDROID,
-    ANDROID_TV,
-    FIRE_TV
+enum class DeviceType(val value: String) {
+    ANDROID("Android"),
+    ANDROID_TV("AndroidTV"),
+    FIRE_TV("FireTV"),
+    AOSP("AOSPTV")
 }
