@@ -154,10 +154,11 @@ class TvVideoPlayer @Inject constructor(
         hasAnalytic = builder.hasAnalytic
         if (builder.hasAnalytic) {
             initAnalytic(
-                builder.mlsTvFragment.requireActivity(),
-                this.player.getDirectInstance()!!,
-                builder.getAnalyticsCode(),
-                builder.videoAnalyticsCustomData
+                activity = builder.mlsTvFragment.requireActivity(),
+                exoPlayer = this.player.getDirectInstance()!!,
+                accountCode = builder.getAnalyticsCode(),
+                videoAnalyticsCustomData = builder.videoAnalyticsCustomData,
+                deviceType = builder.deviceType
             )
         }
         this.player.getDirectInstance()?.let { exoPlayer ->
@@ -305,16 +306,17 @@ class TvVideoPlayer @Inject constructor(
         activity: Activity,
         exoPlayer: ExoPlayer,
         accountCode: String,
+        deviceType: DeviceType?,
         videoAnalyticsCustomData: VideoAnalyticsCustomData?
     ) {
         if (analyticsClient is YouboraClient) {
-            val deviceType = DeviceUtils.detectTVDeviceType(activity)
+            val device = deviceType ?: DeviceUtils.detectTVDeviceType(activity)
 
             analyticsClient.setYouboraPlugin(
                 activity = activity,
                 exoPlayer = exoPlayer,
                 accountCode = accountCode,
-                deviceType = deviceType,
+                deviceType = device,
                 videoAnalyticsCustomData = videoAnalyticsCustomData,
             )
         }

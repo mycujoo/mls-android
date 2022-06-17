@@ -15,6 +15,7 @@ import tv.mycujoo.mcls.api.MLSTVConfiguration
 import tv.mycujoo.mcls.di.AppModule
 import tv.mycujoo.mcls.di.NetworkModule
 import tv.mycujoo.mcls.enum.C
+import tv.mycujoo.mcls.enum.DeviceType
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.mcls.manager.IPrefManager
@@ -48,6 +49,8 @@ open class MLSTvBuilder {
         private set
     internal var hasAnalytic: Boolean = true
         private set
+    internal var deviceType: DeviceType? = null
+        private set
     internal var context: Context? = null
     internal var videoAnalyticsCustomData: VideoAnalyticsCustomData? = null
     internal var onConcurrencyLimitExceeded: ((Int) -> Unit)? = null
@@ -61,6 +64,10 @@ open class MLSTvBuilder {
             throw IllegalArgumentException(C.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
         this.publicKey = publicKey
+    }
+
+    fun deviceType(deviceType: DeviceType) = apply {
+        this.deviceType =  deviceType
     }
 
     fun customPseudoUserId(pseudoUserId: String) = apply {
