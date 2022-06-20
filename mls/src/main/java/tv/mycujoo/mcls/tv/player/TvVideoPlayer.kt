@@ -306,11 +306,11 @@ class TvVideoPlayer @Inject constructor(
         activity: Activity,
         exoPlayer: ExoPlayer,
         accountCode: String,
-        deviceType: DeviceType?,
+        deviceType: String?,
         videoAnalyticsCustomData: VideoAnalyticsCustomData?
     ) {
         if (analyticsClient is YouboraClient) {
-            val device = deviceType ?: DeviceUtils.detectTVDeviceType(activity)
+            val device = deviceType ?: DeviceUtils.detectTVDeviceType(activity).value
 
             analyticsClient.setYouboraPlugin(
                 activity = activity,

@@ -49,7 +49,7 @@ open class MLSTvBuilder {
         private set
     internal var hasAnalytic: Boolean = true
         private set
-    internal var deviceType: DeviceType? = null
+    internal var deviceType: String? = null
         private set
     internal var context: Context? = null
     internal var videoAnalyticsCustomData: VideoAnalyticsCustomData? = null
@@ -66,7 +66,7 @@ open class MLSTvBuilder {
         this.publicKey = publicKey
     }
 
-    fun deviceType(deviceType: DeviceType) = apply {
+    fun deviceType(deviceType: String) = apply {
         this.deviceType =  deviceType
     }
 
