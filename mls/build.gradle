@@ -171,7 +171,7 @@ dependencies {
     testImplementation 'joda-time:joda-time:2.10.13'
 
     // Exoplayer
-    def exo_player_version = "2.17.1"
+    def exo_player_version = "2.18.0"
     api "com.google.android.exoplayer:exoplayer:$exo_player_version"
     api "com.google.android.exoplayer:exoplayer-hls:$exo_player_version"
     api "com.google.android.exoplayer:extension-leanback:$exo_player_version"
