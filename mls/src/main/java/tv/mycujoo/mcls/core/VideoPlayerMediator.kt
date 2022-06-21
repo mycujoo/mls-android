@@ -451,7 +451,7 @@ class VideoPlayerMediator @Inject constructor(
                 activity,
                 exoPlayer,
                 analyticsAccountCode,
-                DeviceType.ANDROID,
+                DeviceType.ANDROID.value,
                 customData
             )
         }
@@ -511,7 +511,7 @@ class VideoPlayerMediator @Inject constructor(
                     activity,
                     exoPlayer,
                     analyticsAccountCode,
-                    DeviceType.ANDROID,
+                    DeviceType.ANDROID.value,
                     customData
                 )
             }

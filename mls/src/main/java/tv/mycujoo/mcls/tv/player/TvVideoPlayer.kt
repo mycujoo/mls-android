@@ -49,6 +49,7 @@ import tv.mycujoo.mcls.tv.api.MLSTvBuilder
 import tv.mycujoo.mcls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackTransportControlGlueImplKt
+import tv.mycujoo.mcls.utils.DeviceUtils
 import tv.mycujoo.mcls.utils.StringUtils
 import tv.mycujoo.mcls.utils.ThreadUtils
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
@@ -153,10 +154,11 @@ class TvVideoPlayer @Inject constructor(
         hasAnalytic = builder.hasAnalytic
         if (builder.hasAnalytic) {
             initAnalytic(
-                builder.mlsTvFragment.requireActivity(),
-                this.player.getDirectInstance()!!,
-                builder.getAnalyticsCode(),
-                builder.videoAnalyticsCustomData
+                activity = builder.mlsTvFragment.requireActivity(),
+                exoPlayer = this.player.getDirectInstance()!!,
+                accountCode = builder.getAnalyticsCode(),
+                videoAnalyticsCustomData = builder.videoAnalyticsCustomData,
+                deviceType = builder.deviceType
             )
         }
         this.player.getDirectInstance()?.let { exoPlayer ->
@@ -304,17 +306,18 @@ class TvVideoPlayer @Inject constructor(
         activity: Activity,
         exoPlayer: ExoPlayer,
         accountCode: String,
+        deviceType: String?,
         videoAnalyticsCustomData: VideoAnalyticsCustomData?
     ) {
         if (analyticsClient is YouboraClient) {
-            val isFireTv = Build.MODEL.contains("AFT", true)
+            val device = deviceType ?: DeviceUtils.detectTVDeviceType(activity).value
 
             analyticsClient.setYouboraPlugin(
-                activity,
-                exoPlayer,
-                accountCode,
-                if (isFireTv) DeviceType.FIRE_TV else DeviceType.ANDROID_TV,
-                videoAnalyticsCustomData
+                activity = activity,
+                exoPlayer = exoPlayer,
+                accountCode = accountCode,
+                deviceType = device,
+                videoAnalyticsCustomData = videoAnalyticsCustomData,
             )
         }
     }
@@ -327,6 +330,10 @@ class TvVideoPlayer @Inject constructor(
             analyticsClient.start()
         }
 
+    }
+
+    fun getPlayerDirectInstance(): ExoPlayer? {
+        return player.getDirectInstance()
     }
 
     fun setLocalAnnotations(annotations: List<Action>) {

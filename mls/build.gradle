@@ -17,7 +17,7 @@ scabbard {
 // publish information on Maven
 ext {
     PUBLISH_GROUP_ID = 'tv.mycujoo.mls'
-    PUBLISH_VERSION = '1.4.6'
+    PUBLISH_VERSION = '1.4.7-beta03'
     PUBLISH_ARTIFACT_ID = 'mls'
     PUBLISH_ARTIFACT_DESCRIPTION = 'Android MLS SDK'
 }
@@ -95,8 +95,8 @@ tasks.withType(Javadoc).all {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.4.1'
-    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.4.2'
+    implementation 'androidx.core:core-ktx:1.8.0'
 
     def lifecycle_ktx_version = "2.4.1"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_ktx_version"
@@ -111,7 +111,7 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
-    testImplementation "org.mockito:mockito-core:4.5.1"
+    testImplementation "org.mockito:mockito-core:4.6.1"
     testImplementation "org.mockito.kotlin:mockito-kotlin:4.0.0"
     testImplementation "org.mockito:mockito-inline:4.5.1"
     androidTestImplementation 'org.mockito:mockito-android:4.3.1'
@@ -122,9 +122,9 @@ dependencies {
     androidTestImplementation 'androidx.annotation:annotation:1.3.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test:core-ktx:1.4.0'
-    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0"
+    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.2"
     testImplementation 'androidx.arch.core:core-testing:2.1.0'
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.2'
     androidTestImplementation 'com.caverock:androidsvg-aar:1.4'
 
     // ConstraintLayout
@@ -153,9 +153,9 @@ dependencies {
     implementation "com.squareup.okhttp3:logging-interceptor:4.9.3"
 
     // Coroutines
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0"
-    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2"
+    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.2"
 
     // RxRelay
     implementation 'com.jakewharton.rxrelay3:rxrelay:3.0.1'
@@ -203,4 +203,6 @@ dependencies {
     // Kluent for Assertions
     testImplementation 'org.amshove.kluent:kluent-android:1.68'
     androidTestImplementation 'org.amshove.kluent:kluent-android:1.68'
+
+    implementation 'com.google.android.gms:play-services-base:18.0.1'
 }

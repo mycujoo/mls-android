@@ -36,24 +36,14 @@ class YouboraClient @Inject constructor(
         activity: Activity,
         exoPlayer: ExoPlayer,
         accountCode: String,
-        deviceType: DeviceType,
+        deviceType: String,
         videoAnalyticsCustomData: VideoAnalyticsCustomData?,
     ) {
         val youboraOptions = Options()
         youboraOptions.accountCode = accountCode
         youboraOptions.isAutoDetectBackground = true
 
-        when (deviceType) {
-            DeviceType.ANDROID_TV -> {
-                youboraOptions.deviceCode = "AndroidTV"
-            }
-            DeviceType.FIRE_TV -> {
-                youboraOptions.deviceCode = "FireTV"
-            }
-            DeviceType.ANDROID -> {
-                youboraOptions.deviceCode = "Android"
-            }
-        }
+        youboraOptions.deviceCode = deviceType
 
         plugin = Plugin(youboraOptions, activity.baseContext)
 
