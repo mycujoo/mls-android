@@ -1,7 +1,9 @@
 package tv.mycujoo.data.model
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
+@JsonClass(generateAdapter = true)
 data class EventSourceData(
     @field:Json(name = "id") val id: String,
     @field:Json(name = "title") val title: String,
@@ -20,6 +22,7 @@ data class EventSourceData(
     @field:Json(name = "is_protected") val is_protected: Boolean,
 )
 
+@JsonClass(generateAdapter = true)
 data class StreamSourceData(
     @field:Json(name = "id") val id: String,
     @field:Json(name = "dvr_window_size") val dvrWindowString: String,
@@ -28,26 +31,32 @@ data class StreamSourceData(
     @field:Json(name = "error") val errorCodeAndMessage: ErrorCodeAndMessageSourceData? = null
 )
 
+@JsonClass(generateAdapter = true)
 data class DrmSourceData(
     @field:Json(name = "widevine") val widevine: WidevineSourceData?,
 )
 
+@JsonClass(generateAdapter = true)
 data class WidevineSourceData(
     @field:Json(name = "full_url") val fullUrl: String?,
     @field:Json(name = "license_url") val licenseUrl: String?
 )
 
+@JsonClass(generateAdapter = true)
 data class ErrorCodeAndMessageSourceData(
     @field:Json(name = "code") val code: String?,
     @field:Json(name = "message") val message: String?
 )
 
+@JsonClass(generateAdapter = true)
 data class LocationSourceData(
     @field:Json(name = "physical") val physicalSourceData: PhysicalSourceData
 )
 
+@JsonClass(generateAdapter = true)
 class MetadataSourceData
 
+@JsonClass(generateAdapter = true)
 data class PhysicalSourceData(
     @field:Json(name = "city") val city: String,
     @field:Json(name = "continent_code") val continent_code: String,
@@ -56,6 +65,7 @@ data class PhysicalSourceData(
     @field:Json(name = "venue") val venue: String
 )
 
+@JsonClass(generateAdapter = true)
 data class CoordinatesSourceData(
     @field:Json(name = "latitude") val latitude: Double,
     @field:Json(name = "longitude") val longitude: Double
