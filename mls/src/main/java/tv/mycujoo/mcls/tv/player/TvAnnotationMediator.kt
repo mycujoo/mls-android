@@ -34,13 +34,17 @@ class TvAnnotationMediator @Inject constructor(
 
     init {
         player.addListener(object : Player.Listener {
-            override fun onPositionDiscontinuity(reason: Int) {
+            override fun onPositionDiscontinuity(
+                oldPosition: Player.PositionInfo,
+                newPosition: Player.PositionInfo,
+                reason: Int,
+            ) {
                 if (reason == Player.DISCONTINUITY_REASON_SEEK) {
                     hasPendingSeek = true
                 }
             }
 
-            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+            override fun onPlaybackStateChanged(playbackState: Int) {
                 if (playbackState == Player.STATE_READY && hasPendingSeek) {
                     hasPendingSeek = false
 

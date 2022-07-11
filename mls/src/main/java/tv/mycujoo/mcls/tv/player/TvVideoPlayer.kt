@@ -215,7 +215,7 @@ class TvVideoPlayer @Inject constructor(
         }
 
         this.player.addListener(object : Player.Listener {
-            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+            override fun onPlaybackStateChanged(playbackState: Int) {
                 if (playbackState == ExoPlayer.STATE_READY) {
                     dataManager.currentEvent?.let { event ->
                         if (event.is_protected && event.isNativeMLS && concurrencyLimitEnabled) {
