@@ -2,6 +2,7 @@ package tv.mycujoo.mcls.api
 
 import android.content.pm.PackageManager
 import androidx.fragment.app.FragmentActivity
+import com.google.android.exoplayer2.PlaybackException
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.internal.modules.ApplicationContextModule
@@ -38,6 +39,8 @@ open class MLSBuilder {
     internal var publicKey: String = ""
         private set
     internal var onConcurrencyLimitExceeded: ((Int) -> Unit)? = null
+        private set
+    internal var onPlaybackException: ((PlaybackException) -> Unit)? = null
         private set
     internal var pseudoUserId: String? = null
         private set
@@ -78,6 +81,10 @@ open class MLSBuilder {
 
     fun setConcurrencyLimitFeatureEnabled(enabled: Boolean) = apply {
         concurrencyLimitFeatureEnabled = enabled
+    }
+
+    fun setOnPlaybackException(onError: (PlaybackException) -> Unit) {
+        onPlaybackException = onError
     }
 
     fun identityToken(identityToken: String) = apply {

@@ -2,6 +2,7 @@ package tv.mycujoo.mcls.core
 
 import android.app.Activity
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player.*
 import com.google.android.exoplayer2.SeekParameters
 import com.google.android.exoplayer2.ui.TimeBar
@@ -202,7 +203,8 @@ class VideoPlayerMediator @Inject constructor(
 
             initPlayerView(
                 playerView,
-                timelineMarkerActionEntities
+                timelineMarkerActionEntities,
+                builder.onPlaybackException,
             )
 
             if (cast != null) {
@@ -213,7 +215,8 @@ class VideoPlayerMediator @Inject constructor(
 
     private fun initPlayerView(
         MLSPlayerView: MLSPlayerView,
-        timelineMarkerActionEntities: List<TimelineMarkerEntity>
+        timelineMarkerActionEntities: List<TimelineMarkerEntity>,
+        onPlaybackException: ((PlaybackException) -> Unit)?
     ) {
         playerView = MLSPlayerView
 
@@ -249,6 +252,10 @@ class VideoPlayerMediator @Inject constructor(
                 handlePlayStatusOfOverlayAnimationsOnPlayPause(isPlaying)
             }
 
+            override fun onPlayerError(error: PlaybackException) {
+                super.onPlayerError(error)
+                onPlaybackException?.invoke(error)
+            }
         }
 
         player.addListener(mainEventListener)
