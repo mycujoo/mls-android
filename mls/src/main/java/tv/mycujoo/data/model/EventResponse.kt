@@ -25,7 +25,7 @@ data class EventSourceData(
 @JsonClass(generateAdapter = true)
 data class StreamSourceData(
     @field:Json(name = "id") val id: String,
-    @field:Json(name = "dvr_window_size") val dvrWindowString: String,
+    @field:Json(name = "dvr_window_size") val dvrWindowString: String?,
     @field:Json(name = "full_url") val fullUrl: String?,
     @field:Json(name = "drm") val drm: DrmSourceData?,
     @field:Json(name = "error") val errorCodeAndMessage: ErrorCodeAndMessageSourceData? = null
