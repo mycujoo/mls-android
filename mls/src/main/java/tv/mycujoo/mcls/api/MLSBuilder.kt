@@ -83,7 +83,7 @@ open class MLSBuilder {
         concurrencyLimitFeatureEnabled = enabled
     }
 
-    fun setOnPlaybackException(onError: (PlaybackException) -> Unit) {
+    fun setOnPlaybackException(onError: (PlaybackException) -> Unit) = apply {
         onPlaybackException = onError
     }
 
