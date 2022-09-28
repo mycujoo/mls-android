@@ -1,7 +1,5 @@
 package tv.mycujoo.domain.entity
 
-import java.util.*
-
 enum class EventStatus {
     EVENT_STATUS_SCHEDULED,
     EVENT_STATUS_RESCHEDULED,
@@ -17,7 +15,7 @@ enum class EventStatus {
     companion object {
         fun fromValueOrUnspecified(value: String) =
             values()
-                .firstOrNull { it.name.lowercase(Locale.ENGLISH) == value }
+                .firstOrNull { it.name.lowercase() == value.lowercase() }
                 ?: EVENT_STATUS_UNSPECIFIED
     }
 }

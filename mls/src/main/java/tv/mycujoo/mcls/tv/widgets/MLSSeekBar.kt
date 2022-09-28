@@ -253,7 +253,7 @@ class MLSSeekBar(context: Context, attrs: AttributeSet?) : View(context, attrs) 
         mAccessibilitySeekListener = listener
     }
 
-    override fun performAccessibilityAction(action: Int, arguments: Bundle): Boolean {
+    override fun performAccessibilityAction(action: Int, arguments: Bundle?): Boolean {
         if (mAccessibilitySeekListener != null) {
             when (action) {
                 AccessibilityNodeInfoCompat.ACTION_SCROLL_FORWARD -> return mAccessibilitySeekListener!!.onAccessibilitySeekForward()
