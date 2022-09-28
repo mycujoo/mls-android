@@ -109,17 +109,17 @@ open class AnimationFactory @Inject constructor() {
         if (animation != null) {
             animation.duration = introTransitionSpec.animationDuration
             animation.addListener(object : Animator.AnimatorListener {
-                override fun onAnimationRepeat(animation: Animator?) {
+                override fun onAnimationRepeat(animation: Animator) {
                 }
 
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                 }
 
-                override fun onAnimationCancel(animation: Animator?) {
+                override fun onAnimationCancel(animation: Animator) {
 
                 }
 
-                override fun onAnimationStart(animation: Animator?) {
+                override fun onAnimationStart(animation: Animator) {
                     scaffoldView.visibility = View.VISIBLE
                 }
 
@@ -144,18 +144,18 @@ open class AnimationFactory @Inject constructor() {
         animation.duration = showOverlayAction.outroTransitionSpec!!.animationDuration
 
         animation.addListener(object : Animator.AnimatorListener {
-            override fun onAnimationStart(animation: Animator?) {
+            override fun onAnimationStart(animation: Animator) {
             }
 
-            override fun onAnimationEnd(animation: Animator?) {
+            override fun onAnimationEnd(animation: Animator) {
                 viewHandler.detachOverlayView(overlayView)
                 viewHandler.removeAnimation(showOverlayAction.id)
             }
 
-            override fun onAnimationRepeat(animation: Animator?) {
+            override fun onAnimationRepeat(animation: Animator) {
             }
 
-            override fun onAnimationCancel(animation: Animator?) {
+            override fun onAnimationCancel(animation: Animator) {
             }
 
         })
@@ -177,18 +177,18 @@ open class AnimationFactory @Inject constructor() {
         animation.duration = outroTransitionSpec.animationDuration
 
         animation.addListener(object : Animator.AnimatorListener {
-            override fun onAnimationStart(animation: Animator?) {
+            override fun onAnimationStart(animation: Animator) {
             }
 
-            override fun onAnimationEnd(animation: Animator?) {
+            override fun onAnimationEnd(animation: Animator) {
                 viewHandler.detachOverlayView(overlayView)
                 viewHandler.removeAnimation(actionId)
             }
 
-            override fun onAnimationRepeat(animation: Animator?) {
+            override fun onAnimationRepeat(animation: Animator) {
             }
 
-            override fun onAnimationCancel(animation: Animator?) {
+            override fun onAnimationCancel(animation: Animator) {
             }
 
         })
@@ -248,19 +248,19 @@ open class AnimationFactory @Inject constructor() {
 
         if (animation != null) {
             animation.addListener(object : Animator.AnimatorListener {
-                override fun onAnimationRepeat(animation: Animator?) {
+                override fun onAnimationRepeat(animation: Animator) {
                 }
 
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     viewHandler.detachOverlayView(view)
                     viewHandler.removeAnimation(actionId)
                 }
 
-                override fun onAnimationCancel(animation: Animator?) {
+                override fun onAnimationCancel(animation: Animator) {
 
                 }
 
-                override fun onAnimationStart(animation: Animator?) {
+                override fun onAnimationStart(animation: Animator) {
                 }
 
             })
@@ -346,18 +346,18 @@ open class AnimationFactory @Inject constructor() {
             animation.duration =
                 overlayEntity.introTransitionSpec.animationDuration
             animation.addListener(object : Animator.AnimatorListener {
-                override fun onAnimationRepeat(animation: Animator?) {
+                override fun onAnimationRepeat(animation: Animator) {
                 }
 
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     viewHandler.removeAnimation(overlayEntity.id)
                 }
 
-                override fun onAnimationCancel(animation: Animator?) {
+                override fun onAnimationCancel(animation: Animator) {
 
                 }
 
-                override fun onAnimationStart(animation: Animator?) {
+                override fun onAnimationStart(animation: Animator) {
                     scaffoldView.visibility = View.VISIBLE
 
                 }
@@ -444,21 +444,21 @@ open class AnimationFactory @Inject constructor() {
             animation.duration =
                 overlayEntity.outroTransitionSpec.animationDuration
             animation.addListener(object : Animator.AnimatorListener {
-                override fun onAnimationRepeat(animation: Animator?) {
+                override fun onAnimationRepeat(animation: Animator) {
                 }
 
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     viewHandler.removeAnimation(overlayEntity.id)
                     viewHandler.detachOverlayView(
                         scaffoldView
                     )
                 }
 
-                override fun onAnimationCancel(animation: Animator?) {
+                override fun onAnimationCancel(animation: Animator) {
 
                 }
 
-                override fun onAnimationStart(animation: Animator?) {
+                override fun onAnimationStart(animation: Animator) {
                     scaffoldView.visibility = View.VISIBLE
                 }
 
