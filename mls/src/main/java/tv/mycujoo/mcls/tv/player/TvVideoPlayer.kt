@@ -203,8 +203,8 @@ class TvVideoPlayer @Inject constructor(
             mTransportControlGlue.setSeekProvider(MLSPlaybackSeekDataProvider(5000L))
         } else {
             mTransportControlGlue.addPlayerCallback(object : PlaybackGlue.PlayerCallback() {
-                override fun onPreparedStateChanged(glue: PlaybackGlue?) {
-                    if (glue?.isPrepared == true) {
+                override fun onPreparedStateChanged(glue: PlaybackGlue) {
+                    if (glue.isPrepared) {
                         glue.removePlayerCallback(this)
                         val transportControlGlue =
                             glue as MLSPlaybackTransportControlGlueImplKt<*>

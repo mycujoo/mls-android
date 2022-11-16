@@ -10,6 +10,7 @@ import androidx.leanback.media.PlaybackGlue
 import androidx.leanback.media.PlaybackGlueHost
 import androidx.leanback.media.PlayerAdapter
 import androidx.leanback.widget.*
+import timber.log.Timber
 import tv.mycujoo.mcls.api.MLSTVConfiguration
 import tv.mycujoo.mcls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mcls.tv.widgets.MLSFastForwardAction
@@ -78,6 +79,10 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
         const val DEBUG = false
 
         fun notifyItemChanged(adapter: ArrayObjectAdapter, obj: Any?) {
+            if (obj == null) {
+                return
+            }
+
             val index = adapter.indexOf(obj)
             if (index >= 0) {
                 adapter.notifyArrayItemRangeChanged(index, 1)
@@ -108,55 +113,55 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
     private var mErrorMessage: String? = null
 
     private val mAdapterCallback = object : PlayerAdapter.Callback() {
-        override fun onPlayStateChanged(adapter: PlayerAdapter?) {
-            if (DEBUG) Log.v(TAG, "onPlayStateChanged")
+        override fun onPlayStateChanged(adapter: PlayerAdapter) {
+            if (DEBUG) Timber.tag(TAG).v("onPlayStateChanged")
             onPlayStateChanged()
         }
 
-        override fun onCurrentPositionChanged(adapter: PlayerAdapter?) {
-            if (DEBUG) Log.v(TAG, "onPlayStateChanged")
+        override fun onCurrentPositionChanged(adapter: PlayerAdapter) {
+            if (DEBUG) Timber.tag(TAG).v("onPlayStateChanged")
             onUpdateProgress()
         }
 
-        override fun onBufferedPositionChanged(adapter: PlayerAdapter?) {
-            if (DEBUG) Log.v(TAG, "onBufferedPositionChanged: ")
+        override fun onBufferedPositionChanged(adapter: PlayerAdapter) {
+            if (DEBUG) Timber.tag(TAG).v("onBufferedPositionChanged: ")
             onUpdateBufferedProgress()
         }
 
-        override fun onDurationChanged(adapter: PlayerAdapter?) {
-            if (DEBUG) Log.v(TAG, "onDurationChanged: ")
+        override fun onDurationChanged(adapter: PlayerAdapter) {
+            if (DEBUG) Timber.tag(TAG).v("onDurationChanged: ")
             onUpdateDuration()
         }
 
-        override fun onPlayCompleted(adapter: PlayerAdapter?) {
-            if (DEBUG) Log.v(TAG, "onPlayCompleted: ")
+        override fun onPlayCompleted(adapter: PlayerAdapter) {
+            if (DEBUG) Timber.tag(TAG).v("onPlayCompleted: ")
             onPlayCompleted()
         }
 
-        override fun onPreparedStateChanged(adapter: PlayerAdapter?) {
-            if (DEBUG) Log.i(TAG, "onPreparedStateChanged: ")
+        override fun onPreparedStateChanged(adapter: PlayerAdapter) {
+            if (DEBUG) Timber.tag(TAG).i("onPreparedStateChanged: ")
             onPreparedStateChanged()
         }
 
-        override fun onVideoSizeChanged(adapter: PlayerAdapter?, width: Int, height: Int) {
+        override fun onVideoSizeChanged(adapter: PlayerAdapter, width: Int, height: Int) {
             mVideoWidth = width
             mVideoHeight = height
             mPlayerCallback?.onVideoSizeChanged(width, height)
         }
 
-        override fun onError(adapter: PlayerAdapter?, errorCode: Int, errorMessage: String?) {
+        override fun onError(adapter: PlayerAdapter, errorCode: Int, errorMessage: String?) {
             mErrorSet = true
             mErrorCode = errorCode
             mErrorMessage = errorMessage
             mPlayerCallback?.onError(errorCode, errorMessage)
         }
 
-        override fun onBufferingStateChanged(adapter: PlayerAdapter?, start: Boolean) {
+        override fun onBufferingStateChanged(adapter: PlayerAdapter, start: Boolean) {
             mBuffering = start
             controllerAgent.onBufferingStateChanged(start)
         }
 
-        override fun onMetadataChanged(adapter: PlayerAdapter?) {
+        override fun onMetadataChanged(adapter: PlayerAdapter) {
             onMetadataChanged()
         }
     }
@@ -170,16 +175,16 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
         return mPlayerAdapter
     }
 
-    override fun onAttachedToHost(host: PlaybackGlueHost?) {
+    override fun onAttachedToHost(host: PlaybackGlueHost) {
         super.onAttachedToHost(host)
-        host?.setOnKeyInterceptListener(this)
-        host?.setOnActionClickedListener(this)
+        host.setOnKeyInterceptListener(this)
+        host.setOnActionClickedListener(this)
         onCreateDefaultControlsRow()
         onCreateDefaultRowPresenter()
-        host?.setPlaybackRowPresenter(getPlaybackRowPresenter())
-        host?.setPlaybackRow(getControlsRow())
+        host.setPlaybackRowPresenter(getPlaybackRowPresenter())
+        host.setPlaybackRow(getControlsRow())
 
-        mPlayerCallback = host?.playerCallback
+        mPlayerCallback = host.playerCallback
         onAttachHostCallback()
         mPlayerAdapter.onAttachedToHost(host)
     }
@@ -249,7 +254,7 @@ abstract class MLSPlaybackBaseControlGlueKt<T : PlayerAdapter> constructor(
     fun setControlsOverlayAutoHideEnabled(enable: Boolean) {
         mFadeWhenPlaying = enable
         if (mFadeWhenPlaying.not() && host != null) {
-            host.isControlsOverlayAutoHideEnabled = false
+            host?.isControlsOverlayAutoHideEnabled = false
         }
     }
 

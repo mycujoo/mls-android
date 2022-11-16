@@ -79,24 +79,24 @@ class MLSPlaybackTransportControlGlueImplKt<AdapterT : PlayerAdapter> constructo
 
     override fun onCreateRowPresenter(liveToggleL: ControllerAgent): PlaybackRowPresenter {
         val detailsPresenter = object : AbstractDetailsDescriptionPresenter() {
-            override fun onBindDescription(vh: ViewHolder?, item: Any?) {
+            override fun onBindDescription(vh: ViewHolder, item: Any) {
                 val glue = item as MLSPlaybackBaseControlGlueKt<*>
-                vh?.title?.text = glue.getTitle()
-                vh?.subtitle?.text = glue.getSubtitle()
+                vh.title.text = glue.getTitle()
+                vh.subtitle.text = glue.getSubtitle()
             }
         }
 
         Log.d(TAG, "onCreateRowPresenter: ")
 
         val rowPresenter = object : MLSPlaybackTransportRowPresenter(controllerAgent, config) {
-            override fun onBindRowViewHolder(holder: RowPresenter.ViewHolder?, item: Any?) {
+            override fun onBindRowViewHolder(holder: RowPresenter.ViewHolder, item: Any) {
                 super.onBindRowViewHolder(holder, item)
-                holder?.onKeyListener = this@MLSPlaybackTransportControlGlueImplKt
+                holder.onKeyListener = this@MLSPlaybackTransportControlGlueImplKt
             }
 
-            override fun onUnbindRowViewHolder(holder: RowPresenter.ViewHolder?) {
+            override fun onUnbindRowViewHolder(holder: RowPresenter.ViewHolder) {
                 super.onUnbindRowViewHolder(holder)
-                holder?.onKeyListener = null
+                holder.onKeyListener = null
             }
         }
 
@@ -104,7 +104,7 @@ class MLSPlaybackTransportControlGlueImplKt<AdapterT : PlayerAdapter> constructo
         return rowPresenter
     }
 
-    override fun onAttachedToHost(host: PlaybackGlueHost?) {
+    override fun onAttachedToHost(host: PlaybackGlueHost) {
         super.onAttachedToHost(host)
         if (host is PlaybackSeekUi) {
             host.setPlaybackSeekUiClient(mPlaybackSeekUiClient)
@@ -263,7 +263,7 @@ class MLSPlaybackTransportControlGlueImplKt<AdapterT : PlayerAdapter> constructo
         }
 
         if (mFadeWhenPlaying && host != null) {
-            host.isControlsOverlayAutoHideEnabled = isPlaying
+            host?.isControlsOverlayAutoHideEnabled = isPlaying
         }
 
         val index =
