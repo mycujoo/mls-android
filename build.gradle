@@ -1,7 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.7.10'
+    ext.kotlin_version = '1.7.20'
     repositories {
         google()
         mavenCentral()
@@ -9,7 +9,7 @@ buildscript {
         maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.2'
+        classpath 'com.android.tools.build:gradle:7.3.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
         classpath 'com.vanniktech:gradle-maven-publish-plugin:0.13.0'
@@ -30,6 +30,13 @@ allprojects {
         maven { url "https://npaw.jfrog.io/artifactory/youbora/" }
         maven {
             url 'https://mls-171009379459.d.codeartifact.eu-central-1.amazonaws.com/maven/mls/'
+            credentials {
+                username "aws"
+                password System.env.CODEARTIFACT_AUTH_TOKEN
+            }
+        }
+        maven {
+            url 'https://mls-171009379459.d.codeartifact.eu-central-1.amazonaws.com/maven/androix/'
             credentials {
                 username "aws"
                 password System.env.CODEARTIFACT_AUTH_TOKEN
