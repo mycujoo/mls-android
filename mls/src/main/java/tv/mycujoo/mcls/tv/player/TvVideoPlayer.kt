@@ -216,6 +216,8 @@ class TvVideoPlayer @Inject constructor(
 
         this.player.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
+                logEventIfNeeded()
+
                 if (playbackState == ExoPlayer.STATE_READY) {
                     dataManager.currentEvent?.let { event ->
                         if (event.is_protected && event.isNativeMLS && concurrencyLimitEnabled) {
@@ -239,7 +241,6 @@ class TvVideoPlayer @Inject constructor(
                     controllerAgent.setControllerLiveMode(MLSPlayerView.LiveState.VOD)
                 }
 
-                logEventIfNeeded(playbackState)
             }
         })
 
@@ -277,17 +278,15 @@ class TvVideoPlayer @Inject constructor(
      * Log event through Youbora client.
      * Log should take place if only analytics is enabled in configuration and should only happen once per stream
      */
-    private fun logEventIfNeeded(playbackState: Int) {
+    private fun logEventIfNeeded() {
         if (!hasAnalytic) {
             return
         }
         if (logged) {
             return
         }
-        if (playbackState == Player.STATE_READY) {
-            analyticsClient.logEvent(dataManager.currentEvent, player.isLive())
-            logged = true
-        }
+        analyticsClient.logEvent(dataManager.currentEvent, player.isLive())
+        logged = true
     }
 
     /**
