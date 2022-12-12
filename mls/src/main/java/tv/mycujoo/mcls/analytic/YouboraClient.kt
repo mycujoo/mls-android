@@ -81,7 +81,6 @@ class YouboraClient @Inject constructor(
         savedPlugin.options.username = userPreferencesUtils.getPseudoUserId()
         savedPlugin.options.contentTitle = event.title
         savedPlugin.options.contentResource = event.streams.firstOrNull()?.toString()
-        savedPlugin.options.contentIsLive = live
 
         savedPlugin.options.contentCustomDimension2 = event.id
 
