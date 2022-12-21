@@ -396,27 +396,27 @@ class VideoPlayerMediator @Inject constructor(
                     }
                 }
 
-                override fun onSessionStarted(session: ICasterSession?) {
+                override fun onSessionStarted(session: ICasterSession) {
                     onCastSessionStarted(session)
                 }
 
-                override fun onSessionStartFailed(session: ICasterSession?) {
+                override fun onSessionStartFailed(session: ICasterSession) {
                     onApplicationDisconnected(session)
                 }
 
-                override fun onSessionResumed(session: ICasterSession?) {
+                override fun onSessionResumed(session: ICasterSession) {
                     onCastSessionResumed(session)
                 }
 
-                override fun onSessionResumeFailed(session: ICasterSession?) {
+                override fun onSessionResumeFailed(session: ICasterSession) {
                     onApplicationDisconnected(session)
                 }
 
-                override fun onSessionEnding(session: ICasterSession?) {
+                override fun onSessionEnding(session: ICasterSession) {
                     onApplicationDisconnected(session)
                 }
 
-                override fun onSessionEnded(session: ICasterSession?) {
+                override fun onSessionEnded(session: ICasterSession) {
                     onApplicationDisconnected(session)
                 }
 
