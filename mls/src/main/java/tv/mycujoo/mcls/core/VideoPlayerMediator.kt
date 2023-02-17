@@ -669,8 +669,8 @@ class VideoPlayerMediator @Inject constructor(
             PLAYABLE -> {
                 if (streaming.not()) {
                     streaming = true
-                    logEventIfNeeded()
                     storeEvent(event)
+                    logEventIfNeeded()
                     playerView.hideInfoDialogs()
                     playerView.updateControllerVisibility(isPlaying = true)
                     // If playback is local, depend on the config, else always load the video but don't play

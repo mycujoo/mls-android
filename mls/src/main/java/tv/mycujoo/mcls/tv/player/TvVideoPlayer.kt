@@ -500,6 +500,7 @@ class TvVideoPlayer @Inject constructor(
             }
             StreamStatus.PLAYABLE -> {
                 if (streaming.not()) {
+                    logEventIfNeeded()
                     streaming = true
                     logged = false
 
