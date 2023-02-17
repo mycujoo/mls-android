@@ -118,7 +118,7 @@ class Cast(
         val localManager = object : ISessionManagerListener {
             private val UPDATE_INTERVAL: Long = 500L
 
-            override fun onSessionStarted(session: ICasterSession?, sessionId: String?) {
+            override fun onSessionStarted(session: ICasterSession, sessionId: String?) {
                 castListener.onSessionStarted(casterSession)
                 casterSession.castSession?.remoteMediaClient?.addProgressListener(
                     progressListener,
@@ -126,11 +126,11 @@ class Cast(
                 )
             }
 
-            override fun onSessionStartFailed(session: ICasterSession?, error: Int) {
+            override fun onSessionStartFailed(session: ICasterSession, error: Int) {
                 castListener.onSessionStartFailed(casterSession)
             }
 
-            override fun onSessionResumed(session: ICasterSession?, wasSuspended: Boolean) {
+            override fun onSessionResumed(session: ICasterSession, wasSuspended: Boolean) {
                 castListener.onSessionResumed(casterSession)
                 casterSession.castSession?.remoteMediaClient?.addProgressListener(
                     progressListener,
@@ -138,17 +138,17 @@ class Cast(
                 )
             }
 
-            override fun onSessionResumeFailed(session: ICasterSession?, error: Int) {
+            override fun onSessionResumeFailed(session: ICasterSession, error: Int) {
                 castListener.onSessionResumeFailed(casterSession)
 
             }
 
-            override fun onSessionEnding(session: ICasterSession?) {
+            override fun onSessionEnding(session: ICasterSession) {
                 castListener.onSessionEnding(casterSession)
 
             }
 
-            override fun onSessionEnded(session: ICasterSession?, error: Int) {
+            override fun onSessionEnded(session: ICasterSession, error: Int) {
                 castListener.onSessionEnded(casterSession)
             }
         }
