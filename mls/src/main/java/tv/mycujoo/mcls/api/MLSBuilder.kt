@@ -40,6 +40,8 @@ open class MLSBuilder {
         private set
     internal var onConcurrencyLimitExceeded: ((Int) -> Unit)? = null
         private set
+    internal var onError: ((String) -> Unit)? = null
+        private set
     internal var onPlaybackException: ((PlaybackException) -> Unit)? = null
         private set
     internal var pseudoUserId: String? = null
@@ -62,6 +64,10 @@ open class MLSBuilder {
     internal var hasAnalytic: Boolean = true
         private set
     internal var concurrencyLimitFeatureEnabled = true
+
+    fun setOnError(onError: (String) -> Unit) = apply {
+        this.onError = onError
+    }
 
     /**
      * public-key of user.

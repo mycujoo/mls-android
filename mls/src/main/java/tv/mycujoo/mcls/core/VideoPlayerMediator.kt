@@ -137,6 +137,11 @@ class VideoPlayerMediator @Inject constructor(
     var concurrencyLimitEnabled = true
 
     /**
+     * Error Broadcasting to the outside world
+     */
+    var onError: ((String) -> Unit)? = null
+
+    /**
      * Retry action for ConcurrencyRequest
      */
     private var bffSocketRetryDelay = INITIAL_SOCKET_RETRY_DELAY
@@ -165,6 +170,8 @@ class VideoPlayerMediator @Inject constructor(
         publicKey = builder.publicKey
         onConcurrencyLimitExceeded = builder.onConcurrencyLimitExceeded
         concurrencyLimitEnabled = builder.concurrencyLimitFeatureEnabled
+
+        this.onError = builder.onError
 
         player.getDirectInstance()?.let {
             videoPlayer = VideoPlayer(it, this, playerView)
@@ -985,7 +992,9 @@ class VideoPlayerMediator @Inject constructor(
         if (!hasAnalytic) {
             return
         }
-        analyticsClient.logEvent(dataManager.currentEvent, player.isLive())
+        analyticsClient.logEvent(dataManager.currentEvent, player.isLive()) {
+            onError?.invoke(it)
+        }
     }
 
     /**

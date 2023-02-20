@@ -57,6 +57,9 @@ open class MLSTvBuilder {
         private set
     internal var concurrencyLimitFeatureEnabled = true
 
+    internal var onError: ((String) -> Unit)? = null
+        private set
+
     private var graph: MLSApplication_HiltComponents.SingletonC? = null
 
     fun publicKey(publicKey: String) = apply {
@@ -64,6 +67,11 @@ open class MLSTvBuilder {
             throw IllegalArgumentException(C.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
         this.publicKey = publicKey
+    }
+
+
+    fun setOnError(onError: (String) -> Unit) = apply {
+        this.onError = onError
     }
 
     fun deviceType(deviceType: String) = apply {

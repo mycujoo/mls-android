@@ -7,6 +7,7 @@ import com.npaw.youbora.lib6.YouboraLog
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
+import timber.log.Timber
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.mcls.enum.DeviceType
 import tv.mycujoo.mcls.enum.LogLevel
@@ -65,16 +66,40 @@ class YouboraClient @Inject constructor(
         this.videoAnalyticsCustomData = videoAnalyticsCustomData
     }
 
+    fun getYouboraError(): String? {
+        val youboraPlugin = plugin ?: return "YouboraClient: Youbora Plugin was not initialed"
+
+        if (youboraPlugin.username.isNullOrEmpty()) {
+            return "YouboraClient: Empty Username"
+        }
+
+        if (youboraPlugin.title.isNullOrEmpty()) {
+            return "YouboraClient: Empty Title"
+        }
+
+        if (youboraPlugin.contentCustomDimension2.isNullOrEmpty() ||
+            youboraPlugin.contentCustomDimension14.isNullOrEmpty() ||
+            youboraPlugin.contentCustomDimension15.isNullOrEmpty()
+        ) {
+            return "YouboraClient: Found Null Mandatory Params " +
+                    "${youboraPlugin.options.contentCustomDimensions}"
+        }
+
+        return null
+    }
+
     /**
      * log an Event to Youbora.
      */
-    override fun logEvent(event: EventEntity?, live: Boolean) {
+    override fun logEvent(event: EventEntity?, live: Boolean, onError: (String) -> Unit) {
         val savedPlugin = plugin
         if (savedPlugin == null) {
+            onError("YouboraClient: Please Set Plugin Before Logging Event!!")
             logger.log(MessageLevel.ERROR, "Please Set Plugin Before Logging Event!!")
             return
         }
         if (event == null) {
+            onError("YouboraClient: event is null")
             logger.log(MessageLevel.ERROR, "event is null")
             return
         }

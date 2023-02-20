@@ -89,11 +89,6 @@ class TvVideoPlayer @Inject constructor(
 
     private lateinit var overlayContainer: ConstraintLayout
 
-    /**
-     * Indicates if current video session is logged or not, for analytical purposes
-     */
-    private var logged = false
-
     /**endregion */
 
     /**
@@ -130,9 +125,12 @@ class TvVideoPlayer @Inject constructor(
 
     private var playerReady = false
 
+    private var onError: ((String) -> Unit)? = null
+
     /**region Initializing*/
     fun initialize(mlsTvFragment: MLSTVFragment, builder: MLSTvBuilder) {
         this.mMlsTvFragment = mlsTvFragment
+        this.onError = builder.onError
         this.ima = builder.ima
         this.onConcurrencyLimitExceeded = builder.onConcurrencyLimitExceeded
         this.concurrencyLimitEnabled = builder.concurrencyLimitFeatureEnabled
@@ -218,6 +216,11 @@ class TvVideoPlayer @Inject constructor(
             override fun onPlaybackStateChanged(playbackState: Int) {
                 logEventIfNeeded()
 
+                val client = analyticsClient as YouboraClient
+                client.getYouboraError()?.let { err ->
+                    onError?.invoke("Error When Playing: ${dataManager.currentEvent} ==> $err")
+                }
+
                 if (playbackState == ExoPlayer.STATE_READY) {
                     dataManager.currentEvent?.let { event ->
                         if (event.is_protected && event.isNativeMLS && concurrencyLimitEnabled) {
@@ -282,11 +285,10 @@ class TvVideoPlayer @Inject constructor(
         if (!hasAnalytic) {
             return
         }
-        if (logged) {
-            return
+
+        analyticsClient.logEvent(dataManager.currentEvent, player.isLive()) {
+            onError?.invoke(it)
         }
-        analyticsClient.logEvent(dataManager.currentEvent, player.isLive())
-        logged = true
     }
 
     /**
@@ -502,7 +504,6 @@ class TvVideoPlayer @Inject constructor(
                 if (streaming.not()) {
                     logEventIfNeeded()
                     streaming = true
-                    logged = false
 
                     play(event.streams.first())
                     eventInfoContainerLayout.visibility = View.GONE

@@ -4,7 +4,7 @@ import tv.mycujoo.domain.entity.EventEntity
 
 interface AnalyticsClient {
 
-    fun logEvent(event: EventEntity?, live: Boolean)
+    fun logEvent(event: EventEntity?, live: Boolean, onError: (String) -> Unit)
 
     fun start()
 
