@@ -187,7 +187,7 @@ dependencies {
     api "com.google.android.exoplayer:extension-okhttp:$exo_player_version"
     api "com.google.android.exoplayer:extension-mediasession:$exo_player_version"
 
-    api 'com.nicepeopleatwork:exoplayer-adapter:6.7.29'
+    api "com.nicepeopleatwork:exoplayer2-18-adapter:6.8.3"
 
     api "androidx.leanback:leanback:1.2.0-alpha99"
     api "androidx.leanback:leanback-grid:1.0.0-alpha99"
