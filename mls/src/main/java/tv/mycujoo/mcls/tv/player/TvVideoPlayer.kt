@@ -70,7 +70,7 @@ class TvVideoPlayer @Inject constructor(
     private val player: IPlayer,
     private val tvAnnotationMediator: TvAnnotationMediator,
     private val annotationFactory: IAnnotationFactory,
-    private val analyticsClient: AnalyticsClient,
+    public val analyticsClient: AnalyticsClient,
     private val controllerAgent: ControllerAgent,
     private val threadUtils: ThreadUtils,
     private val userPreferencesUtils: UserPreferencesUtils,

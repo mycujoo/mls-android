@@ -26,7 +26,7 @@ class YouboraClient @Inject constructor(
     private val userPreferencesUtils: UserPreferencesUtils
 ) : AnalyticsClient {
 
-    private var plugin: Plugin? = null
+    var plugin: Plugin? = null
     private var videoAnalyticsCustomData: VideoAnalyticsCustomData? = null
 
     /**
