@@ -214,8 +214,6 @@ class TvVideoPlayer @Inject constructor(
 
         this.player.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
-                logEventIfNeeded()
-
                 val client = analyticsClient as YouboraClient
                 client.getYouboraError()?.let { err ->
                     onError?.invoke("Error When Playing: ${dataManager.currentEvent} ==> $err")
