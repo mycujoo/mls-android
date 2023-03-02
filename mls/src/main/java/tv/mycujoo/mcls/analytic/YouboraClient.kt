@@ -40,6 +40,10 @@ class YouboraClient @Inject constructor(
         deviceType: String,
         videoAnalyticsCustomData: VideoAnalyticsCustomData?,
     ) {
+        if (plugin != null) {
+            return
+        }
+
         val youboraOptions = Options()
         youboraOptions.accountCode = accountCode
         youboraOptions.isAutoDetectBackground = true
@@ -142,6 +146,7 @@ class YouboraClient @Inject constructor(
     override fun stop() {
         plugin?.fireStop()
         plugin?.removeAdapter()
+        plugin = null
     }
 
     /**region Internal*/
