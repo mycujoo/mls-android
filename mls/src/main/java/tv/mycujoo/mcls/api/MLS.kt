@@ -14,6 +14,7 @@ import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C.Companion.IDENTITY_TOKEN_PREF_KEY
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
 import tv.mycujoo.mcls.helper.SVGAssetResolver
+import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
@@ -164,9 +165,11 @@ class MLS @Inject constructor(
 
     fun setVideoAnalyticsCustomData(
         videoAnalyticsCustomData: VideoAnalyticsCustomData,
+        ima: IIma? = null
     ) {
         videoPlayerMediator.setVideoAnalyticsCustomData(
-            videoAnalyticsCustomData
+            videoAnalyticsCustomData,
+            ima
         )
     }
 
