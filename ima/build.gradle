@@ -65,9 +65,9 @@ dependencies {
     androidTestImplementation "org.mockito.kotlin:mockito-kotlin:4.0.0"
 
     // Exoplayer
-    implementation 'com.google.android.exoplayer:exoplayer:2.18.3'
-    api "com.nicepeopleatwork:exoplayer2-18-adapter:6.8.3"
+    implementation 'com.google.android.exoplayer:exoplayer:2.18.4'
+    api "com.nicepeopleatwork:exoplayer2-18-adapter:6.8.4"
 
-    implementation 'com.google.android.exoplayer:extension-ima:2.18.3'
+    implementation "com.nicepeopleatwork:ima-adapter:6.8.1"
     implementation project(":mls")
 }
