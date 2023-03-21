@@ -1,6 +1,5 @@
 package tv.mycujoo.mcls.tv.player
 
-import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import android.view.Gravity
@@ -46,7 +45,6 @@ import tv.mycujoo.mcls.tv.api.MLSTvBuilder
 import tv.mycujoo.mcls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackTransportControlGlueImplKt
-import tv.mycujoo.mcls.utils.DeviceUtils
 import tv.mycujoo.mcls.utils.StringUtils
 import tv.mycujoo.mcls.utils.ThreadUtils
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
@@ -148,12 +146,8 @@ class TvVideoPlayer @Inject constructor(
         // Analytics
         hasAnalytic = builder.hasAnalytic
         if (builder.hasAnalytic) {
-            initAnalytic(
-                activity = builder.mlsTvFragment.requireActivity(),
-                exoPlayer = this.player.getDirectInstance()!!,
-                accountCode = builder.getAnalyticsCode(),
-                videoAnalyticsCustomData = builder.videoAnalyticsCustomData,
-                deviceType = builder.deviceType
+            initAnalytics(
+                builder.videoAnalyticsCustomData
             )
         }
         this.player.getDirectInstance()?.let { exoPlayer ->
@@ -300,22 +294,12 @@ class TvVideoPlayer @Inject constructor(
     }
 
     /**endregion */
-    private fun initAnalytic(
-        activity: Activity,
-        exoPlayer: ExoPlayer,
-        accountCode: String,
-        deviceType: String?,
+    private fun initAnalytics(
         videoAnalyticsCustomData: VideoAnalyticsCustomData?
     ) {
         if (analyticsClient is YouboraClient) {
-            val device = deviceType ?: DeviceUtils.detectTVDeviceType(activity).value
-
-            analyticsClient.setYouboraPlugin(
-                activity = activity,
-                exoPlayer = exoPlayer,
-                accountCode = accountCode,
-                deviceType = device,
-                videoAnalyticsCustomData = videoAnalyticsCustomData,
+            analyticsClient.attachYouboraToPlayer(
+                videoAnalyticsCustomData
             )
         }
     }
