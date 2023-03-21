@@ -1,31 +1,37 @@
 package tv.mycujoo.mcls.api
 
+import android.content.Context
 import android.content.pm.PackageManager
 import androidx.fragment.app.FragmentActivity
 import com.google.android.exoplayer2.PlaybackException
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.android.internal.modules.ApplicationContextModule
-import dagger.hilt.components.SingletonComponent
-import tv.mycujoo.DaggerMLSApplication_HiltComponents_SingletonC
+import dagger.BindsInstance
+import dagger.Component
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.newSingleThreadContext
+import timber.log.Timber
 import tv.mycujoo.mcls.BuildConfig
+import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
 import tv.mycujoo.mcls.cast.ICast
 import tv.mycujoo.mcls.core.PlayerEventsListener
 import tv.mycujoo.mcls.core.UIEventListener
-import tv.mycujoo.mcls.di.AppModule
-import tv.mycujoo.mcls.di.NetworkModule
+import tv.mycujoo.mcls.di.*
 import tv.mycujoo.mcls.enum.C.Companion.ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE
-import tv.mycujoo.mcls.ima.IIma
-import timber.log.Timber
-import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
+import tv.mycujoo.mcls.enum.DeviceType
 import tv.mycujoo.mcls.enum.LogLevel
+import tv.mycujoo.mcls.ima.IIma
+import javax.inject.Inject
+import javax.inject.Singleton
 
 
 /**
  * builder of MLS(MCLS) main component
  */
 open class MLSBuilder {
+
+    private var injected = false
 
     init {
         if (BuildConfig.DEBUG) {
@@ -57,6 +63,8 @@ open class MLSBuilder {
         private set
     internal var mlsConfiguration: MLSConfiguration = MLSConfiguration()
         private set
+    internal var coroutineScope: CoroutineScope? = null
+        private set
     var cast: ICast? = null
         private set
     internal var ima: IIma? = null
@@ -64,6 +72,9 @@ open class MLSBuilder {
     internal var hasAnalytic: Boolean = true
         private set
     internal var concurrencyLimitFeatureEnabled = true
+
+    @Inject
+    internal lateinit var mls: MLS
 
     fun setOnError(onError: (String) -> Unit) = apply {
         this.onError = onError
@@ -143,6 +154,10 @@ open class MLSBuilder {
      */
     fun setConfiguration(mlsConfiguration: MLSConfiguration) = apply {
         this.mlsConfiguration = mlsConfiguration
+    }
+
+    fun setCoroutinesScope(coroutineScope: CoroutineScope) = apply {
+        this.coroutineScope = coroutineScope
     }
 
     /**
@@ -235,6 +250,7 @@ open class MLSBuilder {
      * @return MLS
      * @throws IllegalArgumentException if public key was not provided via the Manifest AND not set manually
      */
+    @OptIn(DelicateCoroutinesApi::class)
     open fun build(): MLS {
         // Check if grabbed successfully
         initPublicKeyIfNeeded()
@@ -242,27 +258,78 @@ open class MLSBuilder {
             throw IllegalArgumentException(PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
 
-        val graph = DaggerMLSApplication_HiltComponents_SingletonC.builder()
-            .applicationContextModule(ApplicationContextModule(activity))
-            .networkModule(NetworkModule())
-            .appModule(AppModule())
-            .build()
+        val activity = activity
+            ?: throw IllegalArgumentException(ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE)
 
-        val mls = graph.provideMLS()
-        activity?.lifecycle?.addObserver(mls)
+        val coroutineScope = coroutineScope
+        val scope = if (coroutineScope == null) {
+            val job = SupervisorJob()
+            CoroutineScope(newSingleThreadContext(BuildConfig.LIBRARY_PACKAGE_NAME) + job)
+        } else {
+            coroutineScope
+        }
+
+        injectIfNeeded(activity, scope)
+
+        activity.lifecycle.addObserver(mls)
         mls.initializeComponent(this)
 
         return mls
     }
 
-    @EntryPoint
-    @InstallIn(SingletonComponent::class)
-    interface BuilderProvider {
-        fun provideMLS(): MLS
+    private fun injectIfNeeded(
+        activity: FragmentActivity,
+        coroutinesScope: CoroutineScope
+    ) {
+        if (injected) return
+
+        DaggerMLSComponent.builder()
+            .withActivity(activity)
+            .withContext(activity)
+            .withCoroutinesScope(coroutinesScope)
+            .withDeviceType(DeviceType.ANDROID.name)
+            .withYouboraAccountCode(analyticsAccount)
+            .build()
+            .inject(this)
+
+        injected = true
+    }
+}
+
+@Singleton
+@Component(
+    modules = [
+        NetworkModule::class,
+        NetworkModuleBinds::class,
+        PlayerModule::class,
+        AppModuleBinds::class,
+        AppModule::class,
+        CoreModule::class,
+        StorageModule::class,
+        AnalyticsModule::class
+    ]
+)
+interface MLSComponent {
+
+    @Component.Builder
+    interface Builder {
+        @BindsInstance
+        fun withActivity(activity: FragmentActivity): Builder
+
+        @BindsInstance
+        fun withContext(context: Context): Builder
+
+        @BindsInstance
+        fun withCoroutinesScope(coroutineScope: CoroutineScope): Builder
+
+        @BindsInstance
+        fun withYouboraAccountCode(@YouboraAccountCode code: String? = null): Builder
+
+        @BindsInstance
+        fun withDeviceType(@ClientDeviceType type: String? = null): Builder
+
+        fun build(): MLSComponent
     }
 
-
-    companion object {
-        private const val TAG = "MLSBuilder"
-    }
+    fun inject(mlsBuilder: MLSBuilder)
 }

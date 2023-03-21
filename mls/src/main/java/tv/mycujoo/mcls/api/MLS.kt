@@ -165,12 +165,9 @@ class MLS @Inject constructor(
     fun setVideoAnalyticsCustomData(
         videoAnalyticsCustomData: VideoAnalyticsCustomData,
     ) {
-        builder.activity?.let {
-            videoPlayerMediator.setVideoAnalyticsCustomData(
-                it,
-                videoAnalyticsCustomData
-            )
-        }
+        videoPlayerMediator.setVideoAnalyticsCustomData(
+            videoAnalyticsCustomData
+        )
     }
 
     /**endregion */

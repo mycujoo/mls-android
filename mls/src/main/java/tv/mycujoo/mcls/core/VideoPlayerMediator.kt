@@ -1,7 +1,5 @@
 package tv.mycujoo.mcls.core
 
-import android.app.Activity
-import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player.*
 import com.google.android.exoplayer2.SeekParameters
@@ -25,7 +23,6 @@ import tv.mycujoo.mcls.cast.ICasterSession
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mcls.enum.C
-import tv.mycujoo.mcls.enum.DeviceType
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.enum.StreamStatus.*
 import tv.mycujoo.mcls.helper.OverlayViewHelper
@@ -200,12 +197,7 @@ class VideoPlayerMediator @Inject constructor(
 
             hasAnalytic = builder.hasAnalytic
             if (builder.hasAnalytic) {
-                initAnalytic(
-                    builder.activity!!,
-                    it,
-                    builder.getAnalyticsAccountCode(),
-                    builder.customVideoAnalyticsData
-                )
+                initAnalytic(builder.customVideoAnalyticsData)
             }
 
             initPlayerView(
@@ -454,18 +446,9 @@ class VideoPlayerMediator @Inject constructor(
      * Abstracting Analytics client from Youbora
      * Here we can
      */
-    private fun initAnalytic(
-        activity: Activity,
-        exoPlayer: ExoPlayer,
-        analyticsAccountCode: String,
-        customData: VideoAnalyticsCustomData?
-    ) {
+    private fun initAnalytic(customData: VideoAnalyticsCustomData?) {
         if (analyticsClient is YouboraClient) {
-            analyticsClient.setYouboraPlugin(
-                activity,
-                exoPlayer,
-                analyticsAccountCode,
-                DeviceType.ANDROID.value,
+            analyticsClient.attachYouboraToPlayer(
                 customData
             )
         }
@@ -515,20 +498,12 @@ class VideoPlayerMediator @Inject constructor(
      * Changing Video Analytics Custom Data On Runtime After Building
      */
     fun setVideoAnalyticsCustomData(
-        activity: Activity,
-        analyticsAccountCode: String,
         customData: VideoAnalyticsCustomData?
     ) {
         if (hasAnalytic && analyticsClient is YouboraClient) {
-            player.getDirectInstance()?.let { exoPlayer ->
-                analyticsClient.setYouboraPlugin(
-                    activity,
-                    exoPlayer,
-                    analyticsAccountCode,
-                    DeviceType.ANDROID.value,
-                    customData
-                )
-            }
+            analyticsClient.attachYouboraToPlayer(
+                customData
+            )
         }
     }
 

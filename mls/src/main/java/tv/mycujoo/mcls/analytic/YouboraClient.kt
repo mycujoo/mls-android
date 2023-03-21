@@ -1,18 +1,14 @@
 package tv.mycujoo.mcls.analytic
 
-import android.app.Activity
-import androidx.annotation.VisibleForTesting
-import com.google.android.exoplayer2.ExoPlayer
+import androidx.fragment.app.FragmentActivity
 import com.npaw.youbora.lib6.YouboraLog
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
-import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
-import timber.log.Timber
 import tv.mycujoo.domain.entity.EventEntity
-import tv.mycujoo.mcls.enum.DeviceType
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.manager.Logger
+import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import javax.inject.Inject
 
@@ -23,34 +19,16 @@ import javax.inject.Inject
  */
 class YouboraClient @Inject constructor(
     private val logger: Logger,
-    private val userPreferencesUtils: UserPreferencesUtils
+    private val userPreferencesUtils: UserPreferencesUtils,
+    private val plugin: Plugin?,
+    private val player: IPlayer,
+    private val activity: FragmentActivity,
 ) : AnalyticsClient {
 
-    private var plugin: Plugin? = null
+
     private var videoAnalyticsCustomData: VideoAnalyticsCustomData? = null
 
-    /**
-     * Only AnalyticsClient should know about the implementation of the analytics server and libs
-     * This ensures only this class knows about youbora
-     */
-    fun setYouboraPlugin(
-        activity: Activity,
-        exoPlayer: ExoPlayer,
-        accountCode: String,
-        deviceType: String,
-        videoAnalyticsCustomData: VideoAnalyticsCustomData?,
-    ) {
-        val youboraOptions = Options()
-        youboraOptions.accountCode = accountCode
-        youboraOptions.isAutoDetectBackground = true
-
-        youboraOptions.deviceCode = deviceType
-
-        plugin = Plugin(youboraOptions, activity.baseContext)
-
-        plugin?.activity = activity
-        plugin?.adapter = Exoplayer2Adapter(exoPlayer)
-
+    init {
         when (logger.getLogLevel()) {
             LogLevel.MINIMAL -> {
                 YouboraLog.setDebugLevel(YouboraLog.Level.SILENT)
@@ -62,8 +40,19 @@ class YouboraClient @Inject constructor(
                 YouboraLog.setDebugLevel(YouboraLog.Level.VERBOSE)
             }
         }
+    }
 
+    /**
+     * In case Youbora is needed, we should attach it to the activity and exoplayer.
+     * This enabled Youbora to send Events when Analytics is
+     */
+    fun attachYouboraToPlayer(videoAnalyticsCustomData: VideoAnalyticsCustomData? = null) {
         this.videoAnalyticsCustomData = videoAnalyticsCustomData
+
+        player.getDirectInstance()?.let { exoPlayer ->
+            plugin?.activity = activity
+            plugin?.adapter = Exoplayer2Adapter(exoPlayer)
+        }
     }
 
     fun getYouboraError(): String? {
@@ -158,10 +147,5 @@ class YouboraClient @Inject constructor(
     companion object {
         const val MLS_SOURCE = "MLS"
         const val NONE_NATIVE_SOURCE = "NonNativeMLS"
-    }
-
-    @VisibleForTesting
-    fun attachPlugin(plugin: Plugin) {
-        this.plugin = plugin
     }
 }
