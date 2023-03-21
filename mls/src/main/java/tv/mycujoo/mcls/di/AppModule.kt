@@ -2,7 +2,6 @@ package tv.mycujoo.mcls.di
 
 import android.content.Context
 import android.content.res.AssetManager
-import androidx.fragment.app.FragmentActivity
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSource
@@ -11,8 +10,6 @@ import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.npaw.ima.ImaAdapter
-import com.npaw.youbora.lib6.plugin.Options
-import com.npaw.youbora.lib6.plugin.Plugin
 import dagger.Module
 import dagger.Provides
 import okhttp3.Cache
@@ -33,22 +30,6 @@ open class AppModule {
     @Singleton
     fun provideYouboraAdsAdapter(): ImaAdapter {
         return ImaAdapter()
-    }
-
-    @Provides
-    @Singleton
-    fun providePlugin(
-        activity: FragmentActivity,
-        @YouboraAccountCode accountCode: String,
-        @DeviceType deviceType: String
-    ): Plugin {
-        val youboraOptions = Options()
-        youboraOptions.accountCode = accountCode
-        youboraOptions.isAutoDetectBackground = true
-
-        youboraOptions.deviceCode = deviceType
-
-        return Plugin(youboraOptions, activity.baseContext)
     }
 
     @Provides
