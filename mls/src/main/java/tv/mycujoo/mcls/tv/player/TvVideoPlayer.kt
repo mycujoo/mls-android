@@ -3,7 +3,6 @@ package tv.mycujoo.mcls.tv.player
 import android.app.Activity
 import android.content.Context
 import android.graphics.Color
-import android.os.Build
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -16,7 +15,6 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter
 import com.google.android.exoplayer2.ui.AdViewProvider
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,14 +25,13 @@ import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.entity.Stream
 import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.analytic.AnalyticsClient
-import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
+import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.api.MLSTVConfiguration
 import tv.mycujoo.mcls.core.AbstractPlayerMediator
 import tv.mycujoo.mcls.core.IAnnotationFactory
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
-import tv.mycujoo.mcls.enum.DeviceType
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.enum.StreamStatus
 import tv.mycujoo.mcls.helper.ViewersCounterHelper.Companion.isViewersCountValid
@@ -61,7 +58,7 @@ import tv.mycujoo.ui.MLSTVFragment
 import javax.inject.Inject
 
 class TvVideoPlayer @Inject constructor(
-    @ApplicationContext val context: Context,
+    val context: Context,
     private val reactorSocket: IReactorSocket,
     private val bffRtSocket: IBFFRTSocket,
     private val dispatcher: CoroutineScope,
