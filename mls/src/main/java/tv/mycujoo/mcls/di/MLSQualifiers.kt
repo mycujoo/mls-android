@@ -40,8 +40,8 @@ annotation class ExoPlayerOkHttp
 
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
-annotation class DeviceType
+annotation class ClientDeviceType
 
 @Qualifier
-@Retention
+@Retention(AnnotationRetention.RUNTIME)
 annotation class YouboraAccountCode
