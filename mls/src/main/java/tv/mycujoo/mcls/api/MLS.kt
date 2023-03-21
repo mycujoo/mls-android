@@ -8,7 +8,6 @@ import com.caverock.androidsvg.SVG
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ui.AdViewProvider
 import com.google.android.exoplayer2.util.Util
-import dagger.hilt.android.qualifiers.ApplicationContext
 import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
 import tv.mycujoo.mcls.core.VideoPlayerMediator
 import tv.mycujoo.mcls.data.IDataManager
@@ -33,7 +32,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class MLS @Inject constructor(
-    @ApplicationContext private val context: Context,
+    private val context: Context,
     private val videoPlayerMediator: VideoPlayerMediator,
     private val dataManager: IDataManager,
     private val viewHandler: IViewHandler,
