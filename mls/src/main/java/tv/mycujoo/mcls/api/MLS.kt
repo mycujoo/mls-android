@@ -168,7 +168,6 @@ class MLS @Inject constructor(
         builder.activity?.let {
             videoPlayerMediator.setVideoAnalyticsCustomData(
                 it,
-                builder.getAnalyticsAccountCode(),
                 videoAnalyticsCustomData
             )
         }
