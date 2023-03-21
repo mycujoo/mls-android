@@ -9,7 +9,6 @@ import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
-import com.npaw.ima.ImaAdapter
 import dagger.Module
 import dagger.Provides
 import okhttp3.Cache
@@ -24,13 +23,7 @@ import javax.inject.Singleton
  * Coroutines scope, Data manager & Pref manager are provided to dependency graph by this module
  */
 @Module
-open class AppModule {
-
-    @Provides
-    @Singleton
-    fun provideYouboraAdsAdapter(): ImaAdapter {
-        return ImaAdapter()
-    }
+class AppModule {
 
     @Provides
     @Singleton
