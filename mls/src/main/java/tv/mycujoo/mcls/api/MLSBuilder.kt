@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import androidx.fragment.app.FragmentActivity
 import com.google.android.exoplayer2.PlaybackException
+import com.npaw.ima.ImaAdapter
 import dagger.BindsInstance
 import dagger.Component
 import kotlinx.coroutines.CoroutineScope
@@ -75,6 +76,9 @@ open class MLSBuilder {
 
     @Inject
     internal lateinit var mls: MLS
+
+    @Inject
+    internal lateinit var imaAnalyticsAdapter: ImaAdapter
 
     fun setOnError(onError: (String) -> Unit) = apply {
         this.onError = onError
@@ -177,7 +181,11 @@ open class MLSBuilder {
             throw IllegalArgumentException(ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE)
         }
         this.ima = ima.apply {
-            createAdsLoader(activity!!)
+            if (hasAnalytic) {
+                createAdsLoader(activity!!, imaAnalyticsAdapter)
+            } else {
+                createAdsLoader(activity!!)
+            }
         }
     }
 

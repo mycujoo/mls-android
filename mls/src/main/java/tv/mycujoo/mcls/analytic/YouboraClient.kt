@@ -1,6 +1,7 @@
 package tv.mycujoo.mcls.analytic
 
 import androidx.fragment.app.FragmentActivity
+import com.npaw.ima.ImaAdapter
 import com.npaw.youbora.lib6.YouboraLog
 import com.npaw.youbora.lib6.exoplayer2.Exoplayer2Adapter
 import com.npaw.youbora.lib6.plugin.Plugin
@@ -23,6 +24,7 @@ class YouboraClient @Inject constructor(
     private val plugin: Plugin?,
     private val player: IPlayer,
     private val activity: FragmentActivity,
+    private val imaAdapter: ImaAdapter
 ) : AnalyticsClient {
 
 
@@ -46,12 +48,18 @@ class YouboraClient @Inject constructor(
      * In case Youbora is needed, we should attach it to the activity and exoplayer.
      * This enabled Youbora to send Events when Analytics is
      */
-    fun attachYouboraToPlayer(videoAnalyticsCustomData: VideoAnalyticsCustomData? = null) {
+    fun attachYouboraToPlayer(
+        videoAnalyticsCustomData: VideoAnalyticsCustomData? = null,
+        imaEnabled: Boolean
+    ) {
         this.videoAnalyticsCustomData = videoAnalyticsCustomData
 
         player.getDirectInstance()?.let { exoPlayer ->
             plugin?.activity = activity
             plugin?.adapter = Exoplayer2Adapter(exoPlayer)
+            if (imaEnabled) {
+                plugin?.adsAdapter = imaAdapter
+            }
         }
     }
 

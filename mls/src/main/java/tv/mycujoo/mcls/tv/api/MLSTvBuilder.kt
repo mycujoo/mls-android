@@ -3,6 +3,7 @@ package tv.mycujoo.mcls.tv.api
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.fragment.app.FragmentActivity
+import com.npaw.ima.ImaAdapter
 import dagger.BindsInstance
 import dagger.Component
 import kotlinx.coroutines.CoroutineScope
@@ -64,7 +65,10 @@ open class MLSTvBuilder {
         private set
 
     @Inject
-    lateinit var mlsTV: MLSTV
+    internal lateinit var mlsTV: MLSTV
+
+    @Inject
+    internal lateinit var imaAnalyticsAdapter: ImaAdapter
 
     fun setCoroutinesScope(coroutineScope: CoroutineScope) = apply {
         this.coroutineScope = coroutineScope
@@ -172,7 +176,11 @@ open class MLSTvBuilder {
             ?: throw IllegalArgumentException(C.CONTEXT_MUST_BE_SET_IN_MLS_TV_BUILDER_MESSAGE)
 
         this.ima = ima.apply {
-            createAdsLoader(ctx)
+            if (hasAnalytic) {
+                createAdsLoader(ctx, imaAnalyticsAdapter)
+            } else {
+                createAdsLoader(ctx)
+            }
         }
     }
 

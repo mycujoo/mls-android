@@ -299,7 +299,8 @@ class TvVideoPlayer @Inject constructor(
     ) {
         if (analyticsClient is YouboraClient) {
             analyticsClient.attachYouboraToPlayer(
-                videoAnalyticsCustomData
+                videoAnalyticsCustomData,
+                ima != null
             )
         }
     }

@@ -27,6 +27,7 @@ import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.enum.StreamStatus.*
 import tv.mycujoo.mcls.helper.OverlayViewHelper
 import tv.mycujoo.mcls.helper.ViewersCounterHelper.Companion.isViewersCountValid
+import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.mediator.AnnotationMediator
@@ -197,7 +198,7 @@ class VideoPlayerMediator @Inject constructor(
 
             hasAnalytic = builder.hasAnalytic
             if (builder.hasAnalytic) {
-                initAnalytic(builder.customVideoAnalyticsData)
+                initAnalytic(builder.customVideoAnalyticsData, builder.ima)
             }
 
             initPlayerView(
@@ -446,10 +447,11 @@ class VideoPlayerMediator @Inject constructor(
      * Abstracting Analytics client from Youbora
      * Here we can
      */
-    private fun initAnalytic(customData: VideoAnalyticsCustomData?) {
+    private fun initAnalytic(customData: VideoAnalyticsCustomData?, ima: IIma?) {
         if (analyticsClient is YouboraClient) {
             analyticsClient.attachYouboraToPlayer(
-                customData
+                customData,
+                ima != null
             )
         }
     }
@@ -498,11 +500,13 @@ class VideoPlayerMediator @Inject constructor(
      * Changing Video Analytics Custom Data On Runtime After Building
      */
     fun setVideoAnalyticsCustomData(
-        customData: VideoAnalyticsCustomData?
+        customData: VideoAnalyticsCustomData?,
+        ima: IIma?
     ) {
         if (hasAnalytic && analyticsClient is YouboraClient) {
             analyticsClient.attachYouboraToPlayer(
-                customData
+                customData,
+                ima != null
             )
         }
     }

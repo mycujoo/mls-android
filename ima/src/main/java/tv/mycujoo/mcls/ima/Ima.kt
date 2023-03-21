@@ -12,6 +12,7 @@ import com.google.android.exoplayer2.source.ads.AdsMediaSource
 import com.google.android.exoplayer2.ui.AdViewProvider
 import com.google.android.exoplayer2.upstream.DataSpec
 import com.google.common.annotations.VisibleForTesting
+import com.npaw.ima.ImaAdapter
 import tv.mycujoo.domain.entity.EventStatus
 import tv.mycujoo.mcls.enum.C
 import java.net.URLEncoder
@@ -62,9 +63,15 @@ class Ima(
      * Create ImaAdsLoader
      * @param context app/activity context
      */
-    override fun createAdsLoader(context: Context) {
-        val builder = ImaAdsLoader.Builder(context)
-        adsLoader = createAdsLoader(builder, listener)
+    override fun createAdsLoader(context: Context, youboraAdapter: ImaAdapter?) {
+        val adsLoaderBuilder = ImaAdsLoader.Builder(context)
+
+        youboraAdapter?.let { imaAdapter ->
+            adsLoaderBuilder.setAdEventListener(imaAdapter)
+            adsLoaderBuilder.setAdErrorListener(imaAdapter)
+        }
+
+        adsLoader = createAdsLoader(adsLoaderBuilder, listener)
     }
 
     /**
