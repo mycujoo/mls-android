@@ -2,8 +2,6 @@ package tv.mycujoo.mcls.di
 
 import dagger.Binds
 import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import tv.mycujoo.data.repository.EventsRepository
 import tv.mycujoo.domain.repository.IEventsRepository
 import tv.mycujoo.mcls.analytic.AnalyticsClient
@@ -24,7 +22,6 @@ import tv.mycujoo.mcls.player.Player
 import tv.mycujoo.mcls.tv.player.TvAnnotationListener
 import javax.inject.Singleton
 
-@InstallIn(SingletonComponent::class)
 @Module
 interface AppModuleBinds {
 

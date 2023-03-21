@@ -4,11 +4,8 @@ import android.content.Context
 import android.util.Log
 import android.view.View
 import com.caverock.androidsvg.SVG
-import dagger.hilt.android.qualifiers.ApplicationContext
-import timber.log.Timber
 import tv.mycujoo.domain.entity.Action
 import tv.mycujoo.mcls.manager.IVariableKeeper
-import tv.mycujoo.mcls.manager.VariableTranslator
 import tv.mycujoo.mcls.widgets.ScaffoldView
 import javax.inject.Inject
 
@@ -20,7 +17,7 @@ import javax.inject.Inject
  * @param variableKeeper provides observables to for variables defined/used in Overlay
  */
 class OverlayFactory @Inject constructor(
-    @ApplicationContext val context: Context,
+    val context: Context,
     val variableKeeper: IVariableKeeper
 ) : IOverlayFactory {
 
