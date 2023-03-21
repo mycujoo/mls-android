@@ -7,9 +7,6 @@ import androidx.core.content.pm.PackageInfoCompat
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
 import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -33,7 +30,6 @@ import javax.inject.Singleton
  * API and Network clients are provided to dependency graph by this module
  */
 @Module
-@InstallIn(SingletonComponent::class)
 open class NetworkModule {
 
     private val maxAgeInSecond: Int = 60 * 5
@@ -62,7 +58,7 @@ open class NetworkModule {
     @Singleton
     open fun provideOkHttp(
         prefManager: IPrefManager,
-        @ApplicationContext context: Context
+        context: Context
     ): OkHttpClient {
 
         val cacheSize = 10 * 1024 * 1024 // 10 MiB
