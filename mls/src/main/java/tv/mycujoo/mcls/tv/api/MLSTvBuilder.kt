@@ -241,7 +241,7 @@ open class MLSTvBuilder {
             .withContext(activity)
             .withCoroutinesScope(coroutinesScope)
             .withDeviceType(device)
-            .withYouboraAccountCode(analyticsAccount)
+            .withYouboraAccountCode(getAnalyticsCode())
             .build()
             .inject(this)
 
@@ -275,10 +275,10 @@ interface MLSTVComponent {
         fun withCoroutinesScope(coroutineScope: CoroutineScope): Builder
 
         @BindsInstance
-        fun withYouboraAccountCode(@YouboraAccountCode code: String? = null): Builder
+        fun withYouboraAccountCode(@YouboraAccountCode code: String): Builder
 
         @BindsInstance
-        fun withDeviceType(@ClientDeviceType type: String? = null): Builder
+        fun withDeviceType(@ClientDeviceType type: String): Builder
 
         fun build(): MLSTVComponent
     }

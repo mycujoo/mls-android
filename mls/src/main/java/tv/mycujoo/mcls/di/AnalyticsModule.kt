@@ -15,8 +15,8 @@ class AnalyticsModule {
     @Singleton
     fun providePlugin(
         activity: FragmentActivity,
-        @YouboraAccountCode accountCode: String?,
-        @ClientDeviceType clientDeviceType: String?
+        @YouboraAccountCode accountCode: String,
+        @ClientDeviceType clientDeviceType: String
     ): Plugin {
         val youboraOptions = Options()
         youboraOptions.accountCode = accountCode

@@ -296,7 +296,7 @@ open class MLSBuilder {
             .withContext(activity)
             .withCoroutinesScope(coroutinesScope)
             .withDeviceType(DeviceType.ANDROID.name)
-            .withYouboraAccountCode(analyticsAccount)
+            .withYouboraAccountCode(getAnalyticsAccountCode())
             .build()
             .inject(this)
 
@@ -331,10 +331,10 @@ interface MLSComponent {
         fun withCoroutinesScope(coroutineScope: CoroutineScope): Builder
 
         @BindsInstance
-        fun withYouboraAccountCode(@YouboraAccountCode code: String? = null): Builder
+        fun withYouboraAccountCode(@YouboraAccountCode code: String): Builder
 
         @BindsInstance
-        fun withDeviceType(@ClientDeviceType type: String? = null): Builder
+        fun withDeviceType(@ClientDeviceType type: String): Builder
 
         fun build(): MLSComponent
     }
