@@ -64,7 +64,7 @@ class YouboraClient @Inject constructor(
     }
 
     fun getYouboraError(): String? {
-        val youboraPlugin = plugin ?: return "YouboraClient: Youbora Plugin was not initialed"
+        val youboraPlugin = plugin
 
         if (youboraPlugin.username.isNullOrEmpty()) {
             return "YouboraClient: Empty Username"
