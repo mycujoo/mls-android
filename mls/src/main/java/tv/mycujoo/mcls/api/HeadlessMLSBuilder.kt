@@ -99,6 +99,7 @@ class HeadlessMLSBuilder {
             .bindContext(context)
             .bindCoroutinesScope(scope)
             .build()
+            .inject(this)
 
         prefManager.persist(C.IDENTITY_TOKEN_PREF_KEY, identityToken)
         prefManager.persist(C.PUBLIC_KEY_PREF_KEY, publicKey)
