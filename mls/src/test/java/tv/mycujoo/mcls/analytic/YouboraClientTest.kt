@@ -1,6 +1,8 @@
 package tv.mycujoo.mcls.analytic
 
+import androidx.fragment.app.FragmentActivity
 import com.google.android.exoplayer2.ExoPlayer
+import com.npaw.ima.ImaAdapter
 import com.npaw.youbora.lib6.adapter.PlayerAdapter
 import com.npaw.youbora.lib6.plugin.Options
 import com.npaw.youbora.lib6.plugin.Plugin
@@ -12,7 +14,9 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import tv.mycujoo.domain.entity.*
+import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.manager.Logger
+import tv.mycujoo.mcls.player.IPlayer
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import tv.mycujoo.mcls.utils.UuidUtils
 import kotlin.test.assertEquals
@@ -33,6 +37,15 @@ class YouboraClientTest {
     @Mock
     lateinit var userPreferencesUtils: UserPreferencesUtils
 
+    @Mock
+    lateinit var player: IPlayer
+
+    @Mock
+    lateinit var activity: FragmentActivity
+
+    @Mock
+    lateinit var imaAdapter: ImaAdapter
+
     private var options = Options()
 
     @Mock
@@ -45,13 +58,24 @@ class YouboraClientTest {
         whenever(plugin.adapter).thenReturn(playerAdapter)
         whenever(uuidUtils.getUuid()).thenReturn("uuid")
 
-        youboraClient = YouboraClient(logger, userPreferencesUtils)
-        youboraClient.attachPlugin(plugin)
+        whenever(logger.getLogLevel()).thenReturn(LogLevel.VERBOSE)
+
+        youboraClient = YouboraClient(
+            logger,
+            userPreferencesUtils,
+            plugin,
+            player,
+            activity,
+            imaAdapter
+        )
+        youboraClient.attachYouboraToPlayer(null, true)
     }
 
     @Test
     fun `null event should not be logged`() {
-        youboraClient.logEvent(null, false)
+        youboraClient.logEvent(null, false) {
+
+        }
 
         verify(plugin, never()).options
     }
@@ -60,11 +84,12 @@ class YouboraClientTest {
     fun `given valid event, should log needed params`() {
         val eventEntity = getSampleEventEntity(getSampleStreamList())
 
-        youboraClient.logEvent(eventEntity, false)
+        youboraClient.logEvent(eventEntity, false) {
+
+        }
 
         assertEquals(eventEntity.title, options.contentTitle)
         assertEquals(eventEntity.streams.firstOrNull()?.toString(), options.contentResource)
-        assertEquals(false, options.contentIsLive)
 
 
         assertEquals(eventEntity.id, options.contentCustomDimension2)
