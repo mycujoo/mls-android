@@ -501,12 +501,12 @@ class VideoPlayerMediator @Inject constructor(
      */
     fun setVideoAnalyticsCustomData(
         customData: VideoAnalyticsCustomData?,
-        ima: IIma?
+        imaEnabled: Boolean
     ) {
         if (hasAnalytic && analyticsClient is YouboraClient) {
             analyticsClient.attachYouboraToPlayer(
                 customData,
-                ima != null
+                imaEnabled
             )
         }
     }
