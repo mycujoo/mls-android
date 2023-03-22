@@ -11,7 +11,6 @@ import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.params.EventIdPairParam
 import tv.mycujoo.domain.params.EventListParams
 import tv.mycujoo.domain.params.TimelineIdPairParam
-import tv.mycujoo.domain.repository.IEventsRepository
 import tv.mycujoo.domain.usecase.GetActionsUseCase
 import tv.mycujoo.domain.usecase.GetEventDetailUseCase
 import tv.mycujoo.domain.usecase.GetEventsUseCase
@@ -19,6 +18,7 @@ import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.enum.MessageLevel
+import tv.mycujoo.mcls.helper.EventFilterFactory
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.model.SingleLiveEvent
 import javax.inject.Inject
@@ -68,7 +68,7 @@ class DataManager @Inject constructor(
         eventId: String,
         updateId: String?
     ): Result<Exception, EventEntity> {
-        return getEventDetailUseCase.execute(EventIdPairParam(eventId, updateId))
+        return getEventDetailUseCase.execute(EventIdPairParam(eventId))
     }
 
     /**
@@ -122,12 +122,17 @@ class DataManager @Inject constructor(
         this.fetchEventCallback = fetchEventCallback
         scope.launch {
 
+            val filterBuilder = EventFilterFactory()
+                .withEventStatus(eventStatus.orEmpty())
+                .build()
+
             val result = getEventsUseCase.execute(
                 EventListParams(
-                    pageSize,
-                    pageToken,
-                    eventStatus?.map { it.toString() },
-                    orderBy?.toString()
+                    pageSize = pageSize ?: DEFAULT_EVENTS_PER_PAGE,
+                    pageToken = pageToken,
+                    filter = filterBuilder,
+                    orderBy = orderBy ?: OrderByEventsParam.ORDER_UNSPECIFIED,
+                    search = null
                 )
             )
             when (result) {
@@ -159,5 +164,7 @@ class DataManager @Inject constructor(
 
     companion object {
         private const val TAG = "DataManager"
+
+        private const val DEFAULT_EVENTS_PER_PAGE = 20
     }
 }

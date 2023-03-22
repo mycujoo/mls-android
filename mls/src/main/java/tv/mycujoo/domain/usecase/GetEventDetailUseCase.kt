@@ -14,6 +14,6 @@ import javax.inject.Inject
 class GetEventDetailUseCase @Inject constructor(private val repository: IEventsRepository) :
     AbstractParameterizedUseCase<EventIdPairParam, Result<Exception, EventEntity>>() {
     override suspend fun build(param: EventIdPairParam): Result<Exception, EventEntity> {
-        return repository.getEventDetails(param.eventId, param.updateEventId)
+        return repository.getEventDetails(param.eventId)
     }
 }

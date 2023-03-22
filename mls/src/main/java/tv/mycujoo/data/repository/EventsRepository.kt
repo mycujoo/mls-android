@@ -2,6 +2,8 @@ package tv.mycujoo.data.repository
 
 import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.data.mapper.EventMapper.Companion.mapEventSourceDataToEventEntity
+import tv.mycujoo.data.request.GetEventDetailsRequest
+import tv.mycujoo.data.request.GetEventListRequest
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Events
 import tv.mycujoo.domain.entity.Result
@@ -20,10 +22,13 @@ class EventsRepository @Inject constructor(
     override suspend fun getEventsList(eventListParams: EventListParams): Result<Exception, Events> {
         return safeApiCall {
             val eventsSourceData = api.getEvents(
-                pageSize = eventListParams.pageSize,
-                pageToken = eventListParams.pageToken,
-                status = eventListParams.status,
-                orderBy = eventListParams.orderBy
+                GetEventListRequest(
+                    pageSize = eventListParams.pageSize,
+                    pageToken = eventListParams.pageToken,
+                    filter = eventListParams.filter,
+                    orderBy = eventListParams.orderBy.name,
+                    search = eventListParams.search
+                )
             )
             val events = eventsSourceData.events.map { mapEventSourceDataToEventEntity(it) }
             Events(
@@ -36,10 +41,11 @@ class EventsRepository @Inject constructor(
 
     override suspend fun getEventDetails(
         eventId: String,
-        updatedId: String?
     ): Result<Exception, EventEntity> {
         return safeApiCall {
-            val eventDetails = api.getEventDetails(eventId, updatedId)
+            val eventDetails = api.getEventDetails(
+                GetEventDetailsRequest(eventId = eventId)
+            )
             mapEventSourceDataToEventEntity(eventDetails)
         }
     }

@@ -42,7 +42,7 @@ open class NetworkModule {
     @ApiBaseUrl
     @Provides
     @Singleton
-    fun mlsApiBaseUrl(): String = "https://mls-api.mycujoo.tv"
+    fun mlsApiBaseUrl(): String = "https://cda.mycujoo.tv"
 
     @ConcurrencySocketUrl
     @Provides

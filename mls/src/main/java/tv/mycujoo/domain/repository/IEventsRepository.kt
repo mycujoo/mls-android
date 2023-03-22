@@ -11,7 +11,6 @@ interface IEventsRepository {
     suspend fun getEventsList(eventListParams: EventListParams): Result<Exception, Events>
     suspend fun getEventDetails(
         eventId: String,
-        updatedId: String? = null
     ): Result<Exception, EventEntity>
 
     suspend fun getActions(timelineIdPairParam: TimelineIdPairParam): Result<Exception, ActionResponse>
