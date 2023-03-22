@@ -87,7 +87,7 @@ open class MLSTvBuilder {
     }
 
     fun deviceType(deviceType: String) = apply {
-        this.deviceType =  deviceType
+        this.deviceType = deviceType
     }
 
     fun customPseudoUserId(pseudoUserId: String) = apply {
@@ -172,16 +172,8 @@ open class MLSTvBuilder {
     }
 
     fun ima(ima: IIma) = apply {
-        val ctx = context
-            ?: throw IllegalArgumentException(C.CONTEXT_MUST_BE_SET_IN_MLS_TV_BUILDER_MESSAGE)
 
-        this.ima = ima.apply {
-            if (hasAnalytic) {
-                createAdsLoader(ctx, imaAnalyticsAdapter)
-            } else {
-                createAdsLoader(ctx)
-            }
-        }
+        this.ima = ima
     }
 
     /**
@@ -220,6 +212,14 @@ open class MLSTvBuilder {
         }
 
         injectIfNeeded(mlsTvFragment.requireActivity(), scope)
+
+        ima?.apply {
+            if (hasAnalytic) {
+                createAdsLoader(buildContext, imaAnalyticsAdapter)
+            } else {
+                createAdsLoader(buildContext)
+            }
+        }
 
         mlsTV.initialize(this, mlsTvFragment)
 
