@@ -180,13 +180,7 @@ open class MLSBuilder {
         if (activity == null) {
             throw IllegalArgumentException(ACTIVITY_IS_NOT_SET_IN_MLS_BUILDER_MESSAGE)
         }
-        this.ima = ima.apply {
-            if (hasAnalytic) {
-                createAdsLoader(activity!!, imaAnalyticsAdapter)
-            } else {
-                createAdsLoader(activity!!)
-            }
-        }
+        this.ima = ima
     }
 
     /**
@@ -278,6 +272,14 @@ open class MLSBuilder {
         }
 
         injectIfNeeded(activity, scope)
+
+        ima?.apply {
+            if (hasAnalytic) {
+                createAdsLoader(activity, imaAnalyticsAdapter)
+            } else {
+                createAdsLoader(activity)
+            }
+        }
 
         activity.lifecycle.addObserver(mls)
         mls.initializeComponent(this)
