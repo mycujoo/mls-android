@@ -1,9 +1,7 @@
 package tv.mycujoo.mcls.tv.player
 
-import android.app.Activity
 import android.content.Context
 import android.graphics.Color
-import android.os.Build
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -16,7 +14,6 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter
 import com.google.android.exoplayer2.ui.AdViewProvider
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,14 +24,13 @@ import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.entity.Stream
 import tv.mycujoo.mcls.R
 import tv.mycujoo.mcls.analytic.AnalyticsClient
-import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
+import tv.mycujoo.mcls.analytic.YouboraClient
 import tv.mycujoo.mcls.api.MLSTVConfiguration
 import tv.mycujoo.mcls.core.AbstractPlayerMediator
 import tv.mycujoo.mcls.core.IAnnotationFactory
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.enum.C
-import tv.mycujoo.mcls.enum.DeviceType
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.enum.StreamStatus
 import tv.mycujoo.mcls.helper.ViewersCounterHelper.Companion.isViewersCountValid
@@ -49,7 +45,6 @@ import tv.mycujoo.mcls.tv.api.MLSTvBuilder
 import tv.mycujoo.mcls.tv.internal.controller.ControllerAgent
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackSeekDataProvider
 import tv.mycujoo.mcls.tv.internal.transport.MLSPlaybackTransportControlGlueImplKt
-import tv.mycujoo.mcls.utils.DeviceUtils
 import tv.mycujoo.mcls.utils.StringUtils
 import tv.mycujoo.mcls.utils.ThreadUtils
 import tv.mycujoo.mcls.utils.UserPreferencesUtils
@@ -61,7 +56,7 @@ import tv.mycujoo.ui.MLSTVFragment
 import javax.inject.Inject
 
 class TvVideoPlayer @Inject constructor(
-    @ApplicationContext val context: Context,
+    val context: Context,
     private val reactorSocket: IReactorSocket,
     private val bffRtSocket: IBFFRTSocket,
     private val dispatcher: CoroutineScope,
@@ -88,11 +83,6 @@ class TvVideoPlayer @Inject constructor(
     private val dialogs = ArrayList<View>()
 
     private lateinit var overlayContainer: ConstraintLayout
-
-    /**
-     * Indicates if current video session is logged or not, for analytical purposes
-     */
-    private var logged = false
 
     /**endregion */
 
@@ -130,9 +120,12 @@ class TvVideoPlayer @Inject constructor(
 
     private var playerReady = false
 
+    private var onError: ((String) -> Unit)? = null
+
     /**region Initializing*/
     fun initialize(mlsTvFragment: MLSTVFragment, builder: MLSTvBuilder) {
         this.mMlsTvFragment = mlsTvFragment
+        this.onError = builder.onError
         this.ima = builder.ima
         this.onConcurrencyLimitExceeded = builder.onConcurrencyLimitExceeded
         this.concurrencyLimitEnabled = builder.concurrencyLimitFeatureEnabled
@@ -153,12 +146,8 @@ class TvVideoPlayer @Inject constructor(
         // Analytics
         hasAnalytic = builder.hasAnalytic
         if (builder.hasAnalytic) {
-            initAnalytic(
-                activity = builder.mlsTvFragment.requireActivity(),
-                exoPlayer = this.player.getDirectInstance()!!,
-                accountCode = builder.getAnalyticsCode(),
-                videoAnalyticsCustomData = builder.videoAnalyticsCustomData,
-                deviceType = builder.deviceType
+            initAnalytics(
+                builder.videoAnalyticsCustomData
             )
         }
         this.player.getDirectInstance()?.let { exoPlayer ->
@@ -217,6 +206,11 @@ class TvVideoPlayer @Inject constructor(
         this.player.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 logEventIfNeeded()
+
+                val client = analyticsClient as YouboraClient
+                client.getYouboraError()?.let { err ->
+                    onError?.invoke("Error When Playing: ${dataManager.currentEvent} ==> $err")
+                }
 
                 if (playbackState == ExoPlayer.STATE_READY) {
                     dataManager.currentEvent?.let { event ->
@@ -282,11 +276,10 @@ class TvVideoPlayer @Inject constructor(
         if (!hasAnalytic) {
             return
         }
-        if (logged) {
-            return
+
+        analyticsClient.logEvent(dataManager.currentEvent, player.isLive()) {
+            onError?.invoke(it)
         }
-        analyticsClient.logEvent(dataManager.currentEvent, player.isLive())
-        logged = true
     }
 
     /**
@@ -301,22 +294,13 @@ class TvVideoPlayer @Inject constructor(
     }
 
     /**endregion */
-    private fun initAnalytic(
-        activity: Activity,
-        exoPlayer: ExoPlayer,
-        accountCode: String,
-        deviceType: String?,
+    private fun initAnalytics(
         videoAnalyticsCustomData: VideoAnalyticsCustomData?
     ) {
         if (analyticsClient is YouboraClient) {
-            val device = deviceType ?: DeviceUtils.detectTVDeviceType(activity).value
-
-            analyticsClient.setYouboraPlugin(
-                activity = activity,
-                exoPlayer = exoPlayer,
-                accountCode = accountCode,
-                deviceType = device,
-                videoAnalyticsCustomData = videoAnalyticsCustomData,
+            analyticsClient.attachYouboraToPlayer(
+                videoAnalyticsCustomData,
+                ima != null
             )
         }
     }
@@ -500,8 +484,8 @@ class TvVideoPlayer @Inject constructor(
             }
             StreamStatus.PLAYABLE -> {
                 if (streaming.not()) {
+                    logEventIfNeeded()
                     streaming = true
-                    logged = false
 
                     play(event.streams.first())
                     eventInfoContainerLayout.visibility = View.GONE

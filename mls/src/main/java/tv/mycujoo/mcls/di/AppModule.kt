@@ -1,7 +1,6 @@
 package tv.mycujoo.mcls.di
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.content.res.AssetManager
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.exoplayer2.MediaItem
@@ -12,24 +11,10 @@ import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import dagger.Module
 import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.newSingleThreadContext
 import okhttp3.Cache
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import tv.mycujoo.mcls.BuildConfig
-import tv.mycujoo.mcls.enum.LogLevel
-import tv.mycujoo.mcls.manager.IPrefManager
-import tv.mycujoo.mcls.manager.Logger
-import tv.mycujoo.mcls.manager.PrefManager
 import tv.mycujoo.mcls.player.MediaFactory
 import tv.mycujoo.mcls.utils.ThreadUtils
-import tv.mycujoo.mcls.utils.UserPreferencesUtils
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -38,20 +23,13 @@ import javax.inject.Singleton
  * Coroutines scope, Data manager & Pref manager are provided to dependency graph by this module
  */
 @Module
-@InstallIn(SingletonComponent::class)
-open class AppModule {
-
-    @Provides
-    @Singleton
-    fun provideLogger(): Logger {
-        return Logger(LogLevel.MINIMAL)
-    }
+class AppModule {
 
     @Provides
     @Singleton
     @ExoPlayerOkHttp
     fun provideExoPlayerHttpClient(
-        @ApplicationContext context: Context
+        context: Context
     ): OkHttpClient {
         val cacheSize = 10 * 1024 * 1024 // 10 MiB
         val cache = Cache(context.cacheDir, cacheSize.toLong())
@@ -63,32 +41,6 @@ open class AppModule {
             .cache(cache)
 
         return okHttpBuilder.build()
-    }
-
-    @Provides
-    @Singleton
-    fun providePrefManager(preferences: SharedPreferences): IPrefManager {
-        return PrefManager(preferences)
-    }
-
-    @ObsoleteCoroutinesApi
-    @Provides
-    @Singleton
-    fun provideCoroutineScope(): CoroutineScope {
-        val job = SupervisorJob()
-        return CoroutineScope(newSingleThreadContext(BuildConfig.LIBRARY_PACKAGE_NAME) + job)
-    }
-
-    @Provides
-    @Singleton
-    fun provideUserPreferencesUtils(prefManager: IPrefManager): UserPreferencesUtils {
-        return UserPreferencesUtils(prefManager)
-    }
-
-    @Provides
-    @Singleton
-    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
-        return context.getSharedPreferences("MLS", Context.MODE_PRIVATE)
     }
 
     @CountingIdlingResourceViewIdentifierManager
@@ -130,7 +82,7 @@ open class AppModule {
     @Singleton
     @Provides
     fun provideDefaultMediaSourceFactory(
-        @ApplicationContext context: Context
+         context: Context
     ): DefaultMediaSourceFactory {
         val httpDataSourceFactory = DefaultHttpDataSource
             .Factory()
@@ -144,7 +96,7 @@ open class AppModule {
 
     @Singleton
     @Provides
-    fun provideAssetManager(@ApplicationContext context: Context): AssetManager {
+    fun provideAssetManager( context: Context): AssetManager {
         return context.assets
     }
 }

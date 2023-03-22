@@ -1,7 +1,5 @@
 package tv.mycujoo.mcls.core
 
-import android.app.Activity
-import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player.*
 import com.google.android.exoplayer2.SeekParameters
@@ -25,11 +23,11 @@ import tv.mycujoo.mcls.cast.ICasterSession
 import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.entity.msc.VideoPlayerConfig
 import tv.mycujoo.mcls.enum.C
-import tv.mycujoo.mcls.enum.DeviceType
 import tv.mycujoo.mcls.enum.MessageLevel
 import tv.mycujoo.mcls.enum.StreamStatus.*
 import tv.mycujoo.mcls.helper.OverlayViewHelper
 import tv.mycujoo.mcls.helper.ViewersCounterHelper.Companion.isViewersCountValid
+import tv.mycujoo.mcls.ima.IIma
 import tv.mycujoo.mcls.manager.Logger
 import tv.mycujoo.mcls.manager.contracts.IViewHandler
 import tv.mycujoo.mcls.mediator.AnnotationMediator
@@ -137,6 +135,11 @@ class VideoPlayerMediator @Inject constructor(
     var concurrencyLimitEnabled = true
 
     /**
+     * Error Broadcasting to the outside world
+     */
+    var onError: ((String) -> Unit)? = null
+
+    /**
      * Retry action for ConcurrencyRequest
      */
     private var bffSocketRetryDelay = INITIAL_SOCKET_RETRY_DELAY
@@ -166,6 +169,8 @@ class VideoPlayerMediator @Inject constructor(
         onConcurrencyLimitExceeded = builder.onConcurrencyLimitExceeded
         concurrencyLimitEnabled = builder.concurrencyLimitFeatureEnabled
 
+        this.onError = builder.onError
+
         player.getDirectInstance()?.let {
             videoPlayer = VideoPlayer(it, this, playerView)
 
@@ -193,12 +198,7 @@ class VideoPlayerMediator @Inject constructor(
 
             hasAnalytic = builder.hasAnalytic
             if (builder.hasAnalytic) {
-                initAnalytic(
-                    builder.activity!!,
-                    it,
-                    builder.getAnalyticsAccountCode(),
-                    builder.customVideoAnalyticsData
-                )
+                initAnalytic(builder.customVideoAnalyticsData, builder.ima)
             }
 
             initPlayerView(
@@ -447,19 +447,11 @@ class VideoPlayerMediator @Inject constructor(
      * Abstracting Analytics client from Youbora
      * Here we can
      */
-    private fun initAnalytic(
-        activity: Activity,
-        exoPlayer: ExoPlayer,
-        analyticsAccountCode: String,
-        customData: VideoAnalyticsCustomData?
-    ) {
+    private fun initAnalytic(customData: VideoAnalyticsCustomData?, ima: IIma?) {
         if (analyticsClient is YouboraClient) {
-            analyticsClient.setYouboraPlugin(
-                activity,
-                exoPlayer,
-                analyticsAccountCode,
-                DeviceType.ANDROID.value,
-                customData
+            analyticsClient.attachYouboraToPlayer(
+                customData,
+                ima != null
             )
         }
     }
@@ -508,20 +500,14 @@ class VideoPlayerMediator @Inject constructor(
      * Changing Video Analytics Custom Data On Runtime After Building
      */
     fun setVideoAnalyticsCustomData(
-        activity: Activity,
-        analyticsAccountCode: String,
-        customData: VideoAnalyticsCustomData?
+        customData: VideoAnalyticsCustomData?,
+        imaEnabled: Boolean
     ) {
         if (hasAnalytic && analyticsClient is YouboraClient) {
-            player.getDirectInstance()?.let { exoPlayer ->
-                analyticsClient.setYouboraPlugin(
-                    activity,
-                    exoPlayer,
-                    analyticsAccountCode,
-                    DeviceType.ANDROID.value,
-                    customData
-                )
-            }
+            analyticsClient.attachYouboraToPlayer(
+                customData,
+                imaEnabled
+            )
         }
     }
 
@@ -669,8 +655,8 @@ class VideoPlayerMediator @Inject constructor(
             PLAYABLE -> {
                 if (streaming.not()) {
                     streaming = true
-                    logEventIfNeeded()
                     storeEvent(event)
+                    logEventIfNeeded()
                     playerView.hideInfoDialogs()
                     playerView.updateControllerVisibility(isPlaying = true)
                     // If playback is local, depend on the config, else always load the video but don't play
@@ -985,7 +971,9 @@ class VideoPlayerMediator @Inject constructor(
         if (!hasAnalytic) {
             return
         }
-        analyticsClient.logEvent(dataManager.currentEvent, player.isLive())
+        analyticsClient.logEvent(dataManager.currentEvent, player.isLive()) {
+            onError?.invoke(it)
+        }
     }
 
     /**

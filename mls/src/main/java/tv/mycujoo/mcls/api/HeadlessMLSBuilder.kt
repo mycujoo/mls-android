@@ -2,21 +2,25 @@ package tv.mycujoo.mcls.api
 
 import android.content.Context
 import android.content.pm.PackageManager
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.android.internal.modules.ApplicationContextModule
-import dagger.hilt.components.SingletonComponent
+import dagger.BindsInstance
+import dagger.Component
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.newSingleThreadContext
 import timber.log.Timber
-import tv.mycujoo.DaggerMLSApplication_HiltComponents_SingletonC
-import tv.mycujoo.MLSApplication_HiltComponents
 import tv.mycujoo.mcls.BuildConfig
-import tv.mycujoo.mcls.di.AppModule
+import tv.mycujoo.mcls.di.CoreModule
 import tv.mycujoo.mcls.di.NetworkModule
+import tv.mycujoo.mcls.di.NetworkModuleBinds
+import tv.mycujoo.mcls.di.StorageModule
 import tv.mycujoo.mcls.enum.C
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.tv.api.HeadlessMLS
 import tv.mycujoo.ui.MLSTVFragment
+import javax.inject.Inject
+import javax.inject.Singleton
 
 class HeadlessMLSBuilder {
     init {
@@ -24,6 +28,12 @@ class HeadlessMLSBuilder {
             Timber.plant(Timber.DebugTree())
         }
     }
+
+    @Inject
+    lateinit var prefManager: IPrefManager
+
+    @Inject
+    lateinit var headlessMLS: HeadlessMLS
 
     internal lateinit var mlsTvFragment: MLSTVFragment
 
@@ -33,7 +43,7 @@ class HeadlessMLSBuilder {
         private set
     internal var logLevel: LogLevel = LogLevel.MINIMAL
         private set
-    private var graph: MLSApplication_HiltComponents.SingletonC? = null
+    internal var coroutineScope: CoroutineScope? = null
 
     fun publicKey(publicKey: String) = apply {
         if (publicKey == "YOUR_PUBLIC_KEY_HERE") {
@@ -44,6 +54,10 @@ class HeadlessMLSBuilder {
 
     fun identityToken(identityToken: String) = apply {
         this.identityToken = identityToken
+    }
+
+    fun coroutineScope(coroutineScope: CoroutineScope) = apply {
+        this.coroutineScope = coroutineScope
     }
 
     /**
@@ -65,40 +79,55 @@ class HeadlessMLSBuilder {
     fun setLogLevel(logLevel: LogLevel) = apply { this.logLevel = logLevel }
 
     // Headless is a client without UI elements in it.
-    open fun build(context: Context): HeadlessMLS {
+    @OptIn(DelicateCoroutinesApi::class)
+    fun build(context: Context): HeadlessMLS {
         initPublicKeyIfNeeded()
         if (publicKey.isEmpty()) {
             throw IllegalArgumentException(C.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
 
-        val prefManager = getGraph(context).providePrefsManager()
+        val coroutineScope = coroutineScope
+        val scope = if (coroutineScope == null) {
+            val job = SupervisorJob()
+            CoroutineScope(newSingleThreadContext(BuildConfig.LIBRARY_PACKAGE_NAME) + job)
+        } else {
+            coroutineScope
+        }
+
+        DaggerHeadlessMLSComponent
+            .builder()
+            .bindContext(context)
+            .bindCoroutinesScope(scope)
+            .build()
+            .inject(this)
+
         prefManager.persist(C.IDENTITY_TOKEN_PREF_KEY, identityToken)
         prefManager.persist(C.PUBLIC_KEY_PREF_KEY, publicKey)
 
-        return getGraph(context).provideMLSHeadless()
+        return headlessMLS
+    }
+}
+
+@Singleton
+@Component(
+    modules = [
+        StorageModule::class,
+        NetworkModuleBinds::class,
+        NetworkModule::class,
+        CoreModule::class
+    ]
+)
+interface HeadlessMLSComponent {
+    @Component.Builder
+    interface Builder {
+        @BindsInstance
+        fun bindContext(context: Context): Builder
+
+        @BindsInstance
+        fun bindCoroutinesScope(coroutineScope: CoroutineScope): Builder
+
+        fun build(): HeadlessMLSComponent
     }
 
-    private fun getGraph(applicationContext: Context): MLSApplication_HiltComponents.SingletonC {
-        val currentGraph = graph
-        return if (currentGraph == null) {
-            val newGraph = DaggerMLSApplication_HiltComponents_SingletonC.builder()
-                .applicationContextModule(ApplicationContextModule(applicationContext))
-                .networkModule(NetworkModule())
-                .appModule(AppModule())
-                .build()
-            graph = newGraph
-            newGraph
-        } else {
-            currentGraph
-        }
-    }
-
-    @InstallIn(SingletonComponent::class)
-    @EntryPoint
-    interface Entries {
-
-        fun provideMLSHeadless(): HeadlessMLS
-
-        fun providePrefsManager(): IPrefManager
-    }
+    fun inject(builder: HeadlessMLSBuilder)
 }

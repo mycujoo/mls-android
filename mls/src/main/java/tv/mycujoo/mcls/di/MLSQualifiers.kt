@@ -37,3 +37,11 @@ annotation class ConcurrencySocketUrl
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
 annotation class ExoPlayerOkHttp
+
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ClientDeviceType
+
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class YouboraAccountCode

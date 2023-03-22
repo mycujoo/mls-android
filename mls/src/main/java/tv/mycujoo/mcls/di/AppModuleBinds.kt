@@ -2,18 +2,12 @@ package tv.mycujoo.mcls.di
 
 import dagger.Binds
 import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import tv.mycujoo.data.repository.EventsRepository
-import tv.mycujoo.domain.repository.IEventsRepository
 import tv.mycujoo.mcls.analytic.AnalyticsClient
 import tv.mycujoo.mcls.analytic.YouboraClient
-import tv.mycujoo.mcls.api.DataManager
 import tv.mycujoo.mcls.core.AnnotationFactory
 import tv.mycujoo.mcls.core.AnnotationListener
 import tv.mycujoo.mcls.core.IAnnotationFactory
 import tv.mycujoo.mcls.core.IAnnotationListener
-import tv.mycujoo.mcls.data.IDataManager
 import tv.mycujoo.mcls.helper.*
 import tv.mycujoo.mcls.manager.IVariableKeeper
 import tv.mycujoo.mcls.manager.VariableKeeper
@@ -24,7 +18,6 @@ import tv.mycujoo.mcls.player.Player
 import tv.mycujoo.mcls.tv.player.TvAnnotationListener
 import javax.inject.Singleton
 
-@InstallIn(SingletonComponent::class)
 @Module
 interface AppModuleBinds {
 
@@ -60,15 +53,7 @@ interface AppModuleBinds {
 
     @Binds
     @Singleton
-    fun bindEventsRepository(EventsRepository: EventsRepository): IEventsRepository
-
-    @Binds
-    @Singleton
     fun bindPlayer(player: Player): IPlayer
-
-    @Binds
-    @Singleton
-    fun bindDataManager(dataManager: DataManager): IDataManager
 
     @Binds
     @Singleton

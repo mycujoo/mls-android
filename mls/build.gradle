@@ -5,7 +5,6 @@ plugins {
     id 'kotlin-kapt'
     id 'maven-publish'
     id 'signing'
-    id 'dagger.hilt.android.plugin'
     id "scabbard.gradle" version "0.5.0"
     id("com.google.devtools.ksp").version("1.7.20-1.0.6")
 }
@@ -18,7 +17,7 @@ scabbard {
 // publish information on Maven
 ext {
     PUBLISH_GROUP_ID = 'tv.mycujoo.mls'
-    PUBLISH_VERSION = '1.4.15'
+    PUBLISH_VERSION = '1.4.26'
     PUBLISH_ARTIFACT_ID = 'mls'
     PUBLISH_ARTIFACT_DESCRIPTION = 'Android MLS SDK'
 }
@@ -113,16 +112,16 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
-    testImplementation "org.mockito:mockito-core:4.8.1"
+    testImplementation "org.mockito:mockito-core:5.0.0"
     testImplementation "org.mockito.kotlin:mockito-kotlin:4.0.0"
-    testImplementation "org.mockito:mockito-inline:4.8.1"
+    testImplementation "org.mockito:mockito-inline:5.0.0"
     androidTestImplementation 'org.mockito:mockito-android:4.8.1'
     androidTestImplementation "org.mockito.kotlin:mockito-kotlin:4.0.0"
-    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
-    implementation 'androidx.test.espresso:espresso-idling-resource:3.5.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    implementation 'androidx.test.espresso:espresso-idling-resource:3.5.1'
     androidTestImplementation 'androidx.annotation:annotation:1.5.0'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test:core-ktx:1.5.0'
     androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
     testImplementation 'androidx.arch.core:core-testing:2.1.0'
@@ -135,20 +134,14 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:1.2.1"
 
     // Glide
-    implementation 'com.github.bumptech.glide:glide:4.12.0'
-    kapt 'com.github.bumptech.glide:compiler:4.12.0'
-
-
-    // Hilt
-    implementation "com.google.dagger:hilt-android:2.42"
-    kapt "com.google.dagger:hilt-compiler:2.42"
-
-    androidTestImplementation 'com.google.dagger:hilt-android-testing:2.42'
-    kaptAndroidTest 'com.google.dagger:hilt-android-compiler:2.42'
+    implementation 'com.github.bumptech.glide:glide:4.14.2'
+    kapt 'com.github.bumptech.glide:compiler:4.14.2'
 
     // Dagger For non-hilt apps
-    implementation 'com.google.dagger:dagger:2.43.2'
-    kapt 'com.google.dagger:dagger-compiler:2.43.2'
+    implementation 'com.google.dagger:dagger:2.45'
+    kapt 'com.google.dagger:dagger-compiler:2.45'
+    implementation 'com.google.dagger:dagger-android-support:2.45'
+
 
     // Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
@@ -177,7 +170,7 @@ dependencies {
     testImplementation 'joda-time:joda-time:2.12.0'
 
     // Exoplayer
-    def exo_player_version = "2.18.1"
+    def exo_player_version = "2.18.4"
     api "com.google.android.exoplayer:exoplayer:$exo_player_version"
     api "com.google.android.exoplayer:exoplayer-hls:$exo_player_version"
     api("com.google.android.exoplayer:extension-leanback:$exo_player_version") {
@@ -186,18 +179,22 @@ dependencies {
     }
     api "com.google.android.exoplayer:extension-okhttp:$exo_player_version"
     api "com.google.android.exoplayer:extension-mediasession:$exo_player_version"
+    api "com.google.android.exoplayer:extension-ima:$exo_player_version"
 
-    api 'com.nicepeopleatwork:exoplayer-adapter:6.7.29'
+    api "com.nicepeopleatwork:exoplayer2-18-adapter:6.8.4"
+    implementation "com.nicepeopleatwork:ima-adapter:6.8.1"
+
+    api 'com.google.ads.interactivemedia.v3:interactivemedia:3.29.0'
 
     api "androidx.leanback:leanback:1.2.0-alpha99"
     api "androidx.leanback:leanback-grid:1.0.0-alpha99"
 
     // Android Test Rules
-    androidTestImplementation "androidx.test.ext:junit-ktx:1.1.4"
+    androidTestImplementation "androidx.test.ext:junit-ktx:1.1.5"
 
     // Idling Resources for testing
-    androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:3.5.0"
-    androidTestImplementation "androidx.test.espresso:espresso-idling-resource:3.5.0"
+    androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:3.5.1"
+    androidTestImplementation "androidx.test.espresso:espresso-idling-resource:3.5.1"
 
     // Testing
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:4.10.0"
@@ -213,5 +210,5 @@ dependencies {
     testImplementation 'org.amshove.kluent:kluent-android:1.72'
     androidTestImplementation 'org.amshove.kluent:kluent-android:1.72'
 
-    implementation 'com.google.android.gms:play-services-base:18.1.0'
+    implementation 'com.google.android.gms:play-services-base:18.2.0'
 }

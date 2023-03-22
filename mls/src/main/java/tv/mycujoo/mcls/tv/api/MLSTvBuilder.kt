@@ -2,27 +2,29 @@ package tv.mycujoo.mcls.tv.api
 
 import android.content.Context
 import android.content.pm.PackageManager
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.android.internal.modules.ApplicationContextModule
-import dagger.hilt.components.SingletonComponent
+import androidx.fragment.app.FragmentActivity
+import com.npaw.ima.ImaAdapter
+import dagger.BindsInstance
+import dagger.Component
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.newSingleThreadContext
 import timber.log.Timber
-import tv.mycujoo.DaggerMLSApplication_HiltComponents_SingletonC
-import tv.mycujoo.MLSApplication_HiltComponents
 import tv.mycujoo.mcls.BuildConfig
 import tv.mycujoo.mcls.analytic.VideoAnalyticsCustomData
 import tv.mycujoo.mcls.api.MLSTVConfiguration
-import tv.mycujoo.mcls.di.AppModule
-import tv.mycujoo.mcls.di.NetworkModule
+import tv.mycujoo.mcls.di.*
 import tv.mycujoo.mcls.enum.C
-import tv.mycujoo.mcls.enum.DeviceType
 import tv.mycujoo.mcls.enum.LogLevel
 import tv.mycujoo.mcls.ima.IIma
-import tv.mycujoo.mcls.manager.IPrefManager
+import tv.mycujoo.mcls.utils.DeviceUtils
 import tv.mycujoo.ui.MLSTVFragment
-import java.lang.Exception
+import javax.inject.Inject
+import javax.inject.Singleton
 
 open class MLSTvBuilder {
+
+    private var injected = false
 
     init {
         if (BuildConfig.DEBUG) {
@@ -51,13 +53,26 @@ open class MLSTvBuilder {
         private set
     internal var deviceType: String? = null
         private set
+    internal var coroutineScope: CoroutineScope? = null
+        private set
     internal var context: Context? = null
     internal var videoAnalyticsCustomData: VideoAnalyticsCustomData? = null
     internal var onConcurrencyLimitExceeded: ((Int) -> Unit)? = null
         private set
     internal var concurrencyLimitFeatureEnabled = true
 
-    private var graph: MLSApplication_HiltComponents.SingletonC? = null
+    internal var onError: ((String) -> Unit)? = null
+        private set
+
+    @Inject
+    internal lateinit var mlsTV: MLSTV
+
+    @Inject
+    internal lateinit var imaAnalyticsAdapter: ImaAdapter
+
+    fun setCoroutinesScope(coroutineScope: CoroutineScope) = apply {
+        this.coroutineScope = coroutineScope
+    }
 
     fun publicKey(publicKey: String) = apply {
         if (publicKey == "YOUR_PUBLIC_KEY_HERE") {
@@ -66,8 +81,13 @@ open class MLSTvBuilder {
         this.publicKey = publicKey
     }
 
+
+    fun setOnError(onError: (String) -> Unit) = apply {
+        this.onError = onError
+    }
+
     fun deviceType(deviceType: String) = apply {
-        this.deviceType =  deviceType
+        this.deviceType = deviceType
     }
 
     fun customPseudoUserId(pseudoUserId: String) = apply {
@@ -152,12 +172,8 @@ open class MLSTvBuilder {
     }
 
     fun ima(ima: IIma) = apply {
-        val ctx = context
-            ?: throw IllegalArgumentException(C.CONTEXT_MUST_BE_SET_IN_MLS_TV_BUILDER_MESSAGE)
 
-        this.ima = ima.apply {
-            createAdsLoader(ctx)
-        }
+        this.ima = ima
     }
 
     /**
@@ -187,54 +203,85 @@ open class MLSTvBuilder {
             throw IllegalArgumentException(C.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
         }
 
-        val graph = getGraph(buildContext)
-
-        val mlsTv = graph.provideMLSTV()
-        mlsTv.initialize(this, mlsTvFragment)
-
-        mlsTvFragment.lifecycle.addObserver(mlsTv)
-
-        return mlsTv
-    }
-
-
-    // Headless is a client without UI elements in it.
-    @Deprecated("Please use HeadlessMLSBuilder()")
-    open fun buildHeadless(context: Context): HeadlessMLS {
-        initPublicKeyIfNeeded()
-        if (publicKey.isEmpty()) {
-            throw IllegalArgumentException(C.PUBLIC_KEY_MUST_BE_SET_IN_MLS_BUILDER_MESSAGE)
-        }
-
-        val prefManager = getGraph(context).providePrefsManager()
-        prefManager.persist(C.IDENTITY_TOKEN_PREF_KEY, identityToken)
-        prefManager.persist(C.PUBLIC_KEY_PREF_KEY, publicKey)
-
-        return getGraph(context).provideMLSTVHeadless()
-    }
-
-    private fun getGraph(applicationContext: Context): MLSApplication_HiltComponents.SingletonC {
-        val currentGraph = graph
-        return if (currentGraph == null) {
-            val newGraph = DaggerMLSApplication_HiltComponents_SingletonC.builder()
-                .applicationContextModule(ApplicationContextModule(applicationContext))
-                .networkModule(NetworkModule())
-                .appModule(AppModule())
-                .build()
-            graph = newGraph
-            newGraph
+        val coroutineScope = coroutineScope
+        val scope = if (coroutineScope == null) {
+            val job = SupervisorJob()
+            CoroutineScope(newSingleThreadContext(BuildConfig.LIBRARY_PACKAGE_NAME) + job)
         } else {
-            currentGraph
+            coroutineScope
         }
+
+        injectIfNeeded(mlsTvFragment.requireActivity(), scope)
+
+        ima?.apply {
+            if (hasAnalytic) {
+                createAdsLoader(buildContext, imaAnalyticsAdapter)
+            } else {
+                createAdsLoader(buildContext)
+            }
+        }
+
+        mlsTV.initialize(this, mlsTvFragment)
+
+        mlsTvFragment.lifecycle.addObserver(mlsTV)
+
+        return mlsTV
     }
 
-    @InstallIn(SingletonComponent::class)
-    @EntryPoint
-    interface TvEntries {
-        fun provideMLSTV(): MLSTV
+    private fun injectIfNeeded(
+        activity: FragmentActivity,
+        coroutinesScope: CoroutineScope
+    ) {
+        if (injected) return
 
-        fun provideMLSTVHeadless(): HeadlessMLS
+        val device = deviceType ?: DeviceUtils.detectTVDeviceType(activity).value
 
-        fun providePrefsManager(): IPrefManager
+        DaggerMLSTVComponent.builder()
+            .withActivity(activity)
+            .withContext(activity)
+            .withCoroutinesScope(coroutinesScope)
+            .withDeviceType(device)
+            .withYouboraAccountCode(getAnalyticsCode())
+            .build()
+            .inject(this)
+
+        injected = true
     }
+}
+
+@Singleton
+@Component(
+    modules = [
+        NetworkModule::class,
+        NetworkModuleBinds::class,
+        PlayerModule::class,
+        AppModuleBinds::class,
+        AppModule::class,
+        CoreModule::class,
+        StorageModule::class,
+        AnalyticsModule::class
+    ]
+)
+interface MLSTVComponent {
+    @Component.Builder
+    interface Builder {
+        @BindsInstance
+        fun withActivity(activity: FragmentActivity): Builder
+
+        @BindsInstance
+        fun withContext(context: Context): Builder
+
+        @BindsInstance
+        fun withCoroutinesScope(coroutineScope: CoroutineScope): Builder
+
+        @BindsInstance
+        fun withYouboraAccountCode(@YouboraAccountCode code: String): Builder
+
+        @BindsInstance
+        fun withDeviceType(@ClientDeviceType type: String): Builder
+
+        fun build(): MLSTVComponent
+    }
+
+    fun inject(builder: MLSTvBuilder)
 }
