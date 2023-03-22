@@ -21,7 +21,7 @@ import javax.inject.Inject
 class YouboraClient @Inject constructor(
     private val logger: Logger,
     private val userPreferencesUtils: UserPreferencesUtils,
-    private val plugin: Plugin?,
+    private val plugin: Plugin,
     private val player: IPlayer,
     private val activity: FragmentActivity,
     private val imaAdapter: ImaAdapter
@@ -55,10 +55,10 @@ class YouboraClient @Inject constructor(
         this.videoAnalyticsCustomData = videoAnalyticsCustomData
 
         player.getDirectInstance()?.let { exoPlayer ->
-            plugin?.activity = activity
-            plugin?.adapter = Exoplayer2Adapter(exoPlayer)
+            plugin.activity = activity
+            plugin.adapter = Exoplayer2Adapter(exoPlayer)
             if (imaEnabled) {
-                plugin?.adsAdapter = imaAdapter
+                plugin.adsAdapter = imaAdapter
             }
         }
     }
@@ -90,11 +90,6 @@ class YouboraClient @Inject constructor(
      */
     override fun logEvent(event: EventEntity?, live: Boolean, onError: (String) -> Unit) {
         val savedPlugin = plugin
-        if (savedPlugin == null) {
-            onError("YouboraClient: Please Set Plugin Before Logging Event!!")
-            logger.log(MessageLevel.ERROR, "Please Set Plugin Before Logging Event!!")
-            return
-        }
         if (event == null) {
             onError("YouboraClient: event is null")
             logger.log(MessageLevel.ERROR, "event is null")
@@ -129,7 +124,7 @@ class YouboraClient @Inject constructor(
      * activate analytical plugin
      */
     override fun start() {
-        plugin?.adapter?.fireResume()
+        plugin.adapter?.fireResume()
     }
 
 
@@ -137,8 +132,8 @@ class YouboraClient @Inject constructor(
      * deactivate analytical plugin
      */
     override fun stop() {
-        plugin?.fireStop()
-        plugin?.removeAdapter()
+        plugin.fireStop()
+        plugin.removeAdapter()
     }
 
     /**region Internal*/
