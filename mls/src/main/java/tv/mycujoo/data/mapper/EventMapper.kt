@@ -7,7 +7,7 @@ import tv.mycujoo.domain.entity.*
 class EventMapper {
     companion object {
         fun mapEventSourceDataToEventEntity(sourceData: EventSourceData): EventEntity {
-            val location = mapLocationSourceDataToLocationEntity(sourceData.locationSourceData)
+            val location = mapPhysicalSourceDataToPhysicalEntity(sourceData.physical)
             val date = DateTime.parse(sourceData.start_time)
             val eventStatus = EventStatus.fromValueOrUnspecified(sourceData.status)
 
@@ -20,7 +20,7 @@ class EventMapper {
                 description = sourceData.description,
                 thumbnailUrl = sourceData.thumbnailUrl,
                 poster_url = sourceData.poster_url,
-                location = location,
+                physical = location,
                 organiser = sourceData.organiser,
                 start_time = date,
                 status = eventStatus,
@@ -65,10 +65,10 @@ class EventMapper {
         }
 
 
-        private fun mapLocationSourceDataToLocationEntity(sourceData: LocationSourceData): Location {
-            val physical = mapPhysicalSourceDataToPhysicalEntity(sourceData.physicalSourceData)
-            return Location(physical)
-        }
+//        private fun mapLocationSourceDataToLocationEntity(sourceData: LocationSourceData): Location {
+//            val physical = mapPhysicalSourceDataToPhysicalEntity(sourceData.physicalSourceData)
+//            return Location(physical)
+//        }
 
         private fun mapPhysicalSourceDataToPhysicalEntity(sourceData: PhysicalSourceData): Physical {
             val coordinates = mapCoordinatesSourceCodeToCoordinatesEntity(sourceData.coordinates)

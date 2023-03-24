@@ -34,6 +34,7 @@ abstract class AbstractRepository {
                     tv.mycujoo.domain.entity.Result.NetworkError(throwable)
                 }
                 else -> {
+                    Timber.e(throwable)
                     tv.mycujoo.domain.entity.Result.NetworkError(Exception(throwable))
                 }
             }

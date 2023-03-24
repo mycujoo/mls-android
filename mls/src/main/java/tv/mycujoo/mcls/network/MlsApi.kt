@@ -5,7 +5,7 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 import tv.mycujoo.data.entity.ActionResponse
-import tv.mycujoo.data.model.EventSourceData
+import tv.mycujoo.data.model.EventResponse
 import tv.mycujoo.data.model.EventsSourceData
 import tv.mycujoo.data.request.GetEventDetailsRequest
 import tv.mycujoo.data.request.GetEventListRequest
@@ -20,7 +20,7 @@ interface MlsApi {
     @POST("mcls.cda.events.v1.EventsService/Get")
     suspend fun getEventDetails(
         @Body eventByIdRequest: GetEventDetailsRequest
-    ): EventSourceData
+    ): EventResponse
 
     @POST("bff/timeline/v1beta1/{timeline_id}")
     suspend fun getActions(

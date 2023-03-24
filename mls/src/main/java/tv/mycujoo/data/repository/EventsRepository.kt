@@ -46,7 +46,7 @@ class EventsRepository @Inject constructor(
             val eventDetails = api.getEventDetails(
                 GetEventDetailsRequest(eventId = eventId)
             )
-            mapEventSourceDataToEventEntity(eventDetails)
+            mapEventSourceDataToEventEntity(eventDetails.event)
         }
     }
 
