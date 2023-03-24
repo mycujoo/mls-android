@@ -2,15 +2,12 @@ package tv.mycujoo.mcls.network
 
 import retrofit2.http.Body
 import retrofit2.http.POST
-import retrofit2.http.Path
-import retrofit2.http.Query
-import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.data.model.EventResponse
 import tv.mycujoo.data.model.EventsSourceData
 import tv.mycujoo.data.request.GetEventDetailsRequest
 import tv.mycujoo.data.request.GetEventListRequest
 
-interface MlsApi {
+interface EventsApi {
 
     @POST("mcls.cda.events.v1.EventsService/List")
     suspend fun getEvents(
@@ -21,10 +18,4 @@ interface MlsApi {
     suspend fun getEventDetails(
         @Body eventByIdRequest: GetEventDetailsRequest
     ): EventResponse
-
-    @POST("bff/timeline/v1beta1/{timeline_id}")
-    suspend fun getActions(
-        @Path("timeline_id") timelineId: String,
-        @Query("update_id") updateId: String? = null
-    ): ActionResponse
 }

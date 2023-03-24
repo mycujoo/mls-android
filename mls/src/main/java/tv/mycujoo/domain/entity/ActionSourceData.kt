@@ -1,11 +1,13 @@
 package tv.mycujoo.domain.entity
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import tv.mycujoo.domain.entity.models.ActionType
 import tv.mycujoo.domain.entity.models.ActionType.*
 import tv.mycujoo.domain.mapper.DataMapper
 import java.util.*
 
+@JsonClass(generateAdapter = true)
 data class ActionSourceData(
     @field:Json(name = "id") val id: String?,
     @field:Json(name = "type") val type: String?,

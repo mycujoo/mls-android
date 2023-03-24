@@ -11,17 +11,19 @@ import tv.mycujoo.domain.params.EventListParams
 import tv.mycujoo.domain.params.TimelineIdPairParam
 import tv.mycujoo.domain.repository.AbstractRepository
 import tv.mycujoo.domain.repository.IEventsRepository
-import tv.mycujoo.mcls.network.MlsApi
+import tv.mycujoo.mcls.network.EventsApi
+import tv.mycujoo.mcls.network.TimelinesApi
 import javax.inject.Inject
 
 class EventsRepository @Inject constructor(
-    val api: MlsApi
+    private val eventsApi: EventsApi,
+    private val timelinesApi: TimelinesApi,
 ) : AbstractRepository(), IEventsRepository {
 
 
     override suspend fun getEventsList(eventListParams: EventListParams): Result<Exception, Events> {
         return safeApiCall {
-            val eventsSourceData = api.getEvents(
+            val eventsSourceData = eventsApi.getEvents(
                 GetEventListRequest(
                     pageSize = eventListParams.pageSize,
                     pageToken = eventListParams.pageToken,
@@ -43,7 +45,7 @@ class EventsRepository @Inject constructor(
         eventId: String,
     ): Result<Exception, EventEntity> {
         return safeApiCall {
-            val eventDetails = api.getEventDetails(
+            val eventDetails = eventsApi.getEventDetails(
                 GetEventDetailsRequest(eventId = eventId)
             )
             mapEventSourceDataToEventEntity(eventDetails.event)
@@ -52,7 +54,7 @@ class EventsRepository @Inject constructor(
 
     override suspend fun getActions(timelineIdPairParam: TimelineIdPairParam): Result<Exception, ActionResponse> {
         return safeApiCall {
-            api.getActions(
+            timelinesApi.getActions(
                 timelineIdPairParam.timelineId,
                 timelineIdPairParam.updateEventId
             )

@@ -160,6 +160,27 @@ class DataManager @Inject constructor(
             }
         }
     }
+
+    override fun getActions(
+        timelineId: String,
+        onSuccess: (ActionResponse) -> Unit,
+        onError: ((String) -> Unit)?
+    ) {
+        scope.launch {
+            when (val response = getActionsUseCase.execute(TimelineIdPairParam(timelineId))) {
+                is Result.Success -> {
+                    onSuccess(response.value)
+                }
+                is Result.GenericError -> {
+                    onError?.invoke(response.errorMessage)
+                }
+                is Result.NetworkError -> {
+                    onError?.invoke(response.error.message.orEmpty())
+                }
+            }
+        }
+    }
+
     /**endregion */
 
     companion object {
