@@ -1,5 +1,6 @@
 package tv.mycujoo.mcls.api
 
+import tv.mycujoo.data.entity.ActionResponse
 import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.EventStatus
 import tv.mycujoo.domain.entity.OrderByEventsParam
@@ -20,5 +21,11 @@ interface DataProvider {
         eventStatus: List<EventStatus>? = null,
         orderBy: OrderByEventsParam? = null,
         fetchEventCallback: ((eventList: List<EventEntity>, previousPageToken: String, nextPageToken: String) -> Unit)? = null
+    )
+
+    fun getActions(
+        timelineId: String,
+        onSuccess: (ActionResponse) -> Unit,
+        onError: ((String) -> Unit)? = null
     )
 }

@@ -17,10 +17,10 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import timber.log.Timber
 import tv.mycujoo.data.jsonadapter.JodaJsonAdapter
 import tv.mycujoo.mcls.BuildConfig
-import tv.mycujoo.mcls.enum.C.Companion.IDENTITY_TOKEN_PREF_KEY
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
 import tv.mycujoo.mcls.manager.IPrefManager
-import tv.mycujoo.mcls.network.MlsApi
+import tv.mycujoo.mcls.network.EventsApi
+import tv.mycujoo.mcls.network.TimelinesApi
 import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
@@ -39,10 +39,15 @@ open class NetworkModule {
     @Singleton
     fun publicBaseUrl(): String = "https://mls.mycujoo.tv"
 
-    @ApiBaseUrl
+    @EventsApiBaseUrl
     @Provides
     @Singleton
-    fun mlsApiBaseUrl(): String = "https://mls-api.mycujoo.tv"
+    fun mlsApiBaseUrl(): String = "https://cda.mycujoo.tv"
+
+    @TimelineApiBaseUrl
+    @Provides
+    @Singleton
+    fun provideBFFUrl(): String = "https://mls-api.mycujoo.tv"
 
     @ConcurrencySocketUrl
     @Provides
@@ -65,7 +70,7 @@ open class NetworkModule {
         val cache = Cache(context.cacheDir, cacheSize.toLong())
         val loggingInterceptor = HttpLoggingInterceptor()
         if (BuildConfig.DEBUG) {
-            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS)
+            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
         }
 
         val okHttpBuilder = OkHttpClient.Builder()
@@ -75,9 +80,9 @@ open class NetworkModule {
             .addInterceptor { chain: Interceptor.Chain ->
                 var authorizationHeader = "Bearer ${prefManager.get(PUBLIC_KEY_PREF_KEY)}"
 
-                if (prefManager.get(IDENTITY_TOKEN_PREF_KEY).isNullOrEmpty().not()) {
-                    authorizationHeader += ",${prefManager.get(IDENTITY_TOKEN_PREF_KEY)}"
-                }
+//                if (prefManager.get(IDENTITY_TOKEN_PREF_KEY).isNullOrEmpty().not()) {
+//                    authorizationHeader += ",${prefManager.get(IDENTITY_TOKEN_PREF_KEY)}"
+//                }
 
                 val newRequest = chain.request().newBuilder()
                     .addHeader("Authorization", authorizationHeader)
@@ -126,11 +131,25 @@ open class NetworkModule {
     }
 
     @Provides
-    @MLSAPI
+    @MLSEventsApi
     @Singleton
-    fun provideMlsApiRetrofit(
+    fun provideMlsEventsApiRetrofit(
         okHttpClient: OkHttpClient,
-        @ApiBaseUrl baseUrl: String
+        @EventsApiBaseUrl baseUrl: String
+    ): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(baseUrl)
+            .addConverterFactory(MoshiConverterFactory.create())
+            .client(okHttpClient)
+            .build()
+    }
+
+    @Provides
+    @MLSTimelineApi
+    @Singleton
+    fun provideMlsTimelineApiRetrofit(
+        okHttpClient: OkHttpClient,
+        @TimelineApiBaseUrl baseUrl: String
     ): Retrofit {
         return Retrofit.Builder()
             .baseUrl(baseUrl)
@@ -141,8 +160,14 @@ open class NetworkModule {
 
     @Provides
     @Singleton
-    fun provideMlsApi(@MLSAPI retrofit: Retrofit): MlsApi {
-        return retrofit.create(MlsApi::class.java)
+    fun provideMlsEventsApi(@MLSEventsApi retrofit: Retrofit): EventsApi {
+        return retrofit.create(EventsApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMlsTimelineApi(@MLSTimelineApi retrofit: Retrofit): TimelinesApi {
+        return retrofit.create(TimelinesApi::class.java)
     }
 
     private fun getUserAgent(context: Context): String {

@@ -50,7 +50,6 @@ import tv.mycujoo.mcls.widgets.MLSPlayerView
 import tv.mycujoo.mcls.widgets.PlayerControllerMode
 import tv.mycujoo.mcls.widgets.RemotePlayerControllerView
 import tv.mycujoo.mcls.widgets.mlstimebar.MLSTimeBar
-import kotlin.coroutines.CoroutineContext
 
 
 @DelicateCoroutinesApi
@@ -502,7 +501,9 @@ class VideoPlayerMediatorTest {
         exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_READY)
 
 
-        verify(youboraClient).logEvent(event, false)
+        verify(youboraClient).logEvent(event, false) {
+
+        }
     }
 
     @Test
@@ -516,7 +517,9 @@ class VideoPlayerMediatorTest {
         exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_READY)
 
 
-        verify(youboraClient, times(1)).logEvent(event, false)
+        verify(youboraClient, times(1)).logEvent(event, false) {
+
+        }
     }
 
     @Test
@@ -526,7 +529,9 @@ class VideoPlayerMediatorTest {
         exoPlayerMainEventListener.onPlayWhenReadyChanged(true, STATE_ENDED)
 
 
-        verify(youboraClient, never()).logEvent(any(), any())
+        verify(youboraClient, never()).logEvent(any(), any()) {
+
+        }
     }
 
     /**region Cast*/
@@ -553,7 +558,7 @@ class VideoPlayerMediatorTest {
 
     @Test
     fun `should do nothing, when connected to remote player with null cast-session`() {
-        castListener.onSessionStarted(null)
+        castListener.onSessionStarted(mock())
 
 
         verify(cast, never()).loadRemoteMedia(any())

@@ -12,7 +12,11 @@ annotation class PublicBaseUrl
 
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
-annotation class ApiBaseUrl
+annotation class EventsApiBaseUrl
+
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class TimelineApiBaseUrl
 
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
@@ -20,7 +24,11 @@ annotation class PublicApi
 
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
-annotation class MLSAPI
+annotation class MLSEventsApi
+
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class MLSTimelineApi
 
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)

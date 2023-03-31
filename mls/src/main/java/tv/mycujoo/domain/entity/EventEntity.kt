@@ -14,7 +14,7 @@ data class EventEntity(
     val description: String?,
     val thumbnailUrl: String?,
     val poster_url: String?,
-    val location: Location?,
+    val physical: Physical?,
     val organiser: String?,
     val start_time: DateTime?,
     val status: EventStatus,
@@ -126,10 +126,6 @@ data class Widevine(
 data class ErrorCodeAndMessage(
     val code: String?,
     val message: String?
-)
-
-data class Location(
-    val physical: Physical
 )
 
 class Metadata(
