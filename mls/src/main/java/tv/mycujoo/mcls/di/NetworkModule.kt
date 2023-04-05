@@ -17,6 +17,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import timber.log.Timber
 import tv.mycujoo.data.jsonadapter.JodaJsonAdapter
 import tv.mycujoo.mcls.BuildConfig
+import tv.mycujoo.mcls.enum.C.Companion.IDENTITY_TOKEN_PREF_KEY
 import tv.mycujoo.mcls.enum.C.Companion.PUBLIC_KEY_PREF_KEY
 import tv.mycujoo.mcls.manager.IPrefManager
 import tv.mycujoo.mcls.network.EventsApi
@@ -80,9 +81,9 @@ open class NetworkModule {
             .addInterceptor { chain: Interceptor.Chain ->
                 var authorizationHeader = "Bearer ${prefManager.get(PUBLIC_KEY_PREF_KEY)}"
 
-//                if (prefManager.get(IDENTITY_TOKEN_PREF_KEY).isNullOrEmpty().not()) {
-//                    authorizationHeader += ",${prefManager.get(IDENTITY_TOKEN_PREF_KEY)}"
-//                }
+                if (prefManager.get(IDENTITY_TOKEN_PREF_KEY).isNullOrEmpty().not()) {
+                    authorizationHeader += ",${prefManager.get(IDENTITY_TOKEN_PREF_KEY)}"
+                }
 
                 val newRequest = chain.request().newBuilder()
                     .addHeader("Authorization", authorizationHeader)
