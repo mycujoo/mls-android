@@ -2,6 +2,8 @@
  [ ![Download](https://api.bintray.com/packages/mycujoo/mls/tv.mycujoo.mls/images/download.svg) ](https://bintray.com/mycujoo/mls/tv.mycujoo.mls/_latestVersion)
 # MLS (MyCujoo Live Services) in Android platform MLS-android
 
+# This has moved to [https://github.com/mycujoo/mls-android-v2]
+
 ### For usage showcase please refer to Sample-app [https://github.com/mycujoo/mls-android-sample-app]
 
 ## Overview
