@@ -21,7 +21,7 @@ import tv.mycujoo.domain.entity.EventEntity
 import tv.mycujoo.domain.entity.Result
 import tv.mycujoo.domain.params.EventListParams
 import tv.mycujoo.mcls.CoroutineTestRule
-import tv.mycujoo.mcls.network.MlsApi
+import tv.mycujoo.mcls.network.EventsApi
 import java.net.HttpURLConnection
 import kotlin.test.assertEquals
 import kotlin.test.fail
@@ -34,7 +34,7 @@ class GetEventsUseCaseTest {
     var coroutineTestRule = CoroutineTestRule()
 
 
-    private lateinit var api: MlsApi
+    private lateinit var api: EventsApi
     private lateinit var server: MockWebServer
 
     @Before
@@ -51,7 +51,7 @@ class GetEventsUseCaseTest {
             .addConverterFactory(MoshiConverterFactory.create())
             .client(okHttpClient)
             .build()
-            .create(MlsApi::class.java)
+            .create(EventsApi::class.java)
 
     }
 

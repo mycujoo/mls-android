@@ -1,13 +1,26 @@
 package tv.mycujoo.data.mapper
 
 import org.joda.time.DateTime
-import tv.mycujoo.data.model.*
-import tv.mycujoo.domain.entity.*
+import tv.mycujoo.data.model.CoordinatesSourceData
+import tv.mycujoo.data.model.ErrorCodeAndMessageSourceData
+import tv.mycujoo.data.model.EventSourceData
+import tv.mycujoo.data.model.MetadataSourceData
+import tv.mycujoo.data.model.PhysicalSourceData
+import tv.mycujoo.data.model.StreamSourceData
+import tv.mycujoo.data.model.WidevineSourceData
+import tv.mycujoo.domain.entity.Coordinates
+import tv.mycujoo.domain.entity.ErrorCodeAndMessage
+import tv.mycujoo.domain.entity.EventEntity
+import tv.mycujoo.domain.entity.EventStatus
+import tv.mycujoo.domain.entity.Metadata
+import tv.mycujoo.domain.entity.Physical
+import tv.mycujoo.domain.entity.Stream
+import tv.mycujoo.domain.entity.Widevine
 
 class EventMapper {
     companion object {
         fun mapEventSourceDataToEventEntity(sourceData: EventSourceData): EventEntity {
-            val location = mapLocationSourceDataToLocationEntity(sourceData.locationSourceData)
+            val location = mapPhysicalSourceDataToPhysicalEntity(sourceData.physical)
             val date = DateTime.parse(sourceData.start_time)
             val eventStatus = EventStatus.fromValueOrUnspecified(sourceData.status)
 
@@ -20,7 +33,7 @@ class EventMapper {
                 description = sourceData.description,
                 thumbnailUrl = sourceData.thumbnailUrl,
                 poster_url = sourceData.poster_url,
-                location = location,
+                physical = location,
                 organiser = sourceData.organiser,
                 start_time = date,
                 status = eventStatus,
@@ -65,10 +78,10 @@ class EventMapper {
         }
 
 
-        private fun mapLocationSourceDataToLocationEntity(sourceData: LocationSourceData): Location {
-            val physical = mapPhysicalSourceDataToPhysicalEntity(sourceData.physicalSourceData)
-            return Location(physical)
-        }
+//        private fun mapLocationSourceDataToLocationEntity(sourceData: LocationSourceData): Location {
+//            val physical = mapPhysicalSourceDataToPhysicalEntity(sourceData.physicalSourceData)
+//            return Location(physical)
+//        }
 
         private fun mapPhysicalSourceDataToPhysicalEntity(sourceData: PhysicalSourceData): Physical {
             val coordinates = mapCoordinatesSourceCodeToCoordinatesEntity(sourceData.coordinates)

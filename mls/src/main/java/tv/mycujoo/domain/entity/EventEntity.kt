@@ -7,14 +7,13 @@ import tv.mycujoo.data.entity.ServerConstants.Companion.ERROR_CODE_UNSPECIFIED
 import tv.mycujoo.mcls.enum.StreamStatus
 import tv.mycujoo.mcls.helper.DateTimeHelper
 
-
 data class EventEntity(
     val id: String,
     val title: String,
     val description: String?,
     val thumbnailUrl: String?,
     val poster_url: String?,
-    val location: Location?,
+    val physical: Physical?,
     val organiser: String?,
     val start_time: DateTime?,
     val status: EventStatus,
@@ -128,10 +127,6 @@ data class ErrorCodeAndMessage(
     val message: String?
 )
 
-data class Location(
-    val physical: Physical
-)
-
 class Metadata(
 )
 
@@ -147,4 +142,3 @@ data class Coordinates(
     val latitude: Double,
     val longitude: Double
 )
-
