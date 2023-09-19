@@ -5,5 +5,5 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class GetEventDetailsRequest(
-    @Json(name = "id") val eventId: String
+    @field:Json(name = "id") val eventId: String
 )

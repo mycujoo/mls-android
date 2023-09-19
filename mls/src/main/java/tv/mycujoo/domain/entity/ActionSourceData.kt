@@ -1,11 +1,25 @@
 package tv.mycujoo.domain.entity
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import tv.mycujoo.domain.entity.models.ActionType
-import tv.mycujoo.domain.entity.models.ActionType.*
+import tv.mycujoo.domain.entity.models.ActionType.ADJUST_TIMER
+import tv.mycujoo.domain.entity.models.ActionType.CREATE_TIMER
+import tv.mycujoo.domain.entity.models.ActionType.DELETE_ACTION
+import tv.mycujoo.domain.entity.models.ActionType.HIDE_OVERLAY
+import tv.mycujoo.domain.entity.models.ActionType.INCREMENT_VARIABLE
+import tv.mycujoo.domain.entity.models.ActionType.PAUSE_TIMER
+import tv.mycujoo.domain.entity.models.ActionType.RESHOW_OVERLAY
+import tv.mycujoo.domain.entity.models.ActionType.SET_VARIABLE
+import tv.mycujoo.domain.entity.models.ActionType.SHOW_OVERLAY
+import tv.mycujoo.domain.entity.models.ActionType.SHOW_TIMELINE_MARKER
+import tv.mycujoo.domain.entity.models.ActionType.SKIP_TIMER
+import tv.mycujoo.domain.entity.models.ActionType.START_TIMER
+import tv.mycujoo.domain.entity.models.ActionType.UNKNOWN
 import tv.mycujoo.domain.mapper.DataMapper
-import java.util.*
+import java.util.UUID
 
+@JsonClass(generateAdapter = true)
 data class ActionSourceData(
     @field:Json(name = "id") val id: String?,
     @field:Json(name = "type") val type: String?,
