@@ -133,7 +133,7 @@ class Metadata(
 data class Physical(
     val city: String,
     val continent_code: String,
-    val coordinates: Coordinates,
+    val coordinates: Coordinates?,
     val country_code: String,
     val venue: String
 )

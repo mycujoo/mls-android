@@ -20,12 +20,12 @@ import tv.mycujoo.domain.entity.Widevine
 class EventMapper {
     companion object {
         fun mapEventSourceDataToEventEntity(sourceData: EventSourceData): EventEntity {
-            val location = mapPhysicalSourceDataToPhysicalEntity(sourceData.physical)
+            val location = sourceData.physical?.let { mapPhysicalSourceDataToPhysicalEntity(it) }
             val date = DateTime.parse(sourceData.start_time)
             val eventStatus = EventStatus.fromValueOrUnspecified(sourceData.status)
 
             val streams = sourceData.streams.map { mapStreamSourceToStreamEntity(it) }
-            val metaData = mapMetaDataSourceDataToMetaDataEntity(sourceData.metadata)
+            val metaData = sourceData.metadata?.let { mapMetaDataSourceDataToMetaDataEntity(it) }
 
             return EventEntity(
                 id = sourceData.id,
@@ -84,7 +84,11 @@ class EventMapper {
 //        }
 
         private fun mapPhysicalSourceDataToPhysicalEntity(sourceData: PhysicalSourceData): Physical {
-            val coordinates = mapCoordinatesSourceCodeToCoordinatesEntity(sourceData.coordinates)
+            val coordinates = sourceData.coordinates?.let {
+                mapCoordinatesSourceCodeToCoordinatesEntity(
+                    it
+                )
+            }
             return Physical(
                 sourceData.city,
                 sourceData.continent_code,

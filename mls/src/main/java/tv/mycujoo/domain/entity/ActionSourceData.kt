@@ -21,11 +21,11 @@ import java.util.UUID
 
 @JsonClass(generateAdapter = true)
 data class ActionSourceData(
-    @field:Json(name = "id") val id: String?,
-    @field:Json(name = "type") val type: String?,
-    @field:Json(name = "offset") val offset: Long?,
-    @field:Json(name = "absoluteTime") val absoluteTime: Long?,
-    @field:Json(name = "data") val data: Map<String, Any>?
+    @Json(name = "id") val id: String?,
+    @Json(name = "type") val type: String?,
+    @Json(name = "offset") val offset: Long?,
+    @Json(name = "absoluteTime") val absoluteTime: Long?,
+    @Json(name = "data") val data: Map<String, Any>?
 ) {
     fun toAction(): Action {
         val newId = id.orEmpty()

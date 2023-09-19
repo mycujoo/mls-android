@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.pm.PackageInfoCompat
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -126,6 +127,7 @@ open class NetworkModule {
     ): Retrofit {
         val moshi: Moshi = Moshi.Builder()
             .add(JodaJsonAdapter())
+            .add(KotlinJsonAdapterFactory())
             .build()
 
         return Retrofit.Builder()
@@ -142,9 +144,15 @@ open class NetworkModule {
         okHttpClient: OkHttpClient,
         @EventsApiBaseUrl baseUrl: String
     ): Retrofit {
+
+        val moshi: Moshi = Moshi.Builder()
+            .add(JodaJsonAdapter())
+            .add(KotlinJsonAdapterFactory())
+            .build()
+
         return Retrofit.Builder()
             .baseUrl(baseUrl)
-            .addConverterFactory(MoshiConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
             .client(okHttpClient)
             .build()
     }
@@ -156,9 +164,14 @@ open class NetworkModule {
         okHttpClient: OkHttpClient,
         @TimelineApiBaseUrl baseUrl: String
     ): Retrofit {
+        val moshi: Moshi = Moshi.Builder()
+            .add(JodaJsonAdapter())
+            .add(KotlinJsonAdapterFactory())
+            .build()
+
         return Retrofit.Builder()
             .baseUrl(baseUrl)
-            .addConverterFactory(MoshiConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
             .client(okHttpClient)
             .build()
     }
